@@ -197,60 +197,264 @@
 <div id="colcont" class="lg:pl-56 pb-16 lg:pb-0">
   <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b px-4 sm:gap-x-6 sm:px-4 lg:px-4" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
     <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-      <div class="relative flex flex-1 flex-col">
+      <div class="relative flex flex-col">
 
-        <div class="lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl active:scale-100 duration-200 bg-transparent" role="search" style="border:1px solid var(--theme-border-input); color:var(--theme-text-strong);">
-          <%- icon('search', { class: 'h-5 w-5', style: 'color:var(--theme-text-muted)' }) %>
-          <input id="searchInput"
-            class="bg-transparent border-transparent ml-2 focus-visible:ring-transparent border-none ring-transparent sm:text-sm focus-visible:outline-none"
-            style="color:var(--theme-text-strong);"
-            placeholder="<%= req.translations.navSearch || 'Search' %>"
-            type="search"
-            role="combobox"
-            aria-autocomplete="list"
-            aria-expanded="false"
-            aria-controls="searchResults"
-            aria-activedescendant=""
-            aria-label="<%= req.translations.navSearch || 'Search' %>"
-            name="search"
-            autocomplete="off"
-            onfocus="showSearchResults()">
-          <div aria-hidden="true" class="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium rounded-md"
+        <button id="searchTrigger" type="button"
+          class="lg:-ml-2 flex items-center gap-2 w-fit mt-3.5 pl-3 pr-2.5 py-2 h-10 rounded-xl transition duration-200 bg-transparent"
+          style="border:1px solid var(--theme-border-input); color:var(--theme-text-muted);"
+          onclick="openSearchModal()">
+          <%- icon('search', { class: 'h-4 w-4 shrink-0' }) %>
+          <span class="hidden sm:inline text-sm whitespace-nowrap">Search</span>
+          <div aria-hidden="true" class="ml-2 px-1.5 py-0.5 text-[10px] font-medium rounded-md"
             style="color:var(--theme-text-muted); background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
-            CTRL + K
+            CTRL+K
           </div>
-        </div>
+        </button>
 
-        <div id="searchResults" role="listbox" aria-label="Search results" class="absolute w-[19.5rem] rounded-xl shadow-lg hidden mt-1 px-2 pb-2 z-50" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); top:100%;">
-        </div>
+        <div id="searchResults" role="listbox" aria-label="Search results" class="hidden" style="display:none!important"></div>
+      </div>
+
+      <div id="breadcrumb-slot" class="flex items-center flex-1 min-w-0 hidden overflow-hidden" style="flex-direction:row-reverse">
+        <div class="flex items-center gap-1.5 whitespace-nowrap" dir="ltr" id="bc-inner"></div>
       </div>
 
       <script nonce="<%- nonce %>">
-        document.addEventListener('keydown', function(event) {
-          if (event.ctrlKey && event.key === 'k') {
-            event.preventDefault();
-            document.getElementById('searchInput').focus();
-          }
-        });
-
-        function showSearchResults() {
-          document.getElementById('searchResults').classList.remove('hidden');
-          document.getElementById('searchInput').setAttribute('aria-expanded', 'true');
+        function openSearchModal() {
+          var m = document.getElementById('searchModal');
+          var i = document.getElementById('searchModalInput');
+          m.classList.remove('hidden');
+          m.style.opacity = '0';
+          var p = document.getElementById('searchModalPanel');
+          p.style.opacity = '0';
+          p.style.transform = 'scale(0.96) translateY(-8px)';
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              m.style.transition = 'opacity 0.18s ease';
+              m.style.opacity = '1';
+              p.style.transition = 'opacity 0.18s ease, transform 0.18s cubic-bezier(0.16,1,0.3,1)';
+              p.style.opacity = '1';
+              p.style.transform = 'scale(1) translateY(0)';
+            });
+          });
+          setTimeout(function() { i.focus(); }, 50);
         }
 
-        document.getElementById('searchInput').addEventListener('focus', showSearchResults);
-
-        document.addEventListener('click', function(event) {
-          var searchInput = document.getElementById('searchInput');
-          var searchResults = document.getElementById('searchResults');
-          if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-            searchResults.classList.add('hidden');
-            searchInput.setAttribute('aria-expanded', 'false');
-            searchInput.setAttribute('aria-activedescendant', '');
-          }
-        });
+        function closeSearchModal() {
+          var m = document.getElementById('searchModal');
+          var p = document.getElementById('searchModalPanel');
+          m.style.transition = 'opacity 0.15s ease';
+          m.style.opacity = '0';
+          p.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+          p.style.opacity = '0';
+          p.style.transform = 'scale(0.96) translateY(-8px)';
+          setTimeout(function() { m.classList.add('hidden'); m.style.opacity = ''; if(p){p.style.opacity='';p.style.transform='';p.style.transition='';} m.style.transition=''; }, 160);
+        }
       </script>
+
+      <script nonce="<%- nonce %>">
+      var searchTimeoutModal = null;
+      var lastQueryModal = '';
+      var activeIndexModal = -1;
+      function doSearchModal(term) {
+        var results = document.getElementById('searchModalResults');
+        activeIndexModal = -1;
+        if (!term) { results.innerHTML = ''; return; }
+        results.innerHTML = '<div class="flex items-center justify-center py-8"><svg class="animate-spin w-5 h-5" style="color:var(--theme-text-muted)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div>';
+        fetch('/api/search?q=' + encodeURIComponent(term)).then(function(r){return r.json()}).then(function(data){
+          renderModalResults(data.results||[], term);
+        }).catch(function(){
+          renderModalResults([], term);
+        });
+      }
+      function renderModalResults(items, term) {
+        var container = document.getElementById('searchModalResults');
+        container.innerHTML = '';
+        if (!items.length) {
+          container.innerHTML = '<p class="text-sm py-8 text-center" style="color:var(--theme-text-muted)">No results.</p>';
+          return;
+        }
+        var groups = {};
+        items.forEach(function(i){ if(!groups[i.type]) groups[i.type]=[]; groups[i.type].push(i); });
+        var order = ['server','user','node'];
+        var labels = { server:'Servers', user:'Users', node:'Nodes' };
+        order.forEach(function(type){
+          if(!groups[type]) return;
+          var hdr = document.createElement('p');
+          hdr.className = 'text-[10px] font-semibold uppercase tracking-wider px-3 pt-3 pb-1';
+          hdr.style.color = 'var(--theme-text-muted)';
+          hdr.textContent = labels[type];
+          container.appendChild(hdr);
+          groups[type].forEach(function(item){
+            var row = document.createElement('a');
+            row.href = item.url;
+            row.className = 'flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition text-sm';
+            row.style.color = 'var(--theme-text)';
+            row.style.background = 'transparent';
+            row.onmouseenter = function(){ this.style.background = 'var(--theme-bg-hover)'; };
+            row.onmouseleave = function(){ this.style.background = 'transparent'; };
+            row.innerHTML = '<div class="flex-1 min-w-0"><div class="truncate font-medium" style="color:var(--theme-text-strong)">' + escHtml(item.label) + '</div>' +
+              (item.sub ? '<div class="text-xs truncate" style="color:var(--theme-text-muted)">' + escHtml(item.sub) + '</div>' : '') + '</div>';
+            row.addEventListener('click', function(e){
+              e.preventDefault();
+              closeSearchModal();
+              location.href = item.url;
+            });
+            container.appendChild(row);
+          });
+        });
+      }
+      function escHtml(t) {
+        var d = document.createElement('div');
+        d.textContent = t || '';
+        return d.innerHTML;
+      }
+      function onSearchModalInput() {
+        var term = document.getElementById('searchModalInput').value.trim().toLowerCase();
+        if (term === lastQueryModal) return;
+        lastQueryModal = term;
+        clearTimeout(searchTimeoutModal);
+        searchTimeoutModal = setTimeout(function(){ doSearchModal(term); }, 150);
+      }
+      function onSearchModalKeydown(e) {
+        var rows = document.querySelectorAll('#searchModalResults a');
+        if (!rows.length) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); activeIndexModal = Math.min(activeIndexModal + 1, rows.length - 1); updateModalActive(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); activeIndexModal = Math.max(activeIndexModal - 1, 0); updateModalActive(); }
+        else if (e.key === 'Enter') { e.preventDefault(); if (rows[activeIndexModal]) rows[activeIndexModal].click(); }
+      }
+      function updateModalActive() {
+        var rows = document.querySelectorAll('#searchModalResults a');
+        rows.forEach(function(r,i){
+          r.style.background = i === activeIndexModal ? 'var(--theme-bg-hover)' : 'transparent';
+        });
+      }
+
+      document.addEventListener('keydown', function(event) {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+          event.preventDefault();
+          openSearchModal();
+        }
+        if (event.key === 'Escape') {
+          var m = document.getElementById('searchModal');
+          if (!m.classList.contains('hidden')) closeSearchModal();
+        }
+      });
+      </script>
+
       <script nonce="<%- nonce %>" src="/javascript/shared/search.js"></script>
+
+      <script nonce="<%- nonce %>">
+      (function() {
+        function buildBreadcrumb() {
+          var slot = document.getElementById('breadcrumb-slot');
+          if (!slot) return;
+          var inner = document.getElementById('bc-inner');
+          if (!inner) return;
+
+          var path = window.location.pathname;
+          var segs = path.split('/').filter(Boolean);
+          var items = [{ href: '/', label: 'Home' }];
+
+          var labelMap = {
+            'dashboard':'Dashboard', 'account':'Account', 'credits':'Credits',
+            'create-server':'Create Server', 'admin':'Admin', 'overview':'Overview',
+            'servers':'Servers', 'create':'Create', 'edit':'Edit',
+            'nodes':'Nodes', 'users':'Users', 'images':'Images',
+            'store':'Store', 'settings':'Settings', 'security':'Security',
+            'apikeys':'API Keys', 'api':'API', 'docs':'Documentation',
+            'analytics':'Analytics', 'playerstats':'Player Statistics',
+            'addons':'Addons', 'airlink-cloud':'Airlink Cloud',
+            'startup':'Startup', 'files':'Files', 'backups':'Backups',
+            'players':'Players', 'worlds':'Worlds', 'manage':'Manage',
+            'stats':'Statistics', 'sftp':'SFTP',
+          };
+
+          for (var i = 0; i < segs.length; i++) {
+            var seg = segs[i];
+
+            if ((seg === 'server' || seg === 'admin' && segs[i+1] === 'nodes') && i + 1 < segs.length && /^[0-9a-f-]{36}$/i.test(segs[i+1])) {
+              var label = seg === 'server' ? getServerName() : 'Node';
+              items.push({ href: '/' + segs.slice(0, i + 2).join('/'), label: label });
+              i++;
+              continue;
+            }
+            if (seg === 'admin' && segs[i+1] === 'nodes' && i + 2 < segs.length && /^[0-9a-f-]{36}$/i.test(segs[i+2])) {
+              items.push({ href: '/admin/nodes', label: 'Nodes' });
+              var nlabel = 'Node';
+              items.push({ href: '/' + segs.slice(0, i + 3).join('/'), label: nlabel });
+              i += 2;
+              continue;
+            }
+            if (seg === 'admin' && segs[i+1] === 'users' && i + 2 < segs.length && /^[0-9a-f-]{36}$/i.test(segs[i+2])) {
+              items.push({ href: '/admin/users', label: 'Users' });
+              var ulabel = 'User';
+              items.push({ label: ulabel });
+              i += 2;
+              continue;
+            }
+
+            if (/^[0-9a-f-]{36}$/i.test(seg)) continue;
+
+            var label = labelMap[seg] || seg.charAt(0).toUpperCase() + seg.slice(1);
+            var href = '/' + segs.slice(0, i + 1).join('/');
+            items.push(i === segs.length - 1 ? { label: label } : { href: href, label: label });
+          }
+
+          if (items.length <= 1) { slot.classList.add('hidden'); return; }
+
+          var html = '';
+          for (var j = 0; j < items.length; j++) {
+            if (j > 0) html += '<span style="color:var(--theme-text-placeholder);font-size:11px;opacity:0.5">/</span>';
+            if (items[j].href && j < items.length - 1) {
+              html += '<a href="' + items[j].href + '" class="transition" style="color:var(--theme-text-muted);opacity:0.55;text-decoration:none">' + escHtml(items[j].label) + '</a>';
+            } else {
+              html += '<span style="color:var(--theme-text-muted);opacity:0.55">' + escHtml(items[j].label) + '</span>';
+            }
+          }
+          inner.innerHTML = html;
+          slot.classList.remove('hidden');
+        }
+
+        function getServerName() {
+          var el = document.getElementById('server-header-data');
+          if (el) {
+            var h1 = el.closest('#page-content') || el.closest('#server-page-body');
+            var nameEl = h1 ? h1.querySelector('h1') : null;
+            if (nameEl) return nameEl.textContent.trim();
+          }
+          var titles = document.querySelectorAll('h1');
+          for (var t = 0; t < titles.length; t++) {
+            if (titles[t].textContent.trim().length > 0 && titles[t].textContent.trim().length < 100) return titles[t].textContent.trim();
+          }
+          return 'Server';
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', buildBreadcrumb);
+        } else {
+          buildBreadcrumb();
+        }
+      })();
+      </script>
+
+      <!-- Search Modal -->
+      <div id="searchModal" class="hidden" style="position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none">
+        <div onclick="closeSearchModal()" style="position:absolute;inset:0"></div>
+        <div style="position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;padding-top:12vh">
+          <div id="searchModalPanel" style="width:100%;max-width:560px;margin:0 16px;position:relative;opacity:0;transform:scale(0.96) translateY(-8px)">
+            <div style="background:var(--theme-bg-card);border:1px solid var(--theme-border);border-radius:20px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.3),0 8px 20px rgba(0,0,0,0.15)">
+              <div style="display:flex;align-items:center;gap:12px;padding:4px 6px 4px 20px;border-bottom:1px solid var(--theme-border)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--theme-text-muted);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input id="searchModalInput" type="search" placeholder="Search" autocomplete="off" spellcheck="false"
+                  oninput="onSearchModalInput()" onkeydown="onSearchModalKeydown(event)"
+                  style="flex:1;min-width:0;background:transparent;border:none;outline:none;font-size:16px;padding:12px 0;color:var(--theme-text-strong)">
+                <button onclick="closeSearchModal()" style="padding:4px 10px;font-size:11px;font-weight:500;border-radius:8px;border:none;cursor:pointer;background:var(--theme-bg-secondary);color:var(--theme-text-muted);border:1px solid var(--theme-border)">ESC</button>
+              </div>
+              <div id="searchModalResults" style="max-height:360px;overflow-y:auto;padding:4px 8px 8px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Theme toggle switch -->
       <div class="flex items-center shrink-0 ml-2">
@@ -262,6 +466,18 @@
   </div>
 </div>
 <style>
+#bc-inner > * {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+#bc-inner a {
+  transition: opacity 0.15s ease;
+}
+#bc-inner a:hover,
+#bc-inner span:hover {
+  opacity: 0.75 !important;
+}
+
 .theme-toggle-switch {
   position: relative;
   display: flex;

@@ -8,10 +8,6 @@
     </div>
     <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-16">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Users' }
-      ] }) %>
       <%- include('../../components/ui/page-header', {
         title: req.translations.adminUsersTitle,
         description: req.translations.adminUsersText,
