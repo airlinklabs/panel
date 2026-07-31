@@ -393,6 +393,15 @@ html.dark body .mobile-nav-link.active-mobile {
 html .nav-link.active svg {
   color: #ffffff !important;
 }
-html.dark .nav-link.active svg {
+html.dark body .nav-link.active svg {
+  color: #0a0a0a !important;
+}
+
+/* Active sidebar link text — inverted, wins over the themes' forced
+   var(--theme-nav-text-active) which made text unreadable on the pill */
+html .nav-link.active {
+  color: #ffffff !important;
+}
+html.dark body .nav-link.active {
   color: #0a0a0a !important;
 }
