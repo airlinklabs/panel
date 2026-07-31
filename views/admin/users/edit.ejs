@@ -117,11 +117,11 @@
                         <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
                       </p>
                     </div>
-                    <label for="isAdmin" class="relative inline-flex items-center cursor-pointer">
+                    <label for="isAdmin" class="relative inline-flex items-center cursor-pointer shrink-0">
                       <input type="checkbox" id="isAdmin" name="isAdmin" class="sr-only peer" <%= dataUser.isAdmin ? 'checked' : '' %>>
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+                      <span class="ms-3 text-sm font-medium text-neutral-700 dark:text-white" id="adminStatusLabel"><%= dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
                     </label>
-                    <span class="ms-3 text-sm font-medium text-neutral-700 dark:text-white" id="adminStatusLabel"><%= dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
                   </div>
                 </div>
               </div>
