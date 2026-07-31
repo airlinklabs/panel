@@ -180,6 +180,7 @@
     document.querySelectorAll('.nav-link').forEach(function (link) {
       link.classList.remove('active', 'font-medium');
       link.style.color = '';
+      link.style.background = '';
       var href = norm(link.getAttribute('href') || '');
       var prefix = link.getAttribute('data-match-prefix');
       if (!href) return;
@@ -206,6 +207,8 @@
     if (best) {
       best.classList.add('active', 'font-medium');
       best.style.color = isDark ? '#ffffff' : '#0a0a0a';
+      best.style.background = isDark ? '#ffffff' : '#0a0a0a';
+      best.style.borderRadius = '0.75rem';
       if (bg) {
         var r   = best.getBoundingClientRect();
         var ul  = best.closest('ul');

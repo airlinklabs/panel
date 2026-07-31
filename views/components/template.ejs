@@ -174,9 +174,12 @@
       if (active) {
         link.classList.add('active');
         link.style.color = isDark ? '#ffffff' : '#0a0a0a';
+        link.style.background = isDark ? '#ffffff' : '#0a0a0a';
+        link.style.borderRadius = '0.75rem';
       } else {
         link.classList.remove('active');
         link.style.color = '';
+        link.style.background = '';
       }
     });
   }
