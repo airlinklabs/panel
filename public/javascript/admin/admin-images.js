@@ -3,12 +3,13 @@ function handleRowClick(e, url) { if (!e.target.closest('button,a')) window.loca
 function openCreate() {
   const overlay = document.getElementById('createOverlay');
   overlay.classList.add('open');
-  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
+  Animate.openModal(overlay, overlay.querySelector('.modal-box'));
 }
 function closeCreate() {
   const overlay = document.getElementById('createOverlay');
-  const done = function () { overlay.classList.remove('open'); };
-  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
+  overlay.classList.add('closing');
+  const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
+  Animate.closeModal(overlay, overlay.querySelector('.modal-box'), done);
 }
 document.getElementById('createOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeCreate(); });
 
@@ -18,12 +19,13 @@ function openDelete(id, name) {
   document.getElementById('deleteMsg').textContent = '"' + name + '" will be permanently removed.';
   const overlay = document.getElementById('deleteOverlay');
   overlay.classList.add('open');
-  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
+  Animate.openModal(overlay, overlay.querySelector('.modal-box'));
 }
 function closeDelete() {
   const overlay = document.getElementById('deleteOverlay');
-  const done = function () { overlay.classList.remove('open'); };
-  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
+  overlay.classList.add('closing');
+  const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
+  Animate.closeModal(overlay, overlay.querySelector('.modal-box'), done);
   _deleteId = null;
 }
 document.getElementById('deleteOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDelete(); });

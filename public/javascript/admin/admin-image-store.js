@@ -176,14 +176,15 @@ function openGroup(group, imgs) {
   renderMd(imgs[0]?.groupReadme||'', document.getElementById('grpReadme'));
   const overlay = document.getElementById('groupOverlay');
   overlay.classList.add('open');
-  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
+  Animate.openModal(overlay, overlay.querySelector('.modal-box'));
   document.body.style.overflow = 'hidden';
 }
 
 function closeGroup() {
   const overlay = document.getElementById('groupOverlay');
-  const done = function () { overlay.classList.remove('open'); };
-  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
+  overlay.classList.add('closing');
+  const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
+  Animate.closeModal(overlay, overlay.querySelector('.modal-box'), done);
   document.body.style.overflow = '';
 }
 document.getElementById('groupOverlay').addEventListener('click', function(e){if(e.target===e.currentTarget)closeGroup()});
@@ -224,14 +225,15 @@ function openEgg(img) {
   btn.innerHTML = 'Install'; btn.disabled = false;
   const overlay = document.getElementById('eggOverlay');
   overlay.classList.add('open');
-  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
+  Animate.openModal(overlay, overlay.querySelector('.modal-box'));
   document.body.style.overflow = 'hidden';
 }
 
 function closeEgg() {
   const overlay = document.getElementById('eggOverlay');
-  const done = function () { overlay.classList.remove('open'); };
-  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
+  overlay.classList.add('closing');
+  const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
+  Animate.closeModal(overlay, overlay.querySelector('.modal-box'), done);
   document.body.style.overflow = '';
   pendingEgg = null;
 }

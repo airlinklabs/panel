@@ -36,15 +36,18 @@
         const progressMode = opts.progress === true || type === 'loading';
 
         const toast = document.createElement('div');
-        toast.className = 'px-4 py-3 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out opacity-0 flex flex-row items-start gap-3';
+        toast.className = 'al-toast px-4 py-3 rounded-xl shadow-lg flex flex-row items-start gap-3';
         toast.style.background = 'var(--theme-bg-card)';
         toast.style.border = '1px solid var(--theme-border)';
-        toast.style.transform = 'translateY(-8px) scale(0.95)';
+        toast.style.transform = 'translateX(calc(100% + 1rem))';
+        toast.style.opacity = '0';
         toast.style.maxWidth = '400px';
         toast.style.touchAction = 'none';
         toast.style.cursor = 'grab';
         toast.style.userSelect = 'none';
         toast.style.overflowWrap = 'break-word';
+        toast.style.transition = 'transform var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), opacity var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1))';
+        toast.style.willChange = 'transform, opacity';
         toast.style.color = colorMap[type] || colorMap.info;
 
         const icon = document.createElement('span');
@@ -82,9 +85,8 @@
         toastContainer.appendChild(toast);
 
         requestAnimationFrame(() => {
-          toast.classList.remove('opacity-0');
-          toast.style.transform = 'translateY(0) scale(1)';
-          toast.classList.add('opacity-100');
+          toast.style.transform = 'translateX(0)';
+          toast.style.opacity = '1';
         });
 
         let removed = false;
@@ -96,13 +98,12 @@
           if (removed) return;
           removed = true;
           if (dismissTimer) clearTimeout(dismissTimer);
-          toast.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
-          toast.style.transform = 'translateY(-8px) scale(0.95)';
-          toast.classList.remove('opacity-100');
-          toast.classList.add('opacity-0');
+          toast.style.transition = 'transform var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)), opacity var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1))';
+          toast.style.transform = 'translateX(calc(100% + 1rem))';
+          toast.style.opacity = '0';
           setTimeout(() => {
             if (toast.parentNode) toastContainer.removeChild(toast);
-          }, 300);
+          }, 200);
         };
 
         const scheduleDismiss = (ms) => {

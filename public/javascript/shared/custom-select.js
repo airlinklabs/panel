@@ -5,8 +5,9 @@
  *   <div class="custom-select" data-for="x"></div>
  * (or: the select is hidden and the .custom-select container replaces it visually)
  *
- * Behavior: trigger shows current option, dropdown opens with a spring pop
- * (Phys), options keep the native select in sync and dispatch change events.
+ * Behavior: trigger shows current option, dropdown reveals with a CSS
+ * transition (.al-dropdown pattern), options keep the native select in
+ * sync and dispatch change events.
  */
 (function () {
   if (window.__customSelectLoaded) return;
@@ -44,7 +45,7 @@
     trigger.appendChild(arrow);
 
     const dropdown = document.createElement('div');
-    dropdown.className = 'cs-dropdown';
+    dropdown.className = 'cs-dropdown al-dropdown';
     dropdown.setAttribute('role', 'listbox');
     dropdown.style.display = 'none';
 
@@ -94,25 +95,30 @@
       dropdown.style.display = 'block';
       trigger.classList.add('open');
       trigger.setAttribute('aria-expanded', 'true');
-      if (window.Phys) {
-        Phys.set(dropdown, { y: -6, scale: 0.97, opacity: 0 });
-        Phys.to(dropdown, { y: 0, scale: 1, opacity: 1 }, { stiffness: 380, damping: 22 });
-      }
+      // CSS transition on .al-dropdown handles the reveal
+      requestAnimationFrame(function () {
+        dropdown.classList.add('open');
+      });
     }
 
     function close() {
       if (dropdown.style.display === 'none') return;
+      trigger.classList.remove('open');
+      trigger.setAttribute('aria-expanded', 'false');
       const done = function () {
         dropdown.style.display = 'none';
-        trigger.classList.remove('open');
-        trigger.setAttribute('aria-expanded', 'false');
       };
-      if (window.Phys) {
-        Phys.to(dropdown, { y: -4, scale: 0.97, opacity: 0 }, { stiffness: 400, damping: 26 })
-          .then(done);
-      } else {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        dropdown.classList.remove('open');
         done();
+        return;
       }
+      dropdown.classList.add('closing');
+      dropdown.classList.remove('open');
+      setTimeout(function () {
+        dropdown.classList.remove('closing');
+        done();
+      }, 200);
     }
 
     trigger.addEventListener('click', function (e) {

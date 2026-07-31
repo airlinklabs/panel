@@ -1,5 +1,86 @@
-/* ── Motion System ─────────────────────────────────────────────────── */
-/* Adaptive UI animations: fade, slide, scale with stagger support */
+/* ============================================
+   AIRLINK MOTION SYSTEM
+   Material 3-inspired, physics-free
+   ============================================ */
+
+:root {
+  /* Easing curves */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);          /* Decelerate — reveals, modals, slide-ins */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);       /* Standard — hover states, tabs, color */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);               /* Accelerate — exits only */
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);       /* M3 Emphasized — spatial transitions */
+
+  /* Durations */
+  --dur-instant: 80ms;    /* Color/border changes, focus rings */
+  --dur-quick: 150ms;     /* Hover states, button press */
+  --dur-default: 220ms;   /* Most transitions */
+  --dur-enter: 320ms;     /* Modal open, panel slide, reveal */
+  --dur-exit: 180ms;      /* Modal close, panel hide */
+  --dur-stagger: 40ms;    /* Per-item delay in lists */
+}
+
+/* ── data-animate ATTRIBUTE SYSTEM ─────────────────────────────
+   Content is visible by default. Animation is progressive
+   enhancement only — JS adds .will-animate, the observer swaps
+   it for .motion-visible when the element enters the viewport. */
+
+[data-animate] {
+  /* No opacity/visibility hiding here — content ALWAYS visible without JS */
+  will-change: opacity, transform;
+}
+
+[data-animate="blur"] {
+  will-change: opacity, transform, filter;
+}
+
+/* Hidden pre-state — applied only after JS initializes the observer */
+[data-animate].will-animate          { opacity: 0; }
+[data-animate="fade"].will-animate   { opacity: 0; }
+[data-animate="fade-up"].will-animate    { opacity: 0; transform: translateY(12px); }
+[data-animate="fade-down"].will-animate  { opacity: 0; transform: translateY(-12px); }
+[data-animate="slide-left"].will-animate { opacity: 0; transform: translateX(16px); }
+[data-animate="slide-right"].will-animate{ opacity: 0; transform: translateX(-16px); }
+[data-animate="scale"].will-animate   { opacity: 0; transform: scale(0.96); }
+[data-animate="blur"].will-animate    { opacity: 0; filter: blur(6px); }
+
+/* Animated-in state — keyframe driven, fill both so the element
+   holds its final state after the animation ends */
+[data-animate].motion-visible {
+  animation-duration: var(--dur-enter);
+  animation-timing-function: var(--ease-out);
+  animation-fill-mode: both;
+}
+
+[data-animate="fade"].motion-visible { animation-name: motion-fade-in; }
+[data-animate="fade-up"].motion-visible { animation-name: motion-slide-up; }
+[data-animate="fade-down"].motion-visible { animation-name: motion-slide-down; }
+[data-animate="slide-left"].motion-visible { animation-name: motion-slide-left; }
+[data-animate="slide-right"].motion-visible { animation-name: motion-slide-right; }
+[data-animate="scale"].motion-visible { animation-name: motion-scale-in; }
+[data-animate="blur"].motion-visible { animation-name: motion-blur-in; }
+
+/* Exit animations (JS-triggered) */
+.motion-exit-fade { animation-name: motion-fade-out; animation-duration: var(--dur-exit); }
+.motion-exit-scale { animation-name: motion-scale-out; animation-duration: var(--dur-exit); }
+
+/* ── Group animations (container children) ───────────────────── */
+
+[data-animate-group] > * {
+  will-change: opacity, transform;
+}
+
+[data-animate-group].will-animate > * {
+  opacity: 0;
+}
+
+[data-animate-group].motion-visible > * {
+  animation-duration: var(--dur-enter);
+  animation-timing-function: var(--ease-out);
+  animation-fill-mode: both;
+  animation-name: motion-slide-up;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────── */
 
 @keyframes motion-fade-in {
   from { opacity: 0; }
@@ -46,86 +127,130 @@
   to { opacity: 1; filter: blur(0); }
 }
 
-/* ── Base animation class ────────────────────────────────────────── */
+/* ── Modal overlay / panel ────────────────────────────────────── */
 
-[data-animate] {
+.al-modal-overlay {
   opacity: 0;
-  will-change: opacity, transform;
+  pointer-events: none;
+  transition: opacity var(--dur-enter) var(--ease-out);
 }
 
-/* Only add filter to will-change for blur animations */
-[data-animate="blur"] {
-  will-change: opacity, transform, filter;
+.al-modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-[data-animate].motion-visible {
-  animation-duration: 350ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  animation-fill-mode: both;
-}
-
-[data-animate].motion-hidden {
+.al-modal-panel {
+  transform: scale(0.96) translateY(8px);
   opacity: 0;
+  transition:
+    transform var(--dur-enter) var(--ease-out),
+    opacity var(--dur-enter) var(--ease-out);
 }
 
-/* ── Animation type mappings ─────────────────────────────────────── */
-
-[data-animate="fade"].motion-visible { animation-name: motion-fade-in; }
-[data-animate="fade-up"].motion-visible { animation-name: motion-slide-up; }
-[data-animate="fade-down"].motion-visible { animation-name: motion-slide-down; }
-[data-animate="slide-left"].motion-visible { animation-name: motion-slide-left; }
-[data-animate="slide-right"].motion-visible { animation-name: motion-slide-right; }
-[data-animate="scale"].motion-visible { animation-name: motion-scale-in; }
-[data-animate="blur"].motion-visible { animation-name: motion-blur-in; }
-
-/* ── Exit animations (JS-triggered) ──────────────────────────────── */
-
-.motion-exit-fade { animation-name: motion-fade-out; animation-duration: 200ms; }
-.motion-exit-scale { animation-name: motion-scale-out; animation-duration: 200ms; }
-
-/* ── Stagger delays ──────────────────────────────────────────────── */
-
-[data-animate-delay="0"] { animation-delay: 0ms; }
-[data-animate-delay="1"] { animation-delay: 50ms; }
-[data-animate-delay="2"] { animation-delay: 100ms; }
-[data-animate-delay="3"] { animation-delay: 150ms; }
-[data-animate-delay="4"] { animation-delay: 200ms; }
-[data-animate-delay="5"] { animation-delay: 250ms; }
-[data-animate-delay="6"] { animation-delay: 300ms; }
-[data-animate-delay="7"] { animation-delay: 350ms; }
-[data-animate-delay="8"] { animation-delay: 400ms; }
-
-/* ── Reduced motion ──────────────────────────────────────────────── */
-
-@media (prefers-reduced-motion: reduce) {
-  [data-animate] {
-    opacity: 1 !important;
-    animation: none !important;
-    transform: none !important;
-    filter: none !important;
-  }
+.al-modal-panel.open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
 }
 
-/* ── Group animations (container children) ───────────────────────── */
-
-[data-animate-group] > * {
+/* Exit — faster, accelerate in */
+.al-modal-panel.closing {
+  transform: scale(0.97) translateY(4px);
   opacity: 0;
-  will-change: opacity, transform;
+  transition:
+    transform var(--dur-exit) var(--ease-in),
+    opacity var(--dur-exit) var(--ease-in);
 }
 
-[data-animate-group].motion-visible > * {
-  animation-duration: 300ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  animation-fill-mode: both;
-  animation-name: motion-slide-up;
+/* ── Dropdown / popover reveal ────────────────────────────────── */
+
+.al-dropdown {
+  transform-origin: top center;
+  transform: scale(0.97) translateY(-4px);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dur-default) var(--ease-out),
+    opacity var(--dur-default) var(--ease-out);
 }
 
-/* ── Skeleton shimmer ──────────────────────────────────────────── */
-
-@keyframes al-shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position:  200% center; }
+.al-dropdown.open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
+
+/* ── Server card hover ────────────────────────────────────────── */
+
+.al-server-card {
+  transition:
+    transform var(--dur-quick) var(--ease-out),
+    box-shadow var(--dur-quick) var(--ease-out),
+    border-color var(--dur-quick) var(--ease-standard);
+}
+
+.al-server-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px -14px rgb(0 0 0 / 0.34);
+  border-color: rgb(0 0 0 / 0.18);
+}
+
+/* ── Nav item — instant active, quick hover ───────────────────── */
+
+.al-nav-item {
+  transition:
+    background-color var(--dur-instant) var(--ease-standard),
+    color var(--dur-instant) var(--ease-standard);
+}
+
+/* ── Tab underline — slides between tabs via background-size ──── */
+
+.tab-btn,
+.m-tab {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: bottom left;
+  background-size: 0% 2px;
+  transition:
+    color var(--dur-quick) var(--ease-standard),
+    background-size var(--dur-default) var(--ease-emphasized),
+    background-color var(--dur-quick) var(--ease-standard);
+}
+
+.tab-btn[aria-selected="true"],
+.m-tab.on {
+  background-size: 100% 2px;
+}
+
+/* ── Lifecycle button loading state ───────────────────────────── */
+
+.al-btn-lifecycle {
+  transition:
+    background-color var(--dur-quick) var(--ease-standard),
+    color var(--dur-quick) var(--ease-standard),
+    opacity var(--dur-quick) var(--ease-standard);
+}
+
+.al-btn-lifecycle[data-loading="true"] {
+  opacity: 0.7;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.al-btn-lifecycle[data-loading="true"]::after {
+  content: '';
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-left: 0.5rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: al-spin 600ms linear infinite;
+  vertical-align: middle;
+}
+
+/* ── Skeleton shimmer ─────────────────────────────────────────── */
 
 .al-skeleton {
   background: linear-gradient(
@@ -135,5 +260,36 @@
     var(--theme-skeleton-base) 100%
   );
   background-size: 200% 100%;
-  animation: al-shimmer 1.4s ease-in-out infinite;
+  animation: al-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-lg, 12px);
+}
+
+@keyframes al-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* ── Reduced motion — always respect this ─────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-animate],
+  [data-animate-group] > * {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+  .al-modal-overlay,
+  .al-modal-panel,
+  .al-dropdown,
+  .al-server-card,
+  .al-btn-lifecycle,
+  .tab-btn,
+  .m-tab {
+    transition: none !important;
+  }
+  .al-skeleton {
+    animation: none;
+  }
 }

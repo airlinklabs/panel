@@ -629,10 +629,7 @@ massDeleteBtn.addEventListener('click', function() {
   massDeleteMessage.textContent = `Are you sure you want to delete ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}? This is a permanent action and cannot be reversed.`;
   const panel = document.getElementById('massDeleteModalPanel');
   massDeleteModal.classList.remove('opacity-0', 'pointer-events-none');
-  if (window.Phys) {
-    Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
-    Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-  }
+  Animate.openModal(massDeleteModal, panel);
 });
 
 function closeMassDeleteModal() {
@@ -640,7 +637,7 @@ function closeMassDeleteModal() {
   const done = function () {
     massDeleteModal.classList.add('opacity-0', 'pointer-events-none');
   };
-  if (window.Phys) Phys.exit(massDeleteModal, { panel: panel, done: done }); else done();
+  Animate.closeModal(massDeleteModal, panel, done);
 }
 
 confirmMassDeleteBtn.addEventListener('click', async function() {
@@ -683,10 +680,7 @@ function openCreateFileModal() {
     const panel = document.getElementById('createFileModalPanel');
 
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    if (window.Phys) {
-      Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
-      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-    }
+    Animate.openModal(modal, panel);
 
     input.focus();
   }
@@ -697,7 +691,7 @@ function openCreateFileModal() {
     const done = function () {
       modal.classList.add('opacity-0', 'pointer-events-none');
     };
-    if (window.Phys) Phys.exit(modal, { panel: panel, done: done }); else done();
+    Animate.closeModal(modal, panel, done);
   }
 
 
@@ -712,10 +706,7 @@ function openCreateFileModal() {
     input.value = filePath;
 
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    if (window.Phys) {
-      Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
-      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-    }
+    Animate.openModal(modal, panel);
 
     // Select only the filename part (after the last slash), excluding extension
     const slashIndex = filePath.lastIndexOf('/');
@@ -732,7 +723,7 @@ function openCreateFileModal() {
     const done = function () {
       modal.classList.add('opacity-0', 'pointer-events-none');
     };
-    if (window.Phys) Phys.exit(modal, { panel: panel, done: done }); else done();
+    Animate.closeModal(modal, panel, done);
   }
 
   function confirmRename() { /* overridden below */ }
@@ -798,10 +789,7 @@ function openCreateFileModal() {
 
     modal.classList.remove('opacity-0', 'pointer-events-none');
     const panel = document.getElementById('uploadFileModalPanel');
-    if (window.Phys) {
-      Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
-      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-    }
+    Animate.openModal(modal, panel);
 
     // Reset the file selection
     removeSelectedFile();
@@ -824,7 +812,7 @@ function openCreateFileModal() {
     const done = function () {
       modal.classList.add('opacity-0', 'pointer-events-none');
     };
-    if (window.Phys) Phys.exit(modal, { panel: panel, done: done }); else done();
+    Animate.closeModal(modal, panel, done);
   }
 
   function removeSelectedFile() {
@@ -1295,10 +1283,7 @@ function openCreateFileModal() {
     const modal = document.getElementById('moveModal');
     const panel = document.getElementById('moveModalPanel');
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    if (window.Phys) {
-      Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
-      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-    }
+    Animate.openModal(modal, panel);
     setTimeout(() => document.getElementById('moveDestPath').focus(), 80);
   }
   function closeMoveModal() {
@@ -1307,7 +1292,7 @@ function openCreateFileModal() {
     const done = function () {
       modal.classList.add('opacity-0', 'pointer-events-none');
     };
-    if (window.Phys) Phys.exit(modal, { panel: panel, done: done }); else done();
+    Animate.closeModal(modal, panel, done);
   }
   async function confirmMove() {
     const src  = document.getElementById('moveSourcePath').value;

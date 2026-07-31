@@ -138,12 +138,8 @@
     var modal = document.getElementById('sftpModal');
     var panel = modal.querySelector('.al-sftp-panel');
     lastFocusedElement = document.activeElement;
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    if (window.Phys) {
-      Phys.set(panel, { y: 20, scale: 0.94, opacity: 0 });
-      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 22 });
-    }
+    if (window.Animate) Animate.openModal(modal, panel);
+    else { modal.classList.remove('hidden'); modal.classList.add('flex'); }
     loadSftpCredentials();
     // Focus first focusable element
     setTimeout(function() {
@@ -174,7 +170,7 @@
       modal.classList.add('hidden'); modal.classList.remove('flex');
       restoreFocus();
     };
-    if (window.Phys && panel) Phys.exit(modal, { panel: panel, done: done });
+    if (window.Animate && panel) Animate.closeModal(modal, panel, done);
     else done();
   };
 
