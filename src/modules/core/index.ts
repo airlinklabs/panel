@@ -199,6 +199,32 @@ const coreModule: Module = {
           }
         });
 
+        const serverFeatures = [
+          { name: 'Console', suffix: '', kw: 'console terminal status power start stop restart kill' },
+          { name: 'Files', suffix: '/files', kw: 'files file manager sftp upload download' },
+          { name: 'Backups', suffix: '/backups', kw: 'backup backups restore snapshot' },
+          { name: 'Players', suffix: '/players', kw: 'players player list whitelist' },
+          { name: 'Worlds', suffix: '/worlds', kw: 'worlds world map save' },
+          { name: 'Startup', suffix: '/startup', kw: 'startup command variables cmd' },
+          { name: 'Settings', suffix: '/settings', kw: 'server settings rename' },
+        ];
+
+        const featureMatches = serverFeatures.filter((f) => scoreFields([f.kw]) > 0);
+        if (featureMatches.length > 0) {
+          const featServers = await prisma.server.findMany({
+            where: user.isAdmin ? undefined : { ownerId: userId },
+            select: { UUID: true, name: true },
+            orderBy: { id: 'desc' },
+            take: 5,
+          });
+          featureMatches.slice(0, 3).forEach((f) => {
+            const score = scoreFields([f.kw]);
+            featServers.slice(0, 4).forEach((s) => {
+              results.push({ type: 'feature', label: f.name, sub: s.name, url: `/server/${s.UUID}${f.suffix}`, score });
+            });
+          });
+        }
+
         if (user.isAdmin) {
           let users = await prisma.users.findMany({
             where: { OR: tokenFieldOrs(['username', 'email']) },

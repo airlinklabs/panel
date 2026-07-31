@@ -24,6 +24,7 @@ const typeIcon = {
   nav:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd"/></svg>',
   clock:  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 shrink-0 text-neutral-400"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
   arrow:  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 shrink-0 text-neutral-400"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>',
+  feature: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 0 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813A3.75 3.75 0 0 0 7.466 7.89l.813-2.846A.75.75 0 0 1 9 4.5Z" clip-rule="evenodd"/></svg>',
 };
 
 function escHtml(t) {
@@ -103,6 +104,56 @@ const navAliases = {
   'logout':        'logout signout sign out exit',
 };
 
+const pageCatalog = (function() {
+  const pages = [
+    { label: 'Servers', url: '/server', kw: 'instances containers game list dashboard' },
+    { label: 'Dashboard', url: '/', kw: 'home dashboard start main' },
+    { label: 'Create Server', url: '/create-server', kw: 'new server instance deploy create' },
+    { label: 'Account', url: '/account', kw: 'profile me my settings password avatar email' },
+  ];
+  if (isAdmin) {
+    pages.push(
+      { label: 'Admin Overview', url: '/admin/overview', kw: 'dashboard home stats system status' },
+      { label: 'Admin Settings', url: '/admin/settings', kw: 'configuration preferences panel options site' },
+      { label: 'Admin Servers', url: '/admin/servers', kw: 'manage servers list instances delete' },
+      { label: 'Admin Users', url: '/admin/users', kw: 'members accounts people manage delete' },
+      { label: 'Admin Nodes', url: '/admin/nodes', kw: 'machines daemons hosts workers allocate' },
+      { label: 'Admin Images', url: '/admin/images', kw: 'docker eggs templates boxes images' },
+      { label: 'Admin Addons', url: '/admin/addons', kw: 'plugins extensions mods installed' },
+      { label: 'Airlink Cloud', url: '/admin/airlink-cloud', kw: 'cloud backup updates airlink' },
+      { label: 'API Keys', url: '/admin/apikeys', kw: 'tokens access auth api keys' },
+      { label: 'Security', url: '/admin/security', kw: 'ban bans ips rate limit moderation' },
+      { label: 'Player Stats', url: '/admin/playerstats', kw: 'players analytics stats leaderboard top' },
+      { label: 'Analytics', url: '/admin/analytics', kw: 'charts stats metrics graphs' },
+      { label: 'Addon Store', url: '/admin/addons/store', kw: 'plugins store marketplace extensions install' },
+      { label: 'Image Store', url: '/admin/images/store', kw: 'images store marketplace eggs templates install' },
+      { label: 'API Documentation', url: '/admin/api/docs', kw: 'documentation api reference endpoints docs' },
+      { label: 'Create Server', url: '/admin/servers/create', kw: 'new server deploy create admin' },
+      { label: 'Create User', url: '/admin/users/create', kw: 'new user account add admin' },
+      { label: 'Create Node', url: '/admin/nodes/create', kw: 'new node machine add admin' },
+      { label: 'Create Image', url: '/admin/images/create', kw: 'new image docker egg add admin' },
+      { label: 'Upload Image', url: '/admin/images/upload', kw: 'upload image docker egg json' },
+      { label: 'Radar', url: '/admin/radar/scripts', kw: 'radar scan scripts virustotal virus total' },
+      { label: 'Menu', url: '/admin/menu', kw: 'menu navigation sidebar items' }
+    );
+  }
+  return pages;
+})();
+
+function getCatalogResults(term) {
+  const tNorm = normalize(term);
+  const scored = [];
+  pageCatalog.forEach(function(page) {
+    const hay = normalize(page.label + ' ' + page.kw);
+    const score = scoreTerm(tNorm, hay);
+    if (score > 0) {
+      scored.push({ type: 'nav', label: page.label, sub: '', url: page.url, score: score });
+    }
+  });
+  scored.sort(function(a, b) { return b.score - a.score; });
+  return scored.slice(0, 4);
+}
+
 function getNavResults(term) {
   const scopedLinks = Array.from(navLinks).filter(function(link) {
     if (isAdmin) return true;
@@ -149,7 +200,7 @@ function showRecommendations() {
       const row = document.createElement('a');
       row.href = item.url;
       row.className = 'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
-      row.innerHTML = typeIcon[item.icon] || typeIcon.nav +
+      row.innerHTML = (typeIcon[item.icon] || typeIcon.nav) +
         '<span class="flex-1 min-w-0"><span class="block truncate">' + escHtml(item.label) + '</span></span>' +
         typeIcon.arrow;
       row.addEventListener('click', function(e) {
@@ -215,8 +266,8 @@ function renderResults(items, term) {
     groups[item.type].push(item);
   });
 
-  const order  = ['server', 'user', 'node', 'nav'];
-  const labels = { server: 'Servers', user: 'Users', node: 'Nodes', nav: 'Pages' };
+  const order  = ['server', 'user', 'node', 'feature', 'nav'];
+  const labels = { server: 'Servers', user: 'Users', node: 'Nodes', feature: 'Features', nav: 'Pages' };
 
   order.forEach(function(type) {
     if (!groups[type]) return;
@@ -261,13 +312,14 @@ async function doSearch(term) {
   }
   searchInput.setAttribute('aria-expanded', 'true');
 
-  const navItems = getNavResults(term);
+  const navItems  = getNavResults(term);
+  const catalogItems = getCatalogResults(term);
   try {
     const r    = await fetch('/api/search?q=' + encodeURIComponent(term));
     const data = await r.json();
-    renderResults((data.results || []).concat(navItems), term);
+    renderResults((data.results || []).concat(navItems, catalogItems), term);
   } catch {
-    renderResults(navItems, term);
+    renderResults(navItems.concat(catalogItems), term);
   }
 }
 
