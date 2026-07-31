@@ -203,23 +203,25 @@
     color var(--dur-instant) var(--ease-standard);
 }
 
-/* ── Tab underline — slides between tabs via background-size ──── */
+/* ── Tab highlight — pill slides via background-color ─────────── */
 
 .tab-btn,
 .m-tab {
-  background-image: linear-gradient(currentColor, currentColor);
-  background-repeat: no-repeat;
-  background-position: bottom left;
-  background-size: 0% 2px;
+  border-radius: 0.5rem;
   transition:
     color var(--dur-quick) var(--ease-standard),
-    background-size var(--dur-default) var(--ease-emphasized),
     background-color var(--dur-quick) var(--ease-standard);
 }
 
 .tab-btn[aria-selected="true"],
 .m-tab.on {
-  background-size: 100% 2px;
+  background-color: #0a0a0a;
+  color: #ffffff;
+}
+.dark .tab-btn[aria-selected="true"],
+.dark .m-tab.on {
+  background-color: #ffffff;
+  color: #0a0a0a;
 }
 
 /* ── Lifecycle button loading state ───────────────────────────── */
