@@ -167,20 +167,20 @@
   .al-section-label { @apply text-[10px] font-semibold uppercase tracking-widest mb-2; color: var(--theme-text-muted); }
 
   /* Radio selection — active state inverts with theme: white in dark, black in light */
-  .al-radio-active { border-color: #0a0a0a; background: #f4f4f5; }
-  .dark .al-radio-active { border-color: #ffffff; background: rgba(255,255,255,0.06); }
-  .al-radio-ring-active { border-color: #0a0a0a; }
-  .dark .al-radio-ring-active { border-color: #ffffff; }
-  .al-radio-dot-active { background: #0a0a0a; }
-  .dark .al-radio-dot-active { background: #ffffff; }
+  .al-radio-active { border-color: #171717; background: #f4f4f5; }
+  .dark .al-radio-active { border-color: #f0f0f0; background: rgba(255,255,255,0.06); }
+  .al-radio-ring-active { border-color: #171717; }
+  .dark .al-radio-ring-active { border-color: #f0f0f0; }
+  .al-radio-dot-active { background: #171717; }
+  .dark .al-radio-dot-active { background: #f0f0f0; }
 
   /* Toggle switch — activated: white track + black knob in dark, opposite in light */
   .al-toggle-track { @apply w-10 h-[22px] rounded-full flex items-center p-0.5 transition-colors cursor-pointer; background: var(--theme-toggle-bg, var(--theme-border)); }
-  .peer:checked ~ .al-toggle-track { background: #0a0a0a; }
-  .dark .peer:checked ~ .al-toggle-track { background: #ffffff; }
+  .peer:checked ~ .al-toggle-track { background: #171717; }
+  .dark .peer:checked ~ .al-toggle-track { background: #f0f0f0; }
   .al-toggle-dot   { @apply w-[18px] h-[18px] rounded-full transition-transform shadow-sm; background: var(--theme-accent-text); }
-  .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); background: #ffffff; }
-  .dark .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); background: #0a0a0a; }
+  .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); background: #f0f0f0; }
+  .dark .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); background: #171717; }
 
   /* Legacy aliases — kept for backward compat */
   .al-ui-surface {
@@ -339,53 +339,53 @@
    Active pill: black in light mode, white in dark mode. Text on
    the pill inverts to keep contrast. */
 #sliding-background {
-  background: #0a0a0a;
-  border-color: #0a0a0a;
+  background: #171717;
+  border-color: #171717;
   box-shadow: 0 1px 3px rgba(0,0,0,0.18);
 }
 .dark #sliding-background {
-  background: #ffffff;
-  border-color: #ffffff;
+  background: #f0f0f0;
+  border-color: #f0f0f0;
   box-shadow: 0 1px 4px rgba(255,255,255,0.18);
 }
-.nav-link2.nav2-active { color: #ffffff; }
-.dark .nav-link2.nav2-active { color: #0a0a0a; }
+.nav-link2.nav2-active { color: #f0f0f0; }
+.dark .nav-link2.nav2-active { color: #171717; }
 
 /* Server subnav (serverTemplate) — same inverted active pill */
 .nav-link2[data-active="true"] {
-  background: #0a0a0a !important;
-  border-color: #0a0a0a !important;
+  background: #171717 !important;
+  border-color: #171717 !important;
   box-shadow: none !important;
-  color: #ffffff !important;
+  color: #f0f0f0 !important;
   font-weight: 700 !important;
 }
 .dark .nav-link2[data-active="true"] {
-  background: #ffffff !important;
-  border-color: #ffffff !important;
+  background: #f0f0f0 !important;
+  border-color: #f0f0f0 !important;
   box-shadow: none !important;
-  color: #0a0a0a !important;
+  color: #171717 !important;
 }
 
 /* Sidebar sliding pill + mobile bottom nav — same inverted highlight.
    Boosted specificity + !important to win over theme overrides, which
    set the old subtle --theme-bg-active-nav on #active-background. */
 html #active-background {
-  background: #0a0a0a !important;
-  border: 1px solid #0a0a0a !important;
+  background: #171717 !important;
+  border: 1px solid #171717 !important;
 }
 html.dark body #active-background {
-  background: #ffffff !important;
-  border: 1px solid #ffffff !important;
+  background: #f0f0f0 !important;
+  border: 1px solid #f0f0f0 !important;
 }
 html .mobile-nav-link.active-mobile {
-  background: #0a0a0a !important;
+  background: #171717 !important;
   border-radius: 0.75rem;
-  color: #ffffff !important;
+  color: #f0f0f0 !important;
 }
 html.dark body .mobile-nav-link.active-mobile {
-  background: #ffffff !important;
+  background: #f0f0f0 !important;
   border-radius: 0.75rem;
-  color: #0a0a0a !important;
+  color: #171717 !important;
 }
 
 /* Sidebar background and vertical divider (starts below the topbar so it
@@ -401,19 +401,19 @@ html.dark body .mobile-nav-link.active-mobile {
 /* Icons inside the active sidebar link follow the inverted text color
    (themes force var(--theme-nav-icon) on .nav-link svg) */
 html .nav-link.active svg {
-  color: #ffffff !important;
+  color: #f0f0f0 !important;
 }
 html.dark body .nav-link.active svg {
-  color: #0a0a0a !important;
+  color: #171717 !important;
 }
 
 /* Active sidebar link text — inverted, wins over the themes' forced
    var(--theme-nav-text-active) which made text unreadable on the pill */
 html .nav-link.active {
-  color: #ffffff !important;
+  color: #f0f0f0 !important;
   font-weight: 700 !important;
 }
 html.dark body .nav-link.active {
-  color: #0a0a0a !important;
+  color: #171717 !important;
   font-weight: 700 !important;
 }

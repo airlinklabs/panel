@@ -209,8 +209,8 @@
 
     if (best) {
       best.classList.add('active', 'font-medium');
-      best.style.color = isDark ? '#ffffff' : '#0a0a0a';
-      best.style.background = isDark ? '#ffffff' : '#0a0a0a';
+      best.style.color = isDark ? '#f0f0f0' : '#171717';
+      best.style.background = isDark ? '#f0f0f0' : '#171717';
       best.style.borderRadius = '0.75rem';
       if (bg) {
         var r   = best.getBoundingClientRect();
@@ -243,11 +243,11 @@
           bg.style.width  = '100%';
           bg.style.borderRadius = '0';
         }
-        specialMatch.style.color = isDark ? '#ffffff' : '#0a0a0a';
-        specialMatch.style.background = isDark ? '#ffffff' : '#0a0a0a';
+        specialMatch.style.color = isDark ? '#f0f0f0' : '#171717';
+        specialMatch.style.background = isDark ? '#f0f0f0' : '#171717';
         specialMatch.style.fontWeight = '700';
         var userText = specialMatch.querySelector('#sidebar-username');
-        if (userText) userText.parentElement.style.color = isDark ? '#0a0a0a' : '#ffffff';
+        if (userText) userText.parentElement.style.color = isDark ? '#171717' : '#f0f0f0';
       } else if (bg) {
         // Reset width/shape in case we came from a special item
         bg.style.left         = '';
