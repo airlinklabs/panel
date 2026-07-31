@@ -5,6 +5,10 @@
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Analytics' }
+      ] }) %>
       <div class="al-page-header">
         <div class="flex items-center justify-between">
           <div>
@@ -22,11 +26,6 @@
       </div>
 
       <div class="al-page-body">
-        <style>
-          .tab-btn { color: var(--theme-text-muted); border-color: transparent; cursor: pointer; }
-          .tab-btn:hover { color: var(--theme-text-strong); }
-          .tab-btn[aria-selected="true"] { color: var(--theme-text-strong); border-color: var(--theme-text-strong); }
-        </style>
         <!-- Tab bar -->
         <div class="flex gap-0.5 border-b mb-6" style="border-color:var(--theme-border)" role="tablist">
           <button type="button" data-tab="servers"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2" role="tab" aria-selected="true">Servers</button>

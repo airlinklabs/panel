@@ -171,10 +171,9 @@
                   <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="MemoryDisplay" data-step="128" data-min="1" aria-label="Decrease RAM">−</button>
                   <input id="MemoryDisplay" type="number" value="512" min="1" class="stepper-input flex-1" aria-label="RAM value">
                   <button type="button" class="stepper-btn" data-action="inc" data-target="MemoryDisplay" data-step="128" aria-label="Increase RAM">+</button>
-                  <select id="MemoryUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer" aria-label="RAM unit">
-                    <option value="1" selected>MB</option>
-                    <option value="1024">GB</option>
-                  </select>
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="MemoryDisplay" data-hidden="Memory"
+                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
                 <p class="text-[11px] text-neutral-400 mt-1.5"><%= resourceLimits.maxMemory > 0 ? 'Max ' + resourceLimits.maxMemory + ' MB' : 'Unlimited' %></p>
               </div>
@@ -201,10 +200,9 @@
                   <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="StorageDisplay" data-step="1" data-min="1" aria-label="Decrease storage">−</button>
                   <input id="StorageDisplay" type="number" value="5" min="1" class="stepper-input flex-1" aria-label="Storage value">
                   <button type="button" class="stepper-btn" data-action="inc" data-target="StorageDisplay" data-step="1" aria-label="Increase storage">+</button>
-                  <select id="StorageUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer" aria-label="Storage unit">
-                    <option value="1">MB</option>
-                    <option value="1024" selected>GB</option>
-                  </select>
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="StorageDisplay" data-hidden="Storage"
+                    data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
                 </div>
                 <p class="text-[11px] text-neutral-400 mt-1.5"><%= resourceLimits.maxStorage > 0 ? 'Max ' + resourceLimits.maxStorage + ' MB' : 'Unlimited' %></p>
               </div>

@@ -1,30 +1,16 @@
 <%- include('../../components/header', { title: 'Edit Image' }) %>
 
-<style>
-.tab-btn {
-  color: var(--theme-text-muted);
-  border-bottom-color: transparent;
-  opacity: 0.6;
-}
-.tab-btn[aria-selected="true"] {
-  color: var(--theme-text-strong);
-  border-bottom-color: var(--theme-accent, currentColor);
-  opacity: 1;
-}
-.tab-btn:hover:not([aria-selected="true"]) {
-  color: var(--theme-text);
-  border-bottom-color: var(--theme-border);
-  opacity: 0.8;
-}
-.tab-panel { transition: opacity 0.2s ease; }
-</style>
-
 <main class="min-h-screen">
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0">
       <%- include('../../components/template') %>
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Images', href: '/admin/images' },
+        { label: image.name || 'Edit Image' }
+      ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
           <h1 class="al-page-title"><%= image.name || 'Edit Image' %></h1>

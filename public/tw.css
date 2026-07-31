@@ -224,6 +224,55 @@
   #terminal { max-height: 45vh; }
 }
 
+/* ── Tabs (shared across settings, image edit, analytics) ───── */
+.tab-btn {
+  color: var(--theme-text-muted);
+  border-bottom: none;
+  background: transparent;
+  border-radius: 10px 10px 0 0;
+  opacity: 0.75;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+.tab-btn:hover:not([aria-selected="true"]) {
+  color: var(--theme-text);
+  background: var(--theme-bg-hover);
+  opacity: 1;
+}
+.tab-btn[aria-selected="true"] {
+  color: var(--theme-text-strong);
+  background: var(--theme-bg-secondary);
+  opacity: 1;
+  font-weight: 600;
+}
+.tab-panel { transition: opacity 0.2s ease; }
+
+/* ── Resource format switcher (MB/GB/Cores/%) ───────────────── */
+.al-format-switcher {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.5rem;
+  padding: 0 12px;
+  border-radius: 0 12px 12px 0;
+  border: 1px solid var(--theme-border-input);
+  border-left: none;
+  background: var(--theme-bg-secondary);
+  color: var(--theme-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  min-height: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.al-format-switcher:hover {
+  background: var(--theme-bg-hover);
+  color: var(--theme-text-strong);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

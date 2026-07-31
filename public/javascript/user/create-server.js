@@ -154,25 +154,6 @@
     });
   });
 
-  function syncUnit(displayId, unitId, hiddenId) {
-    const display = document.getElementById(displayId);
-    const unit    = document.getElementById(unitId);
-    const hidden  = document.getElementById(hiddenId);
-    function update() {
-      hidden.value = Math.round(parseFloat(display.value || 0) * parseInt(unit.value));
-    }
-    display.addEventListener('input', update);
-    unit.addEventListener('change', function() {
-      const prevMult = this.value === '1024' ? 1 : 1024;
-      const newMult  = parseInt(this.value);
-      if (prevMult !== newMult) display.value = Math.round(parseFloat(display.value || 0) * prevMult / newMult) || 1;
-      update();
-    });
-    update();
-  }
-  syncUnit('MemoryDisplay',  'MemoryUnit',  'Memory');
-  syncUnit('StorageDisplay', 'StorageUnit', 'Storage');
-
   // Real-time validation: remove invalid state when user types
   document.getElementById('serverName').addEventListener('input', function() {
     this.classList.remove('invalid');

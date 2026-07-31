@@ -1,6 +1,6 @@
 <% /* breadcrumb: { items: [{ label, href? }] } */ %>
 <% if (locals.items && items.length > 0) { %>
-<div class="w-full" style="border-bottom:1px solid var(--theme-border);background:var(--theme-bg-secondary);">
+<div class="lg:hidden w-full" style="border-bottom:1px solid var(--theme-border);background:var(--theme-bg-secondary);">
   <div class="pr-6 sm:pr-8 pl-0 py-3">
     <nav aria-label="Breadcrumb">
       <ol class="flex items-center gap-1.5 text-xs">
@@ -20,4 +20,37 @@
     </nav>
   </div>
 </div>
+<script nonce="<%- nonce %>">
+(function () {
+  var slot = document.getElementById('topbar-breadcrumbs');
+  if (!slot) return;
+  var items = <%- JSON.stringify(items).replace(/</g, '\\x3c') %>;
+  slot.classList.remove('hidden');
+  slot.innerHTML = '';
+  items.forEach(function (item, i) {
+    if (i > 0) {
+      var sep = document.createElement('span');
+      sep.className = 'mx-1 shrink-0';
+      sep.style.color = 'var(--theme-text-placeholder)';
+      sep.style.fontSize = '11px';
+      sep.textContent = '/';
+      slot.appendChild(sep);
+    }
+    if (item.href && i < items.length - 1) {
+      var a = document.createElement('a');
+      a.href = item.href;
+      a.className = 'transition whitespace-nowrap';
+      a.style.color = 'var(--theme-text-muted)';
+      a.textContent = item.label;
+      slot.appendChild(a);
+    } else {
+      var span = document.createElement('span');
+      span.className = 'font-medium whitespace-nowrap truncate';
+      span.style.color = 'var(--theme-text-strong)';
+      span.textContent = item.label;
+      slot.appendChild(span);
+    }
+  });
+})();
+</script>
 <% } %>

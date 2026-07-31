@@ -6,6 +6,11 @@
       <%- include('../../components/template') %>
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Users', href: '/admin/users' },
+        { label: 'Edit' }
+      ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
           <h1 class="al-page-title"><%= req.translations.adminEditUserTitle || 'Edit User' %></h1>
@@ -152,11 +157,16 @@
                   <p class="mt-1 text-xs text-neutral-500">Max servers this user can create. 0 = cannot create.</p>
                 </div>
                 <div>
-                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory <span class="text-neutral-400 font-normal text-xs">(MB)</span></label>
-                  <input type="number" id="maxMemory" name="maxMemory" min="128" max="65536"
-                    value="<%= dataUser.maxMemory !== null && dataUser.maxMemory !== undefined ? dataUser.maxMemory : '' %>"
-                    placeholder="Use global default"
-                    class="al-input">
+                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory</label>
+                  <input type="hidden" id="maxMemory" name="maxMemory"
+                    value="<%= dataUser.maxMemory !== null && dataUser.maxMemory !== undefined ? dataUser.maxMemory : '' %>">
+                  <div class="flex items-stretch gap-0">
+                    <input type="number" id="maxMemoryDisplay" min="128" max="65536" placeholder="Use global default"
+                      class="al-input rounded-l-xl flex-1 border-r-0">
+                    <button type="button" class="al-format-switcher" data-format-switcher
+                      data-display="maxMemoryDisplay" data-hidden="maxMemory"
+                      data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+                  </div>
                 </div>
                 <div>
                   <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="text-neutral-400 font-normal text-xs">(%)</span></label>
@@ -166,11 +176,16 @@
                     class="al-input">
                 </div>
                 <div>
-                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage <span class="text-neutral-400 font-normal text-xs">(MB)</span></label>
-                  <input type="number" id="maxStorage" name="maxStorage" min="1" max="10000"
-                    value="<%= dataUser.maxStorage !== null && dataUser.maxStorage !== undefined ? dataUser.maxStorage : '' %>"
-                    placeholder="Use global default"
-                    class="al-input">
+                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage</label>
+                  <input type="hidden" id="maxStorage" name="maxStorage"
+                    value="<%= dataUser.maxStorage !== null && dataUser.maxStorage !== undefined ? dataUser.maxStorage : '' %>">
+                  <div class="flex items-stretch gap-0">
+                    <input type="number" id="maxStorageDisplay" min="1" max="10000" placeholder="Use global default"
+                      class="al-input rounded-l-xl flex-1 border-r-0">
+                    <button type="button" class="al-format-switcher" data-format-switcher
+                      data-display="maxStorageDisplay" data-hidden="maxStorage"
+                      data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+                  </div>
                 </div>
               </div>
             </div>
