@@ -16,20 +16,15 @@
 
       const showToast = (message, type = 'error') => {
         const toast = document.createElement('div');
-        toast.className = 'px-4 py-3 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out opacity-0 flex flex-row items-center gap-3';
+        toast.className = 'px-4 py-3 rounded-xl shadow-lg transform transition-all duration-300 ease-in-out opacity-0 flex flex-row items-start gap-3';
         toast.style.background = 'var(--theme-bg-card)';
         toast.style.border = '1px solid var(--theme-border)';
         toast.style.transform = 'translateY(-8px) scale(0.95)';
-
-        // Left color border
-        const colorMap = {
-          error:   'var(--theme-danger)',
-          success: 'var(--theme-success)',
-          warning: 'var(--theme-warning)',
-          loading: 'var(--theme-info)',
-          info:    'var(--theme-info)',
-        };
-        toast.style.borderLeft = '4px solid ' + (colorMap[type] || colorMap.info);
+        toast.style.maxWidth = '400px';
+        toast.style.touchAction = 'none';
+        toast.style.cursor = 'grab';
+        toast.style.userSelect = 'none';
+        toast.style.overflowWrap = 'break-word';
 
         const textColorMap = {
           error:   'var(--theme-danger)',
@@ -42,6 +37,7 @@
 
         // Icon
         const icon = document.createElement('span');
+        icon.className = 'mt-0.5 shrink-0';
         switch (type) {
           case 'error':
             icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clip-rule="evenodd"/></svg>';
@@ -61,8 +57,8 @@
 
         toast.appendChild(icon);
 
-        const messageSpan = document.createElement('span');
-        messageSpan.className = 'font-medium text-sm';
+        const messageSpan = document.createElement('div');
+        messageSpan.className = 'font-medium text-sm flex-1 min-w-0 leading-relaxed';
         messageSpan.textContent = message;
         toast.appendChild(messageSpan);
 
@@ -88,6 +84,7 @@
         });
 
         const removeToast = () => {
+          toast.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
           toast.style.transform = 'translateY(-8px) scale(0.95)';
           toast.classList.remove('opacity-100');
           toast.classList.add('opacity-0');
@@ -95,6 +92,61 @@
             if (toast.parentNode) toastContainer.removeChild(toast);
           }, 300);
         };
+
+        // Swipe to dismiss — hold and drag right
+        let dragging = false;
+        let startX = null;
+        let currentDx = 0;
+
+        const finishDrag = (commit) => {
+          dragging = false;
+          toast.style.cursor = 'grab';
+          if (commit) {
+            toast.style.transition = 'transform 0.25s ease-in, opacity 0.25s ease-in';
+            toast.style.transform = 'translateX(120%)';
+            toast.style.opacity = '0';
+            setTimeout(() => {
+              if (toast.parentNode) toastContainer.removeChild(toast);
+            }, 250);
+            return;
+          }
+          toast.style.transition = 'transform 0.3s cubic-bezier(0.16,1,0.3,1)';
+          toast.style.transform = 'translateX(0)';
+          setTimeout(() => {
+            toast.style.transition = '';
+          }, 300);
+        };
+
+        toast.addEventListener('pointerdown', (e) => {
+          if (e.button !== undefined && e.button !== 0) return;
+          dragging = true;
+          startX = e.clientX;
+          currentDx = 0;
+          toast.style.cursor = 'grabbing';
+          toast.style.transition = 'none';
+          toast.setPointerCapture(e.pointerId);
+        });
+
+        toast.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const dx = e.clientX - startX;
+          currentDx = dx;
+          if (dx > 0) {
+            toast.style.transform = 'translateX(' + dx + 'px) rotate(' + dx * 0.02 + 'deg)';
+          } else {
+            toast.style.transform = 'translateX(' + dx * 0.3 + 'px)';
+          }
+        });
+
+        toast.addEventListener('pointerup', (e) => {
+          if (!dragging) return;
+          const threshold = Math.max(toast.offsetWidth * 0.4, 80);
+          finishDrag(currentDx > threshold);
+        });
+        toast.addEventListener('pointercancel', (e) => {
+          if (!dragging) return;
+          finishDrag(false);
+        });
 
         if (type !== 'loading') setTimeout(removeToast, 5000);
 
