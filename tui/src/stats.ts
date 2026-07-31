@@ -2,8 +2,9 @@ import { Database } from "bun:sqlite";
 import { existsSync, readFileSync, readdirSync, statfsSync, statSync } from "node:fs";
 import crypto from "node:crypto";
 
-const DB_PATH = process.env.AIRLINK_DB_PATH ?? "../../storage/dev.db";
-const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? "../logs";
+const TUI_DIR = import.meta.dir;
+const DB_PATH = process.env.AIRLINK_DB_PATH ?? `${TUI_DIR}/../../../storage/dev.db`;
+const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? `${TUI_DIR}/../../logs`;
 const PANEL_URL = process.env.AIRLINK_PANEL_URL ?? "http://127.0.0.1:3000";
 
 let db: Database | null | undefined;
