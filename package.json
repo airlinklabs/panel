@@ -11,6 +11,7 @@
   "scripts": {
     "setup": "pnpm install && prisma generate && prisma db push && pnpm run build",
     "start": "node dist/app.js",
+    "tui": "bun tui/src/index.ts",
     "dev": "prisma migrate deploy && prisma generate && nodemon",
     "build": "tsc && tsc -p tsconfig.prisma.json && tailwindcss -i ./public/tw.css -o ./public/styles.css",
     "build:css": "tailwindcss -i ./public/tw.css -o ./public/styles.css --watch",

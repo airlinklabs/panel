@@ -5,8 +5,10 @@ import {
   ScrollBoxRenderable,
   TextRenderable,
   type KeyEvent,
+  type Renderable,
 } from "@opentui/core";
 import { watch, openSync, readSync, closeSync, statSync, existsSync } from "node:fs";
+import { collectStats, type Stats } from "./stats";
 
 const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? "../logs";
 const LOG_FILES = ["combined.log", "error.log"];
@@ -15,6 +17,7 @@ const VERSION = "2.5.128";
 const WIDE_MIN_WIDTH = 110;
 const BRAND_WIDTH = 56;
 const INITIAL_TAIL_LINES = 1000;
+const STATS_INTERVAL_MS = 5000;
 
 const ART = [
   " █████╗ ██╗██████╗ ██╗     ██╗███╗   ██╗██╗  ██╗",
@@ -23,37 +26,6 @@ const ART = [
   "██╔══██║██║██╔══██╗██║     ██║██║╚██╗██║██╔═██╗ ",
   "██║  ██║██║██║  ██║███████╗██║██║ ╚████║██║  ██╗",
   "╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝",
-];
-
-const LICENSE_FULL = [
-  "MIT License",
-  "Copyright (c) 2026 Airlink",
-  "",
-  "Permission is hereby granted, free of charge, to any person",
-  "obtaining a copy of this software and associated documentation",
-  'files (the "Software"), to deal in the Software without',
-  "restriction, including without limitation the rights to use, copy,",
-  "modify, merge, publish, distribute, sublicense, and/or sell copies",
-  "of the Software, and to permit persons to whom the Software is",
-  "furnished to do so, subject to the following conditions:",
-  "",
-  "The above copyright notice and this permission notice shall be",
-  "included in all copies or substantial portions of the Software.",
-  "",
-  'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,',
-  "EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES",
-  "OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND",
-  "NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT",
-  "HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,",
-  "WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,",
-  "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER",
-  "DEALINGS IN THE SOFTWARE.",
-];
-
-const LICENSE_SHORT = [
-  "MIT License — Copyright (c) 2026 Airlink.",
-  "Free to use, copy, modify and redistribute.",
-  "See LICENSE for the full text.",
 ];
 
 function logPath(name: string) {
@@ -85,6 +57,80 @@ function colorForLine(line: string): string {
   return "#9CA3AF";
 }
 
+function fmtBytes(n: number): string {
+  if (n >= 2 ** 30) return `${(n / 2 ** 30).toFixed(1)} GB`;
+  if (n >= 2 ** 20) return `${(n / 2 ** 20).toFixed(1)} MB`;
+  if (n >= 2 ** 10) return `${(n / 2 ** 10).toFixed(0)} KB`;
+  return `${n} B`;
+}
+
+function fmtDur(sec: number): string {
+  const d = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${Math.floor(s)}s`;
+}
+
+function statLines(stats: Stats): { text: string; fg: string }[] {
+  const lines: { text: string; fg: string }[] = [];
+  const panelState = stats.panelOnline ? "online" : "offline";
+  const panelExtra = stats.panelPid ? ` · up ${fmtDur(stats.panelUptimeSec ?? 0)}` : "";
+  lines.push({
+    text: `● Panel       ${panelState}${panelExtra}`,
+    fg: stats.panelOnline ? "#4ADE80" : "#FF6B6B",
+  });
+  lines.push({
+    text: `● Daemon      ${stats.daemonOnline ? "online" : "offline"}${stats.daemonName ? ` (${stats.daemonName})` : ""}`,
+    fg: stats.daemonOnline ? "#4ADE80" : "#FF6B6B",
+  });
+  if (stats.serverName) {
+    const state =
+      stats.serverOnline === true ? "running" : stats.serverExists === false ? "not installed" : "stopped";
+    const name = stats.serverName.length > 11 ? stats.serverName.slice(0, 10) + "…" : stats.serverName;
+    lines.push({
+      text: `● ${name.padEnd(11)} ${state}`,
+      fg: stats.serverOnline === true ? "#4ADE80" : "#FFD166",
+    });
+  } else {
+    lines.push({ text: "● Server      none configured", fg: "#6B7280" });
+  }
+  if (stats.users !== null && stats.sessions !== null && stats.logins24h !== null) {
+    lines.push({
+      text: `Users ${stats.users} · Sessions ${stats.sessions} · Logins 24h ${stats.logins24h}`,
+      fg: "#9CA3AF",
+    });
+  } else {
+    lines.push({ text: "Database      unavailable", fg: "#FF6B6B" });
+  }
+  lines.push({
+    text: `CPU ${stats.cpu ?? "–"}% · RAM ${stats.memUsedGb ?? "–"}/${stats.memTotalGb ?? "–"} GB`,
+    fg: "#9CA3AF",
+  });
+  lines.push({
+    text: `Disk ${stats.diskUsedGb}/${stats.diskTotalGb} GB (${Math.round((stats.diskUsedGb / stats.diskTotalGb) * 100)}%)`,
+    fg: "#9CA3AF",
+  });
+  lines.push({ text: `Load ${stats.load} · Up ${fmtDur(stats.sysUptimeSec)}`, fg: "#9CA3AF" });
+  lines.push({
+    text: `Errors 24h ${stats.errors24h ?? "–"} · Logs ${fmtBytes(stats.logBytes)} · DB ${fmtBytes(stats.dbBytes ?? 0)}`,
+    fg: "#9CA3AF",
+  });
+  return lines;
+}
+
+function renderStats(container: Renderable, renderer: ReturnType<typeof createCliRenderer>, stats: Stats) {
+  for (const child of Array.from(container.getChildren() as unknown as Renderable[])) {
+    container.remove(child);
+  }
+  for (const line of statLines(stats)) {
+    container.add(new TextRenderable(renderer, { content: line.text, fg: line.fg, width: "100%" }));
+  }
+}
+
 async function main() {
   const renderer = await createCliRenderer({
     exitOnCtrlC: true,
@@ -108,7 +154,9 @@ async function main() {
   });
 
   function clearLogs() {
-    for (const child of [...logs.getChildren()]) logs.remove(child);
+    for (const child of Array.from(logs.getChildren() as unknown as Renderable[])) {
+      logs.remove(child);
+    }
   }
 
   function fillFromFile(name: string) {
@@ -157,8 +205,10 @@ async function main() {
     },
     Text({ content: ART.join("\n"), fg: "#4ADE80" }),
     Text({ content: `Codename: ${CODENAME}  ·  v${VERSION}`, fg: "#60A5FA" }),
-    Text({ id: "license-full", content: LICENSE_FULL.join("\n"), fg: "#9CA3AF" }),
-    Text({ id: "license-short", content: LICENSE_SHORT.join("\n"), fg: "#9CA3AF", visible: false }),
+    Box(
+      { id: "stats-box", flexDirection: "column", gap: 0 },
+      Text({ content: "Collecting stats…", fg: "#6B7280" })
+    ),
     Text({ content: "[Tab] switch log   [Ctrl+C] quit", fg: "#4B5563" })
   );
 
@@ -172,16 +222,13 @@ async function main() {
 
   const realOuter = renderer.root.getRenderable("outer")!;
   const realBrand = realOuter.getRenderable("brand")!;
+  const statsBox = realBrand.getRenderable("stats-box")!;
 
   function applyLayout() {
     const wide = renderer.width >= WIDE_MIN_WIDTH;
     realOuter.flexDirection = wide ? "row" : "column";
     realBrand.width = wide ? BRAND_WIDTH : "100%";
     realBrand.height = wide ? "100%" : "auto";
-    const licenseFull = realBrand.getRenderable("license-full");
-    const licenseShort = realBrand.getRenderable("license-short");
-    if (licenseFull) licenseFull.visible = wide;
-    if (licenseShort) licenseShort.visible = !wide;
   }
 
   function switchFile() {
@@ -192,6 +239,16 @@ async function main() {
 
   applyLayout();
   fillFromFile(currentFile);
+
+  const refreshStats = async () => {
+    try {
+      renderStats(statsBox, renderer, await collectStats());
+    } catch (error) {
+      // keep previous stats if a collection fails
+    }
+  };
+  void refreshStats();
+  const statsTimer = setInterval(() => void refreshStats(), STATS_INTERVAL_MS);
 
   renderer.keyInput.on("keypress", (key: KeyEvent) => {
     if (key.name === "tab") switchFile();
@@ -207,7 +264,10 @@ async function main() {
   }
 
   renderer.on("resize", () => applyLayout());
-  renderer.on("destroy", () => watcher?.close());
+  renderer.on("destroy", () => {
+    clearInterval(statsTimer);
+    watcher?.close();
+  });
 }
 
 main().catch((e) => {
