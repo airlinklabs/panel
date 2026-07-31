@@ -1,6 +1,6 @@
 <% if (typeof installed !== 'undefined') { %>
 <% if (installed.failed) { %>
-<div class="mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
+<div class="mx-4 sm:mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
   <div class="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center shrink-0">
     <%- icon('x', { class: 'h-4 w-4 text-red-500 dark:text-red-400', strokeWidth: 2 }) %>
   </div>
@@ -10,7 +10,7 @@
   </div>
 </div>
 <% } else if (!installed.installed && !installed.error) { %>
-<div id="installBanner" class="mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
+<div id="installBanner" class="mx-4 sm:mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
   <div id="installIconWrap" class="h-8 w-8 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0">
     <svg id="installSpinner" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 dark:text-neutral-400 animate-spin" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
