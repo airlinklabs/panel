@@ -192,7 +192,7 @@ const radarModule: Module = {
           });
         } catch (err: unknown) {
           logger.error('VirusTotal API error:', err instanceof Error ? err.message : err);
-          res.status(502).json({ success: false, error: 'VirusTotal request failed', message: err instanceof Error ? err.message : 'Unknown error' });
+          res.status(502).json({ success: false, error: 'VirusTotal request failed', message: 'VirusTotal scan failed' });
         }
       }
     );
@@ -442,7 +442,7 @@ const radarModule: Module = {
           });
         } catch (err: unknown) {
           logger.error('VT file scan error:', err instanceof Error ? err.message : err);
-          res.status(502).json({ success: false, error: err instanceof Error ? err.message : 'VT file scan failed' });
+          res.status(502).json({ success: false, error: 'File scan failed' });
         } finally {
           fs.unlink(tmpPath).catch(() => {});
         }

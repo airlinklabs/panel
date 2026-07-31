@@ -160,11 +160,13 @@
         }, 500);
       } else {
         loader.close();
-        throw new Error('Failed to create node');
+        const data = await response.json().catch(() => ({}));
+        showToast(data.error || 'Failed to create node.', 'error');
       }
     } catch (error) {
       loader.close();
-      showToast('Error creating node: ' + error.message, 'error');
+      console.error('Error creating node:', error);
+      showToast('Error creating node. Try again.', 'error');
     }
   });
 

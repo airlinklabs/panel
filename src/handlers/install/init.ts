@@ -31,7 +31,7 @@ app.post('/install', async (req, res) => {
   } catch (error: unknown) {
     if (error instanceof Error) {
       logger.error('Error during installation:', error.message);
-      res.status(400).json({ error: `Installation failed: ${error.message}` });
+      res.status(400).json({ error: 'Installation failed' });
     } else {
       logger.error('Unknown error during installation:', error);
       res

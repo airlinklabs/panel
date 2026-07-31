@@ -99,7 +99,7 @@ const coreModule: Module = {
         res.status(500).json({ 
           success: false, 
           message: 'Error testing node connection', 
-          error: error instanceof Error ? error.message : 'Unknown error' 
+          error: 'Failed to test node connection' 
         });
         return;
       }

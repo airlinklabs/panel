@@ -479,7 +479,8 @@ app.use((_req, res, next) => {
       (ejs as any).renderFile(view, data, {}, (err: Error | null, html: string) => {
         if (err) {
           if (typeof callback === 'function') return callback(err, '');
-          return res.status(500).send('View render error: ' + err.message);
+          logger.error('View render error:', err);
+          return res.status(500).send('View render error');
         }
         if (typeof callback === 'function') return callback(null!, html);
         res.send(html);
