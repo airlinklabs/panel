@@ -7,10 +7,7 @@
 
   function openOverlay(overlay, panel) {
     overlay.setAttribute('data-open', '');
-    if (window.Phys) {
-      Phys.set(panel, { y: 14, scale: 0.95, opacity: 0 });
-      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 340, damping: 22 });
-    }
+    Animate.openModal(overlay, panel);
   }
 
   function closeOverlay(overlay, panel, after) {
@@ -18,8 +15,7 @@
       overlay.removeAttribute('data-open');
       if (after) after();
     };
-    if (window.Phys) Phys.exit(overlay, { panel: panel, done: done });
-    else done();
+    Animate.closeModal(overlay, panel, done);
   }
 
   // ── View toggle ───────────────────────────────────────────

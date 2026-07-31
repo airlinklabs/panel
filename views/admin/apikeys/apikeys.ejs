@@ -345,10 +345,7 @@
     createApiKeyModal.setAttribute('aria-hidden', 'false');
     createApiKeyModal.classList.remove('hidden');
     createApiKeyModal.classList.add('flex');
-    if (window.Phys) {
-      Phys.set(createApiKeyPanel, { y: 18, scale: 0.94, opacity: 0 });
-      Phys.to(createApiKeyPanel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-    }
+    Animate.openModal(createApiKeyModal, createApiKeyPanel);
     const focusable = getFocusableElements(createApiKeyPanel || createApiKeyModal);
     (focusable[0] || createApiKeyPanel || createApiKeyModal).focus();
   });
@@ -362,8 +359,7 @@
       modalReturnFocus = null;
       activeModalId = null;
     };
-    if (window.Phys) Phys.exit(createApiKeyModal, { panel: createApiKeyPanel, done: done });
-    else done();
+    Animate.closeModal(createApiKeyModal, createApiKeyPanel, done);
   }
 
   function toggleCategory(btn) {
@@ -496,10 +492,7 @@
     editApiKeyModal.setAttribute('aria-hidden', 'false');
     editApiKeyModal.classList.remove('hidden');
     editApiKeyModal.classList.add('flex');
-    if (window.Phys) {
-      Phys.set(editApiKeyModalPanel, { y: 18, scale: 0.94, opacity: 0 });
-      Phys.to(editApiKeyModalPanel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-    }
+    Animate.openModal(editApiKeyModal, editApiKeyModalPanel);
     editNameInput.focus();
   }
 
@@ -512,8 +505,7 @@
       modalReturnFocus = null;
       activeModalId = null;
     };
-    if (window.Phys) Phys.exit(editApiKeyModal, { panel: editApiKeyModalPanel, done: done });
-    else done();
+    Animate.closeModal(editApiKeyModal, editApiKeyModalPanel, done);
   }
 
   editApiKeyModalBackdrop.addEventListener('click', hideEditModal);
@@ -672,10 +664,7 @@
     createdKeyModal.classList.remove('hidden');
     createdKeyModal.classList.add('flex');
     createdKeyModal.setAttribute('aria-hidden', 'false');
-    if (window.Phys) {
-      Phys.set(createdKeyPanel, { y: 18, scale: 0.94, opacity: 0 });
-      Phys.to(createdKeyPanel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-    }
+    Animate.openModal(createdKeyModal, createdKeyPanel);
     if (createdKeyPanel) createdKeyPanel.focus();
     window.hideCreatedKeyModal = function() {
       const done = function () {
@@ -684,8 +673,7 @@
         createdKeyModal.setAttribute('aria-hidden', 'true');
         history.replaceState({}, '', '/admin/apikeys');
       };
-      if (window.Phys) Phys.exit(createdKeyModal, { panel: createdKeyPanel, done: done });
-      else done();
+      Animate.closeModal(createdKeyModal, createdKeyPanel, done);
     };
     window.copyCreatedKey = function() {
       copyToClipboard('<%= created %>');

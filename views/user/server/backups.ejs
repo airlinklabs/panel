@@ -168,10 +168,7 @@ function openCreateBackupModal() {
   const panel = document.getElementById('createBackupModalPanel');
 
   modal.classList.remove('opacity-0', 'pointer-events-none');
-  if (window.Phys) {
-    Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
-    Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-  }
+  Animate.openModal(modal, panel);
 
   input.focus();
 }
@@ -184,7 +181,7 @@ function closeCreateBackupModal() {
     // Clear input
     document.getElementById('backupName').value = '';
   };
-  if (window.Phys) Phys.exit(modal, { panel: panel, done: done }); else done();
+  Animate.closeModal(modal, panel, done);
 }
 
 function handleBackupNameKeyPress(event) {

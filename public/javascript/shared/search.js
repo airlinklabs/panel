@@ -352,10 +352,8 @@ function openSearch(fromKeyboard) {
   }
   searchPanel.style.transformOrigin = ox + 'px ' + oy + 'px';
 
-  if (window.Phys) {
-    Phys.set(searchPanel, { y: 14, scale: 0.96, opacity: 0 });
-    Phys.to(searchPanel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 340, damping: 22 });
-  }
+  searchPanel.classList.add('al-dropdown');
+  requestAnimationFrame(function () { searchPanel.classList.add('open'); });
   searchButton.setAttribute('aria-expanded', 'true');
 
   if (!searchInput.value.trim()) showRecommendations();
@@ -371,10 +369,13 @@ function closeSearch() {
   const done = function() {
     searchOverlay.classList.add('hidden');
     searchOverlay.classList.remove('flex');
+    searchPanel.classList.remove('open');
     panelClosing = false;
   };
-  if (window.Phys) Phys.exit(searchOverlay, { panel: searchPanel, done: done });
-  else done();
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  searchPanel.classList.remove('open');
+  if (reduced) done();
+  else setTimeout(done, 230);
 }
 
 searchButton.addEventListener('click', function() {

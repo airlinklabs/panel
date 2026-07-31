@@ -72,26 +72,22 @@
     cfg._lastKey = '';
     lastFocused = document.activeElement;
 
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    if (window.Animate) Animate.openModal(modal, panel);
+    else { modal.classList.remove('hidden'); modal.classList.add('flex'); }
     modal.setAttribute('aria-hidden', 'false');
     render();
-    if (window.Phys) Phys.enter(modal, { panel: panel, y: 18, scale: 0.94 });
-    else modal.style.opacity = '1';
     var first = panel.querySelector('input, button');
     if (first) setTimeout(function () { first.focus(); }, 60);
   }
 
   function close() {
     const done = function () {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      modal.setAttribute('aria-hidden', 'true');
       if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
       lastFocused = null;
     };
-    if (window.Phys) Phys.exit(modal, { panel: panel, done: done });
-    else done();
+    if (window.Animate) Animate.closeModal(modal, panel, done);
+    else { modal.classList.add('hidden'); modal.classList.remove('flex'); done(); }
+    modal.setAttribute('aria-hidden', 'true');
   }
 
   function commit() {
@@ -189,12 +185,11 @@
         if (listEl.classList.contains('hidden')) {
           fillList();
           listEl.classList.remove('hidden');
-          if (window.Phys) {
-            Phys.set(listEl, { y: -4, scale: 0.98, opacity: 0 });
-            Phys.to(listEl, { y: 0, scale: 1, opacity: 1 }, { stiffness: 380, damping: 22 });
-          }
+          listEl.classList.add('al-dropdown');
+          requestAnimationFrame(function () { listEl.classList.add('open'); });
         } else {
-          listEl.classList.add('hidden');
+          listEl.classList.remove('open');
+          setTimeout(function () { listEl.classList.add('hidden'); }, 200);
         }
       });
 
@@ -226,12 +221,8 @@
       el.appendChild(intWrap);
       el.appendChild(extWrap);
       el.appendChild(rmBtn);
+      el.style.setProperty('--pa-i', String(index));
       rowsEl.appendChild(el);
-
-      if (window.Phys) {
-        Phys.set(el, { y: 10, scale: 0.97, opacity: 0 });
-        Phys.to(el, { y: 0, scale: 1, opacity: 1 }, { stiffness: 300, damping: 20 });
-      }
     });
 
     hintEl.textContent = rows.length > 0 && rowsChanged()

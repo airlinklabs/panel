@@ -119,7 +119,7 @@
             const inFolder = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID));
             if (inFolder) return;
           %>
-          <div class="group relative block al-card cursor-grab hover:border-[var(--theme-border-accent)] hover:shadow-md transition-[box-shadow,transform,border-color] duration-150 active:cursor-grabbing"
+          <div class="al-server-card group relative block al-card cursor-grab hover:border-[var(--theme-border-accent)] hover:shadow-md transition-[box-shadow,transform,border-color] duration-150 active:cursor-grabbing"
             data-server-uuid="<%= server.UUID %>"
             data-server-name="<%= server.name %>"
             style="--i:<%= serverIdx++ %>"

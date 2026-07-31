@@ -49,12 +49,13 @@
     }
     const portsOverlay = document.getElementById('portsOverlay');
     portsOverlay.classList.add('open');
-    if (window.Phys) { const panel = portsOverlay.querySelector('.confirm-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
+    Animate.openModal(portsOverlay, portsOverlay.querySelector('.confirm-box'));
   });
   document.getElementById('portsOk').addEventListener('click', () => {
     const overlay = document.getElementById('portsOverlay');
-    const done = function () { overlay.classList.remove('open'); };
-    if (window.Phys) { const panel = overlay.querySelector('.confirm-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
+    overlay.classList.add('closing');
+    const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
+    Animate.closeModal(overlay, overlay.querySelector('.confirm-box'), done);
   });
 
   document.querySelectorAll('.stepper-btn').forEach(btn => {
@@ -104,7 +105,7 @@
       confirmTitle.textContent = title;
       confirmBody.textContent  = body;
       overlay.classList.add('open');
-      if (window.Phys) { const panel = overlay.querySelector('.confirm-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
+      Animate.openModal(overlay, overlay.querySelector('.confirm-box'));
       confirmResolve = resolve;
       // Focus the cancel button (safe default)
       setTimeout(function() { confirmCancel.focus(); }, 0);
@@ -122,8 +123,9 @@
   }
 
   function closeConfirm(result) {
-    const done = function () { overlay.classList.remove('open'); };
-    if (window.Phys) { const panel = overlay.querySelector('.confirm-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
+    overlay.classList.add('closing');
+    const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
+    Animate.closeModal(overlay, overlay.querySelector('.confirm-box'), done);
     if (overlay._keydownHandler) {
       document.removeEventListener('keydown', overlay._keydownHandler);
       overlay._keydownHandler = null;

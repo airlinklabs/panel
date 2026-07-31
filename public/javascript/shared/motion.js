@@ -15,6 +15,7 @@
       return Promise.resolve();
     }
     return new Promise(function (resolve) {
+      el.classList.remove('will-animate');
       el.classList.add('motion-visible');
       el.style.animationName = '';
       void el.offsetWidth; // force reflow
@@ -72,6 +73,9 @@
     }, { threshold: 0, rootMargin: '0px' });
 
     document.querySelectorAll('[data-animate]').forEach(function (el) {
+      // Hide only now, after JS is confirmed running — content is
+      // visible by default without JS (progressive enhancement).
+      el.classList.add('will-animate');
       observer.observe(el);
     });
   }
@@ -91,6 +95,7 @@
         if (entry.isIntersecting) {
           var group = entry.target;
           var children = group.children;
+          group.classList.remove('will-animate');
           for (var i = 0; i < children.length; i++) {
             (function (child, index) {
               setTimeout(function () {
@@ -105,6 +110,7 @@
     }, { threshold: 0.1 });
 
     document.querySelectorAll('[data-animate-group]').forEach(function (el) {
+      el.classList.add('will-animate');
       observer.observe(el);
     });
   }

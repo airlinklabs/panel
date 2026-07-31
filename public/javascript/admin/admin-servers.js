@@ -219,10 +219,7 @@
     radarScanModal.classList.remove('hidden');
     radarScanModal.classList.add('flex');
     var radarScanPanel = document.getElementById('radarScanPanel');
-    if (window.Phys) {
-      Phys.set(radarScanPanel, { y: 18, scale: 0.94, opacity: 0 });
-      Phys.to(radarScanPanel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-    }
+    Animate.openModal(radarScanModal, radarScanPanel);
     fetchRadarScripts();
   }
 
@@ -233,8 +230,7 @@
       radarScanModal.classList.add('hidden');
       radarScanModal.classList.remove('flex');
     };
-    if (window.Phys) Phys.exit(radarScanModal, { panel: radarScanPanel, done: done });
-    else done();
+    Animate.closeModal(radarScanModal, radarScanPanel, done);
     currentServerIds = [];
     radarServerNames = {};
   }
@@ -398,10 +394,7 @@
           radarScanModal.classList.remove('hidden');
           radarScanModal.classList.add('flex');
           var radarScanPanel = document.getElementById('radarScanPanel');
-          if (window.Phys) {
-            Phys.set(radarScanPanel, { y: 18, scale: 0.94, opacity: 0 });
-            Phys.to(radarScanPanel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
-          }
+          Animate.openModal(radarScanModal, radarScanPanel);
           renderVtFileScanResults(data);
         }, 800);
       })

@@ -118,19 +118,19 @@
           <div class="flex gap-2 shrink-0">
             <button id="startButton" type="button"
               <%= server.Suspended ? 'disabled aria-disabled="true"' : '' %>
-              class="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
+              class="al-btn-lifecycle rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
               <%- icon('play', { class: 'size-4 inline-flex mr-1 text-emerald-100 mb-0.5' }) %>
               <%= req.translations.start %>
             </button>
             <button id="restartButton" type="button"
               <%= server.Suspended ? 'disabled aria-disabled="true"' : '' %>
-              class="rounded-xl bg-neutral-800 dark:bg-neutral-600 hover:bg-neutral-700 dark:hover:bg-neutral-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
+              class="al-btn-lifecycle rounded-xl bg-neutral-800 dark:bg-neutral-600 hover:bg-neutral-700 dark:hover:bg-neutral-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
               <%- icon('refresh-cw', { class: 'size-4 inline-flex mr-1 text-white mb-0.5' }) %>
               <%= req.translations.restart %>
             </button>
             <button id="stopButton" type="button"
               <%= server.Suspended ? 'disabled aria-disabled="true"' : '' %>
-              class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
+              class="al-btn-lifecycle rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
               <%- icon('square', { class: 'size-4 inline-flex mr-1 text-red-100 mb-0.5' }) %>
               <%= req.translations.stop %>
             </button>
@@ -759,13 +759,30 @@ connectWebSocket();
         consoleInput.placeholder = '<%= req.translations.typeACommand || "Type a command..." %>';
     }
 
+    function setButtonLoading(btn, label) {
+        if (!btn || btn.dataset.loading === 'true') return;
+        btn.dataset.loading = 'true';
+        btn.dataset.origLabel = btn.textContent;
+        btn.textContent = label;
+    }
+
+    function clearButtonLoading(btn) {
+        if (!btn || btn.dataset.loading !== 'true') return;
+        btn.dataset.loading = 'false';
+        if (btn.dataset.origLabel) {
+            btn.textContent = btn.dataset.origLabel;
+            delete btn.dataset.origLabel;
+        }
+    }
+
     <% if (!server.Suspended) { %>
     startButton.addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
 
         setStatusText('Starting', 'text-yellow-500');
-        setStatusLog('Sending start request...', 'starting');
+        setStatusLog('Sending start request...');
         lockInput('Starting container...');
+        setButtonLoading(startButton, 'Starting…');
 
         const evtSocket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
 
@@ -776,8 +793,8 @@ connectWebSocket();
             const { type, message } = parsed.data;
             setStatusLog(message, type);
             writeConsole('daemon', 'info', message);
-            if (type === 'started') { unlockInput(); }
-            if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); }
+            if (type === 'started') { unlockInput(); clearButtonLoading(startButton); }
+            if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); clearButtonLoading(startButton); }
         };
 
         fetch(`/server/${serverUUID}/power/start`, { method: 'POST' })
@@ -797,12 +814,14 @@ connectWebSocket();
                                 setStatusLog(null);
                                 updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
                                 showToast('Server is alive!', 'success');
+                                clearButtonLoading(startButton);
                                 restartWebSocket();
                             } else if (attempts >= maxAttempts) {
                                 clearInterval(poll);
                                 evtSocket.close();
                                 setStatusLog(null);
                                 showToast('Woke it up — give it a sec.', 'success');
+                                clearButtonLoading(startButton);
                                 restartWebSocket();
                             }
                         })
@@ -812,8 +831,10 @@ connectWebSocket();
             .catch(() => {
                 evtSocket.close();
                 setStatusLog(null);
+                clearButtonLoading(startButton);
                 showToast("Couldn't wake the server. Try again?", 'error');
             });
+    });
     });
     <% } else { %>
     startButton.addEventListener('click', () => {
@@ -836,6 +857,7 @@ connectWebSocket();
           setStatusLog('Sending restart request...');
           updateStatusChart('rgba(245,158,11,0.1)', 'rgba(245,158,11,0.2)');
           lockInput('Restarting container...');
+          setButtonLoading(restartButton, 'Restarting…');
 
           const evtSocketR = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
 
@@ -846,8 +868,8 @@ connectWebSocket();
               const { type, message } = parsed.data;
               setStatusLog(message, type);
               writeConsole('daemon', 'info', message);
-              if (type === 'started') { unlockInput(); }
-              if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); }
+              if (type === 'started') { unlockInput(); clearButtonLoading(restartButton); }
+              if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); clearButtonLoading(restartButton); }
           };
 
           fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
@@ -867,12 +889,14 @@ connectWebSocket();
                                   setStatusLog(null);
                                   updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
                                    showToast('Server rebooted. Back in action.', 'success');
+                                  clearButtonLoading(restartButton);
                                   restartWebSocket();
                               } else if (attempts >= maxAttempts) {
                                   clearInterval(poll);
                                   evtSocketR.close();
                                   setStatusLog(null);
                                    showToast('Restarting — one moment.', 'success');
+                                  clearButtonLoading(restartButton);
                                   restartWebSocket();
                               }
                           })
@@ -882,6 +906,7 @@ connectWebSocket();
               .catch(() => {
                   evtSocketR.close();
                   setStatusLog(null);
+                  clearButtonLoading(restartButton);
                    showToast("Restart didn't take. Try again?", 'error');
               });
           }
@@ -907,6 +932,7 @@ connectWebSocket();
           setStatusText('Stopping', 'text-red-500');
           setStatusLog('Sending stop command...');
           updateStatusChart('rgba(239,68,68,0.1)', 'rgba(239,68,68,0.2)');
+          setButtonLoading(stopButton, 'Stopping…');
 
           const evtSocketS = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
 
@@ -917,7 +943,7 @@ connectWebSocket();
               const { type, message } = parsed.data;
               writeConsole('daemon', 'info', message);
               setStatusLog(message, type);
-              if (type === 'error') { setStatusLog(null); showToast(message, 'error'); }
+              if (type === 'error') { setStatusLog(null); showToast(message, 'error'); clearButtonLoading(stopButton); }
           };
 
           fetch(`/server/${serverUUID}/power/stop`, { method: 'POST' })
@@ -937,12 +963,14 @@ connectWebSocket();
                                   setAllStatsOffline();
                                   setStatusLog(null);
                                    showToast('Server shut down.', 'success');
+                                  clearButtonLoading(stopButton);
                                   restartWebSocket();
                               } else if (attempts >= maxAttempts) {
                                   clearInterval(poll);
                                   evtSocketS.close();
                                   setStatusLog(null);
                                    showToast('Powering down — give it a moment.', 'success');
+                                  clearButtonLoading(stopButton);
                                   restartWebSocket();
                                   setAllStatsOffline();
                               }
@@ -955,6 +983,7 @@ connectWebSocket();
                   setStatusLog(null);
                   setStatusText('Online', 'text-emerald-500');
                   updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
+                  clearButtonLoading(stopButton);
                    showToast("Couldn't stop the server. Try again?", 'error');
               });
           }
