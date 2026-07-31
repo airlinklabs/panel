@@ -58,40 +58,61 @@ function escJS(val) {
 }
 %>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
+<main class="h-screen m-auto text-neutral-800 dark:text-white">
+  <div class="flex h-full">
     <!-- Sidebar -->
     <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
 
     <!-- Content -->
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Servers', href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
         { label: 'Files' }
       ] }) %>
-      <!-- Page Header -->
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <%- include('../../components/serverHeader') %>
-        <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
-          <button id="createFile" onclick="openCreateFileModal()" type="button"
-              class="al-btn-secondary">
-              <%- icon('file-plus', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
-              New File
-          </button>
+      <!-- Page Header: title + meta left, buttons right -->
+      <div class="px-8 pt-4">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <%- include('../../components/serverHeader') %>
+            <!-- Server meta: image · node · id -->
+            <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <%- icon('box', { class: 'h-3 w-3 shrink-0' }) %>
+                <span class="text-[11px] truncate max-w-[140px]" style="color:var(--theme-text-muted)"><%= server.image.name %></span>
+              </div>
+              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
+              <div class="flex items-center gap-1.5">
+                <%- icon('server', { class: 'h-3 w-3 shrink-0' }) %>
+                <span class="text-[11px] truncate max-w-[100px]" style="color:var(--theme-text-muted)"><%= server.node.name %></span>
+              </div>
+              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
+              <div class="flex items-center gap-1.5">
+                <%- icon('hash', { class: 'h-3 w-3 shrink-0' }) %>
+                <span class="text-[11px] font-mono" style="color:var(--theme-text-muted)"><%= server.UUID.split('-')[0] %></span>
+              </div>
+            </div>
+          </div>
+          <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
+          <div class="flex gap-2 shrink-0">
+            <button id="createFile" onclick="openCreateFileModal()" type="button"
+                class="al-btn-secondary">
+                <%- icon('file-plus', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
+                New File
+            </button>
 
-          <button id="uploadFile" onclick="openUploadFileModal()" type="button"
-              class="al-btn-secondary">
-              <%- icon('upload', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
-              Upload File
-          </button>
+            <button id="uploadFile" onclick="openUploadFileModal()" type="button"
+                class="al-btn-secondary">
+                <%- icon('upload', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
+                Upload File
+            </button>
 
-           <%- include('../../components/sftp', { server: server }) %>
-      </div>
-        <% } %>
+             <%- include('../../components/sftp', { server: server }) %>
+          </div>
+          <% } %>
+        </div>
       </div>
 
       <%- include('../../components/installHeader') %>
