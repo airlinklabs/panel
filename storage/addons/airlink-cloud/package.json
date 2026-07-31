@@ -1,0 +1,15 @@
+{
+  "name": "Airlink Cloud",
+  "version": "2.0.0",
+  "description": "Airlink Cloud integration for AirLink - cloud backup settings",
+  "author": "AirlinkLab",
+  "main": "dist/index.js",
+  "router": "/airlink-cloud",
+  "enabled": true,
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "watch": "tsc -w"
+  }
+}

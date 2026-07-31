@@ -5,6 +5,8 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { checkForUpdates, performUpdate } from '../../handlers/updater';
 import { registerPermission } from '../../handlers/permissions';
+import fs from 'fs';
+import path from 'path';
 
 
 registerPermission('airlink.admin.overview.main');
@@ -49,6 +51,36 @@ const adminModule: Module = {
             where: { id: 1 },
           });
 
+          let airlinkCodename = String(res.locals.airlinkCodename || '');
+          let vcodeBg: string | null = null;
+
+          try {
+            const configPath = path.join(process.cwd(), 'storage', 'config.json');
+            if (fs.existsSync(configPath)) {
+              const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+              if (cfg && cfg.meta && cfg.meta.codename) {
+                airlinkCodename = String(cfg.meta.codename);
+              }
+            }
+          } catch (error) {
+            logger.error('Error reading storage/config.json for codename:', error);
+          }
+
+          if (airlinkCodename) {
+            try {
+              const vcodeDir = path.join(process.cwd(), 'public', 'assets', 'vcode');
+              if (fs.existsSync(vcodeDir)) {
+                const target = airlinkCodename.toLowerCase() + '.svg';
+                const match = fs.readdirSync(vcodeDir).find((f) => f.toLowerCase() === target);
+                if (match) {
+                  vcodeBg = '/assets/vcode/' + match;
+                }
+              }
+            } catch (error) {
+              logger.error('Error scanning vcode assets:', error);
+            }
+          }
+
           res.render('admin/overview/overview', {
             errorMessage,
             user,
@@ -59,7 +91,8 @@ const adminModule: Module = {
             req,
             settings,
             airlinkVersion: res.locals.airlinkVersion,
-            airlinkCodename: res.locals.airlinkCodename,
+            airlinkCodename,
+            vcodeBg,
           });
         } catch (error) {
           logger.error('Error fetching user:', error);

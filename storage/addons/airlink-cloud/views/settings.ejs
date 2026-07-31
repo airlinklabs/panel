@@ -1,11 +1,11 @@
-<%- include('../../components/header', { title: 'Airlink Cloud' }) %>
+<%- include('../../../../views/components/header', { title: 'Airlink Cloud' }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
-    <div class="w-60 shrink-0"><%- include('../../components/template') %></div>
+    <div class="w-60 shrink-0"><%- include('../../../../views/components/template') %></div>
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
-      <%- include('../../components/ui/breadcrumb', { items: [
+      <%- include('../../../../views/components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Airlink Cloud' }
       ] }) %>
@@ -61,5 +61,5 @@
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-airlink-cloud-settings.js"></script>
 
-<%- include('../../components/footer') %>
-<%- include('../../components/toast') %>
+<%- include('../../../../views/components/footer') %>
+<%- include('../../../../views/components/toast') %>

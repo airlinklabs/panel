@@ -120,7 +120,7 @@ const pageCatalog = (function() {
       { label: 'Admin Nodes', url: '/admin/nodes', kw: 'machines daemons hosts workers allocate' },
       { label: 'Admin Images', url: '/admin/images', kw: 'docker eggs templates boxes images' },
       { label: 'Admin Addons', url: '/admin/addons', kw: 'plugins extensions mods installed' },
-      { label: 'Airlink Cloud', url: '/admin/airlink-cloud', kw: 'cloud backup updates airlink' },
+      { label: 'Airlink Cloud', url: '/airlink-cloud/settings', kw: 'cloud backup updates airlink' },
       { label: 'API Keys', url: '/admin/apikeys', kw: 'tokens access auth api keys' },
       { label: 'Security', url: '/admin/security', kw: 'ban bans ips rate limit moderation' },
       { label: 'Player Stats', url: '/admin/playerstats', kw: 'players analytics stats leaderboard top' },
