@@ -206,6 +206,15 @@
   function initDesktopHighlight(fromNav) {
     var bg = el('active-background');
     if (!bg) return;
+    // The sidebar starts hidden (inline display:none) and is revealed by
+    // template.ejs's own DOMContentLoaded handler, which runs after this one.
+    // Measuring a display:none element yields zero-height rects, so retry
+    // until the sidebar is actually visible.
+    var sb = el('pc-sidebar');
+    if (sb && sb.style.display === 'none') {
+      setTimeout(function () { initDesktopHighlight(fromNav); }, 0);
+      return;
+    }
     var path   = normalizePath(window.location.pathname);
     var active = findDesktopActiveLink(path);
     setDesktopActiveLink(active);

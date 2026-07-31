@@ -366,22 +366,24 @@
   color: #0a0a0a !important;
 }
 
-/* Sidebar sliding pill + mobile bottom nav — same inverted highlight */
-#active-background {
-  background: #0a0a0a;
-  border: 1px solid #0a0a0a;
+/* Sidebar sliding pill + mobile bottom nav — same inverted highlight.
+   Boosted specificity + !important to win over theme overrides, which
+   set the old subtle --theme-bg-active-nav on #active-background. */
+html #active-background {
+  background: #0a0a0a !important;
+  border: 1px solid #0a0a0a !important;
 }
-.dark #active-background {
-  background: #ffffff;
-  border: 1px solid #ffffff;
+html.dark body #active-background {
+  background: #ffffff !important;
+  border: 1px solid #ffffff !important;
 }
-.mobile-nav-link.active-mobile {
-  background: #0a0a0a;
+html .mobile-nav-link.active-mobile {
+  background: #0a0a0a !important;
   border-radius: 0.75rem;
   color: #ffffff !important;
 }
-.dark .mobile-nav-link.active-mobile {
-  background: #ffffff;
+html.dark body .mobile-nav-link.active-mobile {
+  background: #ffffff !important;
   border-radius: 0.75rem;
   color: #0a0a0a !important;
 }
