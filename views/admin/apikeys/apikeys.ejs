@@ -1,23 +1,6 @@
 <%- include('../../components/header', { title: 'API Keys Management' }) %>
 
 <style>
-  @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  .animate-fadeIn {
-    animation: fadeIn 0.2s ease-out;
-  }
-
-  .permission-category {
-    transition: all 0.2s ease-out;
-  }
-
-  .permission-category:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-
   .category-panel {
     transition: max-height 0.2s cubic-bezier(0.16,1,0.3,1), opacity 0.15s ease;
     opacity: 1;
@@ -27,12 +10,16 @@
   }
 </style>
 
-<main class="min-h-screen m-auto">
+<main class="min-h-screen">
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0">
       <%- include('../../components/template') %>
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'API Keys' }
+      ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
           <h1 class="al-page-title"><%= req.translations.apiKeysManagement || 'API Keys Management' %></h1>
@@ -67,7 +54,7 @@
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
                   <button onclick="showEditModal(<%- JSON.stringify(apiKey.id) %>, <%- JSON.stringify(apiKey.name) %>, <%- JSON.stringify(apiKey.description || '') %>, <%= apiKey.permissions %>)"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg transition" style="color:var(--theme-text-muted)" hover:text-neutral-900
+                    class="w-8 h-8 flex items-center justify-center rounded-lg transition hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:text-neutral-900 dark:hover:text-white" style="color:var(--theme-text-muted)"
                     type="button" aria-label="Edit API key">
                     <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
                   </button>

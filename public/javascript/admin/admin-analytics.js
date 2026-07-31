@@ -4,29 +4,15 @@
   let data        = null;
   let loginChart  = null;
 
-  function updateBreadcrumbTab(id) {
-    var inner = document.getElementById('bc-inner');
-    if (!inner) return;
-    var existing = inner.querySelector('.bc-tab');
-    if (existing) existing.remove();
-    var span = document.createElement('span');
-    span.className = 'bc-tab';
-    var label = id.charAt(0).toUpperCase() + id.slice(1);
-    span.innerHTML = '<span style="color:var(--theme-text-placeholder);font-size:11px;opacity:0.5">/</span><span style="color:var(--theme-text-muted);opacity:0.55">' + label + '</span>';
-    inner.appendChild(span);
-  }
-
   function activateTab(id) {
     tabBtns.forEach(btn => {
       btn.setAttribute('aria-selected', btn.dataset.tab === id ? 'true' : 'false');
     });
     tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
-    updateBreadcrumbTab(id);
   }
 
   tabBtns.forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
   activateTab('servers');
-  setTimeout(function() { updateBreadcrumbTab('servers'); }, 100);
 
   const isDark    = () => document.documentElement.classList.contains('dark');
   const textColor = () => isDark() ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)';
@@ -39,11 +25,11 @@
     const color = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f97316' : '#3b82f6';
     const label2 = max > 0 ? pct + '%' : '—';
     return `<div>
-      <div class="flex justify-between text-xs mb-1.5" style="color:var(--theme-text)">
+      <div class="flex justify-between text-xs text-neutral-600 dark:text-neutral-400 mb-1.5">
         <span class="truncate max-w-[60%] font-medium">${label}</span>
-        <span class="shrink-0 tabular-nums">${fmt(value)} <span style="color:var(--theme-text-muted)">(${label2})</span></span>
+        <span class="shrink-0 tabular-nums">${fmt(value)} <span class="text-neutral-400">(${label2})</span></span>
       </div>
-      <div class="h-1.5 rounded-full" style="background:var(--theme-skeleton-base)">
+      <div class="h-1.5 rounded-full bg-neutral-200 dark:bg-white/5">
         <div class="h-1.5 rounded-full transition-all duration-500" style="width:${max > 0 ? pct : 0}%;background:${color}"></div>
       </div>
     </div>`;
@@ -59,12 +45,10 @@
     const suspLabel = document.getElementById('sv-suspended-label');
     if (s.suspended > 0) {
       suspLabel.textContent = s.suspended + ' suspended';
-      suspLabel.style.color = 'var(--theme-warning)';
-      suspLabel.className   = 'text-xs mt-1';
+      suspLabel.className   = 'text-xs text-amber-600 dark:text-amber-400 mt-1';
     } else {
       suspLabel.textContent = 'none suspended';
-      suspLabel.style.color = 'var(--theme-text-muted)';
-      suspLabel.className   = 'text-xs mt-1';
+      suspLabel.className   = 'text-xs text-neutral-500 mt-1';
     }
 
     const imgEl = document.getElementById('sv-images');
@@ -74,25 +58,25 @@
         bar(i.name || 'Unknown', i.count, maxCount)
       ).join('');
     } else {
-      imgEl.innerHTML = '<p class="text-sm" style="color:var(--theme-text-muted)">No servers yet.</p>';
+      imgEl.innerHTML = '<p class="text-sm text-neutral-400">No servers yet.</p>';
     }
 
     const heavyEl = document.getElementById('sv-heavy');
     heavyEl.innerHTML = s.topServers.map(sv => `
       <div class="flex items-center gap-4 px-5 py-3">
         <div class="min-w-0 flex-1">
-          <p class="text-sm truncate font-medium" style="color:var(--theme-text-strong)">${sv.name}</p>
-          <p class="text-xs" style="color:var(--theme-text-muted)">${sv.owner} · ${sv.image}</p>
+          <p class="text-sm text-neutral-700 dark:text-neutral-300 truncate font-medium">${sv.name}</p>
+          <p class="text-xs text-neutral-400">${sv.owner} · ${sv.image}</p>
         </div>
-        <div class="flex items-center gap-3 shrink-0 text-xs tabular-nums" style="color:var(--theme-text)">
+        <div class="flex items-center gap-3 shrink-0 text-xs text-neutral-500 dark:text-neutral-400 tabular-nums">
           <span>${fmt(sv.memory)} MB</span>
-          <span style="color:var(--theme-text-muted)">·</span>
+          <span class="text-neutral-300 dark:text-neutral-600">·</span>
           <span>${sv.cpu}%</span>
-          <span style="color:var(--theme-text-muted)">·</span>
+          <span class="text-neutral-300 dark:text-neutral-600">·</span>
           <span>${sv.storage} GB</span>
         </div>
-        ${sv.suspended ? '<span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0" style="color:var(--theme-warning);background:var(--theme-warning-bg);border:1px solid color-mix(in oklch,var(--theme-warning) 20%,transparent)">Suspended</span>' : ''}
-      </div>`).join('') || '<p class="px-5 py-4 text-sm" style="color:var(--theme-text-muted)">No servers.</p>';
+        ${sv.suspended ? '<span class="text-[10px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-1.5 py-0.5 rounded-md shrink-0">Suspended</span>' : ''}
+      </div>`).join('') || '<p class="px-5 py-4 text-sm text-neutral-400">No servers.</p>';
   }
 
   function renderNodes(d) {
@@ -105,40 +89,40 @@
 
     const listEl = document.getElementById('nd-list');
     if (!nodes.length) {
-      listEl.innerHTML = '<p class="text-sm" style="color:var(--theme-text-muted)">No nodes configured.</p>';
+      listEl.innerHTML = '<p class="text-sm text-neutral-400">No nodes configured.</p>';
       return;
     }
     listEl.innerHTML = nodes.map(n => `
-      <div class="al-surface rounded-xl p-5">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-3">
-            <span class="w-2 h-2 rounded-full shrink-0" style="background:${n.online ? 'var(--theme-success)' : 'var(--theme-danger)'}"></span>
+            <span class="w-2 h-2 rounded-full ${n.online ? 'bg-emerald-500' : 'bg-red-500'} shrink-0"></span>
             <div>
-              <p class="text-sm font-medium" style="color:var(--theme-text-strong)">${n.name}</p>
-              <p class="text-xs font-mono" style="color:var(--theme-text-muted)">${n.address}:${n.port}</p>
+              <p class="text-sm font-medium text-neutral-800 dark:text-white">${n.name}</p>
+              <p class="text-xs text-neutral-400 font-mono">${n.address}:${n.port}</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 text-xs" style="color:var(--theme-text-muted)">
-            ${n.online && n.versionRelease ? `<span class="font-mono px-2 py-0.5 rounded-md" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">${n.versionRelease}</span>` : ''}
+          <div class="flex items-center gap-3 text-xs text-neutral-500">
+            ${n.online && n.versionRelease ? `<span class="font-mono bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/5 px-2 py-0.5 rounded-md">${n.versionRelease}</span>` : ''}
             <span>${n.serverCount} server${n.serverCount !== 1 ? 's' : ''}</span>
-            <span class="px-2 py-0.5 rounded-md text-xs font-medium" style="background:${n.online ? 'var(--theme-success-bg)' : 'var(--theme-danger-bg)'};color:${n.online ? 'var(--theme-success)' : 'var(--theme-danger)'};border:1px solid color-mix(in oklch,${n.online ? 'var(--theme-success)' : 'var(--theme-danger)'} 20%,transparent)">${n.online ? 'Online' : 'Offline'}</span>
+            <span class="px-2 py-0.5 rounded-md text-xs font-medium ${n.online ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}">${n.online ? 'Online' : 'Offline'}</span>
           </div>
         </div>
         ${n.ram > 0 || n.cpu > 0 || n.disk > 0 ? `
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <p class="text-[10px] uppercase tracking-wider mb-2" style="color:var(--theme-text-muted)">RAM limit</p>
-            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">${n.ram >= 1024 ? (n.ram/1024).toFixed(1)+' GB' : n.ram+' MB'}</p>
+            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-2">RAM limit</p>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">${n.ram >= 1024 ? (n.ram/1024).toFixed(1)+' GB' : n.ram+' MB'}</p>
           </div>
           <div>
-            <p class="text-[10px] uppercase tracking-wider mb-2" style="color:var(--theme-text-muted)">CPU limit</p>
-            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">${n.cpu}%</p>
+            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-2">CPU limit</p>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">${n.cpu}%</p>
           </div>
           <div>
-            <p class="text-[10px] uppercase tracking-wider mb-2" style="color:var(--theme-text-muted)">Disk limit</p>
-            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">${n.disk} GB</p>
+            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-2">Disk limit</p>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">${n.disk} GB</p>
           </div>
-        </div>` : '<p class="text-xs" style="color:var(--theme-text-muted)">No capacity limits configured for this node.</p>'}
+        </div>` : '<p class="text-xs text-neutral-400">No capacity limits configured for this node.</p>'}
       </div>`).join('');
   }
 
@@ -182,11 +166,11 @@
 
     const tbody = document.getElementById('ac-logins-table');
     tbody.innerHTML = (a.recentLogins || []).map(l => `
-      <tr class="transition">
-        <td class="px-5 py-3 text-xs font-mono" style="color:var(--theme-text-muted)">#${l.userId}</td>
-        <td class="px-5 py-3 text-xs font-mono" style="color:var(--theme-text)">${l.ipAddress || 'Unknown'}</td>
-        <td class="px-5 py-3 text-xs" style="color:var(--theme-text-muted)">${new Date(l.timestamp).toLocaleString()}</td>
-      </tr>`).join('') || '<tr><td colspan="3" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">No login history.</td></tr>';
+      <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition">
+        <td class="px-5 py-3 text-xs font-mono text-neutral-500">#${l.userId}</td>
+        <td class="px-5 py-3 text-xs font-mono text-neutral-600 dark:text-neutral-400">${l.ipAddress || 'Unknown'}</td>
+        <td class="px-5 py-3 text-xs text-neutral-500">${new Date(l.timestamp).toLocaleString()}</td>
+      </tr>`).join('') || '<tr><td colspan="3" class="px-5 py-5 text-center text-sm text-neutral-400">No login history.</td></tr>';
   }
 
   async function load() {

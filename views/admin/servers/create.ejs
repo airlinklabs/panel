@@ -6,6 +6,11 @@
       <%- include('../../components/template') %>
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Servers', href: '/admin/servers' },
+        { label: 'Create' }
+      ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
           <h1 class="al-page-title"><%= req.translations.adminCreateServerTitle %></h1>
@@ -79,10 +84,9 @@
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="1"
                     class="al-input rounded-l-xl flex-1 border-r-0">
-                  <select id="serverCPUUnit" class="al-input rounded-r-xl cursor-pointer" style="flex:0 0 auto;max-width:5rem">
-                    <option value="cores" selected>Cores</option>
-                    <option value="percent">%</option>
-                  </select>
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="serverCPUDisplay" data-hidden="serverCPU"
+                    data-units="100:Cores,1:%" data-default-unit="Cores">Cores</button>
                 </div>
                 <p class="text-xs text-neutral-400">1 core = 100%</p>
               </div>
@@ -95,10 +99,9 @@
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverMemoryDisplay" type="number" min="1" value="1024"
                     class="al-input rounded-l-xl flex-1 border-r-0">
-                  <select id="serverMemoryUnit" class="al-input rounded-r-xl cursor-pointer" style="flex:0 0 auto;max-width:5rem">
-                    <option value="1" selected>MB</option>
-                    <option value="1024">GB</option>
-                  </select>
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="serverMemoryDisplay" data-hidden="serverMemory"
+                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
                 <p class="text-xs text-neutral-400">Min 128 MB</p>
               </div>
@@ -111,10 +114,9 @@
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverStorageDisplay" type="number" min="1" value="20"
                     class="al-input rounded-l-xl flex-1 border-r-0">
-                  <select id="serverStorageUnit" class="al-input rounded-r-xl cursor-pointer" style="flex:0 0 auto;max-width:5rem">
-                    <option value="1">MB</option>
-                    <option value="1024" selected>GB</option>
-                  </select>
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="serverStorageDisplay" data-hidden="serverStorage"
+                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
                 <p class="text-xs text-neutral-400">Min 128 MB</p>
               </div>
@@ -465,23 +467,6 @@
 
     serverImageSelect.addEventListener('change', () => { updateDockerImages(); updateVariables(); ensureMinimumPortRows(); syncPortsButton(); });
     serverNodeSelect.addEventListener('change', () => { updatePortsForSelectedNode(); });
-
-    function syncUnit(displayId, unitId, hiddenId) {
-      const display = document.getElementById(displayId);
-      const unit    = document.getElementById(unitId);
-      const hidden  = document.getElementById(hiddenId);
-      function update() { hidden.value = Math.round(parseFloat(display.value || 0) * parseInt(unit.value)); }
-      display.addEventListener('input', update);
-      unit.addEventListener('change', function() {
-        const prevMult = this.value === '1024' ? 1 : 1024;
-        const newMult  = parseInt(this.value);
-        if (prevMult !== newMult) { display.value = Math.round(parseFloat(display.value || 0) * prevMult / newMult) || 1; }
-        update();
-      });
-      update();
-    }
-    syncUnit('serverMemoryDisplay',  'serverMemoryUnit',  'serverMemory');
-    syncUnit('serverStorageDisplay', 'serverStorageUnit', 'serverStorage');
   });
 </script>
 <script nonce="<%- nonce %>">
@@ -545,7 +530,4 @@ function generateRandomName() {
 .dark .cs-option.selected { background: var(--theme-bg-hover, rgba(255,255,255,0.08)); }
 .cs-option.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 </style>
-<script nonce="<%- nonce %>">
-(function () { const d=document.getElementById('serverCPUDisplay'),h=document.getElementById('serverCPU'),u=document.getElementById('serverCPUUnit'); function s(){ h.value=u.value==='cores'?String(Math.round((parseFloat(d.value)||0)*100)):String(Math.round(parseFloat(d.value)||0)); } u.addEventListener('change',s); d.addEventListener('input',s); s(); })();
-</script>
 <script nonce="<%- nonce %>" src="/javascript/admin/server-create.js"></script>

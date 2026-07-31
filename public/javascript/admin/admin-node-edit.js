@@ -151,12 +151,21 @@
     }
   });
 
+  function gbValue(hiddenId, fallbackId) {
+    const hidden = document.getElementById(hiddenId);
+    if (hidden) {
+      const v = parseFloat(hidden.value);
+      return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
+    }
+    return document.getElementById(fallbackId).value;
+  }
+
   document.getElementById('updateNodeBtn').addEventListener('click', async () => {
     const nodeData = {
       name: document.getElementById('nodeName').value,
-      ram: document.getElementById('nodeRam').value,
+      ram: gbValue('nodeRamValue', 'nodeRam'),
       cpu: document.getElementById('nodeProcessor').value,
-      disk: document.getElementById('nodeDisk').value,
+      disk: gbValue('nodeDiskValue', 'nodeDisk'),
       address: document.getElementById('nodeAddress').value,
       port: document.getElementById('nodePort').value,
       allocatedPorts: JSON.stringify(allocatedPorts)

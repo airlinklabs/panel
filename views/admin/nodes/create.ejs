@@ -4,6 +4,11 @@
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Nodes', href: '/admin/nodes' },
+        { label: 'Create' }
+      ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
           <h1 class="al-page-title"><%= req.translations.adminCreateNodeTitle %></h1>
@@ -30,10 +35,16 @@
               <div>
                 <label for="nodeRam" class="al-label flex items-center gap-1.5">
                   <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.ram %> (GB)
+                  <%= req.translations.ram %>
                 </label>
+                <input type="hidden" id="nodeRamValue" value="">
                 <div class="flex gap-2 items-center">
-                  <input id="nodeRam" class="al-input flex-1" placeholder="Informational only">
+                  <div class="flex items-stretch flex-1 gap-0">
+                    <input id="nodeRam" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+                    <button type="button" class="al-format-switcher" data-format-switcher
+                      data-display="nodeRam" data-hidden="nodeRamValue"
+                      data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
+                  </div>
                   <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
                     <input type="checkbox" id="nodeRamAll" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white focus:ring-0"> All
                   </label>
@@ -43,10 +54,16 @@
               <div>
                 <label for="nodeDisk" class="al-label flex items-center gap-1.5">
                   <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.disk %> (GB)
+                  <%= req.translations.disk %>
                 </label>
+                <input type="hidden" id="nodeDiskValue" value="">
                 <div class="flex gap-2 items-center">
-                  <input id="nodeDisk" class="al-input flex-1" placeholder="Informational only">
+                  <div class="flex items-stretch flex-1 gap-0">
+                    <input id="nodeDisk" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+                    <button type="button" class="al-format-switcher" data-format-switcher
+                      data-display="nodeDisk" data-hidden="nodeDiskValue"
+                      data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
+                  </div>
                   <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
                     <input type="checkbox" id="nodeDiskAll" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white focus:ring-0"> All
                   </label>

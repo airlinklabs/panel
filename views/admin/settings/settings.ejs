@@ -1,29 +1,14 @@
 <%- include('../../components/header', { title: 'Settings' }) %>
 
-<style>
-.tab-btn {
-  color: var(--theme-text-muted);
-  border-bottom-color: transparent;
-  opacity: 0.6;
-}
-.tab-btn[aria-selected="true"] {
-  color: var(--theme-text-strong);
-  border-bottom-color: var(--theme-accent, currentColor);
-  opacity: 1;
-}
-.tab-btn:hover:not([aria-selected="true"]) {
-  color: var(--theme-text);
-  border-bottom-color: var(--theme-border);
-  opacity: 0.8;
-}
-.tab-panel { transition: opacity 0.2s ease; }
-</style>
-
 <main class="min-h-screen">
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Settings' }
+      ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
           <h1 class="al-page-title">Settings</h1>
@@ -249,10 +234,9 @@
                   <input type="number" id="defaultMaxMemoryDisplay" min="1"
                     value="<%= settings.defaultMaxMemory >= 1024 ? Math.round(settings.defaultMaxMemory / 1024) : settings.defaultMaxMemory %>"
                     class="al-input rounded-l-xl flex-1 border-r-0">
-                  <select id="defaultMaxMemoryUnit" class="al-input rounded-r-xl flex-1 cursor-pointer" style="max-width:5rem">
-                    <option value="1"    <%= settings.defaultMaxMemory < 1024  ? 'selected' : '' %>>MB</option>
-                    <option value="1024" <%= settings.defaultMaxMemory >= 1024 ? 'selected' : '' %>>GB</option>
-                  </select>
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="defaultMaxMemoryDisplay" data-hidden="defaultMaxMemory"
+                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
               </div>
               <div>
@@ -267,10 +251,9 @@
                   <input type="number" id="defaultMaxStorageDisplay" min="1"
                     value="<%= settings.defaultMaxStorage >= 1024 ? Math.round(settings.defaultMaxStorage / 1024) : settings.defaultMaxStorage %>"
                     class="al-input rounded-l-xl flex-1 border-r-0">
-                  <select id="defaultMaxStorageUnit" class="al-input rounded-r-xl flex-1 cursor-pointer" style="max-width:5rem">
-                    <option value="1"    <%= settings.defaultMaxStorage < 1024  ? 'selected' : '' %>>MB</option>
-                    <option value="1024" <%= settings.defaultMaxStorage >= 1024 ? 'selected' : '' %>>GB</option>
-                  </select>
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="defaultMaxStorageDisplay" data-hidden="defaultMaxStorage"
+                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
               </div>
             </div>

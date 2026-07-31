@@ -9,6 +9,11 @@
 
     <!-- Content -->
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Nodes', href: '/admin/nodes' },
+        { label: 'Stats' }
+      ] }) %>
       <div class="al-page-header">
         <h1 class="al-page-title"><%= req.translations.adminNodesTitle %></h1>
         <p class="al-page-desc"><%= req.translations.adminNodesText %></p>

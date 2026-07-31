@@ -110,6 +110,13 @@
     }
   });
 
+  function gbValue(hiddenId) {
+    const hidden = document.getElementById(hiddenId);
+    if (!hidden) return '';
+    const v = parseFloat(hidden.value);
+    return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
+  }
+
   document.getElementById('createNodeBtn').addEventListener('click', async () => {
     const ramAll = document.getElementById('nodeRamAll').checked;
     const diskAll = document.getElementById('nodeDiskAll').checked;
@@ -117,9 +124,9 @@
 
     const nodeData = {
       name: document.getElementById('nodeName').value,
-      ram: ramAll ? 'all' : document.getElementById('nodeRam').value,
+      ram: ramAll ? 'all' : gbValue('nodeRamValue'),
       cpu: cpuAll ? 'all' : document.getElementById('nodeProcessor').value,
-      disk: diskAll ? 'all' : document.getElementById('nodeDisk').value,
+      disk: diskAll ? 'all' : gbValue('nodeDiskValue'),
       address: document.getElementById('nodeAddress').value,
       port: document.getElementById('nodePort').value,
       key: document.getElementById('daemonKey').value.trim(),
@@ -167,7 +174,10 @@
     if (checkbox && input) {
       checkbox.addEventListener('change', function() {
         input.disabled = this.checked;
-        if (this.checked) input.value = '';
+        if (this.checked) {
+          input.value = '';
+          input.dispatchEvent(new Event('input'));
+        }
       });
     }
   });

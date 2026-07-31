@@ -10,6 +10,11 @@
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
 
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Addons', href: '/admin/addons' },
+        { label: 'Store' }
+      ] }) %>
 
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>

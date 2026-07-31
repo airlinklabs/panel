@@ -33,7 +33,7 @@
       <!-- Backups Management -->
       <div class="px-6">
         <!-- Backups List -->
-          <div class="al-card shadow-sm overflow-hidden">
+          <div class="al-card rounded-lg shadow overflow-hidden">
             <div class="al-card-header">
               <div>
                 <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Server Backups</h2>
@@ -45,15 +45,15 @@
                 <table class="al-table min-w-full">
                   <thead class="al-table-head">
                     <tr>
-                      <th class="al-table-th px-6 py-3 uppercase">Name</th>
-                      <th class="al-table-th px-6 py-3 uppercase">Size</th>
-                      <th class="al-table-th px-6 py-3 uppercase">Created</th>
-                      <th class="al-table-th px-6 py-3 uppercase text-right">Actions</th>
+                      <th scope="col" class="al-table-th px-6 py-3 uppercase">Name</th>
+                      <th scope="col" class="al-table-th px-6 py-3 uppercase">Size</th>
+                      <th scope="col" class="al-table-th px-6 py-3 uppercase">Created</th>
+                      <th scope="col" class="al-table-th px-6 py-3 uppercase text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="backups-table-body" class="divide-y" style="border-color:var(--theme-border)">
                     <% let backupIdx = 0; backups.forEach(backup => { %>
-                      <tr style="--i:<%= backupIdx++ %>" data-backup-id="<%= backup.UUID %>">
+                      <tr class="al-table-tr transition-colors" style="--i:<%= backupIdx++ %>" data-backup-id="<%= backup.UUID %>">
                         <td class="px-6 py-4 whitespace-nowrap">
                           <div class="text-sm font-medium" style="color:var(--theme-text-strong)">
                             <%= backup.name %>
@@ -276,12 +276,14 @@ function addBackupRow(backup) {
   if (!tbody) return;
 
   const tr = document.createElement('tr');
+  tr.className = 'al-table-tr transition-colors';
   tr.dataset.backupId = backup.UUID;
 
   const nameTd = document.createElement('td');
   nameTd.className = 'px-6 py-4 whitespace-nowrap';
   const nameDiv = document.createElement('div');
-  nameDiv.className = 'text-sm font-medium text-neutral-900 dark:text-white';
+  nameDiv.className = 'text-sm font-medium';
+  nameDiv.style.color = 'var(--theme-text-strong)';
   nameDiv.textContent = backup.name;
   nameTd.appendChild(nameDiv);
   tr.appendChild(nameTd);
@@ -289,12 +291,12 @@ function addBackupRow(backup) {
   const sizeTd = document.createElement('td');
   sizeTd.className = 'px-6 py-4 whitespace-nowrap';
   const sizeText = backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown';
-  sizeTd.innerHTML = `<div class="text-sm text-neutral-500 dark:text-neutral-400">${sizeText}</div>`;
+  sizeTd.innerHTML = `<div class="text-sm" style="color:var(--theme-text-muted)">${sizeText}</div>`;
   tr.appendChild(sizeTd);
 
   const createdTd = document.createElement('td');
   createdTd.className = 'px-6 py-4 whitespace-nowrap';
-  createdTd.innerHTML = `<div class="text-sm text-neutral-500 dark:text-neutral-400">Now</div>`;
+  createdTd.innerHTML = `<div class="text-sm" style="color:var(--theme-text-muted)">Now</div>`;
   tr.appendChild(createdTd);
 
   const actionsTd = document.createElement('td');
