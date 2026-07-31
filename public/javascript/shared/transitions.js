@@ -171,12 +171,22 @@
     var best = null, bestLen = 0;
     var isDark = document.documentElement.classList.contains('dark');
 
+    function norm(p) {
+      try { return new URL(p, window.location.origin).pathname.replace(/\/+$/, '') || '/'; }
+      catch { return p; }
+    }
+    newPath = norm(newPath);
+
     document.querySelectorAll('.nav-link').forEach(function (link) {
       link.classList.remove('active', 'font-medium');
       link.style.color = '';
-      var href = (link.getAttribute('href') || '').replace(/\/$/, '');
+      var href = norm(link.getAttribute('href') || '');
+      var prefix = link.getAttribute('data-match-prefix');
       if (!href) return;
       if (newPath === href) { best = link; bestLen = 9999; }
+      else if (prefix && newPath.startsWith(prefix) && prefix.length > bestLen) {
+        best = link; bestLen = prefix.length;
+      }
       else if (href !== '/' && newPath.startsWith(href) && href.length > bestLen) {
         best = link; bestLen = href.length;
       }
@@ -190,6 +200,7 @@
       if (!link) return;
       link.classList.remove('nav-extra-active');
       link.style.background = '';
+      link.style.color = '';
     });
 
     if (best) {
@@ -226,6 +237,7 @@
           bg.style.width  = '100%';
           bg.style.borderRadius = '0';
         }
+        specialMatch.style.color = isDark ? '#ffffff' : '#0a0a0a';
       } else if (bg) {
         // Reset width/shape in case we came from a special item
         bg.style.left         = '';

@@ -29,7 +29,7 @@
       <ul role="list" class="py-2">
         <li>
           <ul role="list" class="-mx-2 space-y-1 relative">
-            <div id="active-background" class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 transition-none duration-0 z-[-1] rounded-xl opacity-0" style="background:var(--theme-bg-active-nav); border:1px solid var(--theme-border-subtle);"></div>
+            <div id="active-background" class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 transition-none duration-0 z-[-1] rounded-xl opacity-0"></div>
             <%
             const sidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
             if (!sidebarItems || sidebarItems.length === 0) {
@@ -147,8 +147,9 @@
     var account = document.getElementById('sidebar-account-link');
     var logout  = document.getElementById('sidebar-logout-link');
     if (account) {
+      var isDark = document.documentElement.classList.contains('dark');
       var onAccount = path === '/account' || path.startsWith('/account/');
-      account.style.background = onAccount ? 'var(--theme-bg-active-nav)' : '';
+      account.style.color = onAccount ? (isDark ? '#ffffff' : '#0a0a0a') : '';
     }
     if (logout) {
       logout.style.background = '';
@@ -157,26 +158,25 @@
 
   // Mark active nav link
   function markActiveNav(path) {
+    var isDark = document.documentElement.classList.contains('dark');
     var links = document.querySelectorAll('.nav-link');
     links.forEach(function(link) {
       var href = link.getAttribute('href');
       var prefix = link.getAttribute('data-match-prefix');
       var active = false;
-      if (prefix && path.startsWith(prefix)) {
+      if (href && path === href) {
         active = true;
-      } else if (href && !prefix) {
-        if (path === href || (href !== '/' && path.startsWith(href + '/'))) {
-          active = true;
-        }
+      } else if (prefix && path.startsWith(prefix)) {
+        active = true;
+      } else if (href && path.startsWith(href + '/')) {
+        active = true;
       }
       if (active) {
         link.classList.add('active');
-        link.style.color = 'var(--theme-nav-text-active)';
-        link.style.background = 'var(--theme-bg-active-nav)';
+        link.style.color = isDark ? '#ffffff' : '#0a0a0a';
       } else {
         link.classList.remove('active');
         link.style.color = '';
-        link.style.background = '';
       }
     });
   }
