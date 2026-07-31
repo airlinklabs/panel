@@ -417,3 +417,19 @@ html.dark body .nav-link.active {
   color: #171717 !important;
   font-weight: 700 !important;
 }
+
+/* ── Button press feedback ──────────────────────────────────── */
+@keyframes al-btn-press {
+  from { transform: translateY(0) scale(1); }
+  to   { transform: translateY(1px) scale(0.96); }
+}
+button:not(:disabled):active,
+input[type="submit"]:not(:disabled):active,
+input[type="button"]:not(:disabled):active {
+  animation: al-btn-press 0.09s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+button:disabled,
+input[type="submit"]:disabled,
+input[type="button"]:disabled {
+  cursor: not-allowed;
+}

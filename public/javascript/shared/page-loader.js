@@ -188,7 +188,7 @@
     });
     if (!link) return;
     link.classList.add('active', 'font-medium');
-    link.style.color = isDark ? '#f0f0f0' : '#171717';
+    link.style.color = isDark ? '#171717' : '#f0f0f0';
     link.style.background = isDark ? '#f0f0f0' : '#171717';
     link.style.borderRadius = '0.75rem';
   }
@@ -355,6 +355,7 @@
     var active = findDesktopActiveLink(path);
     setDesktopActiveLink(active);
     if (active) movePill(active, false);
+    initMobileHighlight();
     var accountLink = document.getElementById('sidebar-account-link');
     if (accountLink) {
       var onAccount = path === '/account' || path.startsWith('/account/');

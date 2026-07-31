@@ -209,7 +209,7 @@
 
     if (best) {
       best.classList.add('active', 'font-medium');
-      best.style.color = isDark ? '#f0f0f0' : '#171717';
+      best.style.color = isDark ? '#171717' : '#f0f0f0';
       best.style.background = isDark ? '#f0f0f0' : '#171717';
       best.style.borderRadius = '0.75rem';
       if (bg) {
@@ -243,7 +243,7 @@
           bg.style.width  = '100%';
           bg.style.borderRadius = '0';
         }
-        specialMatch.style.color = isDark ? '#f0f0f0' : '#171717';
+        specialMatch.style.color = isDark ? '#171717' : '#f0f0f0';
         specialMatch.style.background = isDark ? '#f0f0f0' : '#171717';
         specialMatch.style.fontWeight = '700';
         var userText = specialMatch.querySelector('#sidebar-username');
