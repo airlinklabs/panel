@@ -287,8 +287,8 @@ function escJS(val) {
    </div>
    <% } %>
   <!-- Move file modal -->
-  <div id="moveModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 ">
-    <div class="rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl scale-95 transition-transform duration-200 sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+  <div id="moveModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
+    <div id="moveModalPanel" class="rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
       <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
         <div>
           <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Move file</h2>
@@ -312,8 +312,8 @@ function escJS(val) {
   </div>
 
   <!-- Mass Delete Confirmation Modal -->
- <div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 ">
-    <div class="rounded-2xl shadow-xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+ <div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
+    <div id="massDeleteModalPanel" class="rounded-2xl shadow-xl w-full max-w-sm mx-4 will-change-transform" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
       <div class="px-5 pt-5 pb-4">
         <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Confirm Mass Deletion</p>
         <p id="massDeleteMessage" class="text-xs mt-1.5 leading-relaxed" style="color:var(--theme-text-muted)"></p>
@@ -325,8 +325,8 @@ function escJS(val) {
     </div>
  </div>
     <!-- Create file / folder modal -->
-  <div id="createFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 ">
-    <div class="rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+  <div id="createFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
+    <div id="createFileModalPanel" class="rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
       <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
         <div>
           <h2 id="createModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New File</h2>
@@ -351,8 +351,8 @@ function escJS(val) {
   </div>
 
   <!-- Upload file -->
-  <div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 ">
-    <div class="rounded-2xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300 shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+  <div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
+    <div id="uploadFileModalPanel" class="rounded-2xl p-8 max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
         <h2 class="text-2xl font-medium mb-1" style="color:var(--theme-text-strong)">Upload File</h2>
         <p class="mb-6" style="color:var(--theme-text-muted)">Select a file to upload to the current directory.</p>
         <div class="mb-4">
@@ -397,8 +397,8 @@ function escJS(val) {
 <%- include('../../components/imageViewer')%>
 
 <!-- Rename Modal -->
-<div id="renameModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 ">
-  <div class="rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+<div id="renameModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
+  <div id="renameModalPanel" class="rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
       <div>
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Rename</h2>
@@ -627,15 +627,20 @@ function archiveFiles(files) {
 
 massDeleteBtn.addEventListener('click', function() {
   massDeleteMessage.textContent = `Are you sure you want to delete ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}? This is a permanent action and cannot be reversed.`;
+  const panel = document.getElementById('massDeleteModalPanel');
   massDeleteModal.classList.remove('opacity-0', 'pointer-events-none');
-  massDeleteModal.querySelector('div').classList.remove('scale-95');
-  massDeleteModal.querySelector('div').classList.add('scale-100');
+  if (window.Phys) {
+    Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
+    Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
+  }
 });
 
 function closeMassDeleteModal() {
-  massDeleteModal.classList.add('opacity-0', 'pointer-events-none');
-  massDeleteModal.querySelector('div').classList.remove('scale-100');
-  massDeleteModal.querySelector('div').classList.add('scale-95');
+  const panel = document.getElementById('massDeleteModalPanel');
+  const done = function () {
+    massDeleteModal.classList.add('opacity-0', 'pointer-events-none');
+  };
+  if (window.Phys) Phys.exit(massDeleteModal, { panel: panel, done: done }); else done();
 }
 
 confirmMassDeleteBtn.addEventListener('click', async function() {
@@ -675,25 +680,31 @@ updateSelectedFiles();
 function openCreateFileModal() {
     const modal = document.getElementById('createFileModal');
     const input = document.getElementById('FileName');
+    const panel = document.getElementById('createFileModalPanel');
 
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    modal.querySelector('div').classList.remove('scale-95');
-    modal.querySelector('div').classList.add('scale-100');
+    if (window.Phys) {
+      Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
+      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
+    }
 
     input.focus();
   }
 
   function closeCreateFileModal() {
     const modal = document.getElementById('createFileModal');
-    modal.classList.add('opacity-0', 'pointer-events-none');
-    modal.querySelector('div').classList.remove('scale-100');
-    modal.querySelector('div').classList.add('scale-95');
+    const panel = document.getElementById('createFileModalPanel');
+    const done = function () {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    };
+    if (window.Phys) Phys.exit(modal, { panel: panel, done: done }); else done();
   }
 
 
   function openRenameModal(fileName, filePath) {
     const modal = document.getElementById('renameModal');
     const input = document.getElementById('newFileName');
+    const panel = document.getElementById('renameModalPanel');
     document.getElementById('currentFileName').value = fileName;
     document.getElementById('currentFilePath').value = filePath;
 
@@ -701,8 +712,10 @@ function openCreateFileModal() {
     input.value = filePath;
 
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    modal.querySelector('div').classList.remove('scale-95');
-    modal.querySelector('div').classList.add('scale-100');
+    if (window.Phys) {
+      Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
+      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
+    }
 
     // Select only the filename part (after the last slash), excluding extension
     const slashIndex = filePath.lastIndexOf('/');
@@ -715,9 +728,11 @@ function openCreateFileModal() {
 
   function closeRenameModal() {
     const modal = document.getElementById('renameModal');
-    modal.classList.add('opacity-0', 'pointer-events-none');
-    modal.querySelector('div').classList.remove('scale-100');
-    modal.querySelector('div').classList.add('scale-95');
+    const panel = document.getElementById('renameModalPanel');
+    const done = function () {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    };
+    if (window.Phys) Phys.exit(modal, { panel: panel, done: done }); else done();
   }
 
   function confirmRename() { /* overridden below */ }
@@ -782,10 +797,10 @@ function openCreateFileModal() {
     }
 
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    const modalContent = modal.querySelector('div');
-    if (modalContent) {
-      modalContent.classList.remove('scale-95');
-      modalContent.classList.add('scale-100');
+    const panel = document.getElementById('uploadFileModalPanel');
+    if (window.Phys) {
+      Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
+      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
     }
 
     // Reset the file selection
@@ -805,12 +820,11 @@ function openCreateFileModal() {
       return;
     }
 
-    modal.classList.add('opacity-0', 'pointer-events-none');
-    const modalContent = modal.querySelector('div');
-    if (modalContent) {
-      modalContent.classList.remove('scale-100');
-      modalContent.classList.add('scale-95');
-    }
+    const panel = document.getElementById('uploadFileModalPanel');
+    const done = function () {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    };
+    if (window.Phys) Phys.exit(modal, { panel: panel, done: done }); else done();
   }
 
   function removeSelectedFile() {
@@ -1279,16 +1293,21 @@ function openCreateFileModal() {
     document.getElementById('moveSourcePath').value = path;
     document.getElementById('moveDestPath').value   = '';
     const modal = document.getElementById('moveModal');
+    const panel = document.getElementById('moveModalPanel');
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    modal.querySelector('div').classList.remove('scale-95');
-    modal.querySelector('div').classList.add('scale-100');
+    if (window.Phys) {
+      Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
+      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
+    }
     setTimeout(() => document.getElementById('moveDestPath').focus(), 80);
   }
   function closeMoveModal() {
     const modal = document.getElementById('moveModal');
-    modal.classList.add('opacity-0', 'pointer-events-none');
-    modal.querySelector('div').classList.remove('scale-100');
-    modal.querySelector('div').classList.add('scale-95');
+    const panel = document.getElementById('moveModalPanel');
+    const done = function () {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    };
+    if (window.Phys) Phys.exit(modal, { panel: panel, done: done }); else done();
   }
   async function confirmMove() {
     const src  = document.getElementById('moveSourcePath').value;

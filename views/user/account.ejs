@@ -96,7 +96,7 @@
               <label class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('globe', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.languagePreference || 'Language' %>
               </label>
-              <select id="language" name="language" class="al-input">
+              <select id="language" name="language" class="cs-native">
                 <option value="en"  <%= req.lang === 'en'  ? 'selected' : '' %>>English</option>
                 <option value="fr"  <%= req.lang === 'fr'  ? 'selected' : '' %>>Français</option>
                 <option value="de"  <%= req.lang === 'de'  ? 'selected' : '' %>>Deutsch</option>
@@ -108,6 +108,7 @@
                 <option value="ja"  <%= req.lang === 'ja'  ? 'selected' : '' %>>日本語</option>
                 <option value="ta"  <%= req.lang === 'ta'  ? 'selected' : '' %>>தமிழ்</option>
               </select>
+              <div class="custom-select" data-for="language"></div>
             </div>
 
             <!-- 2FA -->

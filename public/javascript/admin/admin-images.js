@@ -1,16 +1,31 @@
 function handleRowClick(e, url) { if (!e.target.closest('button,a')) window.location = url; }
 
-function openCreate() { document.getElementById('createOverlay').classList.add('open'); }
-function closeCreate() { document.getElementById('createOverlay').classList.remove('open'); }
+function openCreate() {
+  const overlay = document.getElementById('createOverlay');
+  overlay.classList.add('open');
+  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
+}
+function closeCreate() {
+  const overlay = document.getElementById('createOverlay');
+  const done = function () { overlay.classList.remove('open'); };
+  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
+}
 document.getElementById('createOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeCreate(); });
 
 let _deleteId = null;
 function openDelete(id, name) {
   _deleteId = id;
   document.getElementById('deleteMsg').textContent = '"' + name + '" will be permanently removed.';
-  document.getElementById('deleteOverlay').classList.add('open');
+  const overlay = document.getElementById('deleteOverlay');
+  overlay.classList.add('open');
+  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
 }
-function closeDelete() { document.getElementById('deleteOverlay').classList.remove('open'); _deleteId = null; }
+function closeDelete() {
+  const overlay = document.getElementById('deleteOverlay');
+  const done = function () { overlay.classList.remove('open'); };
+  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
+  _deleteId = null;
+}
 document.getElementById('deleteOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDelete(); });
 document.getElementById('deleteConfirm').addEventListener('click', async function() {
   if (!_deleteId) return;

@@ -133,7 +133,7 @@
                   %>
 
                   <div class="relative">
-                    <select id="dockerImage" name="dockerImage" class="w-full rounded-xl appearance-none focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5 pr-10">
+                    <select id="dockerImage" name="dockerImage" class="cs-native">
                       <% if (availableDockerImages.length > 0) { %>
                         <% availableDockerImages.forEach(image => { %>
                           <option value="<%= image %>" <%= image === currentDockerImage ? 'selected' : '' %>><%= image %></option>
@@ -142,11 +142,7 @@
                         <option value="" disabled selected><%= req.translations.noDockerImages || 'No Docker images available' %></option>
                       <% } %>
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-neutral-500">
-                      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                      </svg>
-                    </div>
+                    <div class="custom-select" data-for="dockerImage"></div>
                   </div>
                   <p class="mt-2 text-xs text-neutral-500"><%= req.translations.dockerImageHint || "Changing the Docker image will restart your server if it's currently running." %></p>
                 </div>

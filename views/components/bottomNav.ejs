@@ -45,7 +45,7 @@
 </nav>
 
 <!-- More sheet (slides up from bottom) -->
-<div id="mobile-more-sheet" class="mobile-more-sheet fixed inset-x-0 bottom-0 z-50 lg:hidden transform translate-y-full transition-transform duration-300 ease-out" role="dialog" aria-label="Additional navigation" aria-modal="true">
+<div id="mobile-more-sheet" class="mobile-more-sheet fixed inset-x-0 bottom-0 z-50 lg:hidden translate-y-full will-change-transform" role="dialog" aria-label="Additional navigation" aria-modal="true">
   <div class="rounded-t-2xl border-t shadow-xl max-h-[70vh] overflow-y-auto" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <div class="sticky top-0 px-4 py-3 border-b flex items-center justify-between" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
       <span class="text-sm font-medium" style="color:var(--theme-text-strong);">Navigation</span>
@@ -144,12 +144,21 @@
     sheet.classList.remove('translate-y-full');
     backdrop.classList.remove('hidden');
     btn.setAttribute('aria-expanded', 'true');
+    if (window.Phys) {
+      Phys.set(sheet, { y: 56, opacity: 1 });
+      Phys.to(sheet, { y: 0 }, { stiffness: 300, damping: 24 });
+    }
   }
 
   function closeSheet() {
-    sheet.classList.add('translate-y-full');
-    backdrop.classList.add('hidden');
-    btn.setAttribute('aria-expanded', 'false');
+    const done = function () {
+      sheet.style.transform = '';
+      sheet.classList.add('translate-y-full');
+      backdrop.classList.add('hidden');
+      btn.setAttribute('aria-expanded', 'false');
+    };
+    if (window.Phys) Phys.to(sheet, { y: 56 }, { stiffness: 360, damping: 26 }).then(done);
+    else { done(); }
   }
 
   if (btn) btn.addEventListener('click', openSheet);

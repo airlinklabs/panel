@@ -107,11 +107,6 @@
 </div>
 
 <style>
-@keyframes al-sftp-in  { from { opacity:0; transform:scale(0.96) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
-@keyframes al-sftp-out { from { opacity:1; transform:scale(1) translateY(0); } to { opacity:0; transform:scale(0.96) translateY(8px); } }
-#sftpModal .al-sftp-panel { animation: al-sftp-in 0.2s cubic-bezier(0.16,1,0.3,1) both; }
-#sftpModal .al-sftp-panel.al-closing { animation: al-sftp-out 0.15s cubic-bezier(0.4,0,1,1) both; }
-
 /* Desktop: hover to reveal. Touch: tap to toggle via JS */
 @media (hover: hover) {
   .sftp-password:hover { filter: blur(0); }
@@ -145,7 +140,10 @@
     lastFocusedElement = document.activeElement;
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    if (panel) { panel.classList.remove('al-closing'); void panel.offsetWidth; }
+    if (window.Phys) {
+      Phys.set(panel, { y: 20, scale: 0.94, opacity: 0 });
+      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 22 });
+    }
     loadSftpCredentials();
     // Focus first focusable element
     setTimeout(function() {
@@ -172,17 +170,12 @@
       document.removeEventListener('keydown', modal._keydownHandler);
       modal._keydownHandler = null;
     }
-    if (!panel || window.matchMedia('(prefers-reduced-motion:reduce)').matches) {
+    var done = function () {
       modal.classList.add('hidden'); modal.classList.remove('flex');
       restoreFocus();
-      return;
-    }
-    panel.classList.add('al-closing');
-    panel.addEventListener('animationend', function () {
-      modal.classList.add('hidden'); modal.classList.remove('flex');
-      panel.classList.remove('al-closing');
-      restoreFocus();
-    }, { once: true });
+    };
+    if (window.Phys && panel) Phys.exit(modal, { panel: panel, done: done });
+    else done();
   };
 
   function restoreFocus() {

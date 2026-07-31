@@ -35,8 +35,7 @@
             <div class="flex-grow">
               <label for="apiKeySelect" class="block text-sm font-medium text-neutral-800 dark:text-white mb-1">Select
                 API Key for Testing</label>
-              <select id="apiKeySelect"
-                class="block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm">
+              <select id="apiKeySelect" class="cs-native">
                 <option value="">Select an API key...</option>
                 <% apiKeys.forEach(key=> { %>
                   <% if (key.active) { %>
@@ -46,6 +45,7 @@
                     <% } %>
                       <% }); %>
               </select>
+              <div class="custom-select" data-for="apiKeySelect"></div>
             </div>
             <div class="flex-shrink-0 self-end sm:self-center">
               <button id="saveApiKeyBtn"

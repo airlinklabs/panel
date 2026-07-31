@@ -174,12 +174,16 @@ function openGroup(group, imgs) {
     list.appendChild(row);
   });
   renderMd(imgs[0]?.groupReadme||'', document.getElementById('grpReadme'));
-  document.getElementById('groupOverlay').classList.add('open');
+  const overlay = document.getElementById('groupOverlay');
+  overlay.classList.add('open');
+  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
   document.body.style.overflow = 'hidden';
 }
 
 function closeGroup() {
-  document.getElementById('groupOverlay').classList.remove('open');
+  const overlay = document.getElementById('groupOverlay');
+  const done = function () { overlay.classList.remove('open'); };
+  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
   document.body.style.overflow = '';
 }
 document.getElementById('groupOverlay').addEventListener('click', function(e){if(e.target===e.currentTarget)closeGroup()});
@@ -218,12 +222,16 @@ function openEgg(img) {
   hide('eggErr');
   var btn = document.getElementById('eggInstallBtn');
   btn.innerHTML = 'Install'; btn.disabled = false;
-  document.getElementById('eggOverlay').classList.add('open');
+  const overlay = document.getElementById('eggOverlay');
+  overlay.classList.add('open');
+  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
   document.body.style.overflow = 'hidden';
 }
 
 function closeEgg() {
-  document.getElementById('eggOverlay').classList.remove('open');
+  const overlay = document.getElementById('eggOverlay');
+  const done = function () { overlay.classList.remove('open'); };
+  if (window.Phys) { const panel = overlay.querySelector('.modal-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
   document.body.style.overflow = '';
   pendingEgg = null;
 }

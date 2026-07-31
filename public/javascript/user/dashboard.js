@@ -5,6 +5,23 @@
   const allFolders = JSON.parse(bridge.dataset.folders || '[]');
   const allServers = JSON.parse(bridge.dataset.servers || '[]');
 
+  function openOverlay(overlay, panel) {
+    overlay.setAttribute('data-open', '');
+    if (window.Phys) {
+      Phys.set(panel, { y: 14, scale: 0.95, opacity: 0 });
+      Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 340, damping: 22 });
+    }
+  }
+
+  function closeOverlay(overlay, panel, after) {
+    const done = function () {
+      overlay.removeAttribute('data-open');
+      if (after) after();
+    };
+    if (window.Phys) Phys.exit(overlay, { panel: panel, done: done });
+    else done();
+  }
+
   // ── View toggle ───────────────────────────────────────────
   const gridView    = document.getElementById('gridView');
   const listView    = document.getElementById('listView');
@@ -41,20 +58,21 @@
 
   // ── New folder dialog ─────────────────────────────────────
   const newFolderOverlay  = document.getElementById('newFolderOverlay');
+  const newFolderPanel    = document.getElementById('newFolderPanel');
   const newFolderName     = document.getElementById('newFolderName');
   const cancelNewFolder   = document.getElementById('cancelNewFolder');
   const confirmNewFolder  = document.getElementById('confirmNewFolder');
 
   document.getElementById('newFolderBtn').addEventListener('click', () => {
     newFolderName.value = '';
-    newFolderOverlay.dataset.open = '';
+    openOverlay(newFolderOverlay, newFolderPanel);
     setTimeout(() => newFolderName.focus(), 80);
   });
-  cancelNewFolder.addEventListener('click', () => delete newFolderOverlay.dataset.open);
-  newFolderOverlay.addEventListener('click', e => { if (e.target === newFolderOverlay) delete newFolderOverlay.dataset.open; });
+  cancelNewFolder.addEventListener('click', () => closeOverlay(newFolderOverlay, newFolderPanel));
+  newFolderOverlay.addEventListener('click', e => { if (e.target === newFolderOverlay) closeOverlay(newFolderOverlay, newFolderPanel); });
   newFolderName.addEventListener('keydown', e => {
     if (e.key === 'Enter') confirmNewFolder.click();
-    if (e.key === 'Escape') delete newFolderOverlay.dataset.open;
+    if (e.key === 'Escape') closeOverlay(newFolderOverlay, newFolderPanel);
   });
   confirmNewFolder.addEventListener('click', async () => {
     const name = newFolderName.value.trim();
@@ -69,6 +87,7 @@
 
   // ── Folder popup (click to open) ──────────────────────────
   const folderPopupOverlay = document.getElementById('folderPopupOverlay');
+  const folderPopupPanel   = document.getElementById('folderPopupPanel');
   const folderPopupTitle   = document.getElementById('folderPopupTitle');
   const folderPopupContent = document.getElementById('folderPopupContent');
   const deleteFolderBtn    = document.getElementById('deleteFolderBtn');
@@ -119,33 +138,32 @@
           folderPopupContent.appendChild(row);
         });
       }
-      folderPopupOverlay.dataset.open = '';
+      openOverlay(folderPopupOverlay, folderPopupPanel);
     });
   });
 
   document.getElementById('closeFolderPopup').addEventListener('click', () => {
-    delete folderPopupOverlay.dataset.open;
-    deleteFolderBtn.style.display = '';
+    closeOverlay(folderPopupOverlay, folderPopupPanel, () => { deleteFolderBtn.style.display = ''; });
   });
   folderPopupOverlay.addEventListener('click', e => {
     if (e.target === folderPopupOverlay) {
-      delete folderPopupOverlay.dataset.open;
-      deleteFolderBtn.style.display = '';
+      closeOverlay(folderPopupOverlay, folderPopupPanel, () => { deleteFolderBtn.style.display = ''; });
     }
   });
 
   // ── Delete folder (custom confirm dialog) ─────────────────
   const deleteFolderOverlay  = document.getElementById('deleteFolderOverlay');
+  const deleteFolderPanel    = document.getElementById('deleteFolderPanel');
   const cancelDeleteFolder   = document.getElementById('cancelDeleteFolder');
   const confirmDeleteFolder  = document.getElementById('confirmDeleteFolder');
 
   deleteFolderBtn.addEventListener('click', () => {
-    delete folderPopupOverlay.dataset.open;
-    deleteFolderOverlay.dataset.open = '';
+    closeOverlay(folderPopupOverlay, folderPopupPanel);
+    openOverlay(deleteFolderOverlay, deleteFolderPanel);
   });
 
-  cancelDeleteFolder.addEventListener('click', () => delete deleteFolderOverlay.dataset.open);
-  deleteFolderOverlay.addEventListener('click', e => { if (e.target === deleteFolderOverlay) delete deleteFolderOverlay.dataset.open; });
+  cancelDeleteFolder.addEventListener('click', () => closeOverlay(deleteFolderOverlay, deleteFolderPanel));
+  deleteFolderOverlay.addEventListener('click', e => { if (e.target === deleteFolderOverlay) closeOverlay(deleteFolderOverlay, deleteFolderPanel); });
 
   confirmDeleteFolder.addEventListener('click', async () => {
     if (!activeFolderId) return;
@@ -153,7 +171,7 @@
     const r = await fetch('/api/folders/' + activeFolderId, { method: 'DELETE' });
     const d = await r.json();
     confirmDeleteFolder.disabled = false;
-    delete deleteFolderOverlay.dataset.open;
+    closeOverlay(deleteFolderOverlay, deleteFolderPanel);
     if (d.success) { showToast('Folder deleted.', 'success'); location.reload(); } else showToast(d.error || 'Couldn\'t delete the folder.', 'error');
   });
 
@@ -272,14 +290,14 @@
       });
       folderPopupContent.appendChild(btn);
     });
-    folderPopupOverlay.dataset.open = '';
+    openOverlay(folderPopupOverlay, folderPopupPanel);
   }
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-      delete folderPopupOverlay.dataset.open;
-      delete newFolderOverlay.dataset.open;
-      delete deleteFolderOverlay.dataset.open;
+      closeOverlay(folderPopupOverlay, folderPopupPanel);
+      closeOverlay(newFolderOverlay, newFolderPanel);
+      closeOverlay(deleteFolderOverlay, deleteFolderPanel);
     }
   });
 
