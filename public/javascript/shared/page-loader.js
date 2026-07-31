@@ -188,8 +188,8 @@
     });
     if (!link) return;
     link.classList.add('active', 'font-medium');
-    link.style.color = isDark ? '#ffffff' : '#0a0a0a';
-    link.style.background = isDark ? '#ffffff' : '#0a0a0a';
+    link.style.color = isDark ? '#f0f0f0' : '#171717';
+    link.style.background = isDark ? '#f0f0f0' : '#171717';
     link.style.borderRadius = '0.75rem';
   }
 
@@ -351,9 +351,26 @@
 
   window.addEventListener('al:themechange', function () {
     var path = normalizePath(window.location.pathname);
+    var isDark = document.documentElement.classList.contains('dark');
     var active = findDesktopActiveLink(path);
     setDesktopActiveLink(active);
     if (active) movePill(active, false);
+    var accountLink = document.getElementById('sidebar-account-link');
+    if (accountLink) {
+      var onAccount = path === '/account' || path.startsWith('/account/');
+      var userText = accountLink.querySelector('#sidebar-username');
+      if (onAccount) {
+        accountLink.style.background = isDark ? '#f0f0f0' : '#171717';
+        accountLink.style.color = isDark ? '#171717' : '#f0f0f0';
+        accountLink.style.fontWeight = '700';
+        if (userText) userText.parentElement.style.color = isDark ? '#171717' : '#f0f0f0';
+      } else {
+        accountLink.style.background = '';
+        accountLink.style.color = '';
+        accountLink.style.fontWeight = '';
+        if (userText) userText.parentElement.style.color = '';
+      }
+    }
   });
 
   document.addEventListener('submit', function () {

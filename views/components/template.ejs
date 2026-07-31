@@ -151,10 +151,10 @@
       var onAccount = path === '/account' || path.startsWith('/account/');
       var userText = account.querySelector('#sidebar-username');
       if (onAccount) {
-        account.style.background = isDark ? '#ffffff' : '#0a0a0a';
-        account.style.color = isDark ? '#0a0a0a' : '#ffffff';
+        account.style.background = isDark ? '#f0f0f0' : '#171717';
+        account.style.color = isDark ? '#171717' : '#f0f0f0';
         account.style.fontWeight = '700';
-        if (userText) userText.parentElement.style.color = isDark ? '#0a0a0a' : '#ffffff';
+        if (userText) userText.parentElement.style.color = isDark ? '#171717' : '#f0f0f0';
       } else {
         account.style.background = '';
         account.style.color = '';
@@ -184,8 +184,8 @@
       }
       if (active) {
         link.classList.add('active');
-        link.style.color = isDark ? '#ffffff' : '#0a0a0a';
-        link.style.background = isDark ? '#ffffff' : '#0a0a0a';
+        link.style.color = isDark ? '#f0f0f0' : '#171717';
+        link.style.background = isDark ? '#f0f0f0' : '#171717';
         link.style.borderRadius = '0.75rem';
       } else {
         link.classList.remove('active');
@@ -279,14 +279,14 @@
   padding: 4px 10px;
   border-radius: 50px;
   cursor: pointer;
-  background: #0a0a0a;
-  border: 1px solid #0a0a0a;
+  background: #171717;
+  border: 1px solid #171717;
   flex-shrink: 0;
   transition: background 0.25s ease, border-color 0.25s ease;
 }
 .dark .theme-toggle-switch {
-  background: #ffffff;
-  border-color: #ffffff;
+  background: #f0f0f0;
+  border-color: #f0f0f0;
 }
 .theme-toggle-knob {
   position: absolute;
@@ -296,12 +296,12 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #ffffff;
+  background: #f0f0f0;
   transition: transform 0.22s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), background 0.25s ease;
 }
 .dark .theme-toggle-knob {
   transform: translateX(33px);
-  background: #0a0a0a;
+  background: #171717;
 }
 </style>
 <script nonce="<%- nonce %>">
