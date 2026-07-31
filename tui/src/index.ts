@@ -10,7 +10,8 @@ import {
 import { watch, openSync, readSync, closeSync, statSync, existsSync } from "node:fs";
 import { collectStats, type Stats } from "./stats";
 
-const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? "../logs";
+const TUI_DIR = import.meta.dir;
+const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? `${TUI_DIR}/../../logs`;
 const LOG_FILES = ["combined.log", "error.log"];
 const CODENAME = "Katharos";
 const VERSION = "2.5.128";
