@@ -177,13 +177,21 @@
 
   <script nonce="<%- nonce %>">
    (function () {
-     var navLinks2 = document.querySelectorAll('.nav-link2');
+     // Scope to this include's own container — serverTemplate is rendered
+     // twice (desktop + mobile mains) and querying the whole document would
+     // let the hidden layout's links steal the highlight.
+     var root = document.currentScript ? document.currentScript.parentNode : document;
+     var navLinks2 = root.querySelectorAll('.nav-link2');
 
      function updateActiveLink(path) {
        var activeLink = null;
+       var bestLen = 0;
        navLinks2.forEach(function(link) {
          link.setAttribute('data-active', 'false');
-         if (path.startsWith(link.getAttribute('href'))) {
+         var href = link.getAttribute('href') || '';
+         var matched = path === href || (href !== '/' && path.startsWith(href + '/'));
+         if (matched && href.length >= bestLen) {
+           bestLen = href.length;
            activeLink = link;
          }
        });
