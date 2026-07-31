@@ -77,11 +77,13 @@ input[type="checkbox"]:not(.sr-only) {
 }
 
 input[type="checkbox"]:not(.sr-only):checked {
-  background-color: var(--theme-text-muted, #404040);
-  border-color: var(--theme-text-muted, #404040);
+  background-color: #d4d4d4;
+  border-color: #d4d4d4;
+  accent-color: #0a0a0a;
 }
 
 .dark input[type="checkbox"]:not(.sr-only):checked {
-  background-color: var(--theme-accent-text, #ffffff);
-  border-color: var(--theme-accent-text, #ffffff);
+  background-color: #3f3f46;
+  border-color: #3f3f46;
+  accent-color: #ffffff;
 }

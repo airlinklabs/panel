@@ -265,10 +265,14 @@
   padding: 4px 10px;
   border-radius: 50px;
   cursor: pointer;
-  background: var(--theme-accent);
-  border: 1px solid var(--theme-border);
+  background: #0a0a0a;
+  border: 1px solid #0a0a0a;
   flex-shrink: 0;
   transition: background 0.25s ease, border-color 0.25s ease;
+}
+.dark .theme-toggle-switch {
+  background: #ffffff;
+  border-color: #ffffff;
 }
 .theme-toggle-knob {
   position: absolute;
@@ -278,11 +282,12 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: var(--theme-accent-text);
+  background: #ffffff;
   transition: transform 0.22s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), background 0.25s ease;
 }
-html.dark .theme-toggle-knob {
+.dark .theme-toggle-knob {
   transform: translateX(33px);
+  background: #0a0a0a;
 }
 </style>
 <script nonce="<%- nonce %>">

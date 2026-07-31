@@ -166,16 +166,21 @@
   /* Section divider label */
   .al-section-label { @apply text-[10px] font-semibold uppercase tracking-widest mb-2; color: var(--theme-text-muted); }
 
-  /* Radio selection — uses theme accent so themed installs stay unified */
-  .al-radio-active { border-color: var(--theme-accent); background: var(--theme-accent-subtle); }
-  .al-radio-ring-active { border-color: var(--theme-accent); }
-  .al-radio-dot-active { background: var(--theme-accent-text); }
+  /* Radio selection — active state inverts with theme: white in dark, black in light */
+  .al-radio-active { border-color: #0a0a0a; background: #f4f4f5; }
+  .dark .al-radio-active { border-color: #ffffff; background: rgba(255,255,255,0.06); }
+  .al-radio-ring-active { border-color: #0a0a0a; }
+  .dark .al-radio-ring-active { border-color: #ffffff; }
+  .al-radio-dot-active { background: #0a0a0a; }
+  .dark .al-radio-dot-active { background: #ffffff; }
 
-  /* Toggle switch — activated via peer:checked sibling */
+  /* Toggle switch — activated: white track + black knob in dark, opposite in light */
   .al-toggle-track { @apply w-10 h-[22px] rounded-full flex items-center p-0.5 transition-colors cursor-pointer; background: var(--theme-toggle-bg, var(--theme-border)); }
-  .peer:checked ~ .al-toggle-track { background: var(--theme-accent); }
+  .peer:checked ~ .al-toggle-track { background: #0a0a0a; }
+  .dark .peer:checked ~ .al-toggle-track { background: #ffffff; }
   .al-toggle-dot   { @apply w-[18px] h-[18px] rounded-full transition-transform shadow-sm; background: var(--theme-accent-text); }
-  .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); }
+  .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); background: #ffffff; }
+  .dark .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); background: #0a0a0a; }
 
   /* Legacy aliases — kept for backward compat */
   .al-ui-surface {
@@ -329,3 +334,23 @@
 @media (prefers-reduced-motion: reduce) {
   .pa-row { animation: none; }
 }
+
+/* ── Settings tab highlight — inverted active state ────────────
+   Active pill: black in light mode, white in dark mode. Text on
+   the pill inverts to keep contrast. */
+#sliding-background {
+  background: #0a0a0a;
+  border-color: #0a0a0a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+.dark #sliding-background {
+  background: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 1px 4px rgba(255,255,255,0.18);
+}
+.nav-link2.nav2-active { color: #ffffff; }
+.dark .nav-link2.nav2-active { color: #0a0a0a; }
+
+/* Inner tab underline — highlighted text: white in dark, black in light */
+.tab-btn[aria-selected="true"] { color: #0a0a0a; }
+.dark .tab-btn[aria-selected="true"] { color: #ffffff; }

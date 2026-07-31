@@ -34,13 +34,11 @@
         if (activeLink) {
           navLinks2.forEach(link => {
             if (!link.classList.contains('cursor-not-allowed')) {
-              link.style.color = '';
-              link.classList.remove('font-semibold');
+              link.classList.remove('nav2-active', 'font-semibold');
             }
           });
 
-          activeLink.style.color = 'var(--theme-accent)';
-          activeLink.classList.add('font-semibold');
+          activeLink.classList.add('nav2-active', 'font-semibold');
           var linkRect = activeLink.getBoundingClientRect();
           var navRect = activeLink.closest('nav').getBoundingClientRect();
 
