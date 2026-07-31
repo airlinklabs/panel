@@ -4,7 +4,7 @@
 
     <!-- Static top: logo -->
     <div class="pl-6 pt-4 pb-4 flex min-w-0 shrink-0">
-      <a href="/" class="flex items-center min-w-0">
+      <a href="/" id="sidebar-logo-link" class="flex items-center min-w-0">
         <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg p-1 h-10 w-10 rounded-xl mr-3 shrink-0 inline-flex" style="background:var(--theme-logo-bg);">
         <h1 class="font-medium tracking-tight text-lg truncate min-w-0" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></h1>
       </a>
@@ -96,12 +96,6 @@
                 </a>
               </li>
               <li>
-                <a href="/admin/airlink-cloud" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                  <%- icon('cloud', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
-                  <span><%= req.translations.navAirlinkCloud || 'Airlink Cloud' %></span>
-                </a>
-              </li>
-              <li>
                 <a href="/admin/apikeys" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- icon('key', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navApiKeys || 'API Keys' %></span>
@@ -144,10 +138,11 @@
 
   // Highlight account/logout when on those pages
   function markSpecialLinks(path) {
+    var isDark = document.documentElement.classList.contains('dark');
     var account = document.getElementById('sidebar-account-link');
     var logout  = document.getElementById('sidebar-logout-link');
+    var logo = document.getElementById('sidebar-logo-link');
     if (account) {
-      var isDark = document.documentElement.classList.contains('dark');
       var onAccount = path === '/account' || path.startsWith('/account/');
       var userText = account.querySelector('#sidebar-username');
       if (onAccount) {
@@ -160,6 +155,27 @@
         account.style.color = '';
         account.style.fontWeight = '';
         if (userText) userText.parentElement.style.color = '';
+      }
+    }
+    if (logo) {
+      var onCredits = path === '/admin/overview' || path.startsWith('/admin/overview/');
+      var logoTitle = logo.querySelector('h1');
+      if (onCredits) {
+        logo.style.background = isDark ? '#f0f0f0' : '#171717';
+        logo.style.color = isDark ? '#171717' : '#f0f0f0';
+        logo.style.borderRadius = '0.75rem';
+        if (logoTitle) {
+          logoTitle.style.color = isDark ? '#171717' : '#f0f0f0';
+          logoTitle.style.fontWeight = '700';
+        }
+      } else {
+        logo.style.background = '';
+        logo.style.color = '';
+        logo.style.borderRadius = '';
+        if (logoTitle) {
+          logoTitle.style.color = '';
+          logoTitle.style.fontWeight = '';
+        }
       }
     }
     if (logout) {

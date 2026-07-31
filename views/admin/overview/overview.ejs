@@ -10,7 +10,7 @@
     position: fixed;
     inset: 0;
     z-index: -1;
-    background-image: url('/assets/vcode/katharos.svg');
+    background-image: var(--vcode-bg, none);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -28,7 +28,7 @@
     <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
-    <div id="page-content" class="admin-overview-bg flex-1 overflow-y-auto pt-16">
+    <div id="page-content" class="admin-overview-bg flex-1 overflow-y-auto pt-16"<% if (vcodeBg) { %> style="--vcode-bg: url('<%= vcodeBg %>');"<% } %>>
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Overview' }
@@ -53,10 +53,9 @@
             <div class="flex items-center gap-3">
               <img src="/assets/airlink_logo.png" class="h-10 w-10 rounded-xl shrink-0" alt="Airlink">
               <div>
-                <p class="text-sm font-medium" style="color:var(--theme-text-strong);">Airlink Panel</p>
+                <p class="text-sm font-medium" style="color:var(--theme-text-strong);">Airlink Panel <span class="font-bold"><%= airlinkCodename %></span></p>
                 <div class="flex items-center gap-2 mt-1">
                   <span class="text-[10px] font-mono px-2 py-0.5 rounded-md" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border); color:var(--theme-text-muted);">v<span class="current-version"></span></span>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-md" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border); color:var(--theme-text-muted);"><%= airlinkCodename %></span>
                   <span class="text-[10px]" style="color:var(--theme-text-muted);"><%= process.env.NODE_ENV %></span>
                 </div>
               </div>

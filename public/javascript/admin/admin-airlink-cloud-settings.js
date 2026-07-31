@@ -6,7 +6,7 @@
     var backupEnabled = document.getElementById('airlinkCloudBackupEnabled').checked;
 
     try {
-      var res = await fetch('/admin/airlink-cloud', {
+      var res = await fetch('/airlink-cloud/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
