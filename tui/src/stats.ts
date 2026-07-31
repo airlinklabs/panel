@@ -5,7 +5,7 @@ import crypto from "node:crypto";
 const TUI_DIR = import.meta.dir;
 const DB_PATH = process.env.AIRLINK_DB_PATH ?? `${TUI_DIR}/../../../storage/dev.db`;
 const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? `${TUI_DIR}/../../logs`;
-const PANEL_URL = process.env.AIRLINK_PANEL_URL ?? "http://127.0.0.1:3000";
+export const PANEL_URL = process.env.AIRLINK_PANEL_URL ?? "http://127.0.0.1:3000";
 
 let db: Database | null | undefined;
 function openDb(): Database | null {
@@ -73,7 +73,7 @@ function hmacSign(key: string, method: string, path: string, body: string, times
   return crypto.createHmac("sha256", key).update(payload).digest("hex");
 }
 
-async function probe(url: string, ms: number): Promise<boolean> {
+export async function probe(url: string, ms: number): Promise<boolean> {
   try {
     await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(ms) });
     return true;
@@ -82,7 +82,7 @@ async function probe(url: string, ms: number): Promise<boolean> {
   }
 }
 
-function panelPid(): { pid: number | null; uptimeSec: number | null } {
+export function panelPid(): { pid: number | null; uptimeSec: number | null } {
   const sysUptime = Number(readFileSync("/proc/uptime", "utf8").split(" ")[0]);
   for (const entry of readdirSync("/proc")) {
     if (!/^\d+$/.test(entry)) continue;
