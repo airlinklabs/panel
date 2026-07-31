@@ -349,6 +349,13 @@
     fadeContentOut();
   }, true);
 
+  window.addEventListener('al:themechange', function () {
+    var path = normalizePath(window.location.pathname);
+    var active = findDesktopActiveLink(path);
+    setDesktopActiveLink(active);
+    if (active) movePill(active, false);
+  });
+
   document.addEventListener('submit', function () {
     markNavigation();
     fadeContentOut();

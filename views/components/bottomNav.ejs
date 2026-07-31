@@ -171,6 +171,7 @@
       } else {
         var isDark = document.documentElement.classList.toggle('dark');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        window.dispatchEvent(new CustomEvent('al:themechange'));
       }
     });
   }
