@@ -7,7 +7,7 @@
   }
   #page-content.admin-overview-bg::before {
     content: '';
-    position: absolute;
+    position: fixed;
     inset: 0;
     z-index: -1;
     background-image: url('/assets/vcode/katharos.svg');
@@ -15,6 +15,7 @@
     background-position: center;
     background-repeat: no-repeat;
     pointer-events: none;
+    opacity: 0.5;
   }
   html.dark #page-content.admin-overview-bg::before {
     filter: invert(1);
