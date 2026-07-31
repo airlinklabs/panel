@@ -200,18 +200,18 @@
         <!-- Search button -->
         <div class="flex items-center shrink-0 lg:-ml-2">
           <button id="searchButton" type="button"
-            class="flex items-center gap-2.5 h-10 px-3.5 rounded-xl transition-colors duration-200 cursor-pointer"
+            class="flex items-center gap-2.5 h-10 px-3.5 rounded-xl cursor-pointer transition-all duration-200 hover:opacity-80 active:scale-95"
             style="border:1px solid var(--theme-border-input); background:var(--theme-bg-secondary);"
             aria-label="<%= req.translations.navSearch || 'Search' %>" aria-haspopup="dialog" aria-expanded="false">
             <%- icon('search', { class: 'h-5 w-5', style: 'color:var(--theme-text-muted)' }) %>
             <span class="hidden sm:block text-sm" style="color:var(--theme-text-muted);"><%= req.translations.navSearch || 'Search' %></span>
-            <span aria-hidden="true" class="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-md"
+            <span aria-hidden="true" class="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-md"
               style="color:var(--theme-text-muted); background:var(--theme-bg-card); border:1px solid var(--theme-border);">CTRL K</span>
           </button>
         </div>
 
       <!-- Admin breadcrumbs (desktop) -->
-      <div id="topbar-breadcrumbs" class="hidden lg:flex items-center min-w-0 flex-1 text-[11px] opacity-60" style="color:var(--theme-text-muted);"></div>
+      <div id="topbar-breadcrumbs" class="hidden lg:flex items-center justify-center min-w-0 flex-1 text-[11px] opacity-60" style="color:var(--theme-text-muted);"></div>
 
       <!-- Theme toggle switch -->
       <div class="flex items-center shrink-0 ml-2">
