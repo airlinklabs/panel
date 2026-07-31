@@ -1,18 +1,18 @@
 <% /* breadcrumb: { items: [{ label, href? }] } */ %>
 <% if (locals.items && items.length > 0) { %>
 <div class="lg:hidden w-full" style="border-bottom:1px solid var(--theme-border);background:var(--theme-bg-secondary);">
-  <div class="pr-6 sm:pr-8 pl-0 py-3">
+  <div class="pr-6 sm:pr-8 pl-0 py-2 opacity-60">
     <nav aria-label="Breadcrumb">
-      <ol class="flex items-center gap-1.5 text-xs">
+      <ol class="flex items-center gap-1.5 text-[11px]">
         <% items.forEach(function(item, index) { %>
           <li class="flex items-center gap-1.5">
             <% if (index > 0) { %>
-              <span style="color:var(--theme-text-placeholder);font-size:11px;">/</span>
+              <span style="color:var(--theme-text-placeholder);font-size:10px;">/</span>
             <% } %>
             <% if (item.href && index < items.length - 1) { %>
               <a href="<%= item.href %>" class="transition" style="color:var(--theme-text-muted);"><%= item.label %></a>
             <% } else { %>
-              <span style="color:var(--theme-text-strong);font-weight:500;"><%= item.label %></span>
+              <span style="color:var(--theme-text-muted);font-weight:500;"><%= item.label %></span>
             <% } %>
           </li>
         <% }); %>
@@ -45,8 +45,8 @@
       slot.appendChild(a);
     } else {
       var span = document.createElement('span');
-      span.className = 'font-medium whitespace-nowrap truncate';
-      span.style.color = 'var(--theme-text-strong)';
+      span.className = 'truncate whitespace-nowrap font-medium';
+      span.style.color = 'var(--theme-text-muted)';
       span.textContent = item.label;
       slot.appendChild(span);
     }

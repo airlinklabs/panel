@@ -8,6 +8,10 @@
     </div>
     <!-- Content -->
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Player Statistics' }
+      ] }) %>
       <div class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/pageTitle', {
           title: 'Player Statistics',

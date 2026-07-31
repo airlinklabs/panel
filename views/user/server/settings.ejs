@@ -6,6 +6,11 @@
       <%- include('../../components/template') %>
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Servers', href: '/' },
+        { label: server.name, href: '/server/' + server.UUID },
+        { label: 'Settings' }
+      ] }) %>
       <%- include('../../components/serverHeader') %>
       <%- include('../../components/installHeader') %>
       <%- include('../../components/serverTemplate') %>

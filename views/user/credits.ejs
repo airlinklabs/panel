@@ -30,6 +30,9 @@
   <div class="flex h-screen">
     <div class="hidden lg:block w-60 h-full shrink-0"><%- include('../components/template') %></div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../components/ui/breadcrumb', { items: [
+        { label: 'Credits' }
+      ] }) %>
 
       <div class="px-8 pt-5 mb-8">
         <div class="flex items-center gap-3 mb-1">
