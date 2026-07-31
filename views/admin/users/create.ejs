@@ -101,11 +101,11 @@
                         <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
                       </p>
                     </div>
-                    <label for="userIsAdminSwitch" class="relative inline-flex items-center cursor-pointer">
+                    <label for="userIsAdminSwitch" class="relative inline-flex items-center cursor-pointer shrink-0">
                       <input type="checkbox" id="userIsAdminSwitch" class="sr-only peer">
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+                      <span class="ms-3 text-sm font-medium text-neutral-700 dark:text-white" id="adminStatusLabel">Disabled</span>
                     </label>
-                    <span class="ms-3 text-sm font-medium text-neutral-700 dark:text-white" id="adminStatusLabel">Disabled</span>
                   </div>
                 </div>
               </div>
