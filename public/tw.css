@@ -388,6 +388,16 @@ html.dark body .mobile-nav-link.active-mobile {
   color: #0a0a0a !important;
 }
 
+/* Sidebar background and vertical divider (starts below the topbar so it
+   doesn't show between sidebar and topbar — only between sidebar and content) */
+#pc-sidebar2 {
+  background: var(--theme-nav-bg);
+  background-image: linear-gradient(var(--theme-nav-border), var(--theme-nav-border));
+  background-size: 1px calc(100% - 64px);
+  background-position: right top 64px;
+  background-repeat: no-repeat;
+}
+
 /* Icons inside the active sidebar link follow the inverted text color
    (themes force var(--theme-nav-icon) on .nav-link svg) */
 html .nav-link.active svg {

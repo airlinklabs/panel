@@ -419,6 +419,12 @@
     navigate(url, false);
   });
 
+  // ── Theme toggle ───────────────────────────────────────────────────────────
+
+  window.addEventListener('al:themechange', function () {
+    updateNav(window.location.pathname);
+  });
+
   // ── Init ──────────────────────────────────────────────────────────────────
 
   history.replaceState(

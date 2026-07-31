@@ -96,10 +96,7 @@ function initializeTheme() {
     if (typeof setTerminalTheme === 'function') {
       setTerminalTheme();
     }
-    const activeLink = document.querySelector('.nav-link.active');
-    if (activeLink) {
-      activeLink.style.color = isDark ? 'var(--theme-nav-text-active)' : 'var(--theme-nav-text-active)';
-    }
+    window.dispatchEvent(new CustomEvent('al:themechange'));
   }
 
   initializeTheme();
