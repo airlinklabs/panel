@@ -10,7 +10,7 @@ import {
 import { watch, openSync, readSync, closeSync, statSync, existsSync } from "node:fs";
 import { spawn, type ChildProcess } from "node:child_process";
 import { resolve } from "node:path";
-import { collectStats, type Stats } from "./stats";
+import { collectStats, panelPid, probe, PANEL_URL, type Stats } from "./stats";
 
 const TUI_DIR = import.meta.dir;
 const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? `${TUI_DIR}/../../logs`;
@@ -147,10 +147,11 @@ async function main() {
   let panelChild: ChildProcess | null = null;
   let panelStartedAt = 0;
   let panelStopRequested = false;
+  let externalMode = false;
   let shuttingDown = false;
 
   function startPanel() {
-    if (panelChild) return;
+    if (panelChild || externalMode) return;
     panelStopRequested = false;
     const child = spawn("node", [`--env-file=${PANEL_ENV_FILE}`, PANEL_ENTRY], {
       cwd: PANEL_DIR,
@@ -159,27 +160,36 @@ async function main() {
     panelChild = child;
     panelStartedAt = Date.now();
     child.on("error", (error) => {
+      panelChild = null;
       console.error("Failed to start panel:", error);
-      process.exit(1);
     });
     child.on("exit", (code, signal) => {
       panelChild = null;
       if (shuttingDown || panelStopRequested) return;
-      setTimeout(() => {
-        console.error(`Panel exited (code ${code ?? "?"}${signal ? `, ${signal}` : ""}) — shutting down.`);
-        renderer.destroy();
-        process.exit(1);
-      }, 2500);
+      console.error(`Panel exited (code ${code ?? "?"}${signal ? `, ${signal}` : ""}) — press [r] to restart.`);
     });
   }
 
   function stopPanel() {
     const child = panelChild;
-    if (!child) return;
-    panelStopRequested = true;
-    child.kill("SIGTERM");
-    const timer = setTimeout(() => child.kill("SIGKILL"), 3000);
-    child.once("exit", () => clearTimeout(timer));
+    if (child) {
+      panelStopRequested = true;
+      child.kill("SIGTERM");
+      const timer = setTimeout(() => child.kill("SIGKILL"), 3000);
+      child.once("exit", () => clearTimeout(timer));
+      return;
+    }
+    if (externalMode) {
+      const p = panelPid();
+      if (p.pid) {
+        try {
+          process.kill(p.pid, "SIGTERM");
+        } catch {
+          /* already gone */
+        }
+      }
+      externalMode = false;
+    }
   }
 
   function shutdownPanel() {
@@ -189,7 +199,9 @@ async function main() {
     setTimeout(() => child.kill("SIGKILL"), 1500);
   }
 
-  startPanel();
+  const panelUp = await probe(PANEL_URL, 1500);
+  if (panelUp) externalMode = true;
+  else startPanel();
 
   let currentFile = LOG_FILES[0];
   let offsets: Record<string, number> = {};
