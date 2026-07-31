@@ -10,7 +10,8 @@
   "license": "MIT",
   "scripts": {
     "setup": "pnpm install && prisma generate && prisma db push && pnpm run build",
-    "start": "node dist/app.js",
+    "start": "bun tui/src/index.ts",
+    "start:panel": "node --env-file=.env dist/app.js",
     "tui": "bun tui/src/index.ts",
     "dev": "prisma migrate deploy && prisma generate && nodemon",
     "build": "tsc && tsc -p tsconfig.prisma.json && tailwindcss -i ./public/tw.css -o ./public/styles.css",

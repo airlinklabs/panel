@@ -8,10 +8,15 @@ import {
   type Renderable,
 } from "@opentui/core";
 import { watch, openSync, readSync, closeSync, statSync, existsSync } from "node:fs";
+import { spawn, type ChildProcess } from "node:child_process";
+import { resolve } from "node:path";
 import { collectStats, type Stats } from "./stats";
 
 const TUI_DIR = import.meta.dir;
 const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? `${TUI_DIR}/../../logs`;
+const PANEL_DIR = resolve(TUI_DIR, "../..");
+const PANEL_ENTRY = `${PANEL_DIR}/dist/app.js`;
+const PANEL_ENV_FILE = `${PANEL_DIR}/.env`;
 const LOG_FILES = ["combined.log", "error.log"];
 const CODENAME = "Katharos";
 const VERSION = "2.5.128";
@@ -139,6 +144,53 @@ async function main() {
     backgroundColor: "#0D1117",
   });
 
+  let panelChild: ChildProcess | null = null;
+  let panelStartedAt = 0;
+  let panelStopRequested = false;
+  let shuttingDown = false;
+
+  function startPanel() {
+    if (panelChild) return;
+    panelStopRequested = false;
+    const child = spawn("node", [`--env-file=${PANEL_ENV_FILE}`, PANEL_ENTRY], {
+      cwd: PANEL_DIR,
+      stdio: "ignore",
+    });
+    panelChild = child;
+    panelStartedAt = Date.now();
+    child.on("error", (error) => {
+      console.error("Failed to start panel:", error);
+      process.exit(1);
+    });
+    child.on("exit", (code, signal) => {
+      panelChild = null;
+      if (shuttingDown || panelStopRequested) return;
+      setTimeout(() => {
+        console.error(`Panel exited (code ${code ?? "?"}${signal ? `, ${signal}` : ""}) — shutting down.`);
+        renderer.destroy();
+        process.exit(1);
+      }, 2500);
+    });
+  }
+
+  function stopPanel() {
+    const child = panelChild;
+    if (!child) return;
+    panelStopRequested = true;
+    child.kill("SIGTERM");
+    const timer = setTimeout(() => child.kill("SIGKILL"), 3000);
+    child.once("exit", () => clearTimeout(timer));
+  }
+
+  function shutdownPanel() {
+    const child = panelChild;
+    if (!child) return;
+    child.kill("SIGTERM");
+    setTimeout(() => child.kill("SIGKILL"), 1500);
+  }
+
+  startPanel();
+
   let currentFile = LOG_FILES[0];
   let offsets: Record<string, number> = {};
 
@@ -210,7 +262,7 @@ async function main() {
       { id: "stats-box", flexDirection: "column", gap: 0 },
       Text({ content: "Collecting stats…", fg: "#6B7280" })
     ),
-    Text({ content: "[Tab] switch log   [Ctrl+C] quit", fg: "#4B5563" })
+    Text({ content: "[Tab] switch log · [k] stop panel · [r] start · [Ctrl+C] quit", fg: "#4B5563" })
   );
 
   const logsWrap = Box({ id: "logs-wrap", flexGrow: 1, flexDirection: "column" }, logs);
@@ -243,7 +295,17 @@ async function main() {
 
   const refreshStats = async () => {
     try {
-      renderStats(statsBox, renderer, await collectStats());
+      const stats = await collectStats();
+      if (panelChild) {
+        stats.panelOnline = true;
+        stats.panelPid = panelChild.pid ?? null;
+        stats.panelUptimeSec = Math.floor((Date.now() - panelStartedAt) / 1000);
+      } else if (panelStopRequested) {
+        stats.panelOnline = false;
+        stats.panelPid = null;
+        stats.panelUptimeSec = null;
+      }
+      renderStats(statsBox, renderer, stats);
     } catch (error) {
       // keep previous stats if a collection fails
     }
@@ -253,6 +315,8 @@ async function main() {
 
   renderer.keyInput.on("keypress", (key: KeyEvent) => {
     if (key.name === "tab") switchFile();
+    else if (key.name === "k") stopPanel();
+    else if (key.name === "r") startPanel();
   });
 
   let watcher: ReturnType<typeof watch> | undefined;
@@ -265,9 +329,15 @@ async function main() {
   }
 
   renderer.on("resize", () => applyLayout());
+  process.on("SIGTERM", () => renderer.destroy());
+  process.on("SIGHUP", () => renderer.destroy());
+  process.on("SIGINT", () => renderer.destroy());
   renderer.on("destroy", () => {
     clearInterval(statsTimer);
     watcher?.close();
+    shuttingDown = true;
+    shutdownPanel();
+    setTimeout(() => process.exit(0), 2000);
   });
 }
 
