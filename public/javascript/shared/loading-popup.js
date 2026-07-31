@@ -16,11 +16,11 @@
     
     overlay = document.createElement('div');
     overlay.id = 'loadingPopupOverlay';
-    overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
+    overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center al-modal-overlay';
     overlay.style.background = 'rgba(0,0,0,0.5)';
     
     panel = document.createElement('div');
-    panel.className = 'bg-white dark:bg-[#1c1c1c] rounded-2xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-300';
+    panel.className = 'bg-white dark:bg-[#1c1c1c] rounded-2xl shadow-2xl w-full max-w-sm mx-4 al-modal-panel';
     panel.style.border = '1px solid var(--theme-border)';
     
     panel.innerHTML = `
@@ -84,18 +84,12 @@
     document.getElementById('lp-progress-fill').style.width = '0%';
     document.getElementById('lp-progress-text').textContent = '0%';
     
-    overlay.style.opacity = '1';
-    overlay.style.pointerEvents = 'auto';
-    panel.classList.remove('scale-95');
-    panel.classList.add('scale-100');
+    Animate.openModal(overlay, panel);
   }
 
   function hide() {
     if (!overlay) return;
-    overlay.style.opacity = '0';
-    overlay.style.pointerEvents = 'none';
-    panel.classList.remove('scale-100');
-    panel.classList.add('scale-95');
+    Animate.closeModal(overlay, panel);
   }
 
   function setTitle(text) {
