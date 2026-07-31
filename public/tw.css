@@ -387,3 +387,12 @@ html.dark body .mobile-nav-link.active-mobile {
   border-radius: 0.75rem;
   color: #0a0a0a !important;
 }
+
+/* Icons inside the active sidebar link follow the inverted text color
+   (themes force var(--theme-nav-icon) on .nav-link svg) */
+html .nav-link.active svg {
+  color: #ffffff !important;
+}
+html.dark .nav-link.active svg {
+  color: #0a0a0a !important;
+}

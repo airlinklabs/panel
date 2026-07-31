@@ -184,10 +184,13 @@
     document.querySelectorAll('.nav-link').forEach(function (l) {
       l.classList.remove('active', 'font-medium');
       l.style.color = '';
+      l.style.background = '';
     });
     if (!link) return;
     link.classList.add('active', 'font-medium');
     link.style.color = isDark ? '#ffffff' : '#0a0a0a';
+    link.style.background = isDark ? '#ffffff' : '#0a0a0a';
+    link.style.borderRadius = '0.75rem';
   }
 
   function movePill(link, animate) {
