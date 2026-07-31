@@ -22,10 +22,11 @@
         </div>
       </div>
 
-      <div id="nodeForm" class="al-page-body">
-        <div class="al-card p-5">
-          <form>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div id="nodeForm" class="al-page-body space-y-5">
+        <form class="space-y-5">
+          <div class="al-card">
+            <h2 class="al-card-header">General</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label for="nodeName" class="al-label flex items-center gap-1.5">
                   <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
@@ -34,6 +35,32 @@
                 <input id="nodeName" value="<%= node.name %>" class="al-input" placeholder="My node">
               </div>
 
+              <div>
+                <label for="nodeAddress" class="al-label flex items-center gap-1.5">
+                  <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.addressIP %>
+                </label>
+                <input id="nodeAddress" value="<%= node.address %>" class="al-input" placeholder="localhost">
+              </div>
+
+              <div>
+                <label for="nodePort" class="al-label flex items-center gap-1.5">
+                  <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.daemonPort %>
+                </label>
+                <input id="nodePort" value="<%= node.port %>" class="al-input" placeholder="3002">
+              </div>
+
+              <div>
+                <label for="nodeKey" class="al-label"><%= req.translations.daemonKey %></label>
+                <input id="nodeKey" value="<%= node.key %>" class="al-input" placeholder="<%= node.key %>" disabled>
+              </div>
+            </div>
+          </div>
+
+          <div class="al-card">
+            <h2 class="al-card-header">Resource Allocation</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label for="nodeRam" class="al-label flex items-center gap-1.5">
                   <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
@@ -77,47 +104,24 @@
                 </label>
                 <input id="nodeProcessor" value="<%= node.cpu %>" class="al-input" placeholder="Informational only">
               </div>
-
-              <div>
-                <label for="nodeAddress" class="al-label flex items-center gap-1.5">
-                  <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.addressIP %>
-                </label>
-                <input id="nodeAddress" value="<%= node.address %>" class="al-input" placeholder="localhost">
-              </div>
-
-              <div>
-                <label for="nodePort" class="al-label flex items-center gap-1.5">
-                  <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.daemonPort %>
-                </label>
-                <input id="nodePort" value="<%= node.port %>" class="al-input" placeholder="3002">
-              </div>
-
-              <div class="sm:col-span-2">
-                <label for="nodeKey" class="al-label"><%= req.translations.daemonKey %></label>
-                <input id="nodeKey" value="<%= node.key %>" class="al-input" placeholder="<%= node.key %>" disabled>
-              </div>
-
-              <div class="sm:col-span-2">
-                <label for="allocatedPorts" class="al-label">Allocated Ports</label>
-                <div class="space-y-2">
-                  <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                    <!-- Port tags will be inserted here -->
-                  </div>
-                  <div class="flex gap-2">
-                    <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1">
-                    <button id="addPortBtn" type="button" class="al-btn-primary">
-                      Add Port
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-
             </div>
-          </form>
-        </div>
+          </div>
+
+          <div class="al-card">
+            <h2 class="al-card-header">Allocated Ports</h2>
+            <div class="space-y-2">
+              <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                <!-- Port tags will be inserted here -->
+              </div>
+              <div class="flex gap-2">
+                <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1">
+                <button id="addPortBtn" type="button" class="al-btn-primary">
+                  Add Port
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
 
     </div>
@@ -125,6 +129,10 @@
 </main>
 
 <%- include('../../components/toast') %>
+
+<style>
+#nodeForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
+</style>
 
 <%
   // Compute used ports from servers
