@@ -365,3 +365,23 @@
   box-shadow: none !important;
   color: #0a0a0a !important;
 }
+
+/* Sidebar sliding pill + mobile bottom nav — same inverted highlight */
+#active-background {
+  background: #0a0a0a;
+  border: 1px solid #0a0a0a;
+}
+.dark #active-background {
+  background: #ffffff;
+  border: 1px solid #ffffff;
+}
+.mobile-nav-link.active-mobile {
+  background: #0a0a0a;
+  border-radius: 0.75rem;
+  color: #ffffff !important;
+}
+.dark .mobile-nav-link.active-mobile {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  color: #0a0a0a !important;
+}

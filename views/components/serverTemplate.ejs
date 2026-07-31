@@ -175,16 +175,15 @@
  </div>
  <% } } %>
 
- <script nonce="<%- nonce %>">
-   document.addEventListener("DOMContentLoaded", function() {
-     var currentPagePath = window.location.pathname;
+  <script nonce="<%- nonce %>">
+   (function () {
      var navLinks2 = document.querySelectorAll('.nav-link2');
 
-     function updateActiveLink() {
+     function updateActiveLink(path) {
        var activeLink = null;
        navLinks2.forEach(function(link) {
          link.setAttribute('data-active', 'false');
-         if (currentPagePath.startsWith(link.getAttribute('href'))) {
+         if (path.startsWith(link.getAttribute('href'))) {
            activeLink = link;
          }
        });
@@ -194,11 +193,17 @@
        }
      }
 
-     updateActiveLink();
+     function syncActiveLink() {
+       updateActiveLink(window.location.pathname);
+     }
 
-     window.addEventListener('popstate', function() {
-       currentPagePath = window.location.pathname;
-       updateActiveLink();
-     });
-   });
- </script>
+     if (document.readyState === 'loading') {
+       document.addEventListener('DOMContentLoaded', syncActiveLink);
+     } else {
+       syncActiveLink();
+     }
+
+     window.addEventListener('popstate', syncActiveLink);
+     document.addEventListener('al:navigated', syncActiveLink);
+   })();
+  </script>

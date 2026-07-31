@@ -160,17 +160,14 @@
       var href        = normalizePath(link.getAttribute('href') || '');
       var matchPrefix = link.getAttribute('data-match-prefix');
       if (!href) return;
+      if (path === href) { best = link; bestLen = 9999; return; }
       if (matchPrefix) {
         if (path.startsWith(matchPrefix) && matchPrefix.length > bestLen) {
           best = link; bestLen = matchPrefix.length;
         }
         return;
       }
-      if (path === href) { best = link; bestLen = 9999; return; }
-      if (href === '/') {
-        if (path === '/' && 1 > bestLen) { best = link; bestLen = 1; }
-        return;
-      }
+      if (href === '/') return;
       if (path.startsWith(href) && href.length > bestLen) { best = link; bestLen = href.length; }
     });
     return best;
