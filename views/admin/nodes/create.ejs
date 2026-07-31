@@ -20,11 +20,12 @@
         </div>
       </div>
 
-      <div id="nodeForm" class="al-page-body">
-        <div class="al-card p-5">
-          <form>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="sm:col-span-2">
+      <div id="nodeForm" class="al-page-body space-y-5">
+        <form class="space-y-5">
+          <div class="al-card">
+            <h2 class="al-card-header">General</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div class="md:col-span-2">
                 <label for="nodeName" class="al-label flex items-center gap-1.5">
                   <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
                   <%= req.translations.name %>
@@ -32,6 +33,27 @@
                 <input id="nodeName" class="al-input" placeholder="My node">
               </div>
 
+              <div>
+                <label for="nodeAddress" class="al-label flex items-center gap-1.5">
+                  <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.addressIP %>
+                </label>
+                <input id="nodeAddress" class="al-input" placeholder="localhost">
+              </div>
+
+              <div>
+                <label for="nodePort" class="al-label flex items-center gap-1.5">
+                  <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.daemonPort %>
+                </label>
+                <input id="nodePort" class="al-input" placeholder="3002">
+              </div>
+            </div>
+          </div>
+
+          <div class="al-card">
+            <h2 class="al-card-header">Resource Allocation</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label for="nodeRam" class="al-label flex items-center gap-1.5">
                   <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
@@ -82,30 +104,19 @@
                   </label>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div>
-                <label for="nodeAddress" class="al-label flex items-center gap-1.5">
-                  <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.addressIP %>
-                </label>
-                <input id="nodeAddress" class="al-input" placeholder="localhost">
-              </div>
-
-              <div>
-                <label for="nodePort" class="al-label flex items-center gap-1.5">
-                  <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.daemonPort %>
-                </label>
-                <input id="nodePort" class="al-input" placeholder="3002">
-              </div>
-
-              <div class="sm:col-span-2">
+          <div class="al-card">
+            <h2 class="al-card-header">Daemon Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div class="md:col-span-2">
                 <label for="daemonKey" class="al-label"><%= req.translations.daemonKey || 'Daemon Key' %></label>
                 <input id="daemonKey" class="al-input" placeholder="Leave blank to auto-generate">
                 <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Optional. If left blank, a secure key will be generated automatically.</p>
               </div>
 
-              <div class="sm:col-span-2">
+              <div class="md:col-span-2">
                 <label for="allocatedPorts" class="al-label">Allocated Ports</label>
                 <div class="space-y-2">
                   <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
@@ -119,11 +130,9 @@
                   </div>
                 </div>
               </div>
-
-
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
 
     </div>
@@ -132,6 +141,10 @@
 
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
+
+<style>
+#nodeForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
+</style>
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-node-create.js"></script>
 
