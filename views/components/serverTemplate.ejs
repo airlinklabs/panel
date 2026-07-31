@@ -1,7 +1,7 @@
-<div class="mt-6 ml-8 mb-8">
+<div class="mt-6 ml-4 sm:ml-8 mb-8">
     <div>
        <!-- Mobile server nav — shows on small screens, hides on sm+ -->
-       <div class="block sm:hidden overflow-x-auto mt-3 ml-4 mr-4">
+       <div class="block sm:hidden overflow-x-auto mt-3">
          <div class="flex gap-1 min-w-max pb-2">
            <%
            const rawMenuItemsMobile = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
@@ -133,7 +133,7 @@
 
     if (sections && sections.length > 0) {
  %>
- <div class="px-8 mt-8">
+ <div class="px-4 sm:px-8 mt-8">
     <% sections.forEach(section => { %>
       <div class="al-card p-6 mb-6">
         <h2 class="text-base font-semibold mb-4 al-page-title"><%= section.title %></h2>
