@@ -2,7 +2,7 @@ import { Database } from "bun:sqlite";
 import { existsSync, readFileSync, readdirSync, statfsSync, statSync } from "node:fs";
 import crypto from "node:crypto";
 
-const TUI_DIR = import.meta.dir;
+const TUI_DIR = __dirname;
 const DB_PATH = process.env.AIRLINK_DB_PATH ?? `${TUI_DIR}/../../../storage/dev.db`;
 const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? `${TUI_DIR}/../../logs`;
 export const PANEL_URL = process.env.AIRLINK_PANEL_URL ?? "http://127.0.0.1:3000";
@@ -54,8 +54,8 @@ interface CpuSample {
 let prevCpu: CpuSample | null = null;
 
 function readCpu(): CpuSample {
-  const parts = readFileSync("/proc/stat", "utf8").split("\n")[0].split(/\s+/).slice(1).map(Number);
-  const idle = parts[3] + (parts[4] ?? 0);
+  const parts = (readFileSync("/proc/stat", "utf8").split("\n")[0] ?? "").split(/\s+/).slice(1).map(Number);
+  const idle = (parts[3] ?? 0) + (parts[4] ?? 0);
   return { total: parts.reduce((a, b) => a + b, 0), idle };
 }
 
@@ -141,7 +141,7 @@ async function daemonStatus(): Promise<{
   if (!database) return { online: false, name: null, serverName: null, serverOnline: null, serverExists: null };
   let node: any;
   try {
-    node = database.query("SELECT name, address, port, key FROM Node LIMIT 1").get();
+    node = database.query("SELECT name, address, port, key FROM Node LIMIT 1").get() as any;
   } catch {
     return { online: false, name: null, serverName: null, serverOnline: null, serverExists: null };
   }
@@ -156,7 +156,7 @@ async function daemonStatus(): Promise<{
   const path = `/container/status?id=${server.UUID}`;
   const timestamp = Math.floor(Date.now() / 1000);
   const nonce = crypto.randomBytes(16).toString("hex");
-  const signature = hmacSign(node.key, "GET", path.split("?")[0], "", timestamp, nonce);
+  const signature = hmacSign(node.key, "GET", path.split("?")[0] ?? "", "", timestamp, nonce);
   try {
     const res = await fetch(`http://${node.address}:${node.port}${path}`, {
       signal: AbortSignal.timeout(2500),

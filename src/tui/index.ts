@@ -1,29 +1,39 @@
 import {
   createCliRenderer,
   Box,
+  BoxRenderable,
   Text,
   ScrollBoxRenderable,
   TextRenderable,
   type KeyEvent,
   type Renderable,
 } from "@opentui/core";
-import { watch, openSync, readSync, closeSync, statSync, existsSync } from "node:fs";
+import { watch, openSync, readSync, closeSync, statSync, existsSync, readFileSync } from "node:fs";
 import { spawn, type ChildProcess } from "node:child_process";
 import { resolve } from "node:path";
 import { collectStats, panelPid, probe, PANEL_URL, type Stats } from "./stats";
 
-const TUI_DIR = import.meta.dir;
+const TUI_DIR = __dirname;
 const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? `${TUI_DIR}/../../logs`;
 const PANEL_DIR = resolve(TUI_DIR, "../..");
 const PANEL_ENTRY = `${PANEL_DIR}/dist/app.js`;
 const PANEL_ENV_FILE = `${PANEL_DIR}/.env`;
 const LOG_FILES = ["combined.log", "error.log"];
 const CODENAME = "Katharos";
-const VERSION = "2.5.128";
+const VERSION = readVersion();
 const WIDE_MIN_WIDTH = 110;
+const SHORT_MAX_HEIGHT = 27;
 const BRAND_WIDTH = 56;
 const INITIAL_TAIL_LINES = 1000;
 const STATS_INTERVAL_MS = 5000;
+
+function readVersion(): string {
+  try {
+    return JSON.parse(readFileSync(`${PANEL_DIR}/package.json`, "utf8")).version ?? "dev";
+  } catch {
+    return "dev";
+  }
+}
 
 const ART = [
   " █████╗ ██╗██████╗ ██╗     ██╗███╗   ██╗██╗  ██╗",
@@ -117,7 +127,7 @@ function statLines(stats: Stats): { text: string; fg: string }[] {
     fg: "#9CA3AF",
   });
   lines.push({
-    text: `Disk ${stats.diskUsedGb}/${stats.diskTotalGb} GB (${Math.round((stats.diskUsedGb / stats.diskTotalGb) * 100)}%)`,
+    text: `Disk ${stats.diskUsedGb}/${stats.diskTotalGb} GB (${Math.round(((stats.diskUsedGb ?? 0) / (stats.diskTotalGb ?? 1)) * 100)}%)`,
     fg: "#9CA3AF",
   });
   lines.push({ text: `Load ${stats.load} · Up ${fmtDur(stats.sysUptimeSec)}`, fg: "#9CA3AF" });
@@ -128,7 +138,9 @@ function statLines(stats: Stats): { text: string; fg: string }[] {
   return lines;
 }
 
-function renderStats(container: Renderable, renderer: ReturnType<typeof createCliRenderer>, stats: Stats) {
+type CliRenderer = Awaited<ReturnType<typeof createCliRenderer>>;
+
+function renderStats(container: Renderable, renderer: CliRenderer, stats: Stats) {
   for (const child of Array.from(container.getChildren() as unknown as Renderable[])) {
     container.remove(child);
   }
@@ -203,7 +215,7 @@ async function main() {
   if (panelUp) externalMode = true;
   else startPanel();
 
-  let currentFile = LOG_FILES[0];
+  let currentFile = LOG_FILES[0] ?? "combined.log";
   let offsets: Record<string, number> = {};
 
   const logs = new ScrollBoxRenderable(renderer, {
@@ -253,29 +265,29 @@ async function main() {
     }
   }
 
-  // ── Brand panel (persistent; properties mutated on resize) ──────────────
-  const brand = Box(
-    {
-      id: "brand",
-      width: BRAND_WIDTH,
-      height: "100%",
-      flexDirection: "column",
-      paddingX: 1,
-      paddingY: 1,
-      gap: 1,
-      borderStyle: "rounded",
-      borderColor: "#374151",
-      title: "Airlink Panel",
-      titleColor: "#4ADE80",
-    },
-    Text({ content: ART.join("\n"), fg: "#4ADE80" }),
-    Text({ content: `Codename: ${CODENAME}  ·  v${VERSION}`, fg: "#60A5FA" }),
-    Box(
-      { id: "stats-box", flexDirection: "column", gap: 0 },
-      Text({ content: "Collecting stats…", fg: "#6B7280" })
-    ),
-    Text({ content: "[Tab] switch log · [k] stop panel · [r] start · [Ctrl+C] quit", fg: "#4B5563" })
-  );
+   // ── Brand panel (persistent; properties mutated on resize) ──────────────
+   const brand = Box(
+     {
+       id: "brand",
+       width: BRAND_WIDTH,
+       height: "100%",
+       flexDirection: "column",
+       paddingX: 1,
+       paddingY: 1,
+       gap: 1,
+       borderStyle: "rounded",
+       borderColor: "#374151",
+       title: "Airlink Panel",
+       titleColor: "#4ADE80",
+     },
+     Box({ id: "art-box", flexDirection: "column" }, Text({ content: ART.join("\n"), fg: "#4ADE80" })),
+     Text({ content: `Codename: ${CODENAME}  ·  v${VERSION}`, fg: "#60A5FA" }),
+     Box(
+       { id: "stats-box", flexDirection: "column", gap: 0 },
+       Text({ content: "Collecting stats…", fg: "#6B7280" })
+     ),
+     Text({ content: "[Tab] logs · [k] stop · [r] start · [Ctrl+C] quit", fg: "#4B5563" })
+   );
 
   const logsWrap = Box({ id: "logs-wrap", flexGrow: 1, flexDirection: "column" }, logs);
   const outer = Box(
@@ -288,17 +300,30 @@ async function main() {
   const realOuter = renderer.root.getRenderable("outer")!;
   const realBrand = realOuter.getRenderable("brand")!;
   const statsBox = realBrand.getRenderable("stats-box")!;
+  const realArt = realBrand.getRenderable("art-box")! as unknown as BoxRenderable;
+  let currentArt: string[] | null = ART;
 
   function applyLayout() {
     const wide = renderer.width >= WIDE_MIN_WIDTH;
+    const short = renderer.height <= SHORT_MAX_HEIGHT;
     realOuter.flexDirection = wide ? "row" : "column";
     realBrand.width = wide ? BRAND_WIDTH : "100%";
     realBrand.height = wide ? "100%" : "auto";
+    const artLines = wide ? (short ? ART.slice(0, 3) : ART) : null;
+    if (currentArt !== artLines) {
+      currentArt = artLines;
+      for (const child of Array.from(realArt.getChildren() as unknown as Renderable[])) {
+        realArt.remove(child);
+      }
+      if (artLines) {
+        realArt.add(new TextRenderable(renderer, { content: artLines.join("\n"), fg: "#4ADE80", width: "100%" }));
+      }
+    }
   }
 
   function switchFile() {
     const idx = LOG_FILES.indexOf(currentFile);
-    currentFile = LOG_FILES[(idx + 1) % LOG_FILES.length];
+    currentFile = LOG_FILES[(idx + 1) % LOG_FILES.length] ?? currentFile;
     fillFromFile(currentFile);
   }
 

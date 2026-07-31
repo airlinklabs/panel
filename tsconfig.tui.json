@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": [
+      "ESNext"
+    ],
+    "types": [
+      "bun-types"
+    ],
+    "noEmit": true
+  },
+  "include": [
+    "src/tui/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
