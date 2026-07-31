@@ -106,11 +106,12 @@
     document.getElementById('lp-message').textContent = text;
   }
 
-  function setProgress(percent) {
+  function setProgress(percent, message) {
     var container = document.getElementById('lp-progress-container');
     container.classList.remove('hidden');
     document.getElementById('lp-progress-fill').style.width = percent + '%';
     document.getElementById('lp-progress-text').textContent = Math.round(percent) + '%';
+    if (typeof message === 'string' && message) setMessage(message);
   }
 
   function addStep(text, status) {

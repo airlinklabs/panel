@@ -43,6 +43,7 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
       xhr.open('POST', '/admin/images/upload', true);
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.onload = () => xhr.status === 200 ? (showToast('Image uploaded.', 'success'), setTimeout(() => location.reload(), 800)) : showToast('Upload failed.', 'error');
+      xhr.onerror = () => showToast('Upload failed.', 'error');
       xhr.send(e.target.result);
     };
     r.readAsText(f);

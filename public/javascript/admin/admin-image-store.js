@@ -91,7 +91,15 @@ async function doRefresh() {
   if (st) st.textContent = 'Refreshing\u2026';
   var before = 0;
   try { before = (await(await fetch('/admin/images/store/catalogue')).json()).builtAt || 0; } catch(e) {}
-  await fetch('/admin/images/store/refresh', { method: 'POST' });
+  try {
+    var refreshRes = await fetch('/admin/images/store/refresh', { method: 'POST' });
+    if (!refreshRes.ok) throw new Error('Refresh failed');
+  } catch(e) {
+    document.getElementById('refreshBtnLoad').disabled = false;
+    if (st) st.textContent = '';
+    if (typeof showToast === 'function') showToast('Could not refresh the catalogue', 'error');
+    return;
+  }
   for (var i = 0; i < 60; i++) {
     await new Promise(function(r){setTimeout(r,1000)});
     try { var cur = (await(await fetch('/admin/images/store/catalogue')).json()).builtAt || 0; if (cur !== before) break; } catch(e) {}

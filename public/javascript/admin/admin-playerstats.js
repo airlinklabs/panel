@@ -89,6 +89,7 @@ async function fetchPlayerData() {
 
     if (data.error) {
       console.error('Error fetching player data:', data.error);
+      showToast(data.error || 'Failed to load player data.', 'error');
       return;
     }
 
@@ -162,6 +163,7 @@ async function fetchPlayerData() {
 
   } catch (error) {
     console.error('Error fetching player data:', error);
+    showToast('Failed to load player data.', 'error');
   }
 }
 
@@ -180,12 +182,15 @@ async function triggerDataCollection() {
 
     if (data.success) {
       console.log('Player statistics collected successfully');
+      showToast('Player statistics collected.', 'success');
       setTimeout(fetchPlayerData, 1000);
     } else {
       console.error('Error collecting player statistics:', data.error);
+      showToast(data.error || 'Failed to collect statistics.', 'error');
     }
   } catch (error) {
     console.error('Error triggering data collection:', error);
+    showToast('Failed to collect statistics.', 'error');
   }
 }
 

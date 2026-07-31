@@ -53,6 +53,7 @@ async function configure(nodeId) {
     showPopup(data);
   } catch (error) {
     console.error(error);
+    showToast(error.message || 'Failed to fetch configure command.', 'error');
   }
 }
 
@@ -111,7 +112,7 @@ function copyCommand(copyBtn, command) {
         copyBtn.classList.replace('bg-neutral-600', 'bg-emerald-600');
       }, 2000);
     })
-    .catch(error => console.error('Failed to copy:', error));
+    .catch(error => { console.error('Failed to copy:', error); showToast('Couldn\'t copy the command. Try again.', 'error'); });
 }
 
 function closePopup() {

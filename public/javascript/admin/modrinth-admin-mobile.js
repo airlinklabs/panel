@@ -49,7 +49,8 @@
   window.addBlocked = function() {
     const inp = document.getElementById('blockedInput');
     const v = inp.value.trim();
-    if (!v || blockedList.includes(v)) return;
+    if (!v) { showToast('Enter a project ID', 'error'); return; }
+    if (blockedList.includes(v)) { showToast('Already blocked', 'warning'); return; }
     blockedList.push(v); renderBlocked(); inp.value = '';
   };
   window.removeBlocked = function(id) { blockedList = blockedList.filter(x => x !== id); renderBlocked(); };
@@ -107,7 +108,7 @@
         document.getElementById('statProjects').textContent = data.data.activeProjects;
         document.getElementById('statBlocked').textContent = data.data.blockedInstallations;
       }
-    } catch {}
+    } catch { showToast('Failed to load statistics', 'error'); }
   }
 
   async function clearCache() {
