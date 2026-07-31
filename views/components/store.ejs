@@ -71,7 +71,6 @@
     display: flex; align-items: center; justify-content: center;
     padding: 16px;
     opacity: 0; pointer-events: none;
-    transition: opacity 0.18s;
   }
   .m-overlay.open { opacity: 1; pointer-events: auto; }
   .dark .m-dialog { background: var(--theme-bg-card, #141414); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
@@ -84,7 +83,6 @@
     max-height: 88vh;
     display: flex; flex-direction: column;
     transform: translateY(6px);
-    transition: transform 0.18s cubic-bezier(0.23,1,0.32,1);
     overflow: hidden;
   }
   .m-overlay.open .m-dialog { transform: none; }
@@ -637,12 +635,16 @@
     document.getElementById('mProgress').style.display = 'none';
     document.getElementById('mLog').innerHTML = '';
 
-    document.getElementById('mOverlay').classList.add('open');
+    const overlay = document.getElementById('mOverlay');
+    overlay.classList.add('open');
+    if (window.Phys) { const panel = overlay.querySelector('.m-dialog'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
     document.body.style.overflow = 'hidden';
   }
 
   function closeModal() {
-    document.getElementById('mOverlay').classList.remove('open');
+    const overlay = document.getElementById('mOverlay');
+    const done = function () { overlay.classList.remove('open'); };
+    if (window.Phys) { const panel = overlay.querySelector('.m-dialog'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
     document.body.style.overflow = '';
     document.getElementById('mGiscus').innerHTML = '';
     currentAddon = null;

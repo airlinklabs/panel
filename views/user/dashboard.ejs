@@ -226,8 +226,8 @@
 </div>
 
 <!-- Folder popup -->
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="folderPopupOverlay" style="background:rgba(0,0,0,0.45);">
-    <div class="border rounded-2xl w-full max-w-[440px] max-h-[80vh] flex flex-col scale-[0.96] opacity-0 transition-[transform,opacity] duration-200 overflow-hidden [[data-open]>&]:scale-100 [[data-open]>&]:opacity-100" role="dialog" aria-modal="true" aria-labelledby="folderPopupTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="folderPopupOverlay" style="background:rgba(0,0,0,0.45);">
+    <div id="folderPopupPanel" class="border rounded-2xl w-full max-w-[440px] max-h-[80vh] flex flex-col overflow-hidden will-change-transform" role="dialog" aria-modal="true" aria-labelledby="folderPopupTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <div class="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style="border-color:var(--theme-border);">
       <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);" id="folderPopupTitle"></h2>
       <div class="flex items-center gap-1">
@@ -246,8 +246,8 @@
 </div>
 
 <!-- New folder dialog -->
-<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="newFolderOverlay" style="background:rgba(0,0,0,0.45);">
-    <div class="border rounded-[14px] w-full max-w-[380px] p-[22px] scale-[0.96] opacity-0 transition-[transform,opacity] duration-200 [[data-open]>&]:scale-100 [[data-open]>&]:opacity-100" role="dialog" aria-modal="true" aria-labelledby="newFolderTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="newFolderOverlay" style="background:rgba(0,0,0,0.45);">
+    <div id="newFolderPanel" class="border rounded-[14px] w-full max-w-[380px] p-[22px] will-change-transform" role="dialog" aria-modal="true" aria-labelledby="newFolderTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <p id="newFolderTitle" class="text-sm font-semibold mb-1" style="color:var(--theme-text-strong);">New folder</p>
     <p class="text-xs mb-4" style="color:var(--theme-text-muted);">Give your folder a name. Drag server cards onto it to add servers.</p>
     <label for="newFolderName" class="sr-only">Folder name</label>
@@ -260,8 +260,8 @@
 </div>
 
 <!-- Delete folder confirm dialog -->
-<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="deleteFolderOverlay" style="background:rgba(0,0,0,0.45);">
-    <div class="border rounded-[14px] w-full max-w-[380px] p-[22px] scale-[0.96] opacity-0 transition-[transform,opacity] duration-200 [[data-open]>&]:scale-100 [[data-open]>&]:opacity-100" role="dialog" aria-modal="true" aria-labelledby="deleteFolderTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="deleteFolderOverlay" style="background:rgba(0,0,0,0.45);">
+    <div id="deleteFolderPanel" class="border rounded-[14px] w-full max-w-[380px] p-[22px] will-change-transform" role="dialog" aria-modal="true" aria-labelledby="deleteFolderTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <p id="deleteFolderTitle" class="text-sm font-semibold mb-1" style="color:var(--theme-text-strong);">Delete folder?</p>
     <p class="text-xs mb-4" style="color:var(--theme-text-muted);">Servers inside will stay accessible. They just won't be in this folder.</p>
     <div class="flex gap-2 justify-end">

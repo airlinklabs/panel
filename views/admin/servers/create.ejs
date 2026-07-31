@@ -201,24 +201,7 @@
   </div>
 </main>
 
-<div id="portsModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 p-4">
-  <div class="w-full max-w-4xl rounded-2xl border border-neutral-200 dark:border-neutral-700/60 bg-white dark:bg-neutral-900 shadow-xl">
-    <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-5 py-4">
-      <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
-      <button type="button" id="closePortsModal" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
-        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
-      </button>
-    </div>
-    <div class="p-5">
-      <div id="portsRows" class="space-y-3"></div>
-      <button type="button" id="addPortRow" class="mt-4 rounded-xl border border-neutral-200 dark:border-white/10 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">Add port</button>
-    </div>
-    <div class="flex justify-end gap-2 border-t border-neutral-200 dark:border-neutral-700/60 px-5 py-4">
-      <button type="button" id="savePortsModal" class="rounded-xl bg-neutral-900 dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-neutral-900 transition hover:bg-neutral-700 dark:hover:bg-neutral-100">Save ports</button>
-    </div>
-  </div>
-</div>
-
+<%- include('../../components/portsAllocator') %>
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
@@ -301,61 +284,20 @@
     }
 
     function renderPortRows() {
-      ensureMinimumPortRows();
-      const rows = document.getElementById('portsRows');
-      rows.innerHTML = '';
-      const min = getPortRequirements().length;
-      assignedPorts.forEach((port, index) => {
-        const row = document.createElement('div');
-        row.className = 'grid grid-cols-1 md:grid-cols-[1fr_130px_1fr_auto] gap-2 items-end rounded-xl border border-neutral-200 dark:border-white/10 p-3 animate-[fadeSlideIn_0.2s_ease-out]';
-        row.innerHTML = `
-          <label class="text-xs text-neutral-500">Port name<input data-port-field="${index}" data-field="name" value="${port.name || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
-          <label class="text-xs text-neutral-500">Internal port<input data-port-field="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${port.internalPort || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
-          <label class="text-xs text-neutral-500">External port<select data-port-field="${index}" data-field="externalPort" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></select></label>
-          <button type="button" data-remove-port="${index}" class="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-500 ${index < min ? 'opacity-40 pointer-events-none' : ''}">Remove</button>`;
-        rows.appendChild(row);
-        const select = row.querySelector('select');
-        select.innerHTML = '<option value="">Select port</option>';
-        availablePorts.forEach(item => {
-          const option = document.createElement('option');
-          option.value = item.port;
-          option.textContent = item.label;
-          option.selected = Number(port.externalPort) === item.port;
-          select.appendChild(option);
-        });
+      if (!window.PortsAllocator) return;
+      PortsAllocator.open({
+        title: 'Assign ports',
+        requirements: getPortRequirements(),
+        assignedPorts: assignedPorts,
+        availablePorts: availablePorts,
+        onSave: function (rows) {
+          assignedPorts = rows;
+          syncPortsButton();
+        }
       });
     }
 
-    document.getElementById('assignPortsBtn').addEventListener('click', () => {
-      renderPortRows();
-      document.getElementById('portsModal').classList.remove('hidden');
-      document.getElementById('portsModal').classList.add('flex');
-    });
-    document.getElementById('closePortsModal').addEventListener('click', () => {
-      document.getElementById('portsModal').classList.add('hidden');
-      document.getElementById('portsModal').classList.remove('flex');
-    });
-    document.getElementById('addPortRow').addEventListener('click', () => {
-      assignedPorts.push({ name: `Port ${assignedPorts.length + 1}`, internalPort: 25565, externalPort: '', primary: assignedPorts.length === 0 });
-      renderPortRows();
-    });
-    document.getElementById('portsRows').addEventListener('click', (event) => {
-      const button = event.target.closest('[data-remove-port]');
-      if (!button) return;
-      assignedPorts.splice(Number(button.dataset.removePort), 1);
-      renderPortRows();
-    });
-    document.getElementById('savePortsModal').addEventListener('click', () => {
-      document.querySelectorAll('[data-port-field]').forEach(input => {
-        const index = Number(input.dataset.portField);
-        assignedPorts[index][input.dataset.field] = input.dataset.field.includes('Port') ? Number(input.value) : input.value;
-      });
-      assignedPorts = assignedPorts.filter(port => port.name && port.internalPort && port.externalPort);
-      assignedPorts.forEach((port, index) => { port.primary = index === 0; });
-      syncPortsButton();
-      document.getElementById('portsModal').classList.add('hidden');
-      document.getElementById('portsModal').classList.remove('flex');
-    });
+    document.getElementById('assignPortsBtn').addEventListener('click', renderPortRows);
 
     function updateDockerImages() {
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
@@ -491,43 +433,6 @@ function generateRandomName() {
 }
 </script>
 <style>
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 #createServerForm .al-card { overflow: visible; }
 #createServerForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
-.custom-select { position: relative; user-select: none; }
-.cs-trigger {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%; padding: 8px 16px; border-radius: 12px; cursor: pointer;
-    font-size: 14px; border: 1px solid var(--theme-border-subtle, rgba(0,0,0,0.07));
-    background: var(--theme-bg-secondary, rgba(180,180,180,0.1));
-    color: var(--theme-text-strong, #1a1a1a); transition: background 0.15s, border-color 0.15s;
-}
-.dark .cs-trigger { background: var(--theme-bg-secondary, rgba(80,80,80,0.2)); color: var(--theme-text, #fff); border-color: var(--theme-border-subtle, rgba(255,255,255,0.05)); }
-.cs-trigger:hover { background: var(--theme-bg-hover, rgba(180,180,180,0.18)); }
-.dark .cs-trigger:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.05)); }
-.cs-trigger.open { border-color: var(--theme-border, rgba(0,0,0,0.15)); }
-.dark .cs-trigger.open { border-color: var(--theme-border-subtle, rgba(255,255,255,0.12)); }
-.cs-trigger svg { width: 14px; height: 14px; opacity: 0.45; transition: transform 0.18s; flex-shrink: 0; }
-.cs-trigger.open svg { transform: rotate(180deg); }
-.cs-placeholder { opacity: 0.4; }
-.cs-dropdown {
-    position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 300;
-    background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border-subtle, rgba(0,0,0,0.1)); border-radius: 12px;
-    box-shadow: 0 8px 24px var(--theme-shadow-md, rgba(0,0,0,0.1)); overflow: hidden;
-    max-height: 220px; overflow-y: auto;
-    animation: cs-open 0.15s cubic-bezier(0.16,1,0.3,1);
-}
-.dark .cs-dropdown { background: var(--theme-bg-card, #1e1e1e); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); box-shadow: 0 8px 24px var(--theme-shadow-md, rgba(0,0,0,0.4)); }
-@keyframes cs-open { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
-.cs-option { padding: 8px 14px; font-size: 13px; cursor: pointer; color: var(--theme-text-strong, #1a1a1a); transition: background 0.1s; }
-.dark .cs-option { color: var(--theme-text, #e5e5e5); }
-.cs-option:hover { background: var(--theme-bg-hover, rgba(0,0,0,0.05)); }
-.dark .cs-option:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.06)); }
-.cs-option.selected { background: var(--theme-bg-active, rgba(0,0,0,0.07)); font-weight: 500; }
-.dark .cs-option.selected { background: var(--theme-bg-hover, rgba(255,255,255,0.08)); }
-.cs-option.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 </style>
-<script nonce="<%- nonce %>" src="/javascript/admin/server-create.js"></script>

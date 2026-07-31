@@ -1,94 +1,4 @@
 (function () {
-  function buildCustomSelect(container) {
-    const select = document.getElementById(container.dataset.for);
-    if (!select) return;
-
-    const trigger  = document.createElement('div');
-    trigger.className = 'cs-trigger';
-    const label = document.createElement('span');
-    label.className = 'cs-label';
-    trigger.appendChild(label);
-
-    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    arrow.setAttribute('viewBox', '0 0 24 24'); arrow.setAttribute('fill', 'none');
-    arrow.setAttribute('stroke', 'currentColor'); arrow.setAttribute('stroke-width', '2');
-    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round');
-    p.setAttribute('d', 'M19 9l-7 7-7-7');
-    arrow.appendChild(p); trigger.appendChild(arrow);
-
-    const dropdown = document.createElement('div');
-    dropdown.className = 'cs-dropdown';
-    dropdown.style.display = 'none';
-
-    container.appendChild(trigger);
-    container.appendChild(dropdown);
-
-    function syncLabel() {
-      const sel = select.options[select.selectedIndex];
-      if (sel && !sel.disabled && sel.value) {
-        label.textContent = sel.text;
-        label.classList.remove('cs-placeholder');
-      } else {
-        const ph = Array.from(select.options).find(o => o.disabled && o.selected);
-        label.textContent = ph ? ph.text : 'Select…';
-        label.classList.add('cs-placeholder');
-      }
-      Array.from(dropdown.children).forEach(item => {
-        item.classList.toggle('selected', item.dataset.value === select.value);
-      });
-    }
-
-    function syncFromSelect() {
-      dropdown.innerHTML = '';
-      Array.from(select.options).forEach(opt => {
-        const item = document.createElement('div');
-        item.className = 'cs-option' + (opt.disabled ? ' disabled' : '');
-        item.textContent = opt.text;
-        item.dataset.value = opt.value;
-        if (!opt.disabled) {
-          item.addEventListener('click', e => {
-            e.stopPropagation();
-            select.value = opt.value;
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-            syncLabel();
-            close();
-          });
-        }
-        dropdown.appendChild(item);
-      });
-      syncLabel();
-    }
-
-    function open() {
-      document.querySelectorAll('.cs-dropdown').forEach(d => {
-        if (d !== dropdown) { d.style.display = 'none'; d.parentElement.querySelector('.cs-trigger')?.classList.remove('open'); }
-      });
-      dropdown.style.display = 'block';
-      trigger.classList.add('open');
-      syncFromSelect();
-    }
-
-    function close() {
-      dropdown.style.display = 'none';
-      trigger.classList.remove('open');
-    }
-
-    trigger.addEventListener('click', e => {
-      e.stopPropagation();
-      dropdown.style.display === 'none' ? open() : close();
-    });
-
-    document.addEventListener('click', close);
-
-    const obs = new MutationObserver(syncFromSelect);
-    obs.observe(select, { childList: true, subtree: true, attributes: true });
-    select.addEventListener('change', syncLabel);
-    syncFromSelect();
-  }
-
-  document.querySelectorAll('.custom-select').forEach(buildCustomSelect);
-
   document.getElementById('imageId').addEventListener('change', function () {
     const opt = this.options[this.selectedIndex];
     const raw = opt.dataset.docker;
@@ -137,9 +47,15 @@
         list.appendChild(row);
       });
     }
-    document.getElementById('portsOverlay').classList.add('open');
+    const portsOverlay = document.getElementById('portsOverlay');
+    portsOverlay.classList.add('open');
+    if (window.Phys) { const panel = portsOverlay.querySelector('.confirm-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
   });
-  document.getElementById('portsOk').addEventListener('click', () => document.getElementById('portsOverlay').classList.remove('open'));
+  document.getElementById('portsOk').addEventListener('click', () => {
+    const overlay = document.getElementById('portsOverlay');
+    const done = function () { overlay.classList.remove('open'); };
+    if (window.Phys) { const panel = overlay.querySelector('.confirm-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
+  });
 
   document.querySelectorAll('.stepper-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -188,6 +104,7 @@
       confirmTitle.textContent = title;
       confirmBody.textContent  = body;
       overlay.classList.add('open');
+      if (window.Phys) { const panel = overlay.querySelector('.confirm-box'); Phys.set(panel, { y: 16, scale: 0.95, opacity: 0 }); Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 }); }
       confirmResolve = resolve;
       // Focus the cancel button (safe default)
       setTimeout(function() { confirmCancel.focus(); }, 0);
@@ -195,8 +112,7 @@
       overlay._keydownHandler = function(e) {
         if (e.key === 'Escape') {
           e.preventDefault();
-          overlay.classList.remove('open');
-          if (confirmResolve) confirmResolve(false);
+          closeConfirm(false);
           return;
         }
         trapConfirmFocus(e);
@@ -206,7 +122,8 @@
   }
 
   function closeConfirm(result) {
-    overlay.classList.remove('open');
+    const done = function () { overlay.classList.remove('open'); };
+    if (window.Phys) { const panel = overlay.querySelector('.confirm-box'); Phys.exit(overlay, { panel: panel, done: done }); } else done();
     if (overlay._keydownHandler) {
       document.removeEventListener('keydown', overlay._keydownHandler);
       overlay._keydownHandler = null;

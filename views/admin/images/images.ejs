@@ -7,14 +7,13 @@
     position: fixed; inset: 0; z-index: 50;
     background: var(--theme-overlay, rgba(0,0,0,0.5));
     display: flex; align-items: center; justify-content: center; padding: 16px;
-    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    opacity: 0; pointer-events: none;
   }
   .modal-overlay.open { opacity: 1; pointer-events: auto; }
   .modal-box {
     background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 12px;
     width: 100%; max-width: 460px;
     transform: scale(0.96); opacity: 0;
-    transition: transform 0.25s, opacity 0.25s;
   }
   html.dark .modal-box { background: var(--theme-bg-card, #1c1c1c); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
   .modal-overlay.open .modal-box { transform: scale(1); opacity: 1; }

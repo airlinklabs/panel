@@ -215,12 +215,26 @@
     document.getElementById('radarRescanBtn').classList.add('hidden');
     document.getElementById('radarPickerPhase').classList.remove('hidden');
     setScanMode('builtin');
-    document.getElementById('radarScanModal').classList.remove('hidden');
+    var radarScanModal = document.getElementById('radarScanModal');
+    radarScanModal.classList.remove('hidden');
+    radarScanModal.classList.add('flex');
+    var radarScanPanel = document.getElementById('radarScanPanel');
+    if (window.Phys) {
+      Phys.set(radarScanPanel, { y: 18, scale: 0.94, opacity: 0 });
+      Phys.to(radarScanPanel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
+    }
     fetchRadarScripts();
   }
 
   function closeRadarScanModal() {
-    document.getElementById('radarScanModal').classList.add('hidden');
+    var radarScanModal = document.getElementById('radarScanModal');
+    var radarScanPanel = document.getElementById('radarScanPanel');
+    var done = function () {
+      radarScanModal.classList.add('hidden');
+      radarScanModal.classList.remove('flex');
+    };
+    if (window.Phys) Phys.exit(radarScanModal, { panel: radarScanPanel, done: done });
+    else done();
     currentServerIds = [];
     radarServerNames = {};
   }
@@ -380,7 +394,14 @@
           document.getElementById('radarPickerPhase').classList.add('hidden');
           document.getElementById('radarResultsPhase').classList.remove('hidden');
           document.getElementById('radarRescanBtn').classList.remove('hidden');
-          document.getElementById('radarScanModal').classList.remove('hidden');
+          var radarScanModal = document.getElementById('radarScanModal');
+          radarScanModal.classList.remove('hidden');
+          radarScanModal.classList.add('flex');
+          var radarScanPanel = document.getElementById('radarScanPanel');
+          if (window.Phys) {
+            Phys.set(radarScanPanel, { y: 18, scale: 0.94, opacity: 0 });
+            Phys.to(radarScanPanel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
+          }
           renderVtFileScanResults(data);
         }, 800);
       })

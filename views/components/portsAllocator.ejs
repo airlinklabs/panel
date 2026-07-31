@@ -1,0 +1,273 @@
+<!-- Ports allocator popup — window.PortsAllocator.open({ title, assignedPorts, availablePorts, requirements, onSave })
+     availablePorts: [{ port, label }]  assignedPorts: [{ name, internalPort, externalPort, primary }] -->
+<div id="paModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 p-4" role="presentation" aria-hidden="true">
+  <div id="paPanel" role="dialog" aria-modal="true" aria-labelledby="paTitle" class="relative w-full max-w-2xl rounded-2xl border overflow-hidden shadow-2xl"
+    style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+    <div class="flex items-center gap-3 px-5 py-4 border-b" style="border-color:var(--theme-border)">
+      <span class="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
+        style="background:var(--theme-accent-subtle); color:var(--theme-text-strong)">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+        </svg>
+      </span>
+      <div class="min-w-0">
+        <h2 id="paTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Assign ports</h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">External ports are drawn from the node's allocation</p>
+      </div>
+      <button type="button" id="paClose" class="ml-auto p-1.5 rounded-lg transition hover:bg-neutral-200 dark:hover:bg-white/10" style="color:var(--theme-text-muted)" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="px-5 py-4">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-xs font-medium" style="color:var(--theme-text-muted)">Port mappings</p>
+        <span id="paCount" class="text-[10px] font-medium px-2 py-0.5 rounded-full"
+          style="background:var(--theme-accent-subtle); color:var(--theme-text-strong)"></span>
+      </div>
+      <div id="paRows" class="space-y-2.5 max-h-[46vh] overflow-y-auto pr-1"></div>
+      <div id="paEmpty" class="hidden text-center py-8">
+        <p class="text-sm" style="color:var(--theme-text-muted)">No ports available on this node</p>
+      </div>
+      <button type="button" id="paAddRow" class="mt-3 w-full rounded-xl border border-dashed px-3 py-2.5 text-xs font-medium transition hover:bg-neutral-100 dark:hover:bg-white/5"
+        style="color:var(--theme-text-muted); border-color:var(--theme-border)">+ Add port</button>
+    </div>
+
+    <div class="flex items-center justify-between gap-2 px-5 py-4 border-t" style="border-color:var(--theme-border)">
+      <p id="paHint" class="text-[11px]" style="color:var(--theme-text-muted)"></p>
+      <div class="flex gap-2 shrink-0">
+        <button type="button" id="paCancel" class="al-btn-secondary px-4 py-2 text-xs font-medium">Cancel</button>
+        <button type="button" id="paSave" class="al-btn-primary px-4 py-2 text-xs font-medium">Save ports</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+(function () {
+  if (window.PortsAllocator) return;
+
+  const modal = document.getElementById('paModal');
+  const panel = document.getElementById('paPanel');
+  const rowsEl = document.getElementById('paRows');
+  const emptyEl = document.getElementById('paEmpty');
+  const countEl = document.getElementById('paCount');
+  const hintEl = document.getElementById('paHint');
+  const addBtn = document.getElementById('paAddRow');
+
+  let cfg = null;
+  let rows = [];
+  let lastFocused = null;
+
+  function rowKey(row) { return row.name + '|' + row.internalPort + '|' + row.externalPort; }
+  function rowsChanged() { return rows.map(rowKey).join(';') !== cfg._lastKey; }
+
+  function open(settings) {
+    cfg = settings || {};
+    cfg.requirements = cfg.requirements || [];
+    rows = (cfg.assignedPorts || []).map(function (r) { return Object.assign({}, r); });
+    cfg._lastKey = '';
+    lastFocused = document.activeElement;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    modal.setAttribute('aria-hidden', 'false');
+    render();
+    if (window.Phys) Phys.enter(modal, { panel: panel, y: 18, scale: 0.94 });
+    else modal.style.opacity = '1';
+    var first = panel.querySelector('input, button');
+    if (first) setTimeout(function () { first.focus(); }, 60);
+  }
+
+  function close() {
+    const done = function () {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      modal.setAttribute('aria-hidden', 'true');
+      if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+      lastFocused = null;
+    };
+    if (window.Phys) Phys.exit(modal, { panel: panel, done: done });
+    else done();
+  }
+
+  function commit() {
+    rows = rows.filter(function (row) { return row.name && row.internalPort && row.externalPort; });
+    rows.forEach(function (row, index) { row.primary = index === 0; });
+    cfg._lastKey = rows.map(rowKey).join(';');
+    if (cfg.onSave) cfg.onSave(rows);
+    close();
+  }
+
+  function render() {
+    rowsEl.innerHTML = '';
+    const avail = cfg.availablePorts || [];
+    const min = cfg.requirements.length;
+    const used = new Set(rows.filter(function (r) { return r.externalPort; }).map(function (r) { return String(r.externalPort); }));
+
+    if (avail.length === 0) {
+      emptyEl.classList.remove('hidden');
+      addBtn.classList.add('hidden');
+      countEl.textContent = '0 ports';
+    } else {
+      emptyEl.classList.add('hidden');
+      addBtn.classList.remove('hidden');
+      countEl.textContent = rows.length + ' port' + (rows.length === 1 ? '' : 's') + ' assigned';
+    }
+
+    rows.forEach(function (row, index) {
+      const el = document.createElement('div');
+      el.className = 'pa-row grid grid-cols-1 md:grid-cols-[1fr_120px_1fr_auto] gap-2 items-end rounded-xl border p-3';
+      el.style.borderColor = 'var(--theme-border)';
+      el.style.background = 'var(--theme-bg-secondary)';
+      el.innerHTML = '';
+
+      const nameWrap = field('Port name', 'text');
+      const nameInput = nameWrap.querySelector('input');
+      nameInput.value = row.name || '';
+      nameInput.placeholder = 'e.g. Game port';
+      nameInput.addEventListener('input', function () { row.name = nameInput.value; });
+
+      const intWrap = field('Internal port', 'number');
+      const intInput = intWrap.querySelector('input');
+      intInput.min = '1'; intInput.max = '65535';
+      intInput.value = row.internalPort !== undefined && row.internalPort !== null ? row.internalPort : '';
+      intInput.placeholder = '25565';
+      intInput.addEventListener('input', function () { row.internalPort = Number(intInput.value) || ''; });
+
+      const extWrap = document.createElement('label');
+      const extLabel = document.createElement('span');
+      extLabel.className = 'block text-[11px] mb-1';
+      extLabel.style.color = 'var(--theme-text-muted)';
+      extLabel.textContent = 'External port';
+      extWrap.appendChild(extLabel);
+      const extBtn = document.createElement('button');
+      extBtn.type = 'button';
+      extBtn.className = 'pa-ext w-full text-left rounded-lg border px-3 py-2 text-sm truncate transition hover:bg-neutral-100 dark:hover:bg-white/5';
+      extBtn.style.borderColor = 'var(--theme-border)';
+      extBtn.style.color = 'var(--theme-text-strong)';
+      extWrap.appendChild(extBtn);
+      const listEl = document.createElement('div');
+      listEl.className = 'hidden pa-extlist absolute z-10 w-full rounded-lg border shadow-xl max-h-48 overflow-y-auto';
+      listEl.style.background = 'var(--theme-bg-card)';
+      listEl.style.borderColor = 'var(--theme-border)';
+      extWrap.appendChild(listEl);
+      extWrap.className = 'relative';
+
+      const extValue = row.externalPort !== undefined && row.externalPort !== null ? String(row.externalPort) : '';
+      const chosen = avail.find(function (a) { return String(a.port) === extValue; });
+      extBtn.textContent = chosen ? chosen.label : (extValue ? 'Port ' + extValue : 'Select port…');
+      if (!chosen) extBtn.style.opacity = '0.45';
+
+      function fillList() {
+        listEl.innerHTML = '';
+        avail.forEach(function (item) {
+          const taken = used.has(String(item.port)) && String(item.port) !== extValue;
+          const opt = document.createElement('div');
+          opt.className = 'pa-extopt px-3 py-2 text-xs truncate cursor-pointer transition hover:bg-neutral-100 dark:hover:bg-white/5';
+          opt.style.color = taken ? 'var(--theme-text-muted)' : 'var(--theme-text-strong)';
+          opt.style.opacity = taken ? '0.45' : '1';
+          opt.textContent = item.label + (taken ? ' — in use' : '');
+          if (!taken) {
+            opt.addEventListener('click', function () {
+              row.externalPort = item.port;
+              extBtn.textContent = item.label;
+              extBtn.style.opacity = '1';
+              listEl.classList.add('hidden');
+              render();
+            });
+          }
+          listEl.appendChild(opt);
+        });
+      }
+
+      extBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (listEl.classList.contains('hidden')) {
+          fillList();
+          listEl.classList.remove('hidden');
+          if (window.Phys) {
+            Phys.set(listEl, { y: -4, scale: 0.98, opacity: 0 });
+            Phys.to(listEl, { y: 0, scale: 1, opacity: 1 }, { stiffness: 380, damping: 22 });
+          }
+        } else {
+          listEl.classList.add('hidden');
+        }
+      });
+
+      const rmBtn = document.createElement('button');
+      rmBtn.type = 'button';
+      rmBtn.className = 'md:justify-self-end rounded-lg border px-3 py-2 text-xs font-medium transition';
+      rmBtn.style.color = 'var(--theme-danger)';
+      rmBtn.style.borderColor = 'var(--theme-border)';
+      rmBtn.textContent = index < min ? 'Required' : 'Remove';
+      rmBtn.disabled = index < min;
+      rmBtn.style.opacity = index < min ? '0.4' : '1';
+      if (index >= min) {
+        rmBtn.addEventListener('click', function () {
+          rows.splice(index, 1);
+          render();
+        });
+      }
+
+      if (index === 0) {
+        const badge = document.createElement('span');
+        badge.className = 'pa-primary ml-auto px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide';
+        badge.style.background = 'var(--theme-accent)';
+        badge.style.color = 'var(--theme-accent-text)';
+        badge.textContent = 'Primary';
+        nameWrap.appendChild(badge);
+      }
+
+      el.appendChild(nameWrap);
+      el.appendChild(intWrap);
+      el.appendChild(extWrap);
+      el.appendChild(rmBtn);
+      rowsEl.appendChild(el);
+
+      if (window.Phys) {
+        Phys.set(el, { y: 10, scale: 0.97, opacity: 0 });
+        Phys.to(el, { y: 0, scale: 1, opacity: 1 }, { stiffness: 300, damping: 20 });
+      }
+    });
+
+    hintEl.textContent = rows.length > 0 && rowsChanged()
+      ? 'Unsaved changes'
+      : (cfg.requirements.length ? 'First port is marked as primary' : '');
+  }
+
+  function field(labelText, type) {
+    const wrap = document.createElement('label');
+    const label = document.createElement('span');
+    label.className = 'block text-[11px] mb-1';
+    label.style.color = 'var(--theme-text-muted)';
+    label.textContent = labelText;
+    const input = document.createElement('input');
+    input.type = type;
+    input.className = 'w-full rounded-lg border px-3 py-2 text-sm';
+    input.style.borderColor = 'var(--theme-border)';
+    input.style.background = 'var(--theme-bg-card)';
+    input.style.color = 'var(--theme-text-strong)';
+    wrap.appendChild(label);
+    wrap.appendChild(input);
+    return wrap;
+  }
+
+  document.getElementById('paClose').addEventListener('click', close);
+  document.getElementById('paCancel').addEventListener('click', close);
+  document.getElementById('paSave').addEventListener('click', commit);
+  addBtn.addEventListener('click', function () {
+    rows.push({ name: 'Port ' + (rows.length + 1), internalPort: 25565, externalPort: '', primary: rows.length === 0 });
+    render();
+  });
+  modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+  modal.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); close(); }
+  });
+
+  window.PortsAllocator = { open: open, close: close };
+})();
+</script>

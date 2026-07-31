@@ -127,8 +127,8 @@
 <%- include('../../components/loadingPopup') %>
 
 <!-- Create Backup Modal -->
-<div id="createBackupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-  <div class="border rounded-2xl shadow-lg w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
+<div id="createBackupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+  <div id="createBackupModalPanel" class="border rounded-2xl shadow-lg w-full max-w-sm mx-4 will-change-transform" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
     <div class="px-5 pt-5 pb-4 border-b" style="border-color:var(--theme-border)">
       <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Create Backup</p>
       <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Choose a name for this backup.</p>
@@ -165,22 +165,26 @@ document.getElementById('confirmation-cancel') && document.getElementById('confi
 function openCreateBackupModal() {
   const modal = document.getElementById('createBackupModal');
   const input = document.getElementById('backupName');
+  const panel = document.getElementById('createBackupModalPanel');
 
   modal.classList.remove('opacity-0', 'pointer-events-none');
-  modal.querySelector('div').classList.remove('scale-95');
-  modal.querySelector('div').classList.add('scale-100');
+  if (window.Phys) {
+    Phys.set(panel, { y: 16, scale: 0.94, opacity: 0 });
+    Phys.to(panel, { y: 0, scale: 1, opacity: 1 }, { stiffness: 320, damping: 21 });
+  }
 
   input.focus();
 }
 
 function closeCreateBackupModal() {
   const modal = document.getElementById('createBackupModal');
-  modal.classList.add('opacity-0', 'pointer-events-none');
-  modal.querySelector('div').classList.remove('scale-100');
-  modal.querySelector('div').classList.add('scale-95');
-
-  // Clear input
-  document.getElementById('backupName').value = '';
+  const panel = document.getElementById('createBackupModalPanel');
+  const done = function () {
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    // Clear input
+    document.getElementById('backupName').value = '';
+  };
+  if (window.Phys) Phys.exit(modal, { panel: panel, done: done }); else done();
 }
 
 function handleBackupNameKeyPress(event) {
