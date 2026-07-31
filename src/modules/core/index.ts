@@ -109,49 +109,137 @@ const coreModule: Module = {
       const userId = req.session?.user?.id;
       if (!userId) return res.status(401).json({ results: [] });
 
-      const q = String(req.query.q || '').trim().toLowerCase();
-      if (!q || q.length < 1) return res.json({ results: [] });
+      const qRaw = String(req.query.q || '').trim().toLowerCase();
+      if (!qRaw) return res.json({ results: [] });
 
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) return res.status(401).json({ results: [] });
 
-        const results: { type: string; label: string; sub: string; url: string }[] = [];
+        type SearchItem = { type: string; label: string; sub: string; url: string; score: number };
 
-        const serverWhere = user.isAdmin
-          ? { OR: [{ name: { contains: q } }, { UUID: { contains: q } }] }
-          : { ownerId: userId, OR: [{ name: { contains: q } }, { UUID: { contains: q } }] };
+        const normalize = (s: string): string =>
+          s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
-        const servers = await prisma.server.findMany({
-          where: serverWhere as any,
+        const qNorm = normalize(qRaw);
+        const tokens = qNorm.split(' ').filter(Boolean);
+        if (tokens.length === 0) return res.json({ results: [] });
+
+        const levenshtein = (a: string, b: string): number => {
+          const m = a.length;
+          const n = b.length;
+          if (!m) return n;
+          if (!n) return m;
+          let prev: number[] = Array.from({ length: n + 1 }, (_, j) => j);
+          let curr: number[] = new Array(n + 1).fill(0);
+          for (let i = 1; i <= m; i++) {
+            curr[0] = i;
+            for (let j = 1; j <= n; j++) {
+              const del = prev[j]! + 1;
+              const ins = curr[j - 1]! + 1;
+              const sub = prev[j - 1]! + (a[i - 1] === b[j - 1] ? 0 : 1);
+              curr[j] = Math.min(del, ins, sub);
+            }
+            const tmp = prev;
+            prev = curr;
+            curr = tmp;
+          }
+          return prev[n]!;
+        };
+
+        const fuzzyOk = (token: string, hay: string): boolean => {
+          if (token.length < 4) return false;
+          return hay
+            .split(/\s+/)
+            .some((w) => Math.abs(w.length - token.length) <= 1 && levenshtein(w, token) <= 1);
+        };
+
+        const scoreFields = (fields: string[]): number => {
+          let best = 0;
+          for (const raw of fields) {
+            const f = normalize(raw);
+            let s = 0;
+            if (f === qNorm) s = 100;
+            else if (f.startsWith(qNorm)) s = 80;
+            else if (f.includes(qNorm)) s = 60;
+            else if (tokens.length > 1 && tokens.every((t) => f.includes(t))) s = 45;
+            else if (tokens.some((t) => f.includes(t))) s = 30;
+            else if (tokens.some((t) => fuzzyOk(t, f))) s = 15;
+            best = Math.max(best, s);
+          }
+          return best;
+        };
+
+        const results: SearchItem[] = [];
+
+        const tokenFieldOrs = (fields: string[]) =>
+          tokens.flatMap((t) => fields.map((f) => ({ [f]: { contains: t } })));
+
+        let servers = await prisma.server.findMany({
+          where: (user.isAdmin
+            ? { OR: tokenFieldOrs(['name', 'description', 'UUID']) }
+            : { ownerId: userId, OR: tokenFieldOrs(['name', 'description', 'UUID']) }) as any,
           select: { UUID: true, name: true, description: true },
-          take: 8,
+          take: 30,
         });
 
-        servers.forEach(s => {
-          results.push({ type: 'server', label: s.name, sub: s.description || s.UUID, url: `/server/${s.UUID}` });
-        });
-
-        if (user.isAdmin) {
-          const users = await prisma.users.findMany({
-            where: { OR: [{ username: { contains: q } }, { email: { contains: q } }] },
-            select: { id: true, username: true, email: true },
-            take: 5,
-          });
-          users.forEach(u => {
-            results.push({ type: 'user', label: u.username ?? '', sub: u.email ?? '', url: `/admin/users/view/${u.id}/` });
-          });
-
-          const nodes = await prisma.node.findMany({
-            where: { OR: [{ name: { contains: q } }, { address: { contains: q } }] },
-            select: { id: true, name: true, address: true },
-            take: 4,
-          });
-          nodes.forEach(n => {
-            results.push({ type: 'node', label: n.name, sub: n.address, url: `/admin/node/${n.id}/stats` });
+        if (servers.length === 0) {
+          servers = await prisma.server.findMany({
+            where: user.isAdmin ? undefined : { ownerId: userId },
+            select: { UUID: true, name: true, description: true },
+            orderBy: { id: 'desc' },
+            take: 100,
           });
         }
 
+        servers.forEach((s) => {
+          const score = scoreFields([s.name, s.description || '', s.UUID]);
+          if (score > 0) {
+            results.push({ type: 'server', label: s.name, sub: s.description || s.UUID, url: `/server/${s.UUID}`, score });
+          }
+        });
+
+        if (user.isAdmin) {
+          let users = await prisma.users.findMany({
+            where: { OR: tokenFieldOrs(['username', 'email']) },
+            select: { id: true, username: true, email: true },
+            take: 20,
+          });
+          if (users.length === 0) {
+            users = await prisma.users.findMany({
+              select: { id: true, username: true, email: true },
+              orderBy: { id: 'desc' },
+              take: 50,
+            });
+          }
+          users.forEach((u) => {
+            const score = scoreFields([u.username || '', u.email || '']);
+            if (score > 0) {
+              results.push({ type: 'user', label: u.username ?? '', sub: u.email ?? '', url: `/admin/users/view/${u.id}/`, score });
+            }
+          });
+
+          let nodes = await prisma.node.findMany({
+            where: { OR: tokenFieldOrs(['name', 'address']) },
+            select: { id: true, name: true, address: true },
+            take: 15,
+          });
+          if (nodes.length === 0) {
+            nodes = await prisma.node.findMany({
+              select: { id: true, name: true, address: true },
+              orderBy: { id: 'desc' },
+              take: 30,
+            });
+          }
+          nodes.forEach((n) => {
+            const score = scoreFields([n.name, n.address]);
+            if (score > 0) {
+              results.push({ type: 'node', label: n.name, sub: n.address, url: `/admin/node/${n.id}/stats`, score });
+            }
+          });
+        }
+
+        results.sort((a, b) => b.score - a.score);
         return res.json({ results });
       } catch (err) {
         logger.error('Search error:', err);

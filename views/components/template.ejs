@@ -196,61 +196,19 @@
 
 <div id="colcont" class="lg:pl-56 pb-16 lg:pb-0">
   <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b px-4 sm:gap-x-6 sm:px-4 lg:px-4" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
-    <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-      <div class="relative flex flex-1 flex-col">
-
-        <div class="lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl active:scale-100 duration-200 bg-transparent" role="search" style="border:1px solid var(--theme-border-input); color:var(--theme-text-strong);">
-          <%- icon('search', { class: 'h-5 w-5', style: 'color:var(--theme-text-muted)' }) %>
-          <input id="searchInput"
-            class="bg-transparent border-transparent ml-2 focus-visible:ring-transparent border-none ring-transparent sm:text-sm focus-visible:outline-none"
-            style="color:var(--theme-text-strong);"
-            placeholder="<%= req.translations.navSearch || 'Search' %>"
-            type="search"
-            role="combobox"
-            aria-autocomplete="list"
-            aria-expanded="false"
-            aria-controls="searchResults"
-            aria-activedescendant=""
-            aria-label="<%= req.translations.navSearch || 'Search' %>"
-            name="search"
-            autocomplete="off"
-            onfocus="showSearchResults()">
-          <div aria-hidden="true" class="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium rounded-md"
-            style="color:var(--theme-text-muted); background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
-            CTRL + K
-          </div>
+      <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+        <!-- Search button -->
+        <div class="flex items-center shrink-0 lg:-ml-2">
+          <button id="searchButton" type="button"
+            class="flex items-center gap-2.5 h-10 px-3.5 rounded-xl transition-colors duration-200 cursor-pointer"
+            style="border:1px solid var(--theme-border-input); background:var(--theme-bg-secondary);"
+            aria-label="<%= req.translations.navSearch || 'Search' %>" aria-haspopup="dialog" aria-expanded="false">
+            <%- icon('search', { class: 'h-5 w-5', style: 'color:var(--theme-text-muted)' }) %>
+            <span class="hidden sm:block text-sm" style="color:var(--theme-text-muted);"><%= req.translations.navSearch || 'Search' %></span>
+            <span aria-hidden="true" class="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-md"
+              style="color:var(--theme-text-muted); background:var(--theme-bg-card); border:1px solid var(--theme-border);">CTRL K</span>
+          </button>
         </div>
-
-        <div id="searchResults" role="listbox" aria-label="Search results" class="absolute w-[19.5rem] rounded-xl shadow-lg hidden mt-1 px-2 pb-2 z-50" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); top:100%;">
-        </div>
-      </div>
-
-      <script nonce="<%- nonce %>">
-        document.addEventListener('keydown', function(event) {
-          if (event.ctrlKey && event.key === 'k') {
-            event.preventDefault();
-            document.getElementById('searchInput').focus();
-          }
-        });
-
-        function showSearchResults() {
-          document.getElementById('searchResults').classList.remove('hidden');
-          document.getElementById('searchInput').setAttribute('aria-expanded', 'true');
-        }
-
-        document.getElementById('searchInput').addEventListener('focus', showSearchResults);
-
-        document.addEventListener('click', function(event) {
-          var searchInput = document.getElementById('searchInput');
-          var searchResults = document.getElementById('searchResults');
-          if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-            searchResults.classList.add('hidden');
-            searchInput.setAttribute('aria-expanded', 'false');
-            searchInput.setAttribute('aria-activedescendant', '');
-          }
-        });
-      </script>
-      <script nonce="<%- nonce %>" src="/javascript/shared/search.js"></script>
 
       <!-- Admin breadcrumbs (desktop) -->
       <div id="topbar-breadcrumbs" class="hidden lg:flex items-center min-w-0 flex-1 text-[11px] opacity-60" style="color:var(--theme-text-muted);"></div>
@@ -263,8 +221,40 @@
       </div>
     </div>
   </div>
+
+  <!-- Search popup -->
+  <div id="searchOverlay" class="fixed inset-0 z-[100] hidden items-start justify-center p-4"
+    role="dialog" aria-modal="true" aria-label="<%= req.translations.navSearch || 'Search' %>"
+    style="background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); padding-top:14vh;">
+    <div id="searchPanel" class="w-full max-w-xl rounded-2xl border overflow-hidden shadow-2xl"
+      style="border-color:var(--theme-border); background:var(--theme-bg-card); box-shadow:0 25px 60px -12px rgba(0,0,0,0.35);">
+      <div class="flex items-center gap-3 px-4 py-3.5 border-b" style="border-color:var(--theme-border);">
+        <%- icon('search', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+        <input id="searchInput" type="text"
+          placeholder="<%= req.translations.navSearch || 'Search' %>..."
+          class="flex-1 bg-transparent outline-none text-sm min-w-0"
+          style="color:var(--theme-text-strong);"
+          role="combobox" aria-autocomplete="list" aria-expanded="false"
+          aria-controls="searchResults" aria-activedescendant=""
+          autocomplete="off" spellcheck="false">
+        <span aria-hidden="true" class="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-md"
+          style="color:var(--theme-text-muted); background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">ESC</span>
+      </div>
+      <div id="searchResults" role="listbox" aria-label="Search results" class="p-2" style="max-height:45vh; overflow-y:auto;"></div>
+      <div class="hidden sm:flex items-center gap-4 px-4 py-2.5 border-t text-[11px]" style="border-color:var(--theme-border); color:var(--theme-text-muted);">
+        <span class="flex items-center gap-1.5"><kbd class="px-1 py-0.5 text-[10px] font-medium rounded" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">↑↓</kbd> navigate</span>
+        <span class="flex items-center gap-1.5"><kbd class="px-1 py-0.5 text-[10px] font-medium rounded" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">Enter</kbd> open</span>
+        <span class="flex items-center gap-1.5"><kbd class="px-1 py-0.5 text-[10px] font-medium rounded" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">Esc</kbd> close</span>
+      </div>
+    </div>
+  </div>
 </div>
+<script nonce="<%- nonce %>" src="/javascript/shared/search.js"></script>
 <style>
+@keyframes search-pop-in  { from { opacity:0; transform:scale(0.92); } to { opacity:1; transform:scale(1); } }
+@keyframes search-pop-out { from { opacity:1; transform:scale(1); } to { opacity:0; transform:scale(0.92); } }
+.search-pop-in  { animation: search-pop-in 0.18s cubic-bezier(0.16,1,0.3,1) both; }
+.search-pop-out { animation: search-pop-out 0.12s ease-in both; }
 .theme-toggle-switch {
   position: relative;
   display: flex;
