@@ -139,13 +139,19 @@
       onConfirm: function () {
         var ids = checked.map(function (cb) { return cb.value; });
         var chain = Promise.resolve();
+        var failed = false;
         ids.forEach(function (id) {
           chain = chain.then(function () {
-            return fetch('/admin/server/delete/' + id, { method: 'POST' });
+            return fetch('/admin/server/delete/' + id, { method: 'POST' })
+              .then(function (r) { if (!r.ok) failed = true; });
           });
         });
-        chain.then(function () { window.location.reload(); })
-             .catch(function () { window.location.reload(); });
+        chain.then(function () {
+          if (failed) { showToast('Some servers failed to delete.', 'error'); return; }
+          showToast('Servers deleted.', 'success');
+          window.location.reload();
+        })
+             .catch(function () { showToast('Failed to delete servers.', 'error'); });
       }
     });
   }
@@ -158,8 +164,12 @@
       confirmLabel: 'Delete',
       onConfirm: function () {
         fetch('/admin/server/delete/' + id, { method: 'POST' })
-          .then(function() { window.location.reload(); })
-          .catch(function() { window.location.reload(); });
+          .then(function(r) {
+            if (!r.ok) throw new Error('Request failed');
+            showToast('Server deleted.', 'success');
+            window.location.reload();
+          })
+          .catch(function() { showToast('Failed to delete server.', 'error'); });
       }
     });
   }

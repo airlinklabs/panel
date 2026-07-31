@@ -308,30 +308,9 @@
       .filter(el => !el.disabled && el.offsetParent !== null);
   }
 
-  function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `fixed bottom-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500`; toast.style.background = type === 'success' ? 'var(--theme-success)' : 'var(--theme-danger)'; toast.style.color = '#fff';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-
-    setTimeout(() => {
-      toast.style.opacity = '1';
-    }, 10);
-
-
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      setTimeout(() => {
-        document.body.removeChild(toast);
-      }, 500);
-    }, 3000);
-  }
-
-
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-      showToast('API key copied to clipboard');
+      showToast('API key copied to clipboard', 'success');
     }).catch(err => {
       console.error('Could not copy text: ', err);
       showToast('Failed to copy to clipboard', 'error');
@@ -513,6 +492,7 @@
       });
     } catch (e) {
       console.error('Error parsing permissions:', e);
+      showToast('Could not load permissions for this API key.', 'error');
     }
 
     editApiKeyModal.setAttribute('aria-hidden', 'false');
@@ -602,14 +582,14 @@
     document.querySelectorAll('.edit-permission-checkbox').forEach(checkbox => {
       checkbox.checked = true;
     });
-    showToast('All permissions selected');
+    showToast('All permissions selected', 'success');
   });
 
   document.getElementById('editSelectNoneBtn').addEventListener('click', function() {
     document.querySelectorAll('.edit-permission-checkbox').forEach(checkbox => {
       checkbox.checked = false;
     });
-    showToast('All permissions cleared');
+    showToast('All permissions cleared', 'success');
   });
 
   document.getElementById('editSelectReadOnlyBtn').addEventListener('click', function() {
@@ -625,7 +605,7 @@
       }
     });
 
-    showToast('Read-only permissions selected');
+    showToast('Read-only permissions selected', 'success');
   });
 </script>
 

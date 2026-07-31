@@ -49,7 +49,7 @@
     const r = await fetch('/api/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
     const d = await r.json();
     confirmNewFolder.disabled = false;
-    if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
+    if (d.success) { showToast('Folder created.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
   });
 
   document.querySelectorAll('.folder-card').forEach(card => {
@@ -117,7 +117,7 @@
     const d = await r.json();
     btn.disabled = false;
     document.getElementById('deleteFolderSheet').classList.add('hidden');
-    if (d.success) location.reload(); else showToast(d.error || "Couldn't delete the folder.", 'error');
+    if (d.success) { showToast('Folder deleted.', 'success'); location.reload(); } else showToast(d.error || "Couldn't delete the folder.", 'error');
   });
 
   let longPressTimer = null;
@@ -166,7 +166,7 @@
     document.getElementById('longPressSheet').classList.add('hidden');
     const r = await fetch('/api/folders/servers/' + activeServerUUID, { method: 'DELETE' });
     const d = await r.json();
-    if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
+    if (d.success) { showToast('Removed from folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
   });
 
   function showFolderPickDialog(uuid) {
@@ -182,7 +182,7 @@
         b.addEventListener('click', async () => {
           const r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
           const d = await r.json();
-          if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
+          if (d.success) { showToast('Added to folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
         });
         list.appendChild(b);
       });

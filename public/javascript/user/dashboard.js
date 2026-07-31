@@ -63,7 +63,7 @@
     const r = await fetch('/api/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
     const d = await r.json();
     confirmNewFolder.disabled = false;
-    if (d.success) location.reload();
+    if (d.success) { showToast('Folder created.', 'success'); location.reload(); }
     else showToast(d.error || 'Something went wrong.', 'error');
   });
 
@@ -154,7 +154,7 @@
     const d = await r.json();
     confirmDeleteFolder.disabled = false;
     delete deleteFolderOverlay.dataset.open;
-    if (d.success) location.reload(); else showToast(d.error || 'Couldn\'t delete the folder.', 'error');
+    if (d.success) { showToast('Folder deleted.', 'success'); location.reload(); } else showToast(d.error || 'Couldn\'t delete the folder.', 'error');
   });
 
   // ── Drag-and-drop: server card → folder ───────────────────
@@ -240,7 +240,7 @@
       if (allFolders.length === 1) {
         const r = await fetch('/api/folders/' + allFolders[0].id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
         const d = await r.json();
-        if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
+        if (d.success) { showToast('Added to folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
         return;
       }
       openFolderPicker(uuid);
@@ -252,7 +252,7 @@
       e.stopPropagation();
       const r = await fetch('/api/folders/servers/' + btn.dataset.uuid, { method: 'DELETE' });
       const d = await r.json();
-      if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
+      if (d.success) { showToast('Removed from folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
     });
   });
 
@@ -268,7 +268,7 @@
       btn.addEventListener('click', async () => {
         const r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID }) });
         const d = await r.json();
-        if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
+        if (d.success) { showToast('Added to folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
       });
       folderPopupContent.appendChild(btn);
     });

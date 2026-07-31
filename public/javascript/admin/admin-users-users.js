@@ -22,6 +22,7 @@
         fetch(`/admin/users/delete/${userId}`, { method: 'DELETE' })
           .then(response => {
             if (response.ok) {
+              showToast('User deleted.', 'success');
               location.reload();
             } else {
               showToast('Failed to delete user.', 'error');

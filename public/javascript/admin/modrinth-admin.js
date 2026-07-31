@@ -101,7 +101,7 @@
       var settings = JSON.parse(document.getElementById('jsonEditor').value);
       if (!Array.isArray(settings.blockedProjects)) return;
       var idx = settings.blockedProjects.indexOf(id);
-      if (idx > -1) { settings.blockedProjects.splice(idx, 1); updateJsonEditor(settings); updateBlockedProjectsList(); }
+      if (idx > -1) { settings.blockedProjects.splice(idx, 1); updateJsonEditor(settings); updateBlockedProjectsList(); showToast('Removed "' + id + '" from blocked list', 'success'); }
     } catch (e) { showToast('Could not update', 'error'); }
   }
   window.removeBlockedProject = removeBlockedProject;
@@ -152,6 +152,7 @@
         updateEasyUI(currentSettings);
         updateProjectTypeButtons();
         updateBlockedProjectsList();
+        showToast('Failed to load settings', 'error');
       });
   }
 

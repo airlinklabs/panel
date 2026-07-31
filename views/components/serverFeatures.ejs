@@ -12,7 +12,12 @@
       onConfirm: () => {
         fetch('/server/<%= req.params.id %>/feature/eula', { method: 'POST' })
           .then(() => location.reload())
-          .catch(error => console.error('There was an error!', error));
+          .catch(error => {
+            console.error('There was an error!', error);
+            if (typeof showToast === 'function') {
+              showToast('Could not accept the EULA. Please try again.', 'error');
+            }
+          });
       }
     });
   });
