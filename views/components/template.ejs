@@ -149,7 +149,18 @@
     if (account) {
       var isDark = document.documentElement.classList.contains('dark');
       var onAccount = path === '/account' || path.startsWith('/account/');
-      account.style.color = onAccount ? (isDark ? '#ffffff' : '#0a0a0a') : '';
+      var userText = account.querySelector('#sidebar-username');
+      if (onAccount) {
+        account.style.background = isDark ? '#ffffff' : '#0a0a0a';
+        account.style.color = isDark ? '#0a0a0a' : '#ffffff';
+        account.style.fontWeight = '700';
+        if (userText) userText.parentElement.style.color = isDark ? '#0a0a0a' : '#ffffff';
+      } else {
+        account.style.background = '';
+        account.style.color = '';
+        account.style.fontWeight = '';
+        if (userText) userText.parentElement.style.color = '';
+      }
     }
     if (logout) {
       logout.style.background = '';

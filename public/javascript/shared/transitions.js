@@ -202,6 +202,9 @@
       link.classList.remove('nav-extra-active');
       link.style.background = '';
       link.style.color = '';
+      link.style.fontWeight = '';
+      var userText = link.querySelector('#sidebar-username');
+      if (userText) userText.parentElement.style.color = '';
     });
 
     if (best) {
@@ -241,6 +244,10 @@
           bg.style.borderRadius = '0';
         }
         specialMatch.style.color = isDark ? '#ffffff' : '#0a0a0a';
+        specialMatch.style.background = isDark ? '#ffffff' : '#0a0a0a';
+        specialMatch.style.fontWeight = '700';
+        var userText = specialMatch.querySelector('#sidebar-username');
+        if (userText) userText.parentElement.style.color = isDark ? '#0a0a0a' : '#ffffff';
       } else if (bg) {
         // Reset width/shape in case we came from a special item
         bg.style.left         = '';
