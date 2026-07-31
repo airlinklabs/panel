@@ -193,7 +193,7 @@
           else if (evt.type === 'error') { log('Error: '+evt.message,'l-err'); termLbl.textContent='Failed'; showToast(evt.message,'error'); setActionBtn(false); break outer; }
         }
       }
-    } catch (err) { log('Error: '+err.message,'l-err'); termLbl.textContent='Failed'; showToast('Installation failed','error'); setActionBtn(false); }
+    } catch (err) { console.error('Addon install error:', err); log('Installation failed. Try again.', 'l-err'); termLbl.textContent='Failed'; showToast('Installation failed','error'); setActionBtn(false); }
   });
 
   loadStore();

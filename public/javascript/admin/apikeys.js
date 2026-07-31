@@ -17,21 +17,37 @@ function showConfirmModal(title, message, onConfirm) {
 }
 
 function confirmDeleteApiKey(keyId) {
+  const doDelete = () => {
+    const form = document.getElementById('deleteKeyForm_' + keyId);
+    fetch(form.action, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: new FormData(form)
+    }).then(function(res) {
+      if (res.ok) {
+        showToast('API key deleted', 'success');
+        setTimeout(function() { location.reload(); }, 700);
+        return;
+      }
+      return res.json().then(function(data) {
+        showToast(data.error || data.message || 'Failed to delete API key.', 'error');
+      });
+    }).catch(function(e) {
+      console.error('Delete API key failed:', e);
+      showToast('Network error — try again.', 'error');
+    });
+  };
   if (window.modal && typeof window.modal.confirm === 'function') {
     window.modal.confirm({
       title: 'Delete API key',
       body: 'This will permanently revoke the key. Any integrations using it will stop working.',
       danger: true,
       confirmLabel: 'Yeah, delete it',
-      onConfirm: () => {
-        document.getElementById('deleteKeyForm_' + keyId).submit();
-      }
+      onConfirm: doDelete
     });
     return;
   }
-  showConfirmModal('Delete API key', 'This will permanently revoke the key. Any integrations using it will stop working.', () => {
-    document.getElementById('deleteKeyForm_' + keyId).submit();
-  });
+  showConfirmModal('Delete API key', 'This will permanently revoke the key. Any integrations using it will stop working.', doDelete);
 }
 
 (function staggerRows() {

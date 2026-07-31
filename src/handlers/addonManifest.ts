@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import fs from 'fs';
 import path from 'path';
+import logger from './logger';
 
 const RESERVED_IDENTIFIER_WORDS = [
   'admin', 'api', 'auth', 'login', 'logout', 'static', 'assets',
@@ -146,9 +147,10 @@ export function parseAddonManifest(filePath: string, addonSlug?: string): ParseM
 
     return { success: true, manifest, filePath };
   } catch (error: any) {
+    logger.error('Failed to parse manifest:', error);
     return {
       success: false,
-      error: `Failed to parse manifest: ${error.message}`,
+      error: 'Failed to parse manifest',
       filePath,
     };
   }

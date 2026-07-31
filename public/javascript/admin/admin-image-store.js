@@ -248,7 +248,8 @@ async function confirmInstall() {
     closeEgg();
     if (typeof showToast === 'function') showToast('"' + pendingEgg.name + '" installed successfully.', 'success');
   } catch(err) {
-    document.getElementById('eggErrTxt').textContent = err.message || 'Network error.';
+    console.error('Image install error:', err);
+    document.getElementById('eggErrTxt').textContent = 'Installation failed. Try again.';
     show('eggErr'); btn.disabled = false; btn.innerHTML = 'Install';
   }
 }

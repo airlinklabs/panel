@@ -525,6 +525,7 @@ const coreModule: Module = {
             allPermissions,
             settings,
             user: req.session.user,
+            created: typeof req.query.created === 'string' ? req.query.created : null,
             req,
           });
         } catch (error) {

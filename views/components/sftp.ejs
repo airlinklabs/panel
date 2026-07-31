@@ -268,8 +268,9 @@
         closeSftpModal();
         showToast('SFTP access revoked.', 'success');
       })
-      .catch(function () {
-        showToast('SFTP access revoked.', 'success');
+      .catch(function (err) {
+        console.error('Failed to revoke SFTP credentials:', err);
+        showToast('Failed to revoke credentials. Try again.', 'error');
       });
   };
 

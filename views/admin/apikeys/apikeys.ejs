@@ -58,7 +58,7 @@
                     type="button" aria-label="Edit API key">
                     <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
                   </button>
-                  <form action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
+                  <form id="toggleKeyForm_<%= apiKey.id %>" action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
                     <%- include('../../components/csrf') %>
                     <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg transition" style="color:var(--theme-text-muted)" aria-label="<%= apiKey.active ? 'Disable API key' : 'Enable API key' %>">
                       <% if (apiKey.active) { %>
@@ -114,7 +114,7 @@
         </button>
       </div>
 
-      <form action="/admin/apikeys/create" method="POST" class="px-6 py-5 space-y-5">
+      <form id="createApiKeyForm" action="/admin/apikeys/create" method="POST" class="px-6 py-5 space-y-5">
         <%- include('../../components/csrf') %>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -296,6 +296,23 @@
     </form>
   </div>
 </div>
+
+<% if (created) { %>
+<div id="createdKeyModal" class="fixed inset-0 z-[8000] hidden items-center justify-center" aria-hidden="true">
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div role="dialog" aria-modal="true" aria-labelledby="createdKeyTitle" tabindex="-1" class="relative bg-white dark:bg-[#1c1c1c] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6">
+    <h3 id="createdKeyTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">API key created</h3>
+    <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-4">Copy it now — for security, this is the only time the full key is shown.</p>
+    <div class="flex items-center gap-2 rounded-xl px-3 py-2.5 mb-4" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+      <code class="flex-1 text-xs font-mono break-all" style="color:var(--theme-text-strong)"><%= created %></code>
+    </div>
+    <div class="flex justify-end gap-2">
+      <button type="button" onclick="hideCreatedKeyModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Close</button>
+      <button type="button" onclick="copyCreatedKey()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">Copy key</button>
+    </div>
+  </div>
+</div>
+<% } %>
 
 
 
@@ -607,6 +624,76 @@
 
     showToast('Read-only permissions selected', 'success');
   });
+
+  async function postForm(form, successMessage) {
+    const btn = form.querySelector('[type="submit"]');
+    if (btn) btn.disabled = true;
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(form)
+      });
+      if (res.ok) {
+        showToast(successMessage, 'success');
+        setTimeout(function() { location.reload(); }, 700);
+        return true;
+      }
+      let msg = 'Something went wrong. Try again.';
+      try { const data = await res.json(); msg = data.error || data.message || msg; } catch (e) {}
+      showToast(msg, 'error');
+      return false;
+    } catch (e) {
+      console.error('Request failed:', e);
+      showToast('Network error — try again.', 'error');
+      return false;
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  const createApiKeyForm = document.getElementById('createApiKeyForm');
+  if (createApiKeyForm) {
+    createApiKeyForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      postForm(createApiKeyForm, 'API key created').then(function(ok) {
+        if (ok) hideCreateModal();
+      });
+    });
+  }
+
+  document.querySelectorAll('form[id^="toggleKeyForm_"]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const enabling = form.querySelector('button[type="submit"]').getAttribute('aria-label')?.includes('Enable');
+      postForm(form, enabling ? 'API key enabled' : 'API key disabled');
+    });
+  });
+
+  editApiKeyForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    postForm(editApiKeyForm, 'API key updated').then(function(ok) {
+      if (ok) hideEditModal();
+    });
+  });
+
+  const createdKeyModal = document.getElementById('createdKeyModal');
+  if (createdKeyModal) {
+    createdKeyModal.classList.remove('hidden');
+    createdKeyModal.classList.add('flex');
+    createdKeyModal.setAttribute('aria-hidden', 'false');
+    const panel = createdKeyModal.querySelector('[role="dialog"]');
+    if (panel) panel.focus();
+    window.hideCreatedKeyModal = function() {
+      createdKeyModal.classList.add('hidden');
+      createdKeyModal.classList.remove('flex');
+      createdKeyModal.setAttribute('aria-hidden', 'true');
+      history.replaceState({}, '', '/admin/apikeys');
+    };
+    window.copyCreatedKey = function() {
+      copyToClipboard('<%= created %>');
+    };
+  }
 </script>
 
 <%- include('../../components/footer') %>

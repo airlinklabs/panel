@@ -48,14 +48,16 @@ function spawnSyncSafe(command: string, args: string[] = [], options: { stdio?: 
       stdio: options.stdio ?? 'pipe',
     });
     if (result.error) {
-      return { success: false, error: result.error.message };
+      logger.error('Update command failed:', result.error.message);
+      return { success: false, error: 'Update failed' };
     }
     if (result.status !== 0) {
       return { success: false, error: result.stderr ?? `Command exited with status ${result.status}` };
     }
     return { success: true, output: result.stdout };
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : String(error) };
+    logger.error('Update command error:', error);
+    return { success: false, error: 'Update failed' };
   }
 }
 

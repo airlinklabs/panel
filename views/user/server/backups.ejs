@@ -235,7 +235,8 @@ try {
   }
 } catch (error) {
   loading.close();
-  showToast('Failed to create backup: ' + error.message, 'error');
+  console.error('Failed to create backup:', error);
+  showToast('Failed to create backup. Try again.', 'error');
 }
 }
 
@@ -268,7 +269,8 @@ function restoreBackup(backupId, backupName) {
           showToast(data.error || 'Failed to restore backup', 'error');
         }
       } catch (error) {
-        showToast('Failed to restore backup: ' + error.message, 'error');
+        console.error('Failed to restore backup:', error);
+        showToast('Failed to restore backup. Try again.', 'error');
       } finally {
         hideLoading();
       }
@@ -372,7 +374,8 @@ function deleteBackup(backupId, backupName) {
           showToast(data.error || 'Failed to delete backup', 'error');
         }
       } catch (error) {
-        showToast('Failed to delete backup: ' + error.message, 'error');
+        console.error('Failed to delete backup:', error);
+        showToast('Failed to delete backup. Try again.', 'error');
       }
     }
   );

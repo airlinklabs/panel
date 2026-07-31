@@ -803,7 +803,8 @@
         }
       }
     } catch (err) {
-      log(err.message, 'err');
+      console.error('Addon install error:', err);
+      log('Installation failed. Try again.', 'err');
       showToast('Installation failed', 'error');
       setActionBtn(false);
     }

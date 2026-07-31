@@ -101,6 +101,7 @@ createBtn.addEventListener('click', async () => {
     }
   } catch (error) {
     loader.close();
-    showToast('Failed to create user: ' + error.message, 'error');
+    console.error('Failed to create user:', error);
+    showToast('Failed to create user. Try again.', 'error');
   }
 });
