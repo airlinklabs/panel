@@ -153,10 +153,10 @@
 </main>
 
 <!-- Add Database Modal -->
-<div id="addDatabaseModal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
-  <div class="absolute inset-0 bg-black/60" aria-hidden="true" onclick="closeModal('addDatabaseModal')"></div>
-  <div class="relative w-full max-w-md mx-4 rounded-2xl shadow-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border)">
-    <h3 class="text-sm font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h3>
+<div id="addDatabaseModal" class="fixed inset-0 z-[8000] hidden items-center justify-center" aria-hidden="true">
+  <div class="absolute inset-0 bg-black/60" aria-hidden="true" onclick="closeAddDatabaseModal()"></div>
+  <div id="addDatabasePanel" class="relative w-full max-w-md mx-4 rounded-2xl shadow-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addDatabaseTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border)">
+    <h3 id="addDatabaseTitle" class="text-sm font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h3>
     <div class="space-y-4">
       <div>
         <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.databaseHostLabel || 'Database host' %></label>
@@ -168,7 +168,7 @@
         <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)"><%= req.translations.dbProvisionHint || 'A database, user and password will be provisioned on this host.' %></p>
       </div>
       <div class="flex gap-2 pt-1">
-        <button onclick="closeModal('addDatabaseModal')" class="al-btn-secondary flex-1"><%= req.translations.cancel || 'Cancel' %></button>
+        <button onclick="closeAddDatabaseModal()" class="al-btn-secondary flex-1"><%= req.translations.cancel || 'Cancel' %></button>
         <button id="confirmAddDatabase" class="al-btn-primary flex-1"><%= req.translations.createDatabaseBtn || 'Create database' %></button>
       </div>
     </div>
@@ -184,14 +184,47 @@ const serverId = '<%= server.UUID %>';
 
 const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m, t) => alert(m) };
 
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-window.closeModal = closeModal;
+function getFocusableElements(panel) {
+  return Array.from((panel || document).querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'))
+    .filter((el) => !el.disabled && el.offsetParent !== null);
+}
+
+let lastAddModalFocus = null;
 
 window.openAddDatabaseModal = () => {
+  lastAddModalFocus = document.activeElement;
   document.getElementById('dbHostSelect').value = document.querySelector('#dbHostSelect option')?.value || '';
-  openModal('addDatabaseModal');
+  Animate.openModal(document.getElementById('addDatabaseModal'), document.getElementById('addDatabasePanel'));
+  const focusable = getFocusableElements(document.getElementById('addDatabasePanel'));
+  (focusable[0] || document.getElementById('addDatabasePanel')).focus();
 };
+
+window.closeAddDatabaseModal = () => {
+  Animate.closeModal(document.getElementById('addDatabaseModal'), document.getElementById('addDatabasePanel'));
+  if (lastAddModalFocus) lastAddModalFocus.focus();
+};
+
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('addDatabaseModal');
+  if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+    e.preventDefault();
+    closeAddDatabaseModal();
+    return;
+  }
+  if (e.key === 'Tab' && !modal.classList.contains('hidden')) {
+    const focusable = getFocusableElements(document.getElementById('addDatabasePanel'));
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+});
 
 document.getElementById('confirmAddDatabase')?.addEventListener('click', async () => {
   const hostId = document.getElementById('dbHostSelect').value;

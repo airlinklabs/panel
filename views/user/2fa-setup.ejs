@@ -38,7 +38,7 @@
           </ol>
 
           <div class="flex flex-col items-center mb-7">
-            <div class="rounded-2xl border p-4 bg-white" style="border-color:var(--theme-border)">
+            <div class="rounded-2xl border p-1.5" style="border-color:var(--theme-border);background:#fff">
               <img src="<%= qrDataUrl %>" alt="QR code" class="h-48 w-48" width="220" height="220">
             </div>
             <p class="text-sm mt-4 mb-2" style="color:var(--theme-text-muted)">Can't scan? Enter this key manually in your authenticator app:</p>
@@ -57,7 +57,7 @@
               <input id="totpToken" name="token" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" autofocus placeholder="••••••" class="al-input flex-1 text-center font-mono text-lg tracking-[0.4em]">
               <button id="enableBtn" type="submit" class="al-btn-primary px-5">Enable 2FA</button>
             </div>
-            <p id="feedback" class="text-sm mt-2 hidden"></p>
+            <p id="feedback" class="text-sm mt-2 hidden" aria-live="polite" style="color:var(--theme-danger)"></p>
           </form>
 
           <div class="mt-7 pt-4 text-xs" style="border-top:1px solid var(--theme-border); color:var(--theme-text-muted)">
@@ -109,12 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         feedback.textContent = data.error || 'Something went wrong. Try again.';
         feedback.classList.remove('hidden');
-        feedback.classList.add('text-red-500');
       }
     } catch {
       feedback.textContent = 'Something went wrong. Try again.';
       feedback.classList.remove('hidden');
-      feedback.classList.add('text-red-500');
     } finally {
       btn.disabled = false;
     }

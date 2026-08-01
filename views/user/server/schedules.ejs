@@ -198,11 +198,12 @@
 </main>
 
 <!-- New Schedule Modal -->
-<div id="addScheduleModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
-  <div class="w-full max-w-md rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+<div id="addScheduleModal" class="fixed inset-0 z-[8000] hidden items-center justify-center p-4" aria-hidden="true">
+  <div class="absolute inset-0 bg-black/60" aria-hidden="true" onclick="closeAddScheduleModal()"></div>
+  <div id="addSchedulePanel" class="relative w-full max-w-md rounded-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addScheduleTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">New schedule</h3>
-      <button onclick="closeModal('addScheduleModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
+      <h3 id="addScheduleTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New schedule</h3>
+      <button onclick="closeAddScheduleModal()" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
     </div>
     <div class="space-y-4">
       <div>
@@ -259,7 +260,7 @@
         <p class="text-[11px]" style="color:var(--theme-text-muted)">Runs <span id="schedVisualDesc" class="font-medium" style="color:var(--theme-accent)">every hour</span> — cron: <span id="schedVisualCron" class="font-mono font-medium" style="color:var(--theme-accent)">0 0 * * * *</span></p>
       </div>
       <div class="flex gap-2 pt-1">
-        <button onclick="closeModal('addScheduleModal')" class="al-btn-secondary flex-1">Cancel</button>
+        <button onclick="closeAddScheduleModal()" class="al-btn-secondary flex-1">Cancel</button>
         <button id="confirmAddSchedule" class="al-btn-primary flex-1">Create schedule</button>
       </div>
     </div>
@@ -274,9 +275,50 @@ const serverId = '<%= server.UUID %>';
 
 const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m, t) => alert(m) };
 
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-window.closeModal = closeModal;
+function getFocusableElements(panel) {
+  return Array.from((panel || document).querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'))
+    .filter((el) => !el.disabled && el.offsetParent !== null);
+}
+
+let lastScheduleModalFocus = null;
+
+window.openAddScheduleModal = () => {
+  lastScheduleModalFocus = document.activeElement;
+  document.getElementById('schedName').value = '';
+  document.getElementById('schedCron').value = '0 0 * * * *';
+  document.getElementById('cronPreview').textContent = describeCron('0 0 * * * *');
+  setSchedMode('visual');
+  Animate.openModal(document.getElementById('addScheduleModal'), document.getElementById('addSchedulePanel'));
+  const focusable = getFocusableElements(document.getElementById('addSchedulePanel'));
+  (focusable[0] || document.getElementById('addSchedulePanel')).focus();
+};
+
+window.closeAddScheduleModal = () => {
+  Animate.closeModal(document.getElementById('addScheduleModal'), document.getElementById('addSchedulePanel'));
+  if (lastScheduleModalFocus) lastScheduleModalFocus.focus();
+};
+
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('addScheduleModal');
+  if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+    e.preventDefault();
+    closeAddScheduleModal();
+    return;
+  }
+  if (e.key === 'Tab' && !modal.classList.contains('hidden')) {
+    const focusable = getFocusableElements(document.getElementById('addSchedulePanel'));
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+});
 
 /* ── Human-readable cron preview ── */
 function describeCron(expr) {
@@ -378,14 +420,6 @@ function setSchedMode(mode) {
   document.getElementById('schedVisualWrap').classList.toggle('hidden', mode !== 'visual');
 }
 document.querySelectorAll('.sched-mode-btn').forEach((b) => b.addEventListener('click', () => setSchedMode(b.dataset.schedMode)));
-
-window.openAddScheduleModal = () => {
-  document.getElementById('schedName').value = '';
-  document.getElementById('schedCron').value = '0 0 * * * *';
-  document.getElementById('cronPreview').textContent = describeCron('0 0 * * * *');
-  setSchedMode('visual');
-  openModal('addScheduleModal');
-};
 
 async function api(url, method, body) {
   try {

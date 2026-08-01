@@ -35,6 +35,12 @@ storage/dev.db-shm
 # Storage (keep structure, ignore data)
 storage/eggs
 
+# Local tooling / agent work dirs (not project source)
 .agents/
+.claude/
 .codex/
+.impeccable/
 .opencode/
+agent/
+backups/
+/dist/*.map
