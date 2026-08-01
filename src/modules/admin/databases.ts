@@ -6,6 +6,7 @@ import logger from '../../handlers/logger';
 import { registerPermission } from '../../handlers/permissions';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import { testDatabaseHost } from '../../handlers/utils/core/mysqlProvisioner';
+import { ensureS3Bucket } from '../../handlers/utils/core/s3Client';
 
 registerPermission('airlink.admin.databases.view');
 registerPermission('airlink.admin.databases.create');
@@ -77,6 +78,54 @@ const databasesModule: Module = {
         } catch (error) {
           logger.error('Error creating database host:', error);
           res.redirect('/admin/databases/create?err=create_failed');
+        }
+      },
+    );
+
+    router.post(
+      '/admin/databases/auto-host',
+      isAuthenticated(true, 'airlink.admin.databases.create'),
+      async (req: Request, res: Response) => {
+        try {
+          const hosts = await prisma.databaseHost.findMany({ orderBy: { id: 'asc' } });
+          let host = hosts[0];
+          let created = false;
+          if (!host) {
+            host = await prisma.databaseHost.create({
+              data: {
+                name: 'Auto-generated host',
+                host: process.env.MYSQL_HOST || '127.0.0.1',
+                port: Number(process.env.MYSQL_PORT) || 3306,
+                username: process.env.MYSQL_USER || 'root',
+                password: process.env.MYSQL_PASSWORD || '',
+              },
+            });
+            created = true;
+          }
+          const result = await testDatabaseHost(host);
+          return res.json({ success: result.success, created, hostId: host.id, latency: result.latency, error: result.error });
+        } catch (error) {
+          logger.error('Error auto-generating database host:', error);
+          return res.status(500).json({ success: false, error: 'Failed to auto-generate database host.' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/databases/auto-bucket',
+      isAuthenticated(true, 'airlink.admin.databases.create'),
+      async (req: Request, res: Response) => {
+        try {
+          const { created } = await ensureS3Bucket();
+          return res.json({ success: true, created });
+        } catch (error) {
+          logger.error('Error auto-generating S3 bucket:', error);
+          const message = error instanceof Error ? error.message : 'Failed to auto-generate S3 bucket.';
+          const unconfigured = message.includes('S3 not configured');
+          return res.status(unconfigured ? 400 : 500).json({
+            success: false,
+            error: unconfigured ? 'S3 is not configured. Add your S3-compatible endpoint and credentials in Admin Settings first.' : message,
+          });
         }
       },
     );

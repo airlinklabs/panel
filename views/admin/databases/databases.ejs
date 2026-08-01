@@ -20,6 +20,33 @@
 
       <div class="al-page-body">
 
+        <div class="mb-5 grid gap-4 md:grid-cols-2">
+          <div class="al-card rounded-xl p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Auto-generate database host</h3>
+                <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)">Creates a MySQL host from the panel environment defaults (<span class="font-mono">MYSQL_HOST</span>, <span class="font-mono">MYSQL_PORT</span>, <span class="font-mono">MYSQL_USER</span>, <span class="font-mono">MYSQL_PASSWORD</span>) when none exists, then verifies the connection.</p>
+              </div>
+              <button onclick="autoGenerateHost()" type="button" class="al-btn-primary shrink-0" id="autoHostBtn">
+                <%- icon('zap', { size: 15 }) %>
+                <span class="ml-1.5">Auto-generate</span>
+              </button>
+            </div>
+          </div>
+          <div class="al-card rounded-xl p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Auto-generate S3 bucket</h3>
+                <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)">Creates the bucket configured in Admin Settings on your S3-compatible endpoint if it does not exist yet.</p>
+              </div>
+              <button onclick="autoGenerateBucket()" type="button" class="al-btn-primary shrink-0" id="autoBucketBtn">
+                <%- icon('zap', { size: 15 }) %>
+                <span class="ml-1.5">Auto-generate</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <% if (req.query.err == "none") { %>
           <%- include('../../components/ui/alert', { type: 'success', message: 'Database host created!', detail: 'The host has been saved and is ready to use.' }) %>
         <% } %>
@@ -36,7 +63,7 @@
               iconName: 'database',
               title: 'No database hosts yet',
               description: 'Add a MySQL host to start provisioning databases.',
-              action: '<a href="/admin/databases/create"><button type="button" class="al-btn-primary">Add Host</button></a>'
+              action: '<button onclick="autoGenerateHost()" type="button" class="al-btn-primary">Auto-generate host</button>'
             }) %>
           <% } else { %>
           <table class="al-table">

@@ -1,4 +1,4 @@
-import { S3Client, DeleteObjectCommand, ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, CreateBucketCommand, DeleteObjectCommand, ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { createReadStream } from 'node:fs';
 import prisma from '../../../db';
@@ -63,6 +63,22 @@ export async function testS3Connection(): Promise<{ success: boolean; latency?: 
       success: false,
       error: error instanceof Error ? error.message : 'S3 connection failed',
     };
+  }
+}
+
+export async function ensureS3Bucket(): Promise<{ created: boolean }> {
+  const { client, bucket } = await getS3Config();
+  try {
+    await client.send(new ListObjectsV2Command({ Bucket: bucket, MaxKeys: 1 }));
+    return { created: false };
+  } catch (error) {
+    const status = (error as { $metadata?: { httpStatusCode?: number } })?.$metadata?.httpStatusCode;
+    const name = (error as { name?: string })?.name;
+    if (status !== 404 && name !== 'NotFound' && name !== 'NoSuchBucket') {
+      throw error;
+    }
+    await client.send(new CreateBucketCommand({ Bucket: bucket }));
+    return { created: true };
   }
 }
 

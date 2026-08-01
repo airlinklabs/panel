@@ -2,6 +2,50 @@ function showConfirmModal(title, message, onConfirm) {
   window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Delete', onConfirm });
 }
 
+async function autoGenerateHost() {
+  const btn = document.getElementById('autoHostBtn');
+  const label = btn ? btn.querySelector('span') : null;
+  if (btn) btn.disabled = true;
+  if (label) label.textContent = 'Working…';
+  try {
+    const response = await fetch('/admin/databases/auto-host', { method: 'POST' });
+    const result = await response.json();
+    if (result.success) {
+      showToast(result.created ? 'Host generated and connection verified.' : 'Host already exists. Connection verified.', 'success');
+      setTimeout(() => window.location.reload(), 900);
+    } else {
+      showToast(result.error || 'Failed to auto-generate host', 'error');
+      if (btn) btn.disabled = false;
+      if (label) label.textContent = 'Auto-generate';
+    }
+  } catch {
+    showToast('Request failed. Try again?', 'error');
+    if (btn) btn.disabled = false;
+    if (label) label.textContent = 'Auto-generate';
+  }
+}
+
+async function autoGenerateBucket() {
+  const btn = document.getElementById('autoBucketBtn');
+  const label = btn ? btn.querySelector('span') : null;
+  if (btn) btn.disabled = true;
+  if (label) label.textContent = 'Working…';
+  try {
+    const response = await fetch('/admin/databases/auto-bucket', { method: 'POST' });
+    const result = await response.json();
+    if (result.success) {
+      showToast(result.created ? 'Bucket created.' : 'Bucket already exists.', 'success');
+    } else {
+      showToast(result.error || 'Failed to auto-generate bucket', 'error');
+    }
+  } catch {
+    showToast('Request failed. Try again?', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+    if (label) label.textContent = 'Auto-generate';
+  }
+}
+
 async function testHost(hostId) {
   try {
     const response = await fetch(`/admin/databases/${hostId}/test`, { method: 'POST' });
