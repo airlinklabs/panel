@@ -1,11 +1,11 @@
 <% if (typeof installed !== 'undefined') { %>
 <% if (installed.failed) { %>
 <div class="mx-4 sm:mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
-  <div class="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center shrink-0">
+  <div class="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--theme-danger-bg);">
     <%- icon('x', { class: 'h-4 w-4 text-red-500 dark:text-red-400', strokeWidth: 2 }) %>
   </div>
   <div class="min-w-0">
-    <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100">Installation failed</p>
+    <p class="text-sm font-medium text-neutral-800 dark:text-neutral-200">Installation failed</p>
     <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Check the server logs or contact an administrator.</p>
   </div>
 </div>
@@ -19,8 +19,8 @@
   </div>
   <div class="flex-1 min-w-0">
     <div class="flex items-center gap-2">
-      <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100 shrink-0">Installing server</p>
-      <span class="text-neutral-300 dark:text-neutral-600">·</span>
+      <p class="text-sm font-medium text-neutral-800 dark:text-neutral-200 shrink-0">Installing server</p>
+      <span class="text-neutral-300 dark:text-neutral-400">·</span>
       <p id="installStateText" class="text-xs text-neutral-500 dark:text-neutral-400 truncate">Waiting for daemon…</p>
     </div>
   </div>
@@ -56,7 +56,8 @@
       spinnerEl.classList.add('text-emerald-500');
     }
     if (iconWrap) {
-      iconWrap.className = 'h-8 w-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0';
+      iconWrap.style.background = 'var(--theme-success-bg)';
+      iconWrap.className = 'h-8 w-8 rounded-lg flex items-center justify-center shrink-0';
     }
     setTimeout(function() { window.location.reload(); }, 1600);
   }
@@ -73,7 +74,8 @@
       spinnerEl.classList.add('text-red-500');
     }
     if (iconWrap) {
-      iconWrap.className = 'h-8 w-8 rounded-lg bg-red-50 dark:bg-red-500/10 flex items-center justify-center shrink-0';
+      iconWrap.style.background = 'var(--theme-danger-bg)';
+      iconWrap.className = 'h-8 w-8 rounded-lg flex items-center justify-center shrink-0';
     }
   }
 

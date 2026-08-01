@@ -70,9 +70,9 @@
               <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide">v<%= addon.version %><% if (addon.author) { %> · <%= addon.author %><% } %></td>
               <td class="whitespace-nowrap px-3 py-4 text-sm col-hide">
                 <% if (addon.hasDisabledPh) { %>
-                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 ring-amber-600/20 dark:ring-amber-400/20">Not enabled</span>
+                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-warning-bg);color:var(--theme-warning);--tw-ring-color:color-mix(in srgb, var(--theme-warning) 25%, transparent);">Not enabled</span>
                 <% } else if (addon.enabled) { %>
-                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-600/20 dark:ring-emerald-400/20">Enabled</span>
+                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent);">Enabled</span>
                 <% } else { %>
                 <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-300 ring-neutral-300 dark:ring-white/10">Disabled</span>
                 <% } %>

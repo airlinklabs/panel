@@ -73,10 +73,17 @@
 
   .al-btn-danger {
     @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
-    background: var(--theme-btn-danger-bg);
-    color: var(--theme-btn-danger-text);
+    background: var(--theme-btn-danger-bg, #dc2626);
+    color: var(--theme-btn-danger-text, #ffffff);
   }
-  .al-btn-danger:hover:not(:disabled) { background: var(--theme-btn-danger-hover); }
+  .al-btn-danger:hover:not(:disabled) { background: var(--theme-btn-danger-hover, #b91c1c); }
+
+  .al-btn-success {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    background: var(--theme-btn-success-bg, #15803d);
+    color: var(--theme-btn-success-text, #ffffff);
+  }
+  .al-btn-success:hover:not(:disabled) { background: var(--theme-btn-success-hover, #166534); }
 
   /* Ghost / icon button */
   .al-btn-ghost {
@@ -120,6 +127,7 @@
   .al-badge-offline { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-danger-bg); color: var(--theme-danger); }
   .al-badge-warning { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-warning-bg); color: var(--theme-warning); }
   .al-badge-info    { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-info-bg); color: var(--theme-info); }
+  .al-badge-neutral { @apply inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full; background: var(--theme-badge-neutral-bg, rgba(0,0,0,0.05)); color: var(--theme-badge-neutral-text, #525252); }
 
   /* Status dot (8px, no ping animation — kills the toy look) */
   .al-dot-online  { @apply inline-block w-2 h-2 rounded-full shrink-0; background: var(--theme-success); }

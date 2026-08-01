@@ -70,6 +70,12 @@
   --theme-btn-secondary-border: oklch(28% 0.01 260);
   --theme-btn-secondary-text:   oklch(70% 0.01 260);
   --theme-btn-secondary-hover:  oklch(24% 0.01 260);
+  --theme-btn-danger-bg:        oklch(65% 0.22 25);
+  --theme-btn-danger-text:      oklch(98% 0.01 25);
+  --theme-btn-danger-hover:     oklch(70% 0.22 25);
+  --theme-btn-success-bg:       oklch(72% 0.19 155);
+  --theme-btn-success-text:     oklch(18% 0.03 155);
+  --theme-btn-success-hover:    oklch(78% 0.19 155);
 
   /* --- Toggle / switch --- */
   --theme-toggle-track:     oklch(25% 0.01 260);
@@ -92,6 +98,7 @@
   --theme-code-bg:          oklch(11% 0.01 260);
   --theme-code-text:        oklch(75% 0.14 175);
   --theme-code-border:      oklch(22% 0.01 260);
+  --theme-terminal-bg:      oklch(13% 0.01 260);
 }
 
 /* ------------------------------------------------------------------ */
@@ -345,4 +352,43 @@ html.dark .a-icon {
 
 html.dark .a-icon svg {
   color: var(--theme-accent) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Text hover states, active fills, placeholders, file inputs            */
+/* ------------------------------------------------------------------ */
+
+html.dark [class*="dark:hover:text-neutral-1"],
+html.dark [class*="dark:hover:text-neutral-2"],
+html.dark [class*="dark:hover:text-neutral-3"],
+html.dark [class*="dark:hover:text-white"] {
+  color: var(--theme-text-strong) !important;
+}
+
+html.dark [class*="dark:active:bg-white/5"] {
+  background-color: var(--theme-bg-hover) !important;
+}
+
+html.dark [class*="dark:bg-white/10"],
+html.dark [class*="dark:peer-checked:bg-white/10"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+html.dark [class*="dark:bg-neutral-6"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--theme-text-placeholder) !important;
+}
+
+html.dark input[type="file"]::file-selector-button {
+  background-color: var(--theme-btn-secondary-bg) !important;
+  color: var(--theme-btn-secondary-text) !important;
+  border-color: var(--theme-btn-secondary-border) !important;
+}
+
+html.dark [class*="dark:hover:border-"] {
+  border-color: var(--theme-border-accent) !important;
 }

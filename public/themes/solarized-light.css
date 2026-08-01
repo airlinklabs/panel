@@ -87,6 +87,12 @@
   --theme-btn-secondary-border: #d5ccb3;
   --theme-btn-secondary-text:   #586e75;
   --theme-btn-secondary-hover:  #e4dbc2;
+  --theme-btn-danger-bg:        #cd2a24;
+  --theme-btn-danger-text:      #ffffff;
+  --theme-btn-danger-hover:     #e0564e;
+  --theme-btn-success-bg:       #587200;
+  --theme-btn-success-text:     #ffffff;
+  --theme-btn-success-hover:    #6b8800;
 
   /* --- Toggle / switch --- */
   --theme-toggle-track:     #c8bfa6;
@@ -370,4 +376,43 @@ button.bg-white:hover,
 [class*="bg-neutral-50"][class*="rounded-xl"],
 [class*="dark:bg-neutral-8\/20"] {
   background-color: var(--theme-bg-card) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Text hover states, active fills, placeholders, file inputs            */
+/* ------------------------------------------------------------------ */
+
+html.dark [class*="dark:hover:text-neutral-1"],
+html.dark [class*="dark:hover:text-neutral-2"],
+html.dark [class*="dark:hover:text-neutral-3"],
+html.dark [class*="dark:hover:text-white"] {
+  color: var(--theme-text-strong) !important;
+}
+
+html.dark [class*="dark:active:bg-white/5"] {
+  background-color: var(--theme-bg-hover) !important;
+}
+
+html.dark [class*="dark:bg-white/10"],
+html.dark [class*="dark:peer-checked:bg-white/10"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+html.dark [class*="dark:bg-neutral-6"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--theme-text-placeholder) !important;
+}
+
+html.dark input[type="file"]::file-selector-button {
+  background-color: var(--theme-btn-secondary-bg) !important;
+  color: var(--theme-btn-secondary-text) !important;
+  border-color: var(--theme-btn-secondary-border) !important;
+}
+
+html.dark [class*="dark:hover:border-"] {
+  border-color: var(--theme-border-accent) !important;
 }

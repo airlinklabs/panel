@@ -129,7 +129,7 @@
                 <div class="min-w-0 flex-1 mr-3">
                   <h3 class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= server.name %>
                     <% if (server.shared) { %>
-                    <span class="inline-flex items-center gap-0.5 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[10px] font-medium text-indigo-500 align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> Shared</span>
+                    <span class="al-badge-neutral align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> Shared</span>
                     <% } %>
                   </h3>
                   <% if (server.description) { %>
@@ -195,7 +195,7 @@
                 <td class="al-table-td pl-6">
                   <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= server.name %>
                     <% if (server.shared) { %>
-                    <span class="inline-flex items-center gap-0.5 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[10px] font-medium text-indigo-500 align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> Shared</span>
+                    <span class="al-badge-neutral align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> Shared</span>
                     <% } %>
                   </p>
                   <% if (server.description) { %><p class="text-xs truncate max-w-xs" style="color:var(--theme-text-muted);"><%= server.description %></p><% } %>

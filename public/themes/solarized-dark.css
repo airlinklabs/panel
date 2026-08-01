@@ -87,6 +87,12 @@
   --theme-btn-secondary-border: #164450;
   --theme-btn-secondary-text:   #839496;
   --theme-btn-secondary-hover:  #0d3f52;
+  --theme-btn-danger-bg:        #dc322f;
+  --theme-btn-danger-text:      #fdf6e3;
+  --theme-btn-danger-hover:     #e0564e;
+  --theme-btn-success-bg:       #859900;
+  --theme-btn-success-text:     #002b36;
+  --theme-btn-success-hover:    #9db10c;
 
   /* --- Toggle / switch --- */
   --theme-toggle-track:     #0f3a47;
@@ -109,6 +115,7 @@
   --theme-code-bg:          #021e28;
   --theme-code-text:        #2aa198;
   --theme-code-border:      #0f3a47;
+  --theme-terminal-bg:      #002b36;
 }
 
 /* ------------------------------------------------------------------ */
@@ -368,4 +375,43 @@ html.dark .a-icon {
 
 html.dark .a-icon svg {
   color: #3d7a9e !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Text hover states, active fills, placeholders, file inputs            */
+/* ------------------------------------------------------------------ */
+
+html.dark [class*="dark:hover:text-neutral-1"],
+html.dark [class*="dark:hover:text-neutral-2"],
+html.dark [class*="dark:hover:text-neutral-3"],
+html.dark [class*="dark:hover:text-white"] {
+  color: var(--theme-text-strong) !important;
+}
+
+html.dark [class*="dark:active:bg-white/5"] {
+  background-color: var(--theme-bg-hover) !important;
+}
+
+html.dark [class*="dark:bg-white/10"],
+html.dark [class*="dark:peer-checked:bg-white/10"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+html.dark [class*="dark:bg-neutral-6"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--theme-text-placeholder) !important;
+}
+
+html.dark input[type="file"]::file-selector-button {
+  background-color: var(--theme-btn-secondary-bg) !important;
+  color: var(--theme-btn-secondary-text) !important;
+  border-color: var(--theme-btn-secondary-border) !important;
+}
+
+html.dark [class*="dark:hover:border-"] {
+  border-color: var(--theme-border-accent) !important;
 }

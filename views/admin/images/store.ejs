@@ -239,7 +239,7 @@
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
   }
-  .err-box { background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 10px 14px; }
+  .err-box { background: var(--theme-danger-bg); border: 1px solid var(--theme-danger-border, color-mix(in srgb, var(--theme-danger) 20%, transparent)); border-radius: 10px; padding: 10px 14px; }
   .err-txt { font-size: 11.5px; color: #dc2626; }
   html.dark .err-txt { color: #f87171; }
   @media (max-width: 640px) { .col-hide { display: none; } }

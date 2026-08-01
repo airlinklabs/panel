@@ -64,6 +64,9 @@
   --theme-btn-danger-bg:       #dc2626;
   --theme-btn-danger-text:     #ffffff;
   --theme-btn-danger-hover:    #b91c1c;
+  --theme-btn-success-bg:      #15803d;
+  --theme-btn-success-text:    #ffffff;
+  --theme-btn-success-hover:   #166534;
 
   /* Skeleton */
   --theme-skeleton-base:       #f0f0f0;
