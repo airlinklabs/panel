@@ -36,35 +36,35 @@
 
       <div class="px-8 pt-5 mb-8">
         <div class="flex items-center gap-3 mb-1">
-          <h1 class="text-base font-medium text-neutral-800 dark:text-white">Credits</h1>
-          <span class="text-xs font-mono text-neutral-400 bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 px-2 py-0.5 rounded-full">v<%= version %></span>
+          <h1 class="text-base font-medium" style="color:var(--theme-text-strong);">Credits</h1>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-md" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border); color:var(--theme-text-muted);">v<%= version %></span>
         </div>
-        <p class="text-sm text-neutral-500">The people who build and maintain Airlink.</p>
+        <p class="text-sm" style="color:var(--theme-text-muted);">The people who build and maintain Airlink.</p>
       </div>
 
       <div class="px-8 space-y-8 max-w-5xl">
 
         <!-- Project leads — horizontal row on desktop -->
         <section>
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-4">Project leads</h2>
+          <h2 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:var(--theme-text-muted);">Project leads</h2>
           <div class="grid grid-cols-3 gap-4">
             <% const leads = [
-              { login: 'thavanish', role: 'Current maintainer' },
+              { login: 'bthavanish', role: 'Current maintainer' },
               { login: 'privt00',   role: 'Project lead' },
               { login: 'achul123',  role: 'Core developer' },
             ]; %>
             <% leads.forEach(function(lead) { %>
-            <div class="flex items-center gap-4 rounded-xl bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-5 py-4">
+            <div class="al-card flex items-center gap-4 px-5 py-4">
               <img src="https://github.com/<%= lead.login %>.png?size=80"
                    alt="<%= lead.login %>"
                    loading="lazy"
                    class="h-12 w-12 rounded-xl border border-neutral-200 dark:border-white/10 object-cover shrink-0"
                    onerror="this.src='https://github.com/ghost.png'">
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-semibold text-neutral-800 dark:text-white truncate"><%= lead.login %></p>
-                <p class="text-xs text-neutral-500 mt-0.5"><%= lead.role %></p>
+                <p class="text-sm font-semibold truncate" style="color:var(--theme-text-strong);"><%= lead.login %></p>
+                <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= lead.role %></p>
                 <a href="https://github.com/<%= lead.login %>" target="_blank" rel="noopener"
-                   class="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition mt-1.5">
+                   class="inline-flex items-center gap-1 text-xs mt-1.5 transition-colors" style="color:var(--theme-text-muted);">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3">
                     <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12Z"/>
                   </svg>
@@ -79,52 +79,52 @@
         <!-- Contributors -->
         <section>
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Contributors</h2>
-            <span id="contrib-cache-label" class="text-xs text-neutral-400"></span>
+            <h2 class="text-xs font-semibold uppercase tracking-widest" style="color:var(--theme-text-muted);">Contributors</h2>
+            <span id="contrib-cache-label" class="text-xs" style="color:var(--theme-text-muted);"></span>
           </div>
           <div id="contributors-grid" class="grid grid-cols-3 lg:grid-cols-4 gap-3">
             <div class="col-span-full flex items-center gap-2 py-2">
               <div class="h-4 w-4 border-2 border-neutral-300 dark:border-neutral-600 border-t-neutral-600 dark:border-t-neutral-300 rounded-full animate-spin"></div>
-              <span class="text-sm text-neutral-400">Loading contributors…</span>
+              <span class="text-sm" style="color:var(--theme-text-muted);">Loading contributors…</span>
             </div>
           </div>
         </section>
 
         <!-- Links — full horizontal row -->
         <section>
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-4">Links</h2>
+          <h2 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:var(--theme-text-muted);">Links</h2>
           <div class="grid grid-cols-4 gap-3">
 
             <a href="https://github.com/airlinklabs/panel" target="_blank" rel="noopener"
-              class="flex items-center gap-3 rounded-xl bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-4 py-3.5 hover:border-neutral-300 dark:hover:border-white/10 transition">
-              <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-white/5 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-neutral-600 dark:text-neutral-300"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12Z"/></svg>
+              class="al-card flex items-center gap-3 px-4 py-3.5 hover:border-[var(--theme-border-accent)] transition-colors">
+              <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0" style="background:var(--theme-bg-secondary);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4" style="color:var(--theme-text-muted);"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12Z"/></svg>
               </span>
-              <div><p class="text-sm font-medium text-neutral-800 dark:text-white">GitHub</p><p class="text-xs text-neutral-500">Source code</p></div>
+              <div><p class="text-sm font-medium" style="color:var(--theme-text-strong);">GitHub</p><p class="text-xs" style="color:var(--theme-text-muted);">Source code</p></div>
             </a>
 
             <a href="https://discord.gg/ujXyxwwMHc" target="_blank" rel="noopener"
-              class="flex items-center gap-3 rounded-xl bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-4 py-3.5 hover:border-neutral-300 dark:hover:border-white/10 transition">
-              <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-white/5 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-neutral-600 dark:text-neutral-300"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.03.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03ZM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418Zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418Z"/></svg>
+              class="al-card flex items-center gap-3 px-4 py-3.5 hover:border-[var(--theme-border-accent)] transition-colors">
+              <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0" style="background:var(--theme-bg-secondary);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4" style="color:var(--theme-text-muted);"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.03.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03ZM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418Zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418Z"/></svg>
               </span>
-              <div><p class="text-sm font-medium text-neutral-800 dark:text-white">Discord</p><p class="text-xs text-neutral-500">Community</p></div>
+              <div><p class="text-sm font-medium" style="color:var(--theme-text-strong);">Discord</p><p class="text-xs" style="color:var(--theme-text-muted);">Community</p></div>
             </a>
 
             <a href="https://airlinklabs.github.io/home/" target="_blank" rel="noopener"
-              class="flex items-center gap-3 rounded-xl bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-4 py-3.5 hover:border-neutral-300 dark:hover:border-white/10 transition">
-              <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-white/5 shrink-0">
-                <%- icon('globe', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300', strokeWidth: 1.5 }) %>
+              class="al-card flex items-center gap-3 px-4 py-3.5 hover:border-[var(--theme-border-accent)] transition-colors">
+              <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0" style="background:var(--theme-bg-secondary);">
+                <%- icon('globe', { class: 'w-4 h-4', style: 'color:var(--theme-text-muted);', strokeWidth: 1.5 }) %>
               </span>
-              <div><p class="text-sm font-medium text-neutral-800 dark:text-white">Website</p><p class="text-xs text-neutral-500">airlinklabs.github.io</p></div>
+              <div><p class="text-sm font-medium" style="color:var(--theme-text-strong);">Website</p><p class="text-xs" style="color:var(--theme-text-muted);">airlinklabs.github.io</p></div>
             </a>
 
             <a href="https://airlinklabs.github.io/home/docs/quickstart/" target="_blank" rel="noopener"
-              class="flex items-center gap-3 rounded-xl bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-4 py-3.5 hover:border-neutral-300 dark:hover:border-white/10 transition">
-              <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-white/5 shrink-0">
-                <%- icon('book-open', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300', strokeWidth: 1.5 }) %>
+              class="al-card flex items-center gap-3 px-4 py-3.5 hover:border-[var(--theme-border-accent)] transition-colors">
+              <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0" style="background:var(--theme-bg-secondary);">
+                <%- icon('book-open', { class: 'w-4 h-4', style: 'color:var(--theme-text-muted);', strokeWidth: 1.5 }) %>
               </span>
-              <div><p class="text-sm font-medium text-neutral-800 dark:text-white">Docs</p><p class="text-xs text-neutral-500">Documentation</p></div>
+              <div><p class="text-sm font-medium" style="color:var(--theme-text-strong);">Docs</p><p class="text-xs" style="color:var(--theme-text-muted);">Documentation</p></div>
             </a>
 
           </div>
@@ -132,15 +132,15 @@
 
         <!-- License -->
         <section class="pb-4">
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-4">License</h2>
-          <div class="rounded-xl bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-5 py-4 flex items-start gap-4">
-            <span class="shrink-0 mt-0.5 w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-white/5">
-              <%- icon('file-text', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300', strokeWidth: 1.5 }) %>
+          <h2 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:var(--theme-text-muted);">License</h2>
+          <div class="al-card flex items-start gap-4 px-5 py-4">
+            <span class="shrink-0 mt-0.5 w-8 h-8 flex items-center justify-center rounded-lg" style="background:var(--theme-bg-secondary);">
+              <%- icon('file-text', { class: 'w-4 h-4', style: 'color:var(--theme-text-muted);', strokeWidth: 1.5 }) %>
             </span>
             <div>
-              <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1">MIT License</p>
-              <p class="text-xs text-neutral-500 leading-relaxed">Airlink is free and open source software. Use, modify, and distribute it provided the copyright notice is included in all copies.</p>
-              <a href="https://github.com/airlinklabs/panel/blob/main/LICENSE" target="_blank" rel="noopener" class="inline-block mt-2 text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 underline transition">View full license</a>
+              <p class="text-sm font-medium mb-1" style="color:var(--theme-text-strong);">MIT License</p>
+              <p class="text-xs leading-relaxed" style="color:var(--theme-text-muted);">Airlink is free and open source software. Use, modify, and distribute it provided the copyright notice is included in all copies.</p>
+              <a href="https://github.com/airlinklabs/panel/blob/main/LICENSE" target="_blank" rel="noopener" class="inline-block mt-2 text-xs underline transition-colors" style="color:var(--theme-text-muted);">View full license</a>
             </div>
           </div>
         </section>
@@ -277,7 +277,7 @@
   // Contributors cache
   var CACHE_KEY    = 'airlink_contributors_v2';
   var CACHE_TTL_MS = 6 * 60 * 60 * 1000;
-  var LEADS        = ['thavanish', 'privt00', 'achul123'];
+  var LEADS        = ['bthavanish', 'privt00', 'achul123'];
 
   function showCacheLabel(ts) {
     var el = document.getElementById('contrib-cache-label');
@@ -293,15 +293,15 @@
       return !LEADS.includes(c.login) && c.type !== 'Bot';
     });
     if (!others.length) {
-      grid.innerHTML = '<p class="col-span-full text-sm text-neutral-400">No other contributors found.</p>';
+      grid.innerHTML = '<p class="col-span-full text-sm" style="color:var(--theme-text-muted);">No other contributors found.</p>';
       return;
     }
     grid.innerHTML = others.map(function (c) {
       return '<a href="' + c.html_url + '" target="_blank" rel="noopener"' +
-        ' class="flex items-center gap-3 rounded-xl bg-white/80 dark:bg-white/5 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-3 py-3 hover:border-neutral-300 dark:hover:border-white/10 transition min-w-0">' +
+        ' class="al-card flex items-center gap-3 px-3 py-3 hover:border-[var(--theme-border-accent)] transition-colors min-w-0">' +
         '<img src="' + c.avatar_url + '&s=48" alt="' + c.login + '" class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-white/10 object-cover shrink-0" onerror="this.src=\'https://github.com/ghost.png\'">' +
-        '<div class="min-w-0 flex-1"><p class="text-xs font-medium text-neutral-800 dark:text-white truncate">' + c.login + '</p>' +
-        '<p class="text-[10px] text-neutral-400">' + c.contributions + ' commit' + (c.contributions !== 1 ? 's' : '') + '</p></div></a>';
+        '<div class="min-w-0 flex-1"><p class="text-xs font-medium truncate" style="color:var(--theme-text-strong);">' + c.login + '</p>' +
+        '<p class="text-[10px]" style="color:var(--theme-text-muted);">' + c.contributions + ' commit' + (c.contributions !== 1 ? 's' : '') + '</p></div></a>';
     }).join('');
   }
 
@@ -330,7 +330,7 @@
       })
       .catch(function () {
         var grid = document.getElementById('contributors-grid');
-        if (grid) grid.innerHTML = '<p class="col-span-full text-sm text-neutral-400">Could not load contributors. GitHub may be rate limiting — try again later.</p>';
+        if (grid) grid.innerHTML = '<p class="col-span-full text-sm" style="color:var(--theme-text-muted);">Could not load contributors. GitHub may be rate limiting — try again later.</p>';
       });
   }
 })();

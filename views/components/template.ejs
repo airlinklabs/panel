@@ -3,7 +3,7 @@
   <div id="pc-sidebar2" class="flex flex-col h-full">
 
     <!-- Static top: logo -->
-    <div class="pl-6 pt-4 pb-4 flex min-w-0 shrink-0">
+    <div id="sidebar-logo-block" class="pl-6 pt-4 pb-4 flex min-w-0 shrink-0">
       <a href="/" id="sidebar-logo-link" class="flex items-center min-w-0">
         <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg p-1 h-10 w-10 rounded-xl mr-3 shrink-0 inline-flex" style="background:var(--theme-logo-bg);">
         <h1 class="font-medium tracking-tight text-lg truncate min-w-0" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></h1>
@@ -158,20 +158,28 @@
       }
     }
     if (logo) {
-      var onCredits = path === '/admin/overview' || path.startsWith('/admin/overview/');
+      var onCredits = path === '/credits' || path.startsWith('/credits/');
+      var logoBlock = document.getElementById('sidebar-logo-block');
       var logoTitle = logo.querySelector('h1');
+      var logoImg = logo.querySelector('img');
       if (onCredits) {
-        logo.style.background = isDark ? '#f0f0f0' : '#171717';
+        if (logoBlock) {
+          logoBlock.style.background = isDark ? '#f0f0f0' : '#000000';
+          logoBlock.style.borderRadius = '0.75rem';
+        }
         logo.style.color = isDark ? '#171717' : '#f0f0f0';
-        logo.style.borderRadius = '0.75rem';
+        if (logoImg) logoImg.style.background = '#000000';
         if (logoTitle) {
           logoTitle.style.color = isDark ? '#171717' : '#f0f0f0';
           logoTitle.style.fontWeight = '700';
         }
       } else {
-        logo.style.background = '';
+        if (logoBlock) {
+          logoBlock.style.background = '';
+          logoBlock.style.borderRadius = '';
+        }
         logo.style.color = '';
-        logo.style.borderRadius = '';
+        if (logoImg) logoImg.style.background = '';
         if (logoTitle) {
           logoTitle.style.color = '';
           logoTitle.style.fontWeight = '';

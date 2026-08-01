@@ -374,20 +374,28 @@
     }
     var logo = document.getElementById('sidebar-logo-link');
     if (logo) {
-      var onCredits = path === '/admin/overview' || path.startsWith('/admin/overview/');
+      var onCredits = path === '/credits' || path.startsWith('/credits/');
+      var logoBlock = document.getElementById('sidebar-logo-block');
       var logoTitle = logo.querySelector('h1');
+      var logoImg = logo.querySelector('img');
       if (onCredits) {
-        logo.style.background = isDark ? '#f0f0f0' : '#171717';
+        if (logoBlock) {
+          logoBlock.style.background = isDark ? '#f0f0f0' : '#000000';
+          logoBlock.style.borderRadius = '0.75rem';
+        }
         logo.style.color = isDark ? '#171717' : '#f0f0f0';
-        logo.style.borderRadius = '0.75rem';
+        if (logoImg) logoImg.style.background = '#000000';
         if (logoTitle) {
           logoTitle.style.color = isDark ? '#171717' : '#f0f0f0';
           logoTitle.style.fontWeight = '700';
         }
       } else {
-        logo.style.background = '';
+        if (logoBlock) {
+          logoBlock.style.background = '';
+          logoBlock.style.borderRadius = '';
+        }
         logo.style.color = '';
-        logo.style.borderRadius = '';
+        if (logoImg) logoImg.style.background = '';
         if (logoTitle) {
           logoTitle.style.color = '';
           logoTitle.style.fontWeight = '';
