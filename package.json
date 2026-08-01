@@ -12,6 +12,7 @@
     "setup": "pnpm install && prisma generate && prisma db push && pnpm run build",
     "start": "bun src/tui/index.ts",
     "start:panel": "node --env-file=.env dist/app.js",
+    "start:headless": "node --env-file=.env dist/app.js start",
     "dev": "prisma migrate deploy && prisma generate && nodemon",
     "build": "tsc && tsc -p tsconfig.prisma.json && tailwindcss -i ./public/tw.css -o ./public/styles.css",
     "build:css": "tailwindcss -i ./public/tw.css -o ./public/styles.css --watch",
