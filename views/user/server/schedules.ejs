@@ -112,7 +112,7 @@
                 <div class="px-5 py-4 space-y-3">
                   <% if (schedule.tasks.length > 0) { %>
                     <% schedule.tasks.forEach(task => { %>
-                      <div class="flex items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm" style="background:var(--theme-bg-secondary)">
+                      <div class="flex items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm task-row" data-task-row="<%= task.id %>" style="background:var(--theme-bg-secondary)">
                         <div class="min-w-0 flex items-center gap-2.5">
                           <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%= task.action %></span>
                           <span class="truncate font-mono text-xs" style="color:var(--theme-text)">
@@ -128,8 +128,10 @@
                       </div>
                     <% }); %>
                   <% } else { %>
-                    <p class="text-sm italic" style="color:var(--theme-text-placeholder)">No tasks yet. Add one below.</p>
+                    <p class="text-sm italic sched-empty" data-schedule="<%= schedule.id %>" style="color:var(--theme-text-placeholder)">No tasks yet. Add one below.</p>
                   <% } %>
+
+                  <div data-pending-tasks="<%= schedule.id %>" class="space-y-3"></div>
 
                   <!-- Add task form -->
                   <div class="flex flex-wrap items-end gap-2.5 pt-1">
@@ -163,6 +165,12 @@
                       style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
                       <%- icon('plus', { class: 'w-3 h-3 mr-1' }) %>
                       Add task
+                    </button>
+                    <button onclick="saveTasks(<%= schedule.id %>)" data-save-tasks="<%= schedule.id %>"
+                      class="hidden inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                      style="color:#fff;background:var(--theme-accent)">
+                      <%- icon('check', { class: 'w-3 h-3 mr-1' }) %>
+                      Save tasks
                     </button>
                   </div>
                 </div>
@@ -202,9 +210,55 @@
         <input id="schedName" type="text" class="al-input w-full" placeholder="Daily restart" autocomplete="off">
       </div>
       <div>
+        <div class="flex rounded-lg p-0.5 text-xs font-medium mb-1.5" style="background:var(--theme-bg-secondary)">
+          <button type="button" data-sched-mode="cron" class="sched-mode-btn flex-1 rounded-md px-3 py-1.5 transition" style="color:var(--theme-text-strong);background:var(--theme-bg-card)">Cron expression</button>
+          <button type="button" data-sched-mode="visual" class="sched-mode-btn flex-1 rounded-md px-3 py-1.5 transition" style="color:var(--theme-text-muted)">Visual timing</button>
+        </div>
+      </div>
+      <div id="schedCronWrap">
         <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Cron expression</label>
         <input id="schedCron" type="text" class="al-input w-full font-mono" placeholder="0 */6 * * *" autocomplete="off" value="0 */6 * * *">
         <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Format: <span class="font-mono">minute hour day month weekday</span> — <span id="cronPreview" class="font-medium" style="color:var(--theme-accent)">every 6 hours</span></p>
+      </div>
+      <div id="schedVisualWrap" class="hidden space-y-3">
+        <div>
+          <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Frequency</label>
+          <select id="schedFreq" class="al-input w-full">
+            <option value="minute">Every minute</option>
+            <option value="15m">Every 15 minutes</option>
+            <option value="hourly">Every hour</option>
+            <option value="daily">Every day</option>
+            <option value="weekly">Every week</option>
+            <option value="monthly">Every month</option>
+          </select>
+        </div>
+        <div id="schedVisualDaily" class="grid grid-cols-2 gap-3 hidden">
+          <div>
+            <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Hour</label>
+            <input id="schedVisualHour" type="number" min="0" max="23" value="0" class="al-input w-full">
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Minute</label>
+            <input id="schedVisualMinute" type="number" min="0" max="59" value="0" class="al-input w-full">
+          </div>
+        </div>
+        <div id="schedVisualWeekly" class="hidden">
+          <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Day of week</label>
+          <select id="schedVisualDow" class="al-input w-full">
+            <option value="0">Sunday</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+        </div>
+        <div id="schedVisualMonthly" class="hidden">
+          <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Day of month</label>
+          <input id="schedVisualDom" type="number" min="1" max="31" value="1" class="al-input w-full">
+        </div>
+        <p class="text-[11px]" style="color:var(--theme-text-muted)">Generated cron: <span id="schedVisualCron" class="font-mono font-medium" style="color:var(--theme-accent)">0 * * * *</span></p>
       </div>
       <div class="flex gap-2 pt-1">
         <button onclick="closeModal('addScheduleModal')" class="al-btn-secondary flex-1">Cancel</button>
@@ -255,10 +309,47 @@ document.getElementById('schedCron').addEventListener('input', function () {
   document.getElementById('cronPreview').textContent = describeCron(this.value);
 });
 
+const visualFields = ['schedFreq', 'schedVisualHour', 'schedVisualMinute', 'schedVisualDow', 'schedVisualDom'];
+function buildVisualCron() {
+  const freq = document.getElementById('schedFreq').value;
+  const h = document.getElementById('schedVisualHour').value || '0';
+  const m = document.getElementById('schedVisualMinute').value || '0';
+  const dow = document.getElementById('schedVisualDow').value;
+  const dom = document.getElementById('schedVisualDom').value || '1';
+  const showTime = freq === 'daily' || freq === 'weekly' || freq === 'monthly';
+  document.getElementById('schedVisualDaily').classList.toggle('hidden', !showTime);
+  document.getElementById('schedVisualWeekly').classList.toggle('hidden', freq !== 'weekly');
+  document.getElementById('schedVisualMonthly').classList.toggle('hidden', freq !== 'monthly');
+  let cron;
+  if (freq === 'minute') cron = '* * * * *';
+  else if (freq === '15m') cron = '*/15 * * * *';
+  else if (freq === 'hourly') cron = '0 * * * *';
+  else if (freq === 'daily') cron = m + ' ' + h + ' * * *';
+  else if (freq === 'weekly') cron = m + ' ' + h + ' * * ' + dow;
+  else cron = m + ' ' + h + ' ' + dom + ' * *';
+  document.getElementById('schedVisualCron').textContent = cron;
+  document.getElementById('schedCron').value = cron;
+  document.getElementById('cronPreview').textContent = describeCron(cron);
+}
+visualFields.forEach(id => document.getElementById(id).addEventListener('change', buildVisualCron));
+
+function setSchedMode(mode) {
+  document.querySelectorAll('.sched-mode-btn').forEach((b) => {
+    const active = b.dataset.schedMode === mode;
+    b.style.background = active ? 'var(--theme-bg-card)' : 'transparent';
+    b.style.color = active ? 'var(--theme-text-strong)' : 'var(--theme-text-muted)';
+  });
+  document.getElementById('schedCronWrap').classList.toggle('hidden', mode !== 'cron');
+  document.getElementById('schedVisualWrap').classList.toggle('hidden', mode !== 'visual');
+}
+document.querySelectorAll('.sched-mode-btn').forEach((b) => b.addEventListener('click', () => setSchedMode(b.dataset.schedMode)));
+
 window.openAddScheduleModal = () => {
   document.getElementById('schedName').value = '';
   document.getElementById('schedCron').value = '0 */6 * * *';
   document.getElementById('cronPreview').textContent = describeCron('0 */6 * * *');
+  setSchedMode('cron');
+  buildVisualCron();
   openModal('addScheduleModal');
 };
 
@@ -337,7 +428,39 @@ window.deleteSchedule = async (scheduleId, name) => {
   if (result) { showToast('Schedule deleted.', 'success'); setTimeout(() => location.reload(), 900); }
 };
 
-window.addTask = async (scheduleId) => {
+const pendingTasks = {};
+
+function renderPendingTasks(scheduleId) {
+  const wrap = document.querySelector('[data-pending-tasks="' + scheduleId + '"]');
+  const saveBtn = document.querySelector('[data-save-tasks="' + scheduleId + '"]');
+  const empty = document.querySelector('.sched-empty[data-schedule="' + scheduleId + '"]');
+  if (!wrap || !saveBtn) return;
+  const tasks = pendingTasks[scheduleId] || [];
+  wrap.innerHTML = '';
+  tasks.forEach((task, i) => {
+    const label = task.action === 'command' ? task.payload.command : (task.action === 'power' ? task.payload.action : task.payload.name);
+    const row = document.createElement('div');
+    row.className = 'flex items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm';
+    row.style.cssText = 'background:var(--theme-bg-secondary);border:1px dashed var(--theme-accent)';
+    row.innerHTML = '<div class="min-w-0 flex items-center gap-2.5">'
+      + '<span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">' + task.action + '</span>'
+      + '<span class="truncate font-mono text-xs" style="color:var(--theme-text)">' + label.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>'
+      + '<span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">New</span>'
+      + '</div>'
+      + '<button class="text-xs inline-flex items-center gap-1 transition shrink-0" style="color:var(--theme-danger)"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>Remove</button>';
+    row.querySelector('button').addEventListener('click', () => removePendingTask(scheduleId, i));
+    wrap.appendChild(row);
+  });
+  saveBtn.classList.toggle('hidden', tasks.length === 0);
+  if (empty) empty.classList.toggle('hidden', tasks.length > 0);
+}
+
+function removePendingTask(scheduleId, index) {
+  pendingTasks[scheduleId].splice(index, 1);
+  renderPendingTasks(scheduleId);
+}
+
+window.addTask = (scheduleId) => {
   const card = document.querySelector('[data-schedule-id="' + scheduleId + '"]');
   const action = card.querySelector('.task-action').value;
   let payload = {};
@@ -352,13 +475,43 @@ window.addTask = async (scheduleId) => {
     if (!name) { showToast('Enter a backup name.', 'error'); return; }
     payload = { name };
   }
-  const result = await api('/server/' + serverId + '/schedules/' + scheduleId + '/tasks', 'POST', { action, payload });
-  if (result) { showToast('Task added.', 'success'); setTimeout(() => location.reload(), 900); }
+  if (!pendingTasks[scheduleId]) pendingTasks[scheduleId] = [];
+  pendingTasks[scheduleId].push({ action, payload });
+  renderPendingTasks(scheduleId);
+  card.querySelector('.task-command').value = '';
+  card.querySelector('.task-backup-name').value = '';
+  showToast('Task staged. Click "Save tasks" to apply.', 'success');
+};
+
+window.saveTasks = async (scheduleId) => {
+  const tasks = pendingTasks[scheduleId] || [];
+  if (!tasks.length) return;
+  const btn = document.querySelector('[data-save-tasks="' + scheduleId + '"]');
+  btn.disabled = true;
+  btn.classList.add('opacity-60', 'pointer-events-none');
+  let ok = true;
+  for (const task of tasks) {
+    const result = await api('/server/' + serverId + '/schedules/' + scheduleId + '/tasks', 'POST', { action: task.action, payload: task.payload });
+    if (!result) { ok = false; break; }
+  }
+  btn.disabled = false;
+  btn.classList.remove('opacity-60', 'pointer-events-none');
+  if (!ok) return;
+  delete pendingTasks[scheduleId];
+  renderPendingTasks(scheduleId);
+  showToast('Tasks saved.', 'success');
+  setTimeout(() => location.reload(), 900);
 };
 
 window.deleteTask = async (scheduleId, taskId) => {
   const result = await api('/server/' + serverId + '/schedules/' + scheduleId + '/tasks/' + taskId, 'DELETE');
-  if (result) { showToast('Task removed.', 'success'); setTimeout(() => location.reload(), 900); }
+  if (!result) return;
+  const row = document.querySelector('[data-task-row="' + taskId + '"]');
+  if (row) row.remove();
+  const card = document.querySelector('[data-schedule-id="' + scheduleId + '"]');
+  const empty = card && card.querySelector('.sched-empty');
+  if (empty) empty.classList.toggle('hidden', (pendingTasks[scheduleId] || []).length > 0 || card.querySelectorAll('.task-row').length > 0);
+  showToast('Task removed.', 'success');
 };
 </script>
 

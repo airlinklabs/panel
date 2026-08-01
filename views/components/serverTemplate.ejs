@@ -1,19 +1,39 @@
 <div class="mt-6 ml-4 sm:ml-8 mb-8">
     <div>
+       <%
+        const rawMenuItemsMobile = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+        const isAdminMobile = (typeof user !== 'undefined' && user && user.isAdmin === true);
+        const isSubUserMobile = (typeof req !== 'undefined' && req && req.subUser) ? true : false;
+        const menuItemsMobile = rawMenuItemsMobile.filter(item => {
+          if (item.isAdminItem && !isAdminMobile) return false;
+          if (item.ownerOnly && isSubUserMobile) return false;
+          return true;
+        });
+        const currentPath = (typeof req !== 'undefined' && req && (req.path || req.originalUrl)) ? req.path : '';
+        const isCurrentItem = (url) => url && url !== '#' && (currentPath === url || (url !== '/' && currentPath.startsWith(url + '/')));
+        const MAX_NAV_ITEMS = 5;
+        let navBarItems = [];
+        let navOverflowItems = [];
+        if (menuItemsMobile && menuItemsMobile.length > 0) {
+          const mapped = menuItemsMobile
+            .filter(item => !item.feature || (typeof features !== 'undefined' && features.includes(item.feature)))
+            .map(item => ({
+              item,
+              url: (item.url || '#').replace(':uuid', server.UUID).replace(':id', server.id),
+            }));
+          const activeIndex = mapped.findIndex(entry => isCurrentItem(entry.url));
+          navBarItems = mapped.slice(0, MAX_NAV_ITEMS);
+          navOverflowItems = mapped.slice(MAX_NAV_ITEMS);
+          if (activeIndex >= MAX_NAV_ITEMS && activeIndex !== -1) {
+            navBarItems = [...mapped.slice(0, MAX_NAV_ITEMS - 1), mapped[activeIndex]];
+            navOverflowItems = [...mapped.slice(MAX_NAV_ITEMS - 1, activeIndex), ...mapped.slice(activeIndex + 1)];
+          }
+        }
+       %>
        <!-- Mobile server nav — shows on small screens, hides on sm+ -->
        <div class="block sm:hidden overflow-x-auto mt-3">
          <div class="flex gap-1 min-w-max pb-2">
-           <%
-            const rawMenuItemsMobile = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
-            const isAdminMobile = (typeof user !== 'undefined' && user && user.isAdmin === true);
-            const isSubUserMobile = (typeof req !== 'undefined' && req && req.subUser) ? true : false;
-            const menuItemsMobile = rawMenuItemsMobile.filter(item => {
-              if (item.isAdminItem && !isAdminMobile) return false;
-              if (item.ownerOnly && isSubUserMobile) return false;
-              return true;
-            });
-           if (!menuItemsMobile || menuItemsMobile.length === 0) {
-           %>
+           <% if (!navBarItems || navBarItems.length === 0) { %>
            <a href="/server/<%= server.UUID %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
              <%- icon('terminal', { class: 'size-4' }) %>
              Console
@@ -43,93 +63,114 @@
              Settings
            </a>
            <% } else {
-              menuItemsMobile.forEach(item => {
-                if (item.feature && !features.includes(item.feature)) return;
-                const url = (item.url || '#').replace(':uuid', server.UUID).replace(':id', server.id);
+              navBarItems.forEach(entry => {
            %>
-           <a href="<%= url %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
-             <%- item.icon %>
-             <%= item.label %>
+           <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %> style="color:var(--theme-text-muted);">
+             <%- entry.item.icon %>
+             <%= entry.item.label %>
            </a>
            <% }); } %>
+           <% if (navOverflowItems.length > 0) { %>
+           <div class="relative" data-more-menu>
+             <button type="button" data-more-btn aria-expanded="false" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4"><path fill-rule="evenodd" d="M4.5 12a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm6 0a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm6 0a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clip-rule="evenodd" /></svg>
+               More
+             </button>
+             <div data-more-panel class="absolute left-0 top-full mt-1 z-50 hidden min-w-44 rounded-xl border p-1.5 shadow-lg" style="background:var(--theme-bg-card);border-color:var(--theme-border);">
+               <% navOverflowItems.forEach(entry => { %>
+               <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm whitespace-nowrap transition hover:bg-neutral-100 dark:hover:bg-white/5" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
+                 <%- entry.item.icon %>
+                 <%= entry.item.label %>
+               </a>
+               <% }); %>
+             </div>
+           </div>
+           <% } %>
          </div>
        </div>
 
        <div class="hidden relative sm:block">
           <nav class="flex relative">
              <ul role="list" class="flex min-w-full mt-1.5 flex-none gap-x-2 text-sm font-normal leading-6 text-neutral-600 dark:text-neutral-400">
-                <%
-                const rawMenuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
-                const isAdmin = (typeof user !== 'undefined' && user && user.isAdmin === true);
-                const isSubUser = (typeof req !== 'undefined' && req && req.subUser) ? true : false;
-                const menuItems = rawMenuItems.filter(item => {
-                  if (item.isAdminItem && !isAdmin) return false;
-                  if (item.ownerOnly && isSubUser) return false;
-                  return true;
-                });
-                if (!menuItems || menuItems.length === 0) {
-                %>
+                <% if (!navBarItems || navBarItems.length === 0) { %>
                 <li class="transition">
                    <a href="/server/<%= server.UUID %>" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                    <%- icon('terminal', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
-                     Console
-                  </a>
+                     <%- icon('terminal', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
+                      Console
+                   </a>
                 </li>
                 <li class="transition">
                    <a href="/server/<%= server.UUID %>/files" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                    <%- icon('folder', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
-                      Files
-                   </a>
+                     <%- icon('folder', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
+                       Files
+                    </a>
                 </li>
                 <% if (features.includes('players')) { %>
                 <li class="transition">
                   <a href="/server/<%= server.UUID %>/players" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                    <%- icon('users', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
-                     Players
-                  </a>
+                     <%- icon('users', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
+                      Players
+                   </a>
                </li>
                <% } %>
                <% if (features.includes('worlds')) { %>
                 <li class="transition">
                   <a href="/server/<%= server.UUID %>/worlds" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                    <%- icon('globe', { class: 'size-5 mb-0.5 inline-flex mr-1', strokeWidth: 1.5 }) %>
-                     Worlds
-                  </a>
+                     <%- icon('globe', { class: 'size-5 mb-0.5 inline-flex mr-1', strokeWidth: 1.5 }) %>
+                      Worlds
+                   </a>
                </li>
                <% } %>
                <li class="transition">
                 <a href="/server/<%= server.UUID %>/startup" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                 <%- icon('play', { class: 'size-5 mb-0.5 inline-flex mr-1', strokeWidth: 1.5 }) %>
+                  <%- icon('play', { class: 'size-5 mb-0.5 inline-flex mr-1', strokeWidth: 1.5 }) %>
 
-                   Startup
-                </a>
-             </li>
-             <li class="transition">
-                <a href="/server/<%= server.UUID %>/settings" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                 <%- icon('settings', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
-                   Settings
-                </a>
-             </li>
+                    Startup
+                 </a>
+              </li>
+              <li class="transition">
+                 <a href="/server/<%= server.UUID %>/settings" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                  <%- icon('settings', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
+                    Settings
+                 </a>
+              </li>
 
-             <% } else {
-                menuItems.forEach(item => {
-                  if (item.feature && !features.includes(item.feature)) return;
-                  const url = (item.url || '#')
-                    .replace(':uuid', server.UUID)
-                    .replace(':id', server.id);
-             %>
-                <li class="transition flex-shrink-0">
-                  <a href="<%= url %>" class="nav-link2 whitespace-nowrap py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                    <%- item.icon %>
-                    <%= item.label %>
+              <% } else {
+                 navBarItems.forEach(entry => {
+              %>
+                 <li class="transition flex-shrink-0">
+                   <a href="<%= entry.url %>" class="nav-link2 whitespace-nowrap py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                     <%- entry.item.icon %>
+                     <%= entry.item.label %>
+                   </a>
+                 </li>
+              <% }); } %>
+              <% if (navOverflowItems.length > 0) { %>
+              <li class="relative" data-more-menu>
+                <button type="button" data-more-btn aria-expanded="false" class="nav-link2 flex items-center gap-1.5 whitespace-nowrap py-2 px-3 transition border border-transparent hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white rounded-xl" style="color:var(--theme-text-muted);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 mb-0.5 inline-flex"><path fill-rule="evenodd" d="M4.5 12a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm6 0a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm6 0a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clip-rule="evenodd" /></svg>
+                  More
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3.5 inline-flex"><path fill-rule="evenodd" d="M12.53 16.28a.75.75 0 0 1-1.06 0l-7.5-7.5a.75.75 0 0 1 1.06-1.06L12 14.69l6.97-6.97a.75.75 0 1 1 1.06 1.06l-7.5 7.5Z" clip-rule="evenodd" /></svg>
+                </button>
+                <div data-more-panel class="absolute right-0 top-full mt-1 z-50 hidden min-w-44 rounded-xl border p-1.5 shadow-lg" style="background:var(--theme-bg-card);border-color:var(--theme-border);">
+                  <% navOverflowItems.forEach(entry => { %>
+                  <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm whitespace-nowrap transition hover:bg-neutral-100 dark:hover:bg-white/5" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
+                    <%- entry.item.icon %>
+                    <%= entry.item.label %>
                   </a>
-                </li>
-             <% }); } %>
+                  <% }); %>
+                </div>
+              </li>
+              <% } %>
              </ul>
           </nav>
        </div>
     </div>
  </div>
+
+ <style>
+  [data-more-panel] a[data-active="true"] { background: var(--theme-bg-secondary); color: var(--theme-text-strong); font-weight: 500; }
+ </style>
 
  <!-- Server Sections -->
  <% if (global.uiComponentStore) {
@@ -217,5 +258,38 @@
 
      window.addEventListener('popstate', syncActiveLink);
      document.addEventListener('al:navigated', syncActiveLink);
+
+     // More dropdown toggles — scoped to this include's container
+     function closeMoreMenus(except) {
+       root.querySelectorAll('[data-more-panel]').forEach(function(panel) {
+         if (panel === except) return;
+         panel.classList.add('hidden');
+       });
+       root.querySelectorAll('[data-more-btn]').forEach(function(btn) {
+         btn.setAttribute('aria-expanded', 'false');
+       });
+     }
+
+     root.querySelectorAll('[data-more-btn]').forEach(function(btn) {
+       btn.addEventListener('click', function(e) {
+         e.stopPropagation();
+         var container = btn.closest('[data-more-menu]');
+         var panel = container ? container.querySelector('[data-more-panel]') : null;
+         if (!panel) return;
+         var willOpen = panel.classList.contains('hidden');
+         closeMoreMenus(panel);
+         if (willOpen) {
+           panel.classList.remove('hidden');
+           btn.setAttribute('aria-expanded', 'true');
+         }
+       });
+     });
+
+     root.querySelectorAll('[data-more-panel] a').forEach(function(link) {
+       link.addEventListener('click', function() { closeMoreMenus(null); });
+     });
+
+     document.addEventListener('click', function() { closeMoreMenus(null); });
+     document.addEventListener('al:navigated', function() { closeMoreMenus(null); });
    })();
   </script>

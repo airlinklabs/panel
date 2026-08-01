@@ -89,9 +89,30 @@
       });
     }
 
+    function positionDropdown() {
+      const rect = trigger.getBoundingClientRect();
+      dropdown.style.position = 'fixed';
+      dropdown.style.left = rect.left + 'px';
+      dropdown.style.width = rect.width + 'px';
+      dropdown.style.maxHeight = '200px';
+      const spaceBelow = window.innerHeight - rect.bottom - 6;
+      const spaceAbove = rect.top - 6;
+      if (spaceBelow < 140 && spaceAbove > spaceBelow) {
+        dropdown.style.top = 'auto';
+        dropdown.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
+      } else {
+        dropdown.style.top = (rect.bottom + 5) + 'px';
+        dropdown.style.bottom = 'auto';
+      }
+    }
+
     function open() {
       if (dropdown.style.display !== 'none') return;
       syncFromSelect();
+      // Portal to <body> so clipping ancestors (overflow:hidden cards,
+      // scroll containers) cannot cut the dropdown off.
+      positionDropdown();
+      document.body.appendChild(dropdown);
       dropdown.style.display = 'block';
       trigger.classList.add('open');
       trigger.setAttribute('aria-expanded', 'true');
@@ -99,6 +120,8 @@
       requestAnimationFrame(function () {
         dropdown.classList.add('open');
       });
+      window.addEventListener('resize', close);
+      window.addEventListener('scroll', close, true);
     }
 
     function close() {
@@ -106,7 +129,11 @@
       trigger.classList.remove('open');
       trigger.setAttribute('aria-expanded', 'false');
       const done = function () {
+        dropdown.removeAttribute('style');
         dropdown.style.display = 'none';
+        container.appendChild(dropdown);
+        window.removeEventListener('resize', close);
+        window.removeEventListener('scroll', close, true);
       };
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         dropdown.classList.remove('open');

@@ -172,6 +172,9 @@
               row.externalPort = item.port;
               extBtn.textContent = item.label;
               extBtn.style.opacity = '1';
+              window.removeEventListener('resize', paHideList);
+              window.removeEventListener('scroll', paHideList, true);
+              extWrap.appendChild(listEl);
               listEl.classList.add('hidden');
               render();
             });
@@ -180,16 +183,48 @@
         });
       }
 
+      function paHideList() {
+        if (listEl.classList.contains('hidden')) return;
+        listEl.classList.remove('open');
+        setTimeout(function () {
+          extWrap.appendChild(listEl);
+          listEl.removeAttribute('style');
+          listEl.classList.add('hidden');
+        }, 200);
+      }
+
+      function paShowList() {
+        fillList();
+        const rect = extBtn.getBoundingClientRect();
+        listEl.style.position = 'fixed';
+        listEl.style.left = rect.left + 'px';
+        listEl.style.width = rect.width + 'px';
+        listEl.style.zIndex = '110';
+        const spaceBelow = window.innerHeight - rect.bottom - 6;
+        const spaceAbove = rect.top - 6;
+        if (spaceBelow < 140 && spaceAbove > spaceBelow) {
+          listEl.style.top = 'auto';
+          listEl.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
+        } else {
+          listEl.style.top = (rect.bottom + 5) + 'px';
+          listEl.style.bottom = 'auto';
+        }
+        document.body.appendChild(listEl);
+        listEl.classList.remove('hidden');
+        listEl.classList.add('al-dropdown');
+        requestAnimationFrame(function () { listEl.classList.add('open'); });
+        window.addEventListener('resize', paHideList);
+        window.addEventListener('scroll', paHideList, true);
+      }
+
       extBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         if (listEl.classList.contains('hidden')) {
-          fillList();
-          listEl.classList.remove('hidden');
-          listEl.classList.add('al-dropdown');
-          requestAnimationFrame(function () { listEl.classList.add('open'); });
+          paShowList();
         } else {
-          listEl.classList.remove('open');
-          setTimeout(function () { listEl.classList.add('hidden'); }, 200);
+          window.removeEventListener('resize', paHideList);
+          window.removeEventListener('scroll', paHideList, true);
+          paHideList();
         }
       });
 
