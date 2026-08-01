@@ -728,6 +728,102 @@ const adminModule: Module = {
       },
     );
 
+    router.post(
+      '/admin/servers/:id/suspend',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+          }
+
+          const serverId = getParamAsNumber(req.params.id);
+          if (isNaN(serverId)) {
+            res.status(400).json({ error: 'Invalid server ID' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            include: { node: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          await prisma.server.update({
+            where: { id: serverId },
+            data: { Suspended: true },
+          });
+
+          try {
+            await daemonRequest({
+              method: 'POST',
+              path: '/container/stop',
+              nodeAddress: server.node?.address ?? '',
+              nodePort: server.node?.port ?? 0,
+              nodeKey: server.node?.key ?? '',
+              body: { id: server.UUID },
+            });
+          } catch {
+            // ignore if already stopped
+          }
+
+          logger.info(`Server ${serverId} suspended by user ${userId}`);
+          res.json({ success: true, message: 'Server suspended' });
+        } catch (error: unknown) {
+          logger.error('Error suspending server:', error);
+          res.status(500).json({ error: 'Failed to suspend server' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/servers/:id/unsuspend',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+          }
+
+          const serverId = getParamAsNumber(req.params.id);
+          if (isNaN(serverId)) {
+            res.status(400).json({ error: 'Invalid server ID' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { id: serverId },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          await prisma.server.update({
+            where: { id: serverId },
+            data: { Suspended: false },
+          });
+
+          logger.info(`Server ${serverId} unsuspended by user ${userId}`);
+          res.json({ success: true, message: 'Server unsuspended' });
+        } catch (error: unknown) {
+          logger.error('Error unsuspending server:', error);
+          res.status(500).json({ error: 'Failed to unsuspend server' });
+        }
+      },
+    );
+
     return router;
   },
 };

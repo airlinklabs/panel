@@ -197,7 +197,7 @@ export function registerConsoleRoutes(router: Router): void {
           });
         }
 
-        if (server.Suspended && powerAction === 'start') {
+        if (server.Suspended && (powerAction === 'start' || powerAction === 'restart')) {
           logger.warn(
             `Attempt to start suspended server ${serverId} by user ${userId}`,
           );
@@ -354,6 +354,17 @@ export function registerConsoleRoutes(router: Router): void {
 
         if (!server) {
           res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        if (server.Suspended) {
+          logger.warn(
+            `Attempt to restart suspended server ${serverId} by user ${userId}`,
+          );
+          res.status(403).json({
+            error:
+              'This server is suspended. Please contact an administrator for assistance.',
+          });
           return;
         }
 

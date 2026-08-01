@@ -372,11 +372,27 @@ function generateRandomName() {
       allowStartupEditLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
     });
 
-    suspendServerToggle.addEventListener('change', function() {
-      suspendServerLabel.textContent = this.checked ? 'Suspended' : 'Active';
+    suspendServerToggle.addEventListener('change', async function() {
+      const checked = this.checked;
+      const action = checked ? 'suspend' : 'unsuspend';
 
-      if (this.checked) {
-        showToast('Warning: Suspending the server will stop it and prevent users from starting it.', 'warning');
+      try {
+        const response = await fetch('/admin/servers/<%= server.id %>/' + action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+
+        if (!response.ok) {
+          throw new Error((await response.json()).error || 'Request failed');
+        }
+
+        suspendServerLabel.textContent = checked ? 'Suspended' : 'Active';
+        window.location.reload();
+      } catch (err) {
+        this.checked = !checked;
+        suspendServerLabel.textContent = checked ? 'Active' : 'Suspended';
+        showToast('Failed to ' + action + ' server: ' + (err.message || 'unknown error'), 'error');
       }
     });
 
