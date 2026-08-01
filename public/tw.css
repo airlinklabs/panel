@@ -448,3 +448,37 @@ input[type="submit"]:disabled,
 input[type="button"]:disabled {
   cursor: not-allowed;
 }
+
+/* ── Unified popup system (sheets) ────────────────────────────────
+   Every popup uses .al-sheet-overlay (fixed wrapper) + .al-sheet-panel
+   (card): centered dialog on >=640px, full-width bottom sheet below.
+   One shared scrim — no inline rgba() backdrops anywhere. Wrappers are
+   hidden via the `hidden` class or Animate's .open/.al-modal-overlay. */
+.al-sheet-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center;
+  background: rgba(0, 0, 0, 0.5);
+}
+@media (max-width: 639px) {
+  .al-sheet-overlay {
+    z-index: 70 !important;
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }  .al-sheet-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 1.25rem 1.25rem 0 0 !important;
+    max-height: 92dvh;
+    overflow-y: auto;
+  }
+  .al-sheet-overlay.open .al-sheet-panel {
+    animation: al-sheet-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .al-sheet-overlay.open .al-sheet-panel { animation: none; }
+  }
+}
+@keyframes al-sheet-in {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}

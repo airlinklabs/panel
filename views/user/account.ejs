@@ -329,9 +329,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openCropPopup(dataUrl, csrf) {
     const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4';
+    overlay.className = 'al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center p-4';
     overlay.innerHTML = `
-      <div class="rounded-2xl shadow-lg border w-full max-w-lg overflow-hidden" style="background:var(--theme-bg-card);border-color:var(--theme-border);">
+      <div class="al-sheet-panel rounded-2xl shadow-lg border w-full max-w-lg overflow-hidden" style="background:var(--theme-bg-card);border-color:var(--theme-border);">
         <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b" style="border-color:var(--theme-border);">
           <div>
             <p class="text-sm font-semibold" style="color:var(--theme-text-strong);">Position your photo</p>

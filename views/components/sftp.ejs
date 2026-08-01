@@ -6,13 +6,13 @@
 </button>
 
 
-<div id="sftpModal" class="fixed inset-0 z-50 hidden items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="sftpModalTitle">
+<div id="sftpModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="sftpModalTitle">
 
   
-  <div onclick="closeSftpModal()" class="absolute inset-0 bg-black/50 " aria-hidden="true"></div>
+  <div onclick="closeSftpModal()" class="absolute inset-0 bg-transparent" aria-hidden="true"></div>
 
   
-  <div class="al-sftp-panel relative rounded-2xl shadow-xl w-full max-w-md mx-4" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+  <div class="al-sftp-panel al-sheet-panel relative rounded-2xl shadow-xl w-full max-w-md mx-4" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
 
     
     <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color:var(--theme-border);">

@@ -153,9 +153,9 @@
 </main>
 
 <!-- Add Database Modal -->
-<div id="addDatabaseModal" class="fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
-  <div class="absolute inset-0 bg-black/60" aria-hidden="true" onclick="closeAddDatabaseModal()"></div>
-  <div id="addDatabasePanel" class="relative w-full max-w-md mx-4 rounded-2xl shadow-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addDatabaseTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border)">
+<div id="addDatabaseModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
+  <div class="absolute inset-0 bg-transparent" aria-hidden="true" onclick="closeAddDatabaseModal()"></div>
+  <div id="addDatabasePanel" class="al-sheet-panel relative w-full max-w-md mx-4 rounded-2xl shadow-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addDatabaseTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border)">
     <h3 id="addDatabaseTitle" class="text-sm font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h3>
     <div class="space-y-4">
       <div>

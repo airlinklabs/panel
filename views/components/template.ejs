@@ -268,10 +268,10 @@
   </div>
 
   <!-- Search popup -->
-  <div id="searchOverlay" class="fixed inset-0 z-50 hidden items-start justify-center p-4"
+  <div id="searchOverlay" class="al-sheet-overlay fixed inset-0 z-50 hidden items-start justify-center p-4"
     role="dialog" aria-modal="true" aria-label="<%= req.translations.navSearch || 'Search' %>"
     style="background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); padding-top:14vh;">
-    <div id="searchPanel" class="w-full max-w-xl rounded-2xl border overflow-hidden shadow-2xl"
+    <div id="searchPanel" class="al-sheet-panel w-full max-w-xl rounded-2xl border overflow-hidden shadow-2xl"
       style="border-color:var(--theme-border); background:var(--theme-bg-card); box-shadow:0 25px 60px -12px rgba(0,0,0,0.35);">
       <div class="flex items-center gap-3 px-4 py-3.5 border-b" style="border-color:var(--theme-border);">
         <%- icon('search', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-text-muted)' }) %>

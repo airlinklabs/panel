@@ -198,9 +198,9 @@
 </main>
 
 <!-- New Schedule Modal -->
-<div id="addScheduleModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" aria-hidden="true">
-  <div class="absolute inset-0 bg-black/60" aria-hidden="true" onclick="closeAddScheduleModal()"></div>
-  <div id="addSchedulePanel" class="relative w-full max-w-md rounded-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addScheduleTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+<div id="addScheduleModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center p-4" aria-hidden="true">
+  <div class="absolute inset-0 bg-transparent" aria-hidden="true" onclick="closeAddScheduleModal()"></div>
+  <div id="addSchedulePanel" class="al-sheet-panel relative w-full max-w-md rounded-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addScheduleTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex items-center justify-between mb-4">
       <h3 id="addScheduleTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New schedule</h3>
       <button type="button" onclick="closeAddScheduleModal()" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>

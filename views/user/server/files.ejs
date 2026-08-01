@@ -308,7 +308,7 @@ function escJS(val) {
    </div>
    <% } %>
   <!-- Move file modal -->
-  <div id="moveModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
+  <div id="moveModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
     <div id="moveModalPanel" class="rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
       <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
         <div>
@@ -333,7 +333,7 @@ function escJS(val) {
   </div>
 
   <!-- Mass Delete Confirmation Modal -->
- <div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
+ <div id="massDeleteModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
     <div id="massDeleteModalPanel" class="rounded-2xl shadow-xl w-full max-w-sm mx-4 will-change-transform" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
       <div class="px-5 pt-5 pb-4">
         <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Confirm Mass Deletion</p>
@@ -346,7 +346,7 @@ function escJS(val) {
     </div>
  </div>
     <!-- Create file / folder modal -->
-  <div id="createFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
+  <div id="createFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
     <div id="createFileModalPanel" class="rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
       <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
         <div>
@@ -372,7 +372,7 @@ function escJS(val) {
   </div>
 
   <!-- Upload file -->
-  <div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
+  <div id="uploadFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
     <div id="uploadFileModalPanel" class="rounded-2xl p-8 max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
         <h2 class="text-2xl font-medium mb-1" style="color:var(--theme-text-strong)">Upload File</h2>
         <p class="mb-6" style="color:var(--theme-text-muted)">Select a file to upload to the current directory.</p>
@@ -418,7 +418,7 @@ function escJS(val) {
 <%- include('../../components/imageViewer')%>
 
 <!-- Rename Modal -->
-<div id="renameModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
+<div id="renameModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
   <div id="renameModalPanel" class="rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
       <div>

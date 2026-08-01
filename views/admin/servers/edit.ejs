@@ -191,7 +191,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <div class="flex items-center gap-3 mb-4">
-                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <%= server.Suspended ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500' %>">
+                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <%= server.Suspended ? 'bg-red-100 text-red-500 dark:bg-red-500/15 dark:text-red-400' : 'bg-green-100 text-green-500 dark:bg-green-500/15 dark:text-green-400' %>">
                     <% if (server.Suspended) { %>
                       <%- icon('x-circle', { size: 20, class: 'shrink-0' }) %>
                     <% } else { %>
@@ -226,7 +226,7 @@
 
               <div>
                 <div class="flex items-center gap-3 mb-4">
-                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-500">
+                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-500 dark:bg-blue-500/15 dark:text-blue-400">
                     <%- icon('calendar', { size: 20, class: 'shrink-0' }) %>
                   </span>
                   <div>

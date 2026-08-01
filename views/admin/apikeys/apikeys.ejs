@@ -104,9 +104,9 @@
 </main>
 
 
-<div id="createApiKeyModal" class="fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto" aria-hidden="true">
-  <div class="fixed inset-0 bg-black/50" aria-hidden="true" onclick="hideCreateModal()"></div>
-  <div id="createApiKeyPanel" class="relative my-auto mx-4 rounded-2xl shadow-xl w-full max-w-2xl" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+<div id="createApiKeyModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto" aria-hidden="true">
+  <div class="fixed inset-0 bg-transparent" aria-hidden="true" onclick="hideCreateModal()"></div>
+  <div id="createApiKeyPanel" class="al-sheet-panel relative my-auto mx-4 rounded-2xl shadow-xl w-full max-w-2xl" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
 
       <div class="flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
         <div>
@@ -227,9 +227,9 @@
 </div>
 
 
-<div id="editApiKeyModal" class="fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
-  <div class="absolute inset-0 bg-black/50 " id="editApiKeyModalBackdrop"></div>
-  <div id="editApiKeyModalPanel" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1" class="relative rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+<div id="editApiKeyModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
+  <div class="absolute inset-0 bg-transparent" id="editApiKeyModalBackdrop"></div>
+  <div id="editApiKeyModalPanel" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1" class="al-sheet-panel relative rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
 
     <!-- Header -->
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 shrink-0">
@@ -305,9 +305,9 @@
 </div>
 
 <% if (created) { %>
-<div id="createdKeyModal" class="fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
-  <div class="absolute inset-0 bg-black/50"></div>
-  <div id="createdKeyPanel" role="dialog" aria-modal="true" aria-labelledby="createdKeyTitle" tabindex="-1" class="relative rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+<div id="createdKeyModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
+  <div class="absolute inset-0 bg-transparent"></div>
+  <div id="createdKeyPanel" role="dialog" aria-modal="true" aria-labelledby="createdKeyTitle" tabindex="-1" class="al-sheet-panel relative rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <h3 id="createdKeyTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">API key created</h3>
     <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-4">Copy it now — for security, this is the only time the full key is shown.</p>
     <div class="flex items-center gap-2 rounded-xl px-3 py-2.5 mb-4" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">

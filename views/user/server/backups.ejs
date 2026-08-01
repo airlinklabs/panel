@@ -143,8 +143,8 @@
 <%- include('../../components/loadingPopup') %>
 
 <!-- Create Backup Modal -->
-<div id="createBackupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none">
-  <div id="createBackupModalPanel" class="border rounded-2xl shadow-lg w-full max-w-sm mx-4 will-change-transform" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
+<div id="createBackupModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+  <div id="createBackupModalPanel" class="al-sheet-panel border rounded-2xl shadow-lg w-full max-w-sm mx-4 will-change-transform" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
     <div class="px-5 pt-5 pb-4 border-b" style="border-color:var(--theme-border)">
       <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Create Backup</p>
       <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Choose a name for this backup.</p>
