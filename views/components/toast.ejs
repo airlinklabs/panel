@@ -48,10 +48,11 @@
         toast.style.overflowWrap = 'break-word';
         toast.style.transition = 'transform var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), opacity var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1))';
         toast.style.willChange = 'transform, opacity';
-        toast.style.color = colorMap[type] || colorMap.info;
+        toast.style.color = 'var(--theme-text)';
 
         const icon = document.createElement('span');
         icon.className = 'mt-0.5 shrink-0';
+        icon.style.color = colorMap[type] || colorMap.info;
         icon.innerHTML = iconMap[type] || iconMap.info;
         toast.appendChild(icon);
 

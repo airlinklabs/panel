@@ -73,8 +73,8 @@ Fixed rem scale (no fluid clamp for product UI):
 
 | Role | Class | Size | Weight |
 |---|---|---|---|
-| Page title | `text-base font-medium` | 16px | 500 |
-| Section heading | `text-lg font-semibold` | 18px | 600 |
+| Page title | `.al-page-title` / `text-xl font-semibold` | 20px | 600 |
+| Section heading | `.al-section-title` / `text-base font-semibold` | 16px | 600 |
 | Body / description | `text-sm text-neutral-500` | 14px | 400 |
 | Small label / badge | `text-xs font-medium` | 12px | 500 |
 | Navigation item | `text-sm` | 14px | 400-500 |

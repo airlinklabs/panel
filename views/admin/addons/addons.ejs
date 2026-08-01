@@ -37,8 +37,8 @@
       <div class="mt-5 rounded-xl bg-amber-600/20 dark:bg-amber-800/10 px-4 py-4 border border-neutral-800/20 flex items-start gap-3">
         <%- icon('triangle-alert', { size: 20, class: 'mt-0.5 shrink-0 text-amber-400' }) %>
         <div>
-          <p class="text-sm font-medium text-amber-400">Database migration required</p>
-          <p class="mt-1 text-xs text-amber-400/70">Run <code class="px-1 py-0.5 rounded font-mono bg-amber-500/10">npm run migrate:dev</code> then restart.</p>
+          <p class="text-sm font-medium" style="color:var(--theme-warning);">Database migration required</p>
+          <p class="mt-1 text-xs" style="color:var(--theme-warning);opacity:0.8;">Run <code class="px-1 py-0.5 rounded font-mono bg-amber-500/10">npm run migrate:dev</code> then restart.</p>
         </div>
       </div>
       <% } %>
@@ -79,11 +79,11 @@
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-2">
-                  <button type="button" onclick="toggleAddon('<%= addon.slug %>', <%= !addon.enabled %>)" type="button"
+                  <button  onclick="toggleAddon('<%= addon.slug %>', <%= !addon.enabled %>)" type="button"
                     class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">
                     <%= addon.enabled ? 'Disable' : 'Enable' %>
                   </button>
-                  <button type="button" onclick="confirmUninstall('<%= addon.slug %>', '<%= addon.name %>')" type="button"
+                  <button  onclick="confirmUninstall('<%= addon.slug %>', '<%= addon.name %>')" type="button"
                     class="al-btn-danger">
                     <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                   </button>

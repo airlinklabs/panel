@@ -45,7 +45,7 @@
 </nav>
 
 <!-- More sheet (slides up from bottom) -->
-<div id="mobile-more-sheet" class="mobile-more-sheet fixed inset-x-0 bottom-0 z-50 lg:hidden translate-y-full will-change-transform" role="dialog" aria-label="Additional navigation" aria-modal="true">
+<div id="mobile-more-sheet" class="mobile-more-sheet fixed inset-x-0 bottom-0 z-50 lg:hidden translate-y-full will-change-transform" role="dialog" aria-label="Additional navigation" aria-modal="true" inert>
   <style>
     #mobile-more-sheet { transition: transform var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)); }
     #mobile-more-sheet.closing { transition: transform var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)); }
@@ -144,12 +144,16 @@
   var close = document.getElementById('mobile-more-close');
   var backdrop = document.getElementById('mobile-more-backdrop');
   var themeToggle = document.getElementById('mobile-theme-toggle');
+  var lastFocus = null;
 
   function openSheet() {
     sheet.classList.remove('translate-y-full');
     sheet.classList.remove('closing');
     backdrop.classList.remove('hidden');
     btn.setAttribute('aria-expanded', 'true');
+    sheet.removeAttribute('inert');
+    lastFocus = document.activeElement;
+    if (close) close.focus();
   }
 
   function closeSheet() {
@@ -157,6 +161,24 @@
     sheet.classList.add('translate-y-full');
     backdrop.classList.add('hidden');
     btn.setAttribute('aria-expanded', 'false');
+    sheet.setAttribute('inert', '');
+    if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+  }
+
+  if (sheet) {
+    sheet.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closeSheet(); return; }
+      if (e.key !== 'Tab') return;
+      var focusables = sheet.querySelectorAll('a[href], button:not([disabled])');
+      if (focusables.length === 0) return;
+      var first = focusables[0];
+      var last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    });
   }
 
   if (btn) btn.addEventListener('click', openSheet);

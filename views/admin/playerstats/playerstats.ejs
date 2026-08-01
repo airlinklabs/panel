@@ -28,10 +28,10 @@
       <% if (errorMessage && errorMessage.message) { %>
       <div class="rounded-xl bg-red-800/10 px-6 py-4 mt-8 mx-8">
         <div class="flex items-center">
-          <%- icon('triangle-alert', { size: 20, class: 'text-red-400 mr-4 shrink-0' }) %>
+          <%- icon('triangle-alert', { size: 20, class: 'mr-4 shrink-0', style: 'color:var(--theme-danger);' }) %>
           <div>
-            <h3 class="text-sm font-medium text-red-400">Error</h3>
-            <p class="text-sm text-red-400/50">
+            <h3 class="text-sm font-medium" style="color:var(--theme-danger);">Error</h3>
+            <p class="text-sm" style="color:var(--theme-danger);opacity:0.7;">
               <%= errorMessage.message %>
             </p>
           </div>

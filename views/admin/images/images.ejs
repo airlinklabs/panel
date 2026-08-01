@@ -95,7 +95,7 @@
                 <div class="flex gap-2">
                   <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">Edit</button></a>
                   <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">Export</button></a>
-                  <button type="button" onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="al-btn-danger">
+                  <button  onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="al-btn-danger">
                     <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                   </button>
                 </div>

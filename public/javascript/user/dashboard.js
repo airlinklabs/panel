@@ -34,6 +34,8 @@
       listView.classList.toggle('hidden', which !== 'list');
       gridViewBtn.classList.toggle('vt-active', which === 'grid');
       listViewBtn.classList.toggle('vt-active', which === 'list');
+      gridViewBtn.setAttribute('aria-pressed', String(which === 'grid'));
+      listViewBtn.setAttribute('aria-pressed', String(which === 'list'));
       target.classList.remove('al-view-entering');
       void target.offsetWidth;
       target.classList.add('al-view-entering');
@@ -216,6 +218,19 @@
       const menu = card.querySelector('.server-ctx-menu');
       if (menu) menu.classList.remove('hidden');
     });
+
+    card.querySelector('a')?.addEventListener('keydown', e => {
+      if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
+        e.preventDefault();
+        document.querySelectorAll('.server-ctx-menu').forEach(m => m.classList.add('hidden'));
+        const menu = card.querySelector('.server-ctx-menu');
+        if (menu) {
+          menu.classList.remove('hidden');
+          const first = menu.querySelector('button');
+          if (first && first.offsetParent !== null) first.focus();
+        }
+      }
+    });
   });
 
   document.addEventListener('click', () => {
@@ -291,6 +306,7 @@
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
+      document.querySelectorAll('.server-ctx-menu').forEach(m => m.classList.add('hidden'));
       closeOverlay(folderPopupOverlay, folderPopupPanel);
       closeOverlay(newFolderOverlay, newFolderPanel);
       closeOverlay(deleteFolderOverlay, deleteFolderPanel);
@@ -299,39 +315,98 @@
 
   // ── Live status polling ────────────────────────────────────
   var serverUUIDs = allServers.map(function(s) { return s.UUID; });
+  var lastPollAt = null;
 
-  function updateServerBadge(uuid, online) {
-    var selector = '[data-server-uuid="' + uuid + '"]';
-    var card = document.querySelector(selector);
+  function fmtUptime(sec) {
+    if (sec === null || typeof sec === 'undefined') return '';
+    sec = Math.max(0, Math.floor(sec));
+    var d = Math.floor(sec / 86400);
+    var h = Math.floor((sec % 86400) / 3600);
+    var m = Math.floor((sec % 3600) / 60);
+    var s = sec % 60;
+    if (d > 0) return d + 'd ' + h + 'h';
+    if (h > 0) return h + 'h ' + m + 'm';
+    if (m > 0) return m + 'm ' + s + 's';
+    return s + 's';
+  }
+
+  function setLiveIndicator(card, state, title) {
+    var el = card.querySelector('.al-live-indicator');
+    if (!el) return;
+    if (state === 'stale') {
+      el.classList.remove('hidden');
+      el.classList.add('is-stale');
+      el.title = title || 'Last update failed — showing saved status';
+    } else if (state === 'live') {
+      el.classList.remove('hidden', 'is-stale');
+      el.title = title || '';
+    } else {
+      el.classList.add('hidden');
+    }
+  }
+
+  function applyServerStatus(uuid, status) {
+    var card = document.querySelector('[data-server-uuid="' + uuid + '"]');
     if (!card) return;
 
     var badge = card.querySelector('.al-badge-online, .al-badge-offline, .al-badge-warning, .al-badge-info');
     if (!badge) return;
 
-    if (online) {
-      badge.className = 'al-badge-online';
-      badge.innerHTML = '<span class="al-dot-online"></span> Online';
-    } else {
+    var ago = lastPollAt ? Math.max(0, Math.round((Date.now() - lastPollAt) / 1000)) + 's ago' : '';
+    var liveTitle = 'Live · updated ' + ago;
+
+    if (status.daemonOffline) {
       badge.className = 'al-badge-offline';
-      badge.innerHTML = '<span class="al-dot-offline"></span> Offline';
+      badge.innerHTML = '<span class="al-dot-offline"></span> Daemon offline';
+      badge.title = status.error || 'Daemon unreachable';
+      setLiveIndicator(card, 'live', liveTitle);
+      return;
     }
+    if (status.starting) {
+      badge.className = 'al-badge-warning';
+      badge.innerHTML = '<span class="al-dot-warning"></span> Starting';
+      setLiveIndicator(card, 'live', liveTitle);
+      return;
+    }
+    if (status.stopping) {
+      badge.className = 'al-badge-warning';
+      badge.innerHTML = '<span class="al-dot-warning"></span> Stopping';
+      setLiveIndicator(card, 'live', liveTitle);
+      return;
+    }
+    if (status.online) {
+      var uptime = fmtUptime(status.uptime);
+      badge.className = 'al-badge-online';
+      badge.innerHTML = '<span class="al-dot-online"></span> Online' + (uptime ? ' · ' + uptime : '');
+      badge.title = uptime ? 'Up for ' + uptime : 'Online';
+      setLiveIndicator(card, 'live', liveTitle);
+      return;
+    }
+    badge.className = 'al-badge-offline';
+    badge.innerHTML = '<span class="al-dot-offline"></span> Offline';
+    setLiveIndicator(card, 'live', liveTitle);
   }
 
   function pollAllServers() {
+    lastPollAt = Date.now();
     Promise.all(serverUUIDs.map(function(uuid) {
       return fetch('/server/' + uuid + '/status')
         .then(function(r) { return r.ok ? r.json() : null; })
         .catch(function() { return null; });
     })).then(function(results) {
       results.forEach(function(status, i) {
+        var card = document.querySelector('[data-server-uuid="' + serverUUIDs[i] + '"]');
         if (status !== null) {
-          updateServerBadge(serverUUIDs[i], status.online);
+          applyServerStatus(serverUUIDs[i], status);
+        } else if (card) {
+          setLiveIndicator(card, 'stale');
         }
       });
     });
   }
 
   if (serverUUIDs.length > 0) {
+    pollAllServers();
     setInterval(pollAllServers, 15000);
   }
 })();

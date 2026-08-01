@@ -73,12 +73,12 @@
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= user.username %></p>
-              <p class="text-xs truncate" style="color:var(--theme-text-muted);"><span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset <%= user.isAdmin ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-neutral-600/10 text-neutral-600 dark:text-neutral-400 ring-neutral-600/20' %>"><%= user.isAdmin ? (req.translations.admin || 'Admin') : (req.translations.user || 'User') %></span></p>
+              <p class="text-xs truncate" style="color:var(--theme-text-muted);"><span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset <%= user.isAdmin ? 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20' : 'bg-neutral-600/10 text-neutral-600 dark:text-neutral-400 ring-neutral-600/20' %>"><%= user.isAdmin ? (req.translations.admin || 'Admin') : (req.translations.user || 'User') %></span></p>
             </div>
             <div class="flex items-center gap-2">
               <a href="/admin/users/view/<%= user.id %>/" class="al-btn-ghost" aria-label="View user"><%- icon('external-link', { size: 16 }) %></a>
               <a href="/admin/users/edit/<%= user.id %>/" class="al-btn-ghost" aria-label="Edit user"><%- icon('pencil', { size: 16 }) %></a>
-              <button type="button" onclick="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user">
+              <button  onclick="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user">
                 <%- icon('trash-2', { size: 16 }) %>
               </button>
             </div>
@@ -119,7 +119,7 @@
                   </td>
                   <td class="al-table-td">
                     <div class="mt-1 ml-2 inline-flex items-center rounded-md
-                    <%= user.isAdmin ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-600 dark:text-amber-400 ring-amber-600/20' %>
+                    <%= user.isAdmin ? 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-700 dark:text-amber-400 ring-amber-600/20' %>
                     px-2 py-1 text-xs font-medium ring-1 ring-inset">
                       <%= user.isAdmin ? 'Admin' : 'User' %>
                     </div></td>
@@ -128,7 +128,7 @@
                     <div class="flex gap-3">
                       <a href="/admin/users/view/<%= user.id %>/" class="al-btn-secondary text-xs">View</a>
                       <a href="/admin/users/edit/<%= user.id %>/" class="al-btn-primary text-xs">Edit</a>
-                      <button type="button" onclick="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user">
+                      <button  onclick="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user">
                         <%- icon('trash-2', { size: 16 }) %>
                       </button>
                     </div>

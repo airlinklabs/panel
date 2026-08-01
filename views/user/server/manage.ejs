@@ -140,10 +140,10 @@
         <!-- Server Suspended Warning -->
         <% if (server.Suspended) { %>
         <div class="mt-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
-          <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0 text-red-500' }) %>
+          <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-danger);' }) %>
           <div>
-            <p class="text-sm font-medium text-red-500"><%= req.translations.serverSuspended || "This server's been grounded. Reach out to your admin if you think that's a mistake." %></p>
-            <p class="text-xs text-red-400"><%= req.translations.serverSuspendedDesc || 'This server has been suspended by an administrator.' %></p>
+            <p class="text-sm font-medium" style="color:var(--theme-danger);"><%= req.translations.serverSuspended || "This server's been grounded. Reach out to your admin if you think that's a mistake." %></p>
+            <p class="text-xs" style="color:var(--theme-danger);"><%= req.translations.serverSuspendedDesc || 'This server has been suspended by an administrator.' %></p>
           </div>
         </div>
         <% } %>
@@ -151,9 +151,9 @@
         <!-- Daemon Offline Warning -->
         <div id="daemonOfflineWarningRow" class="<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %>hidden<% } %> mt-3">
           <div id="daemonOfflineWarning" class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
-            <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0 text-red-500' }) %>
+            <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-danger);' }) %>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-red-500"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon — it might just need a nudge.' %></p>
+              <p class="text-sm font-medium" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon — it might just need a nudge.' %></p>
             </div>
             <button type="button" onclick="window.location.reload()" class="shrink-0 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition">
               Retry Connection
@@ -281,19 +281,19 @@
 
       <% if (server.Suspended) { %>
       <div class="mt-3 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">
-        <%- icon('triangle-alert', { size: 16, class: 'text-red-500 shrink-0' }) %>
+        <%- icon('triangle-alert', { size: 16, class: 'shrink-0', style: 'color:var(--theme-danger);' }) %>
         <div class="min-w-0">
-          <p class="text-xs font-medium text-red-500">Server suspended</p>
-          <p class="text-[11px] text-red-400 truncate">Contact an administrator for assistance.</p>
+          <p class="text-xs font-medium" style="color:var(--theme-danger);">Server suspended</p>
+          <p class="text-[11px] truncate" style="color:var(--theme-danger);">Contact an administrator for assistance.</p>
         </div>
       </div>
       <% } %>
 
       <div id="mobileDaemonOfflineWarning" class="mt-3 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %> hidden<% } %>">
-        <%- icon('triangle-alert', { size: 16, class: 'text-red-500 shrink-0' }) %>
+        <%- icon('triangle-alert', { size: 16, class: 'shrink-0', style: 'color:var(--theme-danger);' }) %>
         <div class="min-w-0 flex-1">
-          <p class="text-xs font-medium text-red-500">Connection Error</p>
-          <p class="text-[11px] text-red-400 truncate"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'The daemon appears to be offline.' %></p>
+          <p class="text-xs font-medium" style="color:var(--theme-danger);">Connection Error</p>
+          <p class="text-[11px] truncate" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'The daemon appears to be offline.' %></p>
         </div>
         <button type="button" onclick="window.location.reload()" class="shrink-0 px-2.5 py-1 bg-red-600 hover:bg-red-500 text-white text-[11px] font-medium rounded-lg transition">
           Retry
@@ -790,7 +790,7 @@ connectWebSocket();
     startButton.addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
 
-        setStatusText('Starting', 'text-yellow-500');
+        setStatusText('Starting', 'var(--theme-warning)');
         setStatusLog('Sending start request...');
         lockInput('Starting container...');
         setButtonLoading(startButton, 'Starting…');
@@ -821,7 +821,7 @@ connectWebSocket();
                             if (data.online) {
                                 clearInterval(poll);
                                 evtSocket.close();
-                                setStatusText('Online', 'text-emerald-500');
+                                setStatusText('Online', 'var(--theme-success)');
                                 setStatusLog(null);
                                 updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
                                 showToast('Server is alive!', 'success');
@@ -863,7 +863,7 @@ connectWebSocket();
           confirmLabel: '<%= req.translations.restartServer || "Restart Server" %>',
           onConfirm: () => {
           const serverUUID = '<%= server.UUID %>';
-          setStatusText('Restarting', 'text-amber-500');
+          setStatusText('Restarting', 'var(--theme-warning)');
           setStatusLog('Sending restart request...');
           updateStatusChart('rgba(245,158,11,0.1)', 'rgba(245,158,11,0.2)');
           lockInput('Restarting container...');
@@ -895,7 +895,7 @@ connectWebSocket();
                               if (data.online) {
                                   clearInterval(poll);
                                   evtSocketR.close();
-                                  setStatusText('Online', 'text-emerald-500');
+                                  setStatusText('Online', 'var(--theme-success)');
                                   setStatusLog(null);
                                   updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
                                    showToast('Server rebooted. Back in action.', 'success');
@@ -939,7 +939,7 @@ connectWebSocket();
           confirmLabel: '<%= req.translations.stopServer || "Stop Server" %>',
           onConfirm: () => {
 
-          setStatusText('Stopping', 'text-red-500');
+          setStatusText('Stopping', 'var(--theme-danger)');
           setStatusLog('Sending stop command...');
           updateStatusChart('rgba(239,68,68,0.1)', 'rgba(239,68,68,0.2)');
           setButtonLoading(stopButton, 'Stopping…');
@@ -991,7 +991,7 @@ connectWebSocket();
               .catch(() => {
                   evtSocketS.close();
                   setStatusLog(null);
-                  setStatusText('Online', 'text-emerald-500');
+                  setStatusText('Online', 'var(--theme-success)');
                   updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
                   clearButtonLoading(stopButton);
                    showToast("Couldn't stop the server. Try again?", 'error');
@@ -1251,15 +1251,18 @@ connectWebSocket();
 
         if (stats.data && stats.data.starting === true) {
             statusElement.textContent = 'Starting';
-            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500 leading-snug w-full';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight leading-snug w-full';
+            statusElement.style.color = 'var(--theme-warning)';
             updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
         } else if (stats.data && stats.data.running === true) {
             statusElement.textContent = 'Online';
-            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500 leading-snug w-full';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight leading-snug w-full';
+            statusElement.style.color = 'var(--theme-success)';
             updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
         } else {
             statusElement.textContent = 'Offline';
-            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500 leading-snug w-full';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight leading-snug w-full';
+            statusElement.style.color = 'var(--theme-danger)';
             updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
         }
     }
@@ -1286,14 +1289,14 @@ connectWebSocket();
 
     // Color map: lifecycle event type → { text color class, chart rgba }
     const statusColors = {
-        pulling:  { cls: 'text-blue-500',   chart: ['rgba(59,130,246,0.1)',  'rgba(59,130,246,0.3)'] },
-        creating: { cls: 'text-blue-500',   chart: ['rgba(59,130,246,0.1)',  'rgba(59,130,246,0.3)'] },
-        starting: { cls: 'text-yellow-500', chart: ['rgba(234,179,8,0.1)',   'rgba(234,179,8,0.3)'] },
-        started:  { cls: 'text-yellow-500', chart: ['rgba(234,179,8,0.1)',   'rgba(234,179,8,0.3)'] },
-        stopping: { cls: 'text-orange-500', chart: ['rgba(249,115,22,0.1)',  'rgba(249,115,22,0.3)'] },
-        stopped:  { cls: 'text-red-500',    chart: ['rgba(239,68,68,0.1)',   'rgba(239,68,68,0.2)'] },
-        killed:   { cls: 'text-red-500',    chart: ['rgba(239,68,68,0.1)',   'rgba(239,68,68,0.2)'] },
-        error:    { cls: 'text-red-400',    chart: ['rgba(239,68,68,0.1)',   'rgba(239,68,68,0.2)'] },
+        pulling:  { cls: 'var(--theme-info)',   chart: ['rgba(59,130,246,0.1)',  'rgba(59,130,246,0.3)'] },
+        creating: { cls: 'var(--theme-info)',   chart: ['rgba(59,130,246,0.1)',  'rgba(59,130,246,0.3)'] },
+        starting: { cls: 'var(--theme-warning)', chart: ['rgba(234,179,8,0.1)',   'rgba(234,179,8,0.3)'] },
+        started:  { cls: 'var(--theme-warning)', chart: ['rgba(234,179,8,0.1)',   'rgba(234,179,8,0.3)'] },
+        stopping: { cls: 'var(--theme-warning)', chart: ['rgba(249,115,22,0.1)',  'rgba(249,115,22,0.3)'] },
+        stopped:  { cls: 'var(--theme-danger)',  chart: ['rgba(239,68,68,0.1)',   'rgba(239,68,68,0.2)'] },
+        killed:   { cls: 'var(--theme-danger)',  chart: ['rgba(239,68,68,0.1)',   'rgba(239,68,68,0.2)'] },
+        error:    { cls: 'var(--theme-danger)',  chart: ['rgba(239,68,68,0.1)',   'rgba(239,68,68,0.2)'] },
     };
 
     // Returns a clean, user-facing label for the status card.
@@ -1314,11 +1317,12 @@ connectWebSocket();
     }
 
     // Updates the big status label (Online / Offline / Starting etc.)
-    function setStatusText(text, colorClass) {
+    function setStatusText(text, colorVar) {
         const el = document.getElementById('status');
         if (!el) return;
         el.textContent = text;
-        el.className = 'mt-1 text-lg font-medium tracking-tight leading-snug ' + colorClass;
+        el.className = 'mt-1 text-lg font-medium tracking-tight leading-snug';
+        el.style.color = colorVar;
     }
 
     // Shows a colored, animated lifecycle label in the status card.
@@ -1372,7 +1376,8 @@ connectWebSocket();
         // Update status display
         const statusElement = document.getElementById('status');
         statusElement.textContent = 'Offline';
-        statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+        statusElement.className = 'mt-1 text-lg font-medium tracking-tight';
+        statusElement.style.color = 'var(--theme-danger)';
 
         // Update status chart
         updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
@@ -1427,13 +1432,13 @@ connectWebSocket();
         const lcSock = new WebSocket(`${proto}://${location.host}/events/<%= server.UUID %>`);
 
         const stateMap = {
-            pulling:  { label: 'Pulling image',      color: 'text-blue-500' },
-            creating: { label: 'Creating container',  color: 'text-blue-500' },
-            starting: { label: 'Starting container',  color: 'text-yellow-500' },
-            started:  { label: 'Starting server',     color: 'text-yellow-500' },
-            stopping: { label: 'Stopping',            color: 'text-orange-500' },
-            stopped:  { label: 'Offline',             color: 'text-red-500' },
-            killed:   { label: 'Offline',             color: 'text-red-500' },
+            pulling:  { label: 'Pulling image',      color: 'var(--theme-info)' },
+            creating: { label: 'Creating container',  color: 'var(--theme-info)' },
+            starting: { label: 'Starting container',  color: 'var(--theme-warning)' },
+            started:  { label: 'Starting server',     color: 'var(--theme-warning)' },
+            stopping: { label: 'Stopping',            color: 'var(--theme-warning)' },
+            stopped:  { label: 'Offline',             color: 'var(--theme-danger)' },
+            killed:   { label: 'Offline',             color: 'var(--theme-danger)' },
         };
 
         const lockingStates = new Set(['pulling', 'creating', 'starting']);
@@ -1514,10 +1519,10 @@ connectWebSocket();
 
         // Patch update functions to also update mobile elements
         var origSetStatusText = setStatusText;
-        function patchedSetStatusText(text, colorClass) {
-            origSetStatusText(text, colorClass);
+        function patchedSetStatusText(text, colorVar) {
+            origSetStatusText(text, colorVar);
             var el = document.getElementById('mobile-status');
-            if (el) { el.textContent = text; el.className = 'mt-0.5 text-base font-semibold leading-tight ' + colorClass; }
+            if (el) { el.textContent = text; el.className = 'mt-0.5 text-base font-semibold leading-tight'; el.style.color = colorVar; }
         }
 
         var origSetStatusLog = setStatusLog;
@@ -1527,9 +1532,10 @@ connectWebSocket();
             if (!logEl) return;
             if (msg === null) { logEl.textContent = ''; logEl.classList.add('hidden'); return; }
             var label = (statusCardLabels[eventType] || msg);
-            var color = (statusColors[eventType] || {}).cls || 'text-neutral-400';
+            var color = (statusColors[eventType] || {}).cls || 'var(--theme-text-muted)';
             logEl.textContent = label;
-            logEl.className = 'text-[10px] font-medium truncate ' + color;
+            logEl.className = 'text-[10px] font-medium truncate';
+            logEl.style.color = color;
             logEl.classList.remove('hidden');
         }
 

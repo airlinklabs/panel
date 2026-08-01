@@ -20,7 +20,7 @@
   --theme-text-muted:          #696969;
   --theme-text-nav:            #4a4a4a;
   --theme-text-nav-active:     #0a0a0a;
-  --theme-text-placeholder:    #9a9a9a;
+  --theme-text-placeholder:    #6b7280;
   --theme-text-code:           #171717;
   --theme-text-link:           #0a0a0a;
 
@@ -39,9 +39,9 @@
   --theme-nav-icon-active:     #0a0a0a;
 
   /* Status (keep semantic color — status can never be color-free) */
-  --theme-success:             #16a34a;
+  --theme-success:             #15803d;
   --theme-success-bg:          #f0fdf4;
-  --theme-warning:             #d97706;
+  --theme-warning:             #b45309;
   --theme-warning-bg:          #fffbeb;
   --theme-danger:              #dc2626;
   --theme-danger-bg:           #fef2f2;

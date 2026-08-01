@@ -275,7 +275,7 @@
     <div class="flex-1 overflow-y-auto pt-16">
       <div class="px-8 pt-6 pb-0 flex items-center justify-between">
         <div>
-          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.addonsTitle || 'Addons' %></h1>
+          <h1 class="text-xl font-semibold tracking-tight text-neutral-800 dark:text-white"><%= req.translations.addonsTitle || 'Addons' %></h1>
           <p class="mt-0.5 text-sm text-neutral-500"><%= req.translations.addonsDesc || 'Manage installed addons and browse the store' %></p>
         </div>
       </div>
@@ -706,12 +706,20 @@
   function loadGiscus(addonId) {
     const c = document.getElementById('mGiscus');
     c.innerHTML = '';
+    const repo = '<%= (typeof settings !== "undefined" && settings.giscusRepo) ? settings.giscusRepo : "" %>';
+    const repoId = '<%= (typeof settings !== "undefined" && settings.giscusRepoId) ? settings.giscusRepoId : "" %>';
+    const category = '<%= (typeof settings !== "undefined" && settings.giscusCategory) ? settings.giscusCategory : "" %>';
+    const categoryId = '<%= (typeof settings !== "undefined" && settings.giscusCategoryId) ? settings.giscusCategoryId : "" %>';
+    if (!repo || !repoId || !category || !categoryId || categoryId.indexOf('YOUR_') === 0) {
+      c.innerHTML = '<div class="text-xs leading-relaxed" style="color:var(--theme-text-muted);">Reviews aren&#39;t configured for this installation yet. Ask your admin to connect a giscus discussion repo to enable them.</div>';
+      return;
+    }
     const s = document.createElement('script');
     s.src = 'https://giscus.app/client.js';
-    s.setAttribute('data-repo', 'airlinklabs/addons');
-    s.setAttribute('data-repo-id', 'YOUR_REPO_ID');
-    s.setAttribute('data-category', 'Marketplace');
-    s.setAttribute('data-category-id', 'YOUR_CATEGORY_ID');
+    s.setAttribute('data-repo', repo);
+    s.setAttribute('data-repo-id', repoId);
+    s.setAttribute('data-category', category);
+    s.setAttribute('data-category-id', categoryId);
     s.setAttribute('data-mapping', 'specific');
     s.setAttribute('data-term', addonId);
     s.setAttribute('data-strict', '1');

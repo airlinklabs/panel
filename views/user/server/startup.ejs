@@ -94,7 +94,7 @@
                   <label for="startCommand" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.startupCommand || 'Startup Command' %></label>
                   <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 <%= !isStartupEditAllowed ? 'bg-neutral-100 dark:bg-neutral-800/50 cursor-not-allowed' : 'bg-white dark:bg-neutral-600/20' %> border border-neutral-300 dark:border-white/5" <%= !isStartupEditAllowed ? 'readonly' : '' %>><%= server.StartCommand %></textarea>
                   <% if (!isStartupEditAllowed) { %>
-                    <p class="mt-2 text-xs text-red-500"><%= req.translations.startupCommandDisabled || 'Startup command editing is disabled for this server. Contact an administrator to enable this feature.' %></p>
+                    <p class="mt-2 text-xs" style="color:var(--theme-danger);"><%= req.translations.startupCommandDisabled || 'Startup command editing is disabled for this server. Contact an administrator to enable this feature.' %></p>
                   <% } else { %>
                     <p class="mt-2 text-xs text-neutral-500"><%= req.translations.startupCommandHint || 'Use $ALVKT(VARIABLE_NAME) to reference environment variables.' %></p>
                   <% } %>

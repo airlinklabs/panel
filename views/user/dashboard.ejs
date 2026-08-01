@@ -39,11 +39,11 @@
             </button>
             <% if (servers && servers.length > 0) { %>
             <div class="flex items-center gap-1 p-1 rounded-xl" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
-              <button type="button" id="gridViewBtn" class="vt-active min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);">
+              <button type="button" id="gridViewBtn" class="vt-active min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);" aria-pressed="true">
                 <%- icon('grid-2x2', { class: 'h-4 w-4' }) %>
                 Grid
               </button>
-              <button type="button" id="listViewBtn" class="min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);">
+              <button type="button" id="listViewBtn" class="min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);" aria-pressed="false">
                 <%- icon('list', { class: 'h-4 w-4' }) %>
                 List
               </button>
@@ -138,7 +138,10 @@
                     <p class="text-xs mt-0.5 truncate italic" style="color:var(--theme-text-placeholder);"><%= req.translations.noDescription || 'No description' %></p>
                   <% } %>
                 </div>
-                <%- include('../components/ui/status-badge', { status: server.status === 'running' ? 'online' : 'offline' }) %>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="al-live-indicator hidden" aria-hidden="true"><span class="al-dot-online"></span>Live</span>
+                  <%- include('../components/ui/status-badge', { status: server.status === 'running' ? 'online' : 'offline' }) %>
+                </div>
               </div>
               <div class="flex gap-3 mb-3">
                 <div class="flex-1 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary);">
@@ -165,9 +168,9 @@
               </div>
             </a>
             <!-- Right-click context menu -->
-            <div class="server-ctx-menu hidden absolute z-40 top-2 right-2 rounded-xl shadow-lg py-1 w-44" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-              <button type="button" class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm rounded-t-xl transition" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>" aria-label="Add to folder">Add to folder</button>
-              <button type="button" class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition" style="color:var(--theme-text); display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>" data-uuid="<%= server.UUID %>" aria-label="Remove from folder">Remove from folder</button>
+            <div class="server-ctx-menu hidden absolute z-40 top-2 right-2 rounded-xl shadow-lg py-1 w-44" role="menu" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+              <button type="button" role="menuitem" class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm rounded-t-xl transition" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>" aria-label="Add to folder">Add to folder</button>
+              <button type="button" role="menuitem" class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition" style="color:var(--theme-text); display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>" data-uuid="<%= server.UUID %>" aria-label="Remove from folder">Remove from folder</button>
             </div>
           </div>
           <% }); %>
@@ -198,7 +201,10 @@
                   <% if (server.description) { %><p class="text-xs truncate max-w-xs" style="color:var(--theme-text-muted);"><%= server.description %></p><% } %>
                 </td>
                 <td class="al-table-td">
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="al-live-indicator hidden" aria-hidden="true"><span class="al-dot-online"></span>Live</span>
                   <%- include('../components/ui/status-badge', { status: server.status === 'running' ? 'online' : 'offline' }) %>
+                </div>
                 </td>
                 <td class="al-table-td"><%= server.owner ? server.owner.username : 'Unknown' %></td>
                 <td class="al-table-td"><%= Math.round(server.ramUsage) %>%</td>

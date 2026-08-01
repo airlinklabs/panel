@@ -2,11 +2,18 @@
 
 <style>
   .category-panel {
-    transition: max-height 0.2s cubic-bezier(0.16,1,0.3,1), opacity 0.15s ease;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.2s cubic-bezier(0.16,1,0.3,1), opacity 0.15s ease;
+    opacity: 0;
+  }
+  .category-panel.open {
+    grid-template-rows: 1fr;
     opacity: 1;
   }
-  .category-panel[style*="max-height: 0px"] {
-    opacity: 0;
+  .category-panel > div {
+    overflow: hidden;
+    min-height: 0;
   }
 </style>
 
@@ -78,7 +85,7 @@
               </div>
               <div class="mt-3 flex items-center gap-3 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
                 <code class="flex-1 text-xs font-mono truncate" style="color:var(--theme-text-muted)"><%= apiKey.key.substring(0, 12) %>••••••••••••</code>
-                <button type="button" onclick="copyToClipboard('<%= apiKey.key %>')" type="button"
+                <button  onclick="copyToClipboard('<%= apiKey.key %>')" type="button"
                   class="text-[11px] font-medium px-2 py-1 rounded-md transition hover:bg-neutral-200 dark:hover:bg-neutral-700" style="color:var(--theme-text-muted); background:var(--theme-bg-card); border:1px solid var(--theme-border)">
                   Copy
                 </button>
@@ -120,13 +127,13 @@
           <div>
             <label for="name" class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"><%= req.translations.apiKeyName || 'Name' %></label>
             <input type="text" name="name" id="name" required
-              class="block w-full rounded-xl px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition"
+              class="block w-full rounded-xl px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition"
               placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
           </div>
           <div>
             <label for="description" class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"><%= req.translations.apiKeyDescriptionLabel || 'Description' %> <span class="text-neutral-400 font-normal">(optional)</span></label>
             <input type="text" name="description" id="description"
-              class="block w-full rounded-xl px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition"
+              class="block w-full rounded-xl px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition"
               placeholder="What is this key used for?">
           </div>
         </div>
@@ -185,7 +192,8 @@
                   </div>
                   <%- icon('chevron-down', { size: 14, class: 'category-chevron text-neutral-400 transition-transform duration-200 shrink-0' }) %>
                 </button>
-                <div class="category-panel hidden px-4 py-3 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60">
+                <div class="category-panel hidden bg-white dark:bg-neutral-900">
+                  <div class="px-4 py-3 border-t border-neutral-200 dark:border-neutral-700/60">
                   <div class="grid grid-cols-2 gap-2">
                     <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
                       <label class="permission-label flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
@@ -195,6 +203,7 @@
                         <span class="permission-label-text text-xs text-neutral-600 dark:text-neutral-300"><%= permission.name.split(' - ')[1] || permission.name %></span>
                       </label>
                     <% }); %>
+                  </div>
                   </div>
                 </div>
               </div>
@@ -364,31 +373,19 @@
     const panel = btn.nextElementSibling;
     const chevron = btn.querySelector('.category-chevron');
     const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-    
+
     if (isExpanded) {
-      panel.style.maxHeight = panel.scrollHeight + 'px';
-      panel.offsetHeight;
-      panel.style.maxHeight = '0px';
-      panel.style.overflow = 'hidden';
+      panel.classList.remove('open');
       btn.setAttribute('aria-expanded', 'false');
       chevron.classList.remove('rotate-180');
       setTimeout(() => {
-        panel.classList.add('hidden');
-        panel.style.maxHeight = '';
-        panel.style.overflow = '';
+        if (!panel.classList.contains('open')) panel.classList.add('hidden');
       }, 200);
     } else {
       panel.classList.remove('hidden');
-      panel.style.overflow = 'hidden';
-      panel.style.maxHeight = '0px';
-      panel.offsetHeight;
-      panel.style.maxHeight = panel.scrollHeight + 'px';
+      panel.classList.add('open');
       btn.setAttribute('aria-expanded', 'true');
       chevron.classList.add('rotate-180');
-      setTimeout(() => {
-        panel.style.maxHeight = '';
-        panel.style.overflow = '';
-      }, 200);
     }
   }
 

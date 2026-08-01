@@ -26,7 +26,7 @@
 
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
         <div class="al-card p-5">
-            <h2 class="al-page-title text-lg mb-2">Status</h2>
+            <h2 class="al-section-title mb-2">Status</h2>
             <%
             const lastStat = stats.totalStats && stats.totalStats.length ? stats.totalStats.at(-1) : null;
             const isOnline = lastStat && (new Date() - new Date(lastStat.timestamp)) <= 10 * 1000;
@@ -40,7 +40,7 @@
         </div>
 
         <div class="al-card p-5">
-        <h2 class="al-page-title text-lg mb-2">Uptime</h2>
+        <h2 class="al-section-title mb-2">Uptime</h2>
         <p class="text-4xl font-normal" style="color:var(--theme-text-strong)">
             <%= isOnline ? stats.uptime : 'N/A' %> 
         </p>
@@ -55,12 +55,12 @@
 
       <div id="charts" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
         <div class="al-card p-6">
-          <h2 class="al-page-title text-lg mb-4">RAM Usage</h2>
+          <h2 class="al-section-title mb-4">RAM Usage</h2>
           <canvas id="ramChart" class="w-full h-64"></canvas>
         </div>
 
         <div class="al-card p-6">
-          <h2 class="al-page-title text-lg mb-4">CPU Usage</h2>
+          <h2 class="al-section-title mb-4">CPU Usage</h2>
           <canvas id="cpuChart" class="w-full h-64"></canvas>
         </div>
       </div>

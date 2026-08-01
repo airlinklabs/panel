@@ -138,7 +138,7 @@
                     <%- icon('refresh', { class: 'w-3 h-3 mr-1' }) %>
                     <%= req.translations.rotatePassword || 'Rotate password' %>
                   </button>
-                  <button type="button" onclick="deleteDatabase(<%= db.id %>)" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete database' %>">
+                  <button  onclick="deleteDatabase(<%= db.id %>)" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete database' %>">
                     <%- icon('trash-2', { size: 16 }) %>
                   </button>
                 </div>

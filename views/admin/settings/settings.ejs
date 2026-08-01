@@ -292,7 +292,7 @@
                 <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
               </div>
-              <% if (settings.virusTotalApiKey) { %><p class="mt-1.5 text-xs text-emerald-600 dark:text-emerald-400">Key is set.</p><% } %>
+              <% if (settings.virusTotalApiKey) { %><p class="mt-1.5 text-xs text-emerald-700 dark:text-emerald-400">Key is set.</p><% } %>
               <p class="mt-1.5 text-xs text-neutral-500">Used to scan uploaded files. Get a free key at <a href="https://www.virustotal.com" target="_blank" class="underline hover:text-neutral-700 dark:hover:text-neutral-300 transition">virustotal.com</a>.</p>
             </div>
           </div>
@@ -370,7 +370,7 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-neutral-700 dark:text-white">Hash API keys at rest</p>
-                  <p class="text-xs text-neutral-500 mt-0.5">Store API keys as SHA-256 hashes in the database. <strong class="text-amber-600 dark:text-amber-400">Enable before creating new keys — existing keys shown once.</strong></p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Store API keys as SHA-256 hashes in the database. <strong class="text-amber-700 dark:text-amber-400">Enable before creating new keys — existing keys shown once.</strong></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
                   <input type="checkbox" id="hashApiKeys" class="sr-only peer" aria-label="Hash API keys at rest" <%= settings.hashApiKeys ? 'checked' : '' %>>
@@ -583,7 +583,6 @@
 </main>
 
 <%- include('../../components/toast') %>
-<%- include('../../components/modal') %>
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-settings.js"></script>
 

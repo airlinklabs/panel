@@ -26,7 +26,7 @@
   --theme-text-muted:       oklch(55% 0.01 260);
   --theme-text-nav:         oklch(60% 0.01 260);
   --theme-text-nav-active:  oklch(90% 0 0);
-  --theme-text-placeholder: oklch(40% 0.01 260);
+  --theme-text-placeholder: oklch(60% 0.01 260);
   --theme-text-code:        oklch(75% 0.14 175);
   --theme-text-link:        oklch(71% 0.19 260);
 

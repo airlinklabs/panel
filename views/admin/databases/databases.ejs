@@ -95,8 +95,8 @@
                   <td class="al-table-td"><%= new Date(host.createdAt).toLocaleDateString() %></td>
                   <td class="al-table-td">
                     <div class="flex gap-3">
-                      <button type="button" onclick="testHost('<%= host.id %>')" type="button" class="al-btn-secondary text-xs"><%= req.translations.test || 'Test' %></button>
-                      <button type="button" onclick="deleteHost('<%= host.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete host' %>">
+                      <button  onclick="testHost('<%= host.id %>')" type="button" class="al-btn-secondary text-xs"><%= req.translations.test || 'Test' %></button>
+                      <button  onclick="deleteHost('<%= host.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete host' %>">
                         <%- icon('trash-2', { size: 16 }) %>
                       </button>
                     </div>

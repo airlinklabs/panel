@@ -34,6 +34,10 @@
     }
     overlay.classList.remove('open');
     setTimeout(function () {
+      // If the overlay was re-opened during the exit animation (e.g. a
+      // second confirm dialog chained in the first one's onConfirm),
+      // leave it visible — do not clobber the newer modal.
+      if (overlay.classList.contains('open')) return;
       overlay.classList.add('hidden');
       overlay.classList.add('opacity-0', 'pointer-events-none');
       overlay.classList.remove('flex');
