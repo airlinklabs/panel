@@ -121,7 +121,7 @@
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex justify-end space-x-2">
-                          <button
+                          <button type="button"
                             onclick="openEditSubUserModal(<%= subUser.id %>, '<%= subUser.user.username || subUser.user.email %>', <%= JSON.stringify(subUser.permissions).replace(/'/g, "&#39;") %>)"
                             class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                             style="color:var(--theme-accent);background:var(--theme-accent-subtle)"
@@ -129,7 +129,7 @@
                             <%- icon('settings', { class: 'w-3 h-3 mr-1' }) %>
                             Edit
                           </button>
-                          <button
+                          <button type="button"
                             onclick="removeSubUser(<%= subUser.id %>, '<%= (subUser.user.username || subUser.user.email).replace(/'/g, "&#39;") %>')"
                             class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                             style="color:var(--theme-danger);background:var(--theme-danger-bg)"
@@ -164,7 +164,7 @@
   <div class="w-full max-w-lg rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Add subuser</h3>
-      <button onclick="closeModal('addSubUserModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
+      <button type="button" onclick="closeModal('addSubUserModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
     </div>
     <div class="space-y-4">
       <div>
@@ -198,8 +198,8 @@
         </div>
       </div>
       <div class="flex gap-2 pt-1">
-        <button onclick="closeModal('addSubUserModal')" class="al-btn-secondary flex-1">Cancel</button>
-        <button id="confirmAddSubUser" class="al-btn-primary flex-1">Add subuser</button>
+        <button type="button" onclick="closeModal('addSubUserModal')" class="al-btn-secondary flex-1">Cancel</button>
+        <button type="button" id="confirmAddSubUser" class="al-btn-primary flex-1">Add subuser</button>
       </div>
     </div>
   </div>
@@ -210,7 +210,7 @@
   <div class="w-full max-w-lg rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex items-center justify-between mb-1">
       <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Edit permissions</h3>
-      <button onclick="closeModal('editSubUserModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
+      <button type="button" onclick="closeModal('editSubUserModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
     </div>
     <p id="editSubUserName" class="text-xs mb-4" style="color:var(--theme-text-muted)"></p>
     <div class="space-y-4">
@@ -241,8 +241,8 @@
         </div>
       </div>
       <div class="flex gap-2 pt-1">
-        <button onclick="closeModal('editSubUserModal')" class="al-btn-secondary flex-1">Cancel</button>
-        <button id="confirmEditSubUser" class="al-btn-primary flex-1">Save changes</button>
+        <button type="button" onclick="closeModal('editSubUserModal')" class="al-btn-secondary flex-1">Cancel</button>
+        <button type="button" id="confirmEditSubUser" class="al-btn-primary flex-1">Save changes</button>
       </div>
     </div>
   </div>

@@ -33,17 +33,17 @@
               New server
             </a>
             <% } %>
-            <button id="newFolderBtn" class="al-btn-secondary">
+            <button type="button" id="newFolderBtn" class="al-btn-secondary">
               <%- icon('folder-plus', { class: 'h-4 w-4', strokeWidth: 1.5 }) %>
               New folder
             </button>
             <% if (servers && servers.length > 0) { %>
             <div class="flex items-center gap-1 p-1 rounded-xl" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
-              <button id="gridViewBtn" class="vt-active min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);">
+              <button type="button" id="gridViewBtn" class="vt-active min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);">
                 <%- icon('grid-2x2', { class: 'h-4 w-4' }) %>
                 Grid
               </button>
-              <button id="listViewBtn" class="min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);">
+              <button type="button" id="listViewBtn" class="min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);">
                 <%- icon('list', { class: 'h-4 w-4' }) %>
                 List
               </button>
@@ -66,7 +66,7 @@
             <p class="font-medium"><%= req.translations.connectionError || 'Connection Error' %></p>
             <p class="text-xs opacity-70 mt-0.5"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
           </div>
-          <button onclick="window.location.reload()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors" style="background:var(--theme-danger-bg); color:var(--theme-danger);"><%= req.translations.retry || 'Retry' %></button>
+          <button type="button" onclick="window.location.reload()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors" style="background:var(--theme-danger-bg); color:var(--theme-danger);"><%= req.translations.retry || 'Retry' %></button>
         </div>
         <% } %>
 
@@ -98,7 +98,7 @@
                 <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= folder.name %></p>
                 <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= folder.members.length %> server<%= folder.members.length !== 1 ? 's' : '' %></p>
               </div>
-              <button class="folder-menu-btn al-btn-ghost shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              <button type="button" class="folder-menu-btn al-btn-ghost shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:group-focus-visible:opacity-100 transition-opacity"
                 data-folder-id="<%= folder.id %>" aria-label="Folder options">
                 <%- icon('more-horizontal', { class: 'w-4 h-4' }) %>
               </button>
@@ -151,7 +151,7 @@
                 </div>
                 <div class="flex-1 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary);">
                   <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);">Storage</p>
-                  <p class="text-sm font-medium" style="color:var(--theme-text);"><%= server.ramUsed || '0MB' %></p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text);"><%= server.Storage === 0 ? 'Unlimited' : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
                 </div>
               </div>
               <div class="flex items-center justify-between pt-2 border-t" style="border-color:var(--theme-border);">
@@ -166,8 +166,8 @@
             </a>
             <!-- Right-click context menu -->
             <div class="server-ctx-menu hidden absolute z-40 top-2 right-2 rounded-xl shadow-lg py-1 w-44" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-              <button class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm rounded-t-xl transition" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>" aria-label="Add to folder">Add to folder</button>
-              <button class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition" style="color:var(--theme-text); display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>" data-uuid="<%= server.UUID %>" aria-label="Remove from folder">Remove from folder</button>
+              <button type="button" class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm rounded-t-xl transition" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>" aria-label="Add to folder">Add to folder</button>
+              <button type="button" class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition" style="color:var(--theme-text); display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>" data-uuid="<%= server.UUID %>" aria-label="Remove from folder">Remove from folder</button>
             </div>
           </div>
           <% }); %>
@@ -228,7 +228,7 @@
 </main>
 
 <!-- Drag ghost element -->
-<div id="drag-ghost" class="fixed z-[70] pointer-events-none rounded-xl px-3.5 py-2.5 text-[13px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center gap-2 opacity-95 max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis" style="display:none; transform:rotate(2deg); background:var(--theme-bg-card); border:1px solid var(--theme-border); color:var(--theme-text-strong);">
+<div id="drag-ghost" class="fixed z-[60] pointer-events-none rounded-xl px-3.5 py-2.5 text-[13px] font-medium shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center gap-2 opacity-95 max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis" style="display:none; transform:rotate(2deg); background:var(--theme-bg-card); border:1px solid var(--theme-border); color:var(--theme-text-strong);">
   <%- icon('folder', { class: 'w-3.5 h-3.5 shrink-0', style: 'color:var(--theme-warning);', fill: 'currentColor' }) %>
   <span id="drag-ghost-name"></span>
 </div>
@@ -239,10 +239,10 @@
     <div class="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style="border-color:var(--theme-border);">
       <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);" id="folderPopupTitle"></h2>
       <div class="flex items-center gap-1">
-        <button id="deleteFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" style="color:var(--theme-danger);" title="Delete folder" aria-label="Delete folder">
+        <button type="button" id="deleteFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" style="color:var(--theme-danger);" title="Delete folder" aria-label="Delete folder">
           <%- icon('trash-2', { class: 'w-3.5 h-3.5', strokeWidth: 1.5 }) %>
         </button>
-        <button id="closeFolderPopup" class="w-10 h-10 flex items-center justify-center rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" style="color:var(--theme-text-muted);" aria-label="Close folder">
+        <button type="button" id="closeFolderPopup" class="w-10 h-10 flex items-center justify-center rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" style="color:var(--theme-text-muted);" aria-label="Close folder">
           <%- icon('x', { class: 'w-4 h-4' }) %>
         </button>
       </div>
@@ -254,27 +254,27 @@
 </div>
 
 <!-- New folder dialog -->
-<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="newFolderOverlay" style="background:rgba(0,0,0,0.45);">
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="newFolderOverlay" style="background:rgba(0,0,0,0.45);">
     <div id="newFolderPanel" class="border rounded-[14px] w-full max-w-[380px] p-[22px] will-change-transform" role="dialog" aria-modal="true" aria-labelledby="newFolderTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <p id="newFolderTitle" class="text-sm font-semibold mb-1" style="color:var(--theme-text-strong);">New folder</p>
     <p class="text-xs mb-4" style="color:var(--theme-text-muted);">Give your folder a name. Drag server cards onto it to add servers.</p>
     <label for="newFolderName" class="sr-only">Folder name</label>
     <input id="newFolderName" type="text" class="al-input mb-4" placeholder="e.g. Game Servers">
     <div class="flex gap-2 justify-end">
-      <button id="cancelNewFolder" class="al-btn-secondary">Cancel</button>
-      <button id="confirmNewFolder" class="al-btn-primary">Create</button>
+      <button type="button" id="cancelNewFolder" class="al-btn-secondary">Cancel</button>
+      <button type="button" id="confirmNewFolder" class="al-btn-primary">Create</button>
     </div>
   </div>
 </div>
 
 <!-- Delete folder confirm dialog -->
-<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="deleteFolderOverlay" style="background:rgba(0,0,0,0.45);">
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="deleteFolderOverlay" style="background:rgba(0,0,0,0.45);">
     <div id="deleteFolderPanel" class="border rounded-[14px] w-full max-w-[380px] p-[22px] will-change-transform" role="dialog" aria-modal="true" aria-labelledby="deleteFolderTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <p id="deleteFolderTitle" class="text-sm font-semibold mb-1" style="color:var(--theme-text-strong);">Delete folder?</p>
     <p class="text-xs mb-4" style="color:var(--theme-text-muted);">Servers inside will stay accessible. They just won't be in this folder.</p>
     <div class="flex gap-2 justify-end">
-      <button id="cancelDeleteFolder" class="al-btn-secondary">Cancel</button>
-      <button id="confirmDeleteFolder" class="al-btn-danger">Delete folder</button>
+      <button type="button" id="cancelDeleteFolder" class="al-btn-secondary">Cancel</button>
+      <button type="button" id="confirmDeleteFolder" class="al-btn-danger">Delete folder</button>
     </div>
   </div>
 </div>

@@ -1,94 +1,10 @@
 <%- include('../components/auth-header', { title: 'Two-Factor Verification' }) %>
 
+<%- include('../components/auth-styles') %>
 <style>
-  .auth-split {
-    display: flex; min-height: 100vh;
-  }
-  .auth-panel {
-    width: 100%; max-width: 420px; flex-shrink: 0;
-    display: flex; flex-direction: column; justify-content: center;
-    padding: 48px 40px;
-    background: #fff;
-    border-right: 1px solid #e5e5e5;
-    position: relative; z-index: 1;
-  }
-  html.dark .auth-panel {
-    background: #111111;
-    border-right-color: rgba(255,255,255,0.06);
-  }
   .auth-image {
-    flex: 1;
     background: url('<%= settings.loginWallpaper || "/assets/wallpapers/login.jpeg" %>') center/cover no-repeat;
   }
-
-  @media (max-width: 768px) {
-    .auth-split { position: relative; display: block; min-height: 100vh; }
-    .auth-image {
-      position: fixed;
-      inset: 0;
-      display: block;
-      z-index: 0;
-    }
-    .auth-panel {
-      position: relative;
-      z-index: 1;
-      max-width: 100%;
-      border-right: none;
-      padding: 40px 24px;
-      min-height: 100vh;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.95);
-    }
-    html.dark .auth-panel {
-      background: rgba(17, 17, 17, 0.95);
-    }
-  }
-
-  .auth-input {
-    width: 100%; padding: 10px 14px; border-radius: 10px;
-    border: 1px solid #e5e5e5; background: #f9fafb;
-    font-size: 14px; color: #171717; outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    box-sizing: border-box; font-family: inherit;
-  }
-  html.dark .auth-input {
-    background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.08); color: #e5e5e5;
-  }
-  .auth-input:focus {
-    border-color: #a3a3a3; box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
-  }
-  html.dark .auth-input:focus {
-    border-color: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
-  }
-  .auth-input::placeholder { color: #a3a3a3; }
-  html.dark .auth-input::placeholder { color: #525252; }
-
-  .auth-label { display: block; font-size: 13px; font-weight: 500; color: #525252; margin-bottom: 6px; }
-  html.dark .auth-label { color: #a3a3a3; }
-
-  .auth-submit {
-    width: 100%; padding: 11px; border-radius: 10px;
-    background: #171717; color: white; font-size: 14px; font-weight: 500;
-    border: none; cursor: pointer; transition: background 0.15s;
-    font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  html.dark .auth-submit { background: white; color: #0a0a0a; }
-  .auth-submit:hover:not(:disabled) { background: #404040; }
-  html.dark .auth-submit:hover:not(:disabled) { background: #e5e5e5; }
-  .auth-submit:disabled { opacity: 0.6; cursor: default; }
-
-  .spinner {
-    width: 15px; height: 15px; flex-shrink: 0;
-    border: 2px solid rgba(255,255,255,0.08); border-top-color: white;
-    border-radius: 50%; animation: spin 0.65s linear infinite; display: none;
-  }
-  html.dark .spinner { border-color: rgba(0,0,0,0.25); border-top-color: #0a0a0a; }
-  .auth-submit.loading .spinner { display: block; }
-  .auth-submit.loading .btn-label { display: none; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); transition-delay: 30ms; will-change: opacity, transform; }
-  .auth-panel.visible { opacity: 1; transform: translateX(0); }
 </style>
 
 <div class="auth-split">
@@ -98,17 +14,17 @@
       <% if (settings.logo) { %>
       <img src="<%= settings.logo %>" alt="" class="h-10 w-10 rounded-xl object-contain mb-5">
       <% } %>
-      <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">Two-factor authentication</h1>
-      <p class="text-sm text-neutral-500 mt-1">Enter the 6-digit code from your authenticator app.</p>
+      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong)">Two-factor authentication</h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)">Enter the 6-digit code from your authenticator app.</p>
     </div>
 
     <% if (req.query.err) { %>
-    <div class="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5">
-      <p class="text-sm font-medium text-red-700 dark:text-red-400">Invalid code. Try again.</p>
+    <div class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)">
+      <p class="text-sm font-medium" style="color:var(--theme-danger)">Invalid code. Try again.</p>
     </div>
     <% } %>
 
-    <p id="feedback" class="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5 text-sm font-medium text-red-700 dark:text-red-400 hidden"></p>
+    <p id="feedback" class="rounded-xl px-4 py-3 mb-5 text-sm font-medium hidden" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);color:var(--theme-danger)"></p>
 
     <form id="verifyForm" method="POST" action="/2fa" autocomplete="off" novalidate>
       <%- include('../components/csrf') %>
@@ -126,9 +42,9 @@
       </div>
     </form>
 
-    <p class="text-sm text-neutral-500 dark:text-neutral-400 text-center mt-6">
+    <p class="text-sm text-center mt-6" style="color:var(--theme-text-muted)">
       Lost access to your authenticator app?
-      <a href="/login" class="font-medium text-neutral-800 dark:text-neutral-200 hover:underline">Sign in again</a>
+      <a href="/login" class="font-medium hover:underline" style="color:var(--theme-text-link)">Sign in again</a>
     </p>
 
   </div>

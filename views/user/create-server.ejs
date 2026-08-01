@@ -26,7 +26,7 @@
 
   /* ── Confirm dialog ──────────────────────────────────────── */
   .confirm-overlay {
-    position: fixed; inset: 0; z-index: 100;
+    position: fixed; inset: 0; z-index: 50;
     background: var(--theme-overlay, rgba(0,0,0,0.45));
     display: flex; align-items: center; justify-content: center; padding: 16px;
     opacity: 0; pointer-events: none;
@@ -215,7 +215,7 @@
     <p id="portsOverlayTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-3">Assign ports</p>
     <div id="requiredPortsList" class="space-y-2"></div>
     <div class="flex justify-end mt-4">
-      <button id="portsOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>
+      <button type="button" id="portsOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>
     </div>
   </div>
 </div>
@@ -226,8 +226,8 @@
     <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1" id="confirmTitle"></p>
     <p class="text-xs text-neutral-500 mb-4" id="confirmBody"></p>
     <div class="flex gap-2 justify-end">
-      <button id="confirmCancel" class="px-4 py-2 rounded-lg text-sm font-medium border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">Cancel</button>
-      <button id="confirmOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>
+      <button type="button" id="confirmCancel" class="px-4 py-2 rounded-lg text-sm font-medium border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">Cancel</button>
+      <button type="button" id="confirmOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>
     </div>
   </div>
 </div>

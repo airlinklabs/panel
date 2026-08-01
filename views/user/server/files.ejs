@@ -133,7 +133,7 @@ function escJS(val) {
         <div>
           <h3 class="text-sm font-medium text-red-500">Connection Error</h3>
           <p class="text-xs text-red-400"><%= errorMessage.message %></p>
-          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
+          <button type="button" onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
             Retry Connection
           </button>
         </div>
@@ -155,7 +155,7 @@ function escJS(val) {
               The daemon appears to be offline. File management is unavailable until the connection is restored.
             </p>
             <div class="mt-6">
-              <button onclick="window.location.reload()" class="al-btn-primary px-4 py-2 text-sm rounded-lg">
+              <button type="button" onclick="window.location.reload()" class="al-btn-primary px-4 py-2 text-sm rounded-lg">
                 Retry Connection
               </button>
             </div>
@@ -204,7 +204,7 @@ function escJS(val) {
            style="color:var(--theme-text-strong);"
            autocomplete="off"
            spellcheck="false">
-         <button id="clearFileSearch" class="hidden p-0.5 rounded transition" style="color:var(--theme-text-muted);">
+         <button type="button" id="clearFileSearch" class="hidden p-0.5 rounded transition" style="color:var(--theme-text-muted);">
            <%- icon('x', { size: 12 }) %>
          </button>
        </div>
@@ -283,22 +283,22 @@ function escJS(val) {
        <span id="selectedFilesCount" class="text-sm font-medium" style="color:var(--theme-text-strong)">0 files selected</span>
      </div>
      <div class="flex items-center gap-2">
-       <button id="massRenameBtn"
+       <button type="button" id="massRenameBtn"
          class="al-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
          <%- icon('pencil', { size: 13, class: 'shrink-0' }) %>
          Rename
        </button>
-       <button id="massArchiveBtn"
+       <button type="button" id="massArchiveBtn"
          class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
          <%- icon('file-archive', { size: 13, class: 'shrink-0' }) %>
          Archive
        </button>
-       <button id="massDeleteBtn"
+       <button type="button" id="massDeleteBtn"
          class="al-btn-danger inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
          <%- icon('trash-2', { size: 13, class: 'shrink-0' }) %>
          Delete
        </button>
-       <button id="dismissSelectionBtn"
+       <button type="button" id="dismissSelectionBtn"
          class="inline-flex items-center justify-center w-7 h-7 rounded-lg transition ml-1"
          style="color:var(--theme-text-muted);"
          title="Deselect all">
@@ -315,7 +315,7 @@ function escJS(val) {
           <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Move file</h2>
           <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Enter the destination path. Use / for subdirectories.</p>
         </div>
-        <button onclick="closeMoveModal()" class="p-1 rounded-lg transition" style="color:var(--theme-text-muted);">
+        <button type="button" onclick="closeMoveModal()" class="p-1 rounded-lg transition" style="color:var(--theme-text-muted);">
           <%- icon('x', { size: 16 }) %>
         </button>
       </div>
@@ -326,8 +326,8 @@ function escJS(val) {
           placeholder="path/to/destination/">
       </div>
       <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button onclick="closeMoveModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium">Cancel</button>
-        <button onclick="confirmMove()" class="al-btn-primary px-4 py-2 text-xs font-medium">Move</button>
+        <button type="button" onclick="closeMoveModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium">Cancel</button>
+        <button type="button" onclick="confirmMove()" class="al-btn-primary px-4 py-2 text-xs font-medium">Move</button>
       </div>
     </div>
   </div>
@@ -340,8 +340,8 @@ function escJS(val) {
         <p id="massDeleteMessage" class="text-xs mt-1.5 leading-relaxed" style="color:var(--theme-text-muted)"></p>
       </div>
       <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button onclick="closeMassDeleteModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium">Cancel</button>
-        <button id="confirmMassDelete" class="al-btn-danger px-4 py-2 text-xs font-medium">Delete</button>
+        <button type="button" onclick="closeMassDeleteModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium">Cancel</button>
+        <button type="button" id="confirmMassDelete" class="al-btn-danger px-4 py-2 text-xs font-medium">Delete</button>
       </div>
     </div>
  </div>
@@ -353,7 +353,7 @@ function escJS(val) {
           <h2 id="createModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New File</h2>
           <p id="createModalHint" class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Use / to create files inside new folders.</p>
         </div>
-        <button onclick="closeCreateFileModal()" class="p-1 rounded-lg transition" style="color:var(--theme-text-muted);">
+        <button type="button" onclick="closeCreateFileModal()" class="p-1 rounded-lg transition" style="color:var(--theme-text-muted);">
           <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
         </button>
       </div>
@@ -365,8 +365,8 @@ function escJS(val) {
         <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
       </div>
       <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button onclick="closeCreateFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95">Cancel</button>
-        <button onclick="confirmCreateFile()" class="al-btn-primary px-4 py-2 text-xs font-medium active:scale-95">Create</button>
+        <button type="button" onclick="closeCreateFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95">Cancel</button>
+        <button type="button" onclick="confirmCreateFile()" class="al-btn-primary px-4 py-2 text-xs font-medium active:scale-95">Create</button>
       </div>
     </div>
   </div>
@@ -394,15 +394,15 @@ function escJS(val) {
                 <p id="selectedFileName" class="font-medium truncate" style="color:var(--theme-text-strong)"></p>
                 <p id="selectedFileSize" class="text-sm" style="color:var(--theme-text-muted)"></p>
               </div>
-              <button onclick="removeSelectedFile()" class="ml-2" style="color:var(--theme-text-muted)">
+              <button type="button" onclick="removeSelectedFile()" class="ml-2" style="color:var(--theme-text-muted)">
                 <%- icon('x', { class: 'w-5 h-5' }) %>
               </button>
             </div>
           </div>
         </div>
         <div class="flex justify-end space-x-4">
-          <button onclick="closeUploadFileModal()" class="al-btn-secondary px-5 py-2">Cancel</button>
-          <button id="uploadButton" class="al-btn-primary w-full md:w-auto px-3 py-2 text-sm font-medium" disabled>Upload</button>
+          <button type="button" onclick="closeUploadFileModal()" class="al-btn-secondary px-5 py-2">Cancel</button>
+          <button type="button" id="uploadButton" class="al-btn-primary w-full md:w-auto px-3 py-2 text-sm font-medium" disabled>Upload</button>
         </div>
     </div>
   </div>
@@ -425,7 +425,7 @@ function escJS(val) {
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Rename</h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Use / to move the file into a different folder.</p>
       </div>
-      <button onclick="closeRenameModal()" class="p-1 rounded-lg transition" style="color:var(--theme-text-muted);">
+      <button type="button" onclick="closeRenameModal()" class="p-1 rounded-lg transition" style="color:var(--theme-text-muted);">
         <%- icon('x', { class: 'w-4 h-4' }) %>
       </button>
     </div>
@@ -438,8 +438,8 @@ function escJS(val) {
     <input type="hidden" id="currentFileName">
     <input type="hidden" id="currentFilePath">
     <div class="flex gap-2 px-5 pb-5 justify-end">
-      <button onclick="closeRenameModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95">Cancel</button>
-      <button onclick="confirmRename()" class="al-btn-primary px-4 py-2 text-xs font-medium active:scale-95">Rename</button>
+      <button type="button" onclick="closeRenameModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95">Cancel</button>
+      <button type="button" onclick="confirmRename()" class="al-btn-primary px-4 py-2 text-xs font-medium active:scale-95">Rename</button>
     </div>
   </div>
 </div>

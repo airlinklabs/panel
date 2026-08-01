@@ -61,11 +61,11 @@
               </div>
             </div>
             <div class="flex gap-2">
-              <button id="checkUpdateBtn" class="al-btn-secondary">
+              <button type="button" id="checkUpdateBtn" class="al-btn-secondary">
                 <%- icon('refresh-cw', { size: 16, class: 'shrink-0' }) %>
                 Check for Updates
               </button>
-              <button id="performUpdateBtn" class="hidden al-btn-secondary">
+              <button type="button" id="performUpdateBtn" class="hidden al-btn-secondary">
                 <%- icon('download', { size: 16, class: 'shrink-0' }) %>
                 <%= req.translations.update || 'Update' %>
               </button>

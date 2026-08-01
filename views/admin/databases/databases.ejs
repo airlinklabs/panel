@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Databases' }) %>
+<%- include('../../components/header', { title: req.translations.adminDatabasesTitle || 'Databases' }) %>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
@@ -9,13 +9,13 @@
     <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-16">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Databases' }
+        { label: req.translations.admin || 'Admin' },
+        { label: req.translations.adminDatabasesTitle || 'Databases' }
       ] }) %>
       <%- include('../../components/ui/page-header', {
-        title: 'Database Hosts',
-        description: 'Manage MySQL hosts used to provision databases for servers.',
-        actions: '<a href="/admin/databases/create"><button type="button" class="al-btn-primary">Add Host</button></a>'
+        title: req.translations.adminDatabasesTitle || 'Database Hosts',
+        description: req.translations.adminDatabasesText || 'Manage MySQL hosts used to provision databases for servers.',
+        actions: '<a href="/admin/databases/create"><button type="button" class="al-btn-primary">' + (req.translations.addDatabaseHost || 'Add Host') + '</button></a>'
       }) %>
 
       <div class="al-page-body">
@@ -24,55 +24,55 @@
           <div class="al-card rounded-xl p-5">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Auto-generate database host</h3>
-                <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)">Creates a MySQL host from the panel environment defaults (<span class="font-mono">MYSQL_HOST</span>, <span class="font-mono">MYSQL_PORT</span>, <span class="font-mono">MYSQL_USER</span>, <span class="font-mono">MYSQL_PASSWORD</span>) when none exists, then verifies the connection.</p>
+                <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.adminDbAutoHostTitle || 'Auto-generate database host' %></h3>
+                <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.adminDbAutoHostDesc || 'Creates a MySQL host from the panel environment defaults (MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD) when none exists, then verifies the connection.' %></p>
               </div>
               <button onclick="autoGenerateHost()" type="button" class="al-btn-primary shrink-0" id="autoHostBtn">
                 <%- icon('zap', { size: 15 }) %>
-                <span class="ml-1.5">Auto-generate</span>
+                <span class="ml-1.5"><%= req.translations.autoGenerate || 'Auto-generate' %></span>
               </button>
             </div>
           </div>
           <div class="al-card rounded-xl p-5">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Auto-generate S3 bucket</h3>
-                <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)">Creates the bucket configured in Admin Settings on your S3-compatible endpoint if it does not exist yet.</p>
+                <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.adminDbAutoBucketTitle || 'Auto-generate S3 bucket' %></h3>
+                <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.adminDbAutoBucketDesc || 'Creates the bucket configured in Admin Settings on your S3-compatible endpoint if it does not exist yet.' %></p>
               </div>
               <button onclick="autoGenerateBucket()" type="button" class="al-btn-primary shrink-0" id="autoBucketBtn">
                 <%- icon('zap', { size: 15 }) %>
-                <span class="ml-1.5">Auto-generate</span>
+                <span class="ml-1.5"><%= req.translations.autoGenerate || 'Auto-generate' %></span>
               </button>
             </div>
           </div>
         </div>
 
         <% if (req.query.err == "none") { %>
-          <%- include('../../components/ui/alert', { type: 'success', message: 'Database host created!', detail: 'The host has been saved and is ready to use.' }) %>
+          <%- include('../../components/ui/alert', { type: 'success', message: req.translations.databaseHostCreated || 'Database host created!', detail: req.translations.databaseHostCreatedDesc || 'The host has been saved and is ready to use.' }) %>
         <% } %>
         <% if (req.query.err == "missing_fields") { %>
-          <%- include('../../components/ui/alert', { type: 'danger', message: 'Missing fields', detail: 'Name, host, username and password are required.' }) %>
+          <%- include('../../components/ui/alert', { type: 'danger', message: req.translations.missingFields || 'Missing fields', detail: req.translations.missingFieldsDesc || 'Name, host, username and password are required.' }) %>
         <% } %>
         <% if (req.query.err == "create_failed") { %>
-          <%- include('../../components/ui/alert', { type: 'danger', message: 'Creation failed', detail: 'Could not save the database host. Try again.' }) %>
+          <%- include('../../components/ui/alert', { type: 'danger', message: req.translations.createFailed || 'Creation failed', detail: req.translations.createFailedDesc || 'Could not save the database host. Try again.' }) %>
         <% } %>
 
         <div class="overflow-x-auto rounded-xl border" id="hostTable" style="border-color:var(--theme-border);box-shadow:var(--theme-shadow-sm)">
           <% if (hosts.length === 0) { %>
             <%- include('../../components/ui/empty-state', {
               iconName: 'database',
-              title: 'No database hosts yet',
-              description: 'Add a MySQL host to start provisioning databases.',
-              action: '<button onclick="autoGenerateHost()" type="button" class="al-btn-primary">Auto-generate host</button>'
+              title: req.translations.noDatabaseHostsTitle || 'No database hosts yet',
+              description: req.translations.noDatabaseHostsDesc || 'Add a MySQL host to start provisioning databases.',
+              action: '<button onclick="autoGenerateHost()" type="button" class="al-btn-primary">' + (req.translations.autoGenerateHost || 'Auto-generate host') + '</button>'
             }) %>
           <% } else { %>
           <table class="al-table">
             <thead class="al-table-head">
               <tr>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.name %></th>
-                <th scope="col" class="al-table-th sm:pl-6">Host</th>
-                <th scope="col" class="al-table-th sm:pl-6">Databases</th>
-                <th scope="col" class="al-table-th sm:pl-6">Created</th>
+                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.host || 'Host' %></th>
+                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.databases || 'Databases' %></th>
+                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.created || 'Created' %></th>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.actions %></th>
               </tr>
             </thead>
@@ -84,7 +84,7 @@
                   </td>
                   <td class="al-table-td">
                     <div class="flex items-center gap-2">
-                      <span class="al-dot-online"></span>
+                      <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
                       <span><%= host.host %>:<%= host.port %></span>
                     </div>
                     <div class="mt-1 ml-2 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset text-neutral-600 dark:text-neutral-300 ring-neutral-600/20">
@@ -95,8 +95,8 @@
                   <td class="al-table-td"><%= new Date(host.createdAt).toLocaleDateString() %></td>
                   <td class="al-table-td">
                     <div class="flex gap-3">
-                      <button onclick="testHost('<%= host.id %>')" type="button" class="al-btn-secondary text-xs">Test</button>
-                      <button onclick="deleteHost('<%= host.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete host">
+                      <button type="button" onclick="testHost('<%= host.id %>')" type="button" class="al-btn-secondary text-xs"><%= req.translations.test || 'Test' %></button>
+                      <button type="button" onclick="deleteHost('<%= host.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete host' %>">
                         <%- icon('trash-2', { size: 16 }) %>
                       </button>
                     </div>

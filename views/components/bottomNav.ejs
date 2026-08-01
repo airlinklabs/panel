@@ -37,7 +37,7 @@
     <% }); %>
 
     <!-- More button (for remaining items) -->
-    <button id="mobile-more-btn" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1.5 text-xs transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" aria-label="More navigation options" aria-expanded="false" aria-controls="mobile-more-sheet">
+    <button type="button" id="mobile-more-btn" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1.5 text-xs transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" aria-label="More navigation options" aria-expanded="false" aria-controls="mobile-more-sheet">
       <%- icon('more-horizontal', { class: 'w-5 h-5' }) %>
       <span>More</span>
     </button>
@@ -54,7 +54,7 @@
   <div class="rounded-t-2xl border-t shadow-xl max-h-[70vh] overflow-y-auto" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <div class="sticky top-0 px-4 py-3 border-b flex items-center justify-between" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
       <span class="text-sm font-medium" style="color:var(--theme-text-strong);">Navigation</span>
-      <button id="mobile-more-close" class="p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-text-muted);" aria-label="Close menu">
+      <button type="button" id="mobile-more-close" class="p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-text-muted);" aria-label="Close menu">
         <%- icon('x', { class: 'w-5 h-5' }) %>
       </button>
     </div>

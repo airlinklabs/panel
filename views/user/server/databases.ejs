@@ -69,7 +69,7 @@
               <%- icon('database', { class: 'mx-auto h-12 w-12', style: 'color:var(--theme-text-muted)' }) %>
               <h3 class="mt-3 text-sm font-medium" style="color:var(--theme-text-strong)"><%= req.translations.noDatabasesYet || 'No databases yet' %></h3>
               <p class="mt-1 text-sm" style="color:var(--theme-text-muted)"><%= req.translations.noDatabasesYetDesc || 'Create a database to use with your server.' %></p>
-              <button onclick="openAddDatabaseModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
+              <button type="button" onclick="openAddDatabaseModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
                 <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
                 <%= req.translations.createDatabase || 'Create Database' %>
               </button>
@@ -100,7 +100,7 @@
                       <div class="mb-1" style="color:var(--theme-text-muted)"><%= req.translations.usernameLabel || 'Username' %></div>
                       <div class="flex items-center gap-2">
                         <span id="db-user-<%= db.id %>" class="font-mono" style="color:var(--theme-text-strong)"><%= db.databaseUser %></span>
-                        <button onclick="copyText('<%= db.databaseUser %>')" class="al-btn-ghost" aria-label="<%= req.translations.copyUsername || 'Copy username' %>">
+                        <button type="button" onclick="copyText('<%= db.databaseUser %>')" class="al-btn-ghost" aria-label="<%= req.translations.copyUsername || 'Copy username' %>">
                           <%- icon('copy', { size: 14 }) %>
                         </button>
                       </div>
@@ -110,10 +110,10 @@
                       <div class="flex items-center gap-2">
                         <span id="db-pass-<%= db.id %>" class="font-mono hidden" style="color:var(--theme-text-strong)"><%= db.databasePassword %></span>
                         <span id="db-pass-mask-<%= db.id %>" class="font-mono" style="color:var(--theme-text-strong)">••••••••••••••••</span>
-                        <button onclick="togglePassword(<%= db.id %>)" class="al-btn-ghost" aria-label="<%= req.translations.showPassword || 'Show password' %>">
+                        <button type="button" onclick="togglePassword(<%= db.id %>)" class="al-btn-ghost" aria-label="<%= req.translations.showPassword || 'Show password' %>">
                           <%- icon('eye', { size: 14 }) %>
                         </button>
-                        <button onclick="copyText(document.getElementById('db-pass-<%= db.id %>').textContent)" class="al-btn-ghost" aria-label="<%= req.translations.copyPassword || 'Copy password' %>">
+                        <button type="button" onclick="copyText(document.getElementById('db-pass-<%= db.id %>').textContent)" class="al-btn-ghost" aria-label="<%= req.translations.copyPassword || 'Copy password' %>">
                           <%- icon('copy', { size: 14 }) %>
                         </button>
                       </div>
@@ -124,7 +124,7 @@
                         <span id="db-dsn-<%= db.id %>" class="font-mono text-[11px] truncate max-w-[calc(100%-2rem)]" style="color:var(--theme-text-strong)">
                           mysql://<%= db.databaseUser %>:<%= db.databasePassword %>@<%= db.host.host %>:<%= db.host.port %>/<%= db.databaseName %>
                         </span>
-                        <button onclick="copyText(document.getElementById('db-dsn-<%= db.id %>').textContent)" class="al-btn-ghost" aria-label="<%= req.translations.copyConnectionString || 'Copy connection string' %>">
+                        <button type="button" onclick="copyText(document.getElementById('db-dsn-<%= db.id %>').textContent)" class="al-btn-ghost" aria-label="<%= req.translations.copyConnectionString || 'Copy connection string' %>">
                           <%- icon('copy', { size: 14 }) %>
                         </button>
                       </div>
@@ -132,13 +132,13 @@
                   </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                  <button onclick="rotatePassword(<%= db.id %>)"
+                  <button type="button" onclick="rotatePassword(<%= db.id %>)"
                     class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                     style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
                     <%- icon('refresh', { class: 'w-3 h-3 mr-1' }) %>
                     <%= req.translations.rotatePassword || 'Rotate password' %>
                   </button>
-                  <button onclick="deleteDatabase(<%= db.id %>)" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete database' %>">
+                  <button type="button" onclick="deleteDatabase(<%= db.id %>)" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete database' %>">
                     <%- icon('trash-2', { size: 16 }) %>
                   </button>
                 </div>
@@ -153,7 +153,7 @@
 </main>
 
 <!-- Add Database Modal -->
-<div id="addDatabaseModal" class="fixed inset-0 z-[8000] hidden items-center justify-center" aria-hidden="true">
+<div id="addDatabaseModal" class="fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0 bg-black/60" aria-hidden="true" onclick="closeAddDatabaseModal()"></div>
   <div id="addDatabasePanel" class="relative w-full max-w-md mx-4 rounded-2xl shadow-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addDatabaseTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border)">
     <h3 id="addDatabaseTitle" class="text-sm font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h3>
@@ -168,8 +168,8 @@
         <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)"><%= req.translations.dbProvisionHint || 'A database, user and password will be provisioned on this host.' %></p>
       </div>
       <div class="flex gap-2 pt-1">
-        <button onclick="closeAddDatabaseModal()" class="al-btn-secondary flex-1"><%= req.translations.cancel || 'Cancel' %></button>
-        <button id="confirmAddDatabase" class="al-btn-primary flex-1"><%= req.translations.createDatabaseBtn || 'Create database' %></button>
+        <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-secondary flex-1"><%= req.translations.cancel || 'Cancel' %></button>
+        <button type="button" id="confirmAddDatabase" class="al-btn-primary flex-1"><%= req.translations.createDatabaseBtn || 'Create database' %></button>
       </div>
     </div>
   </div>

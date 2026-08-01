@@ -95,7 +95,7 @@
                 <div class="flex gap-2">
                   <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">Edit</button></a>
                   <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">Export</button></a>
-                  <button onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="al-btn-danger">
+                  <button type="button" onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="al-btn-danger">
                     <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                   </button>
                 </div>
@@ -120,7 +120,7 @@
         <p id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.newImageTitle || 'New Image' %></p>
         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.newImageDesc || 'Configure Docker images and variables after creation.' %></p>
       </div>
-      <button onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
+      <button type="button" onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
@@ -147,8 +147,8 @@
       <p id="deleteModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1"><%= req.translations.deleteImageTitle || 'Delete image?' %></p>
       <p id="deleteMsg" class="text-xs text-neutral-500 mb-5"></p>
       <div class="flex gap-2">
-        <button onclick="closeDelete()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
-        <button id="deleteConfirm" class="flex-1 py-2 rounded-xl al-btn-danger">Delete</button>
+        <button type="button" onclick="closeDelete()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
+        <button type="button" id="deleteConfirm" class="flex-1 py-2 rounded-xl al-btn-danger">Delete</button>
       </div>
     </div>
   </div>

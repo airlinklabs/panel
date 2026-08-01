@@ -35,10 +35,11 @@
             <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);">
               <%= nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) %>
             </p>
-            <% if (instance.length > 0) { %>
+            <% const totalInstances = nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0); %>
+            <% if (totalInstances > 0 && nodes.length > 0) { %>
               <p class="text-xs mt-2" style="color:var(--theme-text-muted);">
                 <%= req.translations.averageInstanceDensity %>:
-                <%= (nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) / nodes.length).toFixed(2) %>
+                <%= (totalInstances / nodes.length).toFixed(2) %>
               </p>
             <% } else { %>
               <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noInstancesAvailable %></p>
@@ -59,7 +60,7 @@
               <p class="font-medium">Connection Error</p>
               <p class="text-xs opacity-70 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p>
             </div>
-            <button onclick="window.location.reload()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
+            <button type="button" onclick="window.location.reload()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
               Retry Connection
             </button>
           </div>
@@ -95,7 +96,7 @@
                         <% } else if (node.status == "Offline") { %>
                           <span class="al-dot-offline group relative">
                             <% if (node.error) { %>
-                              <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 w-48 text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); color:var(--theme-text);">
+                              <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 w-48 text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none z-10" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); color:var(--theme-text);">
                                 <%= node.error %>
                               </div>
                             <% } %>
@@ -109,18 +110,18 @@
                   </td>
                   <td class="al-table-td"><%= node.address %>:<%= node.port %>
                     <div class="mt-1 ml-2 inline-flex items-center rounded-md
-                    <%= node.versionRelease ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-red-600/10 text-red-600 dark:text-red-400 ring-red-600/20' %>
+                    <%= node.versionRelease ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-neutral-600/10 text-neutral-600 dark:text-neutral-400 ring-neutral-600/20' %>
                     px-2 py-1 text-xs font-medium ring-1 ring-inset">
-                      <%= node.versionRelease || 'unknown' %>
+                      <%= node.versionRelease || (req.translations.unknown || 'unknown') %>
                     </div></td>
                   <td class="al-table-td"><%= node.instances ? node.instances.length : 0 %></td>
                   <td class="al-table-td">
                     <div class="flex gap-3">
-                      <button onclick="configure('<%= node.id %>')" type="button" class="al-btn-secondary text-xs">Configure</button>
+                      <button type="button" onclick="configure('<%= node.id %>')" type="button" class="al-btn-secondary text-xs">Configure</button>
                       <a href="./node/<%= node.id %>">
                         <button type="button" class="al-btn-secondary text-xs">Edit</button>
                       </a>
-                      <button onclick="deleteNode('<%= node.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete node">
+                      <button type="button" onclick="deleteNode('<%= node.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete node">
                         <%- icon('trash-2', { size: 16 }) %>
                       </button>
                     </div>

@@ -96,7 +96,7 @@
                             iconPath = '/assets/world_icons/overworld.png';
                           }
                         %>
-                        <img class="h-10 w-10 rounded-full border border-neutral-200 dark:border-neutral-600" src="<%= iconPath %>" alt="<%= req.translations.worldIconAlt || 'World icon' %>" />
+                        <img loading="lazy" class="h-10 w-10 rounded-full border border-neutral-200 dark:border-neutral-600" src="<%= iconPath %>" alt="<%= req.translations.worldIconAlt || 'World icon' %>" />
                       </div>
                       <div>
                         <div class="font-medium" style="color:var(--theme-text-strong)"><%= world.name %></div>

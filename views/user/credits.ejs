@@ -299,7 +299,7 @@
     grid.innerHTML = others.map(function (c) {
       return '<a href="' + c.html_url + '" target="_blank" rel="noopener"' +
         ' class="al-card flex items-center gap-3 px-3 py-3 hover:border-[var(--theme-border-accent)] transition-colors min-w-0">' +
-        '<img src="' + c.avatar_url + '&s=48" alt="' + c.login + '" class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-white/10 object-cover shrink-0" onerror="this.src=\'https://github.com/ghost.png\'">' +
+        '<img loading="lazy" src="' + c.avatar_url + '&s=48" alt="' + c.login + '" class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-white/10 object-cover shrink-0" onerror="this.src=\'https://github.com/ghost.png\'">' +
         '<div class="min-w-0 flex-1"><p class="text-xs font-medium truncate" style="color:var(--theme-text-strong);">' + c.login + '</p>' +
         '<p class="text-[10px]" style="color:var(--theme-text-muted);">' + c.contributions + ' commit' + (c.contributions !== 1 ? 's' : '') + '</p></div></a>';
     }).join('');

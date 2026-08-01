@@ -16,16 +16,16 @@
             <img id="avatar-preview"
               src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>"
               alt="Avatar"
-              class="h-12 w-12 rounded-xl border border-neutral-200 dark:border-white/10 object-cover">
+              class="h-12 w-12 rounded-xl border object-cover" style="border-color:var(--theme-border);">
             <label for="avatar-input" title="Upload photo"
-              class="absolute -bottom-1.5 -right-1.5 w-6 h-6 flex items-center justify-center rounded-full bg-neutral-800 dark:bg-white border-2 border-white dark:border-neutral-900 cursor-pointer hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">
-              <%- icon('upload', { class: 'w-3 h-3 text-white dark:text-neutral-900', strokeWidth: 2.5 }) %>
+              class="absolute -bottom-1.5 -right-1.5 w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:opacity-80 transition" style="background:var(--theme-text);border:2px solid var(--theme-bg);">
+              <%- icon('upload', { class: 'w-3 h-3', strokeWidth: 2.5, style: 'color:var(--theme-bg);' }) %>
             </label>
             <input id="avatar-input" type="file" accept="image/*" class="hidden">
             <% if (user.avatar) { %>
             <button id="remove-avatar-btn" type="button" title="Remove photo"
-              class="absolute -top-1.5 -right-1.5 w-6 h-6 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-500 border-2 border-white dark:border-neutral-900 transition">
-              <%- icon('x', { class: 'w-3 h-3 text-white', strokeWidth: 2.5 }) %>
+              class="absolute -top-1.5 -right-1.5 w-6 h-6 flex items-center justify-center rounded-full hover:opacity-85 transition" style="background:var(--theme-danger);border:2px solid var(--theme-bg);">
+              <%- icon('x', { class: 'w-3 h-3', strokeWidth: 2.5, style: 'color:var(--theme-btn-danger-text);' }) %>
             </button>
             <% } %>
           </div>
@@ -34,7 +34,7 @@
             <p class="al-page-desc"><%= req.translations.userAccountText || 'Manage your profile and preferences.' %></p>
           </div>
           <a href="/credits"
-            class="flex items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-white/5 hover:bg-neutral-50 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-3 py-1.5 text-xs font-medium shadow-sm dark:shadow-none transition shrink-0">
+            class="flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium shadow-sm transition shrink-0 hover:opacity-85" style="border-color:var(--theme-border);background:var(--theme-btn-secondary-bg);color:var(--theme-btn-secondary-text);">
             <%- icon('circle-alert', { class: 'w-3.5 h-3.5' }) %>
             Credits
           </a>
@@ -54,7 +54,7 @@
               <div class="flex gap-1.5">
                 <input id="username" type="text" name="username" placeholder="<%= user.username %>"
                   class="al-input flex-1">
-                <span id="username-feedback" class="text-[11px] text-neutral-400 hidden"></span>
+                <span id="username-feedback" class="text-[11px] hidden" style="color:var(--theme-text-muted);"></span>
               </div>
             </div>
 
@@ -71,7 +71,7 @@
               <label class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('lock', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.currentPassword || 'Current password' %>
               </label>
-              <span id="current-password-feedback" class="text-[11px] text-neutral-400 block mb-1 hidden"></span>
+              <span id="current-password-feedback" class="text-[11px] block mb-1 hidden" style="color:var(--theme-text-muted);"></span>
               <input id="currentPassword" type="password" name="currentPassword" placeholder="<%= req.translations.currentPassword || 'Current password' %>" class="al-input">
             </div>
 
@@ -158,13 +158,13 @@
                 <% if (loginHistory && loginHistory.length > 0) { %>
                   <% let loginIdx = 0; loginHistory.forEach(login => { %>
                   <tr style="--i:<%= loginIdx++ %>" class="al-table-tr transition-colors">
-                    <td class="px-4 py-3 text-neutral-700 dark:text-neutral-300 whitespace-nowrap"><%= new Date(login.timestamp).toLocaleString() %></td>
-                    <td class="px-4 py-3 text-neutral-500 dark:text-neutral-400 whitespace-nowrap font-mono text-xs"><%= login.ipAddress || 'Unknown' %></td>
-                    <td class="px-4 py-3 text-neutral-400 text-xs truncate max-w-[260px]"><%= login.userAgent || 'Unknown' %></td>
+                    <td class="px-4 py-3 whitespace-nowrap" style="color:var(--theme-text);"><%= new Date(login.timestamp).toLocaleString() %></td>
+                    <td class="px-4 py-3 whitespace-nowrap font-mono text-xs" style="color:var(--theme-text-muted);"><%= login.ipAddress || 'Unknown' %></td>
+                    <td class="px-4 py-3 text-xs truncate max-w-[260px]" style="color:var(--theme-text-muted);"><%= login.userAgent || 'Unknown' %></td>
                   </tr>
                   <% }) %>
                 <% } else { %>
-                <tr><td colspan="3" class="px-4 py-6 text-center text-sm text-neutral-400"><%= req.translations.noLoginHistory || 'No login history available' %></td></tr>
+                <tr><td colspan="3" class="px-4 py-6 text-center text-sm" style="color:var(--theme-text-muted);"><%= req.translations.noLoginHistory || 'No login history available' %></td></tr>
                 <% } %>
               </tbody>
             </table>
@@ -329,20 +329,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openCropPopup(dataUrl, csrf) {
     const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-4';
+    overlay.className = 'fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4';
     overlay.innerHTML = `
-      <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-lg border border-neutral-200 dark:border-white/10 w-full max-w-lg overflow-hidden">
-        <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b border-neutral-100 dark:border-white/5">
+      <div class="rounded-2xl shadow-lg border w-full max-w-lg overflow-hidden" style="background:var(--theme-bg-card);border-color:var(--theme-border);">
+        <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b" style="border-color:var(--theme-border);">
           <div>
-            <p class="text-sm font-semibold text-neutral-800 dark:text-white">Position your photo</p>
-            <p class="text-xs text-neutral-500 mt-0.5">Drag and resize the selection box.</p>
+            <p class="text-sm font-semibold" style="color:var(--theme-text-strong);">Position your photo</p>
+            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Drag and resize the selection box.</p>
           </div>
-          <button id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+          <button type="button" id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-75 transition" style="color:var(--theme-text-muted);">
             <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
           </button>
         </div>
         <div class="relative bg-neutral-950 select-none overflow-hidden" style="height:340px" id="crop-stage">
-          <img id="crop-img" src="${dataUrl}" draggable="false" style="position:absolute;top:0;left:0;user-select:none;max-width:none"/>
+          <img id="crop-img" src="${dataUrl}" draggable="false" alt="Crop preview" style="position:absolute;top:0;left:0;user-select:none;max-width:none"/>
           <div id="crop-box" style="position:absolute;border:2px solid white;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);cursor:move;box-sizing:border-box">
             <div class="crop-handle" data-dir="nw" style="position:absolute;top:-5px;left:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:nw-resize"></div>
             <div class="crop-handle" data-dir="ne" style="position:absolute;top:-5px;right:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:ne-resize"></div>
@@ -350,9 +350,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="crop-handle" data-dir="se" style="position:absolute;bottom:-5px;right:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:se-resize"></div>
           </div>
         </div>
-        <div class="flex gap-3 px-5 py-4 border-t border-neutral-100 dark:border-white/5">
-          <button id="crop-cancel-btn" class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition">Cancel</button>
-          <button id="crop-save" class="flex-1 rounded-xl bg-neutral-950 dark:bg-white py-2.5 text-sm font-medium text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">Save photo</button>
+        <div class="flex gap-3 px-5 py-4 border-t" style="border-color:var(--theme-border);">
+          <button type="button" id="crop-cancel-btn" class="flex-1 rounded-xl border py-2.5 text-sm font-medium transition hover:opacity-85" style="border-color:var(--theme-btn-secondary-border);background:var(--theme-btn-secondary-bg);color:var(--theme-btn-secondary-text);">Cancel</button>
+          <button type="button" id="crop-save" class="flex-1 rounded-xl py-2.5 text-sm font-medium transition hover:opacity-85" style="background:var(--theme-btn-primary-bg);color:var(--theme-btn-primary-text);">Save photo</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);

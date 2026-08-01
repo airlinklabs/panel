@@ -122,7 +122,7 @@ const pageCatalog = (function() {
       { label: 'Admin Addons', url: '/admin/addons', kw: 'plugins extensions mods installed' },
       { label: 'Airlink Cloud', url: '/airlink-cloud/settings', kw: 'cloud backup updates airlink' },
       { label: 'API Keys', url: '/admin/apikeys', kw: 'tokens access auth api keys' },
-      { label: 'Security', url: '/admin/security', kw: 'ban bans ips rate limit moderation' },
+      { label: 'Security', url: '/admin/settings', kw: 'ban bans ips rate limit moderation' },
       { label: 'Player Stats', url: '/admin/playerstats', kw: 'players analytics stats leaderboard top' },
       { label: 'Analytics', url: '/admin/analytics', kw: 'charts stats metrics graphs' },
       { label: 'Addon Store', url: '/admin/addons/store', kw: 'plugins store marketplace extensions install' },

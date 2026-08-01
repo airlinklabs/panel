@@ -146,7 +146,7 @@
             </div>
             <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Couldn&rsquo;t load the catalogue</h3>
             <p class="text-sm mt-1" style="color:var(--theme-text-muted)">Check your connection and try again.</p>
-            <button onclick="loadCatalogue()" class="mt-4 al-btn-secondary">Retry</button>
+            <button type="button" onclick="loadCatalogue()" class="mt-4 al-btn-secondary">Retry</button>
           </div>
         </div>
 
@@ -190,7 +190,7 @@
         <p id="grpTitle" class="text-sm font-semibold truncate" style="color:var(--theme-text-strong)"></p>
         <span id="grpCount" class="text-xs shrink-0" style="color:var(--theme-text-muted)"></span>
       </div>
-      <button onclick="closeGroup()" class="ml-3 shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" style="color:var(--theme-text-muted)">
+      <button type="button" onclick="closeGroup()" class="ml-3 shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" style="color:var(--theme-text-muted)">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
@@ -215,7 +215,7 @@
         <p id="eggTitle" class="text-sm font-semibold truncate" style="color:var(--theme-text-strong)"></p>
         <span id="eggCat" class="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0"></span>
       </div>
-      <button onclick="closeEgg()" class="ml-3 shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" style="color:var(--theme-text-muted)">
+      <button type="button" onclick="closeEgg()" class="ml-3 shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" style="color:var(--theme-text-muted)">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>

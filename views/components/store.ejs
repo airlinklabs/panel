@@ -67,7 +67,7 @@
   .m-overlay {
     position: fixed; inset: 0;
     background: var(--theme-overlay, rgba(0,0,0,0.6));
-    z-index: 100;
+    z-index: 50;
     display: flex; align-items: center; justify-content: center;
     padding: 16px;
     opacity: 0; pointer-events: none;
@@ -111,10 +111,9 @@
     cursor: pointer;
     transition: color 0.12s, background 0.12s;
   }
-  .m-tab.on { color: #ffffff; background: #0a0a0a; border-radius: 8px; }
+  .m-tab.on { color: var(--theme-bg, #ffffff); background: var(--theme-text, #0a0a0a); border-radius: 8px; }
   .m-tab:hover:not(.on) { color: var(--theme-text-muted, #525252); }
-  .dark .m-tab { color: var(--theme-text-muted, #525252); }
-  .dark .m-tab.on { color: #0a0a0a; background: #ffffff; border-radius: 8px; }
+  .dark .m-tab { color: var(--theme-text-muted, #a3a3a3); }
   .dark .m-tab:hover:not(.on) { color: var(--theme-text, #a3a3a3); }
 
   .m-body {
@@ -204,14 +203,14 @@
   /* Action buttons inside modal */
   .m-btn-install {
     display: inline-flex; align-items: center; gap: 6px;
-    background: var(--theme-text-strong, #171717); color: var(--theme-accent-text, #fff);
+    background: var(--theme-btn-primary-bg, var(--theme-text-strong, #171717)); color: var(--theme-btn-primary-text, var(--theme-accent-text, #fff));
     border: none; border-radius: 9px;
     padding: 7px 14px;
     font-size: 13px; font-weight: 500;
     cursor: pointer; flex: 1; justify-content: center;
     transition: background 0.12s;
   }
-  .m-btn-install:hover:not(:disabled) { background: var(--theme-border, #e5e5e5); }
+  .m-btn-install:hover:not(:disabled) { background: var(--theme-btn-primary-hover, var(--theme-border, #e5e5e5)); }
   .m-btn-install:disabled { opacity: 0.45; cursor: not-allowed; }
 
   .m-btn-remove {
@@ -264,7 +263,7 @@
   .dark .m-prog-track { background: var(--theme-border-subtle, rgba(255,255,255,0.06)); }
   .dark .m-prog-fill { background: var(--theme-accent-text, #fff); }
   .dark .m-log-line { color: var(--theme-text-muted, #404040); }
-  .dark .m-btn-install { background: #fff; color: #0a0a0a; }
+  .dark .m-btn-install { background: var(--theme-btn-primary-bg, #0a0a0a); color: var(--theme-btn-primary-text, #fff); }
 </style>
 
 <main class="h-screen m-auto">
@@ -310,7 +309,7 @@
         <div id="storeError" class="hidden py-16 text-center">
           <%- icon('triangle-alert', { class: 'w-9 h-9 text-neutral-800 mx-auto mb-3', strokeWidth: 1 }) %>
           <p id="storeErrorMsg" class="text-sm text-neutral-600"><%= req.translations.failedToLoadStore || 'Failed to load addon store.' %></p>
-          <button onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline"><%= req.translations.retryLoad || 'Retry' %></button>
+          <button type="button" onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline"><%= req.translations.retryLoad || 'Retry' %></button>
         </div>
 
         <!-- Grid -->
@@ -319,7 +318,7 @@
         <!-- Empty -->
         <div id="storeEmpty" class="hidden py-16 text-center">
           <p class="text-sm text-neutral-600"><%= req.translations.noAddonsMatch || 'No addons match your search.' %></p>
-          <button id="clearSearch" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline"><%= req.translations.clearSearch || 'Clear search' %></button>
+          <button type="button" id="clearSearch" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline"><%= req.translations.clearSearch || 'Clear search' %></button>
         </div>
       </div>
     </div>
@@ -341,14 +340,14 @@
           </div>
           <p id="mMeta" class="text-xs text-neutral-600 mt-0.5"></p>
         </div>
-        <button id="mClose" class="flex-shrink-0 w-6 h-6 rounded-md bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 flex items-center justify-center text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition">
+        <button type="button" id="mClose" class="flex-shrink-0 w-6 h-6 rounded-md bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 flex items-center justify-center text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition">
           <%- icon('x', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
         </button>
       </div>
 
       <!-- Action buttons -->
       <div class="flex gap-2 mt-3">
-        <button id="mActionBtn" class="m-btn-install">
+        <button type="button" id="mActionBtn" class="m-btn-install">
           <%- icon('download', { class: 'w-3.5 h-3.5', strokeWidth: 1.5 }) %>
           <span id="mActionLabel"><%= req.translations.install || 'Install' %></span>
         </button>
@@ -361,9 +360,9 @@
 
     <!-- Tabs -->
     <div class="m-tabs" role="tablist">
-      <button id="m-tab-overview" role="tab" aria-selected="true" tabindex="0"  aria-controls="m-pane-overview" class="m-tab on" data-tab="overview"><%= req.translations.overviewTab || 'Overview' %></button>
-      <button id="m-tab-install"  role="tab" aria-selected="false" tabindex="-1" aria-controls="m-pane-install" class="m-tab" data-tab="install"><%= req.translations.installationTab || 'Installation' %></button>
-      <button id="m-tab-reviews"  role="tab" aria-selected="false" tabindex="-1" aria-controls="m-pane-reviews" class="m-tab" data-tab="reviews"><%= req.translations.reviewsTab || 'Reviews' %></button>
+      <button type="button" id="m-tab-overview" role="tab" aria-selected="true" tabindex="0"  aria-controls="m-pane-overview" class="m-tab on" data-tab="overview"><%= req.translations.overviewTab || 'Overview' %></button>
+      <button type="button" id="m-tab-install"  role="tab" aria-selected="false" tabindex="-1" aria-controls="m-pane-install" class="m-tab" data-tab="install"><%= req.translations.installationTab || 'Installation' %></button>
+      <button type="button" id="m-tab-reviews"  role="tab" aria-selected="false" tabindex="-1" aria-controls="m-pane-reviews" class="m-tab" data-tab="reviews"><%= req.translations.reviewsTab || 'Reviews' %></button>
     </div>
 
     <!-- Body -->
@@ -595,7 +594,7 @@
     featEl.innerHTML = '';
     if ((addon.features || []).length) {
       const lbl = document.createElement('p');
-      lbl.style.cssText = 'font-size:11px;color:#404040;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
+      lbl.style.cssText = 'font-size:11px;color:var(--theme-text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
       lbl.textContent = 'Features';
       featEl.appendChild(lbl);
       addon.features.forEach(f => {

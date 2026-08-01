@@ -86,7 +86,7 @@
             </svg>
             <span>
               Refreshing in <span id="refresh-countdown">30</span> seconds
-                <button onclick="refreshPlayers()" class="ml-2 transition-colors duration-200 inline-flex items-center" style="color:var(--theme-accent)">
+                <button type="button" onclick="refreshPlayers()" class="ml-2 transition-colors duration-200 inline-flex items-center" style="color:var(--theme-accent)">
                   <%- icon('refresh-cw', { class: 'h-3 w-3 mr-1' }) %>
                 Refresh now
               </button>
@@ -103,6 +103,7 @@
                 <img
                   src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay"
                   alt="<%= player.name %>'s Avatar"
+                  loading="lazy"
                   class="rounded-lg mr-4"
                   width="64"
                   height="64"
@@ -134,7 +135,7 @@
                 The server appears to be offline. Start your server to see online players.
               </p>
               <div class="mt-6">
-                <button onclick="refreshPlayers()" class="al-btn-primary px-4 py-2 rounded-lg inline-flex items-center">
+                <button type="button" onclick="refreshPlayers()" class="al-btn-primary px-4 py-2 rounded-lg inline-flex items-center">
                   <%- icon('refresh-cw', { class: 'h-4 w-4 mr-2' }) %>
                   Refresh
                 </button>

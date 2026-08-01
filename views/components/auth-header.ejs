@@ -24,8 +24,10 @@
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
     <link rel="stylesheet" href="/styles.css">
     <style>
-      html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
-      ::-webkit-scrollbar { display: none; }
+      * { scrollbar-width: thin; scrollbar-color: var(--theme-border) transparent; }
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 4px; }
+      ::-webkit-scrollbar-track { background: transparent; }
       html, body { transition: background-color 0.25s ease-in, color 0.25s ease-in; margin: 0; padding: 0; }
     </style>
 </head>

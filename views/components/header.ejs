@@ -32,8 +32,10 @@
     <script nonce="<%- nonce %>" src="/javascript/shared/checkbox-anim.js"></script>
     <script nonce="<%- nonce %>" src="/javascript/shared/layout-animations.js"></script>
     <style>
-      html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
-      ::-webkit-scrollbar { display: none; }
+      * { scrollbar-width: thin; scrollbar-color: var(--theme-border) transparent; }
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 4px; }
+      ::-webkit-scrollbar-track { background: transparent; }
       html, body { transition: background-color 0.25s ease-in, color 0.25s ease-in; background: var(--theme-bg); color: var(--theme-text); }
       /* Safe area handling for notched devices */
       body { 

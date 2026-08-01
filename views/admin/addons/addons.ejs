@@ -79,11 +79,11 @@
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-2">
-                  <button onclick="toggleAddon('<%= addon.slug %>', <%= !addon.enabled %>)" type="button"
+                  <button type="button" onclick="toggleAddon('<%= addon.slug %>', <%= !addon.enabled %>)" type="button"
                     class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">
                     <%= addon.enabled ? 'Disable' : 'Enable' %>
                   </button>
-                  <button onclick="confirmUninstall('<%= addon.slug %>', '<%= addon.name %>')" type="button"
+                  <button type="button" onclick="confirmUninstall('<%= addon.slug %>', '<%= addon.name %>')" type="button"
                     class="al-btn-danger">
                     <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                   </button>

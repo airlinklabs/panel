@@ -136,9 +136,15 @@
   var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
   ws.addEventListener('error', function () {});
 
+  function themeVar(name, fallback) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+
   // Highlight account/logout when on those pages
   function markSpecialLinks(path) {
-    var isDark = document.documentElement.classList.contains('dark');
+    var pillBg = themeVar('--theme-text', '#171717');
+    var pillFg = themeVar('--theme-bg', '#f0f0f0');
     var account = document.getElementById('sidebar-account-link');
     var logout  = document.getElementById('sidebar-logout-link');
     var logo = document.getElementById('sidebar-logo-link');
@@ -146,10 +152,10 @@
       var onAccount = path === '/account' || path.startsWith('/account/');
       var userText = account.querySelector('#sidebar-username');
       if (onAccount) {
-        account.style.background = isDark ? '#f0f0f0' : '#171717';
-        account.style.color = isDark ? '#171717' : '#f0f0f0';
+        account.style.background = pillBg;
+        account.style.color = pillFg;
         account.style.fontWeight = '700';
-        if (userText) userText.parentElement.style.color = isDark ? '#171717' : '#f0f0f0';
+        if (userText) userText.parentElement.style.color = pillFg;
       } else {
         account.style.background = '';
         account.style.color = '';
@@ -164,13 +170,13 @@
       var logoImg = logo.querySelector('img');
       if (onCredits) {
         if (logoBlock) {
-          logoBlock.style.background = isDark ? '#f0f0f0' : '#000000';
+          logoBlock.style.background = pillBg;
           logoBlock.style.borderRadius = '0.75rem';
         }
-        logo.style.color = isDark ? '#171717' : '#f0f0f0';
-        if (logoImg) logoImg.style.background = '#000000';
+        logo.style.color = pillFg;
+        if (logoImg) logoImg.style.background = pillFg;
         if (logoTitle) {
-          logoTitle.style.color = isDark ? '#171717' : '#f0f0f0';
+          logoTitle.style.color = pillFg;
           logoTitle.style.fontWeight = '700';
         }
       } else {
@@ -193,7 +199,8 @@
 
   // Mark active nav link
   function markActiveNav(path) {
-    var isDark = document.documentElement.classList.contains('dark');
+    var pillBg = themeVar('--theme-text', '#171717');
+    var pillFg = themeVar('--theme-bg', '#f0f0f0');
     var links = document.querySelectorAll('.nav-link');
     links.forEach(function(link) {
       var href = link.getAttribute('href');
@@ -208,8 +215,8 @@
       }
       if (active) {
         link.classList.add('active');
-        link.style.color = isDark ? '#171717' : '#f0f0f0';
-        link.style.background = isDark ? '#f0f0f0' : '#171717';
+        link.style.color = pillFg;
+        link.style.background = pillBg;
         link.style.borderRadius = '0.75rem';
       } else {
         link.classList.remove('active');
@@ -261,7 +268,7 @@
   </div>
 
   <!-- Search popup -->
-  <div id="searchOverlay" class="fixed inset-0 z-[100] hidden items-start justify-center p-4"
+  <div id="searchOverlay" class="fixed inset-0 z-50 hidden items-start justify-center p-4"
     role="dialog" aria-modal="true" aria-label="<%= req.translations.navSearch || 'Search' %>"
     style="background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); padding-top:14vh;">
     <div id="searchPanel" class="w-full max-w-xl rounded-2xl border overflow-hidden shadow-2xl"
@@ -303,14 +310,14 @@
   padding: 4px 10px;
   border-radius: 50px;
   cursor: pointer;
-  background: #171717;
-  border: 1px solid #171717;
+  background: var(--theme-text);
+  border: 1px solid var(--theme-text);
   flex-shrink: 0;
   transition: background 0.25s ease, border-color 0.25s ease;
 }
 .dark .theme-toggle-switch {
-  background: #f0f0f0;
-  border-color: #f0f0f0;
+  background: var(--theme-bg);
+  border-color: var(--theme-bg);
 }
 .theme-toggle-knob {
   position: absolute;
@@ -320,12 +327,12 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #f0f0f0;
+  background: var(--theme-bg);
   transition: transform 0.22s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), background 0.25s ease;
 }
 .dark .theme-toggle-knob {
   transform: translateX(33px);
-  background: #171717;
+  background: var(--theme-text);
 }
 </style>
 <script nonce="<%- nonce %>">

@@ -208,7 +208,7 @@
               <% if (item.type === 'link') { %>
                 <a href="<%= item.url %>" class="hover:text-neutral-300 transition" style="color:var(--theme-text-muted)"><%= value %></a>
               <% } else if (item.type === 'button') { %>
-                <button onclick="<%= item.onClick %>" class="hover:text-neutral-300 transition" style="color:var(--theme-text-muted)"><%= value %></button>
+                <button type="button" onclick="<%= item.onClick %>" class="hover:text-neutral-300 transition" style="color:var(--theme-text-muted)"><%= value %></button>
               <% } else { %>
                 <p style="color:var(--theme-text-muted)"><%= value %></p>
               <% } %>

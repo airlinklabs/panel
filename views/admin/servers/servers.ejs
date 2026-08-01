@@ -116,7 +116,7 @@
                 </td>
                 <td class="al-table-td">
                   <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-2 group" onclick="event.stopPropagation()">
-                    <img class="h-6 w-6 rounded-md object-cover shrink-0"
+                    <img loading="lazy" class="h-6 w-6 rounded-md object-cover shrink-0"
                       src="<%= server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username) %>" alt="<%= server.owner.username %>'s avatar">
                     <span class="font-medium group-hover:underline truncate max-w-[120px]" style="color:var(--theme-text-strong);"><%= server.owner.username %></span>
                   </a>

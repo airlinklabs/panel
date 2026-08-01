@@ -155,7 +155,7 @@
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-red-500"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon — it might just need a nudge.' %></p>
             </div>
-            <button onclick="window.location.reload()" class="shrink-0 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition">
+            <button type="button" onclick="window.location.reload()" class="shrink-0 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition">
               Retry Connection
             </button>
           </div>
@@ -199,7 +199,7 @@
                         <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %>:</h2>
                         <p id="server-ip-text" class="mt-1 text-sm font-medium font-mono tracking-tight break-all" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></p>
                     </div>
-                    <button id="copy-ip-btn" onclick="copyServerIP()" title="Copy" class="shrink-0 mt-1 rounded-lg p-1.5 transition-colors" style="background:var(--theme-bg-secondary)">
+                    <button type="button" id="copy-ip-btn" onclick="copyServerIP()" title="Copy" class="shrink-0 mt-1 rounded-lg p-1.5 transition-colors" style="background:var(--theme-bg-secondary)">
                         <span id="copy-icon"><%- icon('copy', { class: 'h-3.5 w-3.5', style: 'color:var(--theme-text-muted)' }) %></span>
                         <span id="check-icon" class="hidden"><%- icon('check', { class: 'h-3.5 w-3.5 text-emerald-500', strokeWidth: 2.5 }) %></span>
                     </button>
@@ -295,7 +295,7 @@
           <p class="text-xs font-medium text-red-500">Connection Error</p>
           <p class="text-[11px] text-red-400 truncate"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'The daemon appears to be offline.' %></p>
         </div>
-        <button onclick="window.location.reload()" class="shrink-0 px-2.5 py-1 bg-red-600 hover:bg-red-500 text-white text-[11px] font-medium rounded-lg transition">
+        <button type="button" onclick="window.location.reload()" class="shrink-0 px-2.5 py-1 bg-red-600 hover:bg-red-500 text-white text-[11px] font-medium rounded-lg transition">
           Retry
         </button>
       </div>
@@ -335,7 +335,7 @@
         <%- icon('globe', { class: 'h-4 w-4 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
         <span class="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 shrink-0"><%= req.translations.addressIP %>:</span>
         <span class="text-xs font-medium font-mono text-neutral-800 dark:text-white truncate flex-1" id="mobile-server-ip-text"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></span>
-        <button id="mobile-copy-ip-btn" onclick="copyMobileServerIP()" class="shrink-0 rounded-md p-1 transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">
+        <button type="button" id="mobile-copy-ip-btn" onclick="copyMobileServerIP()" class="shrink-0 rounded-md p-1 transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">
           <svg id="mobile-copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 text-neutral-600 dark:text-neutral-300">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
