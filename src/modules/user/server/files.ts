@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import multer from 'multer';
 import { isWorld } from '../../../handlers/features';
@@ -24,6 +24,7 @@ export function registerFilesRoutes(router: Router): void {
   router.get(
     '/server/:id/files',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const errorMessage: ErrorMessage = {};
       const userId = req.session?.user?.id;
@@ -150,6 +151,7 @@ export function registerFilesRoutes(router: Router): void {
   router.get(
     '/server/:id/files/download/{*path}',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
 
@@ -192,6 +194,7 @@ export function registerFilesRoutes(router: Router): void {
   router.post(
     '/server/:id/zip',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
       let relativePath = req.body?.relativePath || '/';
@@ -251,6 +254,7 @@ export function registerFilesRoutes(router: Router): void {
   router.post(
     '/server/:id/unzip',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
       let relativePath = req.body?.relativePath || '/';
@@ -326,6 +330,7 @@ export function registerFilesRoutes(router: Router): void {
   router.delete(
     '/server/:id/files/rm/{*path}',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
       const filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
@@ -397,6 +402,7 @@ export function registerFilesRoutes(router: Router): void {
   router.post(
     '/server/:id/rename',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -457,6 +463,7 @@ export function registerFilesRoutes(router: Router): void {
   router.post(
     '/server/:id/upload',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response, next) => {
       const settings = await prisma.settings.findUnique({ where: { id: 1 } });
       const limitMb = settings?.uploadLimit ?? 100;

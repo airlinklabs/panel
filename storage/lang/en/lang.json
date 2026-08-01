@@ -320,5 +320,9 @@
   "updateApiKeyDesc": "Update API key details and permissions.",
   "keyInformation": "Key Information",
   "quickSelect": "Quick Select",
-  "refreshDataCollection": "Double-click the Refresh button to manually trigger data collection"
+  "refreshDataCollection": "Double-click the Refresh button to manually trigger data collection",
+  "twoFactorAuth": "Two-factor authentication",
+  "setup2FA": "Set up 2FA",
+  "twoFactorSetupTitle": "Set up two-factor authentication",
+  "twoFactorVerifyTitle": "Two-factor authentication"
 }

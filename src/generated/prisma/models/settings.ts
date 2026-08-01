@@ -37,6 +37,7 @@ export type SettingsAvgAggregateOutputType = {
   defaultMaxStorage: number | null
   loginMaxAttempts: number | null
   loginLockoutMinutes: number | null
+  smtpPort: number | null
 }
 
 export type SettingsSumAggregateOutputType = {
@@ -50,6 +51,7 @@ export type SettingsSumAggregateOutputType = {
   defaultMaxStorage: number | null
   loginMaxAttempts: number | null
   loginLockoutMinutes: number | null
+  smtpPort: number | null
 }
 
 export type SettingsMinAggregateOutputType = {
@@ -86,6 +88,19 @@ export type SettingsMinAggregateOutputType = {
   hashApiKeys: boolean | null
   airlinkCloudApiKey: string | null
   airlinkCloudBackupEnabled: boolean | null
+  smtpHost: string | null
+  smtpPort: number | null
+  smtpUser: string | null
+  smtpPassword: string | null
+  smtpFrom: string | null
+  smtpSecure: boolean | null
+  s3Enabled: boolean | null
+  s3Endpoint: string | null
+  s3Region: string | null
+  s3Bucket: string | null
+  s3AccessKey: string | null
+  s3SecretKey: string | null
+  s3PathStyle: boolean | null
 }
 
 export type SettingsMaxAggregateOutputType = {
@@ -122,6 +137,19 @@ export type SettingsMaxAggregateOutputType = {
   hashApiKeys: boolean | null
   airlinkCloudApiKey: string | null
   airlinkCloudBackupEnabled: boolean | null
+  smtpHost: string | null
+  smtpPort: number | null
+  smtpUser: string | null
+  smtpPassword: string | null
+  smtpFrom: string | null
+  smtpSecure: boolean | null
+  s3Enabled: boolean | null
+  s3Endpoint: string | null
+  s3Region: string | null
+  s3Bucket: string | null
+  s3AccessKey: string | null
+  s3SecretKey: string | null
+  s3PathStyle: boolean | null
 }
 
 export type SettingsCountAggregateOutputType = {
@@ -158,6 +186,19 @@ export type SettingsCountAggregateOutputType = {
   hashApiKeys: number
   airlinkCloudApiKey: number
   airlinkCloudBackupEnabled: number
+  smtpHost: number
+  smtpPort: number
+  smtpUser: number
+  smtpPassword: number
+  smtpFrom: number
+  smtpSecure: number
+  s3Enabled: number
+  s3Endpoint: number
+  s3Region: number
+  s3Bucket: number
+  s3AccessKey: number
+  s3SecretKey: number
+  s3PathStyle: number
   _all: number
 }
 
@@ -173,6 +214,7 @@ export type SettingsAvgAggregateInputType = {
   defaultMaxStorage?: true
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
+  smtpPort?: true
 }
 
 export type SettingsSumAggregateInputType = {
@@ -186,6 +228,7 @@ export type SettingsSumAggregateInputType = {
   defaultMaxStorage?: true
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
+  smtpPort?: true
 }
 
 export type SettingsMinAggregateInputType = {
@@ -222,6 +265,19 @@ export type SettingsMinAggregateInputType = {
   hashApiKeys?: true
   airlinkCloudApiKey?: true
   airlinkCloudBackupEnabled?: true
+  smtpHost?: true
+  smtpPort?: true
+  smtpUser?: true
+  smtpPassword?: true
+  smtpFrom?: true
+  smtpSecure?: true
+  s3Enabled?: true
+  s3Endpoint?: true
+  s3Region?: true
+  s3Bucket?: true
+  s3AccessKey?: true
+  s3SecretKey?: true
+  s3PathStyle?: true
 }
 
 export type SettingsMaxAggregateInputType = {
@@ -258,6 +314,19 @@ export type SettingsMaxAggregateInputType = {
   hashApiKeys?: true
   airlinkCloudApiKey?: true
   airlinkCloudBackupEnabled?: true
+  smtpHost?: true
+  smtpPort?: true
+  smtpUser?: true
+  smtpPassword?: true
+  smtpFrom?: true
+  smtpSecure?: true
+  s3Enabled?: true
+  s3Endpoint?: true
+  s3Region?: true
+  s3Bucket?: true
+  s3AccessKey?: true
+  s3SecretKey?: true
+  s3PathStyle?: true
 }
 
 export type SettingsCountAggregateInputType = {
@@ -294,6 +363,19 @@ export type SettingsCountAggregateInputType = {
   hashApiKeys?: true
   airlinkCloudApiKey?: true
   airlinkCloudBackupEnabled?: true
+  smtpHost?: true
+  smtpPort?: true
+  smtpUser?: true
+  smtpPassword?: true
+  smtpFrom?: true
+  smtpSecure?: true
+  s3Enabled?: true
+  s3Endpoint?: true
+  s3Region?: true
+  s3Bucket?: true
+  s3AccessKey?: true
+  s3SecretKey?: true
+  s3PathStyle?: true
   _all?: true
 }
 
@@ -417,6 +499,19 @@ export type SettingsGroupByOutputType = {
   hashApiKeys: boolean
   airlinkCloudApiKey: string | null
   airlinkCloudBackupEnabled: boolean
+  smtpHost: string | null
+  smtpPort: number | null
+  smtpUser: string | null
+  smtpPassword: string | null
+  smtpFrom: string | null
+  smtpSecure: boolean
+  s3Enabled: boolean
+  s3Endpoint: string | null
+  s3Region: string | null
+  s3Bucket: string | null
+  s3AccessKey: string | null
+  s3SecretKey: string | null
+  s3PathStyle: boolean
   _count: SettingsCountAggregateOutputType | null
   _avg: SettingsAvgAggregateOutputType | null
   _sum: SettingsSumAggregateOutputType | null
@@ -476,6 +571,19 @@ export type settingsWhereInput = {
   hashApiKeys?: Prisma.BoolFilter<"settings"> | boolean
   airlinkCloudApiKey?: Prisma.StringNullableFilter<"settings"> | string | null
   airlinkCloudBackupEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  smtpHost?: Prisma.StringNullableFilter<"settings"> | string | null
+  smtpPort?: Prisma.IntNullableFilter<"settings"> | number | null
+  smtpUser?: Prisma.StringNullableFilter<"settings"> | string | null
+  smtpPassword?: Prisma.StringNullableFilter<"settings"> | string | null
+  smtpFrom?: Prisma.StringNullableFilter<"settings"> | string | null
+  smtpSecure?: Prisma.BoolFilter<"settings"> | boolean
+  s3Enabled?: Prisma.BoolFilter<"settings"> | boolean
+  s3Endpoint?: Prisma.StringNullableFilter<"settings"> | string | null
+  s3Region?: Prisma.StringNullableFilter<"settings"> | string | null
+  s3Bucket?: Prisma.StringNullableFilter<"settings"> | string | null
+  s3AccessKey?: Prisma.StringNullableFilter<"settings"> | string | null
+  s3SecretKey?: Prisma.StringNullableFilter<"settings"> | string | null
+  s3PathStyle?: Prisma.BoolFilter<"settings"> | boolean
 }
 
 export type settingsOrderByWithRelationInput = {
@@ -512,6 +620,19 @@ export type settingsOrderByWithRelationInput = {
   hashApiKeys?: Prisma.SortOrder
   airlinkCloudApiKey?: Prisma.SortOrderInput | Prisma.SortOrder
   airlinkCloudBackupEnabled?: Prisma.SortOrder
+  smtpHost?: Prisma.SortOrderInput | Prisma.SortOrder
+  smtpPort?: Prisma.SortOrderInput | Prisma.SortOrder
+  smtpUser?: Prisma.SortOrderInput | Prisma.SortOrder
+  smtpPassword?: Prisma.SortOrderInput | Prisma.SortOrder
+  smtpFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  smtpSecure?: Prisma.SortOrder
+  s3Enabled?: Prisma.SortOrder
+  s3Endpoint?: Prisma.SortOrderInput | Prisma.SortOrder
+  s3Region?: Prisma.SortOrderInput | Prisma.SortOrder
+  s3Bucket?: Prisma.SortOrderInput | Prisma.SortOrder
+  s3AccessKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  s3SecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  s3PathStyle?: Prisma.SortOrder
 }
 
 export type settingsWhereUniqueInput = Prisma.AtLeast<{
@@ -551,6 +672,19 @@ export type settingsWhereUniqueInput = Prisma.AtLeast<{
   hashApiKeys?: Prisma.BoolFilter<"settings"> | boolean
   airlinkCloudApiKey?: Prisma.StringNullableFilter<"settings"> | string | null
   airlinkCloudBackupEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  smtpHost?: Prisma.StringNullableFilter<"settings"> | string | null
+  smtpPort?: Prisma.IntNullableFilter<"settings"> | number | null
+  smtpUser?: Prisma.StringNullableFilter<"settings"> | string | null
+  smtpPassword?: Prisma.StringNullableFilter<"settings"> | string | null
+  smtpFrom?: Prisma.StringNullableFilter<"settings"> | string | null
+  smtpSecure?: Prisma.BoolFilter<"settings"> | boolean
+  s3Enabled?: Prisma.BoolFilter<"settings"> | boolean
+  s3Endpoint?: Prisma.StringNullableFilter<"settings"> | string | null
+  s3Region?: Prisma.StringNullableFilter<"settings"> | string | null
+  s3Bucket?: Prisma.StringNullableFilter<"settings"> | string | null
+  s3AccessKey?: Prisma.StringNullableFilter<"settings"> | string | null
+  s3SecretKey?: Prisma.StringNullableFilter<"settings"> | string | null
+  s3PathStyle?: Prisma.BoolFilter<"settings"> | boolean
 }, "id">
 
 export type settingsOrderByWithAggregationInput = {
@@ -587,6 +721,19 @@ export type settingsOrderByWithAggregationInput = {
   hashApiKeys?: Prisma.SortOrder
   airlinkCloudApiKey?: Prisma.SortOrderInput | Prisma.SortOrder
   airlinkCloudBackupEnabled?: Prisma.SortOrder
+  smtpHost?: Prisma.SortOrderInput | Prisma.SortOrder
+  smtpPort?: Prisma.SortOrderInput | Prisma.SortOrder
+  smtpUser?: Prisma.SortOrderInput | Prisma.SortOrder
+  smtpPassword?: Prisma.SortOrderInput | Prisma.SortOrder
+  smtpFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  smtpSecure?: Prisma.SortOrder
+  s3Enabled?: Prisma.SortOrder
+  s3Endpoint?: Prisma.SortOrderInput | Prisma.SortOrder
+  s3Region?: Prisma.SortOrderInput | Prisma.SortOrder
+  s3Bucket?: Prisma.SortOrderInput | Prisma.SortOrder
+  s3AccessKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  s3SecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  s3PathStyle?: Prisma.SortOrder
   _count?: Prisma.settingsCountOrderByAggregateInput
   _avg?: Prisma.settingsAvgOrderByAggregateInput
   _max?: Prisma.settingsMaxOrderByAggregateInput
@@ -631,6 +778,19 @@ export type settingsScalarWhereWithAggregatesInput = {
   hashApiKeys?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
   airlinkCloudApiKey?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
   airlinkCloudBackupEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  smtpHost?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
+  smtpPort?: Prisma.IntNullableWithAggregatesFilter<"settings"> | number | null
+  smtpUser?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
+  smtpPassword?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
+  smtpFrom?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
+  smtpSecure?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  s3Enabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  s3Endpoint?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
+  s3Region?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
+  s3Bucket?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
+  s3AccessKey?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
+  s3SecretKey?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
+  s3PathStyle?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
 }
 
 export type settingsCreateInput = {
@@ -666,6 +826,19 @@ export type settingsCreateInput = {
   hashApiKeys?: boolean
   airlinkCloudApiKey?: string | null
   airlinkCloudBackupEnabled?: boolean
+  smtpHost?: string | null
+  smtpPort?: number | null
+  smtpUser?: string | null
+  smtpPassword?: string | null
+  smtpFrom?: string | null
+  smtpSecure?: boolean
+  s3Enabled?: boolean
+  s3Endpoint?: string | null
+  s3Region?: string | null
+  s3Bucket?: string | null
+  s3AccessKey?: string | null
+  s3SecretKey?: string | null
+  s3PathStyle?: boolean
 }
 
 export type settingsUncheckedCreateInput = {
@@ -702,6 +875,19 @@ export type settingsUncheckedCreateInput = {
   hashApiKeys?: boolean
   airlinkCloudApiKey?: string | null
   airlinkCloudBackupEnabled?: boolean
+  smtpHost?: string | null
+  smtpPort?: number | null
+  smtpUser?: string | null
+  smtpPassword?: string | null
+  smtpFrom?: string | null
+  smtpSecure?: boolean
+  s3Enabled?: boolean
+  s3Endpoint?: string | null
+  s3Region?: string | null
+  s3Bucket?: string | null
+  s3AccessKey?: string | null
+  s3SecretKey?: string | null
+  s3PathStyle?: boolean
 }
 
 export type settingsUpdateInput = {
@@ -737,6 +923,19 @@ export type settingsUpdateInput = {
   hashApiKeys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   airlinkCloudApiKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   airlinkCloudBackupEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  smtpUser?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpPassword?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  s3Enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  s3Endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3Region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3Bucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3AccessKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3SecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3PathStyle?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type settingsUncheckedUpdateInput = {
@@ -773,6 +972,19 @@ export type settingsUncheckedUpdateInput = {
   hashApiKeys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   airlinkCloudApiKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   airlinkCloudBackupEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  smtpUser?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpPassword?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  s3Enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  s3Endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3Region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3Bucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3AccessKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3SecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3PathStyle?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type settingsCreateManyInput = {
@@ -809,6 +1021,19 @@ export type settingsCreateManyInput = {
   hashApiKeys?: boolean
   airlinkCloudApiKey?: string | null
   airlinkCloudBackupEnabled?: boolean
+  smtpHost?: string | null
+  smtpPort?: number | null
+  smtpUser?: string | null
+  smtpPassword?: string | null
+  smtpFrom?: string | null
+  smtpSecure?: boolean
+  s3Enabled?: boolean
+  s3Endpoint?: string | null
+  s3Region?: string | null
+  s3Bucket?: string | null
+  s3AccessKey?: string | null
+  s3SecretKey?: string | null
+  s3PathStyle?: boolean
 }
 
 export type settingsUpdateManyMutationInput = {
@@ -844,6 +1069,19 @@ export type settingsUpdateManyMutationInput = {
   hashApiKeys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   airlinkCloudApiKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   airlinkCloudBackupEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  smtpUser?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpPassword?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  s3Enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  s3Endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3Region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3Bucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3AccessKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3SecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3PathStyle?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type settingsUncheckedUpdateManyInput = {
@@ -880,6 +1118,19 @@ export type settingsUncheckedUpdateManyInput = {
   hashApiKeys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   airlinkCloudApiKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   airlinkCloudBackupEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  smtpHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpPort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  smtpUser?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpPassword?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smtpSecure?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  s3Enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  s3Endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3Region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3Bucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3AccessKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3SecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  s3PathStyle?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type settingsCountOrderByAggregateInput = {
@@ -916,6 +1167,19 @@ export type settingsCountOrderByAggregateInput = {
   hashApiKeys?: Prisma.SortOrder
   airlinkCloudApiKey?: Prisma.SortOrder
   airlinkCloudBackupEnabled?: Prisma.SortOrder
+  smtpHost?: Prisma.SortOrder
+  smtpPort?: Prisma.SortOrder
+  smtpUser?: Prisma.SortOrder
+  smtpPassword?: Prisma.SortOrder
+  smtpFrom?: Prisma.SortOrder
+  smtpSecure?: Prisma.SortOrder
+  s3Enabled?: Prisma.SortOrder
+  s3Endpoint?: Prisma.SortOrder
+  s3Region?: Prisma.SortOrder
+  s3Bucket?: Prisma.SortOrder
+  s3AccessKey?: Prisma.SortOrder
+  s3SecretKey?: Prisma.SortOrder
+  s3PathStyle?: Prisma.SortOrder
 }
 
 export type settingsAvgOrderByAggregateInput = {
@@ -929,6 +1193,7 @@ export type settingsAvgOrderByAggregateInput = {
   defaultMaxStorage?: Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
+  smtpPort?: Prisma.SortOrder
 }
 
 export type settingsMaxOrderByAggregateInput = {
@@ -965,6 +1230,19 @@ export type settingsMaxOrderByAggregateInput = {
   hashApiKeys?: Prisma.SortOrder
   airlinkCloudApiKey?: Prisma.SortOrder
   airlinkCloudBackupEnabled?: Prisma.SortOrder
+  smtpHost?: Prisma.SortOrder
+  smtpPort?: Prisma.SortOrder
+  smtpUser?: Prisma.SortOrder
+  smtpPassword?: Prisma.SortOrder
+  smtpFrom?: Prisma.SortOrder
+  smtpSecure?: Prisma.SortOrder
+  s3Enabled?: Prisma.SortOrder
+  s3Endpoint?: Prisma.SortOrder
+  s3Region?: Prisma.SortOrder
+  s3Bucket?: Prisma.SortOrder
+  s3AccessKey?: Prisma.SortOrder
+  s3SecretKey?: Prisma.SortOrder
+  s3PathStyle?: Prisma.SortOrder
 }
 
 export type settingsMinOrderByAggregateInput = {
@@ -1001,6 +1279,19 @@ export type settingsMinOrderByAggregateInput = {
   hashApiKeys?: Prisma.SortOrder
   airlinkCloudApiKey?: Prisma.SortOrder
   airlinkCloudBackupEnabled?: Prisma.SortOrder
+  smtpHost?: Prisma.SortOrder
+  smtpPort?: Prisma.SortOrder
+  smtpUser?: Prisma.SortOrder
+  smtpPassword?: Prisma.SortOrder
+  smtpFrom?: Prisma.SortOrder
+  smtpSecure?: Prisma.SortOrder
+  s3Enabled?: Prisma.SortOrder
+  s3Endpoint?: Prisma.SortOrder
+  s3Region?: Prisma.SortOrder
+  s3Bucket?: Prisma.SortOrder
+  s3AccessKey?: Prisma.SortOrder
+  s3SecretKey?: Prisma.SortOrder
+  s3PathStyle?: Prisma.SortOrder
 }
 
 export type settingsSumOrderByAggregateInput = {
@@ -1014,6 +1305,7 @@ export type settingsSumOrderByAggregateInput = {
   defaultMaxStorage?: Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
+  smtpPort?: Prisma.SortOrder
 }
 
 
@@ -1052,6 +1344,19 @@ export type settingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   hashApiKeys?: boolean
   airlinkCloudApiKey?: boolean
   airlinkCloudBackupEnabled?: boolean
+  smtpHost?: boolean
+  smtpPort?: boolean
+  smtpUser?: boolean
+  smtpPassword?: boolean
+  smtpFrom?: boolean
+  smtpSecure?: boolean
+  s3Enabled?: boolean
+  s3Endpoint?: boolean
+  s3Region?: boolean
+  s3Bucket?: boolean
+  s3AccessKey?: boolean
+  s3SecretKey?: boolean
+  s3PathStyle?: boolean
 }, ExtArgs["result"]["settings"]>
 
 export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1088,6 +1393,19 @@ export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   hashApiKeys?: boolean
   airlinkCloudApiKey?: boolean
   airlinkCloudBackupEnabled?: boolean
+  smtpHost?: boolean
+  smtpPort?: boolean
+  smtpUser?: boolean
+  smtpPassword?: boolean
+  smtpFrom?: boolean
+  smtpSecure?: boolean
+  s3Enabled?: boolean
+  s3Endpoint?: boolean
+  s3Region?: boolean
+  s3Bucket?: boolean
+  s3AccessKey?: boolean
+  s3SecretKey?: boolean
+  s3PathStyle?: boolean
 }, ExtArgs["result"]["settings"]>
 
 export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1124,6 +1442,19 @@ export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   hashApiKeys?: boolean
   airlinkCloudApiKey?: boolean
   airlinkCloudBackupEnabled?: boolean
+  smtpHost?: boolean
+  smtpPort?: boolean
+  smtpUser?: boolean
+  smtpPassword?: boolean
+  smtpFrom?: boolean
+  smtpSecure?: boolean
+  s3Enabled?: boolean
+  s3Endpoint?: boolean
+  s3Region?: boolean
+  s3Bucket?: boolean
+  s3AccessKey?: boolean
+  s3SecretKey?: boolean
+  s3PathStyle?: boolean
 }, ExtArgs["result"]["settings"]>
 
 export type settingsSelectScalar = {
@@ -1160,9 +1491,22 @@ export type settingsSelectScalar = {
   hashApiKeys?: boolean
   airlinkCloudApiKey?: boolean
   airlinkCloudBackupEnabled?: boolean
+  smtpHost?: boolean
+  smtpPort?: boolean
+  smtpUser?: boolean
+  smtpPassword?: boolean
+  smtpFrom?: boolean
+  smtpSecure?: boolean
+  s3Enabled?: boolean
+  s3Endpoint?: boolean
+  s3Region?: boolean
+  s3Bucket?: boolean
+  s3AccessKey?: boolean
+  s3SecretKey?: boolean
+  s3PathStyle?: boolean
 }
 
-export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "loginWallpaper" | "registerWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled", ExtArgs["result"]["settings"]>
+export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "loginWallpaper" | "registerWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle", ExtArgs["result"]["settings"]>
 
 export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "settings"
@@ -1201,6 +1545,19 @@ export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     hashApiKeys: boolean
     airlinkCloudApiKey: string | null
     airlinkCloudBackupEnabled: boolean
+    smtpHost: string | null
+    smtpPort: number | null
+    smtpUser: string | null
+    smtpPassword: string | null
+    smtpFrom: string | null
+    smtpSecure: boolean
+    s3Enabled: boolean
+    s3Endpoint: string | null
+    s3Region: string | null
+    s3Bucket: string | null
+    s3AccessKey: string | null
+    s3SecretKey: string | null
+    s3PathStyle: boolean
   }, ExtArgs["result"]["settings"]>
   composites: {}
 }
@@ -1657,6 +2014,19 @@ export interface settingsFieldRefs {
   readonly hashApiKeys: Prisma.FieldRef<"settings", 'Boolean'>
   readonly airlinkCloudApiKey: Prisma.FieldRef<"settings", 'String'>
   readonly airlinkCloudBackupEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly smtpHost: Prisma.FieldRef<"settings", 'String'>
+  readonly smtpPort: Prisma.FieldRef<"settings", 'Int'>
+  readonly smtpUser: Prisma.FieldRef<"settings", 'String'>
+  readonly smtpPassword: Prisma.FieldRef<"settings", 'String'>
+  readonly smtpFrom: Prisma.FieldRef<"settings", 'String'>
+  readonly smtpSecure: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly s3Enabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly s3Endpoint: Prisma.FieldRef<"settings", 'String'>
+  readonly s3Region: Prisma.FieldRef<"settings", 'String'>
+  readonly s3Bucket: Prisma.FieldRef<"settings", 'String'>
+  readonly s3AccessKey: Prisma.FieldRef<"settings", 'String'>
+  readonly s3SecretKey: Prisma.FieldRef<"settings", 'String'>
+  readonly s3PathStyle: Prisma.FieldRef<"settings", 'Boolean'>
 }
     
 

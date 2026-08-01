@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
@@ -15,6 +15,7 @@ export function registerPlayersRoutes(router: Router): void {
   router.get(
     '/server/:id/players',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;

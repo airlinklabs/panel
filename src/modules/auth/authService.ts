@@ -109,6 +109,14 @@ const authServiceModule: Module = {
           req.session.regenerate(err => (err ? reject(err) : resolve()))
         );
 
+        // Two-factor authentication step: hold the login in a pending state
+        // until the user verifies their TOTP code on /2fa.
+        if (user.totpEnabled) {
+          req.session.pendingUserId = user.id;
+          res.redirect('/2fa');
+          return;
+        }
+
         req.session.user = {
           id:          user.id,
           email:       user.email,

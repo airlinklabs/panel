@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
@@ -18,6 +18,7 @@ export function registerStartupRoutes(router: Router): void {
   router.get(
     '/server/:id/startup',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('startup'),
     async (req: Request, res: Response) => {
       const errorMessage: ErrorMessage = {};
       const userId = req.session?.user?.id;
@@ -90,6 +91,7 @@ export function registerStartupRoutes(router: Router): void {
   router.post(
     '/server/:id/startup/command',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('startup'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -222,6 +224,7 @@ export function registerStartupRoutes(router: Router): void {
   router.post(
     '/server/:id/startup/docker-image',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('startup'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -374,6 +377,7 @@ export function registerStartupRoutes(router: Router): void {
   router.post(
     '/server/:id/startup/variables',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('startup'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;

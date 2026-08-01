@@ -382,6 +382,123 @@
             </div>
           </div>
 
+          <!-- SMTP / Email -->
+          <div class="al-card">
+            <div class="flex items-center justify-between px-5 pt-4">
+              <h2 class="al-card-header !pt-0">Email (SMTP)</h2>
+              <button type="button" id="smtpTestBtn"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+                <%- icon('zap', { class: 'w-3.5 h-3.5' }) %>
+                Test connection
+              </button>
+            </div>
+            <p class="text-xs text-neutral-500 px-5 pt-1">Used to send transactional email like password reset links.</p>
+            <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">SMTP host</label>
+                <input type="text" id="smtpHost" value="<%= settings.smtpHost || '' %>" placeholder="smtp.example.com" autocomplete="off" class="al-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Port</label>
+                <input type="number" id="smtpPort" value="<%= settings.smtpPort ?? 587 %>" min="1" max="65535" class="al-input w-full sm:w-48">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Username</label>
+                <input type="text" id="smtpUser" value="<%= settings.smtpUser || '' %>" placeholder="apikey" autocomplete="off" class="al-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Password</label>
+                <div class="relative">
+                  <input type="password" id="smtpPassword" value="<%= settings.smtpPassword || '' %>" placeholder="••••••••" autocomplete="off" class="al-input pr-16">
+                  <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">From address</label>
+                <input type="text" id="smtpFrom" value="<%= settings.smtpFrom || '' %>" placeholder="noreply@example.com" autocomplete="off" class="al-input">
+              </div>
+              <div class="flex items-center justify-between sm:items-end">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Use SSL/TLS</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Implicit TLS (port 465). Off = STARTTLS (587).</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
+                  <input type="checkbox" id="smtpSecure" class="sr-only peer" aria-label="Use SSL/TLS" <%= settings.smtpSecure ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+            <p id="smtpTestResult" class="px-5 pb-5 text-xs hidden"></p>
+          </div>
+
+          <!-- S3 / Storage -->
+          <div class="al-card">
+            <div class="flex items-center justify-between px-5 pt-4">
+              <h2 class="al-card-header !pt-0">Storage (S3-compatible)</h2>
+              <button type="button" id="s3TestBtn"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+                <%- icon('zap', { class: 'w-3.5 h-3.5' }) %>
+                Test connection
+              </button>
+            </div>
+            <p class="text-xs text-neutral-500 px-5 pt-1">Offload backups to any S3-compatible bucket (AWS S3, Cloudflare R2, MinIO).</p>
+            <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div class="flex items-center justify-between sm:items-end sm:col-span-2">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Enable S3 backups</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">New backups are uploaded to the bucket and removed from the node.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
+                  <input type="checkbox" id="s3Enabled" class="sr-only peer" aria-label="Enable S3 backups" <%= settings.s3Enabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Endpoint URL</label>
+                <input type="text" id="s3Endpoint" value="<%= settings.s3Endpoint || '' %>" placeholder="https://<account>.r2.cloudflarestorage.com or https://minio.local:9000" autocomplete="off" class="al-input">
+                <p class="text-xs text-neutral-500 mt-1">Leave empty for AWS S3 default endpoint.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Region</label>
+                <input type="text" id="s3Region" value="<%= settings.s3Region || '' %>" placeholder="us-east-1" autocomplete="off" class="al-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Bucket</label>
+                <input type="text" id="s3Bucket" value="<%= settings.s3Bucket || '' %>" placeholder="airlink-backups" autocomplete="off" class="al-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Access key</label>
+                <input type="text" id="s3AccessKey" value="<%= settings.s3AccessKey || '' %>" autocomplete="off" class="al-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Secret key</label>
+                <div class="relative">
+                  <input type="password" id="s3SecretKey" value="<%= settings.s3SecretKey || '' %>" placeholder="••••••••" autocomplete="off" class="al-input pr-16">
+                  <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
+                </div>
+              </div>
+              <div class="flex items-center justify-between sm:items-end sm:col-span-2">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Path-style URLs</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Required for MinIO and most self-hosted S3 servers.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
+                  <input type="checkbox" id="s3PathStyle" class="sr-only peer" aria-label="Use path-style URLs" <%= settings.s3PathStyle ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+            <p id="s3TestResult" class="px-5 pb-5 text-xs hidden"></p>
+          </div>
+
           <!-- IP banning -->
           <div class="al-card">
             <h2 class="al-card-header">IP banning</h2>

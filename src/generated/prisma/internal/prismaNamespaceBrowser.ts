@@ -52,8 +52,13 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Users: 'Users',
+  PasswordReset: 'PasswordReset',
   Session: 'Session',
   Server: 'Server',
+  DatabaseHost: 'DatabaseHost',
+  ServerDatabase: 'ServerDatabase',
+  Schedule: 'Schedule',
+  ScheduleTask: 'ScheduleTask',
   Images: 'Images',
   Node: 'Node',
   settings: 'settings',
@@ -65,7 +70,8 @@ export const ModelName = {
   Addon: 'Addon',
   AddonSetting: 'AddonSetting',
   Backup: 'Backup',
-  SftpCredential: 'SftpCredential'
+  SftpCredential: 'SftpCredential',
+  SubUser: 'SubUser'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -96,11 +102,25 @@ export const UsersScalarFieldEnum = {
   maxStorage: 'maxStorage',
   loginAttempts: 'loginAttempts',
   lockedUntil: 'lockedUntil',
+  totpSecret: 'totpSecret',
+  totpEnabled: 'totpEnabled',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof UsersScalarFieldEnum]
+
+
+export const PasswordResetScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  expiresAt: 'expiresAt',
+  used: 'used',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetScalarFieldEnum = (typeof PasswordResetScalarFieldEnum)[keyof typeof PasswordResetScalarFieldEnum]
 
 
 export const SessionScalarFieldEnum = {
@@ -132,12 +152,64 @@ export const ServerScalarFieldEnum = {
   Installing: 'Installing',
   Queued: 'Queued',
   Suspended: 'Suspended',
+  backupLimit: 'backupLimit',
   ownerId: 'ownerId',
   nodeId: 'nodeId',
   imageId: 'imageId'
 } as const
 
 export type ServerScalarFieldEnum = (typeof ServerScalarFieldEnum)[keyof typeof ServerScalarFieldEnum]
+
+
+export const DatabaseHostScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  host: 'host',
+  port: 'port',
+  username: 'username',
+  password: 'password',
+  createdAt: 'createdAt'
+} as const
+
+export type DatabaseHostScalarFieldEnum = (typeof DatabaseHostScalarFieldEnum)[keyof typeof DatabaseHostScalarFieldEnum]
+
+
+export const ServerDatabaseScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  hostId: 'hostId',
+  databaseName: 'databaseName',
+  databaseUser: 'databaseUser',
+  databasePassword: 'databasePassword',
+  createdAt: 'createdAt'
+} as const
+
+export type ServerDatabaseScalarFieldEnum = (typeof ServerDatabaseScalarFieldEnum)[keyof typeof ServerDatabaseScalarFieldEnum]
+
+
+export const ScheduleScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  name: 'name',
+  cron: 'cron',
+  enabled: 'enabled',
+  lastRunAt: 'lastRunAt',
+  nextRunAt: 'nextRunAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ScheduleScalarFieldEnum = (typeof ScheduleScalarFieldEnum)[keyof typeof ScheduleScalarFieldEnum]
+
+
+export const ScheduleTaskScalarFieldEnum = {
+  id: 'id',
+  scheduleId: 'scheduleId',
+  order: 'order',
+  action: 'action',
+  payload: 'payload'
+} as const
+
+export type ScheduleTaskScalarFieldEnum = (typeof ScheduleTaskScalarFieldEnum)[keyof typeof ScheduleTaskScalarFieldEnum]
 
 
 export const ImagesScalarFieldEnum = {
@@ -213,7 +285,20 @@ export const SettingsScalarFieldEnum = {
   behindReverseProxy: 'behindReverseProxy',
   hashApiKeys: 'hashApiKeys',
   airlinkCloudApiKey: 'airlinkCloudApiKey',
-  airlinkCloudBackupEnabled: 'airlinkCloudBackupEnabled'
+  airlinkCloudBackupEnabled: 'airlinkCloudBackupEnabled',
+  smtpHost: 'smtpHost',
+  smtpPort: 'smtpPort',
+  smtpUser: 'smtpUser',
+  smtpPassword: 'smtpPassword',
+  smtpFrom: 'smtpFrom',
+  smtpSecure: 'smtpSecure',
+  s3Enabled: 's3Enabled',
+  s3Endpoint: 's3Endpoint',
+  s3Region: 's3Region',
+  s3Bucket: 's3Bucket',
+  s3AccessKey: 's3AccessKey',
+  s3SecretKey: 's3SecretKey',
+  s3PathStyle: 's3PathStyle'
 } as const
 
 export type SettingsScalarFieldEnum = (typeof SettingsScalarFieldEnum)[keyof typeof SettingsScalarFieldEnum]
@@ -329,6 +414,17 @@ export const SftpCredentialScalarFieldEnum = {
 } as const
 
 export type SftpCredentialScalarFieldEnum = (typeof SftpCredentialScalarFieldEnum)[keyof typeof SftpCredentialScalarFieldEnum]
+
+
+export const SubUserScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  userId: 'userId',
+  permissions: 'permissions',
+  createdAt: 'createdAt'
+} as const
+
+export type SubUserScalarFieldEnum = (typeof SubUserScalarFieldEnum)[keyof typeof SubUserScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1,16 +1,28 @@
 import { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { AirlinkCloudClient } from '../../../handlers/utils/core/airlinkCloud';
+import {
+  uploadStreamToS3,
+  deleteFromS3,
+  getS3ObjectStream,
+  isS3Backup,
+  S3_KEY_PREFIX,
+} from '../../../handlers/utils/core/s3Client';
+
+function s3KeyFor(serverId: string, uuid: string): string {
+  return `backups/${serverId}/${uuid}.tar.gz`;
+}
 
 export function registerBackupRoutes(router: Router): void {
   router.get(
     '/server/:id/backups',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('backups'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -60,6 +72,7 @@ export function registerBackupRoutes(router: Router): void {
   router.post(
     '/server/:id/backups/create',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('backups'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -89,6 +102,12 @@ export function registerBackupRoutes(router: Router): void {
 
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         const isCloudBackupEnabled = settings?.airlinkCloudBackupEnabled && settings?.airlinkCloudApiKey;
+
+        const backupCount = await prisma.backup.count({ where: { serverId: getParamAsString(serverId) } });
+        if (server.backupLimit > 0 && backupCount >= server.backupLimit) {
+          res.status(400).json({ error: `Backup limit reached (${server.backupLimit}). Delete an existing backup first.` });
+          return;
+        }
 
         const response = await daemonRequest<{
           success: boolean;
@@ -147,6 +166,36 @@ export function registerBackupRoutes(router: Router): void {
             } catch (cloudError) {
               logger.error('Failed to redirect backup to Airlink Cloud:', cloudError);
             }
+          } else if (settings?.s3Enabled) {
+            try {
+              const downloadResponse = await daemonRequest<import('stream').Readable>({
+                method: 'GET',
+                path: '/container/backup/download',
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                nodeKey: server.node.key,
+                params: { backupPath: filePath },
+                responseType: 'stream',
+              });
+
+              const s3Key = s3KeyFor(getParamAsString(serverId), response.data.backup!.uuid);
+
+              const stream = downloadResponse.data as import('stream').Readable;
+              await uploadStreamToS3(stream, s3Key);
+
+              await daemonRequest({
+                method: 'DELETE',
+                path: '/container/backup',
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                nodeKey: server.node.key,
+                body: { backupPath: response.data.backup!.filePath },
+              }).catch(e => logger.warn(`Failed to delete temporary local backup: ${e}`));
+
+              filePath = `${S3_KEY_PREFIX}${s3Key}`;
+            } catch (s3Error) {
+              logger.error('Failed to redirect backup to S3:', s3Error);
+            }
           }
 
           const backup = await prisma.backup.create({
@@ -188,6 +237,7 @@ export function registerBackupRoutes(router: Router): void {
   router.post(
     '/server/:id/backups/:backupId/restore',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('backups'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -256,6 +306,36 @@ export function registerBackupRoutes(router: Router): void {
             res.status(500).json({ error: 'Failed to prepare cloud backup for restore' });
             return;
           }
+        } else if (isS3Backup(backup.filePath)) {
+          try {
+            const s3Key = backup.filePath.slice(S3_KEY_PREFIX.length);
+            const stream = await getS3ObjectStream(s3Key);
+            if (!stream) throw new Error('S3 object not found');
+
+            const uploadResponse = await daemonRequest<{ success: boolean; filePath?: string }>({
+              method: 'POST',
+              path: '/container/backup/upload',
+              nodeAddress: server.node.address,
+              nodePort: server.node.port,
+              nodeKey: server.node.key,
+              params: {
+                id: getParamAsString(serverId),
+                backupUuid: backup.UUID
+              },
+              body: stream,
+              timeout: 300000,
+            });
+
+            if (uploadResponse.data.success) {
+              backupPath = uploadResponse.data.filePath!;
+            } else {
+              throw new Error('Failed to upload S3 backup to daemon');
+            }
+          } catch (err) {
+            logger.error('Failed to prepare S3 backup for restore:', err);
+            res.status(500).json({ error: 'Failed to prepare S3 backup for restore' });
+            return;
+          }
         }
 
         const response = await daemonRequest<{ success: boolean }>({
@@ -272,6 +352,15 @@ export function registerBackupRoutes(router: Router): void {
         });
 
         if (backup.airlinkCloudId && backupPath !== 'airlink-cloud') {
+          daemonRequest({
+            method: 'DELETE',
+            path: '/container/backup',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            body: { backupPath: backupPath },
+          }).catch(e => logger.warn(`Failed to delete temporary restore file: ${e}`));
+        } else if (isS3Backup(backup.filePath)) {
           daemonRequest({
             method: 'DELETE',
             path: '/container/backup',
@@ -304,6 +393,7 @@ export function registerBackupRoutes(router: Router): void {
   router.get(
     '/server/:id/backups/:backupId/download',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('backups'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -356,6 +446,24 @@ export function registerBackupRoutes(router: Router): void {
           return;
         }
 
+        if (isS3Backup(backup.filePath)) {
+          const stream = await getS3ObjectStream(backup.filePath.slice(S3_KEY_PREFIX.length));
+          if (!stream) {
+            res.status(404).json({ error: 'S3 backup not found' });
+            return;
+          }
+
+          const fileName = `${backup.name}_${backup.createdAt.toISOString().split('T')[0]}.tar.gz`;
+          res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="${fileName}"`,
+          );
+          res.setHeader('Content-Type', 'application/gzip');
+
+          stream.pipe(res);
+          return;
+        }
+
         const downloadResponse = await daemonRequest<import('stream').Readable>({
           method: 'GET',
           path: '/container/backup/download',
@@ -388,6 +496,7 @@ export function registerBackupRoutes(router: Router): void {
   router.delete(
     '/server/:id/backups/:backupId',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('backups'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -424,6 +533,12 @@ export function registerBackupRoutes(router: Router): void {
           if (settings?.airlinkCloudApiKey) {
             const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
             await cloudClient.deleteFile(backup.airlinkCloudId).catch(e => logger.warn(`Failed to delete backup from Airlink Cloud: ${e}`));
+          }
+        } else if (isS3Backup(backup.filePath)) {
+          try {
+            await deleteFromS3(backup.filePath.slice(S3_KEY_PREFIX.length));
+          } catch (e) {
+            logger.warn(`Failed to delete backup from S3: ${e}`);
           }
         } else {
           try {

@@ -43,6 +43,20 @@ const dashboardModule: Module = {
           include: { node: true, owner: true },
         });
 
+        // Servers the user has been granted subuser access to.
+        const subUserServers = await prisma.subUser.findMany({
+          where: { userId: user.id },
+          include: { server: { include: { node: true, owner: true } } },
+        });
+
+        const ownedUuids = new Set(servers.map((s) => s.UUID));
+        const mergedServers = [
+          ...servers,
+          ...subUserServers
+            .filter((su) => !ownedUuids.has(su.server.UUID))
+            .map((su) => ({ ...su.server, shared: true })),
+        ];
+
         let page: number = 1;
 
         if (typeof req.query.page === 'string') {
@@ -60,7 +74,7 @@ const dashboardModule: Module = {
         let anyNodeOffline = false;
         const nodeStatuses: Record<number, { online: boolean }> = {};
 
-        for (const server of servers) {
+        for (const server of mergedServers) {
           if (!nodeStatuses[server.node.id]) {
             try {
               await daemonRequest({
@@ -101,8 +115,8 @@ const dashboardModule: Module = {
             user,
             req,
             settings,
-            servers,
-            allServers: servers,
+            servers: mergedServers,
+            allServers: mergedServers,
             folders,
             canCreateServer,
             currentPage: 1,
@@ -113,7 +127,7 @@ const dashboardModule: Module = {
         }
 
         const serversWithStats = await Promise.all(
-          servers.map(async (server) => {
+          mergedServers.map(async (server) => {
             try {
               if (
                 nodeStatuses[server.node.id] &&
@@ -239,7 +253,7 @@ const dashboardModule: Module = {
           folders,
           canCreateServer,
           currentPage: page,
-          totalPages: Math.ceil(servers.length / perPage),
+          totalPages: Math.ceil(mergedServers.length / perPage),
           title: 'Servers',
         });
       } catch (error) {

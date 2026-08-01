@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getParamAsString } from '../../../utils/typeHelpers';
@@ -13,6 +13,7 @@ export function registerSettingsRoutes(router: Router): void {
   router.get(
     '/server/:id/settings',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('settings'),
     async (req: Request, res: Response) => {
       const errorMessage: ErrorMessage = {};
       const userId = req.session?.user?.id;
@@ -69,6 +70,7 @@ export function registerSettingsRoutes(router: Router): void {
   router.post(
     '/server/:id/settings',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('settings'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;

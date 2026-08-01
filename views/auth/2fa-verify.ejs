@@ -1,0 +1,179 @@
+<%- include('../components/auth-header', { title: 'Two-Factor Verification' }) %>
+
+<style>
+  .auth-split {
+    display: flex; min-height: 100vh;
+  }
+  .auth-panel {
+    width: 100%; max-width: 420px; flex-shrink: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 48px 40px;
+    background: #fff;
+    border-right: 1px solid #e5e5e5;
+    position: relative; z-index: 1;
+  }
+  html.dark .auth-panel {
+    background: #111111;
+    border-right-color: rgba(255,255,255,0.06);
+  }
+  .auth-image {
+    flex: 1;
+    background: url('<%= settings.loginWallpaper || "/assets/wallpapers/login.jpeg" %>') center/cover no-repeat;
+  }
+
+  @media (max-width: 768px) {
+    .auth-split { position: relative; display: block; min-height: 100vh; }
+    .auth-image {
+      position: fixed;
+      inset: 0;
+      display: block;
+      z-index: 0;
+    }
+    .auth-panel {
+      position: relative;
+      z-index: 1;
+      max-width: 100%;
+      border-right: none;
+      padding: 40px 24px;
+      min-height: 100vh;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.95);
+    }
+    html.dark .auth-panel {
+      background: rgba(17, 17, 17, 0.95);
+    }
+  }
+
+  .auth-input {
+    width: 100%; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid #e5e5e5; background: #f9fafb;
+    font-size: 14px; color: #171717; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box; font-family: inherit;
+  }
+  html.dark .auth-input {
+    background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.08); color: #e5e5e5;
+  }
+  .auth-input:focus {
+    border-color: #a3a3a3; box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+  }
+  html.dark .auth-input:focus {
+    border-color: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+  }
+  .auth-input::placeholder { color: #a3a3a3; }
+  html.dark .auth-input::placeholder { color: #525252; }
+
+  .auth-label { display: block; font-size: 13px; font-weight: 500; color: #525252; margin-bottom: 6px; }
+  html.dark .auth-label { color: #a3a3a3; }
+
+  .auth-submit {
+    width: 100%; padding: 11px; border-radius: 10px;
+    background: #171717; color: white; font-size: 14px; font-weight: 500;
+    border: none; cursor: pointer; transition: background 0.15s;
+    font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  html.dark .auth-submit { background: white; color: #0a0a0a; }
+  .auth-submit:hover:not(:disabled) { background: #404040; }
+  html.dark .auth-submit:hover:not(:disabled) { background: #e5e5e5; }
+  .auth-submit:disabled { opacity: 0.6; cursor: default; }
+
+  .spinner {
+    width: 15px; height: 15px; flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.08); border-top-color: white;
+    border-radius: 50%; animation: spin 0.65s linear infinite; display: none;
+  }
+  html.dark .spinner { border-color: rgba(0,0,0,0.25); border-top-color: #0a0a0a; }
+  .auth-submit.loading .spinner { display: block; }
+  .auth-submit.loading .btn-label { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); transition-delay: 30ms; will-change: opacity, transform; }
+  .auth-panel.visible { opacity: 1; transform: translateX(0); }
+</style>
+
+<div class="auth-split">
+  <div class="auth-panel" id="authPanel">
+
+    <div class="mb-8">
+      <% if (settings.logo) { %>
+      <img src="<%= settings.logo %>" alt="" class="h-10 w-10 rounded-xl object-contain mb-5">
+      <% } %>
+      <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">Two-factor authentication</h1>
+      <p class="text-sm text-neutral-500 mt-1">Enter the 6-digit code from your authenticator app.</p>
+    </div>
+
+    <% if (req.query.err) { %>
+    <div class="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5">
+      <p class="text-sm font-medium text-red-700 dark:text-red-400">Invalid code. Try again.</p>
+    </div>
+    <% } %>
+
+    <p id="feedback" class="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5 text-sm font-medium text-red-700 dark:text-red-400 hidden"></p>
+
+    <form id="verifyForm" method="POST" action="/2fa" autocomplete="off" novalidate>
+      <%- include('../components/csrf') %>
+      <div class="space-y-4">
+        <div>
+          <label class="auth-label" for="token">6-digit code</label>
+          <input id="token" name="token" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code"
+            required autofocus class="auth-input" placeholder="••••••" style="text-align:center;font-size:20px;letter-spacing:0.4em;font-family:monospace">
+        </div>
+
+        <button type="submit" class="auth-submit" id="submitBtn">
+          <span class="btn-label">Verify and sign in</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </form>
+
+    <p class="text-sm text-neutral-500 dark:text-neutral-400 text-center mt-6">
+      Lost access to your authenticator app?
+      <a href="/login" class="font-medium text-neutral-800 dark:text-neutral-200 hover:underline">Sign in again</a>
+    </p>
+
+  </div>
+  <div class="auth-image"></div>
+</div>
+
+<script nonce="<%- nonce %>">
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      document.getElementById('authPanel').classList.add('visible');
+    });
+  });
+
+  document.getElementById('verifyForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var submitBtn = document.getElementById('submitBtn');
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    var token = document.getElementById('token').value.trim();
+
+    try {
+      var res = await fetch('/2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        body: JSON.stringify({ token: token }),
+      });
+      var data = await res.json();
+      if (res.ok && data.success) {
+        window.location.href = data.redirect || '/';
+        return;
+      }
+      var fb = document.getElementById('feedback');
+      fb.textContent = data.error || 'Invalid code. Try again.';
+      fb.classList.remove('hidden');
+    } catch (err) {
+      var fb2 = document.getElementById('feedback');
+      fb2.textContent = 'Something went wrong. Try again.';
+      fb2.classList.remove('hidden');
+    }
+    submitBtn.classList.remove('loading');
+    submitBtn.disabled = false;
+    document.getElementById('token').focus();
+  });
+</script>
+
+<%- include('../components/footer') %>

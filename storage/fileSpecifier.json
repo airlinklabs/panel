@@ -1,0 +1,91 @@
+{
+  "Web Development": [
+    "html",
+    "css",
+    "js",
+    "ts",
+    "jsx",
+    "vue",
+    "scss",
+    "php"
+  ],
+  "Documents": [
+    "pdf",
+    "docx",
+    "txt",
+    "xlsx",
+    "pptx",
+    "md",
+    "odt"
+  ],
+  "Images": [
+    "jpg",
+    "png",
+    "gif",
+    "bmp",
+    "svg",
+    "tiff",
+    "webp"
+  ],
+  "Videos": [
+    "mp4",
+    "mkv",
+    "avi",
+    "mov",
+    "wmv",
+    "flv",
+    "webm"
+  ],
+  "Audio": [
+    "mp3",
+    "wav",
+    "aac",
+    "flac",
+    "ogg",
+    "m4a"
+  ],
+  "Archives": [
+    "zip",
+    "rar",
+    "7z",
+    "tar",
+    "gz",
+    "bz2"
+  ],
+  "Code": [
+    "c",
+    "cpp",
+    "java",
+    "py",
+    "rb",
+    "go",
+    "rs",
+    "cs",
+    "sh",
+    "bat"
+  ],
+  "System Files": [
+    "dll",
+    "exe",
+    "sys",
+    "so",
+    "bin",
+    "deb",
+    "rpm"
+  ],
+  "Configuration Files": [
+    "json",
+    "yaml",
+    "xml",
+    "ini",
+    "env",
+    "conf",
+    "properties"
+  ],
+  "Database Files": [
+    "db",
+    "sqlite",
+    "sql",
+    "csv"
+  ]
+}

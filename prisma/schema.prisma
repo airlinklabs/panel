@@ -22,6 +22,8 @@ model Users {
   maxStorage    Int?             @default(0)
   loginAttempts Int              @default(0)
   lockedUntil   DateTime?
+  totpSecret    String?
+  totpEnabled   Boolean          @default(false)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
@@ -29,6 +31,20 @@ model Users {
   folders       ServerFolder[]
   apiKeys       ApiKey[]
   loginHistory  LoginHistory[]
+  subUserAccess SubUser[]
+  passwordResets PasswordReset[]
+}
+
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Session {
@@ -58,6 +74,7 @@ model Server {
   Installing       Boolean            @default(true)
   Queued           Boolean            @default(true)
   Suspended        Boolean            @default(false)
+  backupLimit      Int                @default(5)
   ownerId          Int
   nodeId           Int
   imageId          Int
@@ -66,6 +83,59 @@ model Server {
   image            Images             @relation(fields: [imageId], references: [id])
   backups          Backup[]
   folder           ServerFolderMember?
+  subUsers         SubUser[]
+  schedules        Schedule[]
+  databases        ServerDatabase[]
+}
+
+model DatabaseHost {
+  id        Int              @id @default(autoincrement())
+  name      String
+  host      String
+  port      Int              @default(3306)
+  username  String
+  password  String
+  createdAt DateTime         @default(now())
+  databases ServerDatabase[]
+}
+
+model ServerDatabase {
+  id               Int          @id @default(autoincrement())
+  serverId         String
+  hostId           Int
+  databaseName     String
+  databaseUser     String
+  databasePassword String
+  createdAt        DateTime     @default(now())
+  server           Server       @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
+  host             DatabaseHost @relation(fields: [hostId], references: [id])
+
+  @@index([serverId])
+}
+
+model Schedule {
+  id        Int            @id @default(autoincrement())
+  serverId  String
+  name      String
+  cron      String
+  enabled   Boolean        @default(true)
+  lastRunAt DateTime?
+  nextRunAt DateTime?
+  createdAt DateTime       @default(now())
+  server    Server         @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
+  tasks     ScheduleTask[]
+
+  @@index([serverId])
+  @@index([nextRunAt])
+}
+
+model ScheduleTask {
+  id         Int      @id @default(autoincrement())
+  scheduleId Int
+  order      Int      @default(0)
+  action     String
+  payload    String
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
 }
 
 model Images {
@@ -139,6 +209,19 @@ model settings {
   hashApiKeys               Boolean  @default(false)
   airlinkCloudApiKey        String?
   airlinkCloudBackupEnabled Boolean  @default(false)
+  smtpHost                  String?
+  smtpPort                  Int?     @default(587)
+  smtpUser                  String?
+  smtpPassword              String?
+  smtpFrom                  String?
+  smtpSecure                Boolean  @default(false)
+  s3Enabled                 Boolean  @default(false)
+  s3Endpoint                String?
+  s3Region                  String?
+  s3Bucket                  String?
+  s3AccessKey               String?
+  s3SecretKey               String?
+  s3PathStyle               Boolean  @default(false)
 }
 
 model ServerFolder {
@@ -241,4 +324,18 @@ model SftpCredential {
   expiresAt DateTime?
   createdAt DateTime @default(now())
   server    Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
+}
+
+model SubUser {
+  id          Int      @id @default(autoincrement())
+  serverId    String
+  userId      Int
+  permissions String   @default("[]")
+  createdAt   DateTime @default(now())
+  server      Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
+  user        Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, userId])
+  @@index([serverId])
+  @@index([userId])
 }

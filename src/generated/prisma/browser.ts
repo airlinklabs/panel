@@ -23,6 +23,11 @@ export * from './enums';
  */
 export type Users = Prisma.UsersModel
 /**
+ * Model PasswordReset
+ * 
+ */
+export type PasswordReset = Prisma.PasswordResetModel
+/**
  * Model Session
  * 
  */
@@ -32,6 +37,26 @@ export type Session = Prisma.SessionModel
  * 
  */
 export type Server = Prisma.ServerModel
+/**
+ * Model DatabaseHost
+ * 
+ */
+export type DatabaseHost = Prisma.DatabaseHostModel
+/**
+ * Model ServerDatabase
+ * 
+ */
+export type ServerDatabase = Prisma.ServerDatabaseModel
+/**
+ * Model Schedule
+ * 
+ */
+export type Schedule = Prisma.ScheduleModel
+/**
+ * Model ScheduleTask
+ * 
+ */
+export type ScheduleTask = Prisma.ScheduleTaskModel
 /**
  * Model Images
  * 
@@ -92,3 +117,8 @@ export type Backup = Prisma.BackupModel
  * 
  */
 export type SftpCredential = Prisma.SftpCredentialModel
+/**
+ * Model SubUser
+ * 
+ */
+export type SubUser = Prisma.SubUserModel

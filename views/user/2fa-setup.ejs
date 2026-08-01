@@ -1,0 +1,109 @@
+<%- include('../components/header', { title: 'Two-Factor Authentication' }) %>
+
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0">
+      <%- include('../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../components/ui/breadcrumb', { items: [
+        { label: 'Account', href: '/account' },
+        { label: 'Two-Factor Authentication' }
+      ] }) %>
+
+      <div class="al-page-header mb-5">
+        <div class="flex items-center gap-4">
+          <div class="shrink-0">
+            <%- icon('shield', { class: 'w-5 h-5', strokeWidth: 1.5 }) %>
+          </div>
+          <div>
+            <h1 class="al-page-title">Set up two-factor authentication</h1>
+            <p class="al-page-desc">Scan the QR code with an authenticator app, then confirm with a code.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="al-page-body space-y-4">
+        <div class="al-card p-6 max-w-xl">
+          <ol class="flex items-center gap-2 text-xs font-medium mb-6">
+            <li class="flex items-center gap-2 text-emerald-500">
+              <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">1</span>
+              Scan QR code
+            </li>
+            <li class="h-px flex-1 bg-neutral-200 dark:bg-white/10"></li>
+            <li class="flex items-center gap-2" style="color:var(--theme-text-muted)">
+              <span class="flex h-5 w-5 items-center justify-center rounded-full bg-neutral-200 dark:bg-white/10">2</span>
+              Enter code
+            </li>
+          </ol>
+
+          <div class="flex flex-col items-center mb-6">
+            <div class="rounded-2xl border p-4 bg-white" style="border-color:var(--theme-border)">
+              <img src="<%= qrDataUrl %>" alt="QR code" class="h-48 w-48" width="220" height="220">
+            </div>
+            <p class="text-sm mt-4 mb-1" style="color:var(--theme-text-muted)">Can't scan? Enter this key manually in your authenticator app:</p>
+            <code class="select-all rounded-lg bg-neutral-100 dark:bg-white/5 px-3 py-1.5 text-sm font-mono" style="color:var(--theme-text-strong)"><%= secretBase32 %></code>
+          </div>
+
+          <form id="enable2faForm" novalidate>
+            <%- include('../components/csrf') %>
+            <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">6-digit code from your app</label>
+            <div class="flex gap-2">
+              <input id="totpToken" name="token" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" autofocus placeholder="••••••" class="al-input flex-1 text-center font-mono text-lg tracking-[0.4em]">
+              <button id="enableBtn" type="submit" class="al-btn-primary px-5">Enable 2FA</button>
+            </div>
+            <p id="feedback" class="text-sm mt-2 hidden"></p>
+          </form>
+
+          <div class="mt-6 pt-4 text-xs" style="border-top:1px solid var(--theme-border); color:var(--theme-text-muted)">
+            <p>Once enabled, you will be asked for a code from your authenticator app every time you sign in.</p>
+            <p class="mt-1">Supported apps: Google Authenticator, Authy, 1Password, Bitwarden and other TOTP-compatible apps.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../components/toast') %>
+
+<script nonce="<%- nonce %>">
+document.addEventListener('DOMContentLoaded', () => {
+  const { showToast } = createToastSystem();
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  const form = document.getElementById('enable2faForm');
+  const btn = document.getElementById('enableBtn');
+  const feedback = document.getElementById('feedback');
+  const tokenInput = document.getElementById('totpToken');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    btn.disabled = true;
+    feedback.classList.add('hidden');
+    try {
+      const res = await fetch('/account/2fa/enable', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        body: JSON.stringify({ token: tokenInput.value }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast('Two-factor authentication enabled.', 'success');
+        setTimeout(() => { window.location.href = '/account'; }, 1200);
+      } else {
+        feedback.textContent = data.error || 'Something went wrong. Try again.';
+        feedback.classList.remove('hidden');
+        feedback.classList.add('text-red-500');
+      }
+    } catch {
+      feedback.textContent = 'Something went wrong. Try again.';
+      feedback.classList.remove('hidden');
+      feedback.classList.add('text-red-500');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+});
+</script>
+
+<%- include('../components/footer') %>

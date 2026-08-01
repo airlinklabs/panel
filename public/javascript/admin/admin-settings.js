@@ -86,6 +86,23 @@
         fd.set('allowRegistration', reg && reg.checked ? 'true' : 'false');
         return fd;
       })()),
+      post('/admin/settings/smtp', {
+        smtpHost:     document.getElementById('smtpHost').value.trim() || null,
+        smtpPort:     parseInt(document.getElementById('smtpPort').value, 10) || 587,
+        smtpUser:     document.getElementById('smtpUser').value.trim() || null,
+        smtpPassword: document.getElementById('smtpPassword').value || null,
+        smtpFrom:     document.getElementById('smtpFrom').value.trim() || null,
+        smtpSecure:   document.getElementById('smtpSecure').checked,
+      }),
+      post('/admin/settings/s3', {
+        s3Enabled:    document.getElementById('s3Enabled').checked,
+        s3Endpoint:   document.getElementById('s3Endpoint').value.trim() || null,
+        s3Region:     document.getElementById('s3Region').value.trim() || null,
+        s3Bucket:     document.getElementById('s3Bucket').value.trim() || null,
+        s3AccessKey:  document.getElementById('s3AccessKey').value.trim() || null,
+        s3SecretKey:  document.getElementById('s3SecretKey').value || null,
+        s3PathStyle:  document.getElementById('s3PathStyle').checked,
+      }),
     ]).then(function() {
       btn.disabled = false; btn.textContent = 'Save';
     }).catch(function() {
@@ -94,6 +111,52 @@
   };
   window.tabLabels['security'] = 'Save';
   window.tabResetHandlers['security'] = function() { location.reload(); };
+
+  /* ── SMTP test ──────────────────────────── */
+  document.getElementById('smtpTestBtn').addEventListener('click', function () {
+    var btn = this;
+    var result = document.getElementById('smtpTestResult');
+    var orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = 'Testing\u2026';
+    result.classList.add('hidden');
+    fetch('/admin/settings/smtp/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        result.classList.remove('hidden');
+        result.textContent = d.success ? 'Connection OK.' : d.error || 'Connection failed.';
+        result.className = 'px-5 pb-5 text-xs ' + (d.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400');
+      })
+      .catch(function() {
+        result.classList.remove('hidden');
+        result.textContent = 'Connection failed.';
+        result.className = 'px-5 pb-5 text-xs text-red-600 dark:text-red-400';
+      })
+      .finally(function() { btn.disabled = false; btn.innerHTML = orig; });
+  });
+
+  /* ── S3 test ──────────────────────────── */
+  document.getElementById('s3TestBtn').addEventListener('click', function () {
+    var btn = this;
+    var result = document.getElementById('s3TestResult');
+    var orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = 'Testing\u2026';
+    result.classList.add('hidden');
+    fetch('/admin/settings/s3/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        result.classList.remove('hidden');
+        result.textContent = d.success ? d.message || 'Connection OK.' : d.error || 'Connection failed.';
+        result.className = 'px-5 pb-5 text-xs ' + (d.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400');
+      })
+      .catch(function() {
+        result.classList.remove('hidden');
+        result.textContent = 'Connection failed.';
+        result.className = 'px-5 pb-5 text-xs text-red-600 dark:text-red-400';
+      })
+      .finally(function() { btn.disabled = false; btn.innerHTML = orig; });
+  });
 
   /* ── IP banning (not tab-specific) ───────── */
   document.getElementById('banIpBtn').addEventListener('click', function () {

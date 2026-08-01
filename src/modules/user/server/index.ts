@@ -8,6 +8,9 @@ import { registerSettingsRoutes } from './settings';
 import { registerStartupRoutes } from './startup';
 import { registerPlayersRoutes } from './players';
 import { registerWorldsRoutes } from './worlds';
+import { registerSubUserRoutes } from './subusers';
+import { registerScheduleRoutes } from './schedules';
+import { registerDatabaseRoutes } from './databases';
 
 const dashboardModule: Module = {
   info: {
@@ -30,6 +33,9 @@ const dashboardModule: Module = {
     registerStartupRoutes(router);
     registerPlayersRoutes(router);
     registerWorldsRoutes(router);
+    registerSubUserRoutes(router);
+    registerScheduleRoutes(router);
+    registerDatabaseRoutes(router);
 
     return router;
   },

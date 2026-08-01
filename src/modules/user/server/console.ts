@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkEulaStatus } from '../../../handlers/features';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
@@ -21,6 +21,7 @@ export function registerConsoleRoutes(router: Router): void {
   router.get(
     '/server/:id',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
     async (req: Request, res: Response) => {
       const errorMessage: ErrorMessage = {};
       const serverId = req.params?.id;
@@ -83,6 +84,7 @@ export function registerConsoleRoutes(router: Router): void {
   router.get(
     '/server/:id/status',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
     async (req: Request, res: Response): Promise<void> => {
       const serverId = req.params?.id;
 
@@ -126,9 +128,47 @@ export function registerConsoleRoutes(router: Router): void {
     },
   );
 
+  router.get(
+    '/server/:id/logs',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
+    async (req: Request, res: Response): Promise<void> => {
+      const serverId = req.params?.id;
+
+      try {
+        const server = await prisma.server.findUnique({
+          where: { UUID: String(serverId) },
+          include: { node: true },
+        });
+
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        const response = await daemonRequest<{ lines?: string[] }>({
+          method: 'GET',
+          path: `/container/logs/${server.UUID}`,
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          timeout: 5000,
+        });
+
+        res.json({ lines: response.data?.lines ?? [] });
+        return;
+      } catch (error) {
+        logger.error('Error fetching console log history:', error);
+        res.status(500).json({ error: 'Failed to fetch console log history' });
+        return;
+      }
+    },
+  );
+
   router.post(
     '/server/:id/power/:poweraction',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
     async (req: Request, res: Response): Promise<void> => {
       const errorMessage: ErrorMessage = {};
       const userId = req.session?.user?.id;
@@ -295,6 +335,7 @@ export function registerConsoleRoutes(router: Router): void {
   router.post(
     '/server/:id/power/restart',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -337,6 +378,7 @@ export function registerConsoleRoutes(router: Router): void {
   router.post(
     '/server/:id/reinstall',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;

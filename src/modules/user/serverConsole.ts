@@ -8,7 +8,7 @@ import { Router, Request } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { WebSocket } from 'ws';
-import { isAuthenticatedForServerWS } from '../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServerWS, subUserHasPermission } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import { getParamAsString } from '../../utils/typeHelpers';
 import { daemonRequest, daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
@@ -225,6 +225,14 @@ const wsServerConsoleModule: Module = {
       isAuthenticatedForServerWS('id'),
       async (ws: WebSocket, req: Request) => {
         const userId = req.session?.user?.id;
+        const subUser = (req as any).subUser as
+          | { permissions: string | null | undefined }
+          | undefined;
+        if (subUser && !subUserHasPermission(subUser, 'console')) {
+          ws.send(JSON.stringify({ error: 'You do not have permission to access the console.' }));
+          ws.close();
+          return;
+        }
         if (!userId) {
           ws.send(JSON.stringify({ error: 'User not authenticated' }));
           ws.close();

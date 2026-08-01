@@ -1,0 +1,85 @@
+<%- include('../../components/header', { title: 'Add Database Host' }) %>
+
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Databases', href: '/admin/databases' },
+        { label: 'Add Host' }
+      ] }) %>
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title">Add Database Host</h1>
+          <p class="al-page-desc">A MySQL-compatible server that databases will be provisioned on.</p>
+        </div>
+        <div class="flex gap-2 shrink-0 items-center">
+          <button id="saveHostBtn" type="button" class="al-btn-primary">Save Host</button>
+          <a href="/admin/databases" class="al-btn-secondary">Back to Databases</a>
+        </div>
+      </div>
+
+      <div id="hostForm" class="al-page-body space-y-5">
+        <% if (req.query.err == "missing_fields") { %>
+          <%- include('../../components/ui/alert', { type: 'danger', message: 'Missing fields', detail: 'Name, host, username and password are required.' }) %>
+        <% } %>
+        <% if (req.query.err == "create_failed") { %>
+          <%- include('../../components/ui/alert', { type: 'danger', message: 'Creation failed', detail: 'Could not save the database host. Try again.' }) %>
+        <% } %>
+        <form class="space-y-5">
+          <div class="al-card">
+            <h2 class="al-card-header">Connection Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div class="md:col-span-2">
+                <label for="hostName" class="al-label flex items-center gap-1.5">
+                  <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.name %>
+                </label>
+                <input id="hostName" class="al-input" placeholder="Primary MySQL host">
+              </div>
+
+              <div>
+                <label for="hostAddress" class="al-label flex items-center gap-1.5">
+                  <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  Host Address
+                </label>
+                <input id="hostAddress" class="al-input" placeholder="localhost or 10.0.0.5">
+              </div>
+
+              <div>
+                <label for="hostPort" class="al-label flex items-center gap-1.5">
+                  <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  Port
+                </label>
+                <input id="hostPort" class="al-input" placeholder="3306" type="number">
+              </div>
+
+              <div>
+                <label for="hostUser" class="al-label flex items-center gap-1.5">
+                  <%- icon('user', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  Username
+                </label>
+                <input id="hostUser" class="al-input" placeholder="root" autocomplete="off">
+              </div>
+
+              <div>
+                <label for="hostPassword" class="al-label flex items-center gap-1.5">
+                  <%- icon('lock', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  Password
+                </label>
+                <input id="hostPassword" type="password" class="al-input" placeholder="••••••••" autocomplete="new-password">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-databases.js"></script>
+
+<%- include('../../components/footer') %>

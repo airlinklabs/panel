@@ -498,6 +498,7 @@ let maxReconnectAttempts = 10;
 let reconnectInterval = 2000;
 let reconnectTimer = null;
 let wsErrorCount = 0;  // only show offline banner after sustained failures
+let historyLoaded = false; // only fetch log history once per page load
 
 function connectWebSocket() {
     if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
@@ -526,6 +527,17 @@ function connectWebSocket() {
             wsErrorCount = 0;
             const row = document.getElementById('daemonOfflineWarningRow');
             if (row) row.classList.add('hidden');
+
+            if (!historyLoaded) {
+                historyLoaded = true;
+                fetch(`/server/<%= server.UUID %>/logs`)
+                    .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+                    .then((data) => {
+                        const lines = data.lines || [];
+                        lines.forEach((line) => term.write(maskPrompts(String(line)) + '\r\n'));
+                    })
+                    .catch(() => {});
+            }
         };
 
         socket.onmessage = handleWebSocketMessage;

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServer, requireSubUserPermission } from '../../handlers/utils/auth/serverAuthUtil';
 import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
 import logger from '../../handlers/logger';
@@ -24,6 +24,7 @@ const sftpModule: Module = {
     router.get(
       '/server/:id/sftp/credentials',
       isAuthenticatedForServer('id'),
+      requireSubUserPermission('files.sftp'),
       async (req: Request, res: Response) => {
         const serverId = getParamAsString(req.params?.id);
 
@@ -58,6 +59,7 @@ const sftpModule: Module = {
     router.post(
       '/server/:id/sftp/credentials',
       isAuthenticatedForServer('id'),
+      requireSubUserPermission('files.sftp'),
       async (req: Request, res: Response) => {
         const serverId = getParamAsString(req.params?.id);
 
@@ -135,6 +137,7 @@ const sftpModule: Module = {
     router.delete(
       '/server/:id/sftp/credentials',
       isAuthenticatedForServer('id'),
+      requireSubUserPermission('files.sftp'),
       async (req: Request, res: Response) => {
         const serverId = getParamAsString(req.params?.id);
 

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { isWorld } from '../../../handlers/features';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
@@ -16,6 +16,7 @@ export function registerWorldsRoutes(router: Router): void {
   router.get(
     '/server/:id/worlds',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;

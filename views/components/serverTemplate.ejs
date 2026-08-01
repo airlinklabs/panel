@@ -4,12 +4,14 @@
        <div class="block sm:hidden overflow-x-auto mt-3">
          <div class="flex gap-1 min-w-max pb-2">
            <%
-           const rawMenuItemsMobile = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
-           const isAdminMobile = (typeof user !== 'undefined' && user && user.isAdmin === true);
-           const menuItemsMobile = rawMenuItemsMobile.filter(item => {
-             if (item.isAdminItem && !isAdminMobile) return false;
-             return true;
-           });
+            const rawMenuItemsMobile = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+            const isAdminMobile = (typeof user !== 'undefined' && user && user.isAdmin === true);
+            const isSubUserMobile = (typeof req !== 'undefined' && req && req.subUser) ? true : false;
+            const menuItemsMobile = rawMenuItemsMobile.filter(item => {
+              if (item.isAdminItem && !isAdminMobile) return false;
+              if (item.ownerOnly && isSubUserMobile) return false;
+              return true;
+            });
            if (!menuItemsMobile || menuItemsMobile.length === 0) {
            %>
            <a href="/server/<%= server.UUID %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
@@ -59,8 +61,10 @@
                 <%
                 const rawMenuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
                 const isAdmin = (typeof user !== 'undefined' && user && user.isAdmin === true);
+                const isSubUser = (typeof req !== 'undefined' && req && req.subUser) ? true : false;
                 const menuItems = rawMenuItems.filter(item => {
                   if (item.isAdminItem && !isAdmin) return false;
+                  if (item.ownerOnly && isSubUser) return false;
                   return true;
                 });
                 if (!menuItems || menuItems.length === 0) {

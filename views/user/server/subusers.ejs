@@ -1,0 +1,290 @@
+<%- include('../../components/header', { title: 'Subusers' }) %>
+
+<main class="h-screen m-auto text-neutral-800 dark:text-white">
+  <div class="flex h-full">
+    <div class="hidden lg:block w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Servers', href: '/' },
+        { label: server.name, href: '/server/' + server.UUID },
+        { label: 'Subusers' }
+      ] }) %>
+      <!-- Page Header: title + meta left, buttons right -->
+      <div class="px-4 sm:px-8 pt-4">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <%- include('../../components/serverHeader') %>
+            <!-- Server meta: image · node · id -->
+            <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <%- icon('box', { class: 'h-3 w-3 shrink-0' }) %>
+                <span class="text-[11px] truncate max-w-[140px]" style="color:var(--theme-text-muted)"><%= server.image.name %></span>
+              </div>
+              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
+              <div class="flex items-center gap-1.5">
+                <%- icon('server', { class: 'h-3 w-3 shrink-0' }) %>
+                <span class="text-[11px] truncate max-w-[100px]" style="color:var(--theme-text-muted)"><%= server.node.name %></span>
+              </div>
+              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
+              <div class="flex items-center gap-1.5">
+                <%- icon('hash', { class: 'h-3 w-3 shrink-0' }) %>
+                <span class="text-[11px] font-mono" style="color:var(--theme-text-muted)"><%= server.UUID.split('-')[0] %></span>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button id="addSubUserBtn" onclick="openAddSubUserModal()" type="button"
+                class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
+                <%- icon('plus', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
+                Add Subuser
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <%- include('../../components/installHeader') %>
+
+      <!-- Server Template -->
+      <%- include('../../components/serverTemplate') %>
+
+      <div id="server-page-body">
+
+      <!-- Subusers Management -->
+      <div class="px-6">
+        <div class="al-card rounded-lg shadow overflow-hidden">
+          <div class="al-card-header">
+            <div>
+              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Server Subusers</h2>
+              <p class="text-xs" style="color:var(--theme-text-muted)">Grant other users access to this server.</p>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <% if (subUsers && subUsers.length > 0) { %>
+              <table class="al-table min-w-full">
+                <thead class="al-table-head">
+                  <tr>
+                    <th scope="col" class="al-table-th px-6 py-3 uppercase">User</th>
+                    <th scope="col" class="al-table-th px-6 py-3 uppercase">Permissions</th>
+                    <th scope="col" class="al-table-th px-6 py-3 uppercase">Added</th>
+                    <th scope="col" class="al-table-th px-6 py-3 uppercase text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="subusers-table-body" class="divide-y" style="border-color:var(--theme-border)">
+                  <% let subIdx = 0; subUsers.forEach(subUser => { %>
+                    <tr class="al-table-tr transition-colors" style="--i:<%= subIdx++ %>" data-subuser-id="<%= subUser.id %>">
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-3">
+                          <img loading="lazy" class="h-8 w-8 rounded-full shrink-0"
+                            src="<%= subUser.user.avatar ? subUser.user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(subUser.user.username || subUser.user.email) %>"
+                            alt="<%= subUser.user.username || subUser.user.email %>">
+                          <div class="min-w-0">
+                            <div class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= subUser.user.username || 'Unknown' %></div>
+                            <div class="text-xs truncate max-w-[200px]" style="color:var(--theme-text-muted)"><%= subUser.user.email %></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4">
+                        <div class="flex flex-wrap gap-1.5 max-w-xs">
+                          <% subUser.permissions.forEach(perm => { %>
+                            <% if (permissionLabels[perm]) { %>
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%= permissionLabels[perm] %></span>
+                            <% } %>
+                          <% }) %>
+                          <% if (subUser.permissions.length === 0) { %>
+                            <span class="text-xs italic" style="color:var(--theme-text-placeholder)">No permissions</span>
+                          <% } %>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm" style="color:var(--theme-text-muted)">
+                          <%= new Date(subUser.createdAt).toLocaleDateString() %>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex justify-end space-x-2">
+                          <button
+                            onclick="openEditSubUserModal(<%= subUser.id %>, '<%= subUser.user.username || subUser.user.email %>', <%= JSON.stringify(subUser.permissions).replace(/'/g, "&#39;") %>)"
+                            class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            style="color:var(--theme-accent);background:var(--theme-accent-subtle)"
+                          >
+                            <%- icon('settings', { class: 'w-3 h-3 mr-1' }) %>
+                            Edit
+                          </button>
+                          <button
+                            onclick="removeSubUser(<%= subUser.id %>, '<%= (subUser.user.username || subUser.user.email).replace(/'/g, "&#39;") %>')"
+                            class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            style="color:var(--theme-danger);background:var(--theme-danger-bg)"
+                          >
+                            <%- icon('trash-2', { class: 'w-3 h-3 mr-1' }) %>
+                            Remove
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            <% } else { %>
+              <div class="p-8 text-center">
+                <%- icon('users', { class: 'mx-auto h-12 w-12', style: 'color:var(--theme-text-muted)' }) %>
+                <h3 class="mt-2 text-sm font-medium" style="color:var(--theme-text-strong)">No subusers</h3>
+                <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Invite other users to help manage this server.</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      </div><!-- /server-page-body -->
+    </div>
+  </div>
+</main>
+
+<!-- Add Subuser Modal -->
+<div id="addSubUserModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
+  <div class="w-full max-w-md rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Add subuser</h3>
+      <button onclick="closeModal('addSubUserModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">User email</label>
+        <input id="addSubUserEmail" type="email" class="al-input w-full" placeholder="friend@example.com" autocomplete="off">
+      </div>
+      <div>
+        <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Permissions</label>
+        <div class="grid grid-cols-2 gap-2">
+          <% permissionOptions.forEach(perm => { %>
+          <label class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs cursor-pointer" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+            <input type="checkbox" class="add-perm" value="<%= perm %>" checked>
+            <span style="color:var(--theme-text)"><%= permissionLabels[perm] %></span>
+          </label>
+          <% }) %>
+        </div>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="closeModal('addSubUserModal')" class="al-btn-secondary flex-1">Cancel</button>
+        <button id="confirmAddSubUser" class="al-btn-primary flex-1">Add subuser</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Subuser Modal -->
+<div id="editSubUserModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
+  <div class="w-full max-w-md rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div class="flex items-center justify-between mb-1">
+      <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Edit permissions</h3>
+      <button onclick="closeModal('editSubUserModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
+    </div>
+    <p id="editSubUserName" class="text-xs mb-4" style="color:var(--theme-text-muted)"></p>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Permissions</label>
+        <div class="grid grid-cols-2 gap-2">
+          <% permissionOptions.forEach(perm => { %>
+          <label class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs cursor-pointer" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+            <input type="checkbox" class="edit-perm" value="<%= perm %>">
+            <span style="color:var(--theme-text)"><%= permissionLabels[perm] %></span>
+          </label>
+          <% }) %>
+        </div>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="closeModal('editSubUserModal')" class="al-btn-secondary flex-1">Cancel</button>
+        <button id="confirmEditSubUser" class="al-btn-primary flex-1">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../../components/toast') %>
+
+<script nonce="<%- nonce %>">
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+const serverId = '<%= server.UUID %>';
+let editingSubUserId = null;
+
+const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m, t) => alert(m) };
+
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+window.closeModal = closeModal;
+
+window.openAddSubUserModal = () => {
+  document.getElementById('addSubUserEmail').value = '';
+  document.querySelectorAll('.add-perm').forEach(cb => cb.checked = true);
+  openModal('addSubUserModal');
+};
+
+window.openEditSubUserModal = (id, name, permissions) => {
+  editingSubUserId = id;
+  document.getElementById('editSubUserName').textContent = name;
+  document.querySelectorAll('.edit-perm').forEach(cb => cb.checked = permissions.includes(cb.value));
+  openModal('editSubUserModal');
+};
+
+async function api(url, method, body) {
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  } catch (err) {
+    showToast(err.message || 'Something went wrong.', 'error');
+    return null;
+  }
+}
+
+document.getElementById('confirmAddSubUser')?.addEventListener('click', async () => {
+  const email = document.getElementById('addSubUserEmail').value.trim();
+  if (!email) { showToast('Enter the user email.', 'error'); return; }
+  const permissions = [...document.querySelectorAll('.add-perm:checked')].map(cb => cb.value);
+  const result = await api('/server/' + serverId + '/subusers', 'POST', { email, permissions });
+  if (result) {
+    showToast('Subuser added.', 'success');
+    setTimeout(() => location.reload(), 900);
+  }
+});
+
+document.getElementById('confirmEditSubUser')?.addEventListener('click', async () => {
+  if (!editingSubUserId) return;
+  const permissions = [...document.querySelectorAll('.edit-perm:checked')].map(cb => cb.value);
+  const result = await api('/server/' + serverId + '/subusers/' + editingSubUserId, 'PUT', { permissions });
+  if (result) {
+    showToast('Permissions updated.', 'success');
+    setTimeout(() => location.reload(), 900);
+  }
+});
+
+window.removeSubUser = async (id, name) => {
+  if (!window.modal || typeof window.modal.confirm !== 'function') {
+    const ok = confirm('Remove ' + name + ' from this server?');
+    if (!ok) return;
+  } else {
+    await new Promise(resolve => {
+      window.modal.confirm({
+        title: 'Remove subuser',
+        body: 'Remove ' + name + ' from this server? They will lose access immediately.',
+        danger: true,
+        confirmLabel: 'Remove',
+        onConfirm: resolve,
+      });
+    });
+  }
+  const result = await api('/server/' + serverId + '/subusers/' + id, 'DELETE');
+  if (result) {
+    showToast('Subuser removed.', 'success');
+    setTimeout(() => location.reload(), 900);
+  }
+};
+</script>
+
+<%- include('../../components/footer') %>

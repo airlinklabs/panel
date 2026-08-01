@@ -9,6 +9,8 @@ import path from 'path';
 import fs from 'fs';
 import { randomUUID } from 'crypto';
 import AdmZip from 'adm-zip';
+import nodemailer from 'nodemailer';
+import { testS3Connection } from '../../handlers/utils/core/s3Client';
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -377,6 +379,105 @@ const adminModule: Module = {
         } catch (error) {
           logger.error('Error saving server policy:', error);
           res.status(500).json({ success: false, error: 'Failed to save server policy.' });
+          return;
+        }
+      },
+    );
+
+    // ── POST /admin/settings/smtp ───────────────────────────────────────────
+    router.post(
+      '/admin/settings/smtp',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const smtpPort = parseInt(req.body.smtpPort, 10);
+          if (isNaN(smtpPort) || smtpPort < 1 || smtpPort > 65535) {
+            return res.status(400).json({ success: false, error: 'SMTP port must be between 1 and 65535.' });
+          }
+
+          const smtpData: Record<string, any> = {
+            smtpHost:     typeof req.body.smtpHost === 'string' ? req.body.smtpHost.trim() || null : null,
+            smtpPort,
+            smtpUser:     typeof req.body.smtpUser === 'string' ? req.body.smtpUser.trim() || null : null,
+            smtpPassword: typeof req.body.smtpPassword === 'string' ? req.body.smtpPassword || null : null,
+            smtpFrom:     typeof req.body.smtpFrom === 'string' ? req.body.smtpFrom.trim() || null : null,
+            smtpSecure:   req.body.smtpSecure === true || req.body.smtpSecure === 'true',
+          };
+          await saveSettings(smtpData);
+          return res.json({ success: true });
+        } catch (error) {
+          logger.error('Error saving SMTP settings:', error);
+          res.status(500).json({ success: false, error: 'Failed to save SMTP settings.' });
+          return;
+        }
+      },
+    );
+
+    // ── POST /admin/settings/smtp/test ──────────────────────────────────────
+    router.post(
+      '/admin/settings/smtp/test',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const smtp = await prisma.settings.findUnique({ where: { id: 1 } });
+          if (!smtp?.smtpHost) {
+            return res.status(400).json({ success: false, error: 'SMTP is not configured yet.' });
+          }
+          const transporter = nodemailer.createTransport({
+            host: smtp.smtpHost,
+            port: smtp.smtpPort ?? 587,
+            secure: smtp.smtpSecure,
+            auth: { user: smtp.smtpUser ?? '', pass: smtp.smtpPassword ?? '' },
+          });
+          await transporter.verify();
+          return res.json({ success: true, message: 'SMTP connection verified.' });
+        } catch (error) {
+          logger.error('SMTP test failed:', error);
+          res.status(500).json({ success: false, error: 'SMTP connection failed.' });
+          return;
+        }
+      },
+    );
+
+    // ── POST /admin/settings/s3 ────────────────────────────────────────────
+    router.post(
+      '/admin/settings/s3',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const s3Data: Record<string, any> = {
+            s3Enabled:    req.body.s3Enabled === true || req.body.s3Enabled === 'true',
+            s3Endpoint:   typeof req.body.s3Endpoint === 'string' ? req.body.s3Endpoint.trim() || null : null,
+            s3Region:     typeof req.body.s3Region === 'string' ? req.body.s3Region.trim() || null : null,
+            s3Bucket:     typeof req.body.s3Bucket === 'string' ? req.body.s3Bucket.trim() || null : null,
+            s3AccessKey:  typeof req.body.s3AccessKey === 'string' ? req.body.s3AccessKey.trim() || null : null,
+            s3SecretKey:  typeof req.body.s3SecretKey === 'string' ? req.body.s3SecretKey || null : null,
+            s3PathStyle:  req.body.s3PathStyle === true || req.body.s3PathStyle === 'true',
+          };
+          await saveSettings(s3Data);
+          return res.json({ success: true });
+        } catch (error) {
+          logger.error('Error saving S3 settings:', error);
+          res.status(500).json({ success: false, error: 'Failed to save S3 settings.' });
+          return;
+        }
+      },
+    );
+
+    // ── POST /admin/settings/s3/test ───────────────────────────────────────
+    router.post(
+      '/admin/settings/s3/test',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const result = await testS3Connection();
+          if (result.success) {
+            return res.json({ success: true, message: `S3 connection verified (${result.latency}ms).` });
+          }
+          return res.status(500).json({ success: false, error: result.error || 'S3 connection failed.' });
+        } catch (error) {
+          logger.error('S3 test failed:', error);
+          res.status(500).json({ success: false, error: 'S3 connection failed.' });
           return;
         }
       },

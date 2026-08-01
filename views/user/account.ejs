@@ -116,13 +116,19 @@
               <p class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('shield', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.twoFactorAuth || 'Two-factor authentication' %>
               </p>
-              <% if (user['2fa'] !== true) { %>
-              <p class="text-sm" style="color:var(--theme-text-muted)">Not yet available.</p>
+              <% if (user.totpEnabled !== true) { %>
+              <p class="text-sm mb-3" style="color:var(--theme-text-muted)">Add an extra layer of security to your account.</p>
+              <a href="/account/2fa/setup" class="al-btn-primary text-sm inline-flex">Set up 2FA</a>
               <% } else { %>
-              <form action="/disable-2fa" method="POST" id="disable2faForm">
-                <%- include('../components/csrf') %>
-                <button type="submit" class="al-btn-secondary text-sm"><%= req.translations.disable2FA || 'Disable 2FA' %></button>
-              </form>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-500">
+                  <%- icon('check', { class: 'w-3 h-3' }) %> Enabled
+                </span>
+              </div>
+              <div class="flex gap-2 items-center">
+                <input id="disable2faPassword" type="password" placeholder="Current password" class="al-input text-sm flex-1" style="max-width:180px">
+                <button id="disable2faBtn" type="button" class="al-btn-secondary text-sm"><%= req.translations.disable2FA || 'Disable 2FA' %></button>
+              </div>
               <% } %>
             </div>
 
@@ -296,6 +302,29 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Profile picture removed.', 'success');
       setTimeout(() => location.reload(), 1200);
     } else showToast('Something went wrong.', 'error');
+  });
+
+  // Disable 2FA (requires current password)
+  document.getElementById('disable2faBtn')?.addEventListener('click', async () => {
+    const password = document.getElementById('disable2faPassword')?.value || '';
+    if (!password) { showToast('Enter your current password to disable 2FA.', 'error'); return; }
+    const btn = document.getElementById('disable2faBtn');
+    btn.disabled = true;
+    try {
+      const res = await fetch('/account/2fa/disable', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast('Two-factor authentication disabled.', 'success');
+        setTimeout(() => location.reload(), 1200);
+      } else {
+        showToast(data.error || 'Failed to disable 2FA.', 'error');
+      }
+    } catch { showToast('Something went wrong.', 'error'); }
+    btn.disabled = false;
   });
 
   function openCropPopup(dataUrl, csrf) {

@@ -398,8 +398,13 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Users: 'Users',
+  PasswordReset: 'PasswordReset',
   Session: 'Session',
   Server: 'Server',
+  DatabaseHost: 'DatabaseHost',
+  ServerDatabase: 'ServerDatabase',
+  Schedule: 'Schedule',
+  ScheduleTask: 'ScheduleTask',
   Images: 'Images',
   Node: 'Node',
   settings: 'settings',
@@ -411,7 +416,8 @@ export const ModelName = {
   Addon: 'Addon',
   AddonSetting: 'AddonSetting',
   Backup: 'Backup',
-  SftpCredential: 'SftpCredential'
+  SftpCredential: 'SftpCredential',
+  SubUser: 'SubUser'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -427,7 +433,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "session" | "server" | "images" | "node" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential"
+    modelProps: "users" | "passwordReset" | "session" | "server" | "databaseHost" | "serverDatabase" | "schedule" | "scheduleTask" | "images" | "node" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential" | "subUser"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -502,6 +508,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UsersCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UsersCountAggregateOutputType> | number
+        }
+      }
+    }
+    PasswordReset: {
+      payload: Prisma.$PasswordResetPayload<ExtArgs>
+      fields: Prisma.PasswordResetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PasswordResetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PasswordResetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload>
+        }
+        findFirst: {
+          args: Prisma.PasswordResetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PasswordResetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload>
+        }
+        findMany: {
+          args: Prisma.PasswordResetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload>[]
+        }
+        create: {
+          args: Prisma.PasswordResetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload>
+        }
+        createMany: {
+          args: Prisma.PasswordResetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PasswordResetCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload>[]
+        }
+        delete: {
+          args: Prisma.PasswordResetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload>
+        }
+        update: {
+          args: Prisma.PasswordResetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload>
+        }
+        deleteMany: {
+          args: Prisma.PasswordResetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PasswordResetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PasswordResetUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload>[]
+        }
+        upsert: {
+          args: Prisma.PasswordResetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetPayload>
+        }
+        aggregate: {
+          args: Prisma.PasswordResetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePasswordReset>
+        }
+        groupBy: {
+          args: Prisma.PasswordResetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PasswordResetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PasswordResetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PasswordResetCountAggregateOutputType> | number
         }
       }
     }
@@ -650,6 +730,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ServerCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ServerCountAggregateOutputType> | number
+        }
+      }
+    }
+    DatabaseHost: {
+      payload: Prisma.$DatabaseHostPayload<ExtArgs>
+      fields: Prisma.DatabaseHostFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DatabaseHostFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DatabaseHostFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload>
+        }
+        findFirst: {
+          args: Prisma.DatabaseHostFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DatabaseHostFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload>
+        }
+        findMany: {
+          args: Prisma.DatabaseHostFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload>[]
+        }
+        create: {
+          args: Prisma.DatabaseHostCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload>
+        }
+        createMany: {
+          args: Prisma.DatabaseHostCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DatabaseHostCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload>[]
+        }
+        delete: {
+          args: Prisma.DatabaseHostDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload>
+        }
+        update: {
+          args: Prisma.DatabaseHostUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload>
+        }
+        deleteMany: {
+          args: Prisma.DatabaseHostDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DatabaseHostUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DatabaseHostUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload>[]
+        }
+        upsert: {
+          args: Prisma.DatabaseHostUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseHostPayload>
+        }
+        aggregate: {
+          args: Prisma.DatabaseHostAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDatabaseHost>
+        }
+        groupBy: {
+          args: Prisma.DatabaseHostGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DatabaseHostGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DatabaseHostCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DatabaseHostCountAggregateOutputType> | number
+        }
+      }
+    }
+    ServerDatabase: {
+      payload: Prisma.$ServerDatabasePayload<ExtArgs>
+      fields: Prisma.ServerDatabaseFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ServerDatabaseFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ServerDatabaseFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload>
+        }
+        findFirst: {
+          args: Prisma.ServerDatabaseFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ServerDatabaseFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload>
+        }
+        findMany: {
+          args: Prisma.ServerDatabaseFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload>[]
+        }
+        create: {
+          args: Prisma.ServerDatabaseCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload>
+        }
+        createMany: {
+          args: Prisma.ServerDatabaseCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ServerDatabaseCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload>[]
+        }
+        delete: {
+          args: Prisma.ServerDatabaseDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload>
+        }
+        update: {
+          args: Prisma.ServerDatabaseUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload>
+        }
+        deleteMany: {
+          args: Prisma.ServerDatabaseDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ServerDatabaseUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ServerDatabaseUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload>[]
+        }
+        upsert: {
+          args: Prisma.ServerDatabaseUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerDatabasePayload>
+        }
+        aggregate: {
+          args: Prisma.ServerDatabaseAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateServerDatabase>
+        }
+        groupBy: {
+          args: Prisma.ServerDatabaseGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServerDatabaseGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ServerDatabaseCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServerDatabaseCountAggregateOutputType> | number
+        }
+      }
+    }
+    Schedule: {
+      payload: Prisma.$SchedulePayload<ExtArgs>
+      fields: Prisma.ScheduleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ScheduleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ScheduleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload>
+        }
+        findFirst: {
+          args: Prisma.ScheduleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ScheduleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload>
+        }
+        findMany: {
+          args: Prisma.ScheduleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload>[]
+        }
+        create: {
+          args: Prisma.ScheduleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload>
+        }
+        createMany: {
+          args: Prisma.ScheduleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ScheduleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload>[]
+        }
+        delete: {
+          args: Prisma.ScheduleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload>
+        }
+        update: {
+          args: Prisma.ScheduleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload>
+        }
+        deleteMany: {
+          args: Prisma.ScheduleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ScheduleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ScheduleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload>[]
+        }
+        upsert: {
+          args: Prisma.ScheduleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePayload>
+        }
+        aggregate: {
+          args: Prisma.ScheduleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSchedule>
+        }
+        groupBy: {
+          args: Prisma.ScheduleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScheduleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ScheduleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScheduleCountAggregateOutputType> | number
+        }
+      }
+    }
+    ScheduleTask: {
+      payload: Prisma.$ScheduleTaskPayload<ExtArgs>
+      fields: Prisma.ScheduleTaskFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ScheduleTaskFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ScheduleTaskFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
+        }
+        findFirst: {
+          args: Prisma.ScheduleTaskFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ScheduleTaskFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
+        }
+        findMany: {
+          args: Prisma.ScheduleTaskFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>[]
+        }
+        create: {
+          args: Prisma.ScheduleTaskCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
+        }
+        createMany: {
+          args: Prisma.ScheduleTaskCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ScheduleTaskCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>[]
+        }
+        delete: {
+          args: Prisma.ScheduleTaskDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
+        }
+        update: {
+          args: Prisma.ScheduleTaskUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
+        }
+        deleteMany: {
+          args: Prisma.ScheduleTaskDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ScheduleTaskUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ScheduleTaskUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>[]
+        }
+        upsert: {
+          args: Prisma.ScheduleTaskUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
+        }
+        aggregate: {
+          args: Prisma.ScheduleTaskAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateScheduleTask>
+        }
+        groupBy: {
+          args: Prisma.ScheduleTaskGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScheduleTaskGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ScheduleTaskCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScheduleTaskCountAggregateOutputType> | number
         }
       }
     }
@@ -1541,6 +1917,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SubUser: {
+      payload: Prisma.$SubUserPayload<ExtArgs>
+      fields: Prisma.SubUserFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SubUserFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SubUserFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload>
+        }
+        findFirst: {
+          args: Prisma.SubUserFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SubUserFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload>
+        }
+        findMany: {
+          args: Prisma.SubUserFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload>[]
+        }
+        create: {
+          args: Prisma.SubUserCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload>
+        }
+        createMany: {
+          args: Prisma.SubUserCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SubUserCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload>[]
+        }
+        delete: {
+          args: Prisma.SubUserDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload>
+        }
+        update: {
+          args: Prisma.SubUserUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload>
+        }
+        deleteMany: {
+          args: Prisma.SubUserDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SubUserUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SubUserUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload>[]
+        }
+        upsert: {
+          args: Prisma.SubUserUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubUserPayload>
+        }
+        aggregate: {
+          args: Prisma.SubUserAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSubUser>
+        }
+        groupBy: {
+          args: Prisma.SubUserGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SubUserGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SubUserCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SubUserCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1592,11 +2042,25 @@ export const UsersScalarFieldEnum = {
   maxStorage: 'maxStorage',
   loginAttempts: 'loginAttempts',
   lockedUntil: 'lockedUntil',
+  totpSecret: 'totpSecret',
+  totpEnabled: 'totpEnabled',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof UsersScalarFieldEnum]
+
+
+export const PasswordResetScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  expiresAt: 'expiresAt',
+  used: 'used',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetScalarFieldEnum = (typeof PasswordResetScalarFieldEnum)[keyof typeof PasswordResetScalarFieldEnum]
 
 
 export const SessionScalarFieldEnum = {
@@ -1628,12 +2092,64 @@ export const ServerScalarFieldEnum = {
   Installing: 'Installing',
   Queued: 'Queued',
   Suspended: 'Suspended',
+  backupLimit: 'backupLimit',
   ownerId: 'ownerId',
   nodeId: 'nodeId',
   imageId: 'imageId'
 } as const
 
 export type ServerScalarFieldEnum = (typeof ServerScalarFieldEnum)[keyof typeof ServerScalarFieldEnum]
+
+
+export const DatabaseHostScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  host: 'host',
+  port: 'port',
+  username: 'username',
+  password: 'password',
+  createdAt: 'createdAt'
+} as const
+
+export type DatabaseHostScalarFieldEnum = (typeof DatabaseHostScalarFieldEnum)[keyof typeof DatabaseHostScalarFieldEnum]
+
+
+export const ServerDatabaseScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  hostId: 'hostId',
+  databaseName: 'databaseName',
+  databaseUser: 'databaseUser',
+  databasePassword: 'databasePassword',
+  createdAt: 'createdAt'
+} as const
+
+export type ServerDatabaseScalarFieldEnum = (typeof ServerDatabaseScalarFieldEnum)[keyof typeof ServerDatabaseScalarFieldEnum]
+
+
+export const ScheduleScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  name: 'name',
+  cron: 'cron',
+  enabled: 'enabled',
+  lastRunAt: 'lastRunAt',
+  nextRunAt: 'nextRunAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ScheduleScalarFieldEnum = (typeof ScheduleScalarFieldEnum)[keyof typeof ScheduleScalarFieldEnum]
+
+
+export const ScheduleTaskScalarFieldEnum = {
+  id: 'id',
+  scheduleId: 'scheduleId',
+  order: 'order',
+  action: 'action',
+  payload: 'payload'
+} as const
+
+export type ScheduleTaskScalarFieldEnum = (typeof ScheduleTaskScalarFieldEnum)[keyof typeof ScheduleTaskScalarFieldEnum]
 
 
 export const ImagesScalarFieldEnum = {
@@ -1709,7 +2225,20 @@ export const SettingsScalarFieldEnum = {
   behindReverseProxy: 'behindReverseProxy',
   hashApiKeys: 'hashApiKeys',
   airlinkCloudApiKey: 'airlinkCloudApiKey',
-  airlinkCloudBackupEnabled: 'airlinkCloudBackupEnabled'
+  airlinkCloudBackupEnabled: 'airlinkCloudBackupEnabled',
+  smtpHost: 'smtpHost',
+  smtpPort: 'smtpPort',
+  smtpUser: 'smtpUser',
+  smtpPassword: 'smtpPassword',
+  smtpFrom: 'smtpFrom',
+  smtpSecure: 'smtpSecure',
+  s3Enabled: 's3Enabled',
+  s3Endpoint: 's3Endpoint',
+  s3Region: 's3Region',
+  s3Bucket: 's3Bucket',
+  s3AccessKey: 's3AccessKey',
+  s3SecretKey: 's3SecretKey',
+  s3PathStyle: 's3PathStyle'
 } as const
 
 export type SettingsScalarFieldEnum = (typeof SettingsScalarFieldEnum)[keyof typeof SettingsScalarFieldEnum]
@@ -1825,6 +2354,17 @@ export const SftpCredentialScalarFieldEnum = {
 } as const
 
 export type SftpCredentialScalarFieldEnum = (typeof SftpCredentialScalarFieldEnum)[keyof typeof SftpCredentialScalarFieldEnum]
+
+
+export const SubUserScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  userId: 'userId',
+  permissions: 'permissions',
+  createdAt: 'createdAt'
+} as const
+
+export type SubUserScalarFieldEnum = (typeof SubUserScalarFieldEnum)[keyof typeof SubUserScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2042,8 +2582,13 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   users?: Prisma.UsersOmit
+  passwordReset?: Prisma.PasswordResetOmit
   session?: Prisma.SessionOmit
   server?: Prisma.ServerOmit
+  databaseHost?: Prisma.DatabaseHostOmit
+  serverDatabase?: Prisma.ServerDatabaseOmit
+  schedule?: Prisma.ScheduleOmit
+  scheduleTask?: Prisma.ScheduleTaskOmit
   images?: Prisma.ImagesOmit
   node?: Prisma.NodeOmit
   settings?: Prisma.settingsOmit
@@ -2056,6 +2601,7 @@ export type GlobalOmitConfig = {
   addonSetting?: Prisma.AddonSettingOmit
   backup?: Prisma.BackupOmit
   sftpCredential?: Prisma.SftpCredentialOmit
+  subUser?: Prisma.SubUserOmit
 }
 
 /* Types for Logging */

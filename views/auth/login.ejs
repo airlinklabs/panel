@@ -130,6 +130,8 @@
         <% } else if (['invalid_credentials','incorrect_password','user_not_found'].includes(req.query.err)) { %>Incorrect username or password.
         <% } else if (req.query.err === 'database_error') { %>Server error — try again shortly.
         <% } else if (req.query.err === 'account_locked') { %>Account temporarily locked. Try again in <%= req.query.wait || 'a few' %> minute<%= req.query.wait == 1 ? '' : 's' %>.
+        <% } else if (req.query.err === 'reset_email_sent') { %>If that email exists, a password reset link has been sent.
+        <% } else if (req.query.err === 'password_reset') { %>Password updated. Sign in with your new password.
         <% } else { %>Something went wrong. Try again.<% } %>
       </p>
     </div>
@@ -162,6 +164,10 @@
           </span>
           <span class="text-sm text-neutral-500 dark:text-neutral-400">Remember me</span>
         </label>
+
+        <div class="text-right -mt-2">
+          <a href="/forgot-password" class="text-xs text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Forgot password?</a>
+        </div>
 
         <button type="submit" class="auth-submit" id="submitBtn">
           <span class="btn-label">Sign in</span>

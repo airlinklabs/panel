@@ -1,0 +1,92 @@
+<%- include('../../components/header', { title: 'Databases' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="hidden lg:block w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Databases' }
+      ] }) %>
+      <%- include('../../components/ui/page-header', {
+        title: 'Database Hosts',
+        description: 'Manage MySQL hosts used to provision databases for servers.',
+        actions: '<a href="/admin/databases/create"><button type="button" class="al-btn-primary">Add Host</button></a>'
+      }) %>
+
+      <div class="al-page-body">
+
+        <% if (req.query.err == "none") { %>
+          <%- include('../../components/ui/alert', { type: 'success', message: 'Database host created!', detail: 'The host has been saved and is ready to use.' }) %>
+        <% } %>
+        <% if (req.query.err == "missing_fields") { %>
+          <%- include('../../components/ui/alert', { type: 'danger', message: 'Missing fields', detail: 'Name, host, username and password are required.' }) %>
+        <% } %>
+        <% if (req.query.err == "create_failed") { %>
+          <%- include('../../components/ui/alert', { type: 'danger', message: 'Creation failed', detail: 'Could not save the database host. Try again.' }) %>
+        <% } %>
+
+        <div class="overflow-x-auto rounded-xl border" id="hostTable" style="border-color:var(--theme-border);box-shadow:var(--theme-shadow-sm)">
+          <% if (hosts.length === 0) { %>
+            <%- include('../../components/ui/empty-state', {
+              iconName: 'database',
+              title: 'No database hosts yet',
+              description: 'Add a MySQL host to start provisioning databases.',
+              action: '<a href="/admin/databases/create"><button type="button" class="al-btn-primary">Add Host</button></a>'
+            }) %>
+          <% } else { %>
+          <table class="al-table">
+            <thead class="al-table-head">
+              <tr>
+                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.name %></th>
+                <th scope="col" class="al-table-th sm:pl-6">Host</th>
+                <th scope="col" class="al-table-th sm:pl-6">Databases</th>
+                <th scope="col" class="al-table-th sm:pl-6">Created</th>
+                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.actions %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% hosts.forEach(function(host) { %>
+                <tr class="al-table-tr" data-host-id="<%= host.id %>">
+                  <td class="al-table-td sm:pl-6">
+                    <div class="font-medium" style="color:var(--theme-text-strong);"><%= host.name %></div>
+                  </td>
+                  <td class="al-table-td">
+                    <div class="flex items-center gap-2">
+                      <span class="al-dot-online"></span>
+                      <span><%= host.host %>:<%= host.port %></span>
+                    </div>
+                    <div class="mt-1 ml-2 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset text-neutral-600 dark:text-neutral-300 ring-neutral-600/20">
+                      <%= host.username %>
+                    </div>
+                  </td>
+                  <td class="al-table-td"><%= host._count.databases %></td>
+                  <td class="al-table-td"><%= new Date(host.createdAt).toLocaleDateString() %></td>
+                  <td class="al-table-td">
+                    <div class="flex gap-3">
+                      <button onclick="testHost('<%= host.id %>')" type="button" class="al-btn-secondary text-xs">Test</button>
+                      <button onclick="deleteHost('<%= host.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete host">
+                        <%- icon('trash-2', { size: 16 }) %>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-databases.js"></script>
+
+<%- include('../../components/footer') %>

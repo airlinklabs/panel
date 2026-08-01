@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
@@ -20,6 +20,7 @@ export function registerFileDetailRoutes(router: Router): void {
   router.get(
     '/server/:id/files/edit/{*path}',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -125,6 +126,7 @@ export function registerFileDetailRoutes(router: Router): void {
   router.post(
     '/server/:id/files/{*path}',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       let filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
       if (filePath.endsWith('/save')) {
@@ -165,6 +167,7 @@ export function registerFileDetailRoutes(router: Router): void {
   router.post(
     '/server/:id/feature/eula',
     isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const context = await loadAuthenticatedServerContext(req);
       if (sendMissingServerContext(res, context)) {
