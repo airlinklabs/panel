@@ -3,8 +3,10 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
+import rateLimit from 'express-rate-limit';
 import { checkForUpdates, performUpdate } from '../../handlers/updater';
 import { registerPermission } from '../../handlers/permissions';
+import { getClientIp } from '../../utils/ip';
 import fs from 'fs';
 import path from 'path';
 
@@ -16,6 +18,18 @@ registerPermission('airlink.admin.overview.performUpdate');
 interface ErrorMessage {
   message?: string;
 }
+
+// Rate limit for expensive admin routes (file system access, update checks/runs).
+// 100 requests per 15 minutes per IP before a 429.
+const adminOverviewLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Try again later.' },
+  keyGenerator: (req) => getClientIp(req),
+  validate: false,
+});
 
 const adminModule: Module = {
   info: {
@@ -32,6 +46,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/overview',
+      adminOverviewLimiter,
       isAuthenticated(true, 'airlink.admin.overview.main'),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
@@ -105,6 +120,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/check-update',
+      adminOverviewLimiter,
       isAuthenticated(true, 'airlink.admin.overview.checkForUpdates'),
       async (_req: Request, res: Response) => {
         try {
@@ -119,6 +135,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/perform-update',
+      adminOverviewLimiter,
       isAuthenticated(true, 'airlink.admin.overview.performUpdate'),
       async (_req: Request, res: Response) => {
         try {
