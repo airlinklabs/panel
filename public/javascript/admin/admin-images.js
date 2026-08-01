@@ -1,25 +1,51 @@
 function handleRowClick(e, url) { if (!e.target.closest('button,a')) window.location = url; }
 
+let modalReturnFocus = null;
+
+function getFocusableElements(root) {
+  return Array.from(root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+    .filter(el => !el.disabled && el.offsetParent !== null);
+}
+
+function trapModalFocus(e, overlay) {
+  const panel = overlay.querySelector('[role="dialog"]');
+  if (!panel) return;
+  if (e.key === 'Tab') {
+    const focusable = getFocusableElements(panel);
+    if (!focusable.length) { e.preventDefault(); panel.focus(); return; }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+}
+
 function openCreate() {
+  modalReturnFocus = document.activeElement;
   const overlay = document.getElementById('createOverlay');
   overlay.classList.add('open');
   Animate.openModal(overlay, overlay.querySelector('.modal-box'));
+  overlay.querySelector('[role="dialog"]').focus();
 }
 function closeCreate() {
   const overlay = document.getElementById('createOverlay');
   overlay.classList.add('closing');
   const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
   Animate.closeModal(overlay, overlay.querySelector('.modal-box'), done);
+  if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
+  modalReturnFocus = null;
 }
 document.getElementById('createOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeCreate(); });
 
 let _deleteId = null;
 function openDelete(id, name) {
+  modalReturnFocus = document.activeElement;
   _deleteId = id;
   document.getElementById('deleteMsg').textContent = '"' + name + '" will be permanently removed.';
   const overlay = document.getElementById('deleteOverlay');
   overlay.classList.add('open');
   Animate.openModal(overlay, overlay.querySelector('.modal-box'));
+  overlay.querySelector('[role="dialog"]').focus();
 }
 function closeDelete() {
   const overlay = document.getElementById('deleteOverlay');
@@ -27,8 +53,16 @@ function closeDelete() {
   const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
   Animate.closeModal(overlay, overlay.querySelector('.modal-box'), done);
   _deleteId = null;
+  if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
+  modalReturnFocus = null;
 }
 document.getElementById('deleteOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDelete(); });
+document.addEventListener('keydown', function(e) {
+  const openOverlay = document.querySelector('.modal-overlay.open');
+  if (!openOverlay) return;
+  if (e.key === 'Escape') { e.preventDefault(); openOverlay === document.getElementById('createOverlay') ? closeCreate() : closeDelete(); return; }
+  trapModalFocus(e, openOverlay);
+});
 document.getElementById('deleteConfirm').addEventListener('click', async function() {
   if (!_deleteId) return;
   this.textContent = 'Deleting…'; this.disabled = true;

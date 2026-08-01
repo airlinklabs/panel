@@ -24,13 +24,24 @@ function assertSafePassword(value: string): void {
 }
 
 async function connect(host: DatabaseHost): Promise<mysql.Connection> {
-  return mysql.createConnection({
-    host: host.host,
-    port: host.port,
-    user: host.username,
-    password: host.password,
-    connectTimeout: 10_000,
-  });
+  try {
+    return await mysql.createConnection({
+      host: host.host,
+      port: host.port,
+      user: host.username,
+      password: host.password,
+      connectTimeout: 10_000,
+    });
+  } catch (error) {
+    const code = (error as { code?: string })?.code;
+    if (code === 'ECONNREFUSED') {
+      throw new Error(`MariaDB missing or not running on ${host.host}:${host.port} (connection refused)`);
+    }
+    if (code === 'ENOTFOUND') {
+      throw new Error(`MariaDB host not found: ${host.host}`);
+    }
+    throw error instanceof Error ? error : new Error('Failed to connect to the database host');
+  }
 }
 
 export async function provisionDatabase(host: DatabaseHost, serverId: string): Promise<DatabaseCredentials> {

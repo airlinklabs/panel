@@ -35,129 +35,47 @@
           <div class="mt-8">
             <h2 class="text-lg font-semibold leading-6 text-neutral-800 dark:text-white">Available Endpoints</h2>
 
-            <div class="mt-4 space-y-6">
-              <!-- Users Endpoints -->
-              <div>
-                <h3 class="text-md font-medium text-neutral-800 dark:text-white">Users</h3>
-                <div class="mt-2 space-y-4">
-                  <div class="rounded-md overflow-hidden" style="border:1px solid var(--theme-border)">
-                    <div class="px-4 py-2 flex items-center" style="background:var(--theme-bg-secondary)">
-                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
-                      <code class="text-sm font-mono">/api/v1/users</code>
-                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.users.read</span>
-                    </div>
-                    <div class="px-4 py-3">
-                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get a list of all users.</p>
-                    </div>
-                  </div>
-
-                  <div class="rounded-md overflow-hidden" style="border:1px solid var(--theme-border)">
-                    <div class="px-4 py-2 flex items-center" style="background:var(--theme-bg-secondary)">
-                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
-                      <code class="text-sm font-mono">/api/v1/users/:id</code>
-                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.users.read</span>
-                    </div>
-                    <div class="px-4 py-3">
-                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get details for a specific user.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Servers Endpoints -->
-              <div>
-                <h3 class="text-md font-medium text-neutral-800 dark:text-white">Servers</h3>
-                <div class="mt-2 space-y-4">
-                  <div class="rounded-md overflow-hidden" style="border:1px solid var(--theme-border)">
-                    <div class="px-4 py-2 flex items-center" style="background:var(--theme-bg-secondary)">
-                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
-                      <code class="text-sm font-mono">/api/v1/servers</code>
-                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.servers.read</span>
-                    </div>
-                    <div class="px-4 py-3">
-                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get a list of all servers.</p>
-                    </div>
-                  </div>
-
-                  <div class="rounded-md overflow-hidden" style="border:1px solid var(--theme-border)">
-                    <div class="px-4 py-2 flex items-center" style="background:var(--theme-bg-secondary)">
-                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
-                      <code class="text-sm font-mono">/api/v1/servers/:id</code>
-                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.servers.read</span>
-                    </div>
-                    <div class="px-4 py-3">
-                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get details for a specific server.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Nodes Endpoints -->
-              <div>
-                <h3 class="text-md font-medium text-neutral-800 dark:text-white">Nodes</h3>
-                <div class="mt-2 space-y-4">
-                  <div class="rounded-md overflow-hidden" style="border:1px solid var(--theme-border)">
-                    <div class="px-4 py-2 flex items-center" style="background:var(--theme-bg-secondary)">
-                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
-                      <code class="text-sm font-mono">/api/v1/nodes</code>
-                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.nodes.read</span>
-                    </div>
-                    <div class="px-4 py-3">
-                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get a list of all nodes.</p>
-                    </div>
-                  </div>
-
-                  <div class="rounded-md overflow-hidden" style="border:1px solid var(--theme-border)">
-                    <div class="px-4 py-2 flex items-center" style="background:var(--theme-bg-secondary)">
-                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
-                      <code class="text-sm font-mono">/api/v1/nodes/:id</code>
-                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.nodes.read</span>
-                    </div>
-                    <div class="px-4 py-3">
-                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get details for a specific node.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Settings Endpoints -->
-              <div>
-                <h3 class="text-md font-medium text-neutral-800 dark:text-white">Settings</h3>
-                <div class="mt-2 space-y-4">
-                  <div class="rounded-md overflow-hidden" style="border:1px solid var(--theme-border)">
-                    <div class="px-4 py-2 flex items-center" style="background:var(--theme-bg-secondary)">
-                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
-                      <code class="text-sm font-mono">/api/v1/settings</code>
-                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.settings.read</span>
-                    </div>
-                    <div class="px-4 py-3">
-                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get the panel settings.</p>
-                    </div>
-                  </div>
-
-                  <div class="rounded-md overflow-hidden" style="border:1px solid var(--theme-border)">
-                    <div class="px-4 py-2 flex items-center" style="background:var(--theme-bg-secondary)">
-                      <span class="inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30 mr-2">PATCH</span>
-                      <code class="text-sm font-mono">/api/v1/settings</code>
-                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.settings.update</span>
-                    </div>
-                    <div class="px-4 py-3">
-                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Update the panel settings.</p>
-                      <div class="mt-2">
-                        <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Request Body:</p>
-                        <pre class="mt-1 bg-neutral-800 text-neutral-200 p-2 rounded-md overflow-x-auto text-xs"><code>{
-  "title": "My Panel",         // Optional
-  "description": "My custom panel", // Optional
-  "logo": "/path/to/logo.png",  // Optional
-  "favicon": "/path/to/favicon.ico", // Optional
-  "theme": "default",         // Optional
-  "language": "en"            // Optional
-}</code></pre>
+            <div class="mt-4 space-y-8">
+              <% apiEndpoints.forEach(category => { %>
+                <div>
+                  <h3 class="text-md font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700 pb-2 mb-4"><%= category.category %> Endpoints</h3>
+                  <div class="space-y-6">
+                    <% category.endpoints.forEach(endpoint => { %>
+                      <div class="rounded-md overflow-hidden" style="border:1px solid var(--theme-border)">
+                        <div class="px-4 py-2 flex items-center" style="background:var(--theme-bg-secondary)">
+                          <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset mr-2
+                            <% if (endpoint.method === 'GET') { %>
+                              style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:var(--theme-success)"
+                            <% } else if (endpoint.method === 'POST') { %>
+                              style="background:var(--theme-accent-subtle);color:var(--theme-accent);--tw-ring-color:var(--theme-accent)"
+                            <% } else if (endpoint.method === 'PATCH') { %>
+                              style="background:var(--theme-warning-bg);color:var(--theme-warning);--tw-ring-color:var(--theme-warning)"
+                            <% } else if (endpoint.method === 'DELETE') { %>
+                              style="background:var(--theme-danger-bg);color:var(--theme-danger);--tw-ring-color:var(--theme-danger)"
+                            <% } %>"><%= endpoint.method %></span>
+                          <code class="text-sm font-mono"><%= endpoint.path %></code>
+                          <span class="ml-auto text-xs text-neutral-500">Permission: <%= endpoint.permission %></span>
+                        </div>
+                        <div class="px-4 py-3">
+                          <p class="text-sm text-neutral-600 dark:text-neutral-300"><%= endpoint.description %></p>
+                          <% if (endpoint.requestExample) { %>
+                            <div class="mt-3">
+                              <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Request Body:</p>
+                              <pre class="mt-1 bg-neutral-800 text-neutral-200 p-2 rounded-md overflow-x-auto text-xs"><code><%= endpoint.requestExample %></code></pre>
+                            </div>
+                          <% } %>
+                          <% if (endpoint.responseExample) { %>
+                            <div class="mt-3">
+                              <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Response:</p>
+                              <pre class="mt-1 bg-neutral-800 text-neutral-200 p-2 rounded-md overflow-x-auto text-xs"><code><%= endpoint.responseExample %></code></pre>
+                            </div>
+                          <% } %>
+                        </div>
                       </div>
-                    </div>
+                    <% }); %>
                   </div>
                 </div>
-              </div>
+              <% }); %>
             </div>
           </div>
 

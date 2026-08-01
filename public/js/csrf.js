@@ -18,11 +18,16 @@
       options = options || {};
       options.headers = options.headers || {};
       
-      // Add CSRF token for non-GET methods
+      // Add CSRF token for non-GET methods, but never duplicate a header
+      // the page already set — Express joins duplicate headers with ", "
+      // and the joined value would fail token validation.
       const method = options.method?.toUpperCase() || 'GET';
       if (method !== 'GET') {
         const token = getCsrfToken();
-        if (token) {
+        const hasToken = Object.keys(options.headers).some(
+          h => h.toLowerCase() === 'csrf-token'
+        );
+        if (token && !hasToken) {
           options.headers['CSRF-Token'] = token;
         }
       }

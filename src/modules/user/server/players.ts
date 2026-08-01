@@ -12,6 +12,131 @@ import {
 } from './shared';
 
 export function registerPlayersRoutes(router: Router): void {
+  async function fetchPlayerData(server: any, primaryPort: string) {
+    let players: Array<{ name: string; uuid: string }> = [];
+    let serverInfo = {
+      maxPlayers: 0,
+      onlinePlayers: 0,
+      version: 'Unknown',
+    };
+    let hadFetchError = false;
+    let serverIsOnline = false;
+
+    try {
+      logger.info(
+        `Fetching players for server ${server.UUID} on port ${primaryPort}`,
+      );
+
+      const playersResponse = await daemonRequest<{
+        online?: boolean;
+        version?: string;
+        players?: Array<{ name: string; uuid: string }>;
+        maxPlayers?: number;
+        onlinePlayers?: number;
+      }>({
+        method: 'GET',
+        path: '/minecraft/players',
+        nodeAddress: server.node.address,
+        nodePort: server.node.port,
+        nodeKey: server.node.key,
+        params: {
+          id: server.UUID,
+          host: server.node.address,
+          port: parseInt(primaryPort, 10),
+        },
+        timeout: 8000,
+      });
+
+      if (playersResponse.data) {
+        serverIsOnline =
+          typeof playersResponse.data.online === 'boolean'
+            ? playersResponse.data.online
+            : !!playersResponse.data.version;
+
+        if (Array.isArray(playersResponse.data.players)) {
+          players = playersResponse.data.players;
+        }
+
+        serverInfo = {
+          maxPlayers: playersResponse.data.maxPlayers || 0,
+          onlinePlayers: playersResponse.data.onlinePlayers || 0,
+          version: playersResponse.data.version || 'Unknown',
+        };
+
+        logger.info(`Successfully fetched server data for ${server.UUID}`);
+        logger.info(
+          `Server version: ${serverInfo.version}, Players: ${players.length} (${serverInfo.onlinePlayers}/${serverInfo.maxPlayers})`,
+        );
+        logger.info(
+          `Server online status: ${serverIsOnline ? 'Online' : 'Offline'}`,
+        );
+      } else {
+        logger.warn(`No valid data returned for server ${server.UUID}`);
+        hadFetchError = true;
+      }
+    } catch (error: any) {
+      if (
+        error?.code !== 'ECONNREFUSED' &&
+        error?.code !== 'ETIMEDOUT' &&
+        error?.code !== 'ENOTFOUND'
+      ) {
+        logger.error(
+          `Error fetching players from daemon for server ${server.UUID}:`,
+          error,
+        );
+      }
+      hadFetchError = true;
+    }
+
+    return { players, serverInfo, serverIsOnline, hadFetchError };
+  }
+
+  router.get(
+    '/server/:id/players/data',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
+    async (req: Request, res: Response) => {
+      const serverId = getParamAsString(req.params?.id);
+
+      try {
+        const server = await prisma.server.findUnique({
+          where: { UUID: serverId },
+          include: { node: true, image: true },
+        });
+
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        const primaryPort = server.Ports
+          ? JSON.parse(server.Ports)
+            .filter((Port: any) => Port.primary)
+            .map((Port: any) => Port.Port.split(':')[1])
+            .pop()
+          : '';
+
+        if (!primaryPort) {
+          res.json({ serverInfo: null, players: [], serverIsOnline: false, error: 'No primary port found' });
+          return;
+        }
+
+        const { players, serverInfo, serverIsOnline, hadFetchError } =
+          await fetchPlayerData(server, primaryPort);
+
+        res.json({
+          players,
+          serverInfo,
+          serverIsOnline,
+          error: hadFetchError && !serverIsOnline ? 'unreachable' : null,
+        });
+      } catch (error) {
+        logger.error('Error fetching players data:', error);
+        res.status(500).json({ error: 'Failed to get players data' });
+      }
+    },
+  );
+
   router.get(
     '/server/:id/players',
     isAuthenticatedForServer('id'),
@@ -59,80 +184,8 @@ export function registerPlayersRoutes(router: Router): void {
           });
         }
 
-        let players: Array<{ name: string; uuid: string }> = [];
-        let serverInfo = {
-          maxPlayers: 0,
-          onlinePlayers: 0,
-          version: 'Unknown',
-        };
-        let hadFetchError = false;
-        let serverIsOnline = false;
-
-        try {
-          logger.info(
-            `Fetching players for server ${serverId} on port ${primaryPort}`,
-          );
-
-          const playersResponse = await daemonRequest<{
-            online?: boolean;
-            version?: string;
-            players?: Array<{ name: string; uuid: string }>;
-            maxPlayers?: number;
-            onlinePlayers?: number;
-          }>({
-            method: 'GET',
-            path: '/minecraft/players',
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            params: {
-              id: server.UUID,
-              host: server.node.address,
-              port: parseInt(primaryPort, 10),
-            },
-            timeout: 8000,
-          });
-
-          if (playersResponse.data) {
-            serverIsOnline =
-              typeof playersResponse.data.online === 'boolean'
-                ? playersResponse.data.online
-                : !!playersResponse.data.version;
-
-            if (Array.isArray(playersResponse.data.players)) {
-              players = playersResponse.data.players;
-            }
-
-            serverInfo = {
-              maxPlayers: playersResponse.data.maxPlayers || 0,
-              onlinePlayers: playersResponse.data.onlinePlayers || 0,
-              version: playersResponse.data.version || 'Unknown',
-            };
-
-            logger.info(`Successfully fetched server data for ${serverId}`);
-            logger.info(
-              `Server version: ${serverInfo.version}, Players: ${players.length} (${serverInfo.onlinePlayers}/${serverInfo.maxPlayers})`,
-            );
-            logger.info(
-              `Server online status: ${serverIsOnline ? 'Online' : 'Offline'}`,
-            );
-          } else {
-            logger.warn(`No valid data returned for server ${serverId}`);
-            hadFetchError = true;
-          }
-        } catch (error: any) {
-          if (
-            error?.code !== 'ECONNREFUSED' &&
-            error?.code !== 'ETIMEDOUT' &&
-            error?.code !== 'ENOTFOUND'
-          ) {
-            logger.error(
-              `Error fetching players from daemon for server ${serverId}:`,
-              error,
-            );
-          }
-          hadFetchError = true;
-        }
+        const { players, serverInfo, serverIsOnline, hadFetchError } =
+          await fetchPlayerData(server, primaryPort);
 
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         const hasError = hadFetchError && !serverIsOnline;

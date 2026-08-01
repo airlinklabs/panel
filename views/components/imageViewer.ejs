@@ -1,6 +1,6 @@
 <!-- Image Viewer Modal Component -->
 <div id="imageViewerModal" class="al-modal-overlay fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
-    <div id="imageViewerPanel" class="al-modal-panel bg-white dark:bg-neutral-800 rounded-xl p-4 max-w-4xl w-full max-h-[90vh] flex flex-col">
+    <div id="imageViewerPanel" class="al-modal-panel bg-white dark:bg-neutral-800 rounded-xl p-4 max-w-4xl w-full max-h-[90vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="imageViewerTitle" tabindex="-1">
         <div class="flex justify-between items-center mb-2">
             <h2 id="imageViewerTitle" class="text-xl font-medium text-neutral-800 dark:text-white truncate"></h2>
             <button onclick="closeImageViewer()" class="text-neutral-500 hover:text-neutral-700 dark:hover:text-white">
@@ -41,6 +41,7 @@
             let currentImagePath = '';
             let currentFileName = '';
             let currentServerUUID = '';
+            let modalReturnFocus = null;
 
             const showImageViewer = (fileName, filePath, fileSize, serverUUID) => {
                 currentImagePath = filePath;
@@ -51,11 +52,13 @@
                 sizeInfo.textContent = fileSize;
                 image.src = `/server/${serverUUID}/files/download/${encodeURIComponent(filePath)}`;
 
+                modalReturnFocus = document.activeElement;
                 modal.classList.remove('opacity-0', 'pointer-events-none');
                 if (window.Animate) Animate.openModal(modal, panel);
                 else { modal.classList.add('open'); panel.classList.add('open'); }
 
-                document.addEventListener('keydown', handleEscapeKey);
+                panel.focus();
+                document.addEventListener('keydown', handleKeyDown);
             };
 
             const closeImageViewer = () => {
@@ -64,16 +67,28 @@
                 };
                 if (window.Animate) Animate.closeModal(modal, panel, done);
                 else { modal.classList.remove('open'); panel.classList.remove('open'); done(); }
-                document.removeEventListener('keydown', handleEscapeKey);
+                document.removeEventListener('keydown', handleKeyDown);
+                if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
+                modalReturnFocus = null;
                 setTimeout(() => {
                     image.src = '';
                 }, 300);
             };
 
-            const handleEscapeKey = (event) => {
+            const handleKeyDown = (event) => {
                 if (event.key === 'Escape') {
+                    event.preventDefault();
                     closeImageViewer();
+                    return;
                 }
+                if (event.key !== 'Tab') return;
+                const focusable = Array.from(panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+                    .filter(el => !el.disabled && el.offsetParent !== null);
+                if (!focusable.length) { event.preventDefault(); panel.focus(); return; }
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
             };
 
             const downloadViewedImage = () => {

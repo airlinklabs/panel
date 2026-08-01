@@ -1,5 +1,20 @@
 <%- include('../../components/header', { title: 'Subusers' }) %>
 
+<%
+  const permMeta = {
+    console: { icon: 'terminal', desc: 'View console and send commands' },
+    files: { icon: 'folder', desc: 'View, upload and edit files' },
+    'files.sftp': { icon: 'key', desc: 'Generate SFTP credentials' },
+    startup: { icon: 'play', desc: 'View and edit startup variables' },
+    backups: { icon: 'archive', desc: 'View and create backups' },
+    settings: { icon: 'settings', desc: 'View server settings (read-only)' },
+  };
+  const permGroups = [
+    { title: 'Server access', perms: ['console', 'files', 'files.sftp'] },
+    { title: 'Server management', perms: ['startup', 'backups', 'settings'] },
+  ];
+%>
+
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-full">
     <div class="hidden lg:block w-60 h-full">
@@ -76,9 +91,7 @@
                     <tr class="al-table-tr transition-colors" style="--i:<%= subIdx++ %>" data-subuser-id="<%= subUser.id %>">
                       <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center gap-3">
-                          <img loading="lazy" class="h-8 w-8 rounded-full shrink-0"
-                            src="<%= subUser.user.avatar ? subUser.user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(subUser.user.username || subUser.user.email) %>"
-                            alt="<%= subUser.user.username || subUser.user.email %>">
+                          <span class="flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%= (subUser.user.username || subUser.user.email || '?').slice(0, 1).toUpperCase() %></span>
                           <div class="min-w-0">
                             <div class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= subUser.user.username || 'Unknown' %></div>
                             <div class="text-xs truncate max-w-[200px]" style="color:var(--theme-text-muted)"><%= subUser.user.email %></div>
@@ -87,11 +100,15 @@
                       </td>
                       <td class="px-6 py-4">
                         <div class="flex flex-wrap gap-1.5 max-w-xs">
-                          <% subUser.permissions.forEach(perm => { %>
+                          <% const shownPerms = subUser.permissions.slice(0, 4); const hiddenPerms = subUser.permissions.length - shownPerms.length; %>
+                          <% shownPerms.forEach(perm => { %>
                             <% if (permissionLabels[perm]) { %>
-                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%= permissionLabels[perm] %></span>
+                            <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%- icon(permMeta[perm] ? permMeta[perm].icon : 'check', { size: 10 }) %><%= permissionLabels[perm] %></span>
                             <% } %>
                           <% }) %>
+                          <% if (hiddenPerms > 0) { %>
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">+<%= hiddenPerms %> more</span>
+                          <% } %>
                           <% if (subUser.permissions.length === 0) { %>
                             <span class="text-xs italic" style="color:var(--theme-text-placeholder)">No permissions</span>
                           <% } %>
@@ -144,7 +161,7 @@
 
 <!-- Add Subuser Modal -->
 <div id="addSubUserModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
-  <div class="w-full max-w-md rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+  <div class="w-full max-w-lg rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Add subuser</h3>
       <button onclick="closeModal('addSubUserModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
@@ -155,14 +172,29 @@
         <input id="addSubUserEmail" type="email" class="al-input w-full" placeholder="friend@example.com" autocomplete="off">
       </div>
       <div>
-        <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Permissions</label>
-        <div class="grid grid-cols-2 gap-2">
-          <% permissionOptions.forEach(perm => { %>
-          <label class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs cursor-pointer" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
-            <input type="checkbox" class="add-perm" value="<%= perm %>" checked>
-            <span style="color:var(--theme-text)"><%= permissionLabels[perm] %></span>
-          </label>
-          <% }) %>
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-xs font-medium" style="color:var(--theme-text-muted)">Permissions</label>
+          <div class="flex items-center gap-3 text-[11px] font-medium">
+            <button type="button" class="perm-select-all" data-modal="addSubUserModal" style="color:var(--theme-accent)">Select all</button>
+            <button type="button" class="perm-select-none" data-modal="addSubUserModal" style="color:var(--theme-text-muted)">Clear</button>
+          </div>
+        </div>
+        <div class="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
+          <% permGroups.forEach(group => { %>
+          <div>
+            <p class="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style="color:var(--theme-text-muted)"><%= group.title %></p>
+            <div class="space-y-1.5">
+              <% group.perms.forEach(perm => { %>
+              <label class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer transition hover:opacity-90" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+                <input type="checkbox" class="add-perm" value="<%= perm %>" checked>
+                <%- icon(permMeta[perm].icon, { size: 14, class: 'shrink-0' }) %>
+                <span class="shrink-0 font-medium" style="color:var(--theme-text-strong)"><%= permissionLabels[perm] %></span>
+                <span class="ml-auto truncate" style="color:var(--theme-text-muted)"><%= permMeta[perm].desc %></span>
+              </label>
+              <% }); %>
+            </div>
+          </div>
+          <% }); %>
         </div>
       </div>
       <div class="flex gap-2 pt-1">
@@ -175,7 +207,7 @@
 
 <!-- Edit Subuser Modal -->
 <div id="editSubUserModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)">
-  <div class="w-full max-w-md rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+  <div class="w-full max-w-lg rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex items-center justify-between mb-1">
       <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Edit permissions</h3>
       <button onclick="closeModal('editSubUserModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
@@ -183,14 +215,29 @@
     <p id="editSubUserName" class="text-xs mb-4" style="color:var(--theme-text-muted)"></p>
     <div class="space-y-4">
       <div>
-        <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Permissions</label>
-        <div class="grid grid-cols-2 gap-2">
-          <% permissionOptions.forEach(perm => { %>
-          <label class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs cursor-pointer" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
-            <input type="checkbox" class="edit-perm" value="<%= perm %>">
-            <span style="color:var(--theme-text)"><%= permissionLabels[perm] %></span>
-          </label>
-          <% }) %>
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-xs font-medium" style="color:var(--theme-text-muted)">Permissions</label>
+          <div class="flex items-center gap-3 text-[11px] font-medium">
+            <button type="button" class="perm-select-all" data-modal="editSubUserModal" style="color:var(--theme-accent)">Select all</button>
+            <button type="button" class="perm-select-none" data-modal="editSubUserModal" style="color:var(--theme-text-muted)">Clear</button>
+          </div>
+        </div>
+        <div class="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
+          <% permGroups.forEach(group => { %>
+          <div>
+            <p class="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style="color:var(--theme-text-muted)"><%= group.title %></p>
+            <div class="space-y-1.5">
+              <% group.perms.forEach(perm => { %>
+              <label class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer transition hover:opacity-90" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+                <input type="checkbox" class="edit-perm" value="<%= perm %>">
+                <%- icon(permMeta[perm].icon, { size: 14, class: 'shrink-0' }) %>
+                <span class="shrink-0 font-medium" style="color:var(--theme-text-strong)"><%= permissionLabels[perm] %></span>
+                <span class="ml-auto truncate" style="color:var(--theme-text-muted)"><%= permMeta[perm].desc %></span>
+              </label>
+              <% }); %>
+            </div>
+          </div>
+          <% }); %>
         </div>
       </div>
       <div class="flex gap-2 pt-1">
@@ -213,6 +260,15 @@ const { showToast } = typeof createToastSystem === 'function' ? createToastSyste
 function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 window.closeModal = closeModal;
+
+document.querySelectorAll('.perm-select-all, .perm-select-none').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const modal = document.getElementById(btn.dataset.modal);
+    if (!modal) return;
+    const selectAll = btn.classList.contains('perm-select-all');
+    modal.querySelectorAll('.add-perm, .edit-perm').forEach(cb => cb.checked = selectAll);
+  });
+});
 
 window.openAddSubUserModal = () => {
   document.getElementById('addSubUserEmail').value = '';

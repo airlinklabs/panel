@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 import validator from 'validator';
 import crypto from 'crypto';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { apiEndpoints } from './apiDocs';
 
 function paginate<T>(items: T[], page: number, perPage: number) {
   const total = items.length;
@@ -78,7 +79,8 @@ const coreModule: Module = {
         res.render('api/documentation', {
           req,
           user: req.session.user,
-          settings
+          settings,
+          apiEndpoints,
         });
       } catch (error) {
         logger.error('Error rendering API documentation:', error);

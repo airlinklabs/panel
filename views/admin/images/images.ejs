@@ -49,7 +49,7 @@
           <p class="al-page-desc">Manage server images installed on this panel</p>
         </div>
         <div class="flex gap-2 shrink-0">
-          <button id="uploadBtn" type="button" class="al-btn-secondary">Upload JSON</button>
+          <button id="uploadBtn" type="button" class="al-btn-secondary"><%= req.translations.uploadJson || 'Upload JSON' %></button>
           <button onclick="openCreate()" type="button" class="al-btn-secondary">New Image</button>
           <a href="/admin/images/store" class="al-btn-secondary">Browse Store</a>
         </div>
@@ -104,7 +104,7 @@
             <% }); %>
           </tbody>
         </table>
-        <div id="noResults" class="hidden py-10 text-center text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800/20">No images match your search.</div>
+        <div id="noResults" class="hidden py-10 text-center text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800/20"><%= req.translations.noImagesMatch || 'No images match your search.' %></div>
       </div>
       <% } %>
       </div>
@@ -114,11 +114,11 @@
 
 <!-- Create modal -->
 <div class="modal-overlay" id="createOverlay">
-  <div class="modal-box">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="createModalTitle" tabindex="-1">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5">
       <div>
-        <p class="text-sm font-semibold text-neutral-800 dark:text-white">New Image</p>
-        <p class="text-xs text-neutral-500 mt-0.5">Configure Docker images and variables after creation.</p>
+        <p id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.newImageTitle || 'New Image' %></p>
+        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.newImageDesc || 'Configure Docker images and variables after creation.' %></p>
       </div>
       <button onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
@@ -134,7 +134,7 @@
       </div>
       <div class="flex gap-2 pt-1">
         <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
-        <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 text-sm font-medium shadow-lg transition">Create & Edit</button>
+        <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 text-sm font-medium shadow-lg transition"><%= req.translations.createAndEdit || 'Create & Edit' %></button>
       </div>
     </form>
   </div>
@@ -142,9 +142,9 @@
 
 <!-- Delete modal -->
 <div class="modal-overlay" id="deleteOverlay">
-  <div class="modal-box" style="max-width:380px;">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" tabindex="-1" style="max-width:380px;">
     <div class="p-5">
-      <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Delete image?</p>
+      <p id="deleteModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1"><%= req.translations.deleteImageTitle || 'Delete image?' %></p>
       <p id="deleteMsg" class="text-xs text-neutral-500 mb-5"></p>
       <div class="flex gap-2">
         <button onclick="closeDelete()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>

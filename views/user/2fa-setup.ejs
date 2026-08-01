@@ -23,26 +23,31 @@
         </div>
       </div>
 
-      <div class="al-page-body space-y-4">
-        <div class="al-card p-6 max-w-xl">
-          <ol class="flex items-center gap-2 text-xs font-medium mb-6">
-            <li class="flex items-center gap-2 text-emerald-500">
-              <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">1</span>
+      <div class="al-page-body">
+        <div class="al-card p-6 sm:p-8 max-w-xl mx-auto">
+          <ol class="flex items-center gap-2 text-xs font-medium mb-8">
+            <li class="flex items-center gap-2" style="color:var(--theme-accent)">
+              <span class="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold" style="background:var(--theme-accent);color:var(--theme-accent-text)">1</span>
               Scan QR code
             </li>
-            <li class="h-px flex-1 bg-neutral-200 dark:bg-white/10"></li>
+            <li class="h-px flex-1" style="background:var(--theme-border)"></li>
             <li class="flex items-center gap-2" style="color:var(--theme-text-muted)">
-              <span class="flex h-5 w-5 items-center justify-center rounded-full bg-neutral-200 dark:bg-white/10">2</span>
+              <span class="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold border" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted)">2</span>
               Enter code
             </li>
           </ol>
 
-          <div class="flex flex-col items-center mb-6">
+          <div class="flex flex-col items-center mb-7">
             <div class="rounded-2xl border p-4 bg-white" style="border-color:var(--theme-border)">
               <img src="<%= qrDataUrl %>" alt="QR code" class="h-48 w-48" width="220" height="220">
             </div>
-            <p class="text-sm mt-4 mb-1" style="color:var(--theme-text-muted)">Can't scan? Enter this key manually in your authenticator app:</p>
-            <code class="select-all rounded-lg bg-neutral-100 dark:bg-white/5 px-3 py-1.5 text-sm font-mono" style="color:var(--theme-text-strong)"><%= secretBase32 %></code>
+            <p class="text-sm mt-4 mb-2" style="color:var(--theme-text-muted)">Can't scan? Enter this key manually in your authenticator app:</p>
+            <div class="flex items-center gap-2 w-full max-w-xs">
+              <code class="select-all flex-1 truncate rounded-lg px-3 py-2 text-sm font-mono text-center" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><%= secretBase32 %></code>
+              <button type="button" id="copySecret" class="al-btn-ghost shrink-0" aria-label="Copy secret key">
+                <%- icon('copy', { size: 14 }) %>
+              </button>
+            </div>
           </div>
 
           <form id="enable2faForm" novalidate>
@@ -55,9 +60,12 @@
             <p id="feedback" class="text-sm mt-2 hidden"></p>
           </form>
 
-          <div class="mt-6 pt-4 text-xs" style="border-top:1px solid var(--theme-border); color:var(--theme-text-muted)">
-            <p>Once enabled, you will be asked for a code from your authenticator app every time you sign in.</p>
-            <p class="mt-1">Supported apps: Google Authenticator, Authy, 1Password, Bitwarden and other TOTP-compatible apps.</p>
+          <div class="mt-7 pt-4 text-xs" style="border-top:1px solid var(--theme-border); color:var(--theme-text-muted)">
+            <p class="flex items-center gap-1.5">
+              <%- icon('shield-check', { class: 'w-3.5 h-3.5 shrink-0' }) %>
+              Once enabled, you will be asked for a code from your authenticator app every time you sign in.
+            </p>
+            <p class="mt-1.5">Supported apps: Google Authenticator, Authy, 1Password, Bitwarden and other TOTP-compatible apps.</p>
           </div>
         </div>
       </div>
@@ -75,6 +83,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('enableBtn');
   const feedback = document.getElementById('feedback');
   const tokenInput = document.getElementById('totpToken');
+  const copySecretBtn = document.getElementById('copySecret');
+
+  copySecretBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText('<%= secretBase32 %>').then(
+      () => showToast('Secret key copied to clipboard.', 'success'),
+      () => showToast('Could not copy secret key.', 'error'),
+    );
+  });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

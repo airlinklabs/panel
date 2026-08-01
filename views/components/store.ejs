@@ -276,8 +276,8 @@
     <div class="flex-1 overflow-y-auto pt-16">
       <div class="px-8 pt-6 pb-0 flex items-center justify-between">
         <div>
-          <h1 class="text-base font-medium text-neutral-800 dark:text-white">Addons</h1>
-          <p class="mt-0.5 text-sm text-neutral-500">Manage installed addons and browse the store</p>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.addonsTitle || 'Addons' %></h1>
+          <p class="mt-0.5 text-sm text-neutral-500"><%= req.translations.addonsDesc || 'Manage installed addons and browse the store' %></p>
         </div>
       </div>
 
@@ -287,7 +287,7 @@
           <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">
             Installed <span class="ml-1 text-xs text-neutral-700"><%= addons ? addons.length : 0 %></span>
           </a>
-          <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Store</a>
+          <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px"><%= req.translations.storeTab || 'Store' %></a>
         </div>
 
         <!-- Search + filters row -->
@@ -309,8 +309,8 @@
         <!-- Error -->
         <div id="storeError" class="hidden py-16 text-center">
           <%- icon('triangle-alert', { class: 'w-9 h-9 text-neutral-800 mx-auto mb-3', strokeWidth: 1 }) %>
-          <p id="storeErrorMsg" class="text-sm text-neutral-600">Failed to load addon store.</p>
-          <button onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Retry</button>
+          <p id="storeErrorMsg" class="text-sm text-neutral-600"><%= req.translations.failedToLoadStore || 'Failed to load addon store.' %></p>
+          <button onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline"><%= req.translations.retryLoad || 'Retry' %></button>
         </div>
 
         <!-- Grid -->
@@ -318,8 +318,8 @@
 
         <!-- Empty -->
         <div id="storeEmpty" class="hidden py-16 text-center">
-          <p class="text-sm text-neutral-600">No addons match your search.</p>
-          <button id="clearSearch" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Clear search</button>
+          <p class="text-sm text-neutral-600"><%= req.translations.noAddonsMatch || 'No addons match your search.' %></p>
+          <button id="clearSearch" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline"><%= req.translations.clearSearch || 'Clear search' %></button>
         </div>
       </div>
     </div>
@@ -360,25 +360,25 @@
     </div>
 
     <!-- Tabs -->
-    <div class="m-tabs">
-      <button class="m-tab on" data-tab="overview">Overview</button>
-      <button class="m-tab" data-tab="install">Installation</button>
-      <button class="m-tab" data-tab="reviews">Reviews</button>
+    <div class="m-tabs" role="tablist">
+      <button id="m-tab-overview" role="tab" aria-selected="true" tabindex="0"  aria-controls="m-pane-overview" class="m-tab on" data-tab="overview"><%= req.translations.overviewTab || 'Overview' %></button>
+      <button id="m-tab-install"  role="tab" aria-selected="false" tabindex="-1" aria-controls="m-pane-install" class="m-tab" data-tab="install"><%= req.translations.installationTab || 'Installation' %></button>
+      <button id="m-tab-reviews"  role="tab" aria-selected="false" tabindex="-1" aria-controls="m-pane-reviews" class="m-tab" data-tab="reviews"><%= req.translations.reviewsTab || 'Reviews' %></button>
     </div>
 
     <!-- Body -->
     <div class="m-body">
 
-      <div class="m-pane on" id="m-pane-overview">
+      <div class="m-pane on" id="m-pane-overview" role="tabpanel" aria-labelledby="m-tab-overview">
         <p id="mDesc" class="text-sm text-neutral-500 leading-relaxed mb-4"></p>
         <div id="mFeatures"></div>
       </div>
 
-      <div class="m-pane" id="m-pane-install">
+      <div class="m-pane" id="m-pane-install" role="tabpanel" aria-labelledby="m-tab-install">
         <!-- Live progress — only visible while installing -->
         <div id="mProgress" class="m-progress" style="display:none;">
           <div class="m-prog-top">
-            <span class="m-prog-label" id="mProgLabel">Installing...</span>
+            <span class="m-prog-label" id="mProgLabel"><%= req.translations.installing || 'Installing...' %></span>
             <span class="m-prog-pct" id="mProgPct">0%</span>
           </div>
           <div class="m-prog-track"><div class="m-prog-fill" id="mProgBar"></div></div>
@@ -388,8 +388,8 @@
         <div id="mSteps"></div>
       </div>
 
-      <div class="m-pane" id="m-pane-reviews">
-        <p class="text-xs text-neutral-700 mb-4 leading-relaxed">Reviews are powered by GitHub Discussions on the addons repository. Sign in with GitHub to leave a comment.</p>
+      <div class="m-pane" id="m-pane-reviews" role="tabpanel" aria-labelledby="m-tab-reviews">
+        <p class="text-xs text-neutral-700 mb-4 leading-relaxed"><%= req.translations.reviewsPoweredBy || 'Reviews are powered by GitHub Discussions on the addons repository. Sign in with GitHub to leave a comment.' %></p>
         <div id="mGiscus"></div>
       </div>
 
@@ -405,6 +405,7 @@
 <script nonce="<%- nonce %>">
 (function () {
   const pd = document.getElementById('page-data').dataset;
+  const tI18n = <%- JSON.stringify(req.translations) %>;
   const INSTALLED = new Set(JSON.parse(pd.installedSlugs || '[]'));
   const infoIconHtml = pd.infoIcon;
   let allAddons = [];
@@ -475,7 +476,7 @@
       b.dataset.tag = tag;
       b.textContent = label;
       b.className = 's-tag cursor-pointer transition';
-      if (active) b.style.cssText = 'background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.14);color:#d4d4d4;';
+      if (active) b.classList.add('on');
       wrap.appendChild(b);
     };
 
@@ -486,8 +487,8 @@
       const btn = e.target.closest('[data-tag]');
       if (!btn) return;
       activeTag = btn.dataset.tag;
-      wrap.querySelectorAll('[data-tag]').forEach(b => { b.style.cssText = ''; });
-      btn.style.cssText = 'background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.14);color:#d4d4d4;';
+      wrap.querySelectorAll('[data-tag]').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
       render(filtered());
     });
   }
@@ -526,10 +527,10 @@
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
               <span class="s-name">${esc(a.name)}</span>
-              ${inst ? '<span class="s-badge s-badge-installed">Installed</span>' : ''}
+              ${inst ? '<span class="s-badge s-badge-installed"><%= req.translations.installedBadge || 'Installed' %></span>' : ''}
               <span class="${badgeClass(a.status)}" style="margin-left:auto;">${esc(a.status||'working')}</span>
             </div>
-            <p class="s-meta">by ${esc(a.author||'Unknown')} · ${esc(a.version||'')}</p>
+            <p class="s-meta">${('<%= req.translations.byAuthor || 'by {author}' %>').replace('{author}', esc(a.author||'Unknown'))} · ${esc(a.version||'')}</p>
           </div>
         </div>
         <p class="s-desc">${esc(a.description)}</p>
@@ -658,23 +659,43 @@
     if (installed) {
       btn.className = 'm-btn-remove';
       btn.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>';
-      lbl.textContent = 'Uninstall';
+      lbl.textContent = tI18n.uninstall || 'Uninstall';
     } else {
       btn.className = 'm-btn-install';
       btn.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>';
-      lbl.textContent = 'Install';
+      lbl.textContent = tI18n.install || 'Install';
     }
     btn.disabled = false;
   }
 
   function switchTab(name) {
-    document.querySelectorAll('.m-tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+    document.querySelectorAll('.m-tab').forEach(t => {
+      const on = t.dataset.tab === name;
+      t.classList.toggle('on', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.setAttribute('tabindex', on ? '0' : '-1');
+    });
     document.querySelectorAll('.m-pane').forEach(p => p.classList.toggle('on', p.id === `m-pane-${name}`));
   }
 
   document.getElementById('mClose').addEventListener('click', closeModal);
   document.getElementById('mOverlay').addEventListener('click', e => { if (e.target.id === 'mOverlay') closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  const mTabList = document.querySelector('.m-tabs');
+  if (mTabList) {
+    mTabList.addEventListener('keydown', e => {
+      const tabs = Array.from(mTabList.querySelectorAll('.m-tab'));
+      const currentIndex = tabs.findIndex(t => t === document.activeElement);
+      if (currentIndex === -1) return;
+      let newIndex = currentIndex;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIndex = (currentIndex + 1) % tabs.length; }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIndex = (currentIndex - 1 + tabs.length) % tabs.length; }
+      else if (e.key === 'Home') { e.preventDefault(); newIndex = 0; }
+      else if (e.key === 'End') { e.preventDefault(); newIndex = tabs.length - 1; }
+      if (newIndex !== currentIndex) { tabs[newIndex].focus(); switchTab(tabs[newIndex].dataset.tab); }
+    });
+  }
 
   document.querySelectorAll('.m-tab').forEach(tab => {
     tab.addEventListener('click', () => {

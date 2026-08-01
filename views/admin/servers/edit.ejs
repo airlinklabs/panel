@@ -215,8 +215,8 @@
                         <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, the server will be suspended and stopped. Users will not be able to start the server while it's suspended.</p>
                       </div>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" name="Suspended" id="suspendServer" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
+                    <label for="suspendServer" class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" name="Suspended" id="suspendServer" aria-label="Server suspension" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
                       <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="suspendServerLabel"><%= server.Suspended ? 'Suspended' : 'Active' %></span>
                     </label>

@@ -6,12 +6,29 @@
 
   function activateTab(id) {
     tabBtns.forEach(btn => {
-      btn.setAttribute('aria-selected', btn.dataset.tab === id ? 'true' : 'false');
+      const on = btn.dataset.tab === id;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      btn.setAttribute('tabindex', on ? '0' : '-1');
     });
     tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
   }
 
   tabBtns.forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
+
+  const tabList = document.querySelector('[role="tablist"]');
+  if (tabList) {
+    tabList.addEventListener('keydown', function (e) {
+      const tabs = Array.from(tabBtns);
+      const currentIndex = tabs.findIndex(t => t === document.activeElement);
+      if (currentIndex === -1) return;
+      let newIndex = currentIndex;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIndex = (currentIndex + 1) % tabs.length; }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIndex = (currentIndex - 1 + tabs.length) % tabs.length; }
+      else if (e.key === 'Home') { e.preventDefault(); newIndex = 0; }
+      else if (e.key === 'End') { e.preventDefault(); newIndex = tabs.length - 1; }
+      if (newIndex !== currentIndex) { tabs[newIndex].focus(); activateTab(tabs[newIndex].dataset.tab); }
+    });
+  }
   activateTab('servers');
 
   const isDark    = () => document.documentElement.classList.contains('dark');
