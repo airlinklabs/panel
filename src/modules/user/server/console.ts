@@ -8,6 +8,7 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
+import { issueWsToken } from '../../../handlers/utils/security/wsToken';
 import {
   type ErrorMessage,
   loadServerPageContext,
@@ -78,6 +79,33 @@ export function registerConsoleRoutes(router: Router): void {
           req,
           settings,
         });
+      }
+    });
+
+  router.get(
+    '/server/:id/ws-token',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
+    async (req: Request, res: Response): Promise<void> => {
+      try {
+        const serverId = req.params?.id as string;
+        const user = req.session?.user;
+        if (!user?.id || !serverId) {
+          res.status(401).json({ error: 'Unauthorized' });
+          return;
+        }
+        const target = await prisma.server.findUnique({
+          where: { UUID: serverId },
+          select: { UUID: true },
+        });
+        if (!target) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+        res.status(200).json({ token: issueWsToken(serverId, user.id) });
+      } catch (error) {
+        logger.error('Error issuing WS token:', error);
+        res.status(500).json({ error: 'Failed to issue WS token' });
       }
     },
   );

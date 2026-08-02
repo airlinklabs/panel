@@ -9,6 +9,7 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { WebSocket } from 'ws';
 import { isAuthenticatedForServerWS, subUserHasPermission } from '../../handlers/utils/auth/serverAuthUtil';
+import { verifyWsToken } from '../../handlers/utils/security/wsToken';
 import logger from '../../handlers/logger';
 import { getParamAsString } from '../../utils/typeHelpers';
 import { daemonRequest, daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
@@ -104,6 +105,13 @@ async function proxyConsole(
   mode: ConsoleProxyMode,
 ) {
   try {
+    const token = new URL(req.url ?? '', 'ws://local').searchParams.get('token');
+    const tokenData = verifyWsToken(token);
+    if (!tokenData) {
+      sendSocketError(ws, 'Invalid or expired connect token. Refresh the page and try again.');
+      return;
+    }
+
     const user = await prisma.users.findUnique({ where: { id: userId } });
     if (!user?.username) {
       sendSocketError(ws, 'User not found or username missing');
@@ -113,6 +121,11 @@ async function proxyConsole(
     const serverId = getParamAsString(req.params.id);
     if (!serverId) {
       sendSocketError(ws, 'Server ID is required');
+      return;
+    }
+
+    if (tokenData.serverId !== serverId || tokenData.userId !== userId) {
+      sendSocketError(ws, 'Connect token does not match this session');
       return;
     }
 

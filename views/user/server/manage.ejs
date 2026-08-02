@@ -497,6 +497,23 @@ window.addEventListener('resize', () => fitAddon.fit());
 
     const socketUrl = `${protocol}//${host}${path}`;
 
+    // Short-lived (60s) WS connect token — the browser never sees the node key.
+    const _wsTokenCache = { serverId: null, promise: null, fetchedAt: 0 };
+    function getWsConnectToken(serverId) {
+        const fresh = Date.now() - _wsTokenCache.fetchedAt < 45000 && _wsTokenCache.serverId === serverId;
+        if (!fresh) {
+            _wsTokenCache.serverId = serverId;
+            _wsTokenCache.promise = fetch('/server/' + encodeURIComponent(serverId) + '/ws-token', { credentials: 'same-origin' })
+                .then((res) => { if (!res.ok) throw new Error('ws-token'); return res.json(); })
+                .then((data) => data.token);
+            _wsTokenCache.fetchedAt = Date.now();
+        }
+        return _wsTokenCache.promise;
+    }
+    function openTimedSocket(url, serverId) {
+        return getWsConnectToken(serverId || '<%= server.UUID %>').then((token) => new WebSocket(url + '?token=' + encodeURIComponent(token)));
+    }
+
     let socket;
 
 let isReconnecting = false;
@@ -524,8 +541,13 @@ function connectWebSocket() {
         socket = null;
     }
 
+    openConsoleSocket();
+}
+
+async function openConsoleSocket() {
     try {
-        socket = new WebSocket(socketUrl);
+        const token = await getWsConnectToken('<%= server.UUID %>');
+        socket = new WebSocket(socketUrl + '?token=' + encodeURIComponent(token));
 
         socket.onopen = () => {
             isReconnecting = false;
@@ -810,7 +832,7 @@ connectWebSocket();
     }
 
     <% if (!server.Suspended) { %>
-    startButton.addEventListener('click', () => {
+    startButton.addEventListener('click', async () => {
         const serverUUID = '<%= server.UUID %>';
 
         setStatusText('Starting', 'var(--theme-warning)');
@@ -818,7 +840,7 @@ connectWebSocket();
         lockInput('Starting container...');
         setButtonLoading(startButton, 'Starting…');
 
-        const evtSocket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
+        const evtSocket = await openTimedSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`, serverUUID);
 
         evtSocket.onmessage = (msg) => {
             let parsed;
@@ -884,7 +906,7 @@ connectWebSocket();
           body: '<%= req.translations.confirmRestartDesc || "Everyone gets disconnected. You sure?" %>',
           danger: false,
           confirmLabel: '<%= req.translations.restartServer || "Restart Server" %>',
-          onConfirm: () => {
+          onConfirm: async () => {
           const serverUUID = '<%= server.UUID %>';
           setStatusText('Restarting', 'var(--theme-warning)');
           setStatusLog('Sending restart request...');
@@ -892,7 +914,7 @@ connectWebSocket();
           lockInput('Restarting container...');
           setButtonLoading(restartButton, 'Restarting…');
 
-          const evtSocketR = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
+          const evtSocketR = await openTimedSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`, serverUUID);
 
           evtSocketR.onmessage = (msg) => {
               let parsed;
@@ -960,14 +982,14 @@ connectWebSocket();
           body: '<%= req.translations.confirmStopDesc || "Everyone gets disconnected. You sure?" %>',
           danger: true,
           confirmLabel: '<%= req.translations.stopServer || "Stop Server" %>',
-          onConfirm: () => {
+          onConfirm: async () => {
 
           setStatusText('Stopping', 'var(--theme-danger)');
           setStatusLog('Sending stop command...');
           updateStatusChart('danger', 0.1, 0.2);
           setButtonLoading(stopButton, 'Stopping…');
 
-          const evtSocketS = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
+          const evtSocketS = await openTimedSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`, serverUUID);
 
           evtSocketS.onmessage = (msg) => {
               let parsed;
@@ -1103,10 +1125,11 @@ connectWebSocket();
             }
         }
 
-        try {
-            statsWs = new WebSocket(`${protocol}//${host}/status/<%= server.UUID %>`);
+        openTimedSocket(`${protocol}//${host}/status/<%= server.UUID %>`, '<%= server.UUID %>')
+            .then((ws) => {
+                statsWs = ws;
 
-            statsWs.onmessage = event => {
+                ws.onmessage = event => {
                 if (!isValidJson(event.data)) { return; }
                 const stats = JSON.parse(event.data);
                 if (stats.error) { return; }
@@ -1121,27 +1144,27 @@ connectWebSocket();
                 updateCpuUsage(stats);
                 updateDiskUsage(stats);
                 updateStatus(stats);
-            };
+                };
 
-            statsWs.onopen = () => {
-                isStatsReconnecting = false;
-                statsReconnectAttempts = 0;
-                statsReconnectInterval = 2000;
-            };
+                ws.onopen = () => {
+                    isStatsReconnecting = false;
+                    statsReconnectAttempts = 0;
+                    statsReconnectInterval = 2000;
+                };
 
-            statsWs.onerror = () => {
-                // Error — don't change status immediately, wait for reconnect result
-            };
+                ws.onerror = () => {
+                    // Error — don't change status immediately, wait for reconnect result
+                };
 
-            statsWs.onclose = () => {
-                if (!isStatsReconnecting) {
-                    scheduleStatsReconnect();
-                }
-            };
-        } catch (error) {
-
-            scheduleStatsReconnect();
-        }
+                ws.onclose = () => {
+                    if (!isStatsReconnecting) {
+                        scheduleStatsReconnect();
+                    }
+                };
+            })
+            .catch(() => {
+                scheduleStatsReconnect();
+            });
     }
 
     function scheduleStatsReconnect() {
@@ -1461,9 +1484,12 @@ connectWebSocket();
     // Writes them to the console terminal and manages input lock state
     (function () {
         const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-        const lcSock = new WebSocket(`${proto}://${location.host}/events/<%= server.UUID %>`);
+        const base = `${proto}://${location.host}/events/<%= server.UUID %>`;
 
-        const stateMap = {
+        getWsConnectToken('<%= server.UUID %>').then((token) => {
+            const lcSock = new WebSocket(base + '?token=' + encodeURIComponent(token));
+
+            const stateMap = {
             pulling:  { label: 'Pulling image',      color: 'var(--theme-info)' },
             creating: { label: 'Creating container',  color: 'var(--theme-info)' },
             starting: { label: 'Starting container',  color: 'var(--theme-warning)' },
@@ -1478,7 +1504,7 @@ connectWebSocket();
         lcSock.onmessage = (msg) => {
             let parsed;
             try { parsed = JSON.parse(msg.data); } catch { return; }
-            if (parsed.event !== 'lifecycle') return;
+if (parsed.event !== 'lifecycle') return;
             const { type, message } = parsed.data;
             setStatusLog(message, type);
             writeConsole('daemon', 'info', message);
@@ -1487,6 +1513,7 @@ connectWebSocket();
             if (type === 'stopped' || type === 'killed') { setStatusLog(null); }
             if (type === 'error') { unlockInput(); setStatusLog(null); }
         };
+        }).catch(() => {});
     })();
 
     // ═══════════════════════════════════════════════════════════════
