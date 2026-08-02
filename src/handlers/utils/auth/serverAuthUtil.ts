@@ -7,15 +7,38 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import { renderErrorPage } from '../../errorPages';
 
 export const SUBUSER_PERMISSIONS = [
-  'console', // view console and send commands
-  'files', // view and edit files
-  'files.sftp', // generate SFTP credentials
-  'startup', // view/edit startup variables
-  'backups', // view and create backups
-  'settings', // view server settings (read-only)
+  'console',
+  'console.send',
+  'files',
+  'files.read',
+  'files.write',
+  'files.delete',
+  'files.sftp',
+  'files.pull',
+  'files.archive',
+  'startup',
+  'startup.read',
+  'startup.update',
+  'startup.docker-image',
+  'backups',
+  'backups.read',
+  'backups.create',
+  'backups.delete',
+  'backups.download',
+  'settings',
+  'settings.update',
 ] as const;
 
 export type SubUserPermission = (typeof SUBUSER_PERMISSIONS)[number];
+
+// Logical groups for the subuser permission UI.
+export const PERMISSION_GROUPS: { title: string; perms: SubUserPermission[] }[] = [
+  { title: 'Console control', perms: ['console', 'console.send'] },
+  { title: 'Files', perms: ['files', 'files.read', 'files.write', 'files.delete', 'files.sftp', 'files.pull', 'files.archive'] },
+  { title: 'Startup', perms: ['startup', 'startup.read', 'startup.update', 'startup.docker-image'] },
+  { title: 'Backups', perms: ['backups', 'backups.read', 'backups.create', 'backups.delete', 'backups.download'] },
+  { title: 'Settings', perms: ['settings', 'settings.update'] },
+];
 
 export function parseSubUserPermissions(raw: string | null | undefined): string[] {
   if (!raw) return [];
@@ -29,9 +52,14 @@ export function parseSubUserPermissions(raw: string | null | undefined): string[
 
 export function subUserHasPermission(subUser: { permissions: string | null | undefined }, permission: string): boolean {
   const perms = parseSubUserPermissions(subUser.permissions);
-  if (perms.includes(permission)) return true;
-  if (permission === 'files.sftp' && perms.includes('files')) return true;
-  return perms.some((perm) => perm.endsWith('.*') && permission.startsWith(perm.slice(0, -1)));
+  const parent = permission.includes('.') ? permission.slice(0, permission.lastIndexOf('.')) : null;
+
+  for (const p of perms) {
+    if (p === permission) return true;
+    if (p.endsWith('.*') && (permission === p.slice(0, -2) || permission.startsWith(p.slice(0, -1)))) return true;
+    if (parent && p === parent) return true;
+  }
+  return false;
 }
 
 async function findSubUser(serverId: string, userId: number) {

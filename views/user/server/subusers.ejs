@@ -3,15 +3,32 @@
 <%
   const permMeta = {
     console: { icon: 'terminal', desc: 'View console and send commands' },
+    'console.send': { icon: 'message-square', desc: 'Send commands to the console' },
     files: { icon: 'folder', desc: 'View, upload and edit files' },
+    'files.read': { icon: 'file', desc: 'View and read files' },
+    'files.write': { icon: 'upload', desc: 'Edit and upload files' },
+    'files.delete': { icon: 'trash-2', desc: 'Rename, move and delete files' },
     'files.sftp': { icon: 'key', desc: 'Generate SFTP credentials' },
+    'files.pull': { icon: 'download', desc: 'Import files by URL' },
+    'files.archive': { icon: 'archive', desc: 'Archive and unpack files' },
     startup: { icon: 'play', desc: 'View and edit startup variables' },
+    'startup.read': { icon: 'eye', desc: 'View startup variables' },
+    'startup.update': { icon: 'pencil', desc: 'Edit startup variables' },
+    'startup.docker-image': { icon: 'box', desc: 'Change the Docker image' },
     backups: { icon: 'archive', desc: 'View and create backups' },
+    'backups.read': { icon: 'list', desc: 'List backups' },
+    'backups.create': { icon: 'plus', desc: 'Create backups' },
+    'backups.delete': { icon: 'trash-2', desc: 'Delete backups' },
+    'backups.download': { icon: 'download', desc: 'Download backups' },
     settings: { icon: 'settings', desc: 'View server settings (read-only)' },
+    'settings.update': { icon: 'pencil', desc: 'Edit server settings' },
   };
   const permGroups = [
-    { title: 'Server access', perms: ['console', 'files', 'files.sftp'] },
-    { title: 'Server management', perms: ['startup', 'backups', 'settings'] },
+    { title: 'Console control', perms: ['console', 'console.send'] },
+    { title: 'Files', perms: ['files', 'files.read', 'files.write', 'files.delete', 'files.sftp', 'files.pull', 'files.archive'] },
+    { title: 'Startup', perms: ['startup', 'startup.read', 'startup.update', 'startup.docker-image'] },
+    { title: 'Backups', perms: ['backups', 'backups.read', 'backups.create', 'backups.delete', 'backups.download'] },
+    { title: 'Settings', perms: ['settings', 'settings.update'] },
   ];
 %>
 
@@ -186,7 +203,7 @@
             <div class="space-y-1.5">
               <% group.perms.forEach(perm => { %>
               <label class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer transition hover:opacity-90" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
-                <input type="checkbox" class="add-perm" value="<%= perm %>" checked>
+                <input type="checkbox" class="add-perm" value="<%= perm %>" <%= perm.indexOf('.') === -1 ? 'checked' : '' %>>
                 <%- icon(permMeta[perm].icon, { size: 14, class: 'shrink-0' }) %>
                 <span class="shrink-0 font-medium" style="color:var(--theme-text-strong)"><%= permissionLabels[perm] %></span>
                 <span class="ml-auto truncate" style="color:var(--theme-text-muted)"><%= permMeta[perm].desc %></span>

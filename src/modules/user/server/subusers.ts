@@ -9,12 +9,26 @@ import { sendSubUserInvite } from '../../../handlers/utils/core/mailer';
 import { serverPageInclude } from './shared';
 
 const PERMISSION_LABELS: Record<string, string> = {
-  console: 'Console',
-  files: 'Files',
-  'files.sftp': 'SFTP Access',
-  startup: 'Startup',
-  backups: 'Backups',
-  settings: 'Settings',
+  console: 'Full console',
+  'console.send': 'Send commands',
+  files: 'All files',
+  'files.read': 'Read files',
+  'files.write': 'Edit & upload',
+  'files.delete': 'Delete files',
+  'files.sftp': 'SFTP access',
+  'files.pull': 'Pull/import',
+  'files.archive': 'Archive & unpack',
+  startup: 'Full startup',
+  'startup.read': 'View startup',
+  'startup.update': 'Edit startup',
+  'startup.docker-image': 'Change Docker image',
+  backups: 'All backups',
+  'backups.read': 'List backups',
+  'backups.create': 'Create backups',
+  'backups.delete': 'Delete backups',
+  'backups.download': 'Download backups',
+  settings: 'View settings',
+  'settings.update': 'Edit settings',
 };
 
 function isValidPermissionSet(permissions: unknown): permissions is string[] {
