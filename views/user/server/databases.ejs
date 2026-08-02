@@ -177,8 +177,14 @@
         <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)"><%= req.translations.dbProvisionHint || 'A database, user and password will be provisioned on this host.' %></p>
       </div>
       <div class="flex gap-2 pt-1">
-        <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-secondary flex-1"><%= req.translations.cancel || 'Cancel' %></button>
-        <button type="button" id="confirmAddDatabase" class="al-btn-primary flex-1"><%= req.translations.createDatabaseBtn || 'Create database' %></button>
+        <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+          <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+          <%= req.translations.cancel || 'Cancel' %>
+        </button>
+        <button type="button" id="confirmAddDatabase" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+          <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+          <%= req.translations.createDatabaseBtn || 'Create database' %>
+        </button>
       </div>
     </div>
   </div>

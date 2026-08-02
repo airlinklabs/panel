@@ -74,7 +74,8 @@
         <div>
           <h3 class="text-sm font-medium" style="color:var(--theme-danger);">Connection Error</h3>
           <p class="text-xs" style="color:var(--theme-danger);"><%= errorMessage.message %></p>
-          <button type="button" onclick="window.location.reload()" class="al-btn-danger mt-2 px-3 py-1 text-xs rounded-lg transition-colors">
+          <button type="button" onclick="window.location.reload()" class="al-btn-danger mt-2 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5">
+            <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
             Retry Connection
           </button>
         </div>

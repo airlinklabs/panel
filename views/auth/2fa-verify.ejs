@@ -35,7 +35,8 @@
             required autofocus class="auth-input" placeholder="••••••" style="text-align:center;font-size:20px;letter-spacing:0.4em;font-family:monospace">
         </div>
 
-        <button type="submit" class="auth-submit" id="submitBtn">
+        <button type="submit" class="auth-submit inline-flex items-center gap-1.5" id="submitBtn">
+          <%- icon('shield-check', { class: 'size-4', strokeWidth: 1.5 }) %>
           <span class="btn-label">Verify and sign in</span>
           <span class="spinner"></span>
         </button>

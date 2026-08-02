@@ -15,10 +15,12 @@
                 <span id="imageViewerSize"></span>
             </div>
             <div class="flex gap-2">
-                <button type="button" id="imageViewerDownload" onclick="downloadViewedImage()" class="px-4 py-2 rounded-xl transition" style="background:var(--theme-btn-primary-bg);color:var(--theme-btn-primary-text);">
+                <button type="button" id="imageViewerDownload" onclick="downloadViewedImage()" class="px-4 py-2 rounded-xl transition inline-flex items-center gap-2" style="background:var(--theme-btn-primary-bg);color:var(--theme-btn-primary-text);">
+                    <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>
                     Download
                 </button>
-                <button type="button" onclick="closeImageViewer()" class="px-4 py-2 rounded-xl transition" style="background:var(--theme-btn-secondary-bg);color:var(--theme-btn-secondary-text);">
+                <button type="button" onclick="closeImageViewer()" class="px-4 py-2 rounded-xl transition inline-flex items-center gap-2" style="background:var(--theme-btn-secondary-bg);color:var(--theme-btn-secondary-text);">
+                    <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
                     Close
                 </button>
             </div>

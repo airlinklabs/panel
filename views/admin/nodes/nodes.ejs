@@ -15,7 +15,7 @@
       <%- include('../../components/ui/page-header', {
         title: req.translations.adminNodesTitle,
         description: req.translations.adminNodesText,
-        actions: '<button id="createButton" type="button" class="al-btn-primary">' + req.translations.createNewNode + '</button>'
+        actions: '<button id="createButton" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
       }) %>
 
       <div class="al-page-body">
@@ -60,7 +60,8 @@
               <p class="font-medium">Connection Error</p>
               <p class="text-xs opacity-70 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p>
             </div>
-            <button type="button" onclick="window.location.reload()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
+            <button type="button" onclick="window.location.reload()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
+              <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
               Retry Connection
             </button>
           </div>
@@ -73,7 +74,7 @@
               iconName: 'network',
               title: 'No nodes yet',
               description: 'Add a node to start hosting servers.',
-              action: '<button id="createButtonEmpty" type="button" class="al-btn-primary">' + req.translations.createNewNode + '</button>'
+              action: '<button id="createButtonEmpty" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
             }) %>
           <% } else { %>
           <table class="al-table">
@@ -117,9 +118,9 @@
                   <td class="al-table-td"><%= node.instances ? node.instances.length : 0 %></td>
                   <td class="al-table-td">
                     <div class="flex gap-3">
-                      <button  onclick="configure('<%= node.id %>')" type="button" class="al-btn-secondary text-xs">Configure</button>
+                      <button  onclick="configure('<%= node.id %>')" type="button" class="al-btn-secondary text-xs"><%- icon('settings', { class: 'size-3', strokeWidth: 1.5 }) %>Configure</button>
                       <a href="./node/<%= node.id %>">
-                        <button type="button" class="al-btn-secondary text-xs">Edit</button>
+                        <button type="button" class="al-btn-secondary text-xs"><%- icon('pencil', { class: 'size-3', strokeWidth: 1.5 }) %>Edit</button>
                       </a>
                       <button  onclick="deleteNode('<%= node.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete node">
                         <%- icon('trash-2', { size: 16 }) %>

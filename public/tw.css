@@ -341,6 +341,38 @@
 .pa-extopt.pa-extopt-active { background: rgba(0,0,0,0.08); }
 .dark .pa-extopt.pa-extopt-active { background: rgba(255,255,255,0.1); }
 
+/* ── Schedule visual timing mode ──────────────────────────────── */
+.sched-step {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.75rem; height: 1.75rem; flex-shrink: 0; border-radius: 0.5rem;
+  border: 1px solid var(--theme-border); color: var(--theme-text-muted);
+  background: var(--theme-bg-card);
+  transition: background var(--dur-quick, 150ms) var(--ease-standard, ease), color var(--dur-quick, 150ms) var(--ease-standard, ease);
+}
+.sched-step:hover { background: var(--theme-bg-hover); color: var(--theme-text-strong); }
+.sched-step:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.sched-every-chip {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
+  border: 1px solid var(--theme-border); color: var(--theme-text-muted);
+  background: var(--theme-bg-card); cursor: pointer; user-select: none;
+  transition: background var(--dur-quick, 150ms) var(--ease-standard, ease), color var(--dur-quick, 150ms) var(--ease-standard, ease), border-color var(--dur-quick, 150ms) var(--ease-standard, ease);
+}
+.sched-every-chip svg { opacity: 0; transform: scale(0.6); transition: opacity 120ms ease, transform 120ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)); }
+.sched-every-chip.on { background: var(--theme-text-strong); color: var(--theme-bg-card); border-color: var(--theme-text-strong); }
+.sched-every-chip.on svg { opacity: 1; transform: scale(1); }
+
+.sched-day-chip {
+  padding: 6px 10px; font-size: 11px; font-weight: 500; border-radius: 8px;
+  border: 1px solid var(--theme-border); color: var(--theme-text-muted);
+  background: var(--theme-bg-card);
+  transition: background var(--dur-quick, 150ms) var(--ease-standard, ease), color var(--dur-quick, 150ms) var(--ease-standard, ease), border-color var(--dur-quick, 150ms) var(--ease-standard, ease);
+}
+.sched-day-chip:hover { background: var(--theme-bg-hover); color: var(--theme-text-strong); }
+.sched-day-chip.on,
+.sched-day-chip.on:hover { background: var(--theme-text-strong); color: var(--theme-bg-card); border-color: var(--theme-text-strong); }
+
 /* ── Ports allocator (shared) ──────────────────────────────────── */
 .pa-row {
   animation: pa-row-in var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
@@ -444,7 +476,13 @@ html.dark body .nav-link.active {
 }
 button:not(:disabled):active,
 input[type="submit"]:not(:disabled):active,
-input[type="button"]:not(:disabled):active {
+input[type="button"]:not(:disabled):active,
+a.nav-link:active,
+.sidebar-special-link:active,
+.sched-mode-btn:active,
+.sched-day-chip:active,
+.sched-step:active,
+.sched-every-chip:active {
   animation: al-btn-press 0.09s cubic-bezier(0.4, 0, 0.6, 1) forwards;
 }
 button:disabled,

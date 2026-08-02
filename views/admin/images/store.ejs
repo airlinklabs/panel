@@ -146,7 +146,7 @@
             </div>
             <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Couldn&rsquo;t load the catalogue</h3>
             <p class="text-sm mt-1" style="color:var(--theme-text-muted)">Check your connection and try again.</p>
-            <button type="button" onclick="loadCatalogue()" class="mt-4 al-btn-secondary">Retry</button>
+            <button type="button" onclick="loadCatalogue()" class="mt-4 al-btn-secondary"><%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>Retry</button>
           </div>
         </div>
 
@@ -229,7 +229,7 @@
         <div id="eggReadme" class="md-body"></div>
       </div>
       <div id="eggErr" style="display:none" class="err-box"><p id="eggErrTxt" class="err-txt"></p></div>
-      <button id="eggInstallBtn" onclick="confirmInstall()" type="button" class="al-btn-primary w-full py-2.5 text-sm font-medium" style="flex-shrink:0">Install</button>
+      <button id="eggInstallBtn" onclick="confirmInstall()" type="button" class="al-btn-primary w-full py-2.5 text-sm font-medium" style="flex-shrink:0"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Install</button>
     </div>
   </div>
 </div>

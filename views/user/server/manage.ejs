@@ -155,7 +155,8 @@
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon — it might just need a nudge.' %></p>
             </div>
-            <button type="button" onclick="window.location.reload()" class="al-btn-danger shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition">
+            <button type="button" onclick="window.location.reload()" class="al-btn-danger shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition inline-flex items-center gap-1.5">
+              <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
               Retry Connection
             </button>
           </div>
@@ -295,7 +296,8 @@
           <p class="text-xs font-medium" style="color:var(--theme-danger);">Connection Error</p>
           <p class="text-[11px] truncate" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'The daemon appears to be offline.' %></p>
         </div>
-        <button type="button" onclick="window.location.reload()" class="al-btn-danger shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-lg transition">
+        <button type="button" onclick="window.location.reload()" class="al-btn-danger shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-lg transition inline-flex items-center gap-1.5">
+          <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
           Retry
         </button>
       </div>

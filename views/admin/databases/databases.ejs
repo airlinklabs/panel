@@ -15,7 +15,7 @@
       <%- include('../../components/ui/page-header', {
         title: req.translations.adminDatabasesTitle || 'Database Hosts',
         description: req.translations.adminDatabasesText || 'Manage MySQL hosts used to provision databases for servers.',
-        actions: '<a href="/admin/databases/create"><button type="button" class="al-btn-primary">' + (req.translations.addDatabaseHost || 'Add Host') + '</button></a>'
+        actions: '<a href="/admin/databases/create"><button type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + (req.translations.addDatabaseHost || 'Add Host') + '</button></a>'
       }) %>
 
       <div class="al-page-body">
@@ -63,7 +63,7 @@
               iconName: 'database',
               title: req.translations.noDatabaseHostsTitle || 'No database hosts yet',
               description: req.translations.noDatabaseHostsDesc || 'Add a MySQL host to start provisioning databases.',
-              action: '<button onclick="autoGenerateHost()" type="button" class="al-btn-primary">' + (req.translations.autoGenerateHost || 'Auto-generate host') + '</button>'
+              action: '<button onclick="autoGenerateHost()" type="button" class="al-btn-primary">' + icon('zap', { class: 'size-4', strokeWidth: 1.5 }) + (req.translations.autoGenerateHost || 'Auto-generate host') + '</button>'
             }) %>
           <% } else { %>
           <table class="al-table">
@@ -95,7 +95,7 @@
                   <td class="al-table-td"><%= new Date(host.createdAt).toLocaleDateString() %></td>
                   <td class="al-table-td">
                     <div class="flex gap-3">
-                      <button  onclick="testHost('<%= host.id %>')" type="button" class="al-btn-secondary text-xs"><%= req.translations.test || 'Test' %></button>
+                      <button  onclick="testHost('<%= host.id %>')" type="button" class="al-btn-secondary text-xs"><%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.test || 'Test' %></button>
                       <button  onclick="deleteHost('<%= host.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete host' %>">
                         <%- icon('trash-2', { size: 16 }) %>
                       </button>

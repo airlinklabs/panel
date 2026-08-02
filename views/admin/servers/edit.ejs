@@ -17,7 +17,7 @@
           <p class="al-page-desc"><%= req.translations.adminManageServer || 'Rename, reassign, or remove this server.' %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button type="submit" form="editServerForm" class="al-btn-primary">Save changes</button>
+          <button type="submit" form="editServerForm" class="al-btn-primary"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>Save changes</button>
           <a href="/admin/servers" class="al-btn-secondary">Back to Servers</a>
         </div>
       </div>

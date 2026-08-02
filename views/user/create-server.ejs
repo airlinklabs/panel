@@ -215,7 +215,7 @@
     <p id="portsOverlayTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-3">Assign ports</p>
     <div id="requiredPortsList" class="space-y-2"></div>
     <div class="flex justify-end mt-4">
-      <button type="button" id="portsOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>
+      <button type="button" id="portsOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition inline-flex items-center gap-2"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>OK</button>
     </div>
   </div>
 </div>
@@ -226,8 +226,8 @@
     <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1" id="confirmTitle"></p>
     <p class="text-xs text-neutral-500 mb-4" id="confirmBody"></p>
     <div class="flex gap-2 justify-end">
-      <button type="button" id="confirmCancel" class="px-4 py-2 rounded-lg text-sm font-medium border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">Cancel</button>
-      <button type="button" id="confirmOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>
+      <button type="button" id="confirmCancel" class="px-4 py-2 rounded-lg text-sm font-medium border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition inline-flex items-center gap-2"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
+      <button type="button" id="confirmOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition inline-flex items-center gap-2"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>OK</button>
     </div>
   </div>
 </div>

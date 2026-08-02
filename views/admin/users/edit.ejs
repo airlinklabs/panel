@@ -18,7 +18,7 @@
         </div>
         <div class="flex gap-2 shrink-0 items-center">
           <a href="/admin/users" class="al-btn-secondary">Back to Users</a>
-          <button type="submit" form="editUserForm" class="al-btn-primary"><%= req.translations.saveChanges || 'Save Changes' %></button>
+          <button type="submit" form="editUserForm" class="al-btn-primary"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.saveChanges || 'Save Changes' %></button>
         </div>
       </div>
 

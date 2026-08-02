@@ -15,7 +15,7 @@
           <p class="al-page-desc"><%= req.translations.adminCreateNodeText || 'One more node and you\'ll have a proper fleet going.' %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button id="createNodeBtn" type="button" class="al-btn-primary"><%= req.translations.create || 'Create Node' %></button>
+          <button id="createNodeBtn" type="button" class="al-btn-primary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.create || 'Create Node' %></button>
           <a href="/admin/nodes" class="al-btn-secondary">Back to Nodes</a>
         </div>
       </div>
@@ -125,6 +125,7 @@
                   <div class="flex gap-2">
                     <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1">
                     <button id="addPortBtn" type="button" class="al-btn-primary">
+                      <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
                       Add Port
                     </button>
                   </div>

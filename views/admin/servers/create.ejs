@@ -17,7 +17,7 @@
           <p class="al-page-desc"><%= req.translations.adminCreateServerText || 'Spin up something new. Naming it is half the fun.' %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button type="submit" form="createServerForm" class="al-btn-primary"><%= req.translations.create || 'Create server' %></button>
+          <button type="submit" form="createServerForm" class="al-btn-primary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.create || 'Create server' %></button>
           <a href="/admin/servers" class="al-btn-secondary">Back to Servers</a>
         </div>
       </div>

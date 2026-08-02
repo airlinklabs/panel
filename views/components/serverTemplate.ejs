@@ -208,7 +208,7 @@
               <% if (item.type === 'link') { %>
                 <a href="<%= item.url %>" class="block text-sm font-medium truncate transition hover:opacity-75" style="color:var(--theme-accent)" title="<%= value %>"><%= value %></a>
               <% } else if (item.type === 'button') { %>
-                <button type="button" onclick="<%= item.onClick %>" class="block max-w-full text-sm font-medium truncate transition hover:opacity-75" style="color:var(--theme-accent)" title="<%= value %>"><%= value %></button>
+                <button type="button" onclick="<%= item.onClick %>" class="flex max-w-full items-center gap-1.5 text-sm font-medium transition hover:opacity-75" style="color:var(--theme-accent)" title="<%= value %>"><%- icon('arrow-up-right', { class: 'size-4 shrink-0', strokeWidth: 1.5 }) %><span class="truncate"><%= value %></span></button>
               <% } else { %>
                 <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong)" title="<%= value %>"><%= value %></p>
               <% } %>

@@ -218,6 +218,36 @@
   border-color: var(--theme-border);
 }
 
+/* ── Sidebar / inline nav micro-motion ──────────────────────────
+   Links slide 2px toward the content on hover (with the icon
+   leading) and share the universal press feedback from tw.css.
+   The .active pill keeps the same behavior — sliding with it. */
+
+.nav-link,
+.sidebar-special-link {
+  transition:
+    color var(--dur-quick) var(--ease-standard),
+    background-color var(--dur-quick) var(--ease-standard),
+    border-color var(--dur-quick) var(--ease-standard),
+    opacity var(--dur-quick) var(--ease-standard),
+    transform var(--dur-quick) var(--ease-out);
+}
+
+.nav-link:hover,
+.sidebar-special-link:hover {
+  transform: translateX(2px);
+}
+
+.nav-link svg,
+.sidebar-special-link svg {
+  transition: transform var(--dur-quick) var(--ease-out);
+}
+
+.nav-link:hover svg,
+.sidebar-special-link:hover svg {
+  transform: translateX(1px);
+}
+
 /* ── Nav item — instant active, quick hover ───────────────────── */
 
 .al-nav-item {
@@ -316,5 +346,11 @@
   }
   .al-skeleton {
     animation: none;
+  }
+  .nav-link:hover,
+  .sidebar-special-link:hover,
+  .nav-link:hover svg,
+  .sidebar-special-link:hover svg {
+    transform: none;
   }
 }

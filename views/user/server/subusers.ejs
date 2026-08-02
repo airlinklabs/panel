@@ -175,8 +175,8 @@
         <div class="flex items-center justify-between mb-2">
           <label class="block text-xs font-medium" style="color:var(--theme-text-muted)">Permissions</label>
           <div class="flex items-center gap-3 text-[11px] font-medium">
-            <button type="button" class="perm-select-all" data-modal="addSubUserModal" style="color:var(--theme-accent)">Select all</button>
-            <button type="button" class="perm-select-none" data-modal="addSubUserModal" style="color:var(--theme-text-muted)">Clear</button>
+            <button type="button" class="perm-select-all inline-flex items-center gap-1.5" data-modal="addSubUserModal" style="color:var(--theme-accent)"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %>Select all</button>
+            <button type="button" class="perm-select-none inline-flex items-center gap-1.5" data-modal="addSubUserModal" style="color:var(--theme-text-muted)"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Clear</button>
           </div>
         </div>
         <div class="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
@@ -198,8 +198,14 @@
         </div>
       </div>
       <div class="flex gap-2 pt-1">
-        <button type="button" onclick="closeModal('addSubUserModal')" class="al-btn-secondary flex-1">Cancel</button>
-        <button type="button" id="confirmAddSubUser" class="al-btn-primary flex-1">Add subuser</button>
+        <button type="button" onclick="closeModal('addSubUserModal')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+          <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+          Cancel
+        </button>
+        <button type="button" id="confirmAddSubUser" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+          <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+          Add subuser
+        </button>
       </div>
     </div>
   </div>
@@ -218,8 +224,8 @@
         <div class="flex items-center justify-between mb-2">
           <label class="block text-xs font-medium" style="color:var(--theme-text-muted)">Permissions</label>
           <div class="flex items-center gap-3 text-[11px] font-medium">
-            <button type="button" class="perm-select-all" data-modal="editSubUserModal" style="color:var(--theme-accent)">Select all</button>
-            <button type="button" class="perm-select-none" data-modal="editSubUserModal" style="color:var(--theme-text-muted)">Clear</button>
+            <button type="button" class="perm-select-all inline-flex items-center gap-1.5" data-modal="editSubUserModal" style="color:var(--theme-accent)"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %>Select all</button>
+            <button type="button" class="perm-select-none inline-flex items-center gap-1.5" data-modal="editSubUserModal" style="color:var(--theme-text-muted)"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Clear</button>
           </div>
         </div>
         <div class="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
@@ -241,8 +247,14 @@
         </div>
       </div>
       <div class="flex gap-2 pt-1">
-        <button type="button" onclick="closeModal('editSubUserModal')" class="al-btn-secondary flex-1">Cancel</button>
-        <button type="button" id="confirmEditSubUser" class="al-btn-primary flex-1">Save changes</button>
+        <button type="button" onclick="closeModal('editSubUserModal')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+          <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+          Cancel
+        </button>
+        <button type="button" id="confirmEditSubUser" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+          <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
+          Save changes
+        </button>
       </div>
     </div>
   </div>

@@ -127,7 +127,7 @@
               </div>
               <div class="flex gap-2 items-center">
                 <input id="disable2faPassword" type="password" placeholder="Current password" class="al-input text-sm flex-1" style="max-width:180px">
-                <button id="disable2faBtn" type="button" class="al-btn-secondary text-sm"><%= req.translations.disable2FA || 'Disable 2FA' %></button>
+                <button id="disable2faBtn" type="button" class="al-btn-secondary text-sm"><%- icon('shield-off', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.disable2FA || 'Disable 2FA' %></button>
               </div>
               <% } %>
             </div>

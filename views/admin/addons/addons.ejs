@@ -23,7 +23,7 @@
           <p class="al-page-desc">Manage installed addons and browse the store</p>
         </div>
         <div class="flex gap-2 shrink-0">
-          <button id="reloadBtn" type="button" class="al-btn-secondary">Reload</button>
+          <button id="reloadBtn" type="button" class="al-btn-secondary"><%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>Reload</button>
         </div>
       </div>
 
@@ -99,7 +99,7 @@
       <div class="flex flex-col items-center justify-center py-24 text-center">
         <p class="text-sm text-neutral-500"><% if (addonTableExists) { %>No addons installed<% } else { %>Migration required<% } %></p>
         <% if (addonTableExists) { %>
-        <a href="/admin/addons/store"><button type="button" class="mt-4 al-btn-secondary">Browse Store</button></a>
+        <a href="/admin/addons/store"><button type="button" class="mt-4 al-btn-secondary"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Browse Store</button></a>
         <% } %>
       </div>
       <% } %>

@@ -18,7 +18,7 @@
         </div>
         <div class="flex gap-2 shrink-0 items-center">
           <button type="button" id="tab-save-btn" class="al-btn-primary">Save</button>
-          <button type="button" id="tab-reset-btn" class="al-btn-secondary">Reset</button>
+          <button type="button" id="tab-reset-btn" class="al-btn-secondary"><%- icon('rotate-ccw', { class: 'size-4', strokeWidth: 1.5 }) %>Reset</button>
           <a href="/admin/images/export/<%= image.id %>" class="al-btn-secondary">Export</a>
           <a href="/admin/images" class="al-btn-secondary">Back</a>
         </div>
@@ -35,12 +35,12 @@
       <div class="al-page-body">
         <!-- Tab nav -->
         <div role="tablist" class="flex gap-1 mb-6">
-          <button type="button" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" data-tab="general" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition">General</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-docker" id="tab-docker" data-tab="docker" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition">Docker Images</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-variables" id="tab-variables" data-tab="variables" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition">Variables</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-install" id="tab-install" data-tab="install" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition">Install Script</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" data-tab="settings" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition">Settings</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-raw" id="tab-raw" data-tab="raw" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition">Raw JSON</button>
+          <button type="button" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" data-tab="general" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('layout-grid', { class: 'size-4', strokeWidth: 1.5 }) %>General</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-docker" id="tab-docker" data-tab="docker" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('container', { class: 'size-4', strokeWidth: 1.5 }) %>Docker Images</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-variables" id="tab-variables" data-tab="variables" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('variable', { class: 'size-4', strokeWidth: 1.5 }) %>Variables</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-install" id="tab-install" data-tab="install" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('terminal', { class: 'size-4', strokeWidth: 1.5 }) %>Install Script</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" data-tab="settings" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('settings', { class: 'size-4', strokeWidth: 1.5 }) %>Settings</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-raw" id="tab-raw" data-tab="raw" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('file-json', { class: 'size-4', strokeWidth: 1.5 }) %>Raw JSON</button>
         </div>
 
         <!-- General tab -->
@@ -98,6 +98,7 @@
               <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Docker Images</h2>
               <button type="button" id="add-docker-image"
                 class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
+                <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
                 Add Image
               </button>
             </div>
@@ -117,6 +118,7 @@
               <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Egg Variables</h2>
               <button type="button" id="add-variable"
                 class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
+                <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
                 Add Variable
               </button>
             </div>
@@ -163,6 +165,7 @@
               <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Required Ports</h2>
               <button type="button" id="add-port-requirement"
                 class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
+                <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
                 Add Port
               </button>
             </div>

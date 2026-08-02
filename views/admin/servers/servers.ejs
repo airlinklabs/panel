@@ -17,7 +17,7 @@
       <%- include('../../components/ui/page-header', {
         title: req.translations.adminServersTitle,
         description: req.translations.adminServersText,
-        actions: '<button onclick="location.href=\'/admin/servers/create\'" type="button" class="al-btn-primary">' + req.translations.createNewServer + '</button>'
+        actions: '<button onclick="location.href=\'/admin/servers/create\'" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewServer + '</button>'
       }) %>
 
       <div class="al-page-body">
@@ -252,6 +252,7 @@
         <div class="sm:ml-auto">
           <button type="button" onclick="closeRadarScanModal()"
             class="al-btn-secondary w-full sm:w-auto min-h-[44px]">
+            <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
             Close
           </button>
         </div>

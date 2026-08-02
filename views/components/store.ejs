@@ -309,7 +309,7 @@
         <div id="storeError" class="hidden py-16 text-center">
           <%- icon('triangle-alert', { class: 'w-9 h-9 text-neutral-800 mx-auto mb-3', strokeWidth: 1 }) %>
           <p id="storeErrorMsg" class="text-sm text-neutral-600"><%= req.translations.failedToLoadStore || 'Failed to load addon store.' %></p>
-          <button type="button" onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline"><%= req.translations.retryLoad || 'Retry' %></button>
+          <button type="button" onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline inline-flex items-center gap-1.5"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.retryLoad || 'Retry' %></button>
         </div>
 
         <!-- Grid -->
@@ -318,7 +318,7 @@
         <!-- Empty -->
         <div id="storeEmpty" class="hidden py-16 text-center">
           <p class="text-sm text-neutral-600"><%= req.translations.noAddonsMatch || 'No addons match your search.' %></p>
-          <button type="button" id="clearSearch" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline"><%= req.translations.clearSearch || 'Clear search' %></button>
+          <button type="button" id="clearSearch" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline inline-flex items-center gap-1.5"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.clearSearch || 'Clear search' %></button>
         </div>
       </div>
     </div>
@@ -360,9 +360,9 @@
 
     <!-- Tabs -->
     <div class="m-tabs" role="tablist">
-      <button type="button" id="m-tab-overview" role="tab" aria-selected="true" tabindex="0"  aria-controls="m-pane-overview" class="m-tab on" data-tab="overview"><%= req.translations.overviewTab || 'Overview' %></button>
-      <button type="button" id="m-tab-install"  role="tab" aria-selected="false" tabindex="-1" aria-controls="m-pane-install" class="m-tab" data-tab="install"><%= req.translations.installationTab || 'Installation' %></button>
-      <button type="button" id="m-tab-reviews"  role="tab" aria-selected="false" tabindex="-1" aria-controls="m-pane-reviews" class="m-tab" data-tab="reviews"><%= req.translations.reviewsTab || 'Reviews' %></button>
+      <button type="button" id="m-tab-overview" role="tab" aria-selected="true" tabindex="0"  aria-controls="m-pane-overview" class="m-tab on inline-flex items-center gap-1.5" data-tab="overview"><%- icon('layout-dashboard', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.overviewTab || 'Overview' %></button>
+      <button type="button" id="m-tab-install"  role="tab" aria-selected="false" tabindex="-1" aria-controls="m-pane-install" class="m-tab inline-flex items-center gap-1.5" data-tab="install"><%- icon('package', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.installationTab || 'Installation' %></button>
+      <button type="button" id="m-tab-reviews"  role="tab" aria-selected="false" tabindex="-1" aria-controls="m-pane-reviews" class="m-tab inline-flex items-center gap-1.5" data-tab="reviews"><%- icon('message-square', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.reviewsTab || 'Reviews' %></button>
     </div>
 
     <!-- Body -->

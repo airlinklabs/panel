@@ -157,8 +157,14 @@
         onkeydown="handleBackupNameKeyPress(event)">
     </div>
     <div class="flex gap-2 px-5 pb-5 justify-end">
-      <button type="button" onclick="closeCreateBackupModal()" class="al-btn-secondary">Cancel</button>
-      <button type="button" onclick="confirmCreateBackup()" class="al-btn-primary">Create</button>
+      <button type="button" onclick="closeCreateBackupModal()" class="al-btn-secondary inline-flex items-center gap-1.5">
+        <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+        Cancel
+      </button>
+      <button type="button" onclick="confirmCreateBackup()" class="al-btn-primary inline-flex items-center gap-1.5">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        Create
+      </button>
     </div>
   </div>
 </div>

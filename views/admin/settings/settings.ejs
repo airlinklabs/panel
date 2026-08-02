@@ -16,7 +16,7 @@
         </div>
         <div class="flex gap-2 shrink-0 items-center">
           <button type="button" id="tab-save-btn" class="al-btn-primary">Save</button>
-          <button type="button" id="tab-reset-btn" class="al-btn-secondary">Reset</button>
+          <button type="button" id="tab-reset-btn" class="al-btn-secondary"><%- icon('rotate-ccw', { class: 'size-4', strokeWidth: 1.5 }) %>Reset</button>
         </div>
       </div>
 
@@ -24,9 +24,9 @@
 
         <!-- Tab bar -->
         <div role="tablist" class="flex gap-1 mb-6">
-          <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition">Appearance</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition">Servers</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition">Security</button>
+          <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('palette', { class: 'size-4', strokeWidth: 1.5 }) %>Appearance</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>Servers</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %>Security</button>
         </div>
 
         <!-- ── APPEARANCE ──────────────────────────────────────────────────── -->
@@ -507,7 +507,7 @@
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1" aria-describedby="banIpHint"
                   class="al-input flex-1 max-w-xs">
-                <button type="button" id="banIpBtn" class="al-btn-danger">Ban IP</button>
+                <button type="button" id="banIpBtn" class="al-btn-danger"><%- icon('ban', { class: 'size-4', strokeWidth: 1.5 }) %>Ban IP</button>
               </div>
               <p id="banIpHint" class="text-xs text-neutral-400 mb-4">Enter the IP address you want to ban from accessing the panel.</p>
               <div id="bannedIpList" class="space-y-2">
@@ -518,7 +518,7 @@
                 <% banned.forEach(function(ip) { %>
                 <div class="flex items-center justify-between rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-4 py-2.5">
                   <span class="text-sm font-mono text-neutral-700 dark:text-neutral-300"><%= ip %></span>
-                  <button type="button" class="unban-btn text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition" data-ip="<%= ip %>">Unban</button>
+                  <button type="button" class="unban-btn text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition inline-flex items-center gap-1.5" data-ip="<%= ip %>"><%- icon('shield-check', { class: 'size-3', strokeWidth: 1.5 }) %>Unban</button>
                 </div>
                 <% }); } %>
               </div>

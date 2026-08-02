@@ -15,7 +15,7 @@
       <%- include('../../components/ui/page-header', {
         title: req.translations.adminUsersTitle,
         description: req.translations.adminUsersText,
-        actions: '<button id="createButton" type="button" class="al-btn-primary">' + req.translations.createNewUser + '</button>'
+        actions: '<button id="createButton" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewUser + '</button>'
       }) %>
 
       <div class="al-page-body">

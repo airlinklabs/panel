@@ -64,7 +64,8 @@
           <a href="/forgot-password" class="text-xs transition" style="color:var(--theme-text-muted)">Forgot password?</a>
         </div>
 
-        <button type="submit" class="auth-submit" id="submitBtn">
+        <button type="submit" class="auth-submit inline-flex items-center gap-1.5" id="submitBtn">
+          <%- icon('log-in', { class: 'size-4', strokeWidth: 1.5 }) %>
           <span class="btn-label">Sign in</span>
           <span class="spinner"></span>
         </button>

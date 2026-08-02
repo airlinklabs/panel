@@ -46,8 +46,8 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button type="button" onclick="generateSftpCredentials()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none border" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong);border-color:var(--theme-border);">Generate credentials</button>
-        <button type="button" onclick="closeSftpModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none hover:opacity-80" style="color:var(--theme-text-muted);">Close</button>
+        <button type="button" onclick="generateSftpCredentials()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none border inline-flex items-center gap-1.5" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong);border-color:var(--theme-border);"><%- icon('key-round', { class: 'size-3', strokeWidth: 1.5 }) %>Generate credentials</button>
+        <button type="button" onclick="closeSftpModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none hover:opacity-80 inline-flex items-center gap-1.5" style="color:var(--theme-text-muted);"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Close</button>
       </div>
     </div>
 
@@ -98,8 +98,8 @@
 
       
       <div class="flex items-center gap-2 px-5 py-4 border-t" style="border-color:var(--theme-border);">
-        <button type="button" onclick="generateSftpCredentials()" id="sftpRegenBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none disabled:opacity-40" style="background:var(--theme-warning);color:var(--theme-bg);">Regenerate</button>
-        <button type="button" onclick="revokeSftpCredentials()" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none" style="background:var(--theme-danger);color:var(--theme-btn-danger-text);">Revoke</button>
+        <button type="button" onclick="generateSftpCredentials()" id="sftpRegenBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none disabled:opacity-40 inline-flex items-center gap-1.5" style="background:var(--theme-warning);color:var(--theme-bg);"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>Regenerate</button>
+        <button type="button" onclick="revokeSftpCredentials()" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none inline-flex items-center gap-1.5" style="background:var(--theme-danger);color:var(--theme-btn-danger-text);"><%- icon('trash-2', { class: 'size-3', strokeWidth: 1.5 }) %>Revoke</button>
       </div>
     </div>
 

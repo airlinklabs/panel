@@ -49,8 +49,8 @@
           <p class="al-page-desc">Manage server images installed on this panel</p>
         </div>
         <div class="flex gap-2 shrink-0">
-          <button id="uploadBtn" type="button" class="al-btn-secondary"><%= req.translations.uploadJson || 'Upload JSON' %></button>
-          <button onclick="openCreate()" type="button" class="al-btn-secondary">New Image</button>
+          <button id="uploadBtn" type="button" class="al-btn-secondary"><%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.uploadJson || 'Upload JSON' %></button>
+          <button onclick="openCreate()" type="button" class="al-btn-secondary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>New Image</button>
           <a href="/admin/images/store" class="al-btn-secondary">Browse Store</a>
         </div>
       </div>
@@ -64,7 +64,7 @@
       <% if (images.length === 0) { %>
       <div class="flex flex-col items-center justify-center py-24 text-center">
         <p class="text-sm text-neutral-500">No images installed yet.</p>
-        <a href="/admin/images/store"><button type="button" class="mt-4 al-btn-secondary">Browse Store</button></a>
+        <a href="/admin/images/store"><button type="button" class="mt-4 al-btn-secondary"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Browse Store</button></a>
       </div>
       <% } else { %>
 
@@ -93,8 +93,8 @@
               <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= new Date(image.createdAt).toLocaleDateString() %></td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-2">
-                  <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">Edit</button></a>
-                  <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">Export</button></a>
+                  <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition"><%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>Edit</button></a>
+                  <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Export</button></a>
                   <button  onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="al-btn-danger">
                     <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                   </button>
@@ -133,8 +133,8 @@
         <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
       </div>
       <div class="flex gap-2 pt-1">
-        <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
-        <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition"><%= req.translations.createAndEdit || 'Create & Edit' %></button>
+        <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
+        <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.createAndEdit || 'Create & Edit' %></button>
       </div>
     </form>
   </div>
@@ -147,7 +147,7 @@
       <p id="deleteModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1"><%= req.translations.deleteImageTitle || 'Delete image?' %></p>
       <p id="deleteMsg" class="text-xs text-neutral-500 mb-5"></p>
       <div class="flex gap-2">
-        <button type="button" onclick="closeDelete()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
+        <button type="button" onclick="closeDelete()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
         <button type="button" id="deleteConfirm" class="flex-1 py-2 rounded-xl al-btn-danger">Delete</button>
       </div>
     </div>

@@ -199,7 +199,7 @@
 <!-- New Schedule Modal -->
 <div id="addScheduleModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center p-4" aria-hidden="true">
   <div class="absolute inset-0 bg-transparent" aria-hidden="true" onclick="closeAddScheduleModal()"></div>
-  <div id="addSchedulePanel" class="al-sheet-panel relative w-full max-w-md rounded-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addScheduleTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+  <div id="addSchedulePanel" class="al-sheet-panel relative w-full max-w-2xl rounded-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addScheduleTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex items-center justify-between mb-5">
       <h3 id="addScheduleTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New schedule</h3>
       <button type="button" onclick="closeAddScheduleModal()" class="al-btn-ghost p-1.5 -mr-1.5" aria-label="Close">
@@ -213,8 +213,14 @@
       </div>
       <div>
         <div class="flex rounded-lg p-0.5 text-xs font-medium mb-1.5" style="background:var(--theme-bg-secondary)">
-          <button type="button" data-sched-mode="cron" class="sched-mode-btn flex-1 rounded-md px-3 py-1.5 transition" style="color:var(--theme-text-strong);background:var(--theme-bg-card)">Cron expression</button>
-          <button type="button" data-sched-mode="visual" class="sched-mode-btn flex-1 rounded-md px-3 py-1.5 transition" style="color:var(--theme-text-muted)">Visual timing</button>
+          <button type="button" data-sched-mode="cron" class="sched-mode-btn flex-1 rounded-md px-3 py-1.5 transition inline-flex items-center gap-1.5" style="color:var(--theme-text-strong);background:var(--theme-bg-card)">
+            <%- icon('clock', { class: 'size-3', strokeWidth: 1.5 }) %>
+            Cron expression
+          </button>
+          <button type="button" data-sched-mode="visual" class="sched-mode-btn flex-1 rounded-md px-3 py-1.5 transition inline-flex items-center gap-1.5" style="color:var(--theme-text-muted)">
+            <%- icon('calendar', { class: 'size-3', strokeWidth: 1.5 }) %>
+            Visual timing
+          </button>
         </div>
       </div>
       <div id="schedCronWrap">
@@ -236,33 +242,48 @@
           <div class="rounded-xl p-3" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
             <label class="block text-[11px] font-medium mb-2" style="color:var(--theme-text-muted)"><%= f.label %></label>
             <div class="flex items-center gap-1.5">
+              <button type="button" class="sched-step" data-step-for="<%= f.key %>" data-step="-1" aria-label="Decrease <%= f.label.toLowerCase() %>">
+                <%- icon('minus', { class: 'size-3.5', strokeWidth: 2 }) %>
+              </button>
               <input id="schedG<%= f.key %>" type="number" min="<%= f.min %>" max="<%= f.max %>" value="<%= f.key === 'dom' ? 1 : 0 %>" class="al-input w-full px-2 py-1.5 text-center font-mono" aria-label="<%= f.label %> value">
-              <label class="shrink-0 cursor-pointer" title="Run for every <%= f.label.toLowerCase() %> value">
-                <input type="checkbox" id="schedG<%= f.key %>Every" class="sr-only peer" checked>
-                <span class="block text-[10px] font-medium rounded-md px-1.5 py-1 border border-neutral-200 dark:border-neutral-700 text-neutral-400 dark:text-neutral-500 peer-checked:border-neutral-900 peer-checked:bg-neutral-900 peer-checked:text-white dark:peer-checked:border-white dark:peer-checked:bg-white dark:peer-checked:text-neutral-900 transition">every</span>
-              </label>
+              <button type="button" class="sched-step" data-step-for="<%= f.key %>" data-step="1" aria-label="Increase <%= f.label.toLowerCase() %>">
+                <%- icon('plus', { class: 'size-3.5', strokeWidth: 2 }) %>
+              </button>
             </div>
+            <label class="mt-2 inline-flex items-center cursor-pointer select-none" title="Run for every <%= f.label.toLowerCase() %> value">
+              <input type="checkbox" id="schedG<%= f.key %>Every" class="sr-only peer" checked>
+              <span class="sched-every-chip">
+                <%- icon('check', { class: 'size-3', strokeWidth: 2.5 }) %>
+                every
+              </span>
+            </label>
           </div>
           <% }); %>
         </div>
         <div>
           <label class="block text-[11px] font-medium mb-1.5" style="color:var(--theme-text-muted)">Day of week</label>
-          <select id="schedGDow" class="al-input w-full">
-            <option value="*">Every day</option>
-            <option value="0">Sunday</option>
-            <option value="1">Monday</option>
-            <option value="2">Tuesday</option>
-            <option value="3">Wednesday</option>
-            <option value="4">Thursday</option>
-            <option value="5">Friday</option>
-            <option value="6">Saturday</option>
-          </select>
+          <div id="schedDowChips" class="flex flex-wrap gap-1.5" role="group" aria-label="Day of week">
+            <button type="button" class="sched-day-chip on" data-dow="*" aria-pressed="true">Every day</button>
+            <button type="button" class="sched-day-chip" data-dow="0" aria-pressed="false" title="Sunday">Sun</button>
+            <button type="button" class="sched-day-chip" data-dow="1" aria-pressed="false" title="Monday">Mon</button>
+            <button type="button" class="sched-day-chip" data-dow="2" aria-pressed="false" title="Tuesday">Tue</button>
+            <button type="button" class="sched-day-chip" data-dow="3" aria-pressed="false" title="Wednesday">Wed</button>
+            <button type="button" class="sched-day-chip" data-dow="4" aria-pressed="false" title="Thursday">Thu</button>
+            <button type="button" class="sched-day-chip" data-dow="5" aria-pressed="false" title="Friday">Fri</button>
+            <button type="button" class="sched-day-chip" data-dow="6" aria-pressed="false" title="Saturday">Sat</button>
+          </div>
         </div>
         <p class="text-[11px]" style="color:var(--theme-text-muted)">Runs <span id="schedVisualDesc" class="font-medium" style="color:var(--theme-accent)">every hour</span> — cron: <span id="schedVisualCron" class="font-mono font-medium" style="color:var(--theme-accent)">0 0 * * * *</span></p>
       </div>
       <div class="flex gap-2 pt-1">
-        <button type="button" onclick="closeAddScheduleModal()" class="al-btn-secondary flex-1">Cancel</button>
-        <button type="button" id="confirmAddSchedule" class="al-btn-primary flex-1">Create schedule</button>
+        <button type="button" onclick="closeAddScheduleModal()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+          <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+          Cancel
+        </button>
+        <button type="button" id="confirmAddSchedule" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+          <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+          Create schedule
+        </button>
       </div>
     </div>
   </div>
@@ -364,6 +385,7 @@ document.getElementById('schedCron').addEventListener('input', function () {
 
 const granKeys = ['sec', 'min', 'hour', 'dom'];
 const granLimits = { sec: [0, 59], min: [0, 59], hour: [0, 23], dom: [1, 31] };
+let schedDow = '*';
 
 function granField(key) {
   const el = document.getElementById('schedG' + key);
@@ -376,11 +398,19 @@ function granField(key) {
 }
 
 function buildGranularCron() {
-  const cron = granKeys.map(granField).concat(['*', document.getElementById('schedGDow').value]).join(' ');
+  const cron = granKeys.map(granField).concat(['*', schedDow]).join(' ');
   document.getElementById('schedVisualCron').textContent = cron;
   document.getElementById('schedVisualDesc').textContent = describeCron(cron);
   document.getElementById('schedCron').value = cron;
   document.getElementById('cronPreview').textContent = describeCron(cron);
+}
+
+function renderDowChips() {
+  document.querySelectorAll('.sched-day-chip').forEach((c) => {
+    const on = c.dataset.dow === schedDow;
+    c.setAttribute('aria-pressed', String(on));
+    c.classList.toggle('on', on);
+  });
 }
 
 function syncVisualFromCron() {
@@ -397,18 +427,38 @@ function syncVisualFromCron() {
     else if (/^\*\/\d+$/.test(v)) { every.checked = false; el.value = String(parseInt(v.slice(2), 10) || 0); el.dataset.interval = 'true'; }
     else { every.checked = false; el.value = String(parseInt(v, 10) || 0); el.dataset.interval = 'false'; }
   });
-  document.getElementById('schedGDow').value = /^\d+$/.test(parts[5]) ? String(Math.min(6, parseInt(parts[5], 10))) : '*';
+  schedDow = /^\d+$/.test(parts[5]) ? String(Math.min(6, parseInt(parts[5], 10))) : '*';
+  renderDowChips();
   buildGranularCron();
 }
 
 granKeys.forEach(key => {
   const el = document.getElementById('schedG' + key);
   const every = document.getElementById('schedG' + key + 'Every');
+  const syncEveryChip = () => {
+    const chip = every.parentElement.querySelector('.sched-every-chip');
+    if (chip) chip.classList.toggle('on', every.checked);
+  };
+  document.querySelectorAll('[data-step-for="' + key + '"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      every.checked = false;
+      el.dataset.interval = 'false';
+      const [min, max] = granLimits[key];
+      let n = parseInt(el.value, 10);
+      if (isNaN(n)) n = key === 'dom' ? 1 : 0;
+      el.value = String(Math.min(max, Math.max(min, n + Number(btn.dataset.step))));
+      syncEveryChip();
+      buildGranularCron();
+    });
+  });
   el.addEventListener('change', buildGranularCron);
   el.addEventListener('input', () => { el.dataset.interval = 'false'; buildGranularCron(); });
-  every.addEventListener('change', () => { el.dataset.interval = 'false'; buildGranularCron(); });
+  every.addEventListener('change', () => { el.dataset.interval = 'false'; syncEveryChip(); buildGranularCron(); });
+  syncEveryChip();
 });
-document.getElementById('schedGDow').addEventListener('change', buildGranularCron);
+document.querySelectorAll('.sched-day-chip').forEach((c) => {
+  c.addEventListener('click', () => { schedDow = c.dataset.dow; renderDowChips(); buildGranularCron(); });
+});
 
 function setSchedMode(mode) {
   document.querySelectorAll('.sched-mode-btn').forEach((b) => {

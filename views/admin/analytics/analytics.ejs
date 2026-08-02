@@ -28,9 +28,9 @@
       <div class="al-page-body">
         <!-- Tab bar -->
         <div class="flex gap-1 mb-6" role="tablist">
-          <button type="button" id="tab-servers"  aria-controls="panel-servers"  data-tab="servers"  tabindex="0"  class="tab-btn px-4 py-2.5 text-sm font-medium transition" role="tab" aria-selected="true">Servers</button>
-          <button type="button" id="tab-nodes"    aria-controls="panel-nodes"    data-tab="nodes"    tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition" role="tab" aria-selected="false">Nodes</button>
-          <button type="button" id="tab-activity" aria-controls="panel-activity" data-tab="activity" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition" role="tab" aria-selected="false">Activity</button>
+          <button type="button" id="tab-servers"  aria-controls="panel-servers"  data-tab="servers"  tabindex="0"  class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="true"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>Servers</button>
+          <button type="button" id="tab-nodes"    aria-controls="panel-nodes"    data-tab="nodes"    tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %>Nodes</button>
+          <button type="button" id="tab-activity" aria-controls="panel-activity" data-tab="activity" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('activity', { class: 'size-4', strokeWidth: 1.5 }) %>Activity</button>
         </div>
 
         <!-- Loading state -->
