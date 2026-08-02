@@ -51,7 +51,7 @@ export function registerScheduleRoutes(router: Router): void {
   router.get(
     '/server/:id/schedules',
     isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    requireSubUserPermission('schedule.read'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -105,7 +105,7 @@ export function registerScheduleRoutes(router: Router): void {
   router.post(
     '/server/:id/schedules',
     isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    requireSubUserPermission('schedule.create'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -161,7 +161,7 @@ export function registerScheduleRoutes(router: Router): void {
   router.patch(
     '/server/:id/schedules/:scheduleId',
     isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    requireSubUserPermission('schedule.update'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -222,7 +222,7 @@ export function registerScheduleRoutes(router: Router): void {
   router.delete(
     '/server/:id/schedules/:scheduleId',
     isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    requireSubUserPermission('schedule.delete'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -267,7 +267,7 @@ export function registerScheduleRoutes(router: Router): void {
   router.post(
     '/server/:id/schedules/:scheduleId/tasks',
     isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    requireSubUserPermission('schedule.update'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -348,7 +348,7 @@ export function registerScheduleRoutes(router: Router): void {
   router.delete(
     '/server/:id/schedules/:scheduleId/tasks/:taskId',
     isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    requireSubUserPermission('schedule.update'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -402,7 +402,7 @@ export function registerScheduleRoutes(router: Router): void {
   router.post(
     '/server/:id/schedules/:scheduleId/run',
     isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    requireSubUserPermission('schedule.update'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;

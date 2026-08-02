@@ -1,0 +1,117 @@
+<%- include('../../components/header', { title: 'Mounts' }) %>
+
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0">
+      <%- include('../../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [ { label: 'Admin' }, { label: 'Mounts' } ] }) %>
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title">Mounts</h1>
+          <p class="al-page-desc">Host directories that can be bind-mounted into server containers.</p>
+        </div>
+        <button type="button" id="newMountBtn" class="al-btn-primary shrink-0"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>New mount</button>
+      </div>
+
+      <div class="al-page-body space-y-5">
+        <div class="al-card p-2">
+          <% if (!mounts.length) { %>
+            <p class="text-sm p-4" style="color:var(--theme-text-muted)">No mounts defined yet.</p>
+          <% } else { %>
+          <table class="al-table min-w-full">
+            <thead class="al-table-head">
+              <tr>
+                <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
+                <th class="al-table-th px-3 py-3.5">Source</th>
+                <th class="al-table-th px-3 py-3.5">Target</th>
+                <th class="al-table-th px-3 py-3.5">Access</th>
+                <th class="al-table-th px-3 py-3.5">Servers</th>
+                <th class="al-table-th px-3 py-3.5 text-right pr-6"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y" style="border-color:var(--theme-border)">
+              <% mounts.forEach(m => { %>
+              <tr>
+                <td class="px-3 py-3 pl-6 text-sm" style="color:var(--theme-text-strong)"><%= m.name %></td>
+                <td class="px-3 py-3 text-sm" style="color:var(--theme-text-muted)"><code class="text-xs bg-neutral-200 dark:bg-neutral-700 px-1 rounded"><%= m.source %></code></td>
+                <td class="px-3 py-3 text-sm" style="color:var(--theme-text-muted)"><code class="text-xs bg-neutral-200 dark:bg-neutral-700 px-1 rounded"><%= m.target %></code></td>
+                <td class="px-3 py-3 text-sm" style="color:var(--theme-text-muted)"><%= m.readOnly ? 'Read-only' : 'Read-write' %></td>
+                <td class="px-3 py-3 text-sm" style="color:var(--theme-text-muted)"><%= m._count.servers %></td>
+                <td class="px-3 py-3 pr-6 text-right">
+                  <button type="button" class="al-btn-ghost text-xs" onclick="deleteMount(<%= m.id %>)" style="color:var(--theme-danger)">Delete</button>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="mountModal" class="al-sheet-overlay fixed inset-0 z-50 hidden">
+  <div class="flex items-end sm:items-center justify-center min-h-screen p-0 sm:p-4">
+    <div class="fixed inset-0" onclick="closeMountModal()"></div>
+    <div class="al-sheet-panel relative border rounded-t-2xl sm:rounded-2xl shadow-lg max-w-lg w-full p-6" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+      <h3 class="text-sm font-semibold mb-4" style="color:var(--theme-text-strong)">New mount</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="al-label">Name</label>
+          <input id="mountName" class="al-input" placeholder="Shared plugins">
+        </div>
+        <div>
+          <label class="al-label">Source (host path)</label>
+          <input id="mountSource" class="al-input" placeholder="/data/shared/plugins">
+        </div>
+        <div>
+          <label class="al-label">Target (container path)</label>
+          <input id="mountTarget" class="al-input" placeholder="/home/container/plugins">
+        </div>
+        <label class="flex items-center gap-2 text-sm cursor-pointer" style="color:var(--theme-text-strong)">
+          <input id="mountReadOnly" type="checkbox" class="al-input h-4 w-4"> Read-only
+        </label>
+      </div>
+      <div class="flex gap-2 mt-6">
+        <button type="button" onclick="closeMountModal()" class="al-btn-secondary flex-1">Cancel</button>
+        <button type="button" id="saveMountBtn" class="al-btn-primary flex-1">Create mount</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../../components/toast') %>
+
+<script nonce="<%- nonce %>">
+document.getElementById('newMountBtn').addEventListener('click', () => {
+  document.getElementById('mountModal').classList.remove('hidden');
+  document.getElementById('mountModal').classList.add('flex');
+});
+function closeMountModal() {
+  document.getElementById('mountModal').classList.add('hidden');
+  document.getElementById('mountModal').classList.remove('flex');
+}
+document.getElementById('saveMountBtn').addEventListener('click', async () => {
+  const body = {
+    name: document.getElementById('mountName').value,
+    source: document.getElementById('mountSource').value,
+    target: document.getElementById('mountTarget').value,
+    readOnly: document.getElementById('mountReadOnly').checked,
+  };
+  const r = await fetch('/admin/mounts', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  });
+  const d = await r.json();
+  if (r.ok) { showToast('Mount created.', 'success'); setTimeout(() => location.reload(), 800); }
+  else showToast(d.error || 'Failed to create mount.', 'error');
+});
+window.deleteMount = async (id) => {
+  const r = await fetch('/admin/mounts/' + id, { method: 'DELETE' });
+  const d = await r.json();
+  if (r.ok) { showToast('Mount deleted.', 'success'); setTimeout(() => location.reload(), 800); }
+  else showToast(d.error || 'Failed to delete mount.', 'error');
+};
+</script>

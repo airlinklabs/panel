@@ -91,10 +91,10 @@ export function registerDatabaseRoutes(router: Router): void {
   );
 
   // ── POST /server/:id/databases ──────────────────────────────────────────
-  router.post(
-    '/server/:id/databases',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('settings'),
+router.post(
+  '/server/:id/databases',
+  isAuthenticatedForServer('id'),
+  requireSubUserPermission('database.create'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -184,7 +184,7 @@ export function registerDatabaseRoutes(router: Router): void {
   router.delete(
     '/server/:id/databases/:dbId',
     isAuthenticatedForServer('id'),
-    requireSubUserPermission('settings'),
+    requireSubUserPermission('database.delete'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -234,7 +234,7 @@ export function registerDatabaseRoutes(router: Router): void {
   router.post(
     '/server/:id/databases/:dbId/rotate-password',
     isAuthenticatedForServer('id'),
-    requireSubUserPermission('settings'),
+    requireSubUserPermission('database.update'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;

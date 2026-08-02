@@ -162,6 +162,15 @@
               </div>
             </div>
           </div>
+        <div class="al-card">
+            <h2 class="al-card-header">Maintenance Mode</h2>
+            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)">While enabled, no new servers may be created on this node and existing servers cannot be started or restarted.</p>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input id="nodeMaintenanceMode" type="checkbox" <%= node.maintenanceMode ? 'checked' : '' %> class="al-input h-4 w-4">
+              Put node into maintenance mode
+            </label>
+          </div>
+
         </form>
       </div>
 

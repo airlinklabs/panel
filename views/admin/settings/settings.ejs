@@ -391,6 +391,18 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Require 2FA for administrators</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Admin accounts with 2FA disabled are redirected to set it up before accessing the admin panel.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
+                  <input type="checkbox" id="require2faForAdmins" class="sr-only peer" aria-label="Require two-factor authentication for administrators" <%= settings.require2faForAdmins ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
                   <p class="text-sm font-medium text-neutral-700 dark:text-white">Hash API keys at rest</p>
                   <p class="text-xs text-neutral-500 mt-0.5">Store API keys as SHA-256 hashes in the database. <strong class="text-amber-700 dark:text-yellow-400">Enable before creating new keys — existing keys shown once.</strong></p>
                 </div>

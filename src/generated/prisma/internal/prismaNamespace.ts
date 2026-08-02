@@ -401,6 +401,8 @@ export const ModelName = {
   PasswordReset: 'PasswordReset',
   Session: 'Session',
   Server: 'Server',
+  Mount: 'Mount',
+  ServerMount: 'ServerMount',
   DatabaseHost: 'DatabaseHost',
   ServerDatabase: 'ServerDatabase',
   Schedule: 'Schedule',
@@ -436,7 +438,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "passwordReset" | "session" | "server" | "databaseHost" | "serverDatabase" | "schedule" | "scheduleTask" | "images" | "allocation" | "node" | "location" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential" | "subUser" | "activityLog"
+    modelProps: "users" | "passwordReset" | "session" | "server" | "mount" | "serverMount" | "databaseHost" | "serverDatabase" | "schedule" | "scheduleTask" | "images" | "allocation" | "node" | "location" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential" | "subUser" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -733,6 +735,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ServerCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ServerCountAggregateOutputType> | number
+        }
+      }
+    }
+    Mount: {
+      payload: Prisma.$MountPayload<ExtArgs>
+      fields: Prisma.MountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload>
+        }
+        findFirst: {
+          args: Prisma.MountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload>
+        }
+        findMany: {
+          args: Prisma.MountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload>[]
+        }
+        create: {
+          args: Prisma.MountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload>
+        }
+        createMany: {
+          args: Prisma.MountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload>[]
+        }
+        delete: {
+          args: Prisma.MountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload>
+        }
+        update: {
+          args: Prisma.MountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload>
+        }
+        deleteMany: {
+          args: Prisma.MountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload>[]
+        }
+        upsert: {
+          args: Prisma.MountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MountPayload>
+        }
+        aggregate: {
+          args: Prisma.MountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMount>
+        }
+        groupBy: {
+          args: Prisma.MountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MountCountAggregateOutputType> | number
+        }
+      }
+    }
+    ServerMount: {
+      payload: Prisma.$ServerMountPayload<ExtArgs>
+      fields: Prisma.ServerMountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ServerMountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ServerMountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload>
+        }
+        findFirst: {
+          args: Prisma.ServerMountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ServerMountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload>
+        }
+        findMany: {
+          args: Prisma.ServerMountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload>[]
+        }
+        create: {
+          args: Prisma.ServerMountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload>
+        }
+        createMany: {
+          args: Prisma.ServerMountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ServerMountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload>[]
+        }
+        delete: {
+          args: Prisma.ServerMountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload>
+        }
+        update: {
+          args: Prisma.ServerMountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload>
+        }
+        deleteMany: {
+          args: Prisma.ServerMountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ServerMountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ServerMountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload>[]
+        }
+        upsert: {
+          args: Prisma.ServerMountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ServerMountPayload>
+        }
+        aggregate: {
+          args: Prisma.ServerMountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateServerMount>
+        }
+        groupBy: {
+          args: Prisma.ServerMountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServerMountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ServerMountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ServerMountCountAggregateOutputType> | number
         }
       }
     }
@@ -2320,6 +2470,7 @@ export const ServerScalarFieldEnum = {
   Queued: 'Queued',
   Suspended: 'Suspended',
   backupLimit: 'backupLimit',
+  backupIgnoreList: 'backupIgnoreList',
   databaseLimit: 'databaseLimit',
   ownerId: 'ownerId',
   nodeId: 'nodeId',
@@ -2327,6 +2478,26 @@ export const ServerScalarFieldEnum = {
 } as const
 
 export type ServerScalarFieldEnum = (typeof ServerScalarFieldEnum)[keyof typeof ServerScalarFieldEnum]
+
+
+export const MountScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  source: 'source',
+  target: 'target',
+  readOnly: 'readOnly',
+  createdAt: 'createdAt'
+} as const
+
+export type MountScalarFieldEnum = (typeof MountScalarFieldEnum)[keyof typeof MountScalarFieldEnum]
+
+
+export const ServerMountScalarFieldEnum = {
+  serverId: 'serverId',
+  mountId: 'mountId'
+} as const
+
+export type ServerMountScalarFieldEnum = (typeof ServerMountScalarFieldEnum)[keyof typeof ServerMountScalarFieldEnum]
 
 
 export const DatabaseHostScalarFieldEnum = {
@@ -2433,7 +2604,8 @@ export const NodeScalarFieldEnum = {
   key: 'key',
   createdAt: 'createdAt',
   allocatedPorts: 'allocatedPorts',
-  sftpPort: 'sftpPort'
+  sftpPort: 'sftpPort',
+  maintenanceMode: 'maintenanceMode'
 } as const
 
 export type NodeScalarFieldEnum = (typeof NodeScalarFieldEnum)[keyof typeof NodeScalarFieldEnum]
@@ -2483,6 +2655,7 @@ export const SettingsScalarFieldEnum = {
   loginMaxAttempts: 'loginMaxAttempts',
   loginLockoutMinutes: 'loginLockoutMinutes',
   enforceDaemonHttps: 'enforceDaemonHttps',
+  require2faForAdmins: 'require2faForAdmins',
   behindReverseProxy: 'behindReverseProxy',
   hashApiKeys: 'hashApiKeys',
   airlinkCloudApiKey: 'airlinkCloudApiKey',
@@ -2861,6 +3034,8 @@ export type GlobalOmitConfig = {
   passwordReset?: Prisma.PasswordResetOmit
   session?: Prisma.SessionOmit
   server?: Prisma.ServerOmit
+  mount?: Prisma.MountOmit
+  serverMount?: Prisma.ServerMountOmit
   databaseHost?: Prisma.DatabaseHostOmit
   serverDatabase?: Prisma.ServerDatabaseOmit
   schedule?: Prisma.ScheduleOmit

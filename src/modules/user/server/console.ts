@@ -237,6 +237,20 @@ export function registerConsoleRoutes(router: Router): void {
           return;
         }
 
+        if (
+          server.node?.maintenanceMode &&
+          (powerAction === 'start' || powerAction === 'restart')
+        ) {
+          logger.warn(
+            `Attempt to start server ${serverId} on node ${server.node.id} in maintenance mode by user ${userId}`,
+          );
+          res.status(403).json({
+            error:
+              'This server is on a node under maintenance. Please try again later.',
+          });
+          return;
+        }
+
         if (powerAction === 'stop') {
           try {
             const stoppingStatus = {
@@ -399,6 +413,17 @@ export function registerConsoleRoutes(router: Router): void {
           return;
         }
 
+        if (server.node?.maintenanceMode) {
+          logger.warn(
+            `Attempt to restart server ${serverId} on node ${server.node.id} in maintenance mode by user ${userId}`,
+          );
+          res.status(403).json({
+            error:
+              'This server is on a node under maintenance. Please try again later.',
+          });
+          return;
+        }
+
         if (!server.dockerImage) {
           res.status(400).json({ error: 'Docker image not found.' });
           return;
@@ -420,7 +445,7 @@ export function registerConsoleRoutes(router: Router): void {
   router.post(
     '/server/:id/reinstall',
     isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    requireSubUserPermission('settings.reinstall'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -449,20 +474,6 @@ export function registerConsoleRoutes(router: Router): void {
             Queued: true,
           },
         });
-
-        await daemonRequest({
-          method: 'DELETE',
-          path: '/container',
-          nodeAddress: server.node.address,
-          nodePort: server.node.port,
-          nodeKey: server.node.key,
-          body: {
-            id: String(serverId),
-          },
-        });
-        logger.info('Container deleted for reinstallation: ' + serverId);
-
-        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         const { queueer } = await import('../../../handlers/queueer');
         queueer.addTask(async () => {
@@ -548,7 +559,7 @@ export function registerConsoleRoutes(router: Router): void {
 
                 const installResponse = await daemonRequest<{ status?: number }>({
                   method: 'POST',
-                  path: '/container/install',
+                  path: '/container/reinstall',
                   nodeAddress: serverToReinstall.node.address,
                   nodePort: serverToReinstall.node.port,
                   nodeKey: serverToReinstall.node.key,
@@ -620,6 +631,7 @@ export function registerConsoleRoutes(router: Router): void {
           success: true,
           message: 'Server reinstallation initiated',
         });
+        logActivity(req, 'server:reinstall', { serverId: String(serverId) }).catch(() => {});
       } catch (error) {
         logger.error('Error reinstalling server:', error);
         res.status(500).json({ error: 'Failed to reinstall server' });

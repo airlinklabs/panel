@@ -129,6 +129,7 @@ async function saveSettings(data: Record<string, any>) {
       loginMaxAttempts:      5,
       loginLockoutMinutes:   15,
       enforceDaemonHttps:    false,
+      require2faForAdmins:   false,
       behindReverseProxy:    false,
       hashApiKeys:           false,
       ...data,
@@ -305,6 +306,7 @@ const adminModule: Module = {
           const loginMaxAttempts    = parseInt(req.body.loginMaxAttempts, 10);
           const loginLockoutMinutes = parseInt(req.body.loginLockoutMinutes, 10);
           const enforceDaemonHttps  = req.body.enforceDaemonHttps === true;
+          const require2faForAdmins = req.body.require2faForAdmins === true;
           const behindReverseProxy  = req.body.behindReverseProxy  === true;
           const hashApiKeys         = req.body.hashApiKeys          === true;
 
@@ -324,6 +326,7 @@ const adminModule: Module = {
             loginMaxAttempts,
             loginLockoutMinutes,
             enforceDaemonHttps,
+            require2faForAdmins,
             behindReverseProxy,
             hashApiKeys,
           };

@@ -5,6 +5,7 @@ import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
 import logger from '../../handlers/logger';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import bcrypt from 'bcryptjs';
 
 
@@ -182,6 +183,72 @@ const sftpModule: Module = {
             logger.error('SFTP revocation error:', error);
             res.status(500).json({ error: 'Internal error while revoking SFTP credentials.' });
           }
+        }
+      },
+    );
+
+    router.get(
+      '/server/:id/sftp/activity',
+      isAuthenticatedForServer('id'),
+      requireSubUserPermission('files.sftp'),
+      async (req: Request, res: Response) => {
+        const serverId = getParamAsString(req.params?.id);
+
+        if (!serverId) {
+          res.status(400).json({ error: 'Server ID is required.' });
+          return;
+        }
+
+        try {
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found.' });
+            return;
+          }
+
+          const response = await daemonRequest<{ events: Array<Record<string, unknown>> }>({
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            method: 'GET',
+            path: '/sftp/activity',
+            params: { server: server.UUID },
+            timeout: 10000,
+          });
+
+          const events = response.data?.events ?? [];
+
+          for (const event of events) {
+            const kind = String((event as { kind?: string }).kind ?? '');
+            const username = String((event as { username?: string }).username ?? '');
+            const ip = String((event as { ip?: string }).ip ?? '');
+            const path = String((event as { path?: string; from?: string }).path ?? '');
+
+            const mapToAuditEvent: Record<string, string> = {
+              connect: 'file:sftp-connect',
+              disconnect: 'file:sftp-disconnect',
+              write: 'file:sftp-write',
+              read: 'file:sftp-read',
+              rename: 'file:sftp-rename',
+              remove: 'file:sftp-delete',
+            };
+            const auditEvent = mapToAuditEvent[kind];
+            if (!auditEvent) continue;
+
+            await logActivity(req, auditEvent as never, {
+              serverId,
+              metadata: { username, ip, ...(path ? { path } : {}) },
+            });
+          }
+
+          res.json({ events: events.length });
+        } catch (error) {
+          logger.error('SFTP activity drain error:', error);
+          res.status(500).json({ error: 'Internal error while fetching SFTP activity.' });
         }
       },
     );

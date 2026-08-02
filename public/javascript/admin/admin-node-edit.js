@@ -161,6 +161,22 @@
   }
 
   document.getElementById('updateNodeBtn').addEventListener('click', async () => {
+    const maintenanceInput = document.getElementById('nodeMaintenanceMode');
+    const maintenanceMode = maintenanceInput ? maintenanceInput.checked : false;
+
+    // Persist the maintenance toggle independently.
+    if (maintenanceInput) {
+      try {
+        await fetch('/admin/node/' + pd.nodeId + '/maintenance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ maintenanceMode })
+        });
+      } catch (err) {
+        console.error('Failed to save maintenance mode:', err);
+      }
+    }
+
     const nodeData = {
       name: document.getElementById('nodeName').value,
       ram: gbValue('nodeRamValue', 'nodeRam'),

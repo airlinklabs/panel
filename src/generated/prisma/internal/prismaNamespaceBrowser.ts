@@ -55,6 +55,8 @@ export const ModelName = {
   PasswordReset: 'PasswordReset',
   Session: 'Session',
   Server: 'Server',
+  Mount: 'Mount',
+  ServerMount: 'ServerMount',
   DatabaseHost: 'DatabaseHost',
   ServerDatabase: 'ServerDatabase',
   Schedule: 'Schedule',
@@ -158,6 +160,7 @@ export const ServerScalarFieldEnum = {
   Queued: 'Queued',
   Suspended: 'Suspended',
   backupLimit: 'backupLimit',
+  backupIgnoreList: 'backupIgnoreList',
   databaseLimit: 'databaseLimit',
   ownerId: 'ownerId',
   nodeId: 'nodeId',
@@ -165,6 +168,26 @@ export const ServerScalarFieldEnum = {
 } as const
 
 export type ServerScalarFieldEnum = (typeof ServerScalarFieldEnum)[keyof typeof ServerScalarFieldEnum]
+
+
+export const MountScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  source: 'source',
+  target: 'target',
+  readOnly: 'readOnly',
+  createdAt: 'createdAt'
+} as const
+
+export type MountScalarFieldEnum = (typeof MountScalarFieldEnum)[keyof typeof MountScalarFieldEnum]
+
+
+export const ServerMountScalarFieldEnum = {
+  serverId: 'serverId',
+  mountId: 'mountId'
+} as const
+
+export type ServerMountScalarFieldEnum = (typeof ServerMountScalarFieldEnum)[keyof typeof ServerMountScalarFieldEnum]
 
 
 export const DatabaseHostScalarFieldEnum = {
@@ -271,7 +294,8 @@ export const NodeScalarFieldEnum = {
   key: 'key',
   createdAt: 'createdAt',
   allocatedPorts: 'allocatedPorts',
-  sftpPort: 'sftpPort'
+  sftpPort: 'sftpPort',
+  maintenanceMode: 'maintenanceMode'
 } as const
 
 export type NodeScalarFieldEnum = (typeof NodeScalarFieldEnum)[keyof typeof NodeScalarFieldEnum]
@@ -321,6 +345,7 @@ export const SettingsScalarFieldEnum = {
   loginMaxAttempts: 'loginMaxAttempts',
   loginLockoutMinutes: 'loginLockoutMinutes',
   enforceDaemonHttps: 'enforceDaemonHttps',
+  require2faForAdmins: 'require2faForAdmins',
   behindReverseProxy: 'behindReverseProxy',
   hashApiKeys: 'hashApiKeys',
   airlinkCloudApiKey: 'airlinkCloudApiKey',

@@ -245,12 +245,15 @@ export async function startServerContainer(
     dockerImage?: string;
     startCommand?: string;
     variables?: string | null | ServerVariable[];
+    mounts?: { source: string; target: string; readOnly?: boolean }[];
   } = {},
 ): Promise<void> {
   const dockerImage = options.dockerImage ?? getConfiguredDockerImage(server);
   if (!dockerImage) {
     throw new Error('Docker image not found.');
   }
+
+  const mounts = options.mounts ?? await resolveServerMounts(serverId);
 
   await daemonRequest({
     method: 'POST',
@@ -268,8 +271,26 @@ export async function startServerContainer(
       Storage: server.Storage,
       env: buildServerRuntimeEnv(server, options.variables ?? server.Variables),
       StartCommand: options.startCommand ?? server.StartCommand,
+      mounts,
     },
   });
+}
+
+async function resolveServerMounts(
+  serverId: string,
+): Promise<{ source: string; target: string; readOnly?: boolean }[] | undefined> {
+  const serverMounts = await prisma.serverMount
+    .findMany({
+      where: { serverId },
+      include: { mount: true },
+    })
+    .catch(() => []);
+  if (serverMounts.length === 0) return undefined;
+  return serverMounts.map((sm) => ({
+    source: sm.mount.source,
+    target: sm.mount.target,
+    readOnly: sm.mount.readOnly,
+  }));
 }
 
 export async function restartServerContainer(
@@ -280,6 +301,7 @@ export async function restartServerContainer(
     startCommand?: string;
     stopCommand?: string;
     variables?: string | null | ServerVariable[];
+    mounts?: { source: string; target: string; readOnly?: boolean }[];
   } = {},
 ): Promise<void> {
   await stopServerContainer(server, serverId, options.stopCommand);

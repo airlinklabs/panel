@@ -71,6 +71,7 @@ const twoFactorModule: Module = {
             user,
             req,
             settings,
+            required: req.query.required === '1',
             qrDataUrl,
             secretBase32: secretBase32.match(/.{1,4}/g)?.join(' ') ?? secretBase32,
           });

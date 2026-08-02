@@ -96,6 +96,7 @@ export type SettingsMinAggregateOutputType = {
   loginMaxAttempts: number | null
   loginLockoutMinutes: number | null
   enforceDaemonHttps: boolean | null
+  require2faForAdmins: boolean | null
   behindReverseProxy: boolean | null
   hashApiKeys: boolean | null
   airlinkCloudApiKey: string | null
@@ -149,6 +150,7 @@ export type SettingsMaxAggregateOutputType = {
   loginMaxAttempts: number | null
   loginLockoutMinutes: number | null
   enforceDaemonHttps: boolean | null
+  require2faForAdmins: boolean | null
   behindReverseProxy: boolean | null
   hashApiKeys: boolean | null
   airlinkCloudApiKey: string | null
@@ -202,6 +204,7 @@ export type SettingsCountAggregateOutputType = {
   loginMaxAttempts: number
   loginLockoutMinutes: number
   enforceDaemonHttps: number
+  require2faForAdmins: number
   behindReverseProxy: number
   hashApiKeys: number
   airlinkCloudApiKey: number
@@ -293,6 +296,7 @@ export type SettingsMinAggregateInputType = {
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
   enforceDaemonHttps?: true
+  require2faForAdmins?: true
   behindReverseProxy?: true
   hashApiKeys?: true
   airlinkCloudApiKey?: true
@@ -346,6 +350,7 @@ export type SettingsMaxAggregateInputType = {
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
   enforceDaemonHttps?: true
+  require2faForAdmins?: true
   behindReverseProxy?: true
   hashApiKeys?: true
   airlinkCloudApiKey?: true
@@ -399,6 +404,7 @@ export type SettingsCountAggregateInputType = {
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
   enforceDaemonHttps?: true
+  require2faForAdmins?: true
   behindReverseProxy?: true
   hashApiKeys?: true
   airlinkCloudApiKey?: true
@@ -539,6 +545,7 @@ export type SettingsGroupByOutputType = {
   loginMaxAttempts: number
   loginLockoutMinutes: number
   enforceDaemonHttps: boolean
+  require2faForAdmins: boolean
   behindReverseProxy: boolean
   hashApiKeys: boolean
   airlinkCloudApiKey: string | null
@@ -615,6 +622,7 @@ export type settingsWhereInput = {
   loginMaxAttempts?: Prisma.IntFilter<"settings"> | number
   loginLockoutMinutes?: Prisma.IntFilter<"settings"> | number
   enforceDaemonHttps?: Prisma.BoolFilter<"settings"> | boolean
+  require2faForAdmins?: Prisma.BoolFilter<"settings"> | boolean
   behindReverseProxy?: Prisma.BoolFilter<"settings"> | boolean
   hashApiKeys?: Prisma.BoolFilter<"settings"> | boolean
   airlinkCloudApiKey?: Prisma.StringNullableFilter<"settings"> | string | null
@@ -668,6 +676,7 @@ export type settingsOrderByWithRelationInput = {
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   enforceDaemonHttps?: Prisma.SortOrder
+  require2faForAdmins?: Prisma.SortOrder
   behindReverseProxy?: Prisma.SortOrder
   hashApiKeys?: Prisma.SortOrder
   airlinkCloudApiKey?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -724,6 +733,7 @@ export type settingsWhereUniqueInput = Prisma.AtLeast<{
   loginMaxAttempts?: Prisma.IntFilter<"settings"> | number
   loginLockoutMinutes?: Prisma.IntFilter<"settings"> | number
   enforceDaemonHttps?: Prisma.BoolFilter<"settings"> | boolean
+  require2faForAdmins?: Prisma.BoolFilter<"settings"> | boolean
   behindReverseProxy?: Prisma.BoolFilter<"settings"> | boolean
   hashApiKeys?: Prisma.BoolFilter<"settings"> | boolean
   airlinkCloudApiKey?: Prisma.StringNullableFilter<"settings"> | string | null
@@ -777,6 +787,7 @@ export type settingsOrderByWithAggregationInput = {
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   enforceDaemonHttps?: Prisma.SortOrder
+  require2faForAdmins?: Prisma.SortOrder
   behindReverseProxy?: Prisma.SortOrder
   hashApiKeys?: Prisma.SortOrder
   airlinkCloudApiKey?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -838,6 +849,7 @@ export type settingsScalarWhereWithAggregatesInput = {
   loginMaxAttempts?: Prisma.IntWithAggregatesFilter<"settings"> | number
   loginLockoutMinutes?: Prisma.IntWithAggregatesFilter<"settings"> | number
   enforceDaemonHttps?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  require2faForAdmins?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
   behindReverseProxy?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
   hashApiKeys?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
   airlinkCloudApiKey?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
@@ -890,6 +902,7 @@ export type settingsCreateInput = {
   loginMaxAttempts?: number
   loginLockoutMinutes?: number
   enforceDaemonHttps?: boolean
+  require2faForAdmins?: boolean
   behindReverseProxy?: boolean
   hashApiKeys?: boolean
   airlinkCloudApiKey?: string | null
@@ -943,6 +956,7 @@ export type settingsUncheckedCreateInput = {
   loginMaxAttempts?: number
   loginLockoutMinutes?: number
   enforceDaemonHttps?: boolean
+  require2faForAdmins?: boolean
   behindReverseProxy?: boolean
   hashApiKeys?: boolean
   airlinkCloudApiKey?: string | null
@@ -995,6 +1009,7 @@ export type settingsUpdateInput = {
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   loginLockoutMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   enforceDaemonHttps?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  require2faForAdmins?: Prisma.BoolFieldUpdateOperationsInput | boolean
   behindReverseProxy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hashApiKeys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   airlinkCloudApiKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1048,6 +1063,7 @@ export type settingsUncheckedUpdateInput = {
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   loginLockoutMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   enforceDaemonHttps?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  require2faForAdmins?: Prisma.BoolFieldUpdateOperationsInput | boolean
   behindReverseProxy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hashApiKeys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   airlinkCloudApiKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1101,6 +1117,7 @@ export type settingsCreateManyInput = {
   loginMaxAttempts?: number
   loginLockoutMinutes?: number
   enforceDaemonHttps?: boolean
+  require2faForAdmins?: boolean
   behindReverseProxy?: boolean
   hashApiKeys?: boolean
   airlinkCloudApiKey?: string | null
@@ -1153,6 +1170,7 @@ export type settingsUpdateManyMutationInput = {
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   loginLockoutMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   enforceDaemonHttps?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  require2faForAdmins?: Prisma.BoolFieldUpdateOperationsInput | boolean
   behindReverseProxy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hashApiKeys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   airlinkCloudApiKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1206,6 +1224,7 @@ export type settingsUncheckedUpdateManyInput = {
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   loginLockoutMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   enforceDaemonHttps?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  require2faForAdmins?: Prisma.BoolFieldUpdateOperationsInput | boolean
   behindReverseProxy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hashApiKeys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   airlinkCloudApiKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1259,6 +1278,7 @@ export type settingsCountOrderByAggregateInput = {
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   enforceDaemonHttps?: Prisma.SortOrder
+  require2faForAdmins?: Prisma.SortOrder
   behindReverseProxy?: Prisma.SortOrder
   hashApiKeys?: Prisma.SortOrder
   airlinkCloudApiKey?: Prisma.SortOrder
@@ -1330,6 +1350,7 @@ export type settingsMaxOrderByAggregateInput = {
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   enforceDaemonHttps?: Prisma.SortOrder
+  require2faForAdmins?: Prisma.SortOrder
   behindReverseProxy?: Prisma.SortOrder
   hashApiKeys?: Prisma.SortOrder
   airlinkCloudApiKey?: Prisma.SortOrder
@@ -1383,6 +1404,7 @@ export type settingsMinOrderByAggregateInput = {
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   enforceDaemonHttps?: Prisma.SortOrder
+  require2faForAdmins?: Prisma.SortOrder
   behindReverseProxy?: Prisma.SortOrder
   hashApiKeys?: Prisma.SortOrder
   airlinkCloudApiKey?: Prisma.SortOrder
@@ -1456,6 +1478,7 @@ export type settingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   loginMaxAttempts?: boolean
   loginLockoutMinutes?: boolean
   enforceDaemonHttps?: boolean
+  require2faForAdmins?: boolean
   behindReverseProxy?: boolean
   hashApiKeys?: boolean
   airlinkCloudApiKey?: boolean
@@ -1509,6 +1532,7 @@ export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   loginMaxAttempts?: boolean
   loginLockoutMinutes?: boolean
   enforceDaemonHttps?: boolean
+  require2faForAdmins?: boolean
   behindReverseProxy?: boolean
   hashApiKeys?: boolean
   airlinkCloudApiKey?: boolean
@@ -1562,6 +1586,7 @@ export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   loginMaxAttempts?: boolean
   loginLockoutMinutes?: boolean
   enforceDaemonHttps?: boolean
+  require2faForAdmins?: boolean
   behindReverseProxy?: boolean
   hashApiKeys?: boolean
   airlinkCloudApiKey?: boolean
@@ -1615,6 +1640,7 @@ export type settingsSelectScalar = {
   loginMaxAttempts?: boolean
   loginLockoutMinutes?: boolean
   enforceDaemonHttps?: boolean
+  require2faForAdmins?: boolean
   behindReverseProxy?: boolean
   hashApiKeys?: boolean
   airlinkCloudApiKey?: boolean
@@ -1634,7 +1660,7 @@ export type settingsSelectScalar = {
   s3PathStyle?: boolean
 }
 
-export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle", ExtArgs["result"]["settings"]>
+export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "require2faForAdmins" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle", ExtArgs["result"]["settings"]>
 
 export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "settings"
@@ -1673,6 +1699,7 @@ export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     loginMaxAttempts: number
     loginLockoutMinutes: number
     enforceDaemonHttps: boolean
+    require2faForAdmins: boolean
     behindReverseProxy: boolean
     hashApiKeys: boolean
     airlinkCloudApiKey: string | null
@@ -2146,6 +2173,7 @@ export interface settingsFieldRefs {
   readonly loginMaxAttempts: Prisma.FieldRef<"settings", 'Int'>
   readonly loginLockoutMinutes: Prisma.FieldRef<"settings", 'Int'>
   readonly enforceDaemonHttps: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly require2faForAdmins: Prisma.FieldRef<"settings", 'Boolean'>
   readonly behindReverseProxy: Prisma.FieldRef<"settings", 'Boolean'>
   readonly hashApiKeys: Prisma.FieldRef<"settings", 'Boolean'>
   readonly airlinkCloudApiKey: Prisma.FieldRef<"settings", 'String'>

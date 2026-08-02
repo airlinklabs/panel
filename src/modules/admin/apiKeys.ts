@@ -8,6 +8,8 @@ import { getParamAsNumber } from '../../utils/typeHelpers';
 import crypto from 'crypto';
 import { apiEndpoints } from '../api/v1/apiDocs';
 
+const MAX_API_KEYS_PER_USER = 25;
+
 function sha256(value: string): string {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
@@ -159,8 +161,15 @@ const coreModule: Module = {
             return;
           }
 
-          const rawKey = generateApiKey(32);
           const userId = req.session.user?.id;
+
+          const keyCount = await prisma.apiKey.count({ where: { userId: userId ?? undefined } });
+          if (keyCount >= MAX_API_KEYS_PER_USER) {
+            res.status(400).json({ error: `API key limit reached (${MAX_API_KEYS_PER_USER}). Delete an existing key first.` });
+            return;
+          }
+
+          const rawKey = generateApiKey(32);
           const useHash = await shouldHashKeys();
           const storedKey = useHash ? sha256(rawKey) : rawKey;
 

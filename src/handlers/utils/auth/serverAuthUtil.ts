@@ -7,8 +7,13 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import { renderErrorPage } from '../../errorPages';
 
 export const SUBUSER_PERMISSIONS = [
+  'websocket.connect',
   'console',
   'console.send',
+  'control.start',
+  'control.stop',
+  'control.restart',
+  'control.console',
   'files',
   'files.read',
   'files.write',
@@ -16,6 +21,8 @@ export const SUBUSER_PERMISSIONS = [
   'files.sftp',
   'files.pull',
   'files.archive',
+  'files.create',
+  'files.update',
   'startup',
   'startup.read',
   'startup.update',
@@ -25,19 +32,40 @@ export const SUBUSER_PERMISSIONS = [
   'backups.create',
   'backups.delete',
   'backups.download',
+  'backups.restore',
+  'backups.lock',
+  'database.create',
+  'database.read',
+  'database.update',
+  'database.delete',
+  'database.view_password',
+  'schedule.create',
+  'schedule.read',
+  'schedule.update',
+  'schedule.delete',
+  'allocation.read',
+  'allocation.create',
+  'allocation.update',
+  'allocation.delete',
   'settings',
   'settings.update',
+  'settings.rename',
+  'settings.reinstall',
+  'activity.read',
 ] as const;
 
 export type SubUserPermission = (typeof SUBUSER_PERMISSIONS)[number];
 
 // Logical groups for the subuser permission UI.
 export const PERMISSION_GROUPS: { title: string; perms: SubUserPermission[] }[] = [
-  { title: 'Console control', perms: ['console', 'console.send'] },
-  { title: 'Files', perms: ['files', 'files.read', 'files.write', 'files.delete', 'files.sftp', 'files.pull', 'files.archive'] },
+  { title: 'Console control', perms: ['console', 'console.send', 'control.start', 'control.stop', 'control.restart', 'control.console', 'websocket.connect'] },
+  { title: 'Files', perms: ['files', 'files.read', 'files.write', 'files.delete', 'files.sftp', 'files.pull', 'files.archive', 'files.create', 'files.update'] },
   { title: 'Startup', perms: ['startup', 'startup.read', 'startup.update', 'startup.docker-image'] },
-  { title: 'Backups', perms: ['backups', 'backups.read', 'backups.create', 'backups.delete', 'backups.download'] },
-  { title: 'Settings', perms: ['settings', 'settings.update'] },
+  { title: 'Backups', perms: ['backups', 'backups.read', 'backups.create', 'backups.delete', 'backups.download', 'backups.restore', 'backups.lock'] },
+  { title: 'Databases', perms: ['database.create', 'database.read', 'database.update', 'database.delete', 'database.view_password'] },
+  { title: 'Schedules', perms: ['schedule.create', 'schedule.read', 'schedule.update', 'schedule.delete'] },
+  { title: 'Allocations', perms: ['allocation.read', 'allocation.create', 'allocation.update', 'allocation.delete'] },
+  { title: 'Settings & Activity', perms: ['settings', 'settings.update', 'settings.rename', 'settings.reinstall', 'activity.read'] },
 ];
 
 export function parseSubUserPermissions(raw: string | null | undefined): string[] {
@@ -94,10 +122,14 @@ export const isAuthenticatedForServer =
         const serverId = req.params[serverIdParam];
         const server = await prisma.server.findUnique({
           where: { UUID: getParamAsString(serverId) },
-          select: { ownerId: true },
+          select: { ownerId: true, Suspended: true },
         });
 
-        if (server?.ownerId === userId) {
+        if (server && server.ownerId === userId) {
+          if (server.Suspended) {
+            renderErrorPage(req, res, 403, 'This server is suspended.');
+            return;
+          }
           next();
           return;
         }
@@ -105,6 +137,10 @@ export const isAuthenticatedForServer =
         // Subuser access: attach the SubUser row for downstream permission checks.
         const subUser = await findSubUser(getParamAsString(serverId), userId);
         if (subUser) {
+          if (server?.Suspended) {
+            renderErrorPage(req, res, 403, 'This server is suspended.');
+            return;
+          }
           (req as any).subUser = subUser;
           next();
           return;
@@ -142,16 +178,24 @@ export const isAuthenticatedForServerWS =
         const serverId = req.params[serverIdParam];
         const server = await prisma.server.findUnique({
           where: { UUID: getParamAsString(serverId) },
-          select: { ownerId: true },
+          select: { ownerId: true, Suspended: true },
         });
 
-        if (server?.ownerId === userId) {
+        if (server && server.ownerId === userId) {
+          if (server.Suspended) {
+            ws.close();
+            return;
+          }
           next();
           return;
         }
 
         const subUser = await findSubUser(getParamAsString(serverId), userId);
         if (subUser) {
+          if (server?.Suspended) {
+            ws.close();
+            return;
+          }
           (req as any).subUser = subUser;
           next();
           return;

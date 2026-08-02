@@ -582,6 +582,32 @@ const adminModule: Module = {
       },
     );
 
+    router.post(
+      '/admin/node/:id/maintenance',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const nodeId = getParamAsNumber(req.params.id);
+          const node = await prisma.node.findUnique({ where: { id: nodeId } });
+          if (!node) {
+            res.status(404).json({ message: 'Node not found.' });
+            return;
+          }
+          const maintenanceMode = req.body.maintenanceMode === true;
+          const updated = await prisma.node.update({
+            where: { id: nodeId },
+            data: { maintenanceMode },
+          });
+          res.status(200).json({ message: 'Node maintenance mode updated.', node: updated });
+          return;
+        } catch (error) {
+          logger.error('Error toggling node maintenance mode:', error);
+          res.status(500).json({ message: 'Error toggling node maintenance mode.' });
+          return;
+        }
+      },
+    );
+
     router.get(
       '/admin/node/:id/stats',
       isAuthenticated(true),

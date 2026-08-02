@@ -38,6 +38,16 @@ export type Session = Prisma.SessionModel
  */
 export type Server = Prisma.ServerModel
 /**
+ * Model Mount
+ * 
+ */
+export type Mount = Prisma.MountModel
+/**
+ * Model ServerMount
+ * 
+ */
+export type ServerMount = Prisma.ServerMountModel
+/**
  * Model DatabaseHost
  * 
  */

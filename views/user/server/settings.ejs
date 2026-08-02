@@ -93,6 +93,20 @@
           </div>
         </div>
 
+        <div class="al-card p-5">
+          <h2 class="text-lg font-semibold mb-1" style="color:var(--theme-text-strong)">Allocations</h2>
+          <p class="text-sm mb-4" style="color:var(--theme-text-muted)">Manage the ports assigned to this server from the node's pool.</p>
+
+          <div id="allocationsSection" class="space-y-3">
+            <p class="text-xs text-neutral-500">Loading allocations...</p>
+          </div>
+
+          <div class="mt-4 flex gap-2">
+            <select id="allocAddPort" class="al-input flex-1"><option value="">Select an available port...</option></select>
+            <button type="button" id="allocAddBtn" class="al-btn-primary shrink-0">Add port</button>
+          </div>
+        </div>
+
         <div class="al-card p-5" style="background:var(--theme-danger-bg);border-color:color-mix(in oklch, var(--theme-danger) 20%, transparent)">
           <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
 
@@ -203,5 +217,60 @@
         }
       });
     });
+
+    // ── Allocations management ─────────────────────────────────────────────
+    const allocList = document.getElementById('allocationsList');
+    const availSelect = document.getElementById('availPortSelect');
+    const addBtn = document.getElementById('addAllocationBtn');
+    const serverUuid = '<%= server.UUID %>';
+
+    function renderAllocations(data) {
+      if (!allocList) return;
+
+      const chips = data.allocated;
+      if (!chips.length) {
+        allocList.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">No ports assigned yet.</p>';
+      } else {
+        allocList.innerHTML = chips.map(p =>
+          '<div class="flex items-center justify-between rounded-lg px-3 py-2 text-sm" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">' +
+            '<span>' + (p.primary ? '<strong>' + p.external + '</strong> <em>(primary)</em>' : p.external + ':' + p.internal) + '</span>' +
+            (p.primary ? '' : '<button type="button" class="al-btn-ghost text-xs" onclick="releaseAllocation(' + p.external + ')">Remove</button>') +
+          '</div>'
+        ).join('');
+      }
+
+      if (availSelect) {
+        availSelect.innerHTML = '<option value="">Select an available port...</option>' +
+          data.available.map(p => '<option value="' + p + '">' + p + '</option>').join('');
+      }
+    }
+
+    async function loadAllocations() {
+      try {
+        const r = await fetch('/server/' + serverUuid + '/settings/allocations');
+        const data = await r.json();
+        if (data.allocated) renderAllocations(data);
+      } catch { if (allocList) allocList.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">Could not load allocations.</p>'; }
+    }
+
+    window.releaseAllocation = async function(port) {
+      const r = await fetch('/server/' + serverUuid + '/settings/allocations/' + port, { method: 'DELETE' });
+      const d = await r.json();
+      if (r.ok) { showToast('Port ' + port + ' released.', 'success'); loadAllocations(); }
+      else showToast(d.error || 'Failed to release port.', 'error');
+    };
+
+    if (addBtn) addBtn.addEventListener('click', async () => {
+      const port = availSelect.value;
+      if (!port) { showToast('Select a port first.', 'error'); return; }
+      const r = await fetch('/server/' + serverUuid + '/settings/allocations', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ port: Number(port) }),
+      });
+      const d = await r.json();
+      if (r.ok) { showToast('Port ' + port + ' added.', 'success'); loadAllocations(); }
+      else showToast(d.error || 'Failed to add port.', 'error');
+    });
+
+    if (document.getElementById('allocationsList')) loadAllocations();
   });
 </script>

@@ -78,6 +78,7 @@ model Server {
   Queued           Boolean            @default(true)
   Suspended        Boolean            @default(false)
   backupLimit      Int                @default(5)
+  backupIgnoreList String            @default("")
   databaseLimit    Int                @default(0)
   ownerId          Int
   nodeId           Int
@@ -92,6 +93,28 @@ model Server {
   databases        ServerDatabase[]
   activityLogs     ActivityLog[]
   allocations      Allocation[]
+  serverMounts      ServerMount[]
+}
+
+model Mount {
+  id       Int     @id @default(autoincrement())
+  name     String
+  source   String
+  target   String
+  readOnly Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  servers ServerMount[]
+}
+
+model ServerMount {
+  serverId String
+  mountId  Int
+
+  @@id([serverId, mountId])
+  @@index([serverId])
+  server Server @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
+  mount  Mount  @relation(fields: [mountId], references: [id], onDelete: Cascade)
 }
 
 model DatabaseHost {
@@ -198,6 +221,7 @@ model Node {
   createdAt           DateTime   @default(now())
   allocatedPorts      String?    @default("[]")
   sftpPort            Int        @default(3003)
+  maintenanceMode     Boolean    @default(false)
   location            Location?  @relation(fields: [locationId], references: [id])
   servers             Server[]
   databaseHosts       DatabaseHost[]
@@ -246,6 +270,7 @@ model settings {
   loginMaxAttempts          Int      @default(5)
   loginLockoutMinutes       Int      @default(15)
   enforceDaemonHttps        Boolean  @default(false)
+  require2faForAdmins       Boolean  @default(false)
   behindReverseProxy        Boolean  @default(false)
   hashApiKeys               Boolean  @default(false)
   airlinkCloudApiKey        String?

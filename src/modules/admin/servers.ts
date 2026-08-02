@@ -92,6 +92,7 @@ const adminModule: Module = {
               node: true,
               owner: true,
               image: true,
+              serverMounts: { include: { mount: true } },
             },
           });
 
@@ -106,6 +107,10 @@ const adminModule: Module = {
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
+          const mounts = await prisma.mount.findMany();
+          const serverMounts = await prisma.serverMount.findMany({
+            where: { serverId: server.UUID },
+          });
 
           res.render('admin/servers/edit', {
             user,
@@ -115,6 +120,8 @@ const adminModule: Module = {
             nodes,
             images,
             users,
+            mounts,
+            serverMounts,
           });
         } catch (error: unknown) {
           logger.error('Error fetching server for editing:', error);
@@ -166,6 +173,8 @@ const adminModule: Module = {
             Suspended,
             StartCommand,
             databaseLimit,
+            backupLimit,
+            backupIgnoreList,
             ports,
           } = req.body;
 
@@ -230,8 +239,10 @@ const adminModule: Module = {
               Swap: Swap !== undefined && Swap !== '' ? parseInt(Swap) || 0 : 0,
               Cpu: parseInt(Cpu),
               Storage: parseInt(Storage),
-              databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : 5,
               StartCommand,
+              databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : 5,
+              backupLimit: backupLimit !== undefined && backupLimit !== '' ? Math.max(0, parseInt(backupLimit) || 0) : 5,
+              backupIgnoreList: typeof backupIgnoreList === 'string' ? backupIgnoreList.trim() : '',
               Ports: serializeServerPorts(submittedPorts),
               Suspended: newSuspendedState,
             },
@@ -277,6 +288,25 @@ const adminModule: Module = {
 
           logger.info(`Server ${serverId} updated successfully`);
           await logActivity(req, 'server:update', { serverId: String(server.UUID), metadata: { name, suspended: newSuspendedState } });
+
+          // Reconcile server mounts
+          try {
+            const rawMountIds = req.body.mountIds;
+            const nextMountIds: number[] = Array.isArray(rawMountIds)
+              ? rawMountIds.map((m: unknown) => Number(String(m)).valueOf()).filter((v) => Number.isInteger(v))
+              : typeof rawMountIds === 'string'
+                ? [Number(rawMountIds)].filter((v) => Number.isInteger(v))
+                : [];
+            await prisma.serverMount.deleteMany({ where: { serverId: server.UUID } });
+            if (nextMountIds.length > 0) {
+              await prisma.serverMount.createMany({
+                data: nextMountIds.map((mountId: number) => ({ serverId: server.UUID, mountId })),
+              });
+            }
+          } catch (mountError) {
+            logger.error('Error syncing server mounts:', mountError);
+          }
+
           res.status(200).json({ success: true });
         } catch (error: unknown) {
           logger.error('Error updating server:', error);
@@ -366,6 +396,11 @@ let minPorts = 0;
 
             if (!node) {
               res.status(400).send('Selected node not found');
+              return;
+            }
+
+            if (node.maintenanceMode) {
+              res.status(400).send('Cannot create a server on a node under maintenance');
               return;
             }
 

@@ -22,6 +22,13 @@ export const isAuthenticated =
           return renderErrorPage(req, res, 403);
         }
 
+        if (!user.totpEnabled) {
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          if (settings?.require2faForAdmins) {
+            return res.redirect('/account/2fa/setup?required=1');
+          }
+        }
+
         return next();
       }
 

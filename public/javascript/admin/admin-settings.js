@@ -80,6 +80,7 @@
         loginMaxAttempts:    parseInt(document.getElementById('loginMaxAttempts').value, 10),
         loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes').value, 10),
         enforceDaemonHttps:  document.getElementById('enforceDaemonHttps').checked,
+        require2faForAdmins: document.getElementById('require2faForAdmins').checked,
         behindReverseProxy:  document.getElementById('behindReverseProxy').checked,
         hashApiKeys:         document.getElementById('hashApiKeys').checked,
         virusTotalApiKey:    document.getElementById('vtKeyInput').value.trim() || null,

@@ -110,6 +110,16 @@ export function registerBackupRoutes(router: Router): void {
           return;
         }
 
+        let ignoreList: string[] = [];
+        if (server.backupIgnoreList) {
+          try {
+            const parsed = JSON.parse(server.backupIgnoreList);
+            ignoreList = Array.isArray(parsed) ? parsed : [];
+          } catch {
+            ignoreList = server.backupIgnoreList.split('\n').map((l) => l.trim()).filter(Boolean);
+          }
+        }
+
         const response = await daemonRequest<{
           success: boolean;
           backup?: { filePath: string; uuid: string; size: number; checksum?: string };
@@ -122,6 +132,7 @@ export function registerBackupRoutes(router: Router): void {
           body: {
             id: getParamAsString(serverId),
             name: name.trim(),
+            ignore: ignoreList,
           },
           timeout: 300000,
         });

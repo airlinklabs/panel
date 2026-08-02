@@ -178,6 +178,55 @@
           </div>
 
           <div class="al-card">
+            <h2 class="al-card-header">Backups</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="al-label">
+                  <%- icon('database-backup', { size: 14, class: 'shrink-0' }) %>
+                  Backup limit:
+                </label>
+                <input id="serverBackupLimit" name="backupLimit" type="number" min="0" value="<%= server.backupLimit ?? 5 %>" class="al-input mt-2">
+                <p class="text-xs text-neutral-400">0 = unlimited backups</p>
+              </div>
+              <div>
+                <label for="backupIgnoreList" class="al-label">
+                  <%- icon('filter', { size: 14, class: 'shrink-0' }) %>
+                  Backup ignore list:
+                </label>
+                <textarea id="backupIgnoreList" name="backupIgnoreList" rows="4" class="al-input mt-2" placeholder="cache/%0A*.log%0A.backup"><%-
+                  (() => {
+                    try {
+                      const raw = server.backupIgnoreList || '';
+                      if (raw.trim().startsWith('[')) {
+                        const parsed = JSON.parse(raw);
+                        return Array.isArray(parsed) ? parsed.join('\n') : raw;
+                      }
+                      return raw;
+                    } catch { return server.backupIgnoreList || ''; }
+                  })()
+                %></textarea>
+                <p class="text-xs text-neutral-400">One glob pattern per line (e.g. <code>cache/</code>, <code>*.log</code>).</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="al-card">
+            <h2 class="al-card-header">Mounts</h2>
+            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)">Attach host directories to this server's container. Define mounts in the Admin → Mounts page.</p>
+            <div class="space-y-2">
+              <% (mounts || []).forEach(m => { %>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="mountIds" value="<%= m.id %>" class="al-input h-4 w-4" <%= (serverMounts||[]).some(sm => sm.mountId === m.id) ? 'checked' : '' %>>
+                  <span class="text-sm" style="color:var(--theme-text-strong)"><%= m.name %> <span class="text-xs" style="color:var(--theme-text-muted)"><%= m.source %> → <%= m.target %> (<%= m.readOnly ? 'ro' : 'rw' %>)</span></span>
+                </label>
+              <% }) %>
+            </div>
+            <% if (!(mounts || []).length) { %>
+              <p class="text-xs mt-2" style="color:var(--theme-text-muted)">No mounts available.</p>
+            <% } %>
+          </div>
+
+          <div class="al-card">
             <h2 class="al-card-header">Startup Configuration</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
@@ -538,6 +587,7 @@ function generateRandomName() {
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
       data.ports = assignedPorts;
+      data.mountIds = formData.getAll('mountIds').map(v => Number(v.valueOf()));
 
       // Handle checkbox values
       if (!formData.has('allowStartupEdit')) {

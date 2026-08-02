@@ -239,6 +239,14 @@ export function initializeDefaultUIComponents(): void {
     priority: 50,
     isAdminItem: true
   });
+  uiComponentStore.addSidebarItem({
+    id: 'mounts',
+    label: 'Mounts',
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mt-0.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h18v15H3zM3 12h18" /></svg>',
+    url: '/admin/mounts',
+    priority: 45,
+    isAdminItem: true
+  });
   uiComponentStore.addServerMenuItem({
     id: 'admin',
     label: 'Admin',
@@ -323,13 +331,22 @@ export function initializeDefaultUIComponents(): void {
     isDefault: true
   });
 
-  uiComponentStore.addServerMenuItem({
+uiComponentStore.addServerMenuItem({
     id: 'settings',
     label: 'Settings',
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 mb-0.5 inline-flex mr-1"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clip-rule="evenodd" /></svg>',
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 mb-0.5 inline-flex mr-1"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.028.352-.087.43l-.723.595a1.875 1.875 0 0 0 .375 3.163l1.158.575c.09.045.138.14.148.245.02.2.031.4.031.602 0 .087.026.169.071.242l.105-.02.178 1.072c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.074c.02-.12.093-.218.213-.255.3-.1.599-.216.898-.34.343-.109.678-.218.993-.342.303-.12.497.202.497.202l.624.543a1.875 1.875 0 0 0 2.395-.038l1.117-.9 1.474 1.197.642 1.972c.01.071-.062.13-.144.13H22.5v1.5a1.125 1.125 0 0 0 1.125 1.125h.75a2.25 2.25 0 0 1 2.25 2.25v2.25a1.875 1.875 0 0 1-1.875 1.875H12.75a1.875 1.875 0 0 1-1.875-1.875v-2.25a2.25 2.25 0 0 1 2.25-2.25h.75a1.125 1.125 0 0 0 1.125-1.125v-0.1a1.875 1.875 0 0 1 1.875-1.875Z" /></svg>',
     url: '/server/:uuid/settings',
     priority: 60,
     isDefault: true
+  });
+
+  uiComponentStore.addSidebarItem({
+    id: 'mounts',
+    label: 'Mounts',
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mt-0.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75ZM22.5 21H1.5" /></svg>',
+    url: '/admin/mounts',
+    priority: 45,
+    isAdminItem: true
   });
 }
 
