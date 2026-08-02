@@ -70,6 +70,19 @@
                 </label>
                 <input id="hostPassword" type="password" class="al-input" placeholder="••••••••" autocomplete="new-password">
               </div>
+              <div>
+                <label for="hostNode" class="al-label flex items-center gap-1.5">
+                  <%- icon('network', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  Node
+                </label>
+                <select id="hostNode" class="al-input">
+                  <option value="">Any node (unscoped)</option>
+                  <% (nodes || []).forEach(n => { %>
+                    <option value="<%= n.id %>"><%= n.name %></option>
+                  <% }); %>
+                </select>
+                <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Scopes this host to servers running on one node. Leave empty to allow any server.</p>
+              </div>
             </div>
           </div>
         </form>

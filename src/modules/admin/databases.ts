@@ -32,7 +32,10 @@ const databasesModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const hosts = await prisma.databaseHost.findMany({
-            include: { _count: { select: { databases: true } } },
+            include: {
+              _count: { select: { databases: true } },
+              node: { select: { id: true, name: true } },
+            },
             orderBy: { id: 'asc' },
           });
           const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
@@ -51,7 +54,8 @@ const databasesModule: Module = {
       async (req: Request, res: Response) => {
         const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-        res.render('admin/databases/create', { user, settings, req });
+        const nodes = await prisma.node.findMany({ orderBy: { name: 'asc' } });
+        res.render('admin/databases/create', { user, settings, nodes, req });
       },
     );
 
@@ -60,11 +64,12 @@ const databasesModule: Module = {
       isAuthenticated(true, 'airlink.admin.databases.create'),
       async (req: Request, res: Response) => {
         try {
-          const { name, host, port, username, password } = req.body;
+          const { name, host, port, username, password, nodeId } = req.body;
           if (!name || !host || !username || !password) {
             return res.redirect('/admin/databases/create?err=missing_fields');
           }
           const portNum = getParamAsNumber(port) || 3306;
+          const parsedNode = getParamAsNumber(nodeId);
           await prisma.databaseHost.create({
             data: {
               name: String(name).trim(),
@@ -72,6 +77,7 @@ const databasesModule: Module = {
               port: portNum,
               username: String(username).trim(),
               password: String(password),
+              nodeId: parsedNode && parsedNode > 0 ? parsedNode : null,
             },
           });
           res.redirect('/admin/databases?err=none');

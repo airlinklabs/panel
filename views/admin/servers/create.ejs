@@ -135,6 +135,14 @@
                 </div>
                 <p class="text-xs text-neutral-400">Min 128 MB</p>
               </div>
+              <div>
+                <label class="al-label">
+                  <%- icon('layers', { size: 14, class: 'shrink-0' }) %>
+                  Database limit:
+                </label>
+                <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="5" class="al-input mt-2 mb-1">
+                <p class="text-xs text-neutral-400">0 = unlimited databases</p>
+              </div>
             </div>
           </div>
 

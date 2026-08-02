@@ -210,6 +210,8 @@ const userCreateServerModule: Module = {
             Swap: swap,
             Cpu: cpu,
             Storage: storage,
+            backupLimit: 5,
+            databaseLimit: 5,
             Variables: JSON.stringify(imageVariables),
             StartCommand: startCommand,
             dockerImage: JSON.stringify(imageDocker),

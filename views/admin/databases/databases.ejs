@@ -90,6 +90,10 @@
                     <div class="mt-1 ml-2 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset text-neutral-600 dark:text-neutral-300 ring-neutral-600/20">
                       <%= host.username %>
                     </div>
+                    <div class="mt-1 ml-2 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset text-neutral-600 dark:text-neutral-300 ring-neutral-600/20">
+                      <%- icon('network', { size: 12, class: 'mr-1' }) %>
+                      <%= host.node ? host.node.name : 'Any node' %>
+                    </div>
                   </td>
                   <td class="al-table-td"><%= host._count.databases %></td>
                   <td class="al-table-td"><%= new Date(host.createdAt).toLocaleDateString() %></td>

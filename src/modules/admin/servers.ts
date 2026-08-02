@@ -157,6 +157,7 @@ const adminModule: Module = {
             allowStartupEdit,
             Suspended,
             StartCommand,
+            databaseLimit,
             ports,
           } = req.body;
 
@@ -223,6 +224,7 @@ const adminModule: Module = {
               Swap: Swap !== undefined && Swap !== '' ? parseInt(Swap) || 0 : 0,
               Cpu: parseInt(Cpu),
               Storage: parseInt(Storage),
+              databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : 5,
               StartCommand,
               Ports: serializeServerPorts(submittedPorts),
               Suspended: newSuspendedState,
@@ -318,6 +320,7 @@ const adminModule: Module = {
           dockerImage,
           variables,
           ownerId,
+          databaseLimit,
           allowStartupEdit,
         } = req.body;
 
@@ -468,6 +471,7 @@ const adminModule: Module = {
               Memory: (parseInt(Memory) || 1024),
               Swap: Swap !== undefined && Swap !== '' ? parseInt(Swap) || 0 : 0,
               Cpu: parseInt(Cpu) || 100,
+              databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : 5,
               Storage: parseInt(Storage) || 20480,
               Variables: JSON.stringify(mergedVariables),
               StartCommand,

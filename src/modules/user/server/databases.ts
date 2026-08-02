@@ -53,7 +53,12 @@ export function registerDatabaseRoutes(router: Router): void {
             include: { host: true },
             orderBy: { createdAt: 'desc' },
           }),
-          prisma.databaseHost.findMany({ orderBy: { id: 'asc' } }),
+          prisma.databaseHost.findMany({
+            where: {
+              OR: [{ nodeId: null }, { nodeId: server.nodeId ?? -1 }],
+            },
+            orderBy: { id: 'asc' },
+          }),
         ]);
 
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
@@ -104,6 +109,21 @@ export function registerDatabaseRoutes(router: Router): void {
         if (!host) {
           res.status(400).json({ error: 'Invalid database host.' });
           return;
+        }
+        if (host.nodeId !== null && host.nodeId !== server.nodeId) {
+          res.status(403).json({ error: 'This database host is not available for this server\'s node.' });
+          return;
+        }
+
+        const databaseLimit = server.databaseLimit ?? 0;
+        if (databaseLimit > 0) {
+          const existing = await prisma.serverDatabase.count({
+            where: { serverId: server.UUID },
+          });
+          if (existing >= databaseLimit) {
+            res.status(400).json({ error: `Database limit reached (${databaseLimit}). Delete an existing database first.` });
+            return;
+          }
         }
 
         try {

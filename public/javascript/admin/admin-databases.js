@@ -90,6 +90,7 @@ async function deleteHost(hostId) {
       port: document.getElementById('hostPort').value || 3306,
       username: document.getElementById('hostUser').value.trim(),
       password: document.getElementById('hostPassword').value,
+      nodeId: document.getElementById('hostNode')?.value || '',
     };
 
     if (!data.name || !data.host || !data.username || !data.password) {
