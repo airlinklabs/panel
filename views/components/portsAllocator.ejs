@@ -32,8 +32,11 @@
       <div id="paEmpty" class="hidden text-center py-8">
         <p class="text-sm" style="color:var(--theme-text-muted)">No ports available on this node</p>
       </div>
-      <button type="button" id="paAddRow" class="mt-3 w-full rounded-xl border border-dashed px-3 py-2.5 text-xs font-medium transition hover:bg-neutral-100 dark:hover:bg-white/5"
-        style="color:var(--theme-text-muted); border-color:var(--theme-border)">+ Add port</button>
+      <button type="button" id="paAddRow" class="mt-3 w-full flex items-center justify-center gap-1.5 rounded-xl border border-dashed px-3 py-2.5 text-xs font-medium transition hover:bg-neutral-100 dark:hover:bg-white/5"
+        style="color:var(--theme-text-muted); border-color:var(--theme-border)">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        Add port
+      </button>
     </div>
 
     <div class="flex items-center justify-between gap-2 px-5 py-4 border-t" style="border-color:var(--theme-border)">
@@ -92,40 +95,66 @@
 
   function commit() {
     rows = rows.filter(function (row) { return row.name && row.internalPort && row.externalPort; });
-    rows.forEach(function (row, index) { row.primary = index === 0; });
-    cfg._lastKey = rows.map(rowKey).join(';');
-    if (cfg.onSave) cfg.onSave(rows);
-    close();
-  }
-
-  function render() {
-    rowsEl.innerHTML = '';
-    const avail = cfg.availablePorts || [];
-    const min = cfg.requirements.length;
-    const used = new Set(rows.filter(function (r) { return r.externalPort; }).map(function (r) { return String(r.externalPort); }));
-
-    if (avail.length === 0) {
-      emptyEl.classList.remove('hidden');
-      addBtn.classList.add('hidden');
-      countEl.textContent = '0 ports';
-    } else {
-      emptyEl.classList.add('hidden');
-      addBtn.classList.remove('hidden');
-      countEl.textContent = rows.length + ' port' + (rows.length === 1 ? '' : 's') + ' assigned';
-    }
-
     rows.forEach(function (row, index) {
       const el = document.createElement('div');
-      el.className = 'pa-row grid grid-cols-1 md:grid-cols-[1fr_120px_1fr_auto] gap-2 items-end rounded-xl border p-3';
+      el.className = 'pa-row rounded-xl border p-3';
       el.style.borderColor = 'var(--theme-border)';
       el.style.background = 'var(--theme-bg-secondary)';
-      el.innerHTML = '';
 
-      const nameWrap = field('Port name', 'text');
-      const nameInput = nameWrap.querySelector('input');
+      const topRow = document.createElement('div');
+      topRow.className = 'flex items-center gap-2 mb-2';
+
+      const nameLabel = document.createElement('span');
+      nameLabel.className = 'text-[11px] font-medium';
+      nameLabel.style.color = 'var(--theme-text-muted)';
+      nameLabel.textContent = 'Port name';
+      topRow.appendChild(nameLabel);
+
+      if (index === 0) {
+        const badge = document.createElement('span');
+        badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide';
+        badge.style.background = 'var(--theme-accent)';
+        badge.style.color = 'var(--theme-accent-text)';
+        badge.textContent = 'Primary';
+        topRow.appendChild(badge);
+      }
+
+      if (index < min) {
+        const req = document.createElement('span');
+        req.className = 'px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide';
+        req.style.background = 'var(--theme-accent-subtle)';
+        req.style.color = 'var(--theme-text-strong)';
+        req.textContent = 'Required';
+        topRow.appendChild(req);
+      } else {
+        const rmBtn = document.createElement('button');
+        rmBtn.type = 'button';
+        rmBtn.className = 'pa-rm ml-auto rounded-lg p-1.5 transition hover:bg-neutral-200 dark:hover:bg-white/10';
+        rmBtn.style.color = 'var(--theme-danger)';
+        rmBtn.setAttribute('aria-label', 'Remove port');
+        rmBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l.608 10.34A2.25 2.25 0 0 0 9.6 20h4.8a2.25 2.25 0 0 0 2.242-2.16L17.25 7.5M12 11.25v4.5M8.25 7.5V5.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V7.5M5.25 7.5h13.5" /></svg>';
+        rmBtn.addEventListener('click', function () {
+          rows.splice(index, 1);
+          render();
+        });
+        topRow.appendChild(rmBtn);
+      }
+
+      el.appendChild(topRow);
+
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.className = 'w-full rounded-lg border px-3 py-2 text-sm mb-2.5';
+      nameInput.style.borderColor = 'var(--theme-border)';
+      nameInput.style.background = 'var(--theme-bg-card)';
+      nameInput.style.color = 'var(--theme-text-strong)';
       nameInput.value = row.name || '';
       nameInput.placeholder = 'e.g. Game port';
       nameInput.addEventListener('input', function () { row.name = nameInput.value; });
+      el.appendChild(nameInput);
+
+      const pair = document.createElement('div');
+      pair.className = 'grid grid-cols-2 gap-2.5';
 
       const intWrap = field('Internal port', 'number');
       const intInput = intWrap.querySelector('input');
@@ -133,8 +162,10 @@
       intInput.value = row.internalPort !== undefined && row.internalPort !== null ? row.internalPort : '';
       intInput.placeholder = '25565';
       intInput.addEventListener('input', function () { row.internalPort = Number(intInput.value) || ''; });
+      pair.appendChild(intWrap);
 
-      const extWrap = document.createElement('label');
+      const extWrap = document.createElement('div');
+      extWrap.className = 'relative';
       const extLabel = document.createElement('span');
       extLabel.className = 'block text-[11px] mb-1';
       extLabel.style.color = 'var(--theme-text-muted)';
@@ -142,36 +173,55 @@
       extWrap.appendChild(extLabel);
       const extBtn = document.createElement('button');
       extBtn.type = 'button';
-      extBtn.className = 'pa-ext w-full text-left rounded-lg border px-3 py-2 text-sm truncate transition hover:bg-neutral-100 dark:hover:bg-white/5';
+      extBtn.className = 'pa-ext flex w-full items-center justify-between gap-1.5 rounded-lg border px-3 py-2 text-sm transition hover:bg-neutral-100 dark:hover:bg-white/5';
       extBtn.style.borderColor = 'var(--theme-border)';
       extBtn.style.color = 'var(--theme-text-strong)';
       extWrap.appendChild(extBtn);
+      const extText = document.createElement('span');
+      extText.className = 'truncate';
+      const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      chevron.setAttribute('viewBox', '0 0 24 24');
+      chevron.setAttribute('fill', 'currentColor');
+      chevron.setAttribute('class', 'size-4 shrink-0');
+      chevron.style.color = 'var(--theme-text-muted)';
+      chevron.innerHTML = '<path fill-rule="evenodd" d="M12.53 16.28a.75.75 0 0 1-1.06 0l-7.5-7.5a.75.75 0 0 1 1.06-1.06L12 14.69l6.97-6.97a.75.75 0 1 1 1.06 1.06l-7.5 7.5Z" clip-rule="evenodd" />';
       const listEl = document.createElement('div');
       listEl.className = 'hidden pa-extlist absolute z-10 w-full rounded-lg border shadow-xl max-h-48 overflow-y-auto';
       listEl.style.background = 'var(--theme-bg-card)';
       listEl.style.borderColor = 'var(--theme-border)';
       extWrap.appendChild(listEl);
-      extWrap.className = 'relative';
 
       const extValue = row.externalPort !== undefined && row.externalPort !== null ? String(row.externalPort) : '';
       const chosen = avail.find(function (a) { return String(a.port) === extValue; });
-      extBtn.textContent = chosen ? chosen.label : (extValue ? 'Port ' + extValue : 'Select port…');
-      if (!chosen) extBtn.style.opacity = '0.45';
+      extText.textContent = chosen ? chosen.label : (extValue ? 'Port ' + extValue : 'Select port…');
+      if (!chosen) extText.style.opacity = '0.45';
+      extBtn.appendChild(extText);
+      extBtn.appendChild(chevron);
 
       function fillList() {
         listEl.innerHTML = '';
         avail.forEach(function (item) {
-          const taken = used.has(String(item.port)) && String(item.port) !== extValue;
+          const isSel = String(item.port) === extValue;
+          const taken = used.has(String(item.port)) && !isSel;
           const opt = document.createElement('div');
-          opt.className = 'pa-extopt px-3 py-2 text-xs truncate cursor-pointer transition hover:bg-neutral-100 dark:hover:bg-white/5';
-          opt.style.color = taken ? 'var(--theme-text-muted)' : 'var(--theme-text-strong)';
+          opt.className = 'pa-extopt flex items-center justify-between gap-2 px-3 py-2 text-xs truncate cursor-pointer transition hover:bg-neutral-100 dark:hover:bg-white/5';
+          opt.style.color = taken ? 'var(--theme-text-muted)' : (isSel ? 'var(--theme-accent)' : 'var(--theme-text-strong)');
           opt.style.opacity = taken ? '0.45' : '1';
-          opt.textContent = item.label + (taken ? ' — in use' : '');
+          const txt = document.createElement('span');
+          txt.className = 'truncate';
+          txt.textContent = item.label + (taken ? ' — in use' : '');
+          opt.appendChild(txt);
+          if (isSel) {
+            const ck = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            ck.setAttribute('viewBox', '0 0 24 24');
+            ck.setAttribute('fill', 'currentColor');
+            ck.setAttribute('class', 'size-3.5 shrink-0');
+            ck.innerHTML = '<path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" />';
+            opt.appendChild(ck);
+          }
           if (!taken) {
             opt.addEventListener('click', function () {
               row.externalPort = item.port;
-              extBtn.textContent = item.label;
-              extBtn.style.opacity = '1';
               window.removeEventListener('resize', paHideList);
               window.removeEventListener('scroll', paHideList, true);
               extWrap.appendChild(listEl);
@@ -228,34 +278,7 @@
         }
       });
 
-      const rmBtn = document.createElement('button');
-      rmBtn.type = 'button';
-      rmBtn.className = 'md:justify-self-end rounded-lg border px-3 py-2 text-xs font-medium transition';
-      rmBtn.style.color = 'var(--theme-danger)';
-      rmBtn.style.borderColor = 'var(--theme-border)';
-      rmBtn.textContent = index < min ? 'Required' : 'Remove';
-      rmBtn.disabled = index < min;
-      rmBtn.style.opacity = index < min ? '0.4' : '1';
-      if (index >= min) {
-        rmBtn.addEventListener('click', function () {
-          rows.splice(index, 1);
-          render();
-        });
-      }
-
-      if (index === 0) {
-        const badge = document.createElement('span');
-        badge.className = 'pa-primary ml-auto px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide';
-        badge.style.background = 'var(--theme-accent)';
-        badge.style.color = 'var(--theme-accent-text)';
-        badge.textContent = 'Primary';
-        nameWrap.appendChild(badge);
-      }
-
-      el.appendChild(nameWrap);
-      el.appendChild(intWrap);
-      el.appendChild(extWrap);
-      el.appendChild(rmBtn);
+      el.appendChild(pair);
       el.style.setProperty('--pa-i', String(index));
       rowsEl.appendChild(el);
     });

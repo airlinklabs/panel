@@ -78,7 +78,7 @@
              </button>
              <div data-more-panel class="absolute left-0 top-full mt-1 z-50 hidden min-w-44 rounded-xl border p-1.5 shadow-lg" style="background:var(--theme-bg-card);border-color:var(--theme-border);">
                <% navOverflowItems.forEach(entry => { %>
-               <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm whitespace-nowrap transition hover:bg-neutral-100 dark:hover:bg-white/5" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
+               <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm whitespace-nowrap truncate transition hover:bg-neutral-100 dark:hover:bg-white/5" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
                  <%- entry.item.icon %>
                  <%= entry.item.label %>
                </a>
@@ -154,7 +154,7 @@
                 </button>
                 <div data-more-panel class="absolute right-0 top-full mt-1 z-50 hidden min-w-44 rounded-xl border p-1.5 shadow-lg" style="background:var(--theme-bg-card);border-color:var(--theme-border);">
                   <% navOverflowItems.forEach(entry => { %>
-                  <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm whitespace-nowrap transition hover:bg-neutral-100 dark:hover:bg-white/5" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
+                  <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm whitespace-nowrap truncate transition hover:bg-neutral-100 dark:hover:bg-white/5" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
                     <%- entry.item.icon %>
                     <%= entry.item.label %>
                   </a>
@@ -259,37 +259,64 @@
      window.addEventListener('popstate', syncActiveLink);
      document.addEventListener('al:navigated', syncActiveLink);
 
-     // More dropdown toggles — scoped to this include's container
-     function closeMoreMenus(except) {
-       root.querySelectorAll('[data-more-panel]').forEach(function(panel) {
-         if (panel === except) return;
-         panel.classList.add('hidden');
-       });
-       root.querySelectorAll('[data-more-btn]').forEach(function(btn) {
-         btn.setAttribute('aria-expanded', 'false');
-       });
-     }
+      // More dropdown toggles — scoped to this include's container.
+      // Panels float to <body> with fixed positioning on open: the mobile
+      // nav is an overflow-x scroll container, which clips absolute children.
+      function hideMorePanel(panel) {
+        if (panel._paAnchor) {
+          panel._paAnchor.appendChild(panel);
+          panel.removeAttribute('style');
+        }
+        panel.classList.add('hidden');
+        if (panel._paBtn) panel._paBtn.setAttribute('aria-expanded', 'false');
+      }
 
-     root.querySelectorAll('[data-more-btn]').forEach(function(btn) {
-       btn.addEventListener('click', function(e) {
-         e.stopPropagation();
-         var container = btn.closest('[data-more-menu]');
-         var panel = container ? container.querySelector('[data-more-panel]') : null;
-         if (!panel) return;
-         var willOpen = panel.classList.contains('hidden');
-         closeMoreMenus(panel);
-         if (willOpen) {
-           panel.classList.remove('hidden');
-           btn.setAttribute('aria-expanded', 'true');
-         }
-       });
-     });
+      function closeMoreMenus(except) {
+        root.querySelectorAll('[data-more-panel]').forEach(function(panel) {
+          if (panel === except) return;
+          hideMorePanel(panel);
+        });
+      }
 
-     root.querySelectorAll('[data-more-panel] a').forEach(function(link) {
-       link.addEventListener('click', function() { closeMoreMenus(null); });
-     });
+      root.querySelectorAll('[data-more-menu]').forEach(function(menu) {
+        var btn = menu.querySelector('[data-more-btn]');
+        var panel = menu.querySelector('[data-more-panel]');
+        if (!btn || !panel) return;
+        panel._paAnchor = menu;
+        panel._paBtn = btn;
 
-     document.addEventListener('click', function() { closeMoreMenus(null); });
-     document.addEventListener('al:navigated', function() { closeMoreMenus(null); });
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var willOpen = panel.classList.contains('hidden');
+          closeMoreMenus(panel);
+          if (!willOpen) return;
+
+          var rect = btn.getBoundingClientRect();
+          var gap = 6;
+          var maxWidth = Math.min(320, window.innerWidth - 24);
+          var left = Math.min(rect.left, window.innerWidth - maxWidth - 12);
+          if (left < 12) left = 12;
+          panel.style.position = 'fixed';
+          panel.style.maxWidth = maxWidth + 'px';
+          panel.style.left = left + 'px';
+          var spaceBelow = window.innerHeight - rect.bottom - gap;
+          var spaceAbove = rect.top - gap;
+          if (spaceBelow < 160 && spaceAbove > spaceBelow) {
+            panel.style.bottom = (window.innerHeight - rect.top + gap) + 'px';
+          } else {
+            panel.style.top = (rect.bottom + gap) + 'px';
+          }
+          document.body.appendChild(panel);
+          panel.classList.remove('hidden');
+          btn.setAttribute('aria-expanded', 'true');
+        });
+      });
+
+      root.querySelectorAll('[data-more-panel] a').forEach(function(link) {
+        link.addEventListener('click', function() { closeMoreMenus(null); });
+      });
+
+      document.addEventListener('click', function() { closeMoreMenus(null); });
+      document.addEventListener('al:navigated', function() { closeMoreMenus(null); });
    })();
   </script>
