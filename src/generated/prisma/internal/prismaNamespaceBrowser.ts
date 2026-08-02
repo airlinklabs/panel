@@ -143,6 +143,7 @@ export const ServerScalarFieldEnum = {
   createdAt: 'createdAt',
   Ports: 'Ports',
   Memory: 'Memory',
+  Swap: 'Swap',
   Cpu: 'Cpu',
   Storage: 'Storage',
   Variables: 'Variables',

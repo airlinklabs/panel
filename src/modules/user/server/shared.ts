@@ -188,6 +188,7 @@ export type ServerRuntimeConfig = Pick<
   ServerPageServer,
   | 'Cpu'
   | 'Memory'
+  | 'Swap'
   | 'Ports'
   | 'StartCommand'
   | 'Storage'
@@ -258,7 +259,9 @@ export async function startServerContainer(
       image: dockerImage,
       ports: portsToDaemonString(server.Ports),
       Memory: server.Memory,
+      Swap: server.Swap ?? 0,
       Cpu: server.Cpu,
+      Storage: server.Storage,
       env: buildServerRuntimeEnv(server, options.variables ?? server.Variables),
       StartCommand: options.startCommand ?? server.StartCommand,
     },

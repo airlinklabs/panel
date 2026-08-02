@@ -171,6 +171,23 @@
                 <p class="text-[11px] text-neutral-400 mt-1.5">50% = half a core. <%= resourceLimits.maxCpu > 0 ? 'Max ' + resourceLimits.maxCpu + '%' : 'Unlimited' %></p>
               </div>
               <div>
+                <label for="SwapDisplay" class="al-label flex items-center gap-1.5">
+                  <%- icon('memory-stick', { width: 14, height: 14 }) %>
+                  Swap
+                </label>
+                <!-- hidden field always holds MB; -1 = unlimited, 0 = off -->
+                <input type="hidden" id="Swap" value="0">
+                <div class="flex items-stretch gap-0">
+                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="SwapDisplay" data-step="128" data-min="-1" aria-label="Decrease swap">−</button>
+                  <input id="SwapDisplay" type="number" value="0" min="-1" class="stepper-input flex-1" aria-label="Swap value">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="SwapDisplay" data-step="128" aria-label="Increase swap">+</button>
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="SwapDisplay" data-hidden="Swap"
+                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+                </div>
+                <p class="text-[11px] text-neutral-400 mt-1.5">0 = off, -1 = unlimited</p>
+              </div>
+              <div>
                 <label for="StorageDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('hard-drive', { width: 14, height: 14 }) %>
                   Storage

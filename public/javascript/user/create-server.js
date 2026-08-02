@@ -157,6 +157,7 @@
     const Memory      = parseInt(document.getElementById('Memory').value);
     const Cpu         = parseInt(document.getElementById('Cpu').value);
     const Storage     = parseInt(document.getElementById('Storage').value);
+    const Swap        = parseInt(document.getElementById('Swap').value);
 
     // Clear previous validation states
     document.querySelectorAll('.form-input').forEach(el => el.classList.remove('invalid'));
@@ -211,7 +212,7 @@
       const r = await fetch('/create-server', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, nodeId, imageId, dockerImage, Memory, Cpu, Storage }),
+        body: JSON.stringify({ name, description, nodeId, imageId, dockerImage, Memory, Cpu, Storage, Swap }),
       });
       const d = await r.json();
       if (d.success) {

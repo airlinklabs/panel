@@ -29,6 +29,7 @@ export type AggregateServer = {
 export type ServerAvgAggregateOutputType = {
   id: number | null
   Memory: number | null
+  Swap: number | null
   Cpu: number | null
   Storage: number | null
   backupLimit: number | null
@@ -40,6 +41,7 @@ export type ServerAvgAggregateOutputType = {
 export type ServerSumAggregateOutputType = {
   id: number | null
   Memory: number | null
+  Swap: number | null
   Cpu: number | null
   Storage: number | null
   backupLimit: number | null
@@ -56,6 +58,7 @@ export type ServerMinAggregateOutputType = {
   createdAt: Date | null
   Ports: string | null
   Memory: number | null
+  Swap: number | null
   Cpu: number | null
   Storage: number | null
   Variables: string | null
@@ -79,6 +82,7 @@ export type ServerMaxAggregateOutputType = {
   createdAt: Date | null
   Ports: string | null
   Memory: number | null
+  Swap: number | null
   Cpu: number | null
   Storage: number | null
   Variables: string | null
@@ -102,6 +106,7 @@ export type ServerCountAggregateOutputType = {
   createdAt: number
   Ports: number
   Memory: number
+  Swap: number
   Cpu: number
   Storage: number
   Variables: number
@@ -122,6 +127,7 @@ export type ServerCountAggregateOutputType = {
 export type ServerAvgAggregateInputType = {
   id?: true
   Memory?: true
+  Swap?: true
   Cpu?: true
   Storage?: true
   backupLimit?: true
@@ -133,6 +139,7 @@ export type ServerAvgAggregateInputType = {
 export type ServerSumAggregateInputType = {
   id?: true
   Memory?: true
+  Swap?: true
   Cpu?: true
   Storage?: true
   backupLimit?: true
@@ -149,6 +156,7 @@ export type ServerMinAggregateInputType = {
   createdAt?: true
   Ports?: true
   Memory?: true
+  Swap?: true
   Cpu?: true
   Storage?: true
   Variables?: true
@@ -172,6 +180,7 @@ export type ServerMaxAggregateInputType = {
   createdAt?: true
   Ports?: true
   Memory?: true
+  Swap?: true
   Cpu?: true
   Storage?: true
   Variables?: true
@@ -195,6 +204,7 @@ export type ServerCountAggregateInputType = {
   createdAt?: true
   Ports?: true
   Memory?: true
+  Swap?: true
   Cpu?: true
   Storage?: true
   Variables?: true
@@ -305,6 +315,7 @@ export type ServerGroupByOutputType = {
   createdAt: Date
   Ports: string
   Memory: number
+  Swap: number
   Cpu: number
   Storage: number
   Variables: string | null
@@ -351,6 +362,7 @@ export type ServerWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Server"> | Date | string
   Ports?: Prisma.StringFilter<"Server"> | string
   Memory?: Prisma.IntFilter<"Server"> | number
+  Swap?: Prisma.IntFilter<"Server"> | number
   Cpu?: Prisma.IntFilter<"Server"> | number
   Storage?: Prisma.IntFilter<"Server"> | number
   Variables?: Prisma.StringNullableFilter<"Server"> | string | null
@@ -383,6 +395,7 @@ export type ServerOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   Ports?: Prisma.SortOrder
   Memory?: Prisma.SortOrder
+  Swap?: Prisma.SortOrder
   Cpu?: Prisma.SortOrder
   Storage?: Prisma.SortOrder
   Variables?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -418,6 +431,7 @@ export type ServerWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Server"> | Date | string
   Ports?: Prisma.StringFilter<"Server"> | string
   Memory?: Prisma.IntFilter<"Server"> | number
+  Swap?: Prisma.IntFilter<"Server"> | number
   Cpu?: Prisma.IntFilter<"Server"> | number
   Storage?: Prisma.IntFilter<"Server"> | number
   Variables?: Prisma.StringNullableFilter<"Server"> | string | null
@@ -450,6 +464,7 @@ export type ServerOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   Ports?: Prisma.SortOrder
   Memory?: Prisma.SortOrder
+  Swap?: Prisma.SortOrder
   Cpu?: Prisma.SortOrder
   Storage?: Prisma.SortOrder
   Variables?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -481,6 +496,7 @@ export type ServerScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Server"> | Date | string
   Ports?: Prisma.StringWithAggregatesFilter<"Server"> | string
   Memory?: Prisma.IntWithAggregatesFilter<"Server"> | number
+  Swap?: Prisma.IntWithAggregatesFilter<"Server"> | number
   Cpu?: Prisma.IntWithAggregatesFilter<"Server"> | number
   Storage?: Prisma.IntWithAggregatesFilter<"Server"> | number
   Variables?: Prisma.StringNullableWithAggregatesFilter<"Server"> | string | null
@@ -503,6 +519,7 @@ export type ServerCreateInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -532,6 +549,7 @@ export type ServerUncheckedCreateInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -560,6 +578,7 @@ export type ServerUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -589,6 +608,7 @@ export type ServerUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -618,6 +638,7 @@ export type ServerCreateManyInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -640,6 +661,7 @@ export type ServerUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -660,6 +682,7 @@ export type ServerUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -693,6 +716,7 @@ export type ServerCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   Ports?: Prisma.SortOrder
   Memory?: Prisma.SortOrder
+  Swap?: Prisma.SortOrder
   Cpu?: Prisma.SortOrder
   Storage?: Prisma.SortOrder
   Variables?: Prisma.SortOrder
@@ -711,6 +735,7 @@ export type ServerCountOrderByAggregateInput = {
 export type ServerAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   Memory?: Prisma.SortOrder
+  Swap?: Prisma.SortOrder
   Cpu?: Prisma.SortOrder
   Storage?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
@@ -727,6 +752,7 @@ export type ServerMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   Ports?: Prisma.SortOrder
   Memory?: Prisma.SortOrder
+  Swap?: Prisma.SortOrder
   Cpu?: Prisma.SortOrder
   Storage?: Prisma.SortOrder
   Variables?: Prisma.SortOrder
@@ -750,6 +776,7 @@ export type ServerMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   Ports?: Prisma.SortOrder
   Memory?: Prisma.SortOrder
+  Swap?: Prisma.SortOrder
   Cpu?: Prisma.SortOrder
   Storage?: Prisma.SortOrder
   Variables?: Prisma.SortOrder
@@ -768,6 +795,7 @@ export type ServerMinOrderByAggregateInput = {
 export type ServerSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   Memory?: Prisma.SortOrder
+  Swap?: Prisma.SortOrder
   Cpu?: Prisma.SortOrder
   Storage?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
@@ -998,6 +1026,7 @@ export type ServerCreateWithoutOwnerInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1026,6 +1055,7 @@ export type ServerUncheckedCreateWithoutOwnerInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1082,6 +1112,7 @@ export type ServerScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Server"> | Date | string
   Ports?: Prisma.StringFilter<"Server"> | string
   Memory?: Prisma.IntFilter<"Server"> | number
+  Swap?: Prisma.IntFilter<"Server"> | number
   Cpu?: Prisma.IntFilter<"Server"> | number
   Storage?: Prisma.IntFilter<"Server"> | number
   Variables?: Prisma.StringNullableFilter<"Server"> | string | null
@@ -1104,6 +1135,7 @@ export type ServerCreateWithoutDatabasesInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1132,6 +1164,7 @@ export type ServerUncheckedCreateWithoutDatabasesInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1175,6 +1208,7 @@ export type ServerUpdateWithoutDatabasesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1203,6 +1237,7 @@ export type ServerUncheckedUpdateWithoutDatabasesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1230,6 +1265,7 @@ export type ServerCreateWithoutSchedulesInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1258,6 +1294,7 @@ export type ServerUncheckedCreateWithoutSchedulesInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1301,6 +1338,7 @@ export type ServerUpdateWithoutSchedulesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1329,6 +1367,7 @@ export type ServerUncheckedUpdateWithoutSchedulesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1356,6 +1395,7 @@ export type ServerCreateWithoutImageInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1384,6 +1424,7 @@ export type ServerUncheckedCreateWithoutImageInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1436,6 +1477,7 @@ export type ServerCreateWithoutNodeInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1464,6 +1506,7 @@ export type ServerUncheckedCreateWithoutNodeInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1516,6 +1559,7 @@ export type ServerCreateWithoutFolderInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1544,6 +1588,7 @@ export type ServerUncheckedCreateWithoutFolderInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1587,6 +1632,7 @@ export type ServerUpdateWithoutFolderInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1615,6 +1661,7 @@ export type ServerUncheckedUpdateWithoutFolderInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1642,6 +1689,7 @@ export type ServerCreateWithoutBackupsInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1670,6 +1718,7 @@ export type ServerUncheckedCreateWithoutBackupsInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1713,6 +1762,7 @@ export type ServerUpdateWithoutBackupsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1741,6 +1791,7 @@ export type ServerUncheckedUpdateWithoutBackupsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1768,6 +1819,7 @@ export type ServerCreateWithoutSftpCredentialInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1796,6 +1848,7 @@ export type ServerUncheckedCreateWithoutSftpCredentialInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1839,6 +1892,7 @@ export type ServerUpdateWithoutSftpCredentialInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1867,6 +1921,7 @@ export type ServerUncheckedUpdateWithoutSftpCredentialInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1894,6 +1949,7 @@ export type ServerCreateWithoutSubUsersInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1922,6 +1978,7 @@ export type ServerUncheckedCreateWithoutSubUsersInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -1965,6 +2022,7 @@ export type ServerUpdateWithoutSubUsersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1993,6 +2051,7 @@ export type ServerUncheckedUpdateWithoutSubUsersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2021,6 +2080,7 @@ export type ServerCreateManyOwnerInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -2042,6 +2102,7 @@ export type ServerUpdateWithoutOwnerInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2070,6 +2131,7 @@ export type ServerUncheckedUpdateWithoutOwnerInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2098,6 +2160,7 @@ export type ServerUncheckedUpdateManyWithoutOwnerInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2120,6 +2183,7 @@ export type ServerCreateManyImageInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -2141,6 +2205,7 @@ export type ServerUpdateWithoutImageInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2169,6 +2234,7 @@ export type ServerUncheckedUpdateWithoutImageInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2197,6 +2263,7 @@ export type ServerUncheckedUpdateManyWithoutImageInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2219,6 +2286,7 @@ export type ServerCreateManyNodeInput = {
   createdAt?: Date | string
   Ports: string
   Memory: number
+  Swap?: number
   Cpu: number
   Storage: number
   Variables?: string | null
@@ -2240,6 +2308,7 @@ export type ServerUpdateWithoutNodeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2268,6 +2337,7 @@ export type ServerUncheckedUpdateWithoutNodeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2296,6 +2366,7 @@ export type ServerUncheckedUpdateManyWithoutNodeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   Ports?: Prisma.StringFieldUpdateOperationsInput | string
   Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
   Cpu?: Prisma.IntFieldUpdateOperationsInput | number
   Storage?: Prisma.IntFieldUpdateOperationsInput | number
   Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2376,6 +2447,7 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   createdAt?: boolean
   Ports?: boolean
   Memory?: boolean
+  Swap?: boolean
   Cpu?: boolean
   Storage?: boolean
   Variables?: boolean
@@ -2409,6 +2481,7 @@ export type ServerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   createdAt?: boolean
   Ports?: boolean
   Memory?: boolean
+  Swap?: boolean
   Cpu?: boolean
   Storage?: boolean
   Variables?: boolean
@@ -2435,6 +2508,7 @@ export type ServerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   createdAt?: boolean
   Ports?: boolean
   Memory?: boolean
+  Swap?: boolean
   Cpu?: boolean
   Storage?: boolean
   Variables?: boolean
@@ -2461,6 +2535,7 @@ export type ServerSelectScalar = {
   createdAt?: boolean
   Ports?: boolean
   Memory?: boolean
+  Swap?: boolean
   Cpu?: boolean
   Storage?: boolean
   Variables?: boolean
@@ -2476,7 +2551,7 @@ export type ServerSelectScalar = {
   imageId?: boolean
 }
 
-export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "description" | "createdAt" | "Ports" | "Memory" | "Cpu" | "Storage" | "Variables" | "StartCommand" | "dockerImage" | "allowStartupEdit" | "Installing" | "Queued" | "Suspended" | "backupLimit" | "ownerId" | "nodeId" | "imageId", ExtArgs["result"]["server"]>
+export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "description" | "createdAt" | "Ports" | "Memory" | "Swap" | "Cpu" | "Storage" | "Variables" | "StartCommand" | "dockerImage" | "allowStartupEdit" | "Installing" | "Queued" | "Suspended" | "backupLimit" | "ownerId" | "nodeId" | "imageId", ExtArgs["result"]["server"]>
 export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sftpCredential?: boolean | Prisma.Server$sftpCredentialArgs<ExtArgs>
   node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
@@ -2521,6 +2596,7 @@ export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     createdAt: Date
     Ports: string
     Memory: number
+    Swap: number
     Cpu: number
     Storage: number
     Variables: string | null
@@ -2973,6 +3049,7 @@ export interface ServerFieldRefs {
   readonly createdAt: Prisma.FieldRef<"Server", 'DateTime'>
   readonly Ports: Prisma.FieldRef<"Server", 'String'>
   readonly Memory: Prisma.FieldRef<"Server", 'Int'>
+  readonly Swap: Prisma.FieldRef<"Server", 'Int'>
   readonly Cpu: Prisma.FieldRef<"Server", 'Int'>
   readonly Storage: Prisma.FieldRef<"Server", 'Int'>
   readonly Variables: Prisma.FieldRef<"Server", 'String'>

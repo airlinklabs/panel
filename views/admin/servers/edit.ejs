@@ -99,7 +99,7 @@
 
           <div class="al-card">
             <h2 class="al-card-header">Resource Allocation</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="al-label">
                   <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
@@ -115,6 +115,23 @@
                     data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
                 <p class="text-xs text-neutral-400">Min 128 MB</p>
+              </div>
+
+              <div>
+                <label class="al-label">
+                  <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
+                  Swap:
+                </label>
+                <input type="hidden" id="serverSwap" name="Swap" value="<%= server.Swap ?? 0 %>">
+                <div class="flex items-stretch mt-2 mb-1 gap-0">
+                  <input id="serverSwapDisplay" type="number" min="-1"
+                    value="<%= server.Swap && server.Swap >= 1024 ? Math.round(server.Swap / 1024) : (server.Swap ?? 0) %>"
+                    class="al-input rounded-l-xl flex-1 border-r-0">
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="serverSwapDisplay" data-hidden="serverSwap"
+                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+                </div>
+                <p class="text-xs text-neutral-400">0 = no swap, -1 = unlimited</p>
               </div>
 
               <div>

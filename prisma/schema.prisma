@@ -64,6 +64,7 @@ model Server {
   createdAt        DateTime           @default(now())
   Ports            String
   Memory           Int
+  Swap             Int      @default(0)
   Cpu              Int
   Storage          Int
   Variables        String?

@@ -115,7 +115,7 @@ const userCreateServerModule: Module = {
 
         const resourceLimits = await resolveUserResourceLimits(userId!, settings);
 
-        const { name, description, nodeId, imageId, dockerImage, Memory, Cpu, Storage } = req.body;
+        const { name, description, nodeId, imageId, dockerImage, Memory, Swap, Cpu, Storage } = req.body;
 
         if (!name || !nodeId || !imageId || !dockerImage || !Memory || !Cpu || !Storage) {
           return res.status(400).json({ error: 'Missing required fields.' });
@@ -124,6 +124,7 @@ const userCreateServerModule: Module = {
         const memory = parseInt(Memory);
         const cpu = parseInt(Cpu);
         const storage = parseInt(Storage);
+        const swap = Swap !== undefined && Swap !== '' ? parseInt(Swap) : 0;
 
         if (isNaN(memory) || memory < 128 || memory > resourceLimits.maxMemory) {
           return res.status(400).json({ error: `Memory must be between 128 and ${resourceLimits.maxMemory} MB.` });
@@ -133,6 +134,9 @@ const userCreateServerModule: Module = {
         }
         if (isNaN(storage) || storage < 128 || storage > resourceLimits.maxStorage) {
           return res.status(400).json({ error: `Storage must be between 128 and ${resourceLimits.maxStorage} MB.` });
+        }
+        if (isNaN(swap) || swap < -1) {
+          return res.status(400).json({ error: 'Swap must be -1 (unlimited), 0 (disabled), or a positive MB value.' });
         }
 
         const node = await prisma.node.findUnique({ where: { id: parseInt(nodeId) } });
@@ -196,6 +200,7 @@ const userCreateServerModule: Module = {
             imageId: image.id,
             Ports: portsJson,
             Memory: memory,
+            Swap: swap,
             Cpu: cpu,
             Storage: storage,
             Variables: JSON.stringify(imageVariables),

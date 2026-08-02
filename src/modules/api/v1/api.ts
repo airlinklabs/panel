@@ -403,7 +403,7 @@ const coreModule: Module = {
       apiValidator('airlink.api.servers.create'),
       async (req: Request, res: Response) => {
         try {
-          const { name, description, ownerId, nodeId, imageId, Ports, Memory, Cpu, Storage, Variables, StartCommand, dockerImage } = req.body;
+          const { name, description, ownerId, nodeId, imageId, Ports, Memory, Swap, Cpu, Storage, Variables, StartCommand, dockerImage } = req.body;
 
           if (!name || !ownerId || !nodeId || !imageId) {
             res.status(422).json({ error: 'name, ownerId, nodeId, and imageId are required' });
@@ -440,6 +440,7 @@ const coreModule: Module = {
               imageId,
               Ports: Ports ?? '[]',
               Memory: Memory ?? 512,
+              Swap: Swap ?? 0,
               Cpu: Cpu ?? 100,
               Storage: Storage ?? 5120,
               Variables: Variables ?? null,
@@ -470,7 +471,7 @@ const coreModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const serverId = getParamAsString(req.params.id);
-          const { name, description, Ports, Memory, Cpu, Storage, Variables, StartCommand, dockerImage } = req.body;
+          const { name, description, Ports, Memory, Swap, Cpu, Storage, Variables, StartCommand, dockerImage } = req.body;
 
           const existing = await prisma.server.findUnique({ where: { UUID: serverId } });
           if (!existing) {
@@ -483,6 +484,7 @@ const coreModule: Module = {
           if (description !== undefined) data.description = description;
           if (Ports !== undefined) data.Ports = Ports;
           if (Memory !== undefined) data.Memory = Memory;
+          if (Swap !== undefined) data.Swap = Swap;
           if (Cpu !== undefined) data.Cpu = Cpu;
           if (Storage !== undefined) data.Storage = Storage;
           if (Variables !== undefined) data.Variables = Variables;
