@@ -346,6 +346,43 @@ const coreModule: Module = {
       },
     );
 
+    router.delete(
+      '/api/application/users/:id',
+      validator,
+      async (req: Request, res: Response) => {
+        try {
+          const userId = getParamAsNumber(req.params.id);
+
+          const user = await prisma.users.findUnique({
+            where: { id: userId },
+          });
+
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          // Never allow deleting the last admin — that would lock the panel.
+          if (user.isAdmin) {
+            const adminCount = await prisma.users.count({ where: { isAdmin: true } });
+            if (adminCount <= 1) {
+              res.status(400).json({ error: 'Cannot delete the last admin user.' });
+              return;
+            }
+          }
+
+          await prisma.users.delete({ where: { id: userId } });
+          res.status(200).json({
+            object: 'user',
+            attributes: { id: user.id, deleted: true },
+          });
+        } catch (error) {
+          logger.error('Error deleting user:', error);
+          res.status(500).json({ error: 'Internal server error' });
+        }
+      },
+    );
+
     router.get(
       '/api/application/nodes',
       validator,
@@ -455,6 +492,46 @@ const coreModule: Module = {
           res.status(500).json({ error: 'Internal Server Error' });
         }
       }
+    );
+
+    router.delete(
+      '/api/application/nodes/:id',
+      validator,
+      async (req: Request, res: Response) => {
+        try {
+          const nodeId = getParamAsNumber(req.params.id);
+
+          const node = await prisma.node.findUnique({
+            where: { id: nodeId },
+            select: {
+              id: true,
+              name: true,
+              _count: { select: { servers: true } },
+            },
+          });
+
+          if (!node) {
+            res.status(404).json({ error: 'Node not found' });
+            return;
+          }
+
+          if (node._count.servers > 0) {
+            res
+              .status(400)
+              .json({ error: 'Cannot delete a node with assigned servers.' });
+            return;
+          }
+
+          await prisma.node.delete({ where: { id: nodeId } });
+          res.status(200).json({
+            object: 'node',
+            attributes: { id: node.id, deleted: true },
+          });
+        } catch (error) {
+          logger.error('Error deleting node:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      },
     );
 
     router.post(
@@ -701,6 +778,56 @@ const coreModule: Module = {
         } catch (error) {
           logger.error('Error creating server:', error);
           res.status(500).send('Error creating server');
+        }
+      },
+    );
+
+    router.delete(
+      '/api/application/servers/:id',
+      validator,
+      async (req: Request, res: Response) => {
+        try {
+          const serverId = String(req.params.id);
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          if (server.node) {
+            try {
+              await daemonRequest({
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                nodeKey: server.node.key,
+                method: 'DELETE',
+                path: '/container',
+                body: { id: server.UUID },
+              });
+            } catch (err: any) {
+              const isGone =
+                err.status === 404 ||
+                (err.body as any)?.error?.includes('not exist');
+              if (!isGone) {
+                logger.warn(`Could not delete container on daemon: ${err}`);
+              }
+            }
+          }
+
+          await prisma.server.delete({ where: { UUID: serverId } });
+
+          res.status(200).json({
+            object: 'server',
+            attributes: { id: serverId, deleted: true },
+          });
+        } catch (error) {
+          logger.error('Error deleting server:', error);
+          res.status(500).json({ error: 'Internal server error' });
         }
       },
     );

@@ -121,6 +121,12 @@ const coreModule: Module = {
             { name: 'Nodes - Delete', value: 'airlink.api.nodes.delete' },
             { name: 'Settings - Read', value: 'airlink.api.settings.read' },
             { name: 'Settings - Update', value: 'airlink.api.settings.update' },
+            { name: 'Images - Read', value: 'airlink.api.images.read' },
+            { name: 'Images - Create', value: 'airlink.api.images.create' },
+            { name: 'Images - Update', value: 'airlink.api.images.update' },
+            { name: 'Images - Delete', value: 'airlink.api.images.delete' },
+            { name: 'Locations - Read', value: 'airlink.api.locations.read' },
+            { name: 'Locations - Create', value: 'airlink.api.locations.create' },
           ];
 
           res.render('admin/apikeys/apikeys', {

@@ -344,7 +344,7 @@ export const apiEndpoints = [
                 }
               ]
             },
-            {
+{
               category: 'Settings',
               endpoints: [
                 {
@@ -390,6 +390,481 @@ export const apiEndpoints = [
     "language": "en",
     "createdAt": "2023-01-01T00:00:00.000Z",
     "updatedAt": "2023-01-01T00:00:00.000Z"
+  }
+}`
+                }
+              ]
+            },
+            {
+              category: 'Server Backups',
+              endpoints: [
+                {
+                  method: 'GET',
+                  path: '/api/v1/servers/:id/backups',
+                  description: 'List backups for a server (by UUID)',
+                  permission: 'airlink.api.servers.read',
+                  responseExample: `{
+  "data": [
+    {
+      "UUID": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Pre-update backup",
+      "size": "123456",
+      "checksum": null,
+      "locked": false,
+      "createdAt": "2023-01-01T00:00:00.000Z"
+    }
+  ]
+}`
+                },
+                {
+                  method: 'POST',
+                  path: '/api/v1/servers/:id/backups',
+                  description: 'Create a backup for a server (by UUID)',
+                  permission: 'airlink.api.servers.update',
+                  requestExample: `{
+  "name": "Pre-update backup"
+}`,
+                  responseExample: `{
+  "data": {
+    "UUID": "550e8400-e29b-41d4-a716-446655440000",
+    "name": "Pre-update backup",
+    "size": "123456",
+    "locked": false,
+    "createdAt": "2023-01-01T00:00:00.000Z"
+  }
+}`
+                },
+                {
+                  method: 'POST',
+                  path: '/api/v1/servers/:id/backups/:backupId/restore',
+                  description: 'Restore a backup (by server UUID + backup UUID)',
+                  permission: 'airlink.api.servers.update',
+                  responseExample: `{
+  "data": { "success": true }
+}`
+                },
+                {
+                  method: 'DELETE',
+                  path: '/api/v1/servers/:id/backups/:backupId',
+                  description: 'Delete a backup. Fails if the backup is locked.',
+                  permission: 'airlink.api.servers.update',
+                  responseExample: `{
+  "data": { "success": true }
+}`
+                }
+              ]
+            },
+            {
+              category: 'Server Databases',
+              endpoints: [
+                {
+                  method: 'GET',
+                  path: '/api/v1/servers/:id/databases',
+                  description: 'List databases for a server (by UUID)',
+                  permission: 'airlink.api.servers.read',
+                  responseExample: `{
+  "data": [
+    {
+      "id": 1,
+      "serverId": "550e8400-e29b-41d4-a716-446655440000",
+      "hostId": 1,
+      "databaseName": "srv_db",
+      "databaseUser": "srv_user",
+      "host": { "id": 1, "name": "MySQL 1" }
+    }
+  ]
+}`
+                },
+                {
+                  method: 'POST',
+                  path: '/api/v1/servers/:id/databases',
+                  description: 'Provision a database for a server. Respects server + owner database limits.',
+                  permission: 'airlink.api.servers.update',
+                  requestExample: `{
+  "hostId": 1
+}`,
+                  responseExample: `{
+  "data": {
+    "id": 1,
+    "serverId": "550e8400-e29b-41d4-a716-446655440000",
+    "databaseName": "srv_db",
+    "databaseUser": "srv_user"
+  }
+}`
+                },
+                {
+                  method: 'DELETE',
+                  path: '/api/v1/servers/:id/databases/:dbId',
+                  description: 'Deprovision and delete a database',
+                  permission: 'airlink.api.servers.update',
+                  responseExample: `{
+  "data": { "success": true }
+}`
+                }
+              ]
+            },
+            {
+              category: 'Server Subusers',
+              endpoints: [
+                {
+                  method: 'GET',
+                  path: '/api/v1/servers/:id/subusers',
+                  description: 'List subusers for a server (by UUID)',
+                  permission: 'airlink.api.servers.read',
+                  responseExample: `{
+  "data": [
+    {
+      "id": 1,
+      "user": { "id": 2, "username": "admin", "email": "admin@example.com" },
+      "permissions": ["console", "files.read"],
+      "createdAt": "2023-01-01T00:00:00.000Z"
+    }
+  ]
+}`
+                },
+                {
+                  method: 'POST',
+                  path: '/api/v1/servers/:id/subusers',
+                  description: 'Add a user (by email) as a subuser',
+                  permission: 'airlink.api.servers.update',
+                  requestExample: `{
+  "email": "admin@example.com",
+  "permissions": ["console", "files"]
+}`,
+                  responseExample: `{
+  "data": {
+    "id": 1,
+    "user": { "id": 2, "username": "admin", "email": "admin@example.com" },
+    "permissions": ["console", "files"]
+  }
+}`
+                },
+                {
+                  method: 'PATCH',
+                  path: '/api/v1/servers/:id/subusers/:subUserId',
+                  description: 'Update a subuser\u2019s permissions',
+                  permission: 'airlink.api.servers.update',
+                  requestExample: `{
+  "permissions": ["console", "files.read"]
+}`,
+                  responseExample: `{
+  "data": { "success": true, "permissions": ["console", "files.read"] }
+}`
+                },
+                {
+                  method: 'DELETE',
+                  path: '/api/v1/servers/:id/subusers/:subUserId',
+                  description: 'Remove a subuser',
+                  permission: 'airlink.api.servers.update',
+                  responseExample: `{
+  "data": { "success": true }
+}`
+                }
+              ]
+            },
+            {
+              category: 'Server Startup',
+              endpoints: [
+                {
+                  method: 'GET',
+                  path: '/api/v1/servers/:id/startup',
+                  description: 'Get startup command, Docker image, and variables',
+                  permission: 'airlink.api.servers.read',
+                  responseExample: `{
+  "data": {
+    "startCommand": "java -jar server.jar",
+    "dockerImage": "ghcr.io/pterodactyl/yolks:java_17",
+    "variables": [
+      { "name": "Memory", "env": "SERVER_MEMORY", "value": "1024" }
+    ]
+  }
+}`
+                },
+                {
+                  method: 'PATCH',
+                  path: '/api/v1/servers/:id/startup',
+                  description: 'Update startup command, Docker image, or variables. Variables are validated against stored rules.',
+                  permission: 'airlink.api.servers.update',
+                  requestExample: `{
+  "startCommand": "java -Xms1G -jar server.jar",
+  "dockerImage": "ghcr.io/parkernoad:java_17",
+  "variables": [{ "env": "SERVER_MEMORY", "value": "2048" }]
+}`,
+                  responseExample: `{
+  "data": { "success": true }
+}`
+                }
+              ]
+            },
+            {
+              category: 'Server Schedules',
+              endpoints: [
+                {
+                  method: 'GET',
+                  path: '/api/v1/servers/:id/schedules',
+                  description: 'List schedules (with tasks) for a server',
+                  permission: 'airlink.api.servers.read',
+                  responseExample: `{
+  "data": [
+    {
+      "id": 1,
+      "name": "Nightly backup",
+      "cron": "0 0 * * *",
+      "enabled": false,
+      "nextRunAt": null,
+      "tasks": []
+    }
+  ]
+}`
+                },
+                {
+                  method: 'POST',
+                  path: '/api/v1/servers/:id/schedules',
+                  description: 'Create a schedule',
+                  permission: 'airlink.api.servers.update',
+                  requestExample: `{
+  "name": "Nightly backup",
+  "cron": "0 0 * * *",
+  "timeOffset": 0
+}`,
+                  responseExample: `{
+  "data": {
+    "id": 1,
+    "serverId": "550e8400-e29b-41d4-a716-446655440000",
+    "name": "Nightly backup",
+    "cron": "0 0 * * *",
+    "enabled": false
+  }
+}`
+                },
+                {
+                  method: 'PATCH',
+                  path: '/api/v1/servers/:id/schedules/:scheduleId',
+                  description: 'Enable/disable a schedule or update its time offset',
+                  permission: 'airlink.api.servers.update',
+                  requestExample: `{
+  "enabled": true
+}`,
+                  responseExample: `{
+  "data": {
+    "id": 1,
+    "enabled": true,
+    "timeOffset": 0
+  }
+}`
+                },
+                {
+                  method: 'DELETE',
+                  path: '/api/v1/servers/:id/schedules/:scheduleId',
+                  description: 'Delete a schedule',
+                  permission: 'airlink.api.servers.update',
+                  responseExample: `{
+  "data": { "success": true }
+}`
+                },
+                {
+                  method: 'POST',
+                  path: '/api/v1/servers/:id/schedules/:scheduleId/tasks',
+                  description: 'Add a task (command | power | backup) to a schedule',
+                  permission: 'airlink.api.servers.update',
+                  requestExample: `{
+  "action": "command",
+  "payload": { "command": "say hello" },
+  "timeOffset": 0
+}`,
+                  responseExample: `{
+  "data": {
+    "id": 1,
+    "scheduleId": 1,
+    "order": 0,
+    "action": "command",
+    "payload": { "command": "say hello" }
+  }
+}`
+                },
+                {
+                  method: 'DELETE',
+                  path: '/api/v1/servers/:id/schedules/:scheduleId/tasks/:taskId',
+                  description: 'Delete a task from a schedule',
+                  permission: 'airlink.api.servers.update',
+                  responseExample: `{
+  "data": { "success": true }
+}`
+                }
+              ]
+            },
+            {
+              category: 'Node Allocations',
+              endpoints: [
+                {
+                  method: 'GET',
+                  path: '/api/v1/nodes/:id/allocations',
+                  description: 'List allocations for a node, including claimed servers',
+                  permission: 'airlink.api.nodes.read',
+                  responseExample: `{
+  "data": [
+    {
+      "id": 1,
+      "nodeId": 1,
+      "ip": "",
+      "port": 25565,
+      "serverId": null
+    }
+  ]
+}`
+                },
+                {
+                  method: 'POST',
+                  path: '/api/v1/nodes/:id/allocations',
+                  description: 'Add a port to the node\u2019s allocation pool',
+                  permission: 'airlink.api.nodes.update',
+                  requestExample: `{
+  "ip": "",
+  "port": 25566
+}`,
+                  responseExample: `{
+  "data": {
+    "id": 2,
+    "nodeId": 1,
+    "ip": "",
+    "port": 25566,
+    "serverId": null
+  }
+}`
+                },
+                {
+                  method: 'DELETE',
+                  path: '/api/v1/nodes/:id/allocations/:allocationId',
+                  description: 'Delete an allocation. Fails if it is currently in use.',
+                  permission: 'airlink.api.nodes.update',
+                  responseExample: `{
+  "data": { "success": true }
+}`
+                }
+              ]
+            },
+            {
+              category: 'Images',
+              endpoints: [
+                {
+                  method: 'GET',
+                  path: '/api/v1/images',
+                  description: 'Get a paginated list of egg images. Query params: page, per_page.',
+                  permission: 'airlink.api.images.read',
+                  responseExample: `{
+  "data": [
+    {
+      "id": 1,
+      "UUID": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Java",
+      "description": "Generic Java egg",
+      "startup": "java -jar server.jar",
+      "stop": "stop",
+      "createdAt": "2023-01-01T00:00:00.000Z"
+    }
+  ],
+  "meta": { "total": 1, "per_page": 25, "current_page": 1, "last_page": 1 }
+}`
+                },
+                {
+                  method: 'POST',
+                  path: '/api/v1/images',
+                  description: 'Create a new egg image',
+                  permission: 'airlink.api.images.create',
+                  requestExample: `{
+  "name": "Java",
+  "description": "Generic Java egg",
+  "startup": "java -jar server.jar"
+}`,
+                  responseExample: `{
+  "data": {
+    "id": 1,
+    "UUID": "550e8400-e29b-41d4-a716-446655440000",
+    "name": "Java",
+    "startup": "java -jar server.jar"
+  }
+}`
+                },
+                {
+                  method: 'GET',
+                  path: '/api/v1/images/:id',
+                  description: 'Get a single image with all egg data',
+                  permission: 'airlink.api.images.read',
+                  responseExample: `{
+  "data": {
+    "id": 1,
+    "name": "Java",
+    "dockerImages": "[]",
+    "variables": "[]",
+    "scripts": "{}",
+    "info": "{\\"features\\":[]}"
+  }
+}`
+                },
+                {
+                  method: 'PATCH',
+                  path: '/api/v1/images/:id',
+                  description: 'Update an image. Array fields (dockerImages, variables, info, scripts) are sent as raw JSON.',
+                  permission: 'airlink.api.images.update',
+                  requestExample: `{
+  "name": "Java 17",
+  "dockerImages": [{ "Java 17": "ghcr.io/pterodactyl/yolks:java_17" }]
+}`,
+                  responseExample: `{
+  "data": {
+    "id": 1,
+    "name": "Java 17",
+    "startup": "java -jar server.jar"
+  }
+}`
+                },
+                {
+                  method: 'DELETE',
+                  path: '/api/v1/images/:id',
+                  description: 'Delete an image. Fails if it is used by servers.',
+                  permission: 'airlink.api.images.delete',
+                  responseExample: `{
+  "data": { "success": true }
+}`
+                }
+              ]
+            },
+            {
+              category: 'Locations',
+              endpoints: [
+                {
+                  method: 'GET',
+                  path: '/api/v1/locations',
+                  description: 'Get a paginated list of locations. Query params: page, per_page.',
+                  permission: 'airlink.api.locations.read',
+                  responseExample: `{
+  "data": [
+    {
+      "id": 1,
+      "name": "US East",
+      "shortCode": "us_east",
+      "createdAt": "2023-01-01T00:00:00.000Z",
+      "_count": { "nodes": 2 }
+    }
+  ],
+  "meta": { "total": 1, "per_page": 25, "current_page": 1, "last_page": 1 }
+}`
+                },
+                {
+                  method: 'POST',
+                  path: '/api/v1/locations',
+                  description: 'Create a location',
+                  permission: 'airlink.api.locations.create',
+                  requestExample: `{
+  "name": "US East",
+  "shortCode": "us-east"
+}`,
+                  responseExample: `{
+  "data": {
+    "id": 1,
+    "name": "US East",
+    "shortCode": "us-east",
+    "createdAt": "2023-01-01T00:00:00.000Z"
   }
 }`
                 }
