@@ -47,7 +47,9 @@
     document.documentElement.setAttribute('data-modal-open', '');
     if (window.Animate) Animate.openModal(overlay, panel);
     else { overlay.classList.add('open'); panel.classList.add('open'); }
-    setTimeout(function () { confirmBtn.focus(); }, 0);
+    // Focus the neutral action first — never land on the destructive
+    // confirm (one accidental Enter should not destroy).
+    setTimeout(function () { cancel.focus(); }, 0);
   }
 
   function close() {

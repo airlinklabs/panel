@@ -161,10 +161,10 @@
 
 <!-- Add Subuser Modal -->
 <div id="addSubUserModal" class="al-sheet-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="al-sheet-panel w-full max-w-lg rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+  <div class="al-sheet-panel w-full max-w-lg rounded-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Add subuser</h3>
-      <button type="button" onclick="closeModal('addSubUserModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
+      <h3 id="addSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Add subuser</h3>
+      <button type="button" onclick="closeModal('addSubUserModal')" aria-label="Close" class="p-2.5 rounded-lg text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
     </div>
     <div class="space-y-4">
       <div>
@@ -207,10 +207,10 @@
 
 <!-- Edit Subuser Modal -->
 <div id="editSubUserModal" class="al-sheet-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="al-sheet-panel w-full max-w-lg rounded-2xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+  <div class="al-sheet-panel w-full max-w-lg rounded-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="editSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex items-center justify-between mb-1">
-      <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Edit permissions</h3>
-      <button type="button" onclick="closeModal('editSubUserModal')" class="text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
+      <h3 id="editSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Edit permissions</h3>
+      <button type="button" onclick="closeModal('editSubUserModal')" aria-label="Close" class="p-2.5 rounded-lg text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
     </div>
     <p id="editSubUserName" class="text-xs mb-4" style="color:var(--theme-text-muted)"></p>
     <div class="space-y-4">

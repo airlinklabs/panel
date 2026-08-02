@@ -9,6 +9,17 @@
 
   var EASING = 'cubic-bezier(0.16, 1, 0.3, 1)';
 
+  // Transient compositing hint — granted for the duration of the
+  // animation only, never left on at rest (see motion.css).
+  function hintWillChange(el) {
+    var anim = el.getAttribute('data-animate') || '';
+    el.style.willChange = anim === 'blur' ? 'opacity, transform, filter' : 'opacity, transform';
+  }
+
+  function dropWillChange(el) {
+    el.style.willChange = '';
+  }
+
   function motionAnimate(el, animation, duration) {
     if (prefersReduced) {
       el.style.opacity = '1';
@@ -18,15 +29,17 @@
       el.classList.remove('will-animate');
       el.classList.add('motion-visible');
       el.style.animationName = '';
+      hintWillChange(el);
       void el.offsetWidth; // force reflow
       el.style.animationName = animation || (el.getAttribute('data-animate') || 'fade-up');
       if (duration) el.style.animationDuration = duration + 'ms';
       el.addEventListener('animationend', function handler() {
         el.removeEventListener('animationend', handler);
+        dropWillChange(el);
         resolve();
       }, { once: true });
       // fallback resolve
-      setTimeout(resolve, 600);
+      setTimeout(function () { dropWillChange(el); resolve(); }, 600);
     });
   }
 
@@ -101,7 +114,12 @@
               setTimeout(function () {
                 child.style.animationName = 'motion-slide-up';
                 child.classList.add('motion-visible');
-              }, index * 60);
+                child.style.willChange = 'opacity, transform';
+                child.addEventListener('animationend', function handler() {
+                  child.removeEventListener('animationend', handler);
+                  child.style.willChange = '';
+                }, { once: true });
+              }, index * 40);
             })(children[i], i);
           }
           observer.unobserve(group);

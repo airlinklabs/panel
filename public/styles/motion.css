@@ -22,18 +22,22 @@
 /* ── data-animate ATTRIBUTE SYSTEM ─────────────────────────────
    Content is visible by default. Animation is progressive
    enhancement only — JS adds .will-animate, the observer swaps
-   it for .motion-visible when the element enters the viewport. */
+   it for .motion-visible when the element enters the viewport.
+   will-change is granted only on the transient .will-animate
+   pre-state and dropped by the JS on animationend, so layers are
+   never promoted at rest. */
 
 [data-animate] {
   /* No opacity/visibility hiding here — content ALWAYS visible without JS */
-  will-change: opacity, transform;
 }
 
 [data-animate="blur"] {
-  will-change: opacity, transform, filter;
+  /* filter is expensive; hinted only while animating (see .will-animate) */
 }
 
-/* Hidden pre-state — applied only after JS initializes the observer */
+/* Hidden pre-state — applied only after JS initializes the observer.
+   No will-change here: motion.js grants it inline for the duration
+   of the animation only. */
 [data-animate].will-animate          { opacity: 0; }
 [data-animate="fade"].will-animate   { opacity: 0; }
 [data-animate="fade-up"].will-animate    { opacity: 0; transform: translateY(12px); }
@@ -66,7 +70,7 @@
 /* ── Group animations (container children) ───────────────────── */
 
 [data-animate-group] > * {
-  will-change: opacity, transform;
+  /* will-change granted only while .will-animate, dropped by JS */
 }
 
 [data-animate-group].will-animate > * {
@@ -140,6 +144,14 @@
   pointer-events: auto;
 }
 
+/* Exit — scrim fades out as fast as the panel so the hide never
+   clips a slower fade (EXIT_MS in animations.js waits on this). */
+.al-modal-overlay.closing {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-exit) var(--ease-in);
+}
+
 .al-modal-panel {
   transform: scale(0.96) translateY(8px);
   opacity: 0;
@@ -180,6 +192,17 @@
   pointer-events: auto;
 }
 
+/* Dropdown exit — quicker, accelerating, origin-aware (handlers
+   flip transform-origin when the dropdown opens upward). */
+.al-dropdown.closing {
+  transform: scale(0.97) translateY(-4px);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dur-exit) var(--ease-in),
+    opacity var(--dur-exit) var(--ease-in);
+}
+
 /* ── Server card hover ────────────────────────────────────────── */
 
 .al-server-card {
@@ -192,7 +215,7 @@
 .al-server-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 18px -14px rgb(0 0 0 / 0.34);
-  border-color: rgb(0 0 0 / 0.18);
+  border-color: var(--theme-border);
 }
 
 /* ── Nav item — instant active, quick hover ───────────────────── */
@@ -215,13 +238,13 @@
 
 .tab-btn[aria-selected="true"],
 .m-tab.on {
-  background-color: #0a0a0a;
-  color: #ffffff;
+  background-color: var(--theme-text-strong);
+  color: var(--theme-bg-card);
 }
 .dark .tab-btn[aria-selected="true"],
 .dark .m-tab.on {
-  background-color: #ffffff;
-  color: #0a0a0a;
+  background-color: var(--theme-text-strong);
+  color: var(--theme-bg-card);
 }
 
 /* ── Lifecycle button loading state ───────────────────────────── */

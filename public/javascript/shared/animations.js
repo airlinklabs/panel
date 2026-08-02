@@ -9,13 +9,19 @@
    - Escape closes the topmost popup
    - only one popup can be open at a time — opening a new one
      closes any currently open popup/dropdown first
+   - opening moves focus into the popup, closing restores it
+   - Tab is contained inside the topmost popup
    ============================================ */
 (function () {
   if (window.Animate) return;
 
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var EXIT_MS = REDUCED ? 0 : 200; /* >= --dur-exit (180ms) */
+  var EXIT_MS = REDUCED ? 0 : 200; /* >= --dur-exit (180ms) and al-sheet-out (200ms) */
   var openOverlays = [];
+
+  function focusables(root) {
+    return root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  }
 
   function panelOf(overlay) {
     if (!overlay) return null;
@@ -33,7 +39,12 @@
 
   /* Open a modal: display the overlay, then transition the panel
      from scale(0.96) translateY(8px) → rest (CSS .al-modal-panel).
-     Only one popup at a time: everything else is closed first. */
+     Only one popup at a time: everything else is closed first.
+     The pre-state (hidden → flex, opacity 0) is applied first and
+     flushed with a reflow so the reveal transition actually plays;
+     without this, .open landing in the same style recalc as the
+     display switch makes the entrance snap (transitions need a
+     computed before-state, animations do not). */
   function openModal(overlay, panel) {
     if (!overlay) return;
     if (overlay.classList.contains('open')) return;
@@ -51,16 +62,40 @@
       if (btn) btn.setAttribute('aria-expanded', 'false');
     });
 
+    overlay._lastFocused = document.activeElement;
     openOverlays.push(overlay);
     overlay.classList.remove('hidden');
     overlay.classList.add('flex');
     overlay.classList.remove('opacity-0', 'pointer-events-none');
-    overlay.classList.add('al-modal-overlay', 'open');
+    overlay.classList.add('al-modal-overlay');
+    overlay.setAttribute('aria-hidden', 'false');
     if (panel) {
+      if (!panel.hasAttribute('tabindex')) panel.setAttribute('tabindex', '-1');
       panel.classList.add('al-modal-panel');
       panel.classList.remove('closing');
-      panel.classList.add('open');
     }
+
+    // Flush the pre-state so the transition starts from it.
+    void overlay.offsetWidth;
+
+    requestAnimationFrame(function () {
+      overlay.classList.add('open');
+      if (panel) panel.classList.add('open');
+    });
+
+    // Move focus into the popup. Callers may override this with a
+    // more specific focus target (first input, cancel button, ...);
+    // this guarantees focus never stays on the page behind the popup.
+    requestAnimationFrame(function () {
+      if (!openOverlays.length) return;
+      if (openOverlays[openOverlays.length - 1] !== overlay) return;
+      var root = panel || overlay;
+      var first = focusables(root)[0];
+      var target = first || panel || overlay;
+      if (target && typeof target.focus === 'function') {
+        try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+      }
+    });
   }
 
   /* Close a modal: exit the panel fast (ease-in), then restore the
@@ -68,17 +103,25 @@
      already-closed overlay only runs the cleanup. */
   function closeModal(overlay, panel, done) {
     if (!overlay) return;
+    // Caller hook: return false to veto the close (e.g. dirty-state
+    // confirmations). Re-entrant guard flag prevents a loop when the
+    // veto handler itself closes the overlay after confirming.
+    if (!overlay._closingVeto && overlay._beforeClose && overlay._beforeClose() === false) return;
     var idx = openOverlays.indexOf(overlay);
     if (idx === -1) {
       if (typeof done === 'function') done();
       return;
     }
+    overlay._closingVeto = true;
     openOverlays.splice(idx, 1);
+    var lastFocused = overlay._lastFocused || null;
+    overlay._lastFocused = null;
     if (panel) {
       panel.classList.remove('open');
       panel.classList.add('closing');
     }
     overlay.classList.remove('open');
+    overlay.classList.add('closing');
     setTimeout(function () {
       // If the overlay was re-opened during the exit animation (e.g. a
       // second confirm dialog chained in the first one's onConfirm),
@@ -86,8 +129,15 @@
       if (overlay.classList.contains('open')) return;
       overlay.classList.add('hidden');
       overlay.classList.add('opacity-0', 'pointer-events-none');
-      overlay.classList.remove('flex');
+      overlay.classList.remove('flex', 'closing');
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay._closingVeto = false;
       if (panel) panel.classList.remove('closing');
+      // Restore focus to whatever opened the popup — unless a caller's
+      // done() already moved it somewhere intentional.
+      if (lastFocused && lastFocused.isConnected && document.activeElement === document.body) {
+        try { lastFocused.focus({ preventScroll: true }); } catch (e) { lastFocused.focus(); }
+      }
       if (typeof done === 'function') done();
     }, EXIT_MS);
   }
@@ -99,11 +149,15 @@
     closeModal(ov, panelOf(ov));
   }
 
-  /* Toggle a dropdown/popover with the .al-dropdown reveal. */
-  function toggleDropdown(el, force) {
+  /* Toggle a dropdown/popover with the .al-dropdown reveal. When a
+     trigger is passed its aria-expanded stays in sync. */
+  function toggleDropdown(el, force, trigger) {
     if (!el) return;
     var shouldOpen = force !== undefined ? force : !el.classList.contains('open');
     el.classList.toggle('open', shouldOpen);
+    if (trigger && typeof trigger.setAttribute === 'function') {
+      trigger.setAttribute('aria-expanded', String(shouldOpen));
+    }
   }
 
   /* Scrim click → close. Outside click → close floating dropdowns. */
@@ -118,6 +172,32 @@
     if (e.key === 'Escape' && openOverlays.length) {
       e.preventDefault();
       closeTop();
+      return;
+    }
+    // Contain Tab inside the topmost popup: wrap at the edges and
+    // pull focus back in if it has wandered out (or onto <body>).
+    // Surfaces with their own trap (e.g. the global confirm modal)
+    // handle it first and preventDefault, so skip those.
+    if (e.key === 'Tab' && openOverlays.length && !e.defaultPrevented) {
+      var top = openOverlays[openOverlays.length - 1];
+      var root = panelOf(top) || top;
+      var f = Array.prototype.slice.call(focusables(root));
+      var active = document.activeElement;
+      if (!f.length) return;
+      if (!root.contains(active)) {
+        e.preventDefault();
+        try { f[0].focus({ preventScroll: true }); } catch (err) { f[0].focus(); }
+        return;
+      }
+      var first = f[0];
+      var last = f[f.length - 1];
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        try { last.focus({ preventScroll: true }); } catch (err) { last.focus(); }
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        try { first.focus({ preventScroll: true }); } catch (err) { first.focus(); }
+      }
     }
   });
 

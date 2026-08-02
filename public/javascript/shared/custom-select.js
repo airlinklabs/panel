@@ -47,11 +47,14 @@
     const dropdown = document.createElement('div');
     dropdown.className = 'cs-dropdown al-dropdown';
     dropdown.setAttribute('role', 'listbox');
+    dropdown.setAttribute('id', 'cs-list-' + (container.dataset.for || '') + '-' + Math.random().toString(36).slice(2, 8));
     dropdown.style.display = 'none';
 
     container.appendChild(trigger);
     container.appendChild(dropdown);
     container.dataset.built = '1';
+
+    let activeIndex = -1;
 
     function syncLabel() {
       const sel = select.options[select.selectedIndex];
@@ -65,11 +68,16 @@
       }
       Array.from(dropdown.children).forEach(function (item) {
         item.classList.toggle('selected', item.dataset.value === select.value);
+        if (item.hasAttribute('aria-selected')) {
+          item.setAttribute('aria-selected', String(item.dataset.value === select.value));
+        }
       });
     }
 
     function syncFromSelect() {
       dropdown.innerHTML = '';
+      activeIndex = -1;
+      trigger.removeAttribute('aria-activedescendant');
       Array.from(select.options).forEach(function (opt) {
         const item = document.createElement('div');
         item.className = 'cs-option' + (opt.disabled ? ' disabled' : '');
@@ -77,6 +85,8 @@
         item.dataset.value = opt.value;
         if (!opt.disabled) {
           item.setAttribute('role', 'option');
+          item.setAttribute('aria-selected', String(opt.value === select.value));
+          item.setAttribute('id', dropdown.id + '-o' + select.options.length + '-' + (item.dataset.value || '').replace(/[^a-z0-9]/gi, ''));
           item.addEventListener('click', function (e) {
             e.stopPropagation();
             select.value = opt.value;
@@ -87,6 +97,46 @@
         }
         dropdown.appendChild(item);
       });
+      trigger.setAttribute('aria-controls', dropdown.id);
+    }
+
+    function setActive(index) {
+      const options = Array.from(dropdown.querySelectorAll('[role="option"]'));
+      if (!options.length) return;
+      if (index < 0) index = options.length - 1;
+      if (index >= options.length) index = 0;
+      // Skip disabled options from the requested position (guarded: a
+      // fully-disabled list must not spin forever).
+      for (let guard = 0; guard < options.length && options[index].classList.contains('disabled'); guard++) {
+        index = (index + 1) % options.length;
+      }
+      if (options[index].classList.contains('disabled')) return;
+      activeIndex = index;
+      const item = options[activeIndex];
+      item.classList.add('cs-active');
+      options.forEach((o, i) => { if (i !== activeIndex) o.classList.remove('cs-active'); });
+      dropdown.setAttribute('aria-activedescendant', item.id || '');
+      item.scrollIntoView({ block: 'nearest' });
+    }
+
+    function moveActive(dir) {
+      const options = Array.from(dropdown.querySelectorAll('[role="option"]'));
+      if (!options.length) return;
+      let next = activeIndex;
+      for (let guard = 0; guard < options.length; guard++) {
+        next = (next + dir + options.length) % options.length;
+        if (!options[next].classList.contains('disabled')) break;
+      }
+      setActive(next);
+    }
+
+    function selectActive() {
+      const item = dropdown.querySelector('[role="option"].cs-active');
+      if (item) {
+        item.click();
+        return true;
+      }
+      return false;
     }
 
     function positionDropdown() {
@@ -97,13 +147,18 @@
       dropdown.style.maxHeight = '200px';
       const spaceBelow = window.innerHeight - rect.bottom - 6;
       const spaceAbove = rect.top - 6;
+      let opensUp = false;
       if (spaceBelow < 140 && spaceAbove > spaceBelow) {
         dropdown.style.top = 'auto';
         dropdown.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
+        opensUp = true;
       } else {
         dropdown.style.top = (rect.bottom + 5) + 'px';
         dropdown.style.bottom = 'auto';
       }
+      // Scale from the anchor edge, not always the top.
+      dropdown.style.transformOrigin = opensUp ? 'bottom center' : 'top center';
+      return opensUp;
     }
 
     function open() {
@@ -128,6 +183,8 @@
       if (dropdown.style.display === 'none') return;
       trigger.classList.remove('open');
       trigger.setAttribute('aria-expanded', 'false');
+      trigger.removeAttribute('aria-activedescendant');
+      activeIndex = -1;
       const done = function () {
         dropdown.removeAttribute('style');
         dropdown.style.display = 'none';
@@ -154,10 +211,21 @@
       else close();
     });
     trigger.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+      const isOpen = dropdown.style.display !== 'none';
+      if ((e.key === 'Enter' || e.key === ' ') && isOpen) {
         e.preventDefault();
-        if (dropdown.style.display === 'none') open();
-      } else if (e.key === 'Escape' || e.key === 'ArrowUp' || e.key === 'Tab') {
+        if (selectActive()) close();
+      } else if ((e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') && !isOpen) {
+        e.preventDefault();
+        open();
+      } else if (isOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        e.preventDefault();
+        moveActive(e.key === 'ArrowDown' ? 1 : -1);
+      } else if (isOpen && (e.key === 'Home' || e.key === 'End')) {
+        e.preventDefault();
+        const options = Array.from(dropdown.querySelectorAll('[role="option"]'));
+        setActive(e.key === 'Home' ? 0 : options.length - 1);
+      } else if (e.key === 'Escape' || e.key === 'Tab') {
         close();
       }
     });

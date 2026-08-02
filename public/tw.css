@@ -331,9 +331,15 @@
 .dark .cs-option { color: var(--theme-text, #e5e5e5); }
 .cs-option:hover { background: rgba(0,0,0,0.05); }
 .dark .cs-option:hover { background: rgba(255,255,255,0.06); }
+.cs-option.cs-active { background: rgba(0,0,0,0.08); }
+.dark .cs-option.cs-active { background: rgba(255,255,255,0.1); }
 .cs-option.selected { background: rgba(0,0,0,0.06); font-weight: 500; }
 .dark .cs-option.selected { background: rgba(255,255,255,0.08); }
 .cs-option.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+/* ports allocator external-port list — keyboard-highlighted option */
+.pa-extopt.pa-extopt-active { background: rgba(0,0,0,0.08); }
+.dark .pa-extopt.pa-extopt-active { background: rgba(255,255,255,0.1); }
 
 /* ── Ports allocator (shared) ──────────────────────────────────── */
 .pa-row {
