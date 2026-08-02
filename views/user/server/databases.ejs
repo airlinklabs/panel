@@ -76,16 +76,17 @@
             </div>
           </div>
         <% } else { %>
-          <% databases.forEach(db => { %>
-            <div class="al-card rounded-lg shadow overflow-hidden" data-db-id="<%= db.id %>">
-              <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+          <div class="al-card rounded-xl overflow-hidden p-0">
+            <% databases.forEach((db, i) => { %>
+            <div class="px-4 sm:px-5 py-4<%= i > 0 ? ' border-t' : '' %>" data-db-id="<%= db.id %>" style="border-color:var(--theme-border)">
+              <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2.5 flex-wrap">
+                  <div class="flex items-center gap-2 flex-wrap">
                     <h3 class="text-sm font-semibold font-mono" style="color:var(--theme-text-strong)"><%= db.databaseName %></h3>
                     <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium font-mono" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">@ <%= db.host.host %>:<%= db.host.port %></span>
                     <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">MySQL</span>
                   </div>
-                  <div class="flex items-center gap-3 mt-1.5 flex-wrap text-[11px]" style="color:var(--theme-text-muted)">
+                  <div class="flex items-center gap-x-4 gap-y-1 mt-1.5 flex-wrap text-[11px]" style="color:var(--theme-text-muted)">
                     <span class="flex items-center gap-1">
                       <%- icon('calendar', { class: 'w-3 h-3' }) %>
                       <%= req.translations.createdLabel || 'Created:' %> <%= new Date(db.createdAt).toLocaleString() %>
@@ -95,56 +96,59 @@
                       <%= req.translations.hostLabel || 'Host:' %> <%= db.host.name %>
                     </span>
                   </div>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 text-[11px]">
-                    <div>
-                      <div class="mb-1" style="color:var(--theme-text-muted)"><%= req.translations.usernameLabel || 'Username' %></div>
-                      <div class="flex items-center gap-2">
-                        <span id="db-user-<%= db.id %>" class="font-mono" style="color:var(--theme-text-strong)"><%= db.databaseUser %></span>
-                        <button type="button" onclick="copyText('<%= db.databaseUser %>')" class="al-btn-ghost" aria-label="<%= req.translations.copyUsername || 'Copy username' %>">
-                          <%- icon('copy', { size: 14 }) %>
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <div class="mb-1" style="color:var(--theme-text-muted)"><%= req.translations.passwordLabel || 'Password' %></div>
-                      <div class="flex items-center gap-2">
-                        <span id="db-pass-<%= db.id %>" class="font-mono hidden" style="color:var(--theme-text-strong)"><%= db.databasePassword %></span>
-                        <span id="db-pass-mask-<%= db.id %>" class="font-mono" style="color:var(--theme-text-strong)">••••••••••••••••</span>
-                        <button type="button" onclick="togglePassword(<%= db.id %>)" class="al-btn-ghost" aria-label="<%= req.translations.showPassword || 'Show password' %>">
-                          <%- icon('eye', { size: 14 }) %>
-                        </button>
-                        <button type="button" onclick="copyText(document.getElementById('db-pass-<%= db.id %>').textContent)" class="al-btn-ghost" aria-label="<%= req.translations.copyPassword || 'Copy password' %>">
-                          <%- icon('copy', { size: 14 }) %>
-                        </button>
-                      </div>
-                    </div>
-                    <div class="md:col-span-2">
-                      <div class="mb-1" style="color:var(--theme-text-muted)"><%= req.translations.connectionString || 'Connection string' %></div>
-                      <div class="flex items-center gap-2">
-                        <span id="db-dsn-<%= db.id %>" class="font-mono text-[11px] truncate max-w-[calc(100%-2rem)]" style="color:var(--theme-text-strong)">
-                          mysql://<%= db.databaseUser %>:<%= db.databasePassword %>@<%= db.host.host %>:<%= db.host.port %>/<%= db.databaseName %>
-                        </span>
-                        <button type="button" onclick="copyText(document.getElementById('db-dsn-<%= db.id %>').textContent)" class="al-btn-ghost" aria-label="<%= req.translations.copyConnectionString || 'Copy connection string' %>">
-                          <%- icon('copy', { size: 14 }) %>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex items-center gap-1.5 shrink-0">
                   <button type="button" onclick="rotatePassword(<%= db.id %>)"
-                    class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
                     style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
-                    <%- icon('refresh', { class: 'w-3 h-3 mr-1' }) %>
+                    <%- icon('refresh', { class: 'w-3 h-3' }) %>
                     <%= req.translations.rotatePassword || 'Rotate password' %>
                   </button>
-                  <button  onclick="deleteDatabase(<%= db.id %>)" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete database' %>">
-                    <%- icon('trash-2', { size: 16 }) %>
+                  <button onclick="deleteDatabase(<%= db.id %>)" type="button" class="al-btn-ghost p-1.5 -mr-1.5" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete database' %>">
+                    <%- icon('trash-2', { size: 15 }) %>
                   </button>
                 </div>
               </div>
+
+              <!-- Credentials -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-4">
+                <div>
+                  <p class="text-[11px] font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.usernameLabel || 'Username' %></p>
+                  <div class="flex items-center gap-1.5 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary)">
+                    <span id="db-user-<%= db.id %>" class="flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)"><%= db.databaseUser %></span>
+                    <button type="button" onclick="copyText('<%= db.databaseUser %>')" class="al-btn-ghost p-1 -mr-1.5 shrink-0" aria-label="<%= req.translations.copyUsername || 'Copy username' %>">
+                      <%- icon('copy', { size: 14 }) %>
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-[11px] font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.passwordLabel || 'Password' %></p>
+                  <div class="flex items-center gap-1.5 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary)">
+                    <span id="db-pass-<%= db.id %>" class="hidden flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong);display:none"><%= db.databasePassword %></span>
+                    <span id="db-pass-mask-<%= db.id %>" class="flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)">••••••••••••••••</span>
+                    <button type="button" onclick="togglePassword(<%= db.id %>)" class="al-btn-ghost p-1 -mr-1.5 shrink-0" aria-label="<%= req.translations.showPassword || 'Show password' %>">
+                      <%- icon('eye', { size: 14 }) %>
+                    </button>
+                    <button type="button" onclick="copyText(document.getElementById('db-pass-<%= db.id %>').textContent)" class="al-btn-ghost p-1 -mr-1.5 shrink-0" aria-label="<%= req.translations.copyPassword || 'Copy password' %>">
+                      <%- icon('copy', { size: 14 }) %>
+                    </button>
+                  </div>
+                </div>
+                <div class="md:col-span-2">
+                  <p class="text-[11px] font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.connectionString || 'Connection string' %></p>
+                  <div class="flex items-center gap-1.5 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary)">
+                    <span id="db-dsn-<%= db.id %>" class="flex-1 min-w-0 truncate font-mono text-[11px]" style="color:var(--theme-text-strong)">
+                      mysql://<%= db.databaseUser %>:<%= db.databasePassword %>@<%= db.host.host %>:<%= db.host.port %>/<%= db.databaseName %>
+                    </span>
+                    <button type="button" onclick="copyText(document.getElementById('db-dsn-<%= db.id %>').textContent)" class="al-btn-ghost p-1 -mr-1.5 shrink-0" aria-label="<%= req.translations.copyConnectionString || 'Copy connection string' %>">
+                      <%- icon('copy', { size: 14 }) %>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-          <% }); %>
+            <% }); %>
+          </div>
         <% } %>
       </div>
       </div>
@@ -156,10 +160,15 @@
 <div id="addDatabaseModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0 bg-transparent" aria-hidden="true" onclick="closeAddDatabaseModal()"></div>
   <div id="addDatabasePanel" class="al-sheet-panel relative w-full max-w-md mx-4 rounded-2xl shadow-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addDatabaseTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border)">
-    <h3 id="addDatabaseTitle" class="text-sm font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h3>
+    <div class="flex items-center justify-between mb-5">
+      <h3 id="addDatabaseTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h3>
+      <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-ghost p-1.5 -mr-1.5" aria-label="Close">
+        <%- icon('x', { class: 'w-4 h-4' }) %>
+      </button>
+    </div>
     <div class="space-y-4">
       <div>
-        <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.databaseHostLabel || 'Database host' %></label>
+        <label class="al-label"><%= req.translations.databaseHostLabel || 'Database host' %></label>
         <select id="dbHostSelect" class="al-input w-full">
           <% hosts.forEach(host => { %>
             <option value="<%= host.id %>"><%= host.name %> (<%= host.host %>:<%= host.port %>)</option>
@@ -265,9 +274,9 @@ window.copyText = (text) => {
 window.togglePassword = (id) => {
   const pass = document.getElementById('db-pass-' + id);
   const mask = document.getElementById('db-pass-mask-' + id);
-  const hidden = pass.classList.contains('hidden');
-  pass.classList.toggle('hidden', !hidden);
-  mask.classList.toggle('hidden', hidden);
+  const hidden = pass.style.display === 'none';
+  pass.style.display = hidden ? 'flex' : 'none';
+  mask.style.display = hidden ? 'none' : 'flex';
 };
 
 window.rotatePassword = async (id) => {
