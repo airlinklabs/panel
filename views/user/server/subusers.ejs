@@ -257,8 +257,16 @@ let editingSubUserId = null;
 
 const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m, t) => alert(m) };
 
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  Animate.openModal(el, el.querySelector('.al-sheet-panel'));
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  Animate.closeModal(el, el.querySelector('.al-sheet-panel'));
+}
 window.closeModal = closeModal;
 
 document.querySelectorAll('.perm-select-all, .perm-select-none').forEach(btn => {

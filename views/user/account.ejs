@@ -356,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>`;
     document.body.appendChild(overlay);
+    Animate.openModal(overlay, overlay.querySelector('.al-sheet-panel'));
 
     const stage = document.getElementById('crop-stage');
     const img   = document.getElementById('crop-img');
@@ -410,7 +411,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
 
-    const close = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); overlay.remove(); };
+    const close = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      Animate.closeModal(overlay, overlay.querySelector('.al-sheet-panel'), () => overlay.remove());
+    };
     document.getElementById('crop-cancel').addEventListener('click', close);
     document.getElementById('crop-cancel-btn').addEventListener('click', close);
 

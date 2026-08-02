@@ -70,7 +70,7 @@
                   <% const lightVal = settings.lightTheme || 'default'; %>
                   <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === 'default' ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= lightVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
                     <input type="radio" name="lightTheme" value="default" class="sr-only" <%= lightVal === 'default' ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === 'default' ? 'al-radio-ring-active' : '' %>" style="<%= lightVal !== 'default' ? 'border-color:var(--theme-text-muted)' : '' %>">
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === 'default' ? 'al-radio-ring-active' : '' %>" style="<%= lightVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
                       <% if (lightVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                     </span>
                     <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
@@ -80,7 +80,7 @@
                   <% const ltv = theme.lightPath || theme.path; %>
                   <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === ltv ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= lightVal !== ltv ? 'border-color:var(--theme-border)' : '' %>">
                     <input type="radio" name="lightTheme" value="<%= ltv %>" class="sr-only" <%= lightVal === ltv ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === ltv ? 'al-radio-ring-active' : '' %>" style="<%= lightVal !== ltv ? 'border-color:var(--theme-text-muted)' : '' %>">
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === ltv ? 'al-radio-ring-active' : '' %>" style="<%= lightVal !== ltv ? 'border-color:var(--theme-border)' : '' %>">
                       <% if (lightVal === ltv) { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                     </span>
                     <div class="flex-1 min-w-0">
@@ -99,7 +99,7 @@
                   <% const darkVal = settings.darkTheme || 'default'; %>
                   <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === 'default' ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= darkVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
                     <input type="radio" name="darkTheme" value="default" class="sr-only" <%= darkVal === 'default' ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === 'default' ? 'al-radio-ring-active' : '' %>" style="<%= darkVal !== 'default' ? 'border-color:var(--theme-text-muted)' : '' %>">
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === 'default' ? 'al-radio-ring-active' : '' %>" style="<%= darkVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
                       <% if (darkVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                     </span>
                     <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
@@ -109,7 +109,7 @@
                   <% const dtv = theme.darkPath || theme.path; %>
                   <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === dtv ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= darkVal !== dtv ? 'border-color:var(--theme-border)' : '' %>">
                     <input type="radio" name="darkTheme" value="<%= dtv %>" class="sr-only" <%= darkVal === dtv ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === dtv ? 'al-radio-ring-active' : '' %>" style="<%= darkVal !== dtv ? 'border-color:var(--theme-text-muted)' : '' %>">
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === dtv ? 'al-radio-ring-active' : '' %>" style="<%= darkVal !== dtv ? 'border-color:var(--theme-border)' : '' %>">
                       <% if (darkVal === dtv) { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                     </span>
                     <div class="flex-1 min-w-0">
