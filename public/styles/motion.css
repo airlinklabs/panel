@@ -353,4 +353,23 @@
   .sidebar-special-link:hover svg {
     transform: none;
   }
+  .sched-step,
+  .sched-every-chip,
+  .sched-day-chip {
+    transition: none !important;
+  }
+  .sched-every-chip svg {
+    transition: none !important;
+  }
+  button:not(:disabled):active,
+  input[type="submit"]:not(:disabled):active,
+  input[type="button"]:not(:disabled):active,
+  a.nav-link:active,
+  .sidebar-special-link:active,
+  .sched-mode-btn:active,
+  .sched-day-chip:active,
+  .sched-step:active,
+  .sched-every-chip:active {
+    animation: none;
+  }
 }

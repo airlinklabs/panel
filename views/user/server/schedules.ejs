@@ -88,7 +88,7 @@
                       <div class="al-toggle-dot"></div>
                     </div>
                   </label>
-                  <button type="button" onclick="runSchedule(<%= schedule.id %>, '<%= schedule.name.replace(/'/g, "&#39;") %>')"
+                  <button type="button" data-sched-name="<%= schedule.name %>" onclick="runSchedule(<%= schedule.id %>, this.dataset.schedName)"
                     class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
                     style="color:var(--theme-success);background:var(--theme-success-bg)">
                     <%- icon('play', { class: 'w-3 h-3' }) %>
@@ -100,7 +100,7 @@
                     <%- icon('settings', { class: 'w-3 h-3' }) %>
                     Tasks
                   </button>
-                  <button type="button" onclick="deleteSchedule(<%= schedule.id %>, '<%= schedule.name.replace(/'/g, "&#39;") %>')"
+                  <button type="button" data-sched-name="<%= schedule.name %>" onclick="deleteSchedule(<%= schedule.id %>, this.dataset.schedName)"
                     class="al-btn-ghost p-1.5 -mr-1.5" style="color:var(--theme-danger)" aria-label="Delete schedule">
                     <%- icon('trash-2', { size: 15 }) %>
                   </button>
@@ -213,11 +213,11 @@
       </div>
       <div>
         <div class="flex rounded-lg p-0.5 text-xs font-medium mb-1.5" style="background:var(--theme-bg-secondary)">
-          <button type="button" data-sched-mode="cron" class="sched-mode-btn flex-1 rounded-md px-3 py-1.5 transition inline-flex items-center gap-1.5" style="color:var(--theme-text-strong);background:var(--theme-bg-card)">
+          <button type="button" data-sched-mode="cron" class="sched-mode-btn flex-1 rounded-md px-3 py-1.5 transition inline-flex items-center gap-1.5" style="color:var(--theme-text-strong);background:var(--theme-bg-card)" aria-pressed="true">
             <%- icon('clock', { class: 'size-3', strokeWidth: 1.5 }) %>
             Cron expression
           </button>
-          <button type="button" data-sched-mode="visual" class="sched-mode-btn flex-1 rounded-md px-3 py-1.5 transition inline-flex items-center gap-1.5" style="color:var(--theme-text-muted)">
+          <button type="button" data-sched-mode="visual" class="sched-mode-btn flex-1 rounded-md px-3 py-1.5 transition inline-flex items-center gap-1.5" style="color:var(--theme-text-muted)" aria-pressed="false">
             <%- icon('calendar', { class: 'size-3', strokeWidth: 1.5 }) %>
             Visual timing
           </button>
@@ -226,6 +226,7 @@
       <div id="schedCronWrap">
         <label class="al-label">Cron expression</label>
         <input id="schedCron" type="text" class="al-input w-full font-mono" placeholder="0 0 * * * *" autocomplete="off" value="0 */6 * * *">
+        <p id="schedCronErr" class="hidden mt-1.5 text-[11px]" style="color:var(--theme-danger)">Cron must be 5 or 6 fields — <span class="font-mono">second minute hour day month weekday</span> (e.g. <span class="font-mono">0 0 * * * *</span>).</p>
         <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Format: <span class="font-mono">second minute hour day month weekday</span> — <span id="cronPreview" class="font-medium" style="color:var(--theme-accent)">every 6 hours</span></p>
       </div>
       <div id="schedVisualWrap" class="hidden space-y-4">
@@ -246,12 +247,13 @@
                 <%- icon('minus', { class: 'size-3.5', strokeWidth: 2 }) %>
               </button>
               <input id="schedG<%= f.key %>" type="number" min="<%= f.min %>" max="<%= f.max %>" value="<%= f.key === 'dom' ? 1 : 0 %>" class="al-input w-full px-2 py-1.5 text-center font-mono" aria-label="<%= f.label %> value">
+              <span id="schedInt<%= f.key %>" class="sched-int hidden items-center justify-center gap-1 font-mono text-xs whitespace-nowrap" style="color:var(--theme-text)">every <b id="schedIntN<%= f.key %>" style="color:var(--theme-accent)">2</b></span>
               <button type="button" class="sched-step" data-step-for="<%= f.key %>" data-step="1" aria-label="Increase <%= f.label.toLowerCase() %>">
                 <%- icon('plus', { class: 'size-3.5', strokeWidth: 2 }) %>
               </button>
             </div>
-            <label class="mt-2 inline-flex items-center cursor-pointer select-none" title="Run for every <%= f.label.toLowerCase() %> value">
-              <input type="checkbox" id="schedG<%= f.key %>Every" class="sr-only peer" checked>
+            <label class="sched-every-label mt-2 inline-flex items-center cursor-pointer select-none" title="Run for every <%= f.label.toLowerCase() %> value">
+              <input type="checkbox" id="schedG<%= f.key %>Every" class="sr-only peer" checked aria-label="Run for every <%= f.label.toLowerCase() %> value">
               <span class="sched-every-chip">
                 <%- icon('check', { class: 'size-3', strokeWidth: 2.5 }) %>
                 every
@@ -272,6 +274,10 @@
             <button type="button" class="sched-day-chip" data-dow="5" aria-pressed="false" title="Friday">Fri</button>
             <button type="button" class="sched-day-chip" data-dow="6" aria-pressed="false" title="Saturday">Sat</button>
           </div>
+        </div>
+        <div id="schedVisualWarn" class="hidden items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs" style="background:var(--theme-danger-bg);color:var(--theme-danger)" role="alert">
+          <%- icon('alert-triangle', { class: 'size-4 shrink-0', strokeWidth: 1.5 }) %>
+          <span>This expression can't be shown visually — it uses ranges, lists, or values outside the visual editor. Edit it in Cron mode.</span>
         </div>
         <p class="text-[11px]" style="color:var(--theme-text-muted)">Runs <span id="schedVisualDesc" class="font-medium" style="color:var(--theme-accent)">every hour</span> — cron: <span id="schedVisualCron" class="font-mono font-medium" style="color:var(--theme-accent)">0 0 * * * *</span></p>
       </div>
@@ -308,11 +314,11 @@ window.openAddScheduleModal = () => {
   lastScheduleModalFocus = document.activeElement;
   document.getElementById('schedName').value = '';
   document.getElementById('schedCron').value = '0 0 * * * *';
+  document.getElementById('schedCronErr')?.classList.add('hidden');
   document.getElementById('cronPreview').textContent = describeCron('0 0 * * * *');
   setSchedMode('visual');
   Animate.openModal(document.getElementById('addScheduleModal'), document.getElementById('addSchedulePanel'));
-  const focusable = getFocusableElements(document.getElementById('addSchedulePanel'));
-  (focusable[0] || document.getElementById('addSchedulePanel')).focus();
+  document.getElementById('schedName').focus();
 };
 
 window.closeAddScheduleModal = () => {
@@ -342,7 +348,88 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-/* ── Human-readable cron preview ── */
+/* ── Human-readable cron preview ──
+   Never invents meaning: tokens outside the supported grammar are
+   echoed back verbatim so the preview can't lie about a schedule. */
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+function fmtClock(h, m) {
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return h12 + ':' + String(m).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM');
+}
+
+function splitCronField(v) {
+  if (v === '*') return [];
+  if (/^\*\/\d+$/.test(v)) return [['int', +v.slice(2)]];
+  const parts = [];
+  for (const item of v.split(',')) {
+    const m = item.match(/^(\d+)(?:-(\d+))?$/);
+    if (!m) return null;
+    parts.push(m[2] !== undefined ? ['range', +m[1], +m[2]] : ['num', +m[1]]);
+  }
+  return parts;
+}
+
+function describeTime(minF, hourF, min, hour) {
+  const minNum = min.length === 1 && min[0][0] === 'num' ? min[0][1] : null;
+  const hourNum = hour.length === 1 && hour[0][0] === 'num' ? hour[0][1] : null;
+  const minInt = min.length === 1 && min[0][0] === 'int' ? min[0][1] : null;
+  const hourInt = hour.length === 1 && hour[0][0] === 'int' ? hour[0][1] : null;
+  if (minF === '*') {
+    if (hourF === '*') return 'every minute';
+    if (hourInt !== null) return 'every minute during every ' + hourInt + ' hours';
+    if (hourNum !== null) return 'every minute during hour ' + hourNum;
+    return 'every minute during hours ' + hourF;
+  }
+  if (minInt !== null) {
+    if (hourF === '*') return 'every ' + minInt + ' minutes';
+    if (hourNum !== null) return 'every ' + minInt + ' minutes in hour ' + hourNum;
+    return 'every ' + minInt + ' minutes, every ' + hourInt + ' hours';
+  }
+  if (minNum !== null) {
+    if (hourF === '*') return minNum === 0 ? 'every hour' : 'every hour at minute ' + minNum;
+    if (hourNum !== null) return 'at ' + fmtClock(hourNum, minNum);
+    if (hourInt !== null) return minNum === 0 ? 'every ' + hourInt + ' hours' : 'every ' + hourInt + ' hours at minute ' + minNum;
+    return 'at minute ' + minNum + ' during hours ' + hourF;
+  }
+  if (hourF === '*') return 'every hour at minutes ' + minF;
+  return 'at minutes ' + minF + ' during hours ' + hourF;
+}
+
+function describeDate(domF, monF, dowF, dom, mon, dow) {
+  const bits = [];
+  const one = (f) => f.length === 1 && f[0][0] === 'num' ? f[0][1] : null;
+  const intv = (f) => f.length === 1 && f[0][0] === 'int' ? f[0][1] : null;
+  const dowNum = one(dow);
+  const dowInt = intv(dow);
+  if (dowF !== '*') {
+    if (dowInt !== null) bits.push('every ' + dowInt + ' days of the week');
+    else if (dow.length === 1 && dowNum !== null) bits.push('every ' + DAY_NAMES[dowNum % 7]);
+    else bits.push('on ' + dowF.split(',').map((t) => {
+      const m = t.match(/^(\d+)(?:-(\d+))?$/);
+      if (!m) return t;
+      return m[2] !== undefined ? DAY_SHORT[+m[1] % 7] + '-' + DAY_SHORT[+m[2] % 7] : DAY_SHORT[+m[1] % 7];
+    }).join(', '));
+  }
+  const domNum = one(dom);
+  const domInt = intv(dom);
+  if (domF !== '*') {
+    if (domInt !== null) bits.push('every ' + domInt + ' days of the month');
+    else if (dom.length === 1 && domNum !== null) bits.push('on day ' + domNum + ' of the month');
+    else bits.push('on days ' + domF + ' of the month');
+  }
+  const monNum = one(mon);
+  const monInt = intv(mon);
+  if (monF !== '*') {
+    if (monInt !== null) bits.push('every ' + monInt + ' months');
+    else if (mon.length === 1 && monNum !== null) bits.push('in ' + MONTH_NAMES[Math.min(12, Math.max(1, monNum)) - 1]);
+    else bits.push('in months ' + monF);
+  }
+  return bits.length ? bits.join(', ') : null;
+}
+
 function describeCron(expr) {
   const p = String(expr || '').trim().split(/\s+/);
   if (p.length === 6) {
@@ -357,48 +444,72 @@ function describeCron(expr) {
 
 function describeCron5(expr) {
   const p = String(expr || '').trim().split(/\s+/);
-  if (p.length !== 5) return 'invalid cron';
-  const [min, hour, dom, mon, dow] = p;
-  const m = (v) => v === '*' ? null : v;
-  if (m(dow) === '0' || m(dow) === '7') return 'every Sunday';
-  if (/^[1-6]$/.test(dow || '')) return 'every ' + ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][+dow - 1];
-  if (m(dom) === null && m(mon) === null) {
-    if (m(hour) === null) {
-      if (m(min) === null) return 'every minute';
-      if (m(min) === '0') return 'every hour';
-      if (/^\*\/\d+$/.test(min)) return 'every ' + min.split('/')[1] + ' minutes';
-      return 'at minute ' + min;
-    }
-    if (m(min) === '0') {
-      if (/^\*\/\d+$/.test(hour)) return 'every ' + hour.split('/')[1] + ' hours';
-      if (hour === '*/12') return 'twice a day';
-      return 'every hour';
-    }
-    if (/^\*\//.test(hour)) return 'every ' + hour.slice(2) + ' hours';
-  }
-  return 'runs on schedule';
+  if (p.length !== 5) return String(expr || '').trim() || 'invalid cron';
+  const [minF, hourF, domF, monF, dowF] = p;
+  const min = splitCronField(minF);
+  const hour = splitCronField(hourF);
+  const dom = splitCronField(domF);
+  const mon = splitCronField(monF);
+  const dow = splitCronField(dowF);
+  if (!min || !hour || !dom || !mon || !dow) return expr;
+  const time = describeTime(minF, hourF, min, hour);
+  const date = describeDate(domF, monF, dowF, dom, mon, dow);
+  return [time, date].filter(Boolean).join(' ');
 }
 
 document.getElementById('schedCron').addEventListener('input', function () {
+  document.getElementById('schedCronErr')?.classList.add('hidden');
   document.getElementById('cronPreview').textContent = describeCron(this.value);
 });
 
 const granKeys = ['sec', 'min', 'hour', 'dom'];
 const granLimits = { sec: [0, 59], min: [0, 59], hour: [0, 23], dom: [1, 31] };
-let schedDow = '*';
+const granInterval = { sec: null, min: null, hour: null, dom: null };
+let schedDowAll = true;
+const schedDowDays = new Set();
+
+function serializeDow() {
+  if (schedDowAll || schedDowDays.size === 0 || schedDowDays.size === 7) return '*';
+  const arr = [...schedDowDays].map(Number).sort((a, b) => a - b);
+  const out = [];
+  let start = arr[0];
+  let prev = arr[0];
+  for (let i = 1; i <= arr.length; i++) {
+    const cur = arr[i];
+    if (cur !== prev + 1) {
+      out.push(start === prev ? String(start) : start + '-' + prev);
+      start = cur;
+    }
+    prev = cur;
+  }
+  return out.join(',');
+}
+
+function dowSetFromToken(v) {
+  const set = new Set();
+  if (v === '*' || v === '') {
+    for (let i = 0; i < 7; i++) set.add(i);
+    return set;
+  }
+  for (const part of v.split(',')) {
+    const m = part.match(/^([0-6])(?:-([0-6]))?$/);
+    if (!m || (m[2] !== undefined && +m[2] < +m[1])) return null;
+    for (let i = +m[1]; i <= +m[2] || i <= +m[1]; i++) set.add(i);
+  }
+  return set;
+}
 
 function granField(key) {
   const el = document.getElementById('schedG' + key);
   const every = document.getElementById('schedG' + key + 'Every');
-  if (every.checked) return '*';
+  if (every.checked) return granInterval[key] ? '*/' + granInterval[key] : '*';
   let n = parseInt(el.value, 10);
   if (isNaN(n)) n = key === 'dom' ? 1 : 0;
-  const val = String(Math.min(granLimits[key][1], Math.max(granLimits[key][0], n)));
-  return el.dataset.interval === 'true' ? '*/' + val : val;
+  return String(Math.min(granLimits[key][1], Math.max(granLimits[key][0], n)));
 }
 
 function buildGranularCron() {
-  const cron = granKeys.map(granField).concat(['*', schedDow]).join(' ');
+  const cron = granKeys.map(granField).concat(['*', serializeDow()]).join(' ');
   document.getElementById('schedVisualCron').textContent = cron;
   document.getElementById('schedVisualDesc').textContent = describeCron(cron);
   document.getElementById('schedCron').value = cron;
@@ -407,27 +518,56 @@ function buildGranularCron() {
 
 function renderDowChips() {
   document.querySelectorAll('.sched-day-chip').forEach((c) => {
-    const on = c.dataset.dow === schedDow;
+    const on = c.dataset.dow === '*' ? schedDowAll : schedDowDays.has(Number(c.dataset.dow));
     c.setAttribute('aria-pressed', String(on));
     c.classList.toggle('on', on);
   });
 }
 
+function updateIntervalDisplay(key) {
+  const el = document.getElementById('schedG' + key);
+  const every = document.getElementById('schedG' + key + 'Every');
+  const span = document.getElementById('schedInt' + key);
+  const nEl = document.getElementById('schedIntN' + key);
+  const on = every.checked;
+  el.classList.toggle('hidden', on);
+  span.classList.toggle('hidden', !on);
+  span.classList.toggle('inline-flex', on);
+  if (on) nEl.textContent = String(granInterval[key] || 2);
+}
+
 function syncVisualFromCron() {
+  const warn = document.getElementById('schedVisualWarn');
   const fields = document.getElementById('schedCron').value.trim().split(/\s+/);
-  let parts = fields.length === 6 ? fields : ['0'].concat(fields.length === 5 ? fields : ['0', '*', '*', '*', '*']);
-  let ok = parts.length === 6;
-  parts.forEach(f => { if (!/^(\*|\*\/\d+|\d+)$/.test(f)) ok = false; });
-  if (!ok) { parts = ['0', '0', '*', '*', '*', '*']; }
+  const parts = fields.length === 6 ? fields : fields.length === 5 ? ['0'].concat(fields) : null;
+  if (!parts || !parts.slice(0, 4).every((f) => /^(\*|\*\/\d+|\d+)$/.test(f)) || !/^(\*|[0-6](?:-[0-6])?)(,[0-6](?:-[0-6])?)*$/.test(parts[5])) {
+    warn.classList.remove('hidden');
+    warn.classList.add('flex');
+    return;
+  }
+  warn.classList.add('hidden');
+  warn.classList.remove('flex');
   granKeys.forEach((key, i) => {
     const v = parts[i];
     const el = document.getElementById('schedG' + key);
     const every = document.getElementById('schedG' + key + 'Every');
-    if (v === '*') { every.checked = true; el.dataset.interval = 'false'; }
-    else if (/^\*\/\d+$/.test(v)) { every.checked = false; el.value = String(parseInt(v.slice(2), 10) || 0); el.dataset.interval = 'true'; }
-    else { every.checked = false; el.value = String(parseInt(v, 10) || 0); el.dataset.interval = 'false'; }
+    if (v === '*') { every.checked = true; granInterval[key] = null; }
+    else if (/^\*\/\d+$/.test(v)) {
+      every.checked = true;
+      const n = parseInt(v.slice(2), 10);
+      granInterval[key] = n > 1 ? Math.min(granLimits[key][1], n) : null;
+    }
+    else {
+      every.checked = false;
+      granInterval[key] = null;
+      el.value = String(Math.min(granLimits[key][1], Math.max(granLimits[key][0], parseInt(v, 10) || (key === 'dom' ? 1 : 0))));
+    }
+    updateIntervalDisplay(key);
   });
-  schedDow = /^\d+$/.test(parts[5]) ? String(Math.min(6, parseInt(parts[5], 10))) : '*';
+  const days = dowSetFromToken(parts[5]);
+  schedDowAll = days.size === 7;
+  schedDowDays.clear();
+  if (!schedDowAll) days.forEach((d) => schedDowDays.add(d));
   renderDowChips();
   buildGranularCron();
 }
@@ -441,28 +581,49 @@ granKeys.forEach(key => {
   };
   document.querySelectorAll('[data-step-for="' + key + '"]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      every.checked = false;
-      el.dataset.interval = 'false';
       const [min, max] = granLimits[key];
-      let n = parseInt(el.value, 10);
-      if (isNaN(n)) n = key === 'dom' ? 1 : 0;
-      el.value = String(Math.min(max, Math.max(min, n + Number(btn.dataset.step))));
-      syncEveryChip();
+      if (every.checked) {
+        const n = Math.min(max, Math.max(2, (granInterval[key] || 1) + Number(btn.dataset.step)));
+        granInterval[key] = n;
+        updateIntervalDisplay(key);
+      } else {
+        let n = parseInt(el.value, 10);
+        if (isNaN(n)) n = key === 'dom' ? 1 : 0;
+        el.value = String(Math.min(max, Math.max(min, n + Number(btn.dataset.step))));
+      }
       buildGranularCron();
     });
   });
   el.addEventListener('change', buildGranularCron);
-  el.addEventListener('input', () => { el.dataset.interval = 'false'; buildGranularCron(); });
-  every.addEventListener('change', () => { el.dataset.interval = 'false'; syncEveryChip(); buildGranularCron(); });
+  el.addEventListener('input', () => { buildGranularCron(); });
+  every.addEventListener('change', () => {
+    if (every.checked) { granInterval[key] = null; }
+    syncEveryChip();
+    updateIntervalDisplay(key);
+    buildGranularCron();
+  });
+  updateIntervalDisplay(key);
   syncEveryChip();
 });
 document.querySelectorAll('.sched-day-chip').forEach((c) => {
-  c.addEventListener('click', () => { schedDow = c.dataset.dow; renderDowChips(); buildGranularCron(); });
+  c.addEventListener('click', () => {
+    if (c.dataset.dow === '*') { schedDowAll = true; schedDowDays.clear(); }
+    else {
+      const d = Number(c.dataset.dow);
+      schedDowAll = false;
+      if (schedDowDays.has(d)) schedDowDays.delete(d);
+      else schedDowDays.add(d);
+      if (schedDowDays.size === 0) schedDowAll = true;
+    }
+    renderDowChips();
+    buildGranularCron();
+  });
 });
 
 function setSchedMode(mode) {
   document.querySelectorAll('.sched-mode-btn').forEach((b) => {
     const active = b.dataset.schedMode === mode;
+    b.setAttribute('aria-pressed', String(active));
     b.style.background = active ? 'var(--theme-bg-card)' : 'transparent';
     b.style.color = active ? 'var(--theme-text-strong)' : 'var(--theme-text-muted)';
     b.style.boxShadow = active ? 'var(--theme-shadow-sm, 0 1px 2px rgba(0,0,0,0.05))' : 'none';
@@ -489,14 +650,35 @@ async function api(url, method, body) {
   }
 }
 
+const CRON_TOKEN_RE = /^(\*|\*\/[0-9]+|[0-9]+(-[0-9]+)?)(,[0-9]+(-[0-9]+)?)*$/;
+
+function validCron(c) {
+  const parts = String(c || '').trim().split(/\s+/);
+  return (parts.length === 5 || parts.length === 6) && parts.every((t) => CRON_TOKEN_RE.test(t));
+}
+
 document.getElementById('confirmAddSchedule')?.addEventListener('click', async () => {
+  const btn = document.getElementById('confirmAddSchedule');
+  const errEl = document.getElementById('schedCronErr');
   const name = document.getElementById('schedName').value.trim();
   const cron = document.getElementById('schedCron').value.trim();
   if (!name) { showToast('Enter a schedule name.', 'error'); return; }
+  if (!validCron(cron)) {
+    errEl.classList.remove('hidden');
+    document.getElementById('schedCron').focus();
+    return;
+  }
+  errEl.classList.add('hidden');
+  btn.disabled = true;
+  btn.classList.add('opacity-60', 'pointer-events-none');
   const result = await api('/server/' + serverId + '/schedules', 'POST', { name, cron });
   if (result) {
     showToast('Schedule created.', 'success');
+    closeAddScheduleModal();
     setTimeout(() => location.reload(), 900);
+  } else {
+    btn.disabled = false;
+    btn.classList.remove('opacity-60', 'pointer-events-none');
   }
 });
 
