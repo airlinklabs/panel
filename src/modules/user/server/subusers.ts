@@ -4,6 +4,7 @@ import logger from '../../../handlers/logger';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
+import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import { serverPageInclude } from './shared';
 
 const PERMISSION_LABELS: Record<string, string> = {
@@ -155,6 +156,7 @@ export function registerSubUserRoutes(router: Router): void {
           },
         });
 
+        await logActivity(req, 'subuser:create', { serverId: String(server.UUID), metadata: { targetUserId: target.id } });
         res.json({ success: true, message: `${target.username || target.email} added as a subuser.` });
         return;
       } catch (error) {
@@ -197,6 +199,7 @@ export function registerSubUserRoutes(router: Router): void {
 
         await prisma.subUser.delete({ where: { id: subUser.id } });
 
+        await logActivity(req, 'subuser:delete', { serverId: String(server.UUID), metadata: { subUserId: String(subUserId) } });
         res.json({ success: true, message: 'Subuser removed.' });
         return;
       } catch (error) {
@@ -248,6 +251,7 @@ export function registerSubUserRoutes(router: Router): void {
           data: { permissions: JSON.stringify(permissions) },
         });
 
+        await logActivity(req, 'subuser:update', { serverId: String(server.UUID), metadata: { subUserId: String(subUserId) } });
         res.json({ success: true, message: 'Subuser permissions updated.' });
         return;
       } catch (error) {

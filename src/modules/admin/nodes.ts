@@ -25,17 +25,27 @@ type NodeWithInstances = {
   ram: number;
   cpu: number;
   disk: number;
+  overallocateMemory: number;
+  overallocateDisk: number;
+  overallocateCpu: number;
+  locationId: number | null;
   address: string;
   port: number;
   key: string;
   createdAt: Date;
   instances: any[];
   servers?: any[]; // For port allocation UI
+  usage?: {
+    memory: number;
+    cpu: number;
+    disk: number;
+    overallocatedMemory: number;
+  };
 }
 
 async function listNodes(res: Response, includeServers = false) {
   try {
-    const nodes = await prisma.node.findMany();
+    const nodes = await prisma.node.findMany({ include: { location: true } });
     const nodesWithStatus = [];
 
     for (const node of nodes) {
@@ -43,10 +53,23 @@ async function listNodes(res: Response, includeServers = false) {
         where: { nodeId: node.id },
       });
 
+      const usedMemory = instances.reduce((sum, s) => sum + s.Memory, 0);
+      const usedCpu = instances.reduce((sum, s) => sum + s.Cpu, 0);
+      const usedDisk = instances.reduce((sum, s) => sum + s.Storage, 0);
+
       const nodeWithInstances: NodeWithInstances = {
         ...node,
         instances,
         ...(includeServers ? { servers: instances } : {}),
+        usage: {
+          memory: node.ram > 0 ? Math.round((usedMemory / (node.ram * 1024)) * 100) : 0,
+          cpu: node.cpu > 0 ? Math.round((usedCpu / node.cpu) * 100) : 0,
+          disk: node.disk > 0 ? Math.round((usedDisk / (node.disk * 1024)) * 100) : 0,
+          overallocatedMemory:
+            node.ram > 0
+              ? Math.round((usedMemory / (node.ram * 1024 * (1 + node.overallocateMemory / 100))) * 100)
+              : 0,
+        },
       };
 
       nodesWithStatus.push(await checkNodeStatus(nodeWithInstances));
@@ -121,7 +144,8 @@ const adminModule: Module = {
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
-          res.render('admin/nodes/create', { user, req, settings, nodes });
+          const locations = await prisma.location.findMany();
+          res.render('admin/nodes/create', { user, req, settings, nodes, locations });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -144,6 +168,30 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         const { name, ram, cpu, disk, address, port } = req.body;
+        const overallocateMemory = parseInt(req.body.overallocateMemory);
+        const overallocateDisk = parseInt(req.body.overallocateDisk);
+        const overallocateCpu = parseInt(req.body.overallocateCpu);
+        const locationId = req.body.locationId ? parseInt(req.body.locationId) : null;
+
+        // 'all' from the UI means unlimited → store 0
+        const parseLimit = (v: unknown): number => (v === 'all' ? 0 : parseFloat(String(v ?? '')));
+
+        if (
+          [overallocateMemory, overallocateDisk, overallocateCpu].some(
+            (v) => isNaN(v) || v < 0,
+          )
+        ) {
+          res.status(400).json({ message: 'Overallocation percentages must be >= 0.' });
+          return;
+        }
+
+        if (locationId !== null) {
+          const location = await prisma.location.findUnique({ where: { id: locationId } });
+          if (!location) {
+            res.status(400).json({ message: 'Selected location not found.' });
+            return;
+          }
+        }
 
         if (!name || typeof name !== 'string') {
           res.status(400).json({ message: 'Name must be a string.' });
@@ -155,17 +203,17 @@ const adminModule: Module = {
           return;
         }
 
-        if (!ram || isNaN(parseInt(ram)) || parseInt(ram) <= 0) {
+        if (ram !== 'all' && (!ram || isNaN(parseFloat(ram)) || parseFloat(ram) <= 0)) {
           res.status(400).json({ message: 'RAM must be a positive number.' });
           return;
         }
 
-        if (!cpu || isNaN(parseInt(cpu)) || parseInt(cpu) <= 0) {
+        if (cpu !== 'all' && (!cpu || isNaN(parseFloat(cpu)) || parseFloat(cpu) <= 0)) {
           res.status(400).json({ message: 'CPU must be a positive number.' });
           return;
         }
 
-        if (!disk || isNaN(parseInt(disk)) || parseInt(disk) <= 0) {
+        if (disk !== 'all' && (!disk || isNaN(parseFloat(disk)) || parseFloat(disk) <= 0)) {
           res.status(400).json({ message: 'Disk must be a positive number.' });
           return;
         }
@@ -223,9 +271,9 @@ const adminModule: Module = {
 
           const key = generateApiKey(32);
 
-          const ramValue = parseFloat(ram);
-          const cpuValue = parseFloat(cpu);
-          const diskValue = parseFloat(disk);
+          const ramValue = parseLimit(ram);
+          const cpuValue = parseLimit(cpu);
+          const diskValue = parseLimit(disk);
           const portValue = parseInt(port);
 
           const node = await prisma.node.create({
@@ -234,6 +282,10 @@ const adminModule: Module = {
               ram: ramValue,
               cpu: cpuValue,
               disk: diskValue,
+              overallocateMemory,
+              overallocateDisk,
+              overallocateCpu,
+              locationId,
               address,
               port: portValue,
               key,
@@ -376,7 +428,8 @@ const adminModule: Module = {
           const node = await prisma.node.findUnique({
             where: { id: nodeId },
             include: {
-              servers: true
+              servers: true,
+              location: true,
             }
           });
 
@@ -388,8 +441,9 @@ const adminModule: Module = {
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
+          const locations = await prisma.location.findMany();
 
-          res.render('admin/nodes/edit', { node, user, req, settings });
+          res.render('admin/nodes/edit', { node, user, req, settings, locations });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -417,6 +471,27 @@ const adminModule: Module = {
           const address = req.body.address;
           const port = parseInt(req.body.port);
           const allocatedPorts = req.body.allocatedPorts || '[]';
+          const overallocateMemory = parseInt(req.body.overallocateMemory);
+          const overallocateDisk = parseInt(req.body.overallocateDisk);
+          const overallocateCpu = parseInt(req.body.overallocateCpu);
+          const locationId = req.body.locationId ? parseInt(req.body.locationId) : null;
+
+          if (
+            [overallocateMemory, overallocateDisk, overallocateCpu].some(
+              (v) => isNaN(v) || v < 0,
+            )
+          ) {
+            res.status(400).json({ message: 'Overallocation percentages must be >= 0.' });
+            return;
+          }
+
+          if (locationId !== null) {
+            const location = await prisma.location.findUnique({ where: { id: locationId } });
+            if (!location) {
+              res.status(400).json({ message: 'Selected location not found.' });
+              return;
+            }
+          }
 
           if (
             !name ||
@@ -460,6 +535,10 @@ const adminModule: Module = {
               ram,
               cpu,
               disk,
+              overallocateMemory,
+              overallocateDisk,
+              overallocateCpu,
+              locationId,
               address,
               port,
               allocatedPorts,

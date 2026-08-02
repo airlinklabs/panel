@@ -1,0 +1,101 @@
+<%- include('../../components/header', { title: 'Locations' }) %>
+
+<main class="al-page">
+  <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div class="px-8 lg:px-12 pt-6 pb-12 max-w-5xl">
+      <div class="flex items-center justify-between mb-7">
+        <div>
+          <h1 class="text-xl font-semibold tracking-tight text-neutral-900 dark:text-white">Locations</h1>
+          <p class="text-sm text-neutral-500 mt-0.5">Group nodes by region. Servers are not location-constrained yet.</p>
+        </div>
+      </div>
+
+      <div class="al-card mb-6">
+        <div class="al-card-header">Create Location</div>
+        <div class="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="al-label" for="locName">Name</label>
+            <input id="locName" type="text" placeholder="US East" class="al-input">
+          </div>
+          <div>
+            <label class="al-label" for="locCode">Short code</label>
+            <input id="locCode" type="text" placeholder="us-east" class="al-input">
+          </div>
+          <div class="flex items-end">
+            <button id="createLocationBtn" type="button" class="al-btn-primary w-full">
+              <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+              Create
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="al-card">
+        <div class="al-card-header">All Locations</div>
+        <div class="p-5">
+          <% if (locations.length === 0) { %>
+            <p class="text-sm text-neutral-500">No locations yet. Create one above.</p>
+          <% } else { %>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <% locations.forEach(loc => { %>
+                <div class="rounded-xl border p-4 flex items-center justify-between" style="border-color:color-mix(in srgb, var(--theme-border, #e5e5e5) 60%, transparent);">
+                  <div>
+                    <p class="font-medium text-sm"><%= loc.name %></p>
+                    <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= loc.shortCode %> · <%= loc._count.nodes %> node(s)</p>
+                  </div>
+                  <button type="button" class="delete-location-btn text-red-500 hover:text-red-700 transition" data-id="<%= loc.id %>" data-name="<%= loc.name %>">
+                    <%- icon('trash', { class: 'size-4', strokeWidth: 1.5 }) %>
+                  </button>
+                </div>
+              <% }); %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+
+<script nonce="<%- nonce %>">
+(function () {
+  const toast = window.showToast || function (m, t) { alert(m); };
+
+  document.getElementById('createLocationBtn').addEventListener('click', async () => {
+    const name = document.getElementById('locName').value.trim();
+    const shortCode = document.getElementById('locCode').value.trim().toLowerCase();
+    if (!name || !shortCode) { toast('Name and short code are required.', 'error'); return; }
+
+    const r = await fetch('/admin/locations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, shortCode }),
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast('Location created.', 'success');
+      setTimeout(() => window.location.reload(), 800);
+    } else {
+      toast(d.message || 'Failed to create location.', 'error');
+    }
+  });
+
+  document.querySelectorAll('.delete-location-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete location "' + btn.dataset.name + '"?')) return;
+      const r = await fetch('/admin/location/' + btn.dataset.id, { method: 'DELETE' });
+      const d = await r.json();
+      if (r.ok) {
+        toast('Location deleted.', 'success');
+        setTimeout(() => window.location.reload(), 800);
+      } else {
+        toast(d.message || 'Failed to delete location.', 'error');
+      }
+    });
+  });
+})();
+</script>
+
+<%- include('../../components/footer') %>

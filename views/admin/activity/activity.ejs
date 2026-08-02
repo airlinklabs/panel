@@ -1,0 +1,80 @@
+<%- include('../../components/header', { title: 'Activity Log' }) %>
+
+<main class="al-page">
+  <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div class="px-8 lg:px-12 pt-6 pb-12 max-w-5xl">
+      <div class="flex items-center justify-between mb-7">
+        <div>
+          <h1 class="text-xl font-semibold tracking-tight text-neutral-900 dark:text-white">Activity Log</h1>
+          <p class="text-sm text-neutral-500 mt-0.5"><%= total %> action(s) recorded.</p>
+        </div>
+      </div>
+
+      <form method="GET" action="/admin/activity" class="al-card mb-6">
+        <div class="p-5 grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div>
+            <label class="al-label" for="event">Event</label>
+            <select id="event" name="event" class="al-input">
+              <option value="">All events</option>
+              <% events.forEach(e => { %>
+                <option value="<%= e.event %>" <%= filters.event === e.event ? 'selected' : '' %>><%= e.event %> (<%= e.count %>)</option>
+              <% }); %>
+            </select>
+          </div>
+          <div>
+            <label class="al-label" for="server">Server UUID</label>
+            <input id="server" name="server" type="text" value="<%= filters.server %>" class="al-input" placeholder="e.g. 3f8a...">
+          </div>
+          <div>
+            <label class="al-label" for="actor">Actor</label>
+            <input id="actor" name="actor" type="text" value="<%= filters.actor %>" class="al-input" placeholder="username / email">
+          </div>
+          <div class="flex items-end gap-2">
+            <button type="submit" class="al-btn-primary flex-1">Filter</button>
+            <a href="/admin/activity" class="al-btn-secondary">Reset</a>
+          </div>
+        </div>
+      </form>
+
+      <div class="al-card">
+        <div class="al-card-header">Recent Activity</div>
+        <div class="p-5">
+          <% if (logs.length === 0) { %>
+            <p class="text-sm text-neutral-500">No activity matching the current filters.</p>
+          <% } else { %>
+            <div class="space-y-2">
+              <% logs.forEach(log => { %>
+                <div class="rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2" style="border-color:color-mix(in srgb, var(--theme-border, #e5e5e5) 60%, transparent);">
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium truncate">
+                      <span class="font-mono text-xs px-1.5 py-0.5 rounded" style="background:color-mix(in srgb, var(--theme-primary, #6366f1) 12%, transparent); color:var(--theme-primary, #6366f1)"><%= log.event %></span>
+                      <span class="ml-2"><%= log.actor ? log.actor.username : 'System' %></span>
+                    </p>
+                    <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
+                      <%= new Date(log.createdAt).toLocaleString() %> · <%= log.ip || 'unknown IP' %>
+                      <% if (log.serverId) { %><span class="font-mono">· <%= log.serverId.slice(0, 8) %>…</span><% } %>
+                    </p>
+                    <% if (log.metadata && Object.keys(log.metadata).length > 0) { %>
+                      <p class="text-xs mt-1 font-mono break-all" style="color:var(--theme-text-muted)"><%= JSON.stringify(log.metadata) %></p>
+                    <% } %>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+
+            <% if (totalPages > 1) { %>
+              <div class="flex items-center justify-between mt-5">
+                <a href="/admin/activity?page=<%= Math.max(page - 1, 1) %><%= filters.event ? '&event=' + encodeURIComponent(filters.event) : '' %><%= filters.server ? '&server=' + encodeURIComponent(filters.server) : '' %><%= filters.actor ? '&actor=' + encodeURIComponent(filters.actor) : '' %>" class="al-btn-secondary <%= page <= 1 ? 'pointer-events-none opacity-40' : '' %>">Previous</a>
+                <span class="text-sm" style="color:var(--theme-text-muted)">Page <%= page %> / <%= totalPages %></span>
+                <a href="/admin/activity?page=<%= Math.min(page + 1, totalPages) %><%= filters.event ? '&event=' + encodeURIComponent(filters.event) : '' %><%= filters.server ? '&server=' + encodeURIComponent(filters.server) : '' %><%= filters.actor ? '&actor=' + encodeURIComponent(filters.actor) : '' %>" class="al-btn-secondary <%= page >= totalPages ? 'pointer-events-none opacity-40' : '' %>">Next</a>
+              </div>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/footer') %>

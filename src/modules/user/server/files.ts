@@ -9,6 +9,7 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { isPathSafe, normalizePath } from '../../../utils/pathSecurity';
+import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import {
   type ErrorMessage,
   loadAuthenticatedServerContext,
@@ -377,6 +378,7 @@ export function registerFilesRoutes(router: Router): void {
           logger.success(
             `Successfully deleted ${isMinecraftWorld ? 'world' : 'file/directory'}: ${filePath}`,
           );
+          await logActivity(req, 'file:delete', { serverId: String(server.UUID), metadata: { path: filePath } });
           res.json({ success: true });
           return;
         } catch (deleteError: any) {
@@ -448,6 +450,7 @@ export function registerFilesRoutes(router: Router): void {
               newPath: newPath,
             },
           });
+          await logActivity(req, 'file:rename', { serverId: String(server.UUID), metadata: { path: relativePath, newName } });
           res.status(200).json({ success: true });
         } catch (error) {
           logger.error('Error renaming file:', error);

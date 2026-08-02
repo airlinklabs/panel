@@ -6,6 +6,7 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { AirlinkCloudClient } from '../../../handlers/utils/core/airlinkCloud';
+import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import {
   uploadStreamToS3,
   deleteFromS3,
@@ -209,6 +210,7 @@ export function registerBackupRoutes(router: Router): void {
             },
           });
 
+          await logActivity(req, 'backup:create', { serverId: getParamAsString(serverId), metadata: { name: name.trim(), uuid: backup.UUID } });
           res.json({
             success: true,
             message: isCloudBackupEnabled && airlinkCloudId ? 'Backup created and uploaded to Airlink Cloud' : 'Backup created successfully',
@@ -372,6 +374,7 @@ export function registerBackupRoutes(router: Router): void {
         }
 
         if (response.data.success) {
+          await logActivity(req, 'backup:restore', { serverId: getParamAsString(serverId), metadata: { name: backup.name, uuid: backup.UUID } });
           res.json({
             success: true,
             message: 'Backup restored successfully',
@@ -561,6 +564,7 @@ export function registerBackupRoutes(router: Router): void {
           where: { UUID: getParamAsString(backupId) },
         });
 
+        await logActivity(req, 'backup:delete', { serverId: getParamAsString(serverId), metadata: { name: backup.name, uuid: backup.UUID } });
         res.json({
           success: true,
           message: 'Backup deleted successfully',

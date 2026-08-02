@@ -407,6 +407,7 @@ export const ModelName = {
   ScheduleTask: 'ScheduleTask',
   Images: 'Images',
   Node: 'Node',
+  Location: 'Location',
   settings: 'settings',
   ServerFolder: 'ServerFolder',
   ServerFolderMember: 'ServerFolderMember',
@@ -417,7 +418,8 @@ export const ModelName = {
   AddonSetting: 'AddonSetting',
   Backup: 'Backup',
   SftpCredential: 'SftpCredential',
-  SubUser: 'SubUser'
+  SubUser: 'SubUser',
+  ActivityLog: 'ActivityLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -433,7 +435,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "passwordReset" | "session" | "server" | "databaseHost" | "serverDatabase" | "schedule" | "scheduleTask" | "images" | "node" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential" | "subUser"
+    modelProps: "users" | "passwordReset" | "session" | "server" | "databaseHost" | "serverDatabase" | "schedule" | "scheduleTask" | "images" | "node" | "location" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential" | "subUser" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1174,6 +1176,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.NodeCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.NodeCountAggregateOutputType> | number
+        }
+      }
+    }
+    Location: {
+      payload: Prisma.$LocationPayload<ExtArgs>
+      fields: Prisma.LocationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LocationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LocationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        findFirst: {
+          args: Prisma.LocationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LocationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        findMany: {
+          args: Prisma.LocationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>[]
+        }
+        create: {
+          args: Prisma.LocationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        createMany: {
+          args: Prisma.LocationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LocationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>[]
+        }
+        delete: {
+          args: Prisma.LocationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        update: {
+          args: Prisma.LocationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        deleteMany: {
+          args: Prisma.LocationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LocationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LocationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>[]
+        }
+        upsert: {
+          args: Prisma.LocationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        aggregate: {
+          args: Prisma.LocationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLocation>
+        }
+        groupBy: {
+          args: Prisma.LocationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LocationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LocationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LocationCountAggregateOutputType> | number
         }
       }
     }
@@ -1991,6 +2067,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ActivityLog: {
+      payload: Prisma.$ActivityLogPayload<ExtArgs>
+      fields: Prisma.ActivityLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ActivityLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ActivityLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+        }
+        findFirst: {
+          args: Prisma.ActivityLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ActivityLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+        }
+        findMany: {
+          args: Prisma.ActivityLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload>[]
+        }
+        create: {
+          args: Prisma.ActivityLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+        }
+        createMany: {
+          args: Prisma.ActivityLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ActivityLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload>[]
+        }
+        delete: {
+          args: Prisma.ActivityLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+        }
+        update: {
+          args: Prisma.ActivityLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.ActivityLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ActivityLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ActivityLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.ActivityLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+        }
+        aggregate: {
+          args: Prisma.ActivityLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateActivityLog>
+        }
+        groupBy: {
+          args: Prisma.ActivityLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ActivityLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ActivityLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ActivityLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2094,6 +2244,7 @@ export const ServerScalarFieldEnum = {
   Queued: 'Queued',
   Suspended: 'Suspended',
   backupLimit: 'backupLimit',
+  databaseLimit: 'databaseLimit',
   ownerId: 'ownerId',
   nodeId: 'nodeId',
   imageId: 'imageId'
@@ -2109,6 +2260,7 @@ export const DatabaseHostScalarFieldEnum = {
   port: 'port',
   username: 'username',
   password: 'password',
+  nodeId: 'nodeId',
   createdAt: 'createdAt'
 } as const
 
@@ -2182,6 +2334,10 @@ export const NodeScalarFieldEnum = {
   ram: 'ram',
   cpu: 'cpu',
   disk: 'disk',
+  overallocateMemory: 'overallocateMemory',
+  overallocateDisk: 'overallocateDisk',
+  overallocateCpu: 'overallocateCpu',
+  locationId: 'locationId',
   address: 'address',
   port: 'port',
   key: 'key',
@@ -2191,6 +2347,16 @@ export const NodeScalarFieldEnum = {
 } as const
 
 export type NodeScalarFieldEnum = (typeof NodeScalarFieldEnum)[keyof typeof NodeScalarFieldEnum]
+
+
+export const LocationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  shortCode: 'shortCode',
+  createdAt: 'createdAt'
+} as const
+
+export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
 
 
 export const SettingsScalarFieldEnum = {
@@ -2336,6 +2502,8 @@ export const BackupScalarFieldEnum = {
   serverId: 'serverId',
   filePath: 'filePath',
   size: 'size',
+  checksum: 'checksum',
+  locked: 'locked',
   createdAt: 'createdAt',
   airlinkCloudId: 'airlinkCloudId'
 } as const
@@ -2366,6 +2534,19 @@ export const SubUserScalarFieldEnum = {
 } as const
 
 export type SubUserScalarFieldEnum = (typeof SubUserScalarFieldEnum)[keyof typeof SubUserScalarFieldEnum]
+
+
+export const ActivityLogScalarFieldEnum = {
+  id: 'id',
+  actorId: 'actorId',
+  serverId: 'serverId',
+  event: 'event',
+  metadata: 'metadata',
+  ip: 'ip',
+  createdAt: 'createdAt'
+} as const
+
+export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2592,6 +2773,7 @@ export type GlobalOmitConfig = {
   scheduleTask?: Prisma.ScheduleTaskOmit
   images?: Prisma.ImagesOmit
   node?: Prisma.NodeOmit
+  location?: Prisma.LocationOmit
   settings?: Prisma.settingsOmit
   serverFolder?: Prisma.ServerFolderOmit
   serverFolderMember?: Prisma.ServerFolderMemberOmit
@@ -2603,6 +2785,7 @@ export type GlobalOmitConfig = {
   backup?: Prisma.BackupOmit
   sftpCredential?: Prisma.SftpCredentialOmit
   subUser?: Prisma.SubUserOmit
+  activityLog?: Prisma.ActivityLogOmit
 }
 
 /* Types for Logging */

@@ -61,6 +61,7 @@ export const ModelName = {
   ScheduleTask: 'ScheduleTask',
   Images: 'Images',
   Node: 'Node',
+  Location: 'Location',
   settings: 'settings',
   ServerFolder: 'ServerFolder',
   ServerFolderMember: 'ServerFolderMember',
@@ -71,7 +72,8 @@ export const ModelName = {
   AddonSetting: 'AddonSetting',
   Backup: 'Backup',
   SftpCredential: 'SftpCredential',
-  SubUser: 'SubUser'
+  SubUser: 'SubUser',
+  ActivityLog: 'ActivityLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -154,6 +156,7 @@ export const ServerScalarFieldEnum = {
   Queued: 'Queued',
   Suspended: 'Suspended',
   backupLimit: 'backupLimit',
+  databaseLimit: 'databaseLimit',
   ownerId: 'ownerId',
   nodeId: 'nodeId',
   imageId: 'imageId'
@@ -169,6 +172,7 @@ export const DatabaseHostScalarFieldEnum = {
   port: 'port',
   username: 'username',
   password: 'password',
+  nodeId: 'nodeId',
   createdAt: 'createdAt'
 } as const
 
@@ -242,6 +246,10 @@ export const NodeScalarFieldEnum = {
   ram: 'ram',
   cpu: 'cpu',
   disk: 'disk',
+  overallocateMemory: 'overallocateMemory',
+  overallocateDisk: 'overallocateDisk',
+  overallocateCpu: 'overallocateCpu',
+  locationId: 'locationId',
   address: 'address',
   port: 'port',
   key: 'key',
@@ -251,6 +259,16 @@ export const NodeScalarFieldEnum = {
 } as const
 
 export type NodeScalarFieldEnum = (typeof NodeScalarFieldEnum)[keyof typeof NodeScalarFieldEnum]
+
+
+export const LocationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  shortCode: 'shortCode',
+  createdAt: 'createdAt'
+} as const
+
+export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
 
 
 export const SettingsScalarFieldEnum = {
@@ -396,6 +414,8 @@ export const BackupScalarFieldEnum = {
   serverId: 'serverId',
   filePath: 'filePath',
   size: 'size',
+  checksum: 'checksum',
+  locked: 'locked',
   createdAt: 'createdAt',
   airlinkCloudId: 'airlinkCloudId'
 } as const
@@ -426,6 +446,19 @@ export const SubUserScalarFieldEnum = {
 } as const
 
 export type SubUserScalarFieldEnum = (typeof SubUserScalarFieldEnum)[keyof typeof SubUserScalarFieldEnum]
+
+
+export const ActivityLogScalarFieldEnum = {
+  id: 'id',
+  actorId: 'actorId',
+  serverId: 'serverId',
+  event: 'event',
+  metadata: 'metadata',
+  ip: 'ip',
+  createdAt: 'createdAt'
+} as const
+
+export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
 
 
 export const SortOrder = {

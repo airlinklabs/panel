@@ -33,6 +33,7 @@ export type ServerAvgAggregateOutputType = {
   Cpu: number | null
   Storage: number | null
   backupLimit: number | null
+  databaseLimit: number | null
   ownerId: number | null
   nodeId: number | null
   imageId: number | null
@@ -45,6 +46,7 @@ export type ServerSumAggregateOutputType = {
   Cpu: number | null
   Storage: number | null
   backupLimit: number | null
+  databaseLimit: number | null
   ownerId: number | null
   nodeId: number | null
   imageId: number | null
@@ -69,6 +71,7 @@ export type ServerMinAggregateOutputType = {
   Queued: boolean | null
   Suspended: boolean | null
   backupLimit: number | null
+  databaseLimit: number | null
   ownerId: number | null
   nodeId: number | null
   imageId: number | null
@@ -93,6 +96,7 @@ export type ServerMaxAggregateOutputType = {
   Queued: boolean | null
   Suspended: boolean | null
   backupLimit: number | null
+  databaseLimit: number | null
   ownerId: number | null
   nodeId: number | null
   imageId: number | null
@@ -117,6 +121,7 @@ export type ServerCountAggregateOutputType = {
   Queued: number
   Suspended: number
   backupLimit: number
+  databaseLimit: number
   ownerId: number
   nodeId: number
   imageId: number
@@ -131,6 +136,7 @@ export type ServerAvgAggregateInputType = {
   Cpu?: true
   Storage?: true
   backupLimit?: true
+  databaseLimit?: true
   ownerId?: true
   nodeId?: true
   imageId?: true
@@ -143,6 +149,7 @@ export type ServerSumAggregateInputType = {
   Cpu?: true
   Storage?: true
   backupLimit?: true
+  databaseLimit?: true
   ownerId?: true
   nodeId?: true
   imageId?: true
@@ -167,6 +174,7 @@ export type ServerMinAggregateInputType = {
   Queued?: true
   Suspended?: true
   backupLimit?: true
+  databaseLimit?: true
   ownerId?: true
   nodeId?: true
   imageId?: true
@@ -191,6 +199,7 @@ export type ServerMaxAggregateInputType = {
   Queued?: true
   Suspended?: true
   backupLimit?: true
+  databaseLimit?: true
   ownerId?: true
   nodeId?: true
   imageId?: true
@@ -215,6 +224,7 @@ export type ServerCountAggregateInputType = {
   Queued?: true
   Suspended?: true
   backupLimit?: true
+  databaseLimit?: true
   ownerId?: true
   nodeId?: true
   imageId?: true
@@ -326,6 +336,7 @@ export type ServerGroupByOutputType = {
   Queued: boolean
   Suspended: boolean
   backupLimit: number
+  databaseLimit: number
   ownerId: number
   nodeId: number
   imageId: number
@@ -373,6 +384,7 @@ export type ServerWhereInput = {
   Queued?: Prisma.BoolFilter<"Server"> | boolean
   Suspended?: Prisma.BoolFilter<"Server"> | boolean
   backupLimit?: Prisma.IntFilter<"Server"> | number
+  databaseLimit?: Prisma.IntFilter<"Server"> | number
   ownerId?: Prisma.IntFilter<"Server"> | number
   nodeId?: Prisma.IntFilter<"Server"> | number
   imageId?: Prisma.IntFilter<"Server"> | number
@@ -385,6 +397,7 @@ export type ServerWhereInput = {
   subUsers?: Prisma.SubUserListRelationFilter
   schedules?: Prisma.ScheduleListRelationFilter
   databases?: Prisma.ServerDatabaseListRelationFilter
+  activityLogs?: Prisma.ActivityLogListRelationFilter
 }
 
 export type ServerOrderByWithRelationInput = {
@@ -406,6 +419,7 @@ export type ServerOrderByWithRelationInput = {
   Queued?: Prisma.SortOrder
   Suspended?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
+  databaseLimit?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   nodeId?: Prisma.SortOrder
   imageId?: Prisma.SortOrder
@@ -418,6 +432,7 @@ export type ServerOrderByWithRelationInput = {
   subUsers?: Prisma.SubUserOrderByRelationAggregateInput
   schedules?: Prisma.ScheduleOrderByRelationAggregateInput
   databases?: Prisma.ServerDatabaseOrderByRelationAggregateInput
+  activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
 }
 
 export type ServerWhereUniqueInput = Prisma.AtLeast<{
@@ -442,6 +457,7 @@ export type ServerWhereUniqueInput = Prisma.AtLeast<{
   Queued?: Prisma.BoolFilter<"Server"> | boolean
   Suspended?: Prisma.BoolFilter<"Server"> | boolean
   backupLimit?: Prisma.IntFilter<"Server"> | number
+  databaseLimit?: Prisma.IntFilter<"Server"> | number
   ownerId?: Prisma.IntFilter<"Server"> | number
   nodeId?: Prisma.IntFilter<"Server"> | number
   imageId?: Prisma.IntFilter<"Server"> | number
@@ -454,6 +470,7 @@ export type ServerWhereUniqueInput = Prisma.AtLeast<{
   subUsers?: Prisma.SubUserListRelationFilter
   schedules?: Prisma.ScheduleListRelationFilter
   databases?: Prisma.ServerDatabaseListRelationFilter
+  activityLogs?: Prisma.ActivityLogListRelationFilter
 }, "id" | "UUID">
 
 export type ServerOrderByWithAggregationInput = {
@@ -475,6 +492,7 @@ export type ServerOrderByWithAggregationInput = {
   Queued?: Prisma.SortOrder
   Suspended?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
+  databaseLimit?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   nodeId?: Prisma.SortOrder
   imageId?: Prisma.SortOrder
@@ -507,6 +525,7 @@ export type ServerScalarWhereWithAggregatesInput = {
   Queued?: Prisma.BoolWithAggregatesFilter<"Server"> | boolean
   Suspended?: Prisma.BoolWithAggregatesFilter<"Server"> | boolean
   backupLimit?: Prisma.IntWithAggregatesFilter<"Server"> | number
+  databaseLimit?: Prisma.IntWithAggregatesFilter<"Server"> | number
   ownerId?: Prisma.IntWithAggregatesFilter<"Server"> | number
   nodeId?: Prisma.IntWithAggregatesFilter<"Server"> | number
   imageId?: Prisma.IntWithAggregatesFilter<"Server"> | number
@@ -530,6 +549,7 @@ export type ServerCreateInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
   node: Prisma.NodeCreateNestedOneWithoutServersInput
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
@@ -539,6 +559,7 @@ export type ServerCreateInput = {
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateInput = {
@@ -560,6 +581,7 @@ export type ServerUncheckedCreateInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   nodeId: number
   imageId: number
@@ -569,6 +591,7 @@ export type ServerUncheckedCreateInput = {
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerUpdateInput = {
@@ -589,6 +612,7 @@ export type ServerUpdateInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
   node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
@@ -598,6 +622,7 @@ export type ServerUpdateInput = {
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateInput = {
@@ -619,6 +644,7 @@ export type ServerUncheckedUpdateInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -628,6 +654,7 @@ export type ServerUncheckedUpdateInput = {
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateManyInput = {
@@ -649,6 +676,7 @@ export type ServerCreateManyInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   nodeId: number
   imageId: number
@@ -672,6 +700,7 @@ export type ServerUpdateManyMutationInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ServerUncheckedUpdateManyInput = {
@@ -693,6 +722,7 @@ export type ServerUncheckedUpdateManyInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -727,6 +757,7 @@ export type ServerCountOrderByAggregateInput = {
   Queued?: Prisma.SortOrder
   Suspended?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
+  databaseLimit?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   nodeId?: Prisma.SortOrder
   imageId?: Prisma.SortOrder
@@ -739,6 +770,7 @@ export type ServerAvgOrderByAggregateInput = {
   Cpu?: Prisma.SortOrder
   Storage?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
+  databaseLimit?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   nodeId?: Prisma.SortOrder
   imageId?: Prisma.SortOrder
@@ -763,6 +795,7 @@ export type ServerMaxOrderByAggregateInput = {
   Queued?: Prisma.SortOrder
   Suspended?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
+  databaseLimit?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   nodeId?: Prisma.SortOrder
   imageId?: Prisma.SortOrder
@@ -787,6 +820,7 @@ export type ServerMinOrderByAggregateInput = {
   Queued?: Prisma.SortOrder
   Suspended?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
+  databaseLimit?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   nodeId?: Prisma.SortOrder
   imageId?: Prisma.SortOrder
@@ -799,6 +833,7 @@ export type ServerSumOrderByAggregateInput = {
   Cpu?: Prisma.SortOrder
   Storage?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
+  databaseLimit?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   nodeId?: Prisma.SortOrder
   imageId?: Prisma.SortOrder
@@ -807,6 +842,11 @@ export type ServerSumOrderByAggregateInput = {
 export type ServerScalarRelationFilter = {
   is?: Prisma.ServerWhereInput
   isNot?: Prisma.ServerWhereInput
+}
+
+export type ServerNullableScalarRelationFilter = {
+  is?: Prisma.ServerWhereInput | null
+  isNot?: Prisma.ServerWhereInput | null
 }
 
 export type ServerCreateNestedManyWithoutOwnerInput = {
@@ -1019,6 +1059,22 @@ export type ServerUpdateOneRequiredWithoutSubUsersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ServerUpdateToOneWithWhereWithoutSubUsersInput, Prisma.ServerUpdateWithoutSubUsersInput>, Prisma.ServerUncheckedUpdateWithoutSubUsersInput>
 }
 
+export type ServerCreateNestedOneWithoutActivityLogsInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutActivityLogsInput, Prisma.ServerUncheckedCreateWithoutActivityLogsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutActivityLogsInput
+  connect?: Prisma.ServerWhereUniqueInput
+}
+
+export type ServerUpdateOneWithoutActivityLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutActivityLogsInput, Prisma.ServerUncheckedCreateWithoutActivityLogsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutActivityLogsInput
+  upsert?: Prisma.ServerUpsertWithoutActivityLogsInput
+  disconnect?: Prisma.ServerWhereInput | boolean
+  delete?: Prisma.ServerWhereInput | boolean
+  connect?: Prisma.ServerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ServerUpdateToOneWithWhereWithoutActivityLogsInput, Prisma.ServerUpdateWithoutActivityLogsInput>, Prisma.ServerUncheckedUpdateWithoutActivityLogsInput>
+}
+
 export type ServerCreateWithoutOwnerInput = {
   UUID?: string
   name: string
@@ -1037,6 +1093,7 @@ export type ServerCreateWithoutOwnerInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
   node: Prisma.NodeCreateNestedOneWithoutServersInput
   image: Prisma.ImagesCreateNestedOneWithoutServersInput
@@ -1045,6 +1102,7 @@ export type ServerCreateWithoutOwnerInput = {
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutOwnerInput = {
@@ -1066,6 +1124,7 @@ export type ServerUncheckedCreateWithoutOwnerInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   nodeId: number
   imageId: number
   sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
@@ -1074,6 +1133,7 @@ export type ServerUncheckedCreateWithoutOwnerInput = {
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutOwnerInput = {
@@ -1123,6 +1183,7 @@ export type ServerScalarWhereInput = {
   Queued?: Prisma.BoolFilter<"Server"> | boolean
   Suspended?: Prisma.BoolFilter<"Server"> | boolean
   backupLimit?: Prisma.IntFilter<"Server"> | number
+  databaseLimit?: Prisma.IntFilter<"Server"> | number
   ownerId?: Prisma.IntFilter<"Server"> | number
   nodeId?: Prisma.IntFilter<"Server"> | number
   imageId?: Prisma.IntFilter<"Server"> | number
@@ -1146,6 +1207,7 @@ export type ServerCreateWithoutDatabasesInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
   node: Prisma.NodeCreateNestedOneWithoutServersInput
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
@@ -1154,6 +1216,7 @@ export type ServerCreateWithoutDatabasesInput = {
   folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutDatabasesInput = {
@@ -1175,6 +1238,7 @@ export type ServerUncheckedCreateWithoutDatabasesInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   nodeId: number
   imageId: number
@@ -1183,6 +1247,7 @@ export type ServerUncheckedCreateWithoutDatabasesInput = {
   folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutDatabasesInput = {
@@ -1219,6 +1284,7 @@ export type ServerUpdateWithoutDatabasesInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
   node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
@@ -1227,6 +1293,7 @@ export type ServerUpdateWithoutDatabasesInput = {
   folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutDatabasesInput = {
@@ -1248,6 +1315,7 @@ export type ServerUncheckedUpdateWithoutDatabasesInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1256,6 +1324,7 @@ export type ServerUncheckedUpdateWithoutDatabasesInput = {
   folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutSchedulesInput = {
@@ -1276,6 +1345,7 @@ export type ServerCreateWithoutSchedulesInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
   node: Prisma.NodeCreateNestedOneWithoutServersInput
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
@@ -1284,6 +1354,7 @@ export type ServerCreateWithoutSchedulesInput = {
   folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutSchedulesInput = {
@@ -1305,6 +1376,7 @@ export type ServerUncheckedCreateWithoutSchedulesInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   nodeId: number
   imageId: number
@@ -1313,6 +1385,7 @@ export type ServerUncheckedCreateWithoutSchedulesInput = {
   folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutSchedulesInput = {
@@ -1349,6 +1422,7 @@ export type ServerUpdateWithoutSchedulesInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
   node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
@@ -1357,6 +1431,7 @@ export type ServerUpdateWithoutSchedulesInput = {
   folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutSchedulesInput = {
@@ -1378,6 +1453,7 @@ export type ServerUncheckedUpdateWithoutSchedulesInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1386,6 +1462,7 @@ export type ServerUncheckedUpdateWithoutSchedulesInput = {
   folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutImageInput = {
@@ -1406,6 +1483,7 @@ export type ServerCreateWithoutImageInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
   node: Prisma.NodeCreateNestedOneWithoutServersInput
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
@@ -1414,6 +1492,7 @@ export type ServerCreateWithoutImageInput = {
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutImageInput = {
@@ -1435,6 +1514,7 @@ export type ServerUncheckedCreateWithoutImageInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   nodeId: number
   sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
@@ -1443,6 +1523,7 @@ export type ServerUncheckedCreateWithoutImageInput = {
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutImageInput = {
@@ -1488,6 +1569,7 @@ export type ServerCreateWithoutNodeInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
   image: Prisma.ImagesCreateNestedOneWithoutServersInput
@@ -1496,6 +1578,7 @@ export type ServerCreateWithoutNodeInput = {
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutNodeInput = {
@@ -1517,6 +1600,7 @@ export type ServerUncheckedCreateWithoutNodeInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   imageId: number
   sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
@@ -1525,6 +1609,7 @@ export type ServerUncheckedCreateWithoutNodeInput = {
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutNodeInput = {
@@ -1570,6 +1655,7 @@ export type ServerCreateWithoutFolderInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
   node: Prisma.NodeCreateNestedOneWithoutServersInput
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
@@ -1578,6 +1664,7 @@ export type ServerCreateWithoutFolderInput = {
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutFolderInput = {
@@ -1599,6 +1686,7 @@ export type ServerUncheckedCreateWithoutFolderInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   nodeId: number
   imageId: number
@@ -1607,6 +1695,7 @@ export type ServerUncheckedCreateWithoutFolderInput = {
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutFolderInput = {
@@ -1643,6 +1732,7 @@ export type ServerUpdateWithoutFolderInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
   node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
@@ -1651,6 +1741,7 @@ export type ServerUpdateWithoutFolderInput = {
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutFolderInput = {
@@ -1672,6 +1763,7 @@ export type ServerUncheckedUpdateWithoutFolderInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1680,6 +1772,7 @@ export type ServerUncheckedUpdateWithoutFolderInput = {
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutBackupsInput = {
@@ -1700,6 +1793,7 @@ export type ServerCreateWithoutBackupsInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
   node: Prisma.NodeCreateNestedOneWithoutServersInput
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
@@ -1708,6 +1802,7 @@ export type ServerCreateWithoutBackupsInput = {
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutBackupsInput = {
@@ -1729,6 +1824,7 @@ export type ServerUncheckedCreateWithoutBackupsInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   nodeId: number
   imageId: number
@@ -1737,6 +1833,7 @@ export type ServerUncheckedCreateWithoutBackupsInput = {
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutBackupsInput = {
@@ -1773,6 +1870,7 @@ export type ServerUpdateWithoutBackupsInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
   node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
@@ -1781,6 +1879,7 @@ export type ServerUpdateWithoutBackupsInput = {
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutBackupsInput = {
@@ -1802,6 +1901,7 @@ export type ServerUncheckedUpdateWithoutBackupsInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1810,6 +1910,7 @@ export type ServerUncheckedUpdateWithoutBackupsInput = {
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutSftpCredentialInput = {
@@ -1830,6 +1931,7 @@ export type ServerCreateWithoutSftpCredentialInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   node: Prisma.NodeCreateNestedOneWithoutServersInput
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
   image: Prisma.ImagesCreateNestedOneWithoutServersInput
@@ -1838,6 +1940,7 @@ export type ServerCreateWithoutSftpCredentialInput = {
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutSftpCredentialInput = {
@@ -1859,6 +1962,7 @@ export type ServerUncheckedCreateWithoutSftpCredentialInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   nodeId: number
   imageId: number
@@ -1867,6 +1971,7 @@ export type ServerUncheckedCreateWithoutSftpCredentialInput = {
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutSftpCredentialInput = {
@@ -1903,6 +2008,7 @@ export type ServerUpdateWithoutSftpCredentialInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
   image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
@@ -1911,6 +2017,7 @@ export type ServerUpdateWithoutSftpCredentialInput = {
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutSftpCredentialInput = {
@@ -1932,6 +2039,7 @@ export type ServerUncheckedUpdateWithoutSftpCredentialInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1940,6 +2048,7 @@ export type ServerUncheckedUpdateWithoutSftpCredentialInput = {
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutSubUsersInput = {
@@ -1960,6 +2069,7 @@ export type ServerCreateWithoutSubUsersInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
   node: Prisma.NodeCreateNestedOneWithoutServersInput
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
@@ -1968,6 +2078,7 @@ export type ServerCreateWithoutSubUsersInput = {
   folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutSubUsersInput = {
@@ -1989,6 +2100,7 @@ export type ServerUncheckedCreateWithoutSubUsersInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   nodeId: number
   imageId: number
@@ -1997,6 +2109,7 @@ export type ServerUncheckedCreateWithoutSubUsersInput = {
   folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutSubUsersInput = {
@@ -2033,6 +2146,7 @@ export type ServerUpdateWithoutSubUsersInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
   node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
@@ -2041,6 +2155,7 @@ export type ServerUpdateWithoutSubUsersInput = {
   folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutSubUsersInput = {
@@ -2062,12 +2177,152 @@ export type ServerUncheckedUpdateWithoutSubUsersInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
   backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
+  databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+}
+
+export type ServerCreateWithoutActivityLogsInput = {
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Swap?: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  backupLimit?: number
+  databaseLimit?: number
+  sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
+  node: Prisma.NodeCreateNestedOneWithoutServersInput
+  owner: Prisma.UsersCreateNestedOneWithoutServersInput
+  image: Prisma.ImagesCreateNestedOneWithoutServersInput
+  backups?: Prisma.BackupCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
+  schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
+  databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+}
+
+export type ServerUncheckedCreateWithoutActivityLogsInput = {
+  id?: number
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Swap?: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  backupLimit?: number
+  databaseLimit?: number
+  ownerId: number
+  nodeId: number
+  imageId: number
+  sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
+  backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
+  schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
+  databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+}
+
+export type ServerCreateOrConnectWithoutActivityLogsInput = {
+  where: Prisma.ServerWhereUniqueInput
+  create: Prisma.XOR<Prisma.ServerCreateWithoutActivityLogsInput, Prisma.ServerUncheckedCreateWithoutActivityLogsInput>
+}
+
+export type ServerUpsertWithoutActivityLogsInput = {
+  update: Prisma.XOR<Prisma.ServerUpdateWithoutActivityLogsInput, Prisma.ServerUncheckedUpdateWithoutActivityLogsInput>
+  create: Prisma.XOR<Prisma.ServerCreateWithoutActivityLogsInput, Prisma.ServerUncheckedCreateWithoutActivityLogsInput>
+  where?: Prisma.ServerWhereInput
+}
+
+export type ServerUpdateToOneWithWhereWithoutActivityLogsInput = {
+  where?: Prisma.ServerWhereInput
+  data: Prisma.XOR<Prisma.ServerUpdateWithoutActivityLogsInput, Prisma.ServerUncheckedUpdateWithoutActivityLogsInput>
+}
+
+export type ServerUpdateWithoutActivityLogsInput = {
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
+  node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
+  owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
+  image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
+  backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
+  schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
+  databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+}
+
+export type ServerUncheckedUpdateWithoutActivityLogsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  ownerId?: Prisma.IntFieldUpdateOperationsInput | number
+  nodeId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageId?: Prisma.IntFieldUpdateOperationsInput | number
+  sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
+  backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
 }
@@ -2091,6 +2346,7 @@ export type ServerCreateManyOwnerInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   nodeId: number
   imageId: number
 }
@@ -2113,6 +2369,7 @@ export type ServerUpdateWithoutOwnerInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
   node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
   image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
@@ -2121,6 +2378,7 @@ export type ServerUpdateWithoutOwnerInput = {
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutOwnerInput = {
@@ -2142,6 +2400,7 @@ export type ServerUncheckedUpdateWithoutOwnerInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
@@ -2150,6 +2409,7 @@ export type ServerUncheckedUpdateWithoutOwnerInput = {
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateManyWithoutOwnerInput = {
@@ -2171,6 +2431,7 @@ export type ServerUncheckedUpdateManyWithoutOwnerInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -2194,6 +2455,7 @@ export type ServerCreateManyImageInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   nodeId: number
 }
@@ -2216,6 +2478,7 @@ export type ServerUpdateWithoutImageInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
   node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
@@ -2224,6 +2487,7 @@ export type ServerUpdateWithoutImageInput = {
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutImageInput = {
@@ -2245,6 +2509,7 @@ export type ServerUncheckedUpdateWithoutImageInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
@@ -2253,6 +2518,7 @@ export type ServerUncheckedUpdateWithoutImageInput = {
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateManyWithoutImageInput = {
@@ -2274,6 +2540,7 @@ export type ServerUncheckedUpdateManyWithoutImageInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   nodeId?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -2297,6 +2564,7 @@ export type ServerCreateManyNodeInput = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: number
+  databaseLimit?: number
   ownerId: number
   imageId: number
 }
@@ -2319,6 +2587,7 @@ export type ServerUpdateWithoutNodeInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
   image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
@@ -2327,6 +2596,7 @@ export type ServerUpdateWithoutNodeInput = {
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutNodeInput = {
@@ -2348,6 +2618,7 @@ export type ServerUncheckedUpdateWithoutNodeInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
@@ -2356,6 +2627,7 @@ export type ServerUncheckedUpdateWithoutNodeInput = {
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateManyWithoutNodeInput = {
@@ -2377,6 +2649,7 @@ export type ServerUncheckedUpdateManyWithoutNodeInput = {
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.IntFieldUpdateOperationsInput | number
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -2391,6 +2664,7 @@ export type ServerCountOutputType = {
   subUsers: number
   schedules: number
   databases: number
+  activityLogs: number
 }
 
 export type ServerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2398,6 +2672,7 @@ export type ServerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   subUsers?: boolean | ServerCountOutputTypeCountSubUsersArgs
   schedules?: boolean | ServerCountOutputTypeCountSchedulesArgs
   databases?: boolean | ServerCountOutputTypeCountDatabasesArgs
+  activityLogs?: boolean | ServerCountOutputTypeCountActivityLogsArgs
 }
 
 /**
@@ -2438,6 +2713,13 @@ export type ServerCountOutputTypeCountDatabasesArgs<ExtArgs extends runtime.Type
   where?: Prisma.ServerDatabaseWhereInput
 }
 
+/**
+ * ServerCountOutputType without action
+ */
+export type ServerCountOutputTypeCountActivityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ActivityLogWhereInput
+}
+
 
 export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2458,6 +2740,7 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: boolean
+  databaseLimit?: boolean
   ownerId?: boolean
   nodeId?: boolean
   imageId?: boolean
@@ -2470,6 +2753,7 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   subUsers?: boolean | Prisma.Server$subUsersArgs<ExtArgs>
   schedules?: boolean | Prisma.Server$schedulesArgs<ExtArgs>
   databases?: boolean | Prisma.Server$databasesArgs<ExtArgs>
+  activityLogs?: boolean | Prisma.Server$activityLogsArgs<ExtArgs>
   _count?: boolean | Prisma.ServerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["server"]>
 
@@ -2492,6 +2776,7 @@ export type ServerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: boolean
+  databaseLimit?: boolean
   ownerId?: boolean
   nodeId?: boolean
   imageId?: boolean
@@ -2519,6 +2804,7 @@ export type ServerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: boolean
+  databaseLimit?: boolean
   ownerId?: boolean
   nodeId?: boolean
   imageId?: boolean
@@ -2546,12 +2832,13 @@ export type ServerSelectScalar = {
   Queued?: boolean
   Suspended?: boolean
   backupLimit?: boolean
+  databaseLimit?: boolean
   ownerId?: boolean
   nodeId?: boolean
   imageId?: boolean
 }
 
-export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "description" | "createdAt" | "Ports" | "Memory" | "Swap" | "Cpu" | "Storage" | "Variables" | "StartCommand" | "dockerImage" | "allowStartupEdit" | "Installing" | "Queued" | "Suspended" | "backupLimit" | "ownerId" | "nodeId" | "imageId", ExtArgs["result"]["server"]>
+export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "description" | "createdAt" | "Ports" | "Memory" | "Swap" | "Cpu" | "Storage" | "Variables" | "StartCommand" | "dockerImage" | "allowStartupEdit" | "Installing" | "Queued" | "Suspended" | "backupLimit" | "databaseLimit" | "ownerId" | "nodeId" | "imageId", ExtArgs["result"]["server"]>
 export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sftpCredential?: boolean | Prisma.Server$sftpCredentialArgs<ExtArgs>
   node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
@@ -2562,6 +2849,7 @@ export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   subUsers?: boolean | Prisma.Server$subUsersArgs<ExtArgs>
   schedules?: boolean | Prisma.Server$schedulesArgs<ExtArgs>
   databases?: boolean | Prisma.Server$databasesArgs<ExtArgs>
+  activityLogs?: boolean | Prisma.Server$activityLogsArgs<ExtArgs>
   _count?: boolean | Prisma.ServerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ServerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2587,6 +2875,7 @@ export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     subUsers: Prisma.$SubUserPayload<ExtArgs>[]
     schedules: Prisma.$SchedulePayload<ExtArgs>[]
     databases: Prisma.$ServerDatabasePayload<ExtArgs>[]
+    activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -2607,6 +2896,7 @@ export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     Queued: boolean
     Suspended: boolean
     backupLimit: number
+    databaseLimit: number
     ownerId: number
     nodeId: number
     imageId: number
@@ -3013,6 +3303,7 @@ export interface Prisma__ServerClient<T, Null = never, ExtArgs extends runtime.T
   subUsers<T extends Prisma.Server$subUsersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$subUsersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   schedules<T extends Prisma.Server$schedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   databases<T extends Prisma.Server$databasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$databasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerDatabasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  activityLogs<T extends Prisma.Server$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3060,6 +3351,7 @@ export interface ServerFieldRefs {
   readonly Queued: Prisma.FieldRef<"Server", 'Boolean'>
   readonly Suspended: Prisma.FieldRef<"Server", 'Boolean'>
   readonly backupLimit: Prisma.FieldRef<"Server", 'Int'>
+  readonly databaseLimit: Prisma.FieldRef<"Server", 'Int'>
   readonly ownerId: Prisma.FieldRef<"Server", 'Int'>
   readonly nodeId: Prisma.FieldRef<"Server", 'Int'>
   readonly imageId: Prisma.FieldRef<"Server", 'Int'>
@@ -3593,6 +3885,30 @@ export type Server$databasesArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.ServerDatabaseScalarFieldEnum | Prisma.ServerDatabaseScalarFieldEnum[]
+}
+
+/**
+ * Server.activityLogs
+ */
+export type Server$activityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ActivityLog
+   */
+  select?: Prisma.ActivityLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ActivityLog
+   */
+  omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
+  where?: Prisma.ActivityLogWhereInput
+  orderBy?: Prisma.ActivityLogOrderByWithRelationInput | Prisma.ActivityLogOrderByWithRelationInput[]
+  cursor?: Prisma.ActivityLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ActivityLogScalarFieldEnum | Prisma.ActivityLogScalarFieldEnum[]
 }
 
 /**

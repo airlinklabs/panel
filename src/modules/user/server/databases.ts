@@ -4,6 +4,7 @@ import logger from '../../../handlers/logger';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
+import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import { serverPageInclude } from './shared';
 import {
   provisionDatabase,
@@ -115,6 +116,7 @@ export function registerDatabaseRoutes(router: Router): void {
             },
             include: { host: true },
           });
+          await logActivity(req, 'database:create', { serverId: String(server.UUID), metadata: { databaseId: db.id, hostId: host.id } });
           return res.json({ success: true, database: db });
         } catch (error) {
           logger.error('Failed to provision database:', error);
@@ -164,6 +166,7 @@ export function registerDatabaseRoutes(router: Router): void {
         try {
           await deprovisionDatabase(db.host, db);
           await prisma.serverDatabase.delete({ where: { id: db.id } });
+          await logActivity(req, 'database:delete', { serverId: String(server.UUID), metadata: { databaseId: db.id } });
           return res.json({ success: true });
         } catch (error) {
           logger.error('Failed to deprovision database:', error);

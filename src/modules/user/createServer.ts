@@ -5,6 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { queueer } from '../../handlers/queueer';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { assertNodeCapacity } from '../../handlers/utils/server/resourceCheck';
 import {
   getUsedExternalPorts,
   parseImagePortRequirements,
@@ -141,6 +142,12 @@ const userCreateServerModule: Module = {
 
         const node = await prisma.node.findUnique({ where: { id: parseInt(nodeId) } });
         if (!node) return res.status(400).json({ error: 'Node not found.' });
+
+        try {
+          await assertNodeCapacity(node, memory, cpu, storage);
+        } catch (error) {
+          return res.status(400).json({ error: error instanceof Error ? error.message : 'Node capacity exceeded.' });
+        }
 
         let allocatedPorts: number[] = [];
         try {

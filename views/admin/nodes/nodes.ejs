@@ -83,6 +83,7 @@
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.name %></th>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.connection %></th>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.instances %></th>
+                <th scope="col" class="al-table-th sm:pl-6">Usage</th>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.actions %></th>
               </tr>
             </thead>
@@ -116,6 +117,21 @@
                       <%= node.versionRelease || (req.translations.unknown || 'unknown') %>
                     </div></td>
                   <td class="al-table-td"><%= node.instances ? node.instances.length : 0 %></td>
+                  <td class="al-table-td">
+                    <% const memPct = node.usage ? node.usage.memory : 0; %>
+                    <div class="flex items-center gap-2">
+                      <div class="w-24 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden">
+                        <div class="h-full rounded-full <%= memPct > (node.usage ? node.usage.overallocatedMemory : 0) || memPct >= 90 ? 'bg-red-500' : 'bg-emerald-500' %>"
+                          style="width: <%= Math.min(100, memPct) %>%"></div>
+                      </div>
+                      <span class="text-xs" style="color:var(--theme-text-muted)"><%= memPct %>%</span>
+                    </div>
+                    <% if (node.location) { %>
+                      <div class="mt-1 text-xs inline-flex items-center gap-1" style="color:var(--theme-text-muted)">
+                        <%- icon('map-pin', { class: 'size-3', strokeWidth: 1.5 }) %><%= node.location.name %>
+                      </div>
+                    <% } %>
+                  </td>
                   <td class="al-table-td">
                     <div class="flex gap-3">
                       <button  onclick="configure('<%= node.id %>')" type="button" class="al-btn-secondary text-xs"><%- icon('settings', { class: 'size-3', strokeWidth: 1.5 }) %>Configure</button>

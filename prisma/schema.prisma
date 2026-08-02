@@ -33,6 +33,7 @@ model Users {
   loginHistory  LoginHistory[]
   subUserAccess SubUser[]
   passwordResets PasswordReset[]
+  activityLogs  ActivityLog[]
 }
 
 model PasswordReset {
@@ -76,6 +77,7 @@ model Server {
   Queued           Boolean            @default(true)
   Suspended        Boolean            @default(false)
   backupLimit      Int                @default(5)
+  databaseLimit    Int                @default(0)
   ownerId          Int
   nodeId           Int
   imageId          Int
@@ -87,6 +89,7 @@ model Server {
   subUsers         SubUser[]
   schedules        Schedule[]
   databases        ServerDatabase[]
+  activityLogs     ActivityLog[]
 }
 
 model DatabaseHost {
@@ -96,7 +99,9 @@ model DatabaseHost {
   port      Int              @default(3306)
   username  String
   password  String
+  nodeId    Int?
   createdAt DateTime         @default(now())
+  node      Node?            @relation(fields: [nodeId], references: [id], onDelete: SetNull)
   databases ServerDatabase[]
 }
 
@@ -162,18 +167,32 @@ model Images {
 }
 
 model Node {
-  id             Int      @id @default(autoincrement())
-  name           String
-  ram            Int      @default(0)
-  cpu            Int      @default(0)
-  disk           Int      @default(0)
-  address        String   @default("127.0.0.1")
-  port           Int      @default(3001)
-  key            String
-  createdAt      DateTime @default(now())
-  allocatedPorts String?  @default("[]")
-  sftpPort       Int      @default(3003)
-  servers        Server[]
+  id                  Int        @id @default(autoincrement())
+  name                String
+  ram                 Int        @default(0)
+  cpu                 Int        @default(0)
+  disk                Int        @default(0)
+  overallocateMemory  Int        @default(0)
+  overallocateDisk    Int        @default(0)
+  overallocateCpu     Int        @default(0)
+  locationId          Int?
+  address             String     @default("127.0.0.1")
+  port                Int        @default(3001)
+  key                 String
+  createdAt           DateTime   @default(now())
+  allocatedPorts      String?    @default("[]")
+  sftpPort            Int        @default(3003)
+  location            Location?  @relation(fields: [locationId], references: [id])
+  servers             Server[]
+  databaseHosts       DatabaseHost[]
+}
+
+model Location {
+  id        Int      @id @default(autoincrement())
+  name      String
+  shortCode String   @unique
+  createdAt DateTime @default(now())
+  nodes     Node[]
 }
 
 model settings {
@@ -307,6 +326,8 @@ model Backup {
   serverId      String
   filePath      String
   size          BigInt?
+  checksum      String?
+  locked        Boolean  @default(false)
   createdAt     DateTime @default(now())
   server        Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
   airlinkCloudId String?
@@ -338,5 +359,20 @@ model SubUser {
 
   @@unique([serverId, userId])
   @@index([serverId])
-  @@index([userId])
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  actorId   Int?
+  serverId  String?
+  event     String
+  metadata  String?
+  ip        String?
+  createdAt DateTime @default(now())
+  actor     Users?   @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  server    Server?  @relation(fields: [serverId], references: [UUID], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([serverId])
+  @@index([createdAt])
 }

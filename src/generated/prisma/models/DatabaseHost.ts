@@ -29,11 +29,13 @@ export type AggregateDatabaseHost = {
 export type DatabaseHostAvgAggregateOutputType = {
   id: number | null
   port: number | null
+  nodeId: number | null
 }
 
 export type DatabaseHostSumAggregateOutputType = {
   id: number | null
   port: number | null
+  nodeId: number | null
 }
 
 export type DatabaseHostMinAggregateOutputType = {
@@ -43,6 +45,7 @@ export type DatabaseHostMinAggregateOutputType = {
   port: number | null
   username: string | null
   password: string | null
+  nodeId: number | null
   createdAt: Date | null
 }
 
@@ -53,6 +56,7 @@ export type DatabaseHostMaxAggregateOutputType = {
   port: number | null
   username: string | null
   password: string | null
+  nodeId: number | null
   createdAt: Date | null
 }
 
@@ -63,6 +67,7 @@ export type DatabaseHostCountAggregateOutputType = {
   port: number
   username: number
   password: number
+  nodeId: number
   createdAt: number
   _all: number
 }
@@ -71,11 +76,13 @@ export type DatabaseHostCountAggregateOutputType = {
 export type DatabaseHostAvgAggregateInputType = {
   id?: true
   port?: true
+  nodeId?: true
 }
 
 export type DatabaseHostSumAggregateInputType = {
   id?: true
   port?: true
+  nodeId?: true
 }
 
 export type DatabaseHostMinAggregateInputType = {
@@ -85,6 +92,7 @@ export type DatabaseHostMinAggregateInputType = {
   port?: true
   username?: true
   password?: true
+  nodeId?: true
   createdAt?: true
 }
 
@@ -95,6 +103,7 @@ export type DatabaseHostMaxAggregateInputType = {
   port?: true
   username?: true
   password?: true
+  nodeId?: true
   createdAt?: true
 }
 
@@ -105,6 +114,7 @@ export type DatabaseHostCountAggregateInputType = {
   port?: true
   username?: true
   password?: true
+  nodeId?: true
   createdAt?: true
   _all?: true
 }
@@ -202,6 +212,7 @@ export type DatabaseHostGroupByOutputType = {
   port: number
   username: string
   password: string
+  nodeId: number | null
   createdAt: Date
   _count: DatabaseHostCountAggregateOutputType | null
   _avg: DatabaseHostAvgAggregateOutputType | null
@@ -235,7 +246,9 @@ export type DatabaseHostWhereInput = {
   port?: Prisma.IntFilter<"DatabaseHost"> | number
   username?: Prisma.StringFilter<"DatabaseHost"> | string
   password?: Prisma.StringFilter<"DatabaseHost"> | string
+  nodeId?: Prisma.IntNullableFilter<"DatabaseHost"> | number | null
   createdAt?: Prisma.DateTimeFilter<"DatabaseHost"> | Date | string
+  node?: Prisma.XOR<Prisma.NodeNullableScalarRelationFilter, Prisma.NodeWhereInput> | null
   databases?: Prisma.ServerDatabaseListRelationFilter
 }
 
@@ -246,7 +259,9 @@ export type DatabaseHostOrderByWithRelationInput = {
   port?: Prisma.SortOrder
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  nodeId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  node?: Prisma.NodeOrderByWithRelationInput
   databases?: Prisma.ServerDatabaseOrderByRelationAggregateInput
 }
 
@@ -260,7 +275,9 @@ export type DatabaseHostWhereUniqueInput = Prisma.AtLeast<{
   port?: Prisma.IntFilter<"DatabaseHost"> | number
   username?: Prisma.StringFilter<"DatabaseHost"> | string
   password?: Prisma.StringFilter<"DatabaseHost"> | string
+  nodeId?: Prisma.IntNullableFilter<"DatabaseHost"> | number | null
   createdAt?: Prisma.DateTimeFilter<"DatabaseHost"> | Date | string
+  node?: Prisma.XOR<Prisma.NodeNullableScalarRelationFilter, Prisma.NodeWhereInput> | null
   databases?: Prisma.ServerDatabaseListRelationFilter
 }, "id">
 
@@ -271,6 +288,7 @@ export type DatabaseHostOrderByWithAggregationInput = {
   port?: Prisma.SortOrder
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  nodeId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.DatabaseHostCountOrderByAggregateInput
   _avg?: Prisma.DatabaseHostAvgOrderByAggregateInput
@@ -289,6 +307,7 @@ export type DatabaseHostScalarWhereWithAggregatesInput = {
   port?: Prisma.IntWithAggregatesFilter<"DatabaseHost"> | number
   username?: Prisma.StringWithAggregatesFilter<"DatabaseHost"> | string
   password?: Prisma.StringWithAggregatesFilter<"DatabaseHost"> | string
+  nodeId?: Prisma.IntNullableWithAggregatesFilter<"DatabaseHost"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"DatabaseHost"> | Date | string
 }
 
@@ -299,6 +318,7 @@ export type DatabaseHostCreateInput = {
   username: string
   password: string
   createdAt?: Date | string
+  node?: Prisma.NodeCreateNestedOneWithoutDatabaseHostsInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutHostInput
 }
 
@@ -309,6 +329,7 @@ export type DatabaseHostUncheckedCreateInput = {
   port?: number
   username: string
   password: string
+  nodeId?: number | null
   createdAt?: Date | string
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutHostInput
 }
@@ -320,6 +341,7 @@ export type DatabaseHostUpdateInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  node?: Prisma.NodeUpdateOneWithoutDatabaseHostsNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutHostNestedInput
 }
 
@@ -330,6 +352,7 @@ export type DatabaseHostUncheckedUpdateInput = {
   port?: Prisma.IntFieldUpdateOperationsInput | number
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
+  nodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutHostNestedInput
 }
@@ -341,6 +364,7 @@ export type DatabaseHostCreateManyInput = {
   port?: number
   username: string
   password: string
+  nodeId?: number | null
   createdAt?: Date | string
 }
 
@@ -360,6 +384,7 @@ export type DatabaseHostUncheckedUpdateManyInput = {
   port?: Prisma.IntFieldUpdateOperationsInput | number
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
+  nodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -370,12 +395,14 @@ export type DatabaseHostCountOrderByAggregateInput = {
   port?: Prisma.SortOrder
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  nodeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type DatabaseHostAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   port?: Prisma.SortOrder
+  nodeId?: Prisma.SortOrder
 }
 
 export type DatabaseHostMaxOrderByAggregateInput = {
@@ -385,6 +412,7 @@ export type DatabaseHostMaxOrderByAggregateInput = {
   port?: Prisma.SortOrder
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  nodeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -395,17 +423,29 @@ export type DatabaseHostMinOrderByAggregateInput = {
   port?: Prisma.SortOrder
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  nodeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type DatabaseHostSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   port?: Prisma.SortOrder
+  nodeId?: Prisma.SortOrder
 }
 
 export type DatabaseHostScalarRelationFilter = {
   is?: Prisma.DatabaseHostWhereInput
   isNot?: Prisma.DatabaseHostWhereInput
+}
+
+export type DatabaseHostListRelationFilter = {
+  every?: Prisma.DatabaseHostWhereInput
+  some?: Prisma.DatabaseHostWhereInput
+  none?: Prisma.DatabaseHostWhereInput
+}
+
+export type DatabaseHostOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type DatabaseHostCreateNestedOneWithoutDatabasesInput = {
@@ -422,6 +462,48 @@ export type DatabaseHostUpdateOneRequiredWithoutDatabasesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DatabaseHostUpdateToOneWithWhereWithoutDatabasesInput, Prisma.DatabaseHostUpdateWithoutDatabasesInput>, Prisma.DatabaseHostUncheckedUpdateWithoutDatabasesInput>
 }
 
+export type DatabaseHostCreateNestedManyWithoutNodeInput = {
+  create?: Prisma.XOR<Prisma.DatabaseHostCreateWithoutNodeInput, Prisma.DatabaseHostUncheckedCreateWithoutNodeInput> | Prisma.DatabaseHostCreateWithoutNodeInput[] | Prisma.DatabaseHostUncheckedCreateWithoutNodeInput[]
+  connectOrCreate?: Prisma.DatabaseHostCreateOrConnectWithoutNodeInput | Prisma.DatabaseHostCreateOrConnectWithoutNodeInput[]
+  createMany?: Prisma.DatabaseHostCreateManyNodeInputEnvelope
+  connect?: Prisma.DatabaseHostWhereUniqueInput | Prisma.DatabaseHostWhereUniqueInput[]
+}
+
+export type DatabaseHostUncheckedCreateNestedManyWithoutNodeInput = {
+  create?: Prisma.XOR<Prisma.DatabaseHostCreateWithoutNodeInput, Prisma.DatabaseHostUncheckedCreateWithoutNodeInput> | Prisma.DatabaseHostCreateWithoutNodeInput[] | Prisma.DatabaseHostUncheckedCreateWithoutNodeInput[]
+  connectOrCreate?: Prisma.DatabaseHostCreateOrConnectWithoutNodeInput | Prisma.DatabaseHostCreateOrConnectWithoutNodeInput[]
+  createMany?: Prisma.DatabaseHostCreateManyNodeInputEnvelope
+  connect?: Prisma.DatabaseHostWhereUniqueInput | Prisma.DatabaseHostWhereUniqueInput[]
+}
+
+export type DatabaseHostUpdateManyWithoutNodeNestedInput = {
+  create?: Prisma.XOR<Prisma.DatabaseHostCreateWithoutNodeInput, Prisma.DatabaseHostUncheckedCreateWithoutNodeInput> | Prisma.DatabaseHostCreateWithoutNodeInput[] | Prisma.DatabaseHostUncheckedCreateWithoutNodeInput[]
+  connectOrCreate?: Prisma.DatabaseHostCreateOrConnectWithoutNodeInput | Prisma.DatabaseHostCreateOrConnectWithoutNodeInput[]
+  upsert?: Prisma.DatabaseHostUpsertWithWhereUniqueWithoutNodeInput | Prisma.DatabaseHostUpsertWithWhereUniqueWithoutNodeInput[]
+  createMany?: Prisma.DatabaseHostCreateManyNodeInputEnvelope
+  set?: Prisma.DatabaseHostWhereUniqueInput | Prisma.DatabaseHostWhereUniqueInput[]
+  disconnect?: Prisma.DatabaseHostWhereUniqueInput | Prisma.DatabaseHostWhereUniqueInput[]
+  delete?: Prisma.DatabaseHostWhereUniqueInput | Prisma.DatabaseHostWhereUniqueInput[]
+  connect?: Prisma.DatabaseHostWhereUniqueInput | Prisma.DatabaseHostWhereUniqueInput[]
+  update?: Prisma.DatabaseHostUpdateWithWhereUniqueWithoutNodeInput | Prisma.DatabaseHostUpdateWithWhereUniqueWithoutNodeInput[]
+  updateMany?: Prisma.DatabaseHostUpdateManyWithWhereWithoutNodeInput | Prisma.DatabaseHostUpdateManyWithWhereWithoutNodeInput[]
+  deleteMany?: Prisma.DatabaseHostScalarWhereInput | Prisma.DatabaseHostScalarWhereInput[]
+}
+
+export type DatabaseHostUncheckedUpdateManyWithoutNodeNestedInput = {
+  create?: Prisma.XOR<Prisma.DatabaseHostCreateWithoutNodeInput, Prisma.DatabaseHostUncheckedCreateWithoutNodeInput> | Prisma.DatabaseHostCreateWithoutNodeInput[] | Prisma.DatabaseHostUncheckedCreateWithoutNodeInput[]
+  connectOrCreate?: Prisma.DatabaseHostCreateOrConnectWithoutNodeInput | Prisma.DatabaseHostCreateOrConnectWithoutNodeInput[]
+  upsert?: Prisma.DatabaseHostUpsertWithWhereUniqueWithoutNodeInput | Prisma.DatabaseHostUpsertWithWhereUniqueWithoutNodeInput[]
+  createMany?: Prisma.DatabaseHostCreateManyNodeInputEnvelope
+  set?: Prisma.DatabaseHostWhereUniqueInput | Prisma.DatabaseHostWhereUniqueInput[]
+  disconnect?: Prisma.DatabaseHostWhereUniqueInput | Prisma.DatabaseHostWhereUniqueInput[]
+  delete?: Prisma.DatabaseHostWhereUniqueInput | Prisma.DatabaseHostWhereUniqueInput[]
+  connect?: Prisma.DatabaseHostWhereUniqueInput | Prisma.DatabaseHostWhereUniqueInput[]
+  update?: Prisma.DatabaseHostUpdateWithWhereUniqueWithoutNodeInput | Prisma.DatabaseHostUpdateWithWhereUniqueWithoutNodeInput[]
+  updateMany?: Prisma.DatabaseHostUpdateManyWithWhereWithoutNodeInput | Prisma.DatabaseHostUpdateManyWithWhereWithoutNodeInput[]
+  deleteMany?: Prisma.DatabaseHostScalarWhereInput | Prisma.DatabaseHostScalarWhereInput[]
+}
+
 export type DatabaseHostCreateWithoutDatabasesInput = {
   name: string
   host: string
@@ -429,6 +511,7 @@ export type DatabaseHostCreateWithoutDatabasesInput = {
   username: string
   password: string
   createdAt?: Date | string
+  node?: Prisma.NodeCreateNestedOneWithoutDatabaseHostsInput
 }
 
 export type DatabaseHostUncheckedCreateWithoutDatabasesInput = {
@@ -438,6 +521,7 @@ export type DatabaseHostUncheckedCreateWithoutDatabasesInput = {
   port?: number
   username: string
   password: string
+  nodeId?: number | null
   createdAt?: Date | string
 }
 
@@ -464,9 +548,112 @@ export type DatabaseHostUpdateWithoutDatabasesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  node?: Prisma.NodeUpdateOneWithoutDatabaseHostsNestedInput
 }
 
 export type DatabaseHostUncheckedUpdateWithoutDatabasesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  host?: Prisma.StringFieldUpdateOperationsInput | string
+  port?: Prisma.IntFieldUpdateOperationsInput | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  nodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DatabaseHostCreateWithoutNodeInput = {
+  name: string
+  host: string
+  port?: number
+  username: string
+  password: string
+  createdAt?: Date | string
+  databases?: Prisma.ServerDatabaseCreateNestedManyWithoutHostInput
+}
+
+export type DatabaseHostUncheckedCreateWithoutNodeInput = {
+  id?: number
+  name: string
+  host: string
+  port?: number
+  username: string
+  password: string
+  createdAt?: Date | string
+  databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutHostInput
+}
+
+export type DatabaseHostCreateOrConnectWithoutNodeInput = {
+  where: Prisma.DatabaseHostWhereUniqueInput
+  create: Prisma.XOR<Prisma.DatabaseHostCreateWithoutNodeInput, Prisma.DatabaseHostUncheckedCreateWithoutNodeInput>
+}
+
+export type DatabaseHostCreateManyNodeInputEnvelope = {
+  data: Prisma.DatabaseHostCreateManyNodeInput | Prisma.DatabaseHostCreateManyNodeInput[]
+}
+
+export type DatabaseHostUpsertWithWhereUniqueWithoutNodeInput = {
+  where: Prisma.DatabaseHostWhereUniqueInput
+  update: Prisma.XOR<Prisma.DatabaseHostUpdateWithoutNodeInput, Prisma.DatabaseHostUncheckedUpdateWithoutNodeInput>
+  create: Prisma.XOR<Prisma.DatabaseHostCreateWithoutNodeInput, Prisma.DatabaseHostUncheckedCreateWithoutNodeInput>
+}
+
+export type DatabaseHostUpdateWithWhereUniqueWithoutNodeInput = {
+  where: Prisma.DatabaseHostWhereUniqueInput
+  data: Prisma.XOR<Prisma.DatabaseHostUpdateWithoutNodeInput, Prisma.DatabaseHostUncheckedUpdateWithoutNodeInput>
+}
+
+export type DatabaseHostUpdateManyWithWhereWithoutNodeInput = {
+  where: Prisma.DatabaseHostScalarWhereInput
+  data: Prisma.XOR<Prisma.DatabaseHostUpdateManyMutationInput, Prisma.DatabaseHostUncheckedUpdateManyWithoutNodeInput>
+}
+
+export type DatabaseHostScalarWhereInput = {
+  AND?: Prisma.DatabaseHostScalarWhereInput | Prisma.DatabaseHostScalarWhereInput[]
+  OR?: Prisma.DatabaseHostScalarWhereInput[]
+  NOT?: Prisma.DatabaseHostScalarWhereInput | Prisma.DatabaseHostScalarWhereInput[]
+  id?: Prisma.IntFilter<"DatabaseHost"> | number
+  name?: Prisma.StringFilter<"DatabaseHost"> | string
+  host?: Prisma.StringFilter<"DatabaseHost"> | string
+  port?: Prisma.IntFilter<"DatabaseHost"> | number
+  username?: Prisma.StringFilter<"DatabaseHost"> | string
+  password?: Prisma.StringFilter<"DatabaseHost"> | string
+  nodeId?: Prisma.IntNullableFilter<"DatabaseHost"> | number | null
+  createdAt?: Prisma.DateTimeFilter<"DatabaseHost"> | Date | string
+}
+
+export type DatabaseHostCreateManyNodeInput = {
+  id?: number
+  name: string
+  host: string
+  port?: number
+  username: string
+  password: string
+  createdAt?: Date | string
+}
+
+export type DatabaseHostUpdateWithoutNodeInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  host?: Prisma.StringFieldUpdateOperationsInput | string
+  port?: Prisma.IntFieldUpdateOperationsInput | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  databases?: Prisma.ServerDatabaseUpdateManyWithoutHostNestedInput
+}
+
+export type DatabaseHostUncheckedUpdateWithoutNodeInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  host?: Prisma.StringFieldUpdateOperationsInput | string
+  port?: Prisma.IntFieldUpdateOperationsInput | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutHostNestedInput
+}
+
+export type DatabaseHostUncheckedUpdateManyWithoutNodeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   host?: Prisma.StringFieldUpdateOperationsInput | string
@@ -514,7 +701,9 @@ export type DatabaseHostSelect<ExtArgs extends runtime.Types.Extensions.Internal
   port?: boolean
   username?: boolean
   password?: boolean
+  nodeId?: boolean
   createdAt?: boolean
+  node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
   databases?: boolean | Prisma.DatabaseHost$databasesArgs<ExtArgs>
   _count?: boolean | Prisma.DatabaseHostCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["databaseHost"]>
@@ -526,7 +715,9 @@ export type DatabaseHostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   port?: boolean
   username?: boolean
   password?: boolean
+  nodeId?: boolean
   createdAt?: boolean
+  node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
 }, ExtArgs["result"]["databaseHost"]>
 
 export type DatabaseHostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -536,7 +727,9 @@ export type DatabaseHostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   port?: boolean
   username?: boolean
   password?: boolean
+  nodeId?: boolean
   createdAt?: boolean
+  node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
 }, ExtArgs["result"]["databaseHost"]>
 
 export type DatabaseHostSelectScalar = {
@@ -546,20 +739,27 @@ export type DatabaseHostSelectScalar = {
   port?: boolean
   username?: boolean
   password?: boolean
+  nodeId?: boolean
   createdAt?: boolean
 }
 
-export type DatabaseHostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "host" | "port" | "username" | "password" | "createdAt", ExtArgs["result"]["databaseHost"]>
+export type DatabaseHostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "host" | "port" | "username" | "password" | "nodeId" | "createdAt", ExtArgs["result"]["databaseHost"]>
 export type DatabaseHostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
   databases?: boolean | Prisma.DatabaseHost$databasesArgs<ExtArgs>
   _count?: boolean | Prisma.DatabaseHostCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type DatabaseHostIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type DatabaseHostIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type DatabaseHostIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
+}
+export type DatabaseHostIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
+}
 
 export type $DatabaseHostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DatabaseHost"
   objects: {
+    node: Prisma.$NodePayload<ExtArgs> | null
     databases: Prisma.$ServerDatabasePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -569,6 +769,7 @@ export type $DatabaseHostPayload<ExtArgs extends runtime.Types.Extensions.Intern
     port: number
     username: string
     password: string
+    nodeId: number | null
     createdAt: Date
   }, ExtArgs["result"]["databaseHost"]>
   composites: {}
@@ -964,6 +1165,7 @@ readonly fields: DatabaseHostFieldRefs;
  */
 export interface Prisma__DatabaseHostClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  node<T extends Prisma.DatabaseHost$nodeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatabaseHost$nodeArgs<ExtArgs>>): Prisma.Prisma__NodeClient<runtime.Types.Result.GetResult<Prisma.$NodePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   databases<T extends Prisma.DatabaseHost$databasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatabaseHost$databasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerDatabasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1000,6 +1202,7 @@ export interface DatabaseHostFieldRefs {
   readonly port: Prisma.FieldRef<"DatabaseHost", 'Int'>
   readonly username: Prisma.FieldRef<"DatabaseHost", 'String'>
   readonly password: Prisma.FieldRef<"DatabaseHost", 'String'>
+  readonly nodeId: Prisma.FieldRef<"DatabaseHost", 'Int'>
   readonly createdAt: Prisma.FieldRef<"DatabaseHost", 'DateTime'>
 }
     
@@ -1253,6 +1456,10 @@ export type DatabaseHostCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * The data used to create many DatabaseHosts.
    */
   data: Prisma.DatabaseHostCreateManyInput | Prisma.DatabaseHostCreateManyInput[]
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatabaseHostIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1323,6 +1530,10 @@ export type DatabaseHostUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * Limit how many DatabaseHosts to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatabaseHostIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1389,6 +1600,25 @@ export type DatabaseHostDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many DatabaseHosts to delete.
    */
   limit?: number
+}
+
+/**
+ * DatabaseHost.node
+ */
+export type DatabaseHost$nodeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Node
+   */
+  select?: Prisma.NodeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Node
+   */
+  omit?: Prisma.NodeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NodeInclude<ExtArgs> | null
+  where?: Prisma.NodeWhereInput
 }
 
 /**

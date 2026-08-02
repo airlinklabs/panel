@@ -168,7 +168,11 @@
       disk: gbValue('nodeDiskValue', 'nodeDisk'),
       address: document.getElementById('nodeAddress').value,
       port: document.getElementById('nodePort').value,
-      allocatedPorts: JSON.stringify(allocatedPorts)
+      allocatedPorts: JSON.stringify(allocatedPorts),
+      overallocateMemory: document.getElementById('nodeOverallocateMemory').value,
+      overallocateDisk: document.getElementById('nodeOverallocateDisk').value,
+      overallocateCpu: document.getElementById('nodeOverallocateCpu').value,
+      locationId: document.getElementById('nodeLocation').value
     };
 
     try {

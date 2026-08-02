@@ -14,6 +14,8 @@ import {
   serializeServerPorts,
   validatePortAssignments,
 } from '../../handlers/utils/server/ports';
+import { assertNodeCapacity } from '../../handlers/utils/server/resourceCheck';
+import { logActivity } from '../../handlers/utils/activity/activityLogger';
 
 
 const adminModule: Module = {
@@ -189,6 +191,26 @@ const adminModule: Module = {
             return;
           }
 
+          try {
+            const capacityNode = server.nodeId === parseInt(nodeId)
+              ? server.node
+              : await prisma.node.findUnique({ where: { id: parseInt(nodeId) } });
+            if (!capacityNode) {
+              res.status(400).json({ error: 'Target node not found.' });
+              return;
+            }
+            await assertNodeCapacity(
+              capacityNode,
+              parseInt(Memory),
+              parseInt(Cpu),
+              parseInt(Storage),
+              server.UUID,
+            );
+          } catch (error) {
+            res.status(400).json({ error: error instanceof Error ? error.message : 'Node capacity exceeded.' });
+            return;
+          }
+
           await prisma.server.update({
             where: { id: serverId },
             data: {
@@ -235,6 +257,7 @@ const adminModule: Module = {
           }
 
           logger.info(`Server ${serverId} updated successfully`);
+          await logActivity(req, 'server:update', { serverId: String(server.UUID), metadata: { name, suspended: newSuspendedState } });
           res.status(200).json({ success: true });
         } catch (error: unknown) {
           logger.error('Error updating server:', error);
@@ -354,9 +377,17 @@ const adminModule: Module = {
             res.status(400).send(portError);
             return;
           }
+
+          await assertNodeCapacity(
+            node,
+            parseInt(Memory) || 1024,
+            parseInt(Cpu) || 100,
+            parseInt(Storage) || 20480,
+          );
         } catch (error) {
-          logger.error('Error validating port allocation:', error);
-          res.status(500).send('Error validating port allocation');
+          const message = error instanceof Error ? error.message : 'Error validating port allocation';
+          logger.error('Error validating server resources:', error);
+          res.status(400).send(message);
           return;
         }
 
@@ -619,6 +650,7 @@ const adminModule: Module = {
           });
 
           res.status(200).send('Server created successfully');
+          await logActivity(req, 'server:create', { serverId: String(createdServer.UUID), metadata: { name, nodeId: createdServer.nodeId } });
         } catch (error: unknown) {
           logger.error('Error creating server:', error);
           res.status(500).send('Error creating server');
@@ -716,6 +748,7 @@ const adminModule: Module = {
             });
 
             logger.info(`Server ${serverId} successfully deleted`);
+            await logActivity(req, 'server:delete', { serverId: String(server.UUID), metadata: { name: server.name, nodeId: server.nodeId } });
             res.redirect('/admin/servers');
             return;
           } catch (error: unknown) {
@@ -779,6 +812,7 @@ const adminModule: Module = {
           }
 
           logger.info(`Server ${serverId} suspended by user ${userId}`);
+          await logActivity(req, 'server:suspend', { serverId: String(server.UUID), metadata: { name: server.name } });
           res.json({ success: true, message: 'Server suspended' });
         } catch (error: unknown) {
           logger.error('Error suspending server:', error);
@@ -820,6 +854,7 @@ const adminModule: Module = {
           });
 
           logger.info(`Server ${serverId} unsuspended by user ${userId}`);
+          await logActivity(req, 'server:unsuspend', { serverId: String(server.UUID), metadata: { name: server.name } });
           res.json({ success: true, message: 'Server unsuspended' });
         } catch (error: unknown) {
           logger.error('Error unsuspending server:', error);

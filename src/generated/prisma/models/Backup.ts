@@ -43,6 +43,8 @@ export type BackupMinAggregateOutputType = {
   serverId: string | null
   filePath: string | null
   size: bigint | null
+  checksum: string | null
+  locked: boolean | null
   createdAt: Date | null
   airlinkCloudId: string | null
 }
@@ -54,6 +56,8 @@ export type BackupMaxAggregateOutputType = {
   serverId: string | null
   filePath: string | null
   size: bigint | null
+  checksum: string | null
+  locked: boolean | null
   createdAt: Date | null
   airlinkCloudId: string | null
 }
@@ -65,6 +69,8 @@ export type BackupCountAggregateOutputType = {
   serverId: number
   filePath: number
   size: number
+  checksum: number
+  locked: number
   createdAt: number
   airlinkCloudId: number
   _all: number
@@ -88,6 +94,8 @@ export type BackupMinAggregateInputType = {
   serverId?: true
   filePath?: true
   size?: true
+  checksum?: true
+  locked?: true
   createdAt?: true
   airlinkCloudId?: true
 }
@@ -99,6 +107,8 @@ export type BackupMaxAggregateInputType = {
   serverId?: true
   filePath?: true
   size?: true
+  checksum?: true
+  locked?: true
   createdAt?: true
   airlinkCloudId?: true
 }
@@ -110,6 +120,8 @@ export type BackupCountAggregateInputType = {
   serverId?: true
   filePath?: true
   size?: true
+  checksum?: true
+  locked?: true
   createdAt?: true
   airlinkCloudId?: true
   _all?: true
@@ -208,6 +220,8 @@ export type BackupGroupByOutputType = {
   serverId: string
   filePath: string
   size: bigint | null
+  checksum: string | null
+  locked: boolean
   createdAt: Date
   airlinkCloudId: string | null
   _count: BackupCountAggregateOutputType | null
@@ -242,6 +256,8 @@ export type BackupWhereInput = {
   serverId?: Prisma.StringFilter<"Backup"> | string
   filePath?: Prisma.StringFilter<"Backup"> | string
   size?: Prisma.BigIntNullableFilter<"Backup"> | bigint | number | null
+  checksum?: Prisma.StringNullableFilter<"Backup"> | string | null
+  locked?: Prisma.BoolFilter<"Backup"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Backup"> | Date | string
   airlinkCloudId?: Prisma.StringNullableFilter<"Backup"> | string | null
   server?: Prisma.XOR<Prisma.ServerScalarRelationFilter, Prisma.ServerWhereInput>
@@ -254,6 +270,8 @@ export type BackupOrderByWithRelationInput = {
   serverId?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
+  checksum?: Prisma.SortOrderInput | Prisma.SortOrder
+  locked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   airlinkCloudId?: Prisma.SortOrderInput | Prisma.SortOrder
   server?: Prisma.ServerOrderByWithRelationInput
@@ -269,6 +287,8 @@ export type BackupWhereUniqueInput = Prisma.AtLeast<{
   serverId?: Prisma.StringFilter<"Backup"> | string
   filePath?: Prisma.StringFilter<"Backup"> | string
   size?: Prisma.BigIntNullableFilter<"Backup"> | bigint | number | null
+  checksum?: Prisma.StringNullableFilter<"Backup"> | string | null
+  locked?: Prisma.BoolFilter<"Backup"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Backup"> | Date | string
   airlinkCloudId?: Prisma.StringNullableFilter<"Backup"> | string | null
   server?: Prisma.XOR<Prisma.ServerScalarRelationFilter, Prisma.ServerWhereInput>
@@ -281,6 +301,8 @@ export type BackupOrderByWithAggregationInput = {
   serverId?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
+  checksum?: Prisma.SortOrderInput | Prisma.SortOrder
+  locked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   airlinkCloudId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.BackupCountOrderByAggregateInput
@@ -300,6 +322,8 @@ export type BackupScalarWhereWithAggregatesInput = {
   serverId?: Prisma.StringWithAggregatesFilter<"Backup"> | string
   filePath?: Prisma.StringWithAggregatesFilter<"Backup"> | string
   size?: Prisma.BigIntNullableWithAggregatesFilter<"Backup"> | bigint | number | null
+  checksum?: Prisma.StringNullableWithAggregatesFilter<"Backup"> | string | null
+  locked?: Prisma.BoolWithAggregatesFilter<"Backup"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Backup"> | Date | string
   airlinkCloudId?: Prisma.StringNullableWithAggregatesFilter<"Backup"> | string | null
 }
@@ -309,6 +333,8 @@ export type BackupCreateInput = {
   name: string
   filePath: string
   size?: bigint | number | null
+  checksum?: string | null
+  locked?: boolean
   createdAt?: Date | string
   airlinkCloudId?: string | null
   server: Prisma.ServerCreateNestedOneWithoutBackupsInput
@@ -321,6 +347,8 @@ export type BackupUncheckedCreateInput = {
   serverId: string
   filePath: string
   size?: bigint | number | null
+  checksum?: string | null
+  locked?: boolean
   createdAt?: Date | string
   airlinkCloudId?: string | null
 }
@@ -330,6 +358,8 @@ export type BackupUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   airlinkCloudId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   server?: Prisma.ServerUpdateOneRequiredWithoutBackupsNestedInput
@@ -342,6 +372,8 @@ export type BackupUncheckedUpdateInput = {
   serverId?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   airlinkCloudId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -353,6 +385,8 @@ export type BackupCreateManyInput = {
   serverId: string
   filePath: string
   size?: bigint | number | null
+  checksum?: string | null
+  locked?: boolean
   createdAt?: Date | string
   airlinkCloudId?: string | null
 }
@@ -362,6 +396,8 @@ export type BackupUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   airlinkCloudId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -373,6 +409,8 @@ export type BackupUncheckedUpdateManyInput = {
   serverId?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   airlinkCloudId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -394,6 +432,8 @@ export type BackupCountOrderByAggregateInput = {
   serverId?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  checksum?: Prisma.SortOrder
+  locked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   airlinkCloudId?: Prisma.SortOrder
 }
@@ -410,6 +450,8 @@ export type BackupMaxOrderByAggregateInput = {
   serverId?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  checksum?: Prisma.SortOrder
+  locked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   airlinkCloudId?: Prisma.SortOrder
 }
@@ -421,6 +463,8 @@ export type BackupMinOrderByAggregateInput = {
   serverId?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
   size?: Prisma.SortOrder
+  checksum?: Prisma.SortOrder
+  locked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   airlinkCloudId?: Prisma.SortOrder
 }
@@ -485,6 +529,8 @@ export type BackupCreateWithoutServerInput = {
   name: string
   filePath: string
   size?: bigint | number | null
+  checksum?: string | null
+  locked?: boolean
   createdAt?: Date | string
   airlinkCloudId?: string | null
 }
@@ -495,6 +541,8 @@ export type BackupUncheckedCreateWithoutServerInput = {
   name: string
   filePath: string
   size?: bigint | number | null
+  checksum?: string | null
+  locked?: boolean
   createdAt?: Date | string
   airlinkCloudId?: string | null
 }
@@ -534,6 +582,8 @@ export type BackupScalarWhereInput = {
   serverId?: Prisma.StringFilter<"Backup"> | string
   filePath?: Prisma.StringFilter<"Backup"> | string
   size?: Prisma.BigIntNullableFilter<"Backup"> | bigint | number | null
+  checksum?: Prisma.StringNullableFilter<"Backup"> | string | null
+  locked?: Prisma.BoolFilter<"Backup"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Backup"> | Date | string
   airlinkCloudId?: Prisma.StringNullableFilter<"Backup"> | string | null
 }
@@ -544,6 +594,8 @@ export type BackupCreateManyServerInput = {
   name: string
   filePath: string
   size?: bigint | number | null
+  checksum?: string | null
+  locked?: boolean
   createdAt?: Date | string
   airlinkCloudId?: string | null
 }
@@ -553,6 +605,8 @@ export type BackupUpdateWithoutServerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   airlinkCloudId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -563,6 +617,8 @@ export type BackupUncheckedUpdateWithoutServerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   airlinkCloudId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -573,6 +629,8 @@ export type BackupUncheckedUpdateManyWithoutServerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   airlinkCloudId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -586,6 +644,8 @@ export type BackupSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   serverId?: boolean
   filePath?: boolean
   size?: boolean
+  checksum?: boolean
+  locked?: boolean
   createdAt?: boolean
   airlinkCloudId?: boolean
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
@@ -598,6 +658,8 @@ export type BackupSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   serverId?: boolean
   filePath?: boolean
   size?: boolean
+  checksum?: boolean
+  locked?: boolean
   createdAt?: boolean
   airlinkCloudId?: boolean
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
@@ -610,6 +672,8 @@ export type BackupSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   serverId?: boolean
   filePath?: boolean
   size?: boolean
+  checksum?: boolean
+  locked?: boolean
   createdAt?: boolean
   airlinkCloudId?: boolean
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
@@ -622,11 +686,13 @@ export type BackupSelectScalar = {
   serverId?: boolean
   filePath?: boolean
   size?: boolean
+  checksum?: boolean
+  locked?: boolean
   createdAt?: boolean
   airlinkCloudId?: boolean
 }
 
-export type BackupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "serverId" | "filePath" | "size" | "createdAt" | "airlinkCloudId", ExtArgs["result"]["backup"]>
+export type BackupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "serverId" | "filePath" | "size" | "checksum" | "locked" | "createdAt" | "airlinkCloudId", ExtArgs["result"]["backup"]>
 export type BackupInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
 }
@@ -649,6 +715,8 @@ export type $BackupPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     serverId: string
     filePath: string
     size: bigint | null
+    checksum: string | null
+    locked: boolean
     createdAt: Date
     airlinkCloudId: string | null
   }, ExtArgs["result"]["backup"]>
@@ -1081,6 +1149,8 @@ export interface BackupFieldRefs {
   readonly serverId: Prisma.FieldRef<"Backup", 'String'>
   readonly filePath: Prisma.FieldRef<"Backup", 'String'>
   readonly size: Prisma.FieldRef<"Backup", 'BigInt'>
+  readonly checksum: Prisma.FieldRef<"Backup", 'String'>
+  readonly locked: Prisma.FieldRef<"Backup", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Backup", 'DateTime'>
   readonly airlinkCloudId: Prisma.FieldRef<"Backup", 'String'>
 }

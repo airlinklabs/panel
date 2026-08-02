@@ -90,6 +90,11 @@ export type Images = Prisma.ImagesModel
  */
 export type Node = Prisma.NodeModel
 /**
+ * Model Location
+ * 
+ */
+export type Location = Prisma.LocationModel
+/**
  * Model settings
  * 
  */
@@ -144,3 +149,8 @@ export type SftpCredential = Prisma.SftpCredentialModel
  * 
  */
 export type SubUser = Prisma.SubUserModel
+/**
+ * Model ActivityLog
+ * 
+ */
+export type ActivityLog = Prisma.ActivityLogModel

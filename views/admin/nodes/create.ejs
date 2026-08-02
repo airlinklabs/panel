@@ -108,6 +108,46 @@
           </div>
 
           <div class="al-card">
+            <h2 class="al-card-header">Overallocation</h2>
+            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)">Allow servers to exceed node limits by this percentage (0 = strict).</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <label for="nodeOverallocateMemory" class="al-label flex items-center gap-1.5">
+                  <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  Memory %
+                </label>
+                <input id="nodeOverallocateMemory" type="number" min="0" value="0" class="al-input">
+              </div>
+              <div>
+                <label for="nodeOverallocateDisk" class="al-label flex items-center gap-1.5">
+                  <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  Disk %
+                </label>
+                <input id="nodeOverallocateDisk" type="number" min="0" value="0" class="al-input">
+              </div>
+              <div>
+                <label for="nodeOverallocateCpu" class="al-label flex items-center gap-1.5">
+                  <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  CPU %
+                </label>
+                <input id="nodeOverallocateCpu" type="number" min="0" value="0" class="al-input">
+              </div>
+            </div>
+            <div class="mt-4">
+              <label for="nodeLocation" class="al-label flex items-center gap-1.5">
+                <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
+                Location
+              </label>
+              <select id="nodeLocation" class="al-input">
+                <option value="">No location</option>
+                <% (locations || []).forEach(loc => { %>
+                  <option value="<%= loc.id %>"><%= loc.name %> (<%= loc.shortCode %>)</option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
+
+          <div class="al-card">
             <h2 class="al-card-header">Daemon Configuration</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">

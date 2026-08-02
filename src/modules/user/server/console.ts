@@ -7,6 +7,7 @@ import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import {
   type ErrorMessage,
   loadServerPageContext,
@@ -253,6 +254,7 @@ export function registerConsoleRoutes(router: Router): void {
               },
             });
             logger.info('Container stopped successfully: ' + serverId);
+            await logActivity(req, 'server:stop', { serverId: String(serverId) });
             return;
           } catch (stopError: any) {
             if (
@@ -305,6 +307,7 @@ export function registerConsoleRoutes(router: Router): void {
           }
 
           logger.info('Container restarted successfully: ' + serverId);
+          await logActivity(req, 'server:restart', { serverId: String(serverId) });
           res.status(200).json({ success: true, message: 'Server restarted successfully' });
           return;
         }
@@ -319,7 +322,7 @@ export function registerConsoleRoutes(router: Router): void {
           throw error;
         }
         logger.info('Container started successfully: ' + serverId);
-
+        await logActivity(req, 'server:start', { serverId: String(serverId) });
         res.status(200).json({ message: 'Container started successfully.' });
         return;
       } catch (error) {
