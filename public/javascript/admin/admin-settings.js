@@ -58,6 +58,10 @@
       defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value,   10),
       defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value,      10),
       defaultMaxStorage:     parseInt(document.getElementById('defaultMaxStorage').value,  10),
+      defaultMaxDatabases:   parseInt(document.getElementById('defaultMaxDatabases').value, 10),
+      defaultOverallocateMemory: parseInt(document.getElementById('defaultOverallocateMemory').value, 10),
+      defaultOverallocateDisk:   parseInt(document.getElementById('defaultOverallocateDisk').value, 10),
+      defaultOverallocateCpu:    parseInt(document.getElementById('defaultOverallocateCpu').value, 10),
       uploadLimit:           parseInt(document.getElementById('uploadLimitInput').value,   10) || 100,
     }, btn);
   };

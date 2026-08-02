@@ -148,6 +148,11 @@
                     data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
               </div>
+              <div>
+                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
+                <input type="number" id="maxDatabases" name="maxDatabases" min="0" max="100000" placeholder="Use global default" class="al-input">
+                <p class="mt-1 text-xs text-neutral-500">Total databases across all servers. 0 = unlimited.</p>
+              </div>
             </div>
           </div>
         </form>

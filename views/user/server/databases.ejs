@@ -24,6 +24,18 @@
               </div>
               <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
               <div class="flex items-center gap-1.5">
+                <%- icon('database', { class: 'h-3 w-3 shrink-0' }) %>
+                <span class="text-[11px] truncate" style="color:var(--theme-text-muted)"><%= userDbCount %>/<%= typeof userDbLimit !== 'undefined' && userDbLimit > 0 ? userDbLimit : '∞' %> databases</span>
+              </div>
+              <% if (typeof userDbLimit !== 'undefined' && userDbLimit > 0) { %>
+              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
+              <div class="flex items-center gap-1.5">
+                <%- icon('shield-check', { class: 'h-3 w-3 shrink-0' }) %>
+                <span class="text-[11px]" style="color:var(--theme-text-muted)">account limit</span>
+              </div>
+              <% } %>
+              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
+              <div class="flex items-center gap-1.5">
                 <%- icon('server', { class: 'h-3 w-3 shrink-0' }) %>
                 <span class="text-[11px] truncate max-w-[100px]" style="color:var(--theme-text-muted)"><%= server.node.name %></span>
               </div>

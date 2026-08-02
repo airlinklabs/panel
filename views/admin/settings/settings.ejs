@@ -256,6 +256,28 @@
                     data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
               </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max databases</label>
+                <input type="number" id="defaultMaxDatabases" value="<%= settings.defaultMaxDatabases %>" min="0" max="100000"
+                  class="al-input">
+                <p class="mt-1 text-xs text-neutral-500">0 = unlimited.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Default overalloc memory (%)</label>
+                <input type="number" id="defaultOverallocateMemory" value="<%= settings.defaultOverallocateMemory %>" min="0" max="10000"
+                  class="al-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Default overalloc disk (%)</label>
+                <input type="number" id="defaultOverallocateDisk" value="<%= settings.defaultOverallocateDisk %>" min="0" max="10000"
+                  class="al-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Default overalloc CPU (%)</label>
+                <input type="number" id="defaultOverallocateCpu" value="<%= settings.defaultOverallocateCpu %>" min="0" max="10000"
+                  class="al-input">
+                <p class="mt-1 text-xs text-neutral-500">Applied to new nodes.</p>
+              </div>
             </div>
           </div>
 

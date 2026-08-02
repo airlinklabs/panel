@@ -353,6 +353,10 @@ const adminModule: Module = {
           const defaultMaxMemory      = parseInt(req.body.defaultMaxMemory,   10);
           const defaultMaxCpu         = parseInt(req.body.defaultMaxCpu,      10);
           const defaultMaxStorage     = parseInt(req.body.defaultMaxStorage,  10);
+          const defaultMaxDatabases   = parseInt(req.body.defaultMaxDatabases, 10);
+          const defaultOverallocateMemory = parseInt(req.body.defaultOverallocateMemory, 10);
+          const defaultOverallocateDisk   = parseInt(req.body.defaultOverallocateDisk, 10);
+          const defaultOverallocateCpu    = parseInt(req.body.defaultOverallocateCpu, 10);
 
           if (isNaN(defaultServerLimit) || defaultServerLimit < 0)
             return res.status(400).json({ success: false, error: 'Server limit must be 0 or greater.' });
@@ -362,6 +366,10 @@ const adminModule: Module = {
             return res.status(400).json({ success: false, error: 'Max CPU must be at least 10%.' });
           if (isNaN(defaultMaxStorage) || defaultMaxStorage < 128)
             return res.status(400).json({ success: false, error: 'Max storage must be at least 128 MB.' });
+          if (isNaN(defaultMaxDatabases) || defaultMaxDatabases < 0)
+            return res.status(400).json({ success: false, error: 'Default max databases must be 0 or greater.' });
+          if ([defaultOverallocateMemory, defaultOverallocateDisk, defaultOverallocateCpu].some((v) => isNaN(v) || v < 0 || v > 10000))
+            return res.status(400).json({ success: false, error: 'Overallocation defaults must be between 0 and 10000%.' });
 
           const serverPolicyData: Record<string, any> = {
             allowUserCreateServer,
@@ -370,6 +378,10 @@ const adminModule: Module = {
             defaultMaxMemory,
             defaultMaxCpu,
             defaultMaxStorage,
+            defaultMaxDatabases,
+            defaultOverallocateMemory,
+            defaultOverallocateDisk,
+            defaultOverallocateCpu,
           };
           if (req.body.uploadLimit) {
             serverPolicyData.uploadLimit = parseInt(req.body.uploadLimit, 10) || 100;

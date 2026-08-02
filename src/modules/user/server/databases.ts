@@ -62,6 +62,14 @@ export function registerDatabaseRoutes(router: Router): void {
         ]);
 
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
+        const userDbLimit =
+          owner?.maxDatabases !== null && owner?.maxDatabases !== undefined
+            ? (owner.maxDatabases ?? 0)
+            : (settings?.defaultMaxDatabases ?? 0);
+        const userDbCount = await prisma.serverDatabase.count({
+          where: { server: { ownerId: server.ownerId } },
+        });
 
         res.render('user/server/databases', {
           user,
@@ -70,6 +78,8 @@ export function registerDatabaseRoutes(router: Router): void {
           settings,
           databases,
           hosts,
+          userDbLimit,
+          userDbCount,
           features: JSON.parse(server.image.info || '{}').features || [],
           installed: await checkForServerInstallation(getParamAsString(serverId)),
         });
@@ -122,6 +132,25 @@ export function registerDatabaseRoutes(router: Router): void {
           });
           if (existing >= databaseLimit) {
             res.status(400).json({ error: `Database limit reached (${databaseLimit}). Delete an existing database first.` });
+            return;
+          }
+        }
+
+        // User-level hard cap — the server owner's total across all their servers.
+        const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const userMaxDatabases =
+          owner?.maxDatabases !== null && owner?.maxDatabases !== undefined
+            ? (owner.maxDatabases ?? 0)
+            : (settings?.defaultMaxDatabases ?? 0);
+        if (userMaxDatabases > 0) {
+          const totalOwnerDatabases = await prisma.serverDatabase.count({
+            where: { server: { ownerId: server.ownerId } },
+          });
+          if (totalOwnerDatabases >= userMaxDatabases) {
+            res.status(400).json({
+              error: `You have reached your database limit of ${userMaxDatabases} across all servers. Delete an existing database first.`,
+            });
             return;
           }
         }

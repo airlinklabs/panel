@@ -168,13 +168,24 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         const { name, ram, cpu, disk, address, port } = req.body;
-        const overallocateMemory = parseInt(req.body.overallocateMemory);
-        const overallocateDisk = parseInt(req.body.overallocateDisk);
-        const overallocateCpu = parseInt(req.body.overallocateCpu);
         const locationId = req.body.locationId ? parseInt(req.body.locationId) : null;
 
         // 'all' from the UI means unlimited → store 0
         const parseLimit = (v: unknown): number => (v === 'all' ? 0 : parseFloat(String(v ?? '')));
+
+        // Fall back to the global defaults (set in admin settings) when the form
+        // leaves overallocation empty or the field isn't sent.
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const defOvMem = settings?.defaultOverallocateMemory ?? 0;
+        const defOvDisk = settings?.defaultOverallocateDisk ?? 0;
+        const defOvCpu = settings?.defaultOverallocateCpu ?? 0;
+        const rawOv = (v: unknown, d: number): number =>
+          v === undefined || v === null || String(v).trim() === '' || String(v) === 'all'
+            ? d
+            : parseFloat(String(v));
+        const overallocateMemory = rawOv(req.body.overallocateMemory, defOvMem);
+        const overallocateDisk   = rawOv(req.body.overallocateDisk, defOvDisk);
+        const overallocateCpu    = rawOv(req.body.overallocateCpu, defOvCpu);
 
         if (
           [overallocateMemory, overallocateDisk, overallocateCpu].some(

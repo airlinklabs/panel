@@ -35,6 +35,10 @@ export type SettingsAvgAggregateOutputType = {
   defaultMaxMemory: number | null
   defaultMaxCpu: number | null
   defaultMaxStorage: number | null
+  defaultMaxDatabases: number | null
+  defaultOverallocateMemory: number | null
+  defaultOverallocateDisk: number | null
+  defaultOverallocateCpu: number | null
   loginMaxAttempts: number | null
   loginLockoutMinutes: number | null
   smtpPort: number | null
@@ -49,6 +53,10 @@ export type SettingsSumAggregateOutputType = {
   defaultMaxMemory: number | null
   defaultMaxCpu: number | null
   defaultMaxStorage: number | null
+  defaultMaxDatabases: number | null
+  defaultOverallocateMemory: number | null
+  defaultOverallocateDisk: number | null
+  defaultOverallocateCpu: number | null
   loginMaxAttempts: number | null
   loginLockoutMinutes: number | null
   smtpPort: number | null
@@ -79,6 +87,10 @@ export type SettingsMinAggregateOutputType = {
   defaultMaxMemory: number | null
   defaultMaxCpu: number | null
   defaultMaxStorage: number | null
+  defaultMaxDatabases: number | null
+  defaultOverallocateMemory: number | null
+  defaultOverallocateDisk: number | null
+  defaultOverallocateCpu: number | null
   loginWallpaper: string | null
   registerWallpaper: string | null
   loginMaxAttempts: number | null
@@ -128,6 +140,10 @@ export type SettingsMaxAggregateOutputType = {
   defaultMaxMemory: number | null
   defaultMaxCpu: number | null
   defaultMaxStorage: number | null
+  defaultMaxDatabases: number | null
+  defaultOverallocateMemory: number | null
+  defaultOverallocateDisk: number | null
+  defaultOverallocateCpu: number | null
   loginWallpaper: string | null
   registerWallpaper: string | null
   loginMaxAttempts: number | null
@@ -177,6 +193,10 @@ export type SettingsCountAggregateOutputType = {
   defaultMaxMemory: number
   defaultMaxCpu: number
   defaultMaxStorage: number
+  defaultMaxDatabases: number
+  defaultOverallocateMemory: number
+  defaultOverallocateDisk: number
+  defaultOverallocateCpu: number
   loginWallpaper: number
   registerWallpaper: number
   loginMaxAttempts: number
@@ -212,6 +232,10 @@ export type SettingsAvgAggregateInputType = {
   defaultMaxMemory?: true
   defaultMaxCpu?: true
   defaultMaxStorage?: true
+  defaultMaxDatabases?: true
+  defaultOverallocateMemory?: true
+  defaultOverallocateDisk?: true
+  defaultOverallocateCpu?: true
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
   smtpPort?: true
@@ -226,6 +250,10 @@ export type SettingsSumAggregateInputType = {
   defaultMaxMemory?: true
   defaultMaxCpu?: true
   defaultMaxStorage?: true
+  defaultMaxDatabases?: true
+  defaultOverallocateMemory?: true
+  defaultOverallocateDisk?: true
+  defaultOverallocateCpu?: true
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
   smtpPort?: true
@@ -256,6 +284,10 @@ export type SettingsMinAggregateInputType = {
   defaultMaxMemory?: true
   defaultMaxCpu?: true
   defaultMaxStorage?: true
+  defaultMaxDatabases?: true
+  defaultOverallocateMemory?: true
+  defaultOverallocateDisk?: true
+  defaultOverallocateCpu?: true
   loginWallpaper?: true
   registerWallpaper?: true
   loginMaxAttempts?: true
@@ -305,6 +337,10 @@ export type SettingsMaxAggregateInputType = {
   defaultMaxMemory?: true
   defaultMaxCpu?: true
   defaultMaxStorage?: true
+  defaultMaxDatabases?: true
+  defaultOverallocateMemory?: true
+  defaultOverallocateDisk?: true
+  defaultOverallocateCpu?: true
   loginWallpaper?: true
   registerWallpaper?: true
   loginMaxAttempts?: true
@@ -354,6 +390,10 @@ export type SettingsCountAggregateInputType = {
   defaultMaxMemory?: true
   defaultMaxCpu?: true
   defaultMaxStorage?: true
+  defaultMaxDatabases?: true
+  defaultOverallocateMemory?: true
+  defaultOverallocateDisk?: true
+  defaultOverallocateCpu?: true
   loginWallpaper?: true
   registerWallpaper?: true
   loginMaxAttempts?: true
@@ -490,6 +530,10 @@ export type SettingsGroupByOutputType = {
   defaultMaxMemory: number
   defaultMaxCpu: number
   defaultMaxStorage: number
+  defaultMaxDatabases: number
+  defaultOverallocateMemory: number
+  defaultOverallocateDisk: number
+  defaultOverallocateCpu: number
   loginWallpaper: string | null
   registerWallpaper: string | null
   loginMaxAttempts: number
@@ -562,6 +606,10 @@ export type settingsWhereInput = {
   defaultMaxMemory?: Prisma.IntFilter<"settings"> | number
   defaultMaxCpu?: Prisma.IntFilter<"settings"> | number
   defaultMaxStorage?: Prisma.IntFilter<"settings"> | number
+  defaultMaxDatabases?: Prisma.IntFilter<"settings"> | number
+  defaultOverallocateMemory?: Prisma.IntFilter<"settings"> | number
+  defaultOverallocateDisk?: Prisma.IntFilter<"settings"> | number
+  defaultOverallocateCpu?: Prisma.IntFilter<"settings"> | number
   loginWallpaper?: Prisma.StringNullableFilter<"settings"> | string | null
   registerWallpaper?: Prisma.StringNullableFilter<"settings"> | string | null
   loginMaxAttempts?: Prisma.IntFilter<"settings"> | number
@@ -611,6 +659,10 @@ export type settingsOrderByWithRelationInput = {
   defaultMaxMemory?: Prisma.SortOrder
   defaultMaxCpu?: Prisma.SortOrder
   defaultMaxStorage?: Prisma.SortOrder
+  defaultMaxDatabases?: Prisma.SortOrder
+  defaultOverallocateMemory?: Prisma.SortOrder
+  defaultOverallocateDisk?: Prisma.SortOrder
+  defaultOverallocateCpu?: Prisma.SortOrder
   loginWallpaper?: Prisma.SortOrderInput | Prisma.SortOrder
   registerWallpaper?: Prisma.SortOrderInput | Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
@@ -663,6 +715,10 @@ export type settingsWhereUniqueInput = Prisma.AtLeast<{
   defaultMaxMemory?: Prisma.IntFilter<"settings"> | number
   defaultMaxCpu?: Prisma.IntFilter<"settings"> | number
   defaultMaxStorage?: Prisma.IntFilter<"settings"> | number
+  defaultMaxDatabases?: Prisma.IntFilter<"settings"> | number
+  defaultOverallocateMemory?: Prisma.IntFilter<"settings"> | number
+  defaultOverallocateDisk?: Prisma.IntFilter<"settings"> | number
+  defaultOverallocateCpu?: Prisma.IntFilter<"settings"> | number
   loginWallpaper?: Prisma.StringNullableFilter<"settings"> | string | null
   registerWallpaper?: Prisma.StringNullableFilter<"settings"> | string | null
   loginMaxAttempts?: Prisma.IntFilter<"settings"> | number
@@ -712,6 +768,10 @@ export type settingsOrderByWithAggregationInput = {
   defaultMaxMemory?: Prisma.SortOrder
   defaultMaxCpu?: Prisma.SortOrder
   defaultMaxStorage?: Prisma.SortOrder
+  defaultMaxDatabases?: Prisma.SortOrder
+  defaultOverallocateMemory?: Prisma.SortOrder
+  defaultOverallocateDisk?: Prisma.SortOrder
+  defaultOverallocateCpu?: Prisma.SortOrder
   loginWallpaper?: Prisma.SortOrderInput | Prisma.SortOrder
   registerWallpaper?: Prisma.SortOrderInput | Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
@@ -769,6 +829,10 @@ export type settingsScalarWhereWithAggregatesInput = {
   defaultMaxMemory?: Prisma.IntWithAggregatesFilter<"settings"> | number
   defaultMaxCpu?: Prisma.IntWithAggregatesFilter<"settings"> | number
   defaultMaxStorage?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  defaultMaxDatabases?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  defaultOverallocateMemory?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  defaultOverallocateDisk?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  defaultOverallocateCpu?: Prisma.IntWithAggregatesFilter<"settings"> | number
   loginWallpaper?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
   registerWallpaper?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
   loginMaxAttempts?: Prisma.IntWithAggregatesFilter<"settings"> | number
@@ -817,6 +881,10 @@ export type settingsCreateInput = {
   defaultMaxMemory?: number
   defaultMaxCpu?: number
   defaultMaxStorage?: number
+  defaultMaxDatabases?: number
+  defaultOverallocateMemory?: number
+  defaultOverallocateDisk?: number
+  defaultOverallocateCpu?: number
   loginWallpaper?: string | null
   registerWallpaper?: string | null
   loginMaxAttempts?: number
@@ -866,6 +934,10 @@ export type settingsUncheckedCreateInput = {
   defaultMaxMemory?: number
   defaultMaxCpu?: number
   defaultMaxStorage?: number
+  defaultMaxDatabases?: number
+  defaultOverallocateMemory?: number
+  defaultOverallocateDisk?: number
+  defaultOverallocateCpu?: number
   loginWallpaper?: string | null
   registerWallpaper?: string | null
   loginMaxAttempts?: number
@@ -914,6 +986,10 @@ export type settingsUpdateInput = {
   defaultMaxMemory?: Prisma.IntFieldUpdateOperationsInput | number
   defaultMaxCpu?: Prisma.IntFieldUpdateOperationsInput | number
   defaultMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateDisk?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateCpu?: Prisma.IntFieldUpdateOperationsInput | number
   loginWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registerWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -963,6 +1039,10 @@ export type settingsUncheckedUpdateInput = {
   defaultMaxMemory?: Prisma.IntFieldUpdateOperationsInput | number
   defaultMaxCpu?: Prisma.IntFieldUpdateOperationsInput | number
   defaultMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateDisk?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateCpu?: Prisma.IntFieldUpdateOperationsInput | number
   loginWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registerWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1012,6 +1092,10 @@ export type settingsCreateManyInput = {
   defaultMaxMemory?: number
   defaultMaxCpu?: number
   defaultMaxStorage?: number
+  defaultMaxDatabases?: number
+  defaultOverallocateMemory?: number
+  defaultOverallocateDisk?: number
+  defaultOverallocateCpu?: number
   loginWallpaper?: string | null
   registerWallpaper?: string | null
   loginMaxAttempts?: number
@@ -1060,6 +1144,10 @@ export type settingsUpdateManyMutationInput = {
   defaultMaxMemory?: Prisma.IntFieldUpdateOperationsInput | number
   defaultMaxCpu?: Prisma.IntFieldUpdateOperationsInput | number
   defaultMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateDisk?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateCpu?: Prisma.IntFieldUpdateOperationsInput | number
   loginWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registerWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1109,6 +1197,10 @@ export type settingsUncheckedUpdateManyInput = {
   defaultMaxMemory?: Prisma.IntFieldUpdateOperationsInput | number
   defaultMaxCpu?: Prisma.IntFieldUpdateOperationsInput | number
   defaultMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateDisk?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultOverallocateCpu?: Prisma.IntFieldUpdateOperationsInput | number
   loginWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registerWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1158,6 +1250,10 @@ export type settingsCountOrderByAggregateInput = {
   defaultMaxMemory?: Prisma.SortOrder
   defaultMaxCpu?: Prisma.SortOrder
   defaultMaxStorage?: Prisma.SortOrder
+  defaultMaxDatabases?: Prisma.SortOrder
+  defaultOverallocateMemory?: Prisma.SortOrder
+  defaultOverallocateDisk?: Prisma.SortOrder
+  defaultOverallocateCpu?: Prisma.SortOrder
   loginWallpaper?: Prisma.SortOrder
   registerWallpaper?: Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
@@ -1191,6 +1287,10 @@ export type settingsAvgOrderByAggregateInput = {
   defaultMaxMemory?: Prisma.SortOrder
   defaultMaxCpu?: Prisma.SortOrder
   defaultMaxStorage?: Prisma.SortOrder
+  defaultMaxDatabases?: Prisma.SortOrder
+  defaultOverallocateMemory?: Prisma.SortOrder
+  defaultOverallocateDisk?: Prisma.SortOrder
+  defaultOverallocateCpu?: Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   smtpPort?: Prisma.SortOrder
@@ -1221,6 +1321,10 @@ export type settingsMaxOrderByAggregateInput = {
   defaultMaxMemory?: Prisma.SortOrder
   defaultMaxCpu?: Prisma.SortOrder
   defaultMaxStorage?: Prisma.SortOrder
+  defaultMaxDatabases?: Prisma.SortOrder
+  defaultOverallocateMemory?: Prisma.SortOrder
+  defaultOverallocateDisk?: Prisma.SortOrder
+  defaultOverallocateCpu?: Prisma.SortOrder
   loginWallpaper?: Prisma.SortOrder
   registerWallpaper?: Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
@@ -1270,6 +1374,10 @@ export type settingsMinOrderByAggregateInput = {
   defaultMaxMemory?: Prisma.SortOrder
   defaultMaxCpu?: Prisma.SortOrder
   defaultMaxStorage?: Prisma.SortOrder
+  defaultMaxDatabases?: Prisma.SortOrder
+  defaultOverallocateMemory?: Prisma.SortOrder
+  defaultOverallocateDisk?: Prisma.SortOrder
+  defaultOverallocateCpu?: Prisma.SortOrder
   loginWallpaper?: Prisma.SortOrder
   registerWallpaper?: Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
@@ -1303,6 +1411,10 @@ export type settingsSumOrderByAggregateInput = {
   defaultMaxMemory?: Prisma.SortOrder
   defaultMaxCpu?: Prisma.SortOrder
   defaultMaxStorage?: Prisma.SortOrder
+  defaultMaxDatabases?: Prisma.SortOrder
+  defaultOverallocateMemory?: Prisma.SortOrder
+  defaultOverallocateDisk?: Prisma.SortOrder
+  defaultOverallocateCpu?: Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   smtpPort?: Prisma.SortOrder
@@ -1335,6 +1447,10 @@ export type settingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   defaultMaxMemory?: boolean
   defaultMaxCpu?: boolean
   defaultMaxStorage?: boolean
+  defaultMaxDatabases?: boolean
+  defaultOverallocateMemory?: boolean
+  defaultOverallocateDisk?: boolean
+  defaultOverallocateCpu?: boolean
   loginWallpaper?: boolean
   registerWallpaper?: boolean
   loginMaxAttempts?: boolean
@@ -1384,6 +1500,10 @@ export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   defaultMaxMemory?: boolean
   defaultMaxCpu?: boolean
   defaultMaxStorage?: boolean
+  defaultMaxDatabases?: boolean
+  defaultOverallocateMemory?: boolean
+  defaultOverallocateDisk?: boolean
+  defaultOverallocateCpu?: boolean
   loginWallpaper?: boolean
   registerWallpaper?: boolean
   loginMaxAttempts?: boolean
@@ -1433,6 +1553,10 @@ export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   defaultMaxMemory?: boolean
   defaultMaxCpu?: boolean
   defaultMaxStorage?: boolean
+  defaultMaxDatabases?: boolean
+  defaultOverallocateMemory?: boolean
+  defaultOverallocateDisk?: boolean
+  defaultOverallocateCpu?: boolean
   loginWallpaper?: boolean
   registerWallpaper?: boolean
   loginMaxAttempts?: boolean
@@ -1482,6 +1606,10 @@ export type settingsSelectScalar = {
   defaultMaxMemory?: boolean
   defaultMaxCpu?: boolean
   defaultMaxStorage?: boolean
+  defaultMaxDatabases?: boolean
+  defaultOverallocateMemory?: boolean
+  defaultOverallocateDisk?: boolean
+  defaultOverallocateCpu?: boolean
   loginWallpaper?: boolean
   registerWallpaper?: boolean
   loginMaxAttempts?: boolean
@@ -1506,7 +1634,7 @@ export type settingsSelectScalar = {
   s3PathStyle?: boolean
 }
 
-export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "loginWallpaper" | "registerWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle", ExtArgs["result"]["settings"]>
+export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle", ExtArgs["result"]["settings"]>
 
 export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "settings"
@@ -1536,6 +1664,10 @@ export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     defaultMaxMemory: number
     defaultMaxCpu: number
     defaultMaxStorage: number
+    defaultMaxDatabases: number
+    defaultOverallocateMemory: number
+    defaultOverallocateDisk: number
+    defaultOverallocateCpu: number
     loginWallpaper: string | null
     registerWallpaper: string | null
     loginMaxAttempts: number
@@ -2005,6 +2137,10 @@ export interface settingsFieldRefs {
   readonly defaultMaxMemory: Prisma.FieldRef<"settings", 'Int'>
   readonly defaultMaxCpu: Prisma.FieldRef<"settings", 'Int'>
   readonly defaultMaxStorage: Prisma.FieldRef<"settings", 'Int'>
+  readonly defaultMaxDatabases: Prisma.FieldRef<"settings", 'Int'>
+  readonly defaultOverallocateMemory: Prisma.FieldRef<"settings", 'Int'>
+  readonly defaultOverallocateDisk: Prisma.FieldRef<"settings", 'Int'>
+  readonly defaultOverallocateCpu: Prisma.FieldRef<"settings", 'Int'>
   readonly loginWallpaper: Prisma.FieldRef<"settings", 'String'>
   readonly registerWallpaper: Prisma.FieldRef<"settings", 'String'>
   readonly loginMaxAttempts: Prisma.FieldRef<"settings", 'Int'>

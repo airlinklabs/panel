@@ -59,10 +59,20 @@ usernameInput.addEventListener('input', checkUsername);
 passwordInput.addEventListener('input', checkPassword);
 
 createBtn.addEventListener('click', async () => {
-  const emailVal = document.getElementById('userEmail').value.trim();
+const emailVal = document.getElementById('userEmail').value.trim();
   const usernameVal = usernameInput.value.trim();
   const passwordVal = passwordInput.value;
   const isAdmin = document.getElementById('userIsAdminSwitch').checked;
+
+  const limits = {};
+  ['serverLimit', 'maxCpu', 'maxDatabases'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) limits[id] = el.value === '' ? null : parseInt(el.value, 10);
+  });
+  ['maxMemory', 'maxStorage'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) limits[id] = el.value === '' ? null : parseInt(el.value, 10);
+  });
 
   if (!emailVal || !usernameVal || !passwordVal) {
     showToast('Please fill in all required fields.', 'error');
@@ -84,7 +94,7 @@ createBtn.addEventListener('click', async () => {
     const response = await fetch('/admin/users/create-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailVal, username: usernameVal, password: passwordVal, isAdmin }),
+      body: JSON.stringify({ email: emailVal, username: usernameVal, password: passwordVal, isAdmin, ...limits }),
     });
 
     if (response.ok) {

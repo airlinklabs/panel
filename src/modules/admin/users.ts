@@ -93,7 +93,7 @@ const adminModule: Module = {
       '/admin/users/create-user',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const { email, username, password, isAdmin } = req.body;
+        const { email, username, password, isAdmin, serverLimit, maxMemory, maxCpu, maxStorage, maxDatabases } = req.body;
 
         if (!email || !username || !password) {
           res.status(400).json({
@@ -138,6 +138,11 @@ const adminModule: Module = {
               username,
               password: await bcrypt.hash(password, 12),
               isAdmin: isAdminBool,
+              serverLimit: serverLimit === '' || serverLimit === null || serverLimit === undefined ? null : parseInt(serverLimit, 10),
+              maxMemory: maxMemory === '' || maxMemory === null || maxMemory === undefined ? null : parseInt(maxMemory, 10),
+              maxCpu: maxCpu === '' || maxCpu === null || maxCpu === undefined ? null : parseInt(maxCpu, 10),
+              maxStorage: maxStorage === '' || maxStorage === null || maxStorage === undefined ? null : parseInt(maxStorage, 10),
+              maxDatabases: maxDatabases === '' || maxDatabases === null || maxDatabases === undefined ? null : parseInt(maxDatabases, 10),
             },
           });
 
@@ -270,7 +275,7 @@ const adminModule: Module = {
             return;
           }
 
-          const { email, username, description, isAdmin, password, serverLimit, maxMemory, maxCpu, maxStorage } = req.body;
+          const { email, username, description, isAdmin, password, serverLimit, maxMemory, maxCpu, maxStorage, maxDatabases } = req.body;
 
           // Check if email or username is already taken by another user
           if (email && email !== targetUser.email) {
@@ -325,6 +330,9 @@ const adminModule: Module = {
           }
           if (maxStorage !== undefined) {
             updateData.maxStorage = maxStorage === '' || maxStorage === null ? null : parseInt(maxStorage, 10);
+          }
+          if (maxDatabases !== undefined) {
+            updateData.maxDatabases = maxDatabases === '' || maxDatabases === null || maxDatabases === 'null' ? null : parseInt(maxDatabases, 10);
           }
 
           // Handle password update if provided

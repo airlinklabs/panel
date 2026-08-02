@@ -20,6 +20,7 @@ model Users {
   maxMemory     Int?             @default(0)
   maxCpu        Int?             @default(0)
   maxStorage    Int?             @default(0)
+  maxDatabases  Int?             @default(0)
   loginAttempts Int              @default(0)
   lockedUntil   DateTime?
   totpSecret    String?
@@ -218,6 +219,10 @@ model settings {
   defaultMaxMemory          Int      @default(512)
   defaultMaxCpu             Int      @default(100)
   defaultMaxStorage         Int      @default(5120)
+  defaultMaxDatabases       Int      @default(0)
+  defaultOverallocateMemory Int      @default(0)
+  defaultOverallocateDisk   Int      @default(0)
+  defaultOverallocateCpu    Int      @default(0)
   loginWallpaper            String?
   registerWallpaper         String?
   loginMaxAttempts          Int      @default(5)

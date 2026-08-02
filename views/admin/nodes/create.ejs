@@ -116,21 +116,24 @@
                   <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Memory %
                 </label>
-                <input id="nodeOverallocateMemory" type="number" min="0" value="0" class="al-input">
+                <input id="nodeOverallocateMemory" type="number" min="0" value="<%= settings.defaultOverallocateMemory ?? 0 %>" class="al-input">
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Default from global settings.</p>
               </div>
               <div>
                 <label for="nodeOverallocateDisk" class="al-label flex items-center gap-1.5">
                   <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Disk %
                 </label>
-                <input id="nodeOverallocateDisk" type="number" min="0" value="0" class="al-input">
+                <input id="nodeOverallocateDisk" type="number" min="0" value="<%= settings.defaultOverallocateDisk ?? 0 %>" class="al-input">
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Default from global settings.</p>
               </div>
               <div>
                 <label for="nodeOverallocateCpu" class="al-label flex items-center gap-1.5">
                   <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
                   CPU %
                 </label>
-                <input id="nodeOverallocateCpu" type="number" min="0" value="0" class="al-input">
+                <input id="nodeOverallocateCpu" type="number" min="0" value="<%= settings.defaultOverallocateCpu ?? 0 %>" class="al-input">
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Default from global settings.</p>
               </div>
             </div>
             <div class="mt-4">

@@ -46,6 +46,9 @@
       const maxStorageVal = document.getElementById('maxStorage').value;
       data.maxStorage = maxStorageVal === '' ? null : parseInt(maxStorageVal, 10);
 
+      const maxDatabasesVal = document.getElementById('maxDatabases').value;
+      data.maxDatabases = maxDatabasesVal === '' ? null : parseInt(maxDatabasesVal, 10);
+
       const loader = showLoadingPopup(pd.updatingUser, pd.processingUserUpdate);
       loader.updateProgress(20, pd.sendingUserInformation);
 
