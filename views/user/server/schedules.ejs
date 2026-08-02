@@ -62,6 +62,9 @@
                   <div class="flex items-center gap-2 flex-wrap">
                     <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= schedule.name %></h3>
                     <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium font-mono" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%= schedule.cron %></span>
+                    <% if (schedule.timeOffset) { %>
+                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium font-mono" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)" title="Schedule clock offset"><%= schedule.timeOffset > 0 ? '+' : '' %><%= schedule.timeOffset %>m</span>
+                    <% } %>
                     <% if (!schedule.enabled) { %>
                     <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Disabled</span>
                     <% } %>
@@ -228,6 +231,11 @@
         <p id="schedCronErr" class="hidden mt-1.5 text-[11px]" style="color:var(--theme-danger)">Cron must be 5 or 6 fields — <span class="font-mono">second minute hour day month weekday</span> — with values in range (seconds/minutes 0-59, hours 0-23, day 1-31, month 1-12, weekday 0-7).</p>
         <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Format: <span class="font-mono">second minute hour day month weekday</span> — <span id="cronPreview" class="font-medium" style="color:var(--theme-accent)">every hour</span></p>
       </div>
+      <div>
+        <label class="al-label" for="schedTimeOffset">Time offset (minutes)</label>
+        <input id="schedTimeOffset" type="number" min="-1440" max="1440" value="0" class="al-input w-full" autocomplete="off">
+        <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Shift the schedule's clock forward (+) or backward (−) from the server's UTC time, in minutes. e.g. <span class="font-mono">60</span> = run as if the time were one hour ahead.</p>
+      </div>
       <div id="schedVisualWrap" class="hidden space-y-4">
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <%
@@ -313,6 +321,7 @@ window.openAddScheduleModal = () => {
   lastScheduleModalFocus = document.activeElement;
   document.getElementById('schedName').value = '';
   document.getElementById('schedCron').value = '0 0 * * * *';
+  document.getElementById('schedTimeOffset').value = '0';
   document.getElementById('schedCronErr')?.classList.add('hidden');
   document.getElementById('cronPreview').textContent = describeCron('0 0 * * * *');
   setSchedMode('visual');
@@ -708,7 +717,7 @@ document.getElementById('confirmAddSchedule')?.addEventListener('click', async (
   btn.disabled = true;
   btn.classList.add('opacity-60', 'pointer-events-none');
   btn.querySelector('span').textContent = 'Creating\u2026';
-  const result = await api('/server/' + serverId + '/schedules', 'POST', { name, cron });
+  const result = await api('/server/' + serverId + '/schedules', 'POST', { name, cron, timeOffset: document.getElementById('schedTimeOffset').value });
   if (result) {
     showToast('Schedule created.', 'success');
     closeAddScheduleModal();

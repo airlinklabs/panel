@@ -2286,6 +2286,7 @@ export const ScheduleScalarFieldEnum = {
   name: 'name',
   cron: 'cron',
   enabled: 'enabled',
+  timeOffset: 'timeOffset',
   lastRunAt: 'lastRunAt',
   nextRunAt: 'nextRunAt',
   createdAt: 'createdAt'

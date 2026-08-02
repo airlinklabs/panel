@@ -28,10 +28,12 @@ export type AggregateSchedule = {
 
 export type ScheduleAvgAggregateOutputType = {
   id: number | null
+  timeOffset: number | null
 }
 
 export type ScheduleSumAggregateOutputType = {
   id: number | null
+  timeOffset: number | null
 }
 
 export type ScheduleMinAggregateOutputType = {
@@ -40,6 +42,7 @@ export type ScheduleMinAggregateOutputType = {
   name: string | null
   cron: string | null
   enabled: boolean | null
+  timeOffset: number | null
   lastRunAt: Date | null
   nextRunAt: Date | null
   createdAt: Date | null
@@ -51,6 +54,7 @@ export type ScheduleMaxAggregateOutputType = {
   name: string | null
   cron: string | null
   enabled: boolean | null
+  timeOffset: number | null
   lastRunAt: Date | null
   nextRunAt: Date | null
   createdAt: Date | null
@@ -62,6 +66,7 @@ export type ScheduleCountAggregateOutputType = {
   name: number
   cron: number
   enabled: number
+  timeOffset: number
   lastRunAt: number
   nextRunAt: number
   createdAt: number
@@ -71,10 +76,12 @@ export type ScheduleCountAggregateOutputType = {
 
 export type ScheduleAvgAggregateInputType = {
   id?: true
+  timeOffset?: true
 }
 
 export type ScheduleSumAggregateInputType = {
   id?: true
+  timeOffset?: true
 }
 
 export type ScheduleMinAggregateInputType = {
@@ -83,6 +90,7 @@ export type ScheduleMinAggregateInputType = {
   name?: true
   cron?: true
   enabled?: true
+  timeOffset?: true
   lastRunAt?: true
   nextRunAt?: true
   createdAt?: true
@@ -94,6 +102,7 @@ export type ScheduleMaxAggregateInputType = {
   name?: true
   cron?: true
   enabled?: true
+  timeOffset?: true
   lastRunAt?: true
   nextRunAt?: true
   createdAt?: true
@@ -105,6 +114,7 @@ export type ScheduleCountAggregateInputType = {
   name?: true
   cron?: true
   enabled?: true
+  timeOffset?: true
   lastRunAt?: true
   nextRunAt?: true
   createdAt?: true
@@ -203,6 +213,7 @@ export type ScheduleGroupByOutputType = {
   name: string
   cron: string
   enabled: boolean
+  timeOffset: number
   lastRunAt: Date | null
   nextRunAt: Date | null
   createdAt: Date
@@ -237,6 +248,7 @@ export type ScheduleWhereInput = {
   name?: Prisma.StringFilter<"Schedule"> | string
   cron?: Prisma.StringFilter<"Schedule"> | string
   enabled?: Prisma.BoolFilter<"Schedule"> | boolean
+  timeOffset?: Prisma.IntFilter<"Schedule"> | number
   lastRunAt?: Prisma.DateTimeNullableFilter<"Schedule"> | Date | string | null
   nextRunAt?: Prisma.DateTimeNullableFilter<"Schedule"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Schedule"> | Date | string
@@ -250,6 +262,7 @@ export type ScheduleOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   cron?: Prisma.SortOrder
   enabled?: Prisma.SortOrder
+  timeOffset?: Prisma.SortOrder
   lastRunAt?: Prisma.SortOrderInput | Prisma.SortOrder
   nextRunAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -266,6 +279,7 @@ export type ScheduleWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Schedule"> | string
   cron?: Prisma.StringFilter<"Schedule"> | string
   enabled?: Prisma.BoolFilter<"Schedule"> | boolean
+  timeOffset?: Prisma.IntFilter<"Schedule"> | number
   lastRunAt?: Prisma.DateTimeNullableFilter<"Schedule"> | Date | string | null
   nextRunAt?: Prisma.DateTimeNullableFilter<"Schedule"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Schedule"> | Date | string
@@ -279,6 +293,7 @@ export type ScheduleOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   cron?: Prisma.SortOrder
   enabled?: Prisma.SortOrder
+  timeOffset?: Prisma.SortOrder
   lastRunAt?: Prisma.SortOrderInput | Prisma.SortOrder
   nextRunAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -298,6 +313,7 @@ export type ScheduleScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Schedule"> | string
   cron?: Prisma.StringWithAggregatesFilter<"Schedule"> | string
   enabled?: Prisma.BoolWithAggregatesFilter<"Schedule"> | boolean
+  timeOffset?: Prisma.IntWithAggregatesFilter<"Schedule"> | number
   lastRunAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Schedule"> | Date | string | null
   nextRunAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Schedule"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Schedule"> | Date | string
@@ -307,6 +323,7 @@ export type ScheduleCreateInput = {
   name: string
   cron: string
   enabled?: boolean
+  timeOffset?: number
   lastRunAt?: Date | string | null
   nextRunAt?: Date | string | null
   createdAt?: Date | string
@@ -320,6 +337,7 @@ export type ScheduleUncheckedCreateInput = {
   name: string
   cron: string
   enabled?: boolean
+  timeOffset?: number
   lastRunAt?: Date | string | null
   nextRunAt?: Date | string | null
   createdAt?: Date | string
@@ -330,6 +348,7 @@ export type ScheduleUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   cron?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeOffset?: Prisma.IntFieldUpdateOperationsInput | number
   lastRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   nextRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -343,6 +362,7 @@ export type ScheduleUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   cron?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeOffset?: Prisma.IntFieldUpdateOperationsInput | number
   lastRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   nextRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -355,6 +375,7 @@ export type ScheduleCreateManyInput = {
   name: string
   cron: string
   enabled?: boolean
+  timeOffset?: number
   lastRunAt?: Date | string | null
   nextRunAt?: Date | string | null
   createdAt?: Date | string
@@ -364,6 +385,7 @@ export type ScheduleUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   cron?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeOffset?: Prisma.IntFieldUpdateOperationsInput | number
   lastRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   nextRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -375,6 +397,7 @@ export type ScheduleUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   cron?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeOffset?: Prisma.IntFieldUpdateOperationsInput | number
   lastRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   nextRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -396,6 +419,7 @@ export type ScheduleCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   cron?: Prisma.SortOrder
   enabled?: Prisma.SortOrder
+  timeOffset?: Prisma.SortOrder
   lastRunAt?: Prisma.SortOrder
   nextRunAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -403,6 +427,7 @@ export type ScheduleCountOrderByAggregateInput = {
 
 export type ScheduleAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  timeOffset?: Prisma.SortOrder
 }
 
 export type ScheduleMaxOrderByAggregateInput = {
@@ -411,6 +436,7 @@ export type ScheduleMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   cron?: Prisma.SortOrder
   enabled?: Prisma.SortOrder
+  timeOffset?: Prisma.SortOrder
   lastRunAt?: Prisma.SortOrder
   nextRunAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -422,6 +448,7 @@ export type ScheduleMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   cron?: Prisma.SortOrder
   enabled?: Prisma.SortOrder
+  timeOffset?: Prisma.SortOrder
   lastRunAt?: Prisma.SortOrder
   nextRunAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -429,6 +456,7 @@ export type ScheduleMinOrderByAggregateInput = {
 
 export type ScheduleSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  timeOffset?: Prisma.SortOrder
 }
 
 export type ScheduleScalarRelationFilter = {
@@ -496,6 +524,7 @@ export type ScheduleCreateWithoutServerInput = {
   name: string
   cron: string
   enabled?: boolean
+  timeOffset?: number
   lastRunAt?: Date | string | null
   nextRunAt?: Date | string | null
   createdAt?: Date | string
@@ -507,6 +536,7 @@ export type ScheduleUncheckedCreateWithoutServerInput = {
   name: string
   cron: string
   enabled?: boolean
+  timeOffset?: number
   lastRunAt?: Date | string | null
   nextRunAt?: Date | string | null
   createdAt?: Date | string
@@ -547,6 +577,7 @@ export type ScheduleScalarWhereInput = {
   name?: Prisma.StringFilter<"Schedule"> | string
   cron?: Prisma.StringFilter<"Schedule"> | string
   enabled?: Prisma.BoolFilter<"Schedule"> | boolean
+  timeOffset?: Prisma.IntFilter<"Schedule"> | number
   lastRunAt?: Prisma.DateTimeNullableFilter<"Schedule"> | Date | string | null
   nextRunAt?: Prisma.DateTimeNullableFilter<"Schedule"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Schedule"> | Date | string
@@ -556,6 +587,7 @@ export type ScheduleCreateWithoutTasksInput = {
   name: string
   cron: string
   enabled?: boolean
+  timeOffset?: number
   lastRunAt?: Date | string | null
   nextRunAt?: Date | string | null
   createdAt?: Date | string
@@ -568,6 +600,7 @@ export type ScheduleUncheckedCreateWithoutTasksInput = {
   name: string
   cron: string
   enabled?: boolean
+  timeOffset?: number
   lastRunAt?: Date | string | null
   nextRunAt?: Date | string | null
   createdAt?: Date | string
@@ -593,6 +626,7 @@ export type ScheduleUpdateWithoutTasksInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   cron?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeOffset?: Prisma.IntFieldUpdateOperationsInput | number
   lastRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   nextRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -605,6 +639,7 @@ export type ScheduleUncheckedUpdateWithoutTasksInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   cron?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeOffset?: Prisma.IntFieldUpdateOperationsInput | number
   lastRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   nextRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -615,6 +650,7 @@ export type ScheduleCreateManyServerInput = {
   name: string
   cron: string
   enabled?: boolean
+  timeOffset?: number
   lastRunAt?: Date | string | null
   nextRunAt?: Date | string | null
   createdAt?: Date | string
@@ -624,6 +660,7 @@ export type ScheduleUpdateWithoutServerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   cron?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeOffset?: Prisma.IntFieldUpdateOperationsInput | number
   lastRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   nextRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -635,6 +672,7 @@ export type ScheduleUncheckedUpdateWithoutServerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   cron?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeOffset?: Prisma.IntFieldUpdateOperationsInput | number
   lastRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   nextRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -646,6 +684,7 @@ export type ScheduleUncheckedUpdateManyWithoutServerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   cron?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeOffset?: Prisma.IntFieldUpdateOperationsInput | number
   lastRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   nextRunAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -688,6 +727,7 @@ export type ScheduleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name?: boolean
   cron?: boolean
   enabled?: boolean
+  timeOffset?: boolean
   lastRunAt?: boolean
   nextRunAt?: boolean
   createdAt?: boolean
@@ -702,6 +742,7 @@ export type ScheduleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   cron?: boolean
   enabled?: boolean
+  timeOffset?: boolean
   lastRunAt?: boolean
   nextRunAt?: boolean
   createdAt?: boolean
@@ -714,6 +755,7 @@ export type ScheduleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   cron?: boolean
   enabled?: boolean
+  timeOffset?: boolean
   lastRunAt?: boolean
   nextRunAt?: boolean
   createdAt?: boolean
@@ -726,12 +768,13 @@ export type ScheduleSelectScalar = {
   name?: boolean
   cron?: boolean
   enabled?: boolean
+  timeOffset?: boolean
   lastRunAt?: boolean
   nextRunAt?: boolean
   createdAt?: boolean
 }
 
-export type ScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "serverId" | "name" | "cron" | "enabled" | "lastRunAt" | "nextRunAt" | "createdAt", ExtArgs["result"]["schedule"]>
+export type ScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "serverId" | "name" | "cron" | "enabled" | "timeOffset" | "lastRunAt" | "nextRunAt" | "createdAt", ExtArgs["result"]["schedule"]>
 export type ScheduleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
   tasks?: boolean | Prisma.Schedule$tasksArgs<ExtArgs>
@@ -756,6 +799,7 @@ export type $SchedulePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     name: string
     cron: string
     enabled: boolean
+    timeOffset: number
     lastRunAt: Date | null
     nextRunAt: Date | null
     createdAt: Date
@@ -1189,6 +1233,7 @@ export interface ScheduleFieldRefs {
   readonly name: Prisma.FieldRef<"Schedule", 'String'>
   readonly cron: Prisma.FieldRef<"Schedule", 'String'>
   readonly enabled: Prisma.FieldRef<"Schedule", 'Boolean'>
+  readonly timeOffset: Prisma.FieldRef<"Schedule", 'Int'>
   readonly lastRunAt: Prisma.FieldRef<"Schedule", 'DateTime'>
   readonly nextRunAt: Prisma.FieldRef<"Schedule", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Schedule", 'DateTime'>

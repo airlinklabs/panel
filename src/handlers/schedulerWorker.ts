@@ -8,6 +8,7 @@ export interface ScheduleWithRelations {
   serverId: string;
   name: string;
   cron: string;
+  timeOffset: number;
   enabled: boolean;
   lastRunAt: Date | null;
   nextRunAt: Date | null;
@@ -23,9 +24,9 @@ export interface ScheduleWithRelations {
 
 export async function runSchedule(schedule: ScheduleWithRelations): Promise<void> {
   for (const task of schedule.tasks) {
-    let payload: Record<string, unknown> = {};
+    let payload: Record<string, unknown>;
     try {
-      payload = JSON.parse(task.payload || '{}');
+      payload = JSON.parse(task.payload || '{}') as Record<string, unknown>;
     } catch {
       logger.error(`Schedule ${schedule.id} task ${task.id} has invalid payload, skipping`);
       continue;
@@ -96,7 +97,8 @@ export function startScheduler(): void {
       for (const schedule of due) {
         try {
           await runSchedule(schedule);
-          const interval = CronParser.parse(schedule.cron);
+          const offsetClock = new Date(now.getTime() + (schedule.timeOffset || 0) * 60_000);
+          const interval = CronParser.parse(schedule.cron, { currentDate: offsetClock });
           await prisma.schedule.update({
             where: { id: schedule.id },
             data: {

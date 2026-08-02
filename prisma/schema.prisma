@@ -120,19 +120,17 @@ model ServerDatabase {
 }
 
 model Schedule {
-  id        Int            @id @default(autoincrement())
-  serverId  String
-  name      String
-  cron      String
-  enabled   Boolean        @default(true)
-  lastRunAt DateTime?
-  nextRunAt DateTime?
-  createdAt DateTime       @default(now())
-  server    Server         @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
-  tasks     ScheduleTask[]
-
-  @@index([serverId])
-  @@index([nextRunAt])
+  id         Int      @id @default(autoincrement())
+  serverId   String
+  name       String
+  cron       String
+  enabled    Boolean  @default(false)
+  timeOffset Int      @default(0)
+  lastRunAt  DateTime?
+  nextRunAt  DateTime?
+  createdAt  DateTime @default(now())
+  server     Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
+  tasks      ScheduleTask[]
 }
 
 model ScheduleTask {

@@ -20,8 +20,9 @@ function isValidCron(cron: string): boolean {
   }
 }
 
-function nextRunFromCron(cron: string): Date {
-  return CronParser.parse(cron).next().toDate();
+function nextRunFromCron(cron: string, timeOffset = 0): Date {
+  const clock = new Date(Date.now() + timeOffset * 60_000);
+  return CronParser.parse(cron, { currentDate: clock }).next().toDate();
 }
 
 function parsePayload(raw: string): Record<string, unknown> {
@@ -108,7 +109,7 @@ export function registerScheduleRoutes(router: Router): void {
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
-      const { name, cron } = req.body as { name?: string; cron?: string };
+      const { name, cron, timeOffset } = req.body as { name?: string; cron?: string; timeOffset?: unknown };
 
       if (!name || typeof name !== 'string' || name.trim() === '') {
         res.status(400).json({ error: 'Schedule name is required' });
@@ -122,6 +123,8 @@ export function registerScheduleRoutes(router: Router): void {
         res.status(400).json({ error: 'Invalid cron expression.' });
         return;
       }
+      const parsedOffset = parseInt(String(timeOffset ?? '0'), 10);
+      const offset = Number.isNaN(parsedOffset) ? 0 : Math.min(Math.max(parsedOffset, -1440), 1440);
 
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
@@ -141,6 +144,7 @@ export function registerScheduleRoutes(router: Router): void {
             serverId: server.UUID,
             name: name.trim(),
             cron: cron.trim(),
+            timeOffset: offset,
             nextRunAt: nextRunFromCron(cron.trim()),
           },
         });
@@ -162,7 +166,7 @@ export function registerScheduleRoutes(router: Router): void {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
       const scheduleId = parseInt(getParamAsString(req.params?.scheduleId), 10);
-      const { enabled } = req.body as { enabled?: unknown };
+      const { enabled, timeOffset } = req.body as { enabled?: unknown; timeOffset?: unknown };
 
       if (isNaN(scheduleId)) {
         res.status(400).json({ error: 'Invalid schedule id' });
@@ -190,12 +194,19 @@ export function registerScheduleRoutes(router: Router): void {
           return;
         }
 
+        let offset = schedule.timeOffset ?? 0;
+        if (timeOffset !== undefined) {
+          const parsed = parseInt(String(timeOffset), 10);
+          offset = Number.isNaN(parsed) ? 0 : Math.min(Math.max(parsed, -1440), 1440);
+        }
+
         const wantEnabled = enabled === true || enabled === 'true';
         await prisma.schedule.update({
           where: { id: schedule.id },
           data: {
             enabled: wantEnabled,
-            nextRunAt: wantEnabled ? nextRunFromCron(schedule.cron) : null,
+            timeOffset: offset,
+            nextRunAt: wantEnabled ? nextRunFromCron(schedule.cron, offset) : null,
           },
         });
 
