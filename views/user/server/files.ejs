@@ -126,7 +126,7 @@ function escJS(val) {
 
       <!-- Daemon Offline Warning -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
-      <div class="mx-4 sm:mx-8 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
+      <div class="mx-4 sm:mx-8 mt-4 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl p-4 flex items-center">
         <div class="flex-shrink-0 mr-3">
           <%- icon('triangle-alert', { class: 'h-6 w-6', strokeWidth: 2, style: 'color:var(--theme-danger);' }) %>
         </div>

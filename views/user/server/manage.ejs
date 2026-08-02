@@ -139,7 +139,7 @@
 
         <!-- Server Suspended Warning -->
         <% if (server.Suspended) { %>
-        <div class="mt-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
+        <div class="mt-3 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl px-4 py-3 flex items-center gap-3">
           <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-danger);' }) %>
           <div>
             <p class="text-sm font-medium" style="color:var(--theme-danger);"><%= req.translations.serverSuspended || "This server's been grounded. Reach out to your admin if you think that's a mistake." %></p>
@@ -150,7 +150,7 @@
 
         <!-- Daemon Offline Warning -->
         <div id="daemonOfflineWarningRow" class="<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %>hidden<% } %> mt-3">
-          <div id="daemonOfflineWarning" class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
+          <div id="daemonOfflineWarning" class="bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl px-4 py-3 flex items-center gap-3">
             <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-danger);' }) %>
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon — it might just need a nudge.' %></p>
@@ -280,7 +280,7 @@
       </div>
 
       <% if (server.Suspended) { %>
-      <div class="mt-3 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">
+      <div class="mt-3 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl px-3 py-2.5">
         <%- icon('triangle-alert', { size: 16, class: 'shrink-0', style: 'color:var(--theme-danger);' }) %>
         <div class="min-w-0">
           <p class="text-xs font-medium" style="color:var(--theme-danger);">Server suspended</p>
@@ -289,7 +289,7 @@
       </div>
       <% } %>
 
-      <div id="mobileDaemonOfflineWarning" class="mt-3 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %> hidden<% } %>">
+      <div id="mobileDaemonOfflineWarning" class="mt-3 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl px-3 py-2.5<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %> hidden<% } %>">
         <%- icon('triangle-alert', { size: 16, class: 'shrink-0', style: 'color:var(--theme-danger);' }) %>
         <div class="min-w-0 flex-1">
           <p class="text-xs font-medium" style="color:var(--theme-danger);">Connection Error</p>
