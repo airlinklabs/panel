@@ -139,7 +139,6 @@
                   <% } %>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                  <span class="al-live-indicator hidden" aria-hidden="true"><span class="al-dot-online"></span>Live</span>
                   <%- include('../components/ui/status-badge', { status: server.status === 'running' ? 'online' : 'offline' }) %>
                 </div>
               </div>
@@ -202,7 +201,6 @@
                 </td>
                 <td class="al-table-td">
                 <div class="flex items-center gap-2 shrink-0">
-                  <span class="al-live-indicator hidden" aria-hidden="true"><span class="al-dot-online"></span>Live</span>
                   <%- include('../components/ui/status-badge', { status: server.status === 'running' ? 'online' : 'offline' }) %>
                 </div>
                 </td>

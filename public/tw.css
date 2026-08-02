@@ -481,16 +481,9 @@ input[type="button"]:disabled {
 }
 }
 
-/* Live indicator (dashboard cards) — in components layer so `hidden`
-   (utility) can actually hide it; previously its inline-flex display
-   always beat the utility and the pill showed on every card. */
-@layer components {
-  .al-live-indicator { @apply inline-flex items-center gap-1 text-[10px] font-medium shrink-0; color: var(--theme-success); }
-  .al-live-indicator .al-dot-online { @apply w-1.5 h-1.5; }
-  .al-live-indicator.is-stale { color: var(--theme-text-muted); }
-  .al-live-indicator.is-stale .al-dot-online { background: var(--theme-text-muted); }
-}
-
 /* Tables — scroll horizontally on narrow screens instead of bursting
-   the layout; width 100% when there's room. */
+   the layout; normal table layout restored on desktop. */
 .al-table { display: block; overflow-x: auto; }
+@media (min-width: 640px) {
+  .al-table { display: table; overflow: visible; }
+}

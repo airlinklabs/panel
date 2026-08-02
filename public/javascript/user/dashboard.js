@@ -330,21 +330,6 @@
     return s + 's';
   }
 
-  function setLiveIndicator(card, state, title) {
-    var el = card.querySelector('.al-live-indicator');
-    if (!el) return;
-    if (state === 'stale') {
-      el.classList.remove('hidden');
-      el.classList.add('is-stale');
-      el.title = title || 'Last update failed — showing saved status';
-    } else if (state === 'live') {
-      el.classList.remove('hidden', 'is-stale');
-      el.title = title || '';
-    } else {
-      el.classList.add('hidden');
-    }
-  }
-
   function applyServerStatus(uuid, status) {
     var card = document.querySelector('[data-server-uuid="' + uuid + '"]');
     if (!card) return;
@@ -359,19 +344,16 @@
       badge.className = 'al-badge-offline';
       badge.innerHTML = '<span class="al-dot-offline"></span> Daemon offline';
       badge.title = status.error || 'Daemon unreachable';
-      setLiveIndicator(card, 'live', liveTitle);
       return;
     }
     if (status.starting) {
       badge.className = 'al-badge-warning';
       badge.innerHTML = '<span class="al-dot-warning"></span> Starting';
-      setLiveIndicator(card, 'live', liveTitle);
       return;
     }
     if (status.stopping) {
       badge.className = 'al-badge-warning';
       badge.innerHTML = '<span class="al-dot-warning"></span> Stopping';
-      setLiveIndicator(card, 'live', liveTitle);
       return;
     }
     if (status.online) {
@@ -379,12 +361,10 @@
       badge.className = 'al-badge-online';
       badge.innerHTML = '<span class="al-dot-online"></span> Online' + (uptime ? ' · ' + uptime : '');
       badge.title = uptime ? 'Up for ' + uptime : 'Online';
-      setLiveIndicator(card, 'live', liveTitle);
       return;
     }
     badge.className = 'al-badge-offline';
     badge.innerHTML = '<span class="al-dot-offline"></span> Offline';
-    setLiveIndicator(card, 'live', liveTitle);
   }
 
   function pollAllServers() {
@@ -399,7 +379,6 @@
         if (status !== null) {
           applyServerStatus(serverUUIDs[i], status);
         } else if (card) {
-          setLiveIndicator(card, 'stale');
         }
       });
     });
