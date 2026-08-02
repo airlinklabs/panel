@@ -214,7 +214,8 @@ export const ScheduleTaskScalarFieldEnum = {
   scheduleId: 'scheduleId',
   order: 'order',
   action: 'action',
-  payload: 'payload'
+  payload: 'payload',
+  timeOffset: 'timeOffset'
 } as const
 
 export type ScheduleTaskScalarFieldEnum = (typeof ScheduleTaskScalarFieldEnum)[keyof typeof ScheduleTaskScalarFieldEnum]

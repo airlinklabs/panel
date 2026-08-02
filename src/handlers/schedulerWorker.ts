@@ -19,7 +19,7 @@ export interface ScheduleWithRelations {
     Suspended: boolean;
     node: { address: string; port: number; key: string };
   };
-  tasks: { id: number; action: string; payload: string }[];
+  tasks: { id: number; action: string; payload: string; timeOffset: number }[];
 }
 
 export async function runSchedule(schedule: ScheduleWithRelations): Promise<void> {
@@ -30,6 +30,10 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<void
     } catch {
       logger.error(`Schedule ${schedule.id} task ${task.id} has invalid payload, skipping`);
       continue;
+    }
+
+    if (task.timeOffset > 0) {
+      await new Promise((resolve) => setTimeout(resolve, task.timeOffset * 1000));
     }
 
     try {

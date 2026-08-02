@@ -272,7 +272,11 @@ export function registerScheduleRoutes(router: Router): void {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
       const scheduleId = parseInt(getParamAsString(req.params?.scheduleId), 10);
-      const { action, payload } = req.body as { action?: string; payload?: Record<string, unknown> };
+      const { action, payload, timeOffset = 0 } = req.body as {
+        action?: string;
+        payload?: Record<string, unknown>;
+        timeOffset?: unknown;
+      };
 
       if (isNaN(scheduleId)) {
         res.status(400).json({ error: 'Invalid schedule id' });
@@ -328,6 +332,7 @@ export function registerScheduleRoutes(router: Router): void {
             order: taskCount,
             action,
             payload: JSON.stringify(payload),
+            timeOffset: Math.max(0, parseInt(String(timeOffset), 10) || 0),
           },
         });
 

@@ -141,6 +141,7 @@ model ScheduleTask {
   order      Int      @default(0)
   action     String
   payload    String
+  timeOffset Int      @default(0)
   schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
 }
 

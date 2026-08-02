@@ -118,9 +118,12 @@
                       <div class="task-row flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm" data-task-row="<%= task.id %>" style="background:var(--theme-bg-secondary)">
                         <div class="min-w-0 flex items-center gap-2.5">
                           <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%= task.action %></span>
-                          <span class="truncate font-mono text-xs" style="color:var(--theme-text)">
-                            <% if (task.action === 'command') { %><%= task.payload.command %><% } else if (task.action === 'power') { %><%= task.payload.action %><% } else { %><%= task.payload.name %><% } %>
-                          </span>
+<span class="truncate font-mono text-xs" style="color:var(--theme-text)">
+                             <% if (task.action === 'command') { %><%= task.payload.command %><% } else if (task.action === 'power') { %><%= task.payload.action %><% } else { %><%= task.payload.name %><% } %>
+                           </span>
+                           <% if (task.timeOffset > 0) { %>
+                             <span class="shrink-0 text-[10px] font-medium" style="color:var(--theme-text-muted)">+<%= task.timeOffset %>s</span>
+                           <% } %>
                         </div>
                         <button type="button" onclick="deleteTask(<%= schedule.id %>, <%= task.id %>)" class="al-btn-ghost p-1.5 -mr-1.5 shrink-0" style="color:var(--theme-danger)" aria-label="Remove task">
                           <%- icon('x', { class: 'w-3.5 h-3.5' }) %>
@@ -160,6 +163,10 @@
                     <div class="task-fields-backup hidden" data-schedule="<%= schedule.id %>">
                       <label class="al-label">Backup name</label>
                       <input type="text" class="al-input task-backup-name w-48" placeholder="daily" autocomplete="off">
+                    </div>
+                    <div>
+                      <label class="al-label">Seconds before</label>
+                      <input type="number" min="0" step="1" value="0" class="al-input task-timeOffset w-24" data-schedule="<%= schedule.id %>" autocomplete="off">
                     </div>
                     <button type="button" onclick="addTask(<%= schedule.id %>)"
                       class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
@@ -795,6 +802,7 @@ function renderPendingTasks(scheduleId) {
     row.innerHTML = '<div class="min-w-0 flex items-center gap-2.5">'
       + '<span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">' + task.action + '</span>'
       + '<span class="truncate font-mono text-xs" style="color:var(--theme-text)">' + label.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>'
+      + (task.timeOffset > 0 ? '<span class="shrink-0 text-[10px] font-medium" style="color:var(--theme-text-muted)">+' + task.timeOffset + 's</span>' : '')
       + '</div>'
       + '<button type="button" class="al-btn-ghost p-1.5 -mr-1.5 shrink-0" style="color:var(--theme-danger)" aria-label="Remove task"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>';
     row.querySelector('button').addEventListener('click', () => removePendingTask(scheduleId, i));
@@ -825,10 +833,12 @@ window.addTask = (scheduleId) => {
     payload = { name };
   }
   if (!pendingTasks[scheduleId]) pendingTasks[scheduleId] = [];
-  pendingTasks[scheduleId].push({ action, payload });
+  const timeOffset = parseInt(card.querySelector('.task-timeOffset').value, 10) || 0;
+  pendingTasks[scheduleId].push({ action, payload, timeOffset: Math.max(0, timeOffset) });
   renderPendingTasks(scheduleId);
   card.querySelector('.task-command').value = '';
   card.querySelector('.task-backup-name').value = '';
+  card.querySelector('.task-timeOffset').value = '0';
   showToast('Task staged. Click "Save tasks" to apply.', 'success');
 };
 
@@ -840,7 +850,7 @@ window.saveTasks = async (scheduleId) => {
   btn.classList.add('opacity-60', 'pointer-events-none');
   let ok = true;
   for (const task of tasks) {
-    const result = await api('/server/' + serverId + '/schedules/' + scheduleId + '/tasks', 'POST', { action: task.action, payload: task.payload });
+    const result = await api('/server/' + serverId + '/schedules/' + scheduleId + '/tasks', 'POST', { action: task.action, payload: task.payload, timeOffset: task.timeOffset || 0 });
     if (!result) { ok = false; break; }
   }
   btn.disabled = false;
