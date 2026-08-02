@@ -60,7 +60,7 @@
     </div>
     <div class="px-2 py-2">
       <% (bottomNavItems || []).slice(4).forEach(function(item) { %>
-      <a href="<%= item.url %>" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;" data-match-prefix="<%= item.matchPrefix || '' %>">
+      <a href="<%= item.url %>" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;" data-match-prefix="<%= item.matchPrefix || '' %>">
         <%- item.icon %>
         <span class="text-sm"><%= item.label %></span>
       </a>
@@ -71,52 +71,52 @@
         <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide" style="color:var(--theme-text-muted);">Admin</p>
         
         <!-- Core -->
-        <a href="/admin/overview" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/overview" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('layout-grid', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Overview</span>
         </a>
-        <a href="/admin/servers" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/servers" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('server', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Servers</span>
         </a>
-        <a href="/admin/users" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/users" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('users', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Users</span>
         </a>
 
         <!-- Infrastructure -->
         <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Infrastructure</p>
-        <a href="/admin/nodes" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/nodes" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('network', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Nodes</span>
         </a>
-        <a href="/admin/locations" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/locations" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('map-pin', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Locations</span>
         </a>
-        <a href="/admin/activity" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/activity" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('activity', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Activity Log</span>
         </a>
-        <a href="/admin/images" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/images" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('box', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Images</span>
         </a>
 
         <!-- Extensions -->
         <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Extensions</p>
-        <a href="/admin/addons" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/addons" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('puzzle', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Addons</span>
         </a>
-        <a href="/admin/apikeys" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/apikeys" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('key', { class: 'w-5 h-5' }) %>
           <span class="text-sm">API Keys</span>
         </a>
 
         <!-- Configuration -->
         <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Configuration</p>
-        <a href="/admin/settings" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/settings" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('settings', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Settings</span>
         </a>
@@ -125,16 +125,16 @@
 
       <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
         <% if (typeof user !== 'undefined') { %>
-        <a href="/account" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/account" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <img class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
           <span class="text-sm">Account</span>
         </a>
-        <a href="/logout" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/logout" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('log-out', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Logout</span>
         </a>
         <% } else { %>
-        <a href="/login" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/login" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('log-in', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Login</span>
         </a>

@@ -1,0 +1,16 @@
+<div class="flex items-center gap-3 mt-1.5 flex-wrap">
+  <div class="flex items-center gap-1.5">
+    <%- icon('box', { class: 'h-3 w-3 shrink-0' }) %>
+    <span class="text-[11px] truncate max-w-[140px]" style="color:var(--theme-text-muted)"><%= server.image.name %></span>
+  </div>
+  <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
+  <div class="flex items-center gap-1.5">
+    <%- icon('server', { class: 'h-3 w-3 shrink-0' }) %>
+    <span class="text-[11px] truncate max-w-[100px]" style="color:var(--theme-text-muted)"><%= server.node.name %></span>
+  </div>
+  <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
+  <div class="flex items-center gap-1.5">
+    <%- icon('hash', { class: 'h-3 w-3 shrink-0' }) %>
+    <span class="text-[11px] font-mono" style="color:var(--theme-text-muted)"><%= server.UUID.split('-')[0] %></span>
+  </div>
+</div>
