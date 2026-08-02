@@ -100,3 +100,36 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     r.readAsText(f);
   };
 });
+
+const importUrlBtn = document.getElementById('importUrlBtn');
+if (importUrlBtn) {
+  importUrlBtn.addEventListener('click', () => {
+    const panel = document.getElementById('importUrlPanel');
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden')) document.getElementById('importUrlInput').focus();
+  });
+  document.getElementById('importUrlSubmit').addEventListener('click', async () => {
+    const url = document.getElementById('importUrlInput').value.trim();
+    if (!url) { showToast('Enter a URL.', 'error'); return; }
+    const btn = document.getElementById('importUrlSubmit');
+    btn.disabled = true; btn.classList.add('opacity-60');
+    try {
+      const r = await fetch('/admin/images/import-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const d = await r.json();
+      if (r.ok && d.success) {
+        showToast(d.message || 'Image imported.', 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast(d.error || 'Import failed.', 'error');
+      }
+    } catch {
+      showToast('Import failed.', 'error');
+    } finally {
+      btn.disabled = false; btn.classList.remove('opacity-60');
+    }
+  });
+}

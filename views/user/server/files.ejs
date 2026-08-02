@@ -109,6 +109,12 @@ function escJS(val) {
                 Upload File
             </button>
 
+            <button id="pullFile" onclick="openPullFileModal()" type="button"
+                class="al-btn-secondary">
+                <%- icon('download', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
+                Pull From URL
+            </button>
+
              <%- include('../../components/sftp', { server: server }) %>
           </div>
           <% } %>
@@ -428,6 +434,29 @@ function escJS(val) {
           <button type="button" id="uploadButton" class="al-btn-primary w-full md:w-auto px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5" disabled>
             <%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %>
             Upload
+          </button>
+        </div>
+    </div>
+  </div>
+
+  <!-- Pull file from URL -->
+  <div id="pullFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
+    <div id="pullFileModalPanel" class="al-sheet-panel rounded-2xl p-8 max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+        <h2 class="text-2xl font-medium mb-1" style="color:var(--theme-text-strong)">Pull File From URL</h2>
+        <p class="mb-6" style="color:var(--theme-text-muted)">Download a file from a public URL into the current directory.</p>
+        <div class="mb-4">
+          <label for="pullUrlInput" class="mb-1.5 block text-xs font-medium" style="color:var(--theme-text-muted)">File URL</label>
+          <input type="url" id="pullUrlInput" class="al-input w-full font-mono" placeholder="https://example.com/file.zip" autocomplete="off" spellcheck="false">
+          <p id="pullUrlPreview" class="mt-2 text-xs font-mono hidden" style="color:var(--theme-text-muted)"></p>
+        </div>
+        <div class="flex justify-end space-x-4">
+          <button type="button" onclick="closePullFileModal()" class="al-btn-secondary px-5 py-2 inline-flex items-center gap-2">
+            <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+            Cancel
+          </button>
+          <button type="button" id="pullButton" class="al-btn-primary w-full md:w-auto px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+            <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>
+            Pull
           </button>
         </div>
     </div>
@@ -1408,6 +1437,84 @@ function openCreateFileModal() {
       }, i * 25);
     });
   })();
+
+  // ── Pull file from URL ──────────────────────────────────────────────────
+  function openPullFileModal() {
+    const modal = document.getElementById('pullFileModal');
+    const input = document.getElementById('pullUrlInput');
+    const preview = document.getElementById('pullUrlPreview');
+    const button = document.getElementById('pullButton');
+    if (!modal) return;
+    input.value = '';
+    preview.classList.add('hidden');
+    button.disabled = false;
+    button.classList.remove('opacity-60');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    Animate.openModal(modal, document.getElementById('pullFileModalPanel'));
+    setTimeout(() => input.focus(), 80);
+  }
+
+  function closePullFileModal() {
+    const modal = document.getElementById('pullFileModal');
+    const panel = document.getElementById('pullFileModalPanel');
+    const done = function () {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    };
+    Animate.closeModal(modal, panel, done);
+  }
+
+  const pullUrlInput = document.getElementById('pullUrlInput');
+  if (pullUrlInput) {
+    pullUrlInput.addEventListener('input', () => {
+      const preview = document.getElementById('pullUrlPreview');
+      const url = pullUrlInput.value.trim();
+      if (!url) { preview.classList.add('hidden'); return; }
+      let name = '';
+      try {
+        const parsed = new URL(url);
+        name = parsed.pathname.split('/').filter(Boolean).pop() || '';
+      } catch {}
+      if (!name) { preview.classList.add('hidden'); return; }
+      const base = '<%= currentPath ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
+      preview.textContent = 'Will save as: ' + (base ? base + '/' : '/') + name;
+      preview.classList.remove('hidden');
+    });
+    pullUrlInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('pullButton').click(); }
+    });
+  }
+
+  document.getElementById('pullButton')?.addEventListener('click', async () => {
+    const url = document.getElementById('pullUrlInput').value.trim();
+    if (!url) { showToast('Enter a file URL.', 'error'); return; }
+    let parsed;
+    try { parsed = new URL(url); } catch { showToast('Invalid URL.', 'error'); return; }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      showToast('Only http(s) URLs are allowed.', 'error');
+      return;
+    }
+
+    closePullFileModal();
+    const loader = showLoadingPopup('Pulling File', 'Downloading from URL...');
+    try {
+      const res = await fetch('/server/<%= server.UUID %>/files/pull', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+        body: JSON.stringify({ url, path: '<%= currentPath %>' }),
+      });
+      const data = await res.json();
+      loader.close();
+      if (res.ok && data.success) {
+        showToast(data.message || 'File pulled.', 'success');
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        showToast(data.error || 'Failed to pull file.', 'error');
+      }
+    } catch {
+      loader.close();
+      showToast('Failed to pull file — check the URL and try again.', 'error');
+    }
+  });
 </script>
 
 <%- include('../../components/footer') %>

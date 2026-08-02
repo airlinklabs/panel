@@ -635,9 +635,89 @@ export function registerFilesRoutes(router: Router): void {
               .json({ error: 'Error setting up upload request' });
           }
         }
-      } catch (error) {
+        } catch (error) {
         logger.error('Error uploading file:', error);
         res.status(500).json({ error: 'Failed to upload file' });
+      }
+    },
+  );
+
+  router.post(
+    '/server/:id/files/pull',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
+    async (req: Request, res: Response) => {
+      const serverId = req.params?.id;
+      const { url, path } = req.body as { url?: string; path?: string };
+
+      if (!url || typeof url !== 'string') {
+        res.status(400).json({ error: 'URL is required' });
+        return;
+      }
+      let parsed: URL;
+      try {
+        parsed = new URL(url);
+      } catch {
+        res.status(400).json({ error: 'Invalid URL' });
+        return;
+      }
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        res.status(400).json({ error: 'Only http(s) URLs are allowed' });
+        return;
+      }
+
+      try {
+        const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
+        if (!user) {
+          res.status(404).json({ error: 'User not found' });
+          return;
+        }
+
+        const server = await prisma.server.findUnique({
+          where: { UUID: getParamAsString(serverId) },
+          include: { node: true },
+        });
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        const pullResponse = await daemonRequest<{ success: boolean; file?: string; path?: string; error?: string }>({
+          method: 'POST',
+          path: '/fs/pull',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          body: {
+            id: server.UUID,
+            url,
+            path: typeof path === 'string' ? path : '/',
+          },
+          timeout: 120000,
+        });
+
+        if (pullResponse.status !== 200 || !pullResponse.data?.success) {
+          res.status(pullResponse.status === 200 ? 400 : pullResponse.status).json({
+            error: pullResponse.data?.error || 'Failed to pull file from URL',
+          });
+          return;
+        }
+
+        await logActivity(req, 'file:pull', {
+          serverId: String(server.UUID),
+          metadata: { url, path: pullResponse.data.path ?? '/' },
+        });
+        res.json({
+          success: true,
+          message: 'File pulled successfully',
+          file: pullResponse.data.file,
+          path: pullResponse.data.path,
+        });
+      } catch (error: any) {
+        logger.error('Error pulling file from URL:', error);
+        res.status(500).json({
+          error: error?.body?.error || error?.message || 'Failed to pull file from URL',
+        });
       }
     },
   );

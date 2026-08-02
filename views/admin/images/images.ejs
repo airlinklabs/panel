@@ -50,9 +50,18 @@
         </div>
         <div class="flex gap-2 shrink-0">
           <button id="uploadBtn" type="button" class="al-btn-secondary"><%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.uploadJson || 'Upload JSON' %></button>
+          <button id="importUrlBtn" type="button" class="al-btn-secondary"><%- icon('globe', { class: 'size-4', strokeWidth: 1.5 }) %>Import from URL</button>
           <button onclick="openCreate()" type="button" class="al-btn-secondary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>New Image</button>
           <a href="/admin/images/store" class="al-btn-secondary">Browse Store</a>
         </div>
+      </div>
+
+      <div id="importUrlPanel" class="hidden al-card mt-5 p-5">
+        <div class="flex items-center gap-3">
+          <input id="importUrlInput" type="url" placeholder="https://raw.githubusercontent.com/…/egg.json" class="al-input flex-1">
+          <button id="importUrlSubmit" type="button" class="al-btn-primary shrink-0"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Fetch &amp; Import</button>
+        </div>
+        <p class="mt-2 text-xs" style="color:var(--theme-text-muted)">Fetch a Pterodactyl egg JSON from a raw URL and install it as an image.</p>
       </div>
 
       <div class="al-page-body">

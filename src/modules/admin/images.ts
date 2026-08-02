@@ -79,6 +79,77 @@ const adminModule: Module = {
     );
 
     router.post(
+      '/admin/images/import-url',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const url = String(req.body?.url ?? '').trim();
+          if (!url) {
+            res.status(400).json({ success: false, error: 'URL is required' });
+            return;
+          }
+          let parsed: URL;
+          try {
+            parsed = new URL(url);
+          } catch {
+            res.status(400).json({ success: false, error: 'Invalid URL' });
+            return;
+          }
+          if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+            res.status(400).json({ success: false, error: 'Only http(s) URLs are allowed' });
+            return;
+          }
+          if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+            res.status(400).json({ success: false, error: 'Local URLs are not allowed' });
+            return;
+          }
+
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 15_000);
+          let payload: unknown;
+          try {
+            const response = await fetch(url, { signal: controller.signal });
+            if (!response.ok) {
+              res.status(400).json({ success: false, error: `Remote returned ${response.status}` });
+              return;
+            }
+            const text = await response.text();
+            if (text.length > 2_000_000) {
+              res.status(400).json({ success: false, error: 'Egg file is too large (>2MB)' });
+              return;
+            }
+            payload = JSON.parse(text);
+          } catch (error) {
+            logger.error('Failed to fetch egg from URL:', error);
+            res.status(400).json({ success: false, error: 'Failed to fetch egg from URL' });
+            return;
+          } finally {
+            clearTimeout(timeout);
+          }
+
+          const { valid, errors } = validateEggData(payload as Record<string, unknown>);
+          if (!valid) {
+            res.status(400).json({ success: false, error: 'Invalid egg configuration', details: errors });
+            return;
+          }
+
+          const data = normalizeImageData(payload as Record<string, unknown>);
+          const existing = await prisma.images.findFirst({ where: { name: data.name } });
+          if (existing) {
+            await prisma.images.update({ where: { id: existing.id }, data });
+            res.status(200).json({ success: true, message: 'Image updated successfully', id: existing.id });
+          } else {
+            const created = await prisma.images.create({ data });
+            res.status(200).json({ success: true, message: 'Image created successfully', id: created.id });
+          }
+        } catch (error) {
+          logger.error('Error importing image from URL:', error);
+          res.status(500).json({ success: false, error: 'Failed to import egg from URL' });
+        }
+      },
+    );
+
+    router.post(
       '/admin/images/upload',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
