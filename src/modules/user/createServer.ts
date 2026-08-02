@@ -21,6 +21,25 @@ function pickAvailablePorts(allocatedPorts: number[], usedPorts: number[], count
   return picked;
 }
 
+// Serialize port assignment + DB insert per node so concurrent
+// create requests can't pick the same external port.
+const portMutexes = new Map<number, Promise<void>>();
+
+async function withNodePortLock<T>(nodeId: number, task: () => Promise<T>): Promise<T> {
+  const prev = portMutexes.get(nodeId) ?? Promise.resolve();
+  let release!: () => void;
+  const current = new Promise<void>((resolve) => { release = resolve; });
+  const tail = prev.catch(() => {}).then(() => current);
+  portMutexes.set(nodeId, tail);
+  await prev.catch(() => {});
+  try {
+    return await task();
+  } finally {
+    release();
+    if (portMutexes.get(nodeId) === tail) portMutexes.delete(nodeId);
+  }
+}
+
 async function resolveUserServerLimit(userId: number, settings: any): Promise<number> {
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) return 0;
@@ -161,12 +180,6 @@ const userCreateServerModule: Module = {
 
         const portRequirements = parseImagePortRequirements(image.portRequirements);
         const requiredPortCount = Math.max(1, portRequirements.length);
-        const existingServers = await prisma.server.findMany({ where: { nodeId: node.id } });
-        const assignedPorts = pickAvailablePorts(allocatedPorts, getUsedExternalPorts(existingServers), requiredPortCount);
-
-        if (assignedPorts.length < requiredPortCount) {
-          return res.status(503).json({ error: `No available ports on the selected node. ${requiredPortCount} port(s) required.` });
-        }
 
         let dockerImages: any[] = [];
         try {
@@ -188,34 +201,44 @@ const userCreateServerModule: Module = {
           imageVariables = [];
         }
 
-        const portsJson = serializeServerPorts(assignedPorts.map((externalPort, index) => {
-          const requirement = portRequirements[index];
-          return {
-            name: requirement?.name || `Port ${index + 1}`,
-            internalPort: requirement?.internalPort || externalPort,
-            externalPort,
-            primary: index === 0,
-          };
-        }));
+        const { assignedPorts, createdServer }: { assignedPorts: number[]; createdServer: any } = await withNodePortLock(node.id, async () => {
+          const existingServers = await prisma.server.findMany({ where: { nodeId: node.id } });
+          const picked = pickAvailablePorts(allocatedPorts, getUsedExternalPorts(existingServers), requiredPortCount);
+          if (picked.length < requiredPortCount) {
+            throw new Error(`No available ports on the selected node. ${requiredPortCount} port(s) required.`);
+          }
 
-        const createdServer = await prisma.server.create({
-          data: {
-            name: name.trim(),
-            description: description?.trim() || null,
-            ownerId: userId!,
-            nodeId: node.id,
-            imageId: image.id,
-            Ports: portsJson,
-            Memory: memory,
-            Swap: swap,
-            Cpu: cpu,
-            Storage: storage,
-            backupLimit: 5,
-            databaseLimit: 5,
-            Variables: JSON.stringify(imageVariables),
-            StartCommand: startCommand,
-            dockerImage: JSON.stringify(imageDocker),
-          },
+          const portsJson = serializeServerPorts(picked.map((externalPort, index) => {
+            const requirement = portRequirements[index];
+            return {
+              name: requirement?.name || `Port ${index + 1}`,
+              internalPort: requirement?.internalPort || externalPort,
+              externalPort,
+              primary: index === 0,
+            };
+          }));
+
+          const created = await prisma.server.create({
+            data: {
+              name: name.trim(),
+              description: description?.trim() || null,
+              ownerId: userId!,
+              nodeId: node.id,
+              imageId: image.id,
+              Ports: portsJson,
+              Memory: memory,
+              Swap: swap,
+              Cpu: cpu,
+              Storage: storage,
+              backupLimit: 5,
+              databaseLimit: 5,
+              Variables: JSON.stringify(imageVariables),
+              StartCommand: startCommand,
+              dockerImage: JSON.stringify(imageDocker),
+            },
+          });
+
+          return { assignedPorts: picked, createdServer: created };
         });
 
         queueer.addTask(async () => {
@@ -323,6 +346,10 @@ const userCreateServerModule: Module = {
 
         return res.status(200).json({ success: true, serverUUID: createdServer.UUID });
       } catch (error) {
+        if (error instanceof Error && error.message.startsWith('No available ports on the selected node.')) {
+          res.status(503).json({ error: error.message });
+          return;
+        }
         logger.error('Error creating user server:', error);
         res.status(500).json({ error: 'Failed to create server.' });
         return;
