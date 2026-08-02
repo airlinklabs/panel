@@ -65,6 +65,9 @@ importers:
       csrf-csrf:
         specifier: ^4.0.3
         version: 4.0.3
+      dompurify:
+        specifier: ^3.4.12
+        version: 3.4.12
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -1828,6 +1831,9 @@ packages:
 
   dijkstrajs@1.0.3:
     resolution: {integrity: sha512-qiSlmBq9+BCdCA/L46dw8Uy93mloxsPSbwnm5yrKn2vMPiy8KyAskTF6zuV/j5BMsmOGZDPs7KjU+mjb670kfA==}
+
+  dompurify@3.4.12:
+    resolution: {integrity: sha512-zQvGet8Z2sWbQhCmfFz/T5QWH2oBmjnqK3qvOjaqaNLrLEF912WamU+ohnTp0TCep/MFVHpdJuCZEdFOdTnEFg==}
 
   dompurify@3.4.8:
     resolution: {integrity: sha512-yb1cEmaOum7wFvOCSQxyfgVlv5D47Rc30iZWoMpbDIWTnJ6grDDQyu2KFJzB2k7u0pMuJcQ1zphH//fFnw2tjQ==}
@@ -4784,6 +4790,10 @@ snapshots:
   diff@9.0.0: {}
 
   dijkstrajs@1.0.3: {}
+
+  dompurify@3.4.12:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
 
   dompurify@3.4.8:
     optionalDependencies:

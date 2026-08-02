@@ -99,8 +99,20 @@ const adminModule: Module = {
             res.status(400).json({ success: false, error: 'Only http(s) URLs are allowed' });
             return;
           }
-          if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+          if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.hostname === '::1') {
             res.status(400).json({ success: false, error: 'Local URLs are not allowed' });
+            return;
+          }
+
+          const hostname = parsed.hostname;
+          if (
+            /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
+            /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(hostname) ||
+            /^192\.168\.\d+\.\d+$/.test(hostname) ||
+            /^169\.254\.\d+\.\d+$/.test(hostname) ||
+            /^0\.\d+\.\d+\.\d+$/.test(hostname)
+          ) {
+            res.status(400).json({ success: false, error: 'Private/internal network URLs are not allowed' });
             return;
           }
 

@@ -34,7 +34,12 @@ export async function sendMail(to: string, subject: string, html: string): Promi
 }
 
 function esc(value: string): string {
-  return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
 }
 
 function emailShell(input: { title: string; panelName: string; body: string[] }): string {
