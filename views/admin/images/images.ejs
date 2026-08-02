@@ -104,7 +104,7 @@
                 <div class="flex gap-2">
                   <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition"><%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>Edit</button></a>
                   <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Export</button></a>
-                  <button  onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="al-btn-danger">
+                  <button  onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="al-btn-danger" aria-label="Delete image <%= image.name %>">
                     <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                   </button>
                 </div>
@@ -129,7 +129,7 @@
         <p id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.newImageTitle || 'New Image' %></p>
         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.newImageDesc || 'Configure Docker images and variables after creation.' %></p>
       </div>
-      <button type="button" onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
+      <button type="button" onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition" aria-label="Close">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>

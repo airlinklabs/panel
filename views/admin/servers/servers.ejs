@@ -135,15 +135,15 @@
                 </td>
                 <td class="al-table-td">
                   <div class="flex items-center gap-1.5">
-                    <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()" title="Open console"
+                    <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()" title="Open console" aria-label="Open console"
                       class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
                       <%- icon('external-link', { size: 16, class: 'shrink-0' }) %>
                     </a>
-                    <a href="/admin/servers/edit/<%= server.id %>" onclick="event.stopPropagation()" title="Edit"
+                    <a href="/admin/servers/edit/<%= server.id %>" onclick="event.stopPropagation()" title="Edit" aria-label="Edit server"
                       class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
                       <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
                     </a>
-                    <button type="button" onclick="event.stopPropagation(); deleteServer('<%= server.id %>', '<%= server.name %>')" title="Delete"
+                    <button type="button" onclick="event.stopPropagation(); deleteServer('<%= server.id %>', '<%= server.name %>')" title="Delete" aria-label="Delete server"
                       class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);">
                       <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                     </button>
@@ -204,7 +204,7 @@
         <div id="builtinPickerSection">
           <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-start">
             <div class="flex-1">
-              <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);">Script</label>
+              <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);" for="scriptSelect">Script</label>
               <select id="scriptSelect" class="cs-native">
                 <option value="">Loading scripts...</option>
               </select>

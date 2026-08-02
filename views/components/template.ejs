@@ -281,7 +281,7 @@
 
       <!-- Theme toggle switch -->
       <div class="flex items-center shrink-0 ml-2">
-        <div id="theme-toggle-topbar" class="theme-toggle-switch" role="button" tabindex="0" aria-label="Toggle theme">
+        <div id="theme-toggle-topbar" class="theme-toggle-switch" role="button" tabindex="0" aria-label="Toggle theme" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();if(typeof toggleTheme==='function')toggleTheme();}">
           <div class="theme-toggle-knob"></div>
         </div>
       </div>

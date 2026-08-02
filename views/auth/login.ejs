@@ -106,9 +106,7 @@
   var cbCheck = document.getElementById('cbCheck');
   var accent  = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#171717';
   var accentText = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent-text').trim() || '#ffffff';
-  document.getElementById('rememberLabel').addEventListener('click', function (e) {
-    if (e.target === cbInput) return;
-    cbInput.checked = !cbInput.checked;
+  function renderCb() {
     if (cbInput.checked) {
       cbBox.style.background   = accent;
       cbBox.style.borderColor  = accent;
@@ -119,7 +117,14 @@
       cbBox.style.borderColor = '';
       cbCheck.style.display   = 'none';
     }
+  }
+  document.getElementById('rememberLabel').addEventListener('click', function (e) {
+    if (e.target === cbInput) return;
+    cbInput.checked = !cbInput.checked;
+    renderCb();
   });
+  // Keyboard toggle fires 'change', not 'click' — keep the visual in sync.
+  cbInput.addEventListener('change', renderCb);
 
   document.getElementById('loginForm').addEventListener('submit', function () {
     document.getElementById('submitBtn').classList.add('loading');

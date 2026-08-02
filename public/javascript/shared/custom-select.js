@@ -22,7 +22,7 @@
 
     const trigger = document.createElement('div');
     trigger.className = 'cs-trigger';
-    trigger.setAttribute('role', 'button');
+    trigger.setAttribute('role', 'combobox');
     trigger.setAttribute('tabindex', '0');
     trigger.setAttribute('aria-haspopup', 'listbox');
     trigger.setAttribute('aria-expanded', 'false');
@@ -30,6 +30,14 @@
     const label = document.createElement('span');
     label.className = 'cs-label';
     trigger.appendChild(label);
+
+    // The native <select> is visually hidden (display:none), so its label is
+    // not exposed to AT. Carry the field label over to the visible trigger so
+    // the combobox has an accessible name.
+    const namedLabel = document.querySelector('label[for="' + select.id + '"]');
+    if (namedLabel && namedLabel.id) trigger.setAttribute('aria-labelledby', namedLabel.id);
+    else if (namedLabel) trigger.setAttribute('aria-label', namedLabel.textContent.trim());
+    else trigger.setAttribute('aria-label', select.getAttribute('aria-label') || 'Select');
 
     const ns = 'http://www.w3.org/2000/svg';
     const arrow = document.createElementNS(ns, 'svg');
@@ -116,6 +124,7 @@
       item.classList.add('cs-active');
       options.forEach((o, i) => { if (i !== activeIndex) o.classList.remove('cs-active'); });
       dropdown.setAttribute('aria-activedescendant', item.id || '');
+      trigger.setAttribute('aria-activedescendant', item.id || '');
       item.scrollIntoView({ block: 'nearest' });
     }
 
@@ -185,6 +194,7 @@
       trigger.setAttribute('aria-expanded', 'false');
       trigger.removeAttribute('aria-activedescendant');
       activeIndex = -1;
+      trigger.focus();
       const done = function () {
         dropdown.removeAttribute('style');
         dropdown.style.display = 'none';

@@ -45,7 +45,7 @@
                     <p class="font-medium text-sm"><%= loc.name %></p>
                     <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= loc.shortCode %> · <%= loc._count.nodes %> node(s)</p>
                   </div>
-                  <button type="button" class="delete-location-btn text-red-500 hover:text-red-700 transition" data-id="<%= loc.id %>" data-name="<%= loc.name %>">
+                  <button type="button" class="delete-location-btn text-red-500 hover:text-red-700 transition" data-id="<%= loc.id %>" data-name="<%= loc.name %>" aria-label="Delete location <%= loc.name %>">
                     <%- icon('trash', { class: 'size-4', strokeWidth: 1.5 }) %>
                   </button>
                 </div>

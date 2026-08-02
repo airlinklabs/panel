@@ -98,7 +98,7 @@
             <div class="al-card-header">Node & image</div>
             <div class="p-5 space-y-4">
               <div>
-                <label class="al-label">Node</label>
+                <label class="al-label" for="nodeId">Node</label>
                 <select id="nodeId" class="hidden">
                   <option value="" disabled selected>Select a node</option>
                   <% nodes.forEach(node => { %>
@@ -109,7 +109,7 @@
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="al-label">Image</label>
+                  <label class="al-label" for="imageId">Image</label>
                   <select id="imageId" class="hidden">
                     <option value="" disabled selected>Select an image</option>
                     <% images.forEach(image => { %>
@@ -119,7 +119,7 @@
                   <div class="custom-select" data-for="imageId"></div>
                 </div>
                 <div>
-                  <label class="al-label">Docker variant</label>
+                  <label class="al-label" for="dockerImage">Docker variant</label>
                   <select id="dockerImage" class="hidden">
                     <option value="" disabled selected>Select an image first</option>
                   </select>

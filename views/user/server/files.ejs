@@ -197,7 +197,7 @@ function escJS(val) {
            style="color:var(--theme-text-strong);"
            autocomplete="off"
            spellcheck="false">
-         <button type="button" id="clearFileSearch" class="hidden p-0.5 rounded transition" style="color:var(--theme-text-muted);">
+         <button type="button" id="clearFileSearch" class="hidden p-0.5 rounded transition" aria-label="Clear search filter" style="color:var(--theme-text-muted);">
            <%- icon('x', { size: 12 }) %>
          </button>
        </div>
@@ -308,7 +308,7 @@ function escJS(val) {
           <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Move file</h2>
           <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Enter the destination path. Use / for subdirectories.</p>
         </div>
-        <button type="button" onclick="closeMoveModal()" class="p-1 rounded-lg transition" style="color:var(--theme-text-muted);">
+        <button type="button" onclick="closeMoveModal()" class="p-1 rounded-lg transition" aria-label="Close" style="color:var(--theme-text-muted);">
           <%- icon('x', { size: 16 }) %>
         </button>
       </div>
@@ -405,7 +405,7 @@ function escJS(val) {
                 <p id="selectedFileName" class="font-medium truncate" style="color:var(--theme-text-strong)"></p>
                 <p id="selectedFileSize" class="text-sm" style="color:var(--theme-text-muted)"></p>
               </div>
-              <button type="button" onclick="removeSelectedFile()" class="ml-2" style="color:var(--theme-text-muted)">
+              <button type="button" onclick="removeSelectedFile()" class="ml-2" aria-label="Remove selected file" style="color:var(--theme-text-muted)">
                 <%- icon('x', { class: 'w-5 h-5' }) %>
               </button>
             </div>
@@ -465,7 +465,7 @@ function escJS(val) {
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Rename</h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Use / to move the file into a different folder.</p>
       </div>
-      <button type="button" onclick="closeRenameModal()" class="p-1 rounded-lg transition" style="color:var(--theme-text-muted);">
+      <button type="button" onclick="closeRenameModal()" class="p-1 rounded-lg transition" aria-label="Close" style="color:var(--theme-text-muted);">
         <%- icon('x', { class: 'w-4 h-4' }) %>
       </button>
     </div>

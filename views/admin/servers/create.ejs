@@ -43,7 +43,7 @@
                 <input id="serverDescription" name="description" class="al-input" placeholder="<%= user.username %>'s server description">
               </div>
               <div>
-                <label class="al-label">
+                <label class="al-label" for="serverUser">
                   <%- icon('user', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.user %>:</label>
                 <select id="serverUser" name="ownerId" class="hidden">
@@ -54,7 +54,7 @@
                 <div class="custom-select mt-2" data-for="serverUser"></div>
               </div>
               <div>
-                <label class="al-label">
+                <label class="al-label" for="serverNode">
                   <%- icon('server', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Node %>:
                 </label>
@@ -150,7 +150,7 @@
             <h2 class="al-card-header">Startup</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label class="al-label">
+                <label class="al-label" for="serverImage">
                   <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Image %>:</label>
                 <select id="serverImage" name="imageId" class="hidden">
@@ -163,7 +163,7 @@
                 <div class="custom-select mt-2" data-for="serverImage"></div>
               </div>
               <div>
-                <label class="al-label">
+                <label class="al-label" for="dockerImage">
                   <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.DockerImage %>:</label>
                 <select id="dockerImage" name="dockerImage" class="hidden">

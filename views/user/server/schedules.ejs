@@ -71,7 +71,7 @@
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
                   <label class="relative inline-flex items-center cursor-pointer" title="<%= schedule.enabled ? 'Disable schedule' : 'Enable schedule' %>">
-                    <input type="checkbox" class="sr-only peer sched-toggle" <%= schedule.enabled ? 'checked' : '' %>>
+                    <input type="checkbox" class="sr-only peer sched-toggle" aria-label="<%= schedule.enabled ? 'Disable schedule' : 'Enable schedule' %>" <%= schedule.enabled ? 'checked' : '' %>>
                     <div class="al-toggle-track">
                       <div class="al-toggle-dot"></div>
                     </div>

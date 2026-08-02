@@ -320,7 +320,7 @@
           <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Transfer Server</h3>
           <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Move "<%= server.name %>" to another node</p>
         </div>
-        <button type="button" onclick="closeTransferModal()" class="al-btn-ghost mt-0.5 min-w-[44px] min-h-[44px] flex items-center justify-center">
+        <button type="button" onclick="closeTransferModal()" class="al-btn-ghost mt-0.5 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Close">
           <%- icon('x', { size: 20, class: 'shrink-0' }) %>
         </button>
       </div>
@@ -692,7 +692,7 @@ function generateRandomName() {
             <label class="flex items-center gap-1 text-xs shrink-0">
               <input type="checkbox" class="transfer-port-primary" data-idx="${idx}" ${port.primary ? 'checked' : ''}> Primary
             </label>
-            <button type="button" onclick="removeTransferPort(${idx})" class="al-btn-ghost p-1 shrink-0" style="color:var(--theme-danger);">
+            <button type="button" onclick="removeTransferPort(${idx})" class="al-btn-ghost p-1 shrink-0" style="color:var(--theme-danger);" aria-label="Remove port">
               <%- icon('x', { size: 14 }) %>
             </button>
           </div>
