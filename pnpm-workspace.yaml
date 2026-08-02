@@ -1,6 +1,9 @@
 packages:
   - "."
 
+overrides:
+  dompurify: "^3.4.12"
+
 allowBuilds:
   '@parcel/watcher': true
   '@prisma/engines': true
