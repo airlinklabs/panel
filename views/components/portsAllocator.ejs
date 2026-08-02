@@ -95,6 +95,28 @@
 
   function commit() {
     rows = rows.filter(function (row) { return row.name && row.internalPort && row.externalPort; });
+    rows.forEach(function (row, index) { row.primary = index === 0; });
+    cfg._lastKey = rows.map(rowKey).join(';');
+    if (cfg.onSave) cfg.onSave(rows);
+    close();
+  }
+
+  function render() {
+    rowsEl.innerHTML = '';
+    const avail = cfg.availablePorts || [];
+    const min = cfg.requirements.length;
+    const used = new Set(rows.filter(function (r) { return r.externalPort; }).map(function (r) { return String(r.externalPort); }));
+
+    if (avail.length === 0) {
+      emptyEl.classList.remove('hidden');
+      addBtn.classList.add('hidden');
+      countEl.textContent = '0 ports';
+    } else {
+      emptyEl.classList.add('hidden');
+      addBtn.classList.remove('hidden');
+      countEl.textContent = rows.length + ' port' + (rows.length === 1 ? '' : 's') + ' assigned';
+    }
+
     rows.forEach(function (row, index) {
       const el = document.createElement('div');
       el.className = 'pa-row rounded-xl border p-3';
@@ -277,6 +299,8 @@
           paHideList();
         }
       });
+
+      pair.appendChild(extWrap);
 
       el.appendChild(pair);
       el.style.setProperty('--pa-i', String(index));
