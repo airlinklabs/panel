@@ -112,7 +112,7 @@ export function registerBackupRoutes(router: Router): void {
 
         const response = await daemonRequest<{
           success: boolean;
-          backup?: { filePath: string; uuid: string; size: number };
+          backup?: { filePath: string; uuid: string; size: number; checksum?: string };
         }>({
           method: 'POST',
           path: '/container/backup',
@@ -206,6 +206,7 @@ export function registerBackupRoutes(router: Router): void {
               serverId: getParamAsString(serverId),
               filePath: filePath,
               size: BigInt(response.data.backup!.size),
+              checksum: typeof response.data.backup!.checksum === 'string' ? response.data.backup!.checksum : null,
               airlinkCloudId: airlinkCloudId,
             },
           });
@@ -349,6 +350,7 @@ export function registerBackupRoutes(router: Router): void {
           body: {
             id: getParamAsString(serverId),
             backupPath: backupPath,
+            checksum: backup.checksum ?? undefined,
           },
           timeout: 300000,
         });
@@ -531,6 +533,11 @@ export function registerBackupRoutes(router: Router): void {
           return;
         }
 
+        if (backup.locked) {
+          res.status(403).json({ error: 'This backup is locked. Unlock it before deleting.' });
+          return;
+        }
+
         if (backup.airlinkCloudId) {
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           if (settings?.airlinkCloudApiKey) {
@@ -572,6 +579,60 @@ export function registerBackupRoutes(router: Router): void {
       } catch (error) {
         logger.error('Error deleting backup:', error);
         res.status(500).json({ error: 'Failed to delete backup' });
+      }
+    },
+  );
+
+  router.patch(
+    '/server/:id/backups/:backupId/lock',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('backups'),
+    async (req: Request, res: Response) => {
+      const userId = req.session?.user?.id;
+      const serverId = req.params?.id;
+      const backupId = req.params?.backupId;
+      const { locked } = req.body as { locked?: unknown };
+
+      try {
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          res.status(404).json({ error: 'User not found' });
+          return;
+        }
+
+        const server = await prisma.server.findUnique({
+          where: { UUID: getParamAsString(serverId) },
+        });
+
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        const backup = await prisma.backup.findUnique({
+          where: { UUID: getParamAsString(backupId), serverId: getParamAsString(serverId) },
+        });
+
+        if (!backup) {
+          res.status(404).json({ error: 'Backup not found' });
+          return;
+        }
+
+        const wantLocked = locked === true || locked === 'true';
+        await prisma.backup.update({
+          where: { UUID: backup.UUID },
+          data: { locked: wantLocked },
+        });
+
+        await logActivity(req, wantLocked ? 'backup:lock' : 'backup:unlock', {
+          serverId: getParamAsString(serverId),
+          metadata: { name: backup.name, uuid: backup.UUID },
+        });
+
+        res.json({ success: true, locked: wantLocked });
+      } catch (error) {
+        logger.error('Error toggling backup lock:', error);
+        res.status(500).json({ error: 'Failed to update backup lock' });
       }
     },
   );

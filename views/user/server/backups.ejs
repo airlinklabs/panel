@@ -78,7 +78,16 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                           <div class="text-sm font-medium" style="color:var(--theme-text-strong)">
                             <%= backup.name %>
+                            <% if (backup.locked) { %>
+                              <span class="ml-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium align-middle" style="background:var(--theme-warning-bg, var(--theme-bg-secondary));color:var(--theme-warning, var(--theme-text-muted))">
+                                <%- icon('lock', { class: 'size-2.5', strokeWidth: 2 }) %>
+                                locked
+                              </span>
+                            <% } %>
                           </div>
+                          <% if (backup.checksum) { %>
+                            <div class="text-[10px] font-mono mt-0.5" style="color:var(--theme-text-muted)" title="sha256: <%= backup.checksum %>">sha256 <%= backup.checksum.slice(0, 12) %>…</div>
+                          <% } %>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                           <div class="text-sm" style="color:var(--theme-text-muted)">
@@ -109,9 +118,18 @@
                               Restore
                             </button>
                             <button type="button"
+                              onclick="toggleBackupLock('<%= backup.UUID %>', '<%= backup.name %>', <%= backup.locked ? 'true' : 'false' %>)"
+                              class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                              style="<%= backup.locked ? 'color:var(--theme-warning);background:var(--theme-warning-bg, var(--theme-bg-secondary))' : 'color:var(--theme-text-muted);background:var(--theme-bg-secondary)' %>"
+                            >
+                              <%- icon('lock', { class: 'w-3 h-3 mr-1' }) %>
+                              <%= backup.locked ? 'Unlock' : 'Lock' %>
+                            </button>
+                            <button type="button"
                               onclick="deleteBackup('<%= backup.UUID %>', '<%= backup.name %>')"
                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-                              style="color:var(--theme-danger);background:var(--theme-danger-bg)"
+                              style="<%= backup.locked ? 'opacity:40;pointer-events:none;color:var(--theme-danger);background:var(--theme-danger-bg)' : 'color:var(--theme-danger);background:var(--theme-danger-bg)' %>"
+                              <%= backup.locked ? 'disabled title="Locked backups cannot be deleted until unlocked"' : '' %>
                             >
                               <%- icon('trash-2', { class: 'w-3 h-3 mr-1' }) %>
                               Delete
@@ -361,9 +379,33 @@ function addBackupRow(backup) {
   tbody.prepend(tr);
 }
 
+// Toggle backup lock
+async function toggleBackupLock(backupId, backupName, currentlyLocked) {
+  try {
+    const response = await fetch(`/server/${serverUUID}/backups/${backupId}/lock`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ locked: !currentlyLocked }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showToast(currentlyLocked ? 'Backup unlocked.' : 'Backup locked.', 'success');
+      setTimeout(() => window.location.reload(), 600);
+    } else {
+      showToast(data.error || 'Failed to update backup lock', 'error');
+    }
+  } catch (error) {
+    console.error('Failed to toggle backup lock:', error);
+    showToast('Failed to update backup lock. Try again.', 'error');
+  }
+}
+
 // Delete backup
-function deleteBackup(backupId, backupName) {
-  showConfirmation(
+function deleteBackup(backupId, backupName) {  showConfirmation(
     'Delete Backup',
     `Are you sure you want to delete the backup "${backupName}"? This action cannot be undone.`,
     async () => {
