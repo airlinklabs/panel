@@ -199,7 +199,7 @@
 <!-- New Schedule Modal -->
 <div id="addScheduleModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center p-4" aria-hidden="true">
   <div class="absolute inset-0 bg-transparent" aria-hidden="true" onclick="closeAddScheduleModal()"></div>
-  <div id="addSchedulePanel" class="al-sheet-panel relative w-full max-w-2xl rounded-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addScheduleTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+  <div id="addSchedulePanel" class="al-sheet-panel relative w-full max-w-2xl rounded-2xl p-6 max-h-[92dvh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="addScheduleTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex items-center justify-between mb-5">
       <h3 id="addScheduleTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New schedule</h3>
       <button type="button" onclick="closeAddScheduleModal()" class="al-btn-ghost p-1.5 -mr-1.5" aria-label="Close">
@@ -225,9 +225,9 @@
       </div>
       <div id="schedCronWrap">
         <label class="al-label">Cron expression</label>
-        <input id="schedCron" type="text" class="al-input w-full font-mono" placeholder="0 0 * * * *" autocomplete="off" value="0 */6 * * *">
-        <p id="schedCronErr" class="hidden mt-1.5 text-[11px]" style="color:var(--theme-danger)">Cron must be 5 or 6 fields — <span class="font-mono">second minute hour day month weekday</span> (e.g. <span class="font-mono">0 0 * * * *</span>).</p>
-        <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Format: <span class="font-mono">second minute hour day month weekday</span> — <span id="cronPreview" class="font-medium" style="color:var(--theme-accent)">every 6 hours</span></p>
+        <input id="schedCron" type="text" class="al-input w-full font-mono" placeholder="0 0 * * * *" autocomplete="off" value="0 0 * * * *">
+        <p id="schedCronErr" class="hidden mt-1.5 text-[11px]" style="color:var(--theme-danger)">Cron must be 5 or 6 fields — <span class="font-mono">second minute hour day month weekday</span> — with values in range (seconds/minutes 0-59, hours 0-23, day 1-31, month 1-12, weekday 0-7).</p>
+        <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Format: <span class="font-mono">second minute hour day month weekday</span> — <span id="cronPreview" class="font-medium" style="color:var(--theme-accent)">every hour</span></p>
       </div>
       <div id="schedVisualWrap" class="hidden space-y-4">
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -247,7 +247,7 @@
                 <%- icon('minus', { class: 'size-3.5', strokeWidth: 2 }) %>
               </button>
               <input id="schedG<%= f.key %>" type="number" min="<%= f.min %>" max="<%= f.max %>" value="<%= f.key === 'dom' ? 1 : 0 %>" class="al-input w-full px-2 py-1.5 text-center font-mono" aria-label="<%= f.label %> value">
-              <span id="schedInt<%= f.key %>" class="sched-int hidden items-center justify-center gap-1 font-mono text-xs whitespace-nowrap" style="color:var(--theme-text)">every <b id="schedIntN<%= f.key %>" style="color:var(--theme-accent)">2</b></span>
+              <span id="schedInt<%= f.key %>" class="sched-int hidden items-center justify-center gap-1 font-mono text-xs whitespace-nowrap" style="color:var(--theme-text)">every <b id="schedIntN<%= f.key %>" class="hidden" style="color:var(--theme-accent)">2</b></span>
               <button type="button" class="sched-step" data-step-for="<%= f.key %>" data-step="1" aria-label="Increase <%= f.label.toLowerCase() %>">
                 <%- icon('plus', { class: 'size-3.5', strokeWidth: 2 }) %>
               </button>
@@ -279,7 +279,7 @@
           <%- icon('alert-triangle', { class: 'size-4 shrink-0', strokeWidth: 1.5 }) %>
           <span>This expression can't be shown visually — it uses ranges, lists, or values outside the visual editor. Edit it in Cron mode.</span>
         </div>
-        <p class="text-[11px]" style="color:var(--theme-text-muted)">Runs <span id="schedVisualDesc" class="font-medium" style="color:var(--theme-accent)">every hour</span> — cron: <span id="schedVisualCron" class="font-mono font-medium" style="color:var(--theme-accent)">0 0 * * * *</span></p>
+        <p class="text-[11px]" aria-live="polite" style="color:var(--theme-text-muted)">Runs <span id="schedVisualDesc" class="font-medium" style="color:var(--theme-accent)">every hour</span> — cron: <span id="schedVisualCron" class="font-mono font-medium" style="color:var(--theme-accent)">0 0 * * * *</span></p>
       </div>
       <div class="flex gap-2 pt-1">
         <button type="button" onclick="closeAddScheduleModal()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
@@ -288,7 +288,7 @@
         </button>
         <button type="button" id="confirmAddSchedule" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
           <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-          Create schedule
+          <span>Create schedule</span>
         </button>
       </div>
     </div>
@@ -463,6 +463,7 @@ document.getElementById('schedCron').addEventListener('input', function () {
 });
 
 const granKeys = ['sec', 'min', 'hour', 'dom'];
+const granLabels = { sec: 'Seconds', min: 'Minutes', hour: 'Hours', dom: 'Day of month' };
 const granLimits = { sec: [0, 59], min: [0, 59], hour: [0, 23], dom: [1, 31] };
 const granInterval = { sec: null, min: null, hour: null, dom: null };
 let schedDowAll = true;
@@ -530,10 +531,17 @@ function updateIntervalDisplay(key) {
   const span = document.getElementById('schedInt' + key);
   const nEl = document.getElementById('schedIntN' + key);
   const on = every.checked;
+  const label = granLabels[key];
   el.classList.toggle('hidden', on);
   span.classList.toggle('hidden', !on);
   span.classList.toggle('inline-flex', on);
-  if (on) nEl.textContent = String(granInterval[key] || 2);
+  const hasN = on && granInterval[key] !== null;
+  nEl.classList.toggle('hidden', !hasN);
+  if (hasN) nEl.textContent = String(granInterval[key]);
+  document.querySelectorAll('[data-step-for="' + key + '"]').forEach((b) => {
+    const dir = Number(b.dataset.step) > 0 ? 'Increase' : 'Decrease';
+    b.setAttribute('aria-label', on ? dir + ' every-N interval for ' + label.toLowerCase() : dir + ' ' + label.toLowerCase() + ' value');
+  });
 }
 
 function syncVisualFromCron() {
@@ -594,7 +602,12 @@ granKeys.forEach(key => {
       buildGranularCron();
     });
   });
-  el.addEventListener('change', buildGranularCron);
+  el.addEventListener('change', () => {
+    let n = parseInt(el.value, 10);
+    if (isNaN(n)) n = key === 'dom' ? 1 : 0;
+    el.value = String(Math.min(granLimits[key][1], Math.max(granLimits[key][0], n)));
+    buildGranularCron();
+  });
   el.addEventListener('input', () => { buildGranularCron(); });
   every.addEventListener('change', () => {
     if (every.checked) { granInterval[key] = null; }
@@ -650,11 +663,33 @@ async function api(url, method, body) {
   }
 }
 
-const CRON_TOKEN_RE = /^(\*|\*\/[0-9]+|[0-9]+(-[0-9]+)?)(,[0-9]+(-[0-9]+)?)*$/;
+const FIELD_BOUNDS = [[0, 59], [0, 59], [0, 23], [1, 31], [1, 12], [0, 7]];
+
+function tokenValid(tok, bounds) {
+  if (tok === '*') return true;
+  const [lo, hi] = bounds;
+  for (const item of tok.split(',')) {
+    const m = item.match(/^\*\/?([0-9]+)?$|^(\*|(\d+)(?:-(\d+))?)$/);
+    if (!m) return false;
+    if (m[1] !== undefined) {
+      const n = +m[1];
+      if (!(n >= 1 && n <= hi)) return false;
+    } else if (m[2] === '*') {
+      continue;
+    } else {
+      const a = +m[3];
+      const b = m[4] !== undefined ? +m[4] : a;
+      if (a < lo || a > hi || b < lo || b > hi || b < a) return false;
+    }
+  }
+  return true;
+}
 
 function validCron(c) {
   const parts = String(c || '').trim().split(/\s+/);
-  return (parts.length === 5 || parts.length === 6) && parts.every((t) => CRON_TOKEN_RE.test(t));
+  if (parts.length !== 5 && parts.length !== 6) return false;
+  const bounds = parts.length === 6 ? FIELD_BOUNDS : FIELD_BOUNDS.slice(1);
+  return parts.every((t, i) => tokenValid(t, bounds[i]));
 }
 
 document.getElementById('confirmAddSchedule')?.addEventListener('click', async () => {
@@ -664,21 +699,26 @@ document.getElementById('confirmAddSchedule')?.addEventListener('click', async (
   const cron = document.getElementById('schedCron').value.trim();
   if (!name) { showToast('Enter a schedule name.', 'error'); return; }
   if (!validCron(cron)) {
+    setSchedMode('cron');
     errEl.classList.remove('hidden');
     document.getElementById('schedCron').focus();
     return;
   }
   errEl.classList.add('hidden');
+  btn.setAttribute('aria-busy', 'true');
   btn.disabled = true;
   btn.classList.add('opacity-60', 'pointer-events-none');
+  btn.querySelector('span').textContent = 'Creating\u2026';
   const result = await api('/server/' + serverId + '/schedules', 'POST', { name, cron });
   if (result) {
     showToast('Schedule created.', 'success');
     closeAddScheduleModal();
     setTimeout(() => location.reload(), 900);
   } else {
+    btn.removeAttribute('aria-busy');
     btn.disabled = false;
     btn.classList.remove('opacity-60', 'pointer-events-none');
+    btn.querySelector('span').textContent = 'Create schedule';
   }
 });
 
