@@ -248,7 +248,7 @@
     function showMessage(message, type) {
       const messageContainer = document.getElementById('message-container');
       const messageElement = document.createElement('div');
-      messageElement.className = `p-4 mb-4 rounded-xl shadow-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`;
+      messageElement.className = `p-4 mb-4 rounded-xl shadow-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200 dark:bg-green-500/15 dark:text-green-400 dark:border-green-500/30' : 'bg-red-100 text-red-800 border border-red-200 dark:bg-red-500/15 dark:text-red-400 dark:border-red-500/30'}`;
       
       const flex = document.createElement('div');
       flex.className = 'flex items-center';

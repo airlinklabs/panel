@@ -121,7 +121,7 @@
               <a href="/account/2fa/setup" class="al-btn-primary text-sm inline-flex">Set up 2FA</a>
               <% } else { %>
               <div class="flex items-center gap-2 mb-3">
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-500">
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-500">
                   <%- icon('check', { class: 'w-3 h-3' }) %> Enabled
                 </span>
               </div>
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
           </button>
         </div>
-        <div class="relative bg-neutral-950 select-none overflow-hidden" style="height:340px" id="crop-stage">
+        <div class="relative bg-neutral-900 dark:bg-neutral-950 select-none overflow-hidden" style="height:340px" id="crop-stage">
           <img id="crop-img" src="${dataUrl}" draggable="false" alt="Crop preview" style="position:absolute;top:0;left:0;user-select:none;max-width:none"/>
           <div id="crop-box" style="position:absolute;border:2px solid white;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);cursor:move;box-sizing:border-box">
             <div class="crop-handle" data-dir="nw" style="position:absolute;top:-5px;left:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:nw-resize"></div>

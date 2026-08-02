@@ -304,13 +304,13 @@
       <div class="flex gap-2 mt-3">
         <button id="mobileStartButton" type="button"
           <%= server.Suspended ? 'disabled' : '' %>
-          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
+          class="al-btn-success flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
           <%- icon('play', { class: 'w-3.5 h-3.5' }) %>
           <%= req.translations.start %>
         </button>
         <button id="mobileRestartButton" type="button"
           <%= server.Suspended ? 'disabled' : '' %>
-          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
+          class="al-btn-secondary flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
           <%- icon('refresh-cw', { class: 'w-3.5 h-3.5' }) %>
           <%= req.translations.restart %>
         </button>

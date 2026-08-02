@@ -29,7 +29,7 @@
           <div class="mt-4">
             <p class="text-sm text-neutral-600 dark:text-neutral-300">API keys can be created in the <a href="/admin/apikeys" class="text-blue-600 dark:text-blue-400 hover:underline">API Keys</a> section of the admin panel.</p>
             <p class="text-sm text-neutral-600 dark:text-neutral-300 mt-2">All API requests must include an <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">Authorization</code> header with a Bearer token:</p>
-            <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+            <pre class="mt-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 p-3 rounded-md overflow-x-auto"><code>Authorization: Bearer YOUR_API_KEY</code></pre>
           </div>
 
           <div class="mt-8">
@@ -61,13 +61,13 @@
                           <% if (endpoint.requestExample) { %>
                             <div class="mt-3">
                               <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Request Body:</p>
-                              <pre class="mt-1 bg-neutral-800 text-neutral-200 p-2 rounded-md overflow-x-auto text-xs"><code><%= endpoint.requestExample %></code></pre>
+                              <pre class="mt-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 p-2 rounded-md overflow-x-auto text-xs"><code><%= endpoint.requestExample %></code></pre>
                             </div>
                           <% } %>
                           <% if (endpoint.responseExample) { %>
                             <div class="mt-3">
                               <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Response:</p>
-                              <pre class="mt-1 bg-neutral-800 text-neutral-200 p-2 rounded-md overflow-x-auto text-xs"><code><%= endpoint.responseExample %></code></pre>
+                              <pre class="mt-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 p-2 rounded-md overflow-x-auto text-xs"><code><%= endpoint.responseExample %></code></pre>
                             </div>
                           <% } %>
                         </div>
@@ -82,14 +82,14 @@
           <div class="mt-8">
             <h2 class="text-lg font-semibold leading-6 text-neutral-800 dark:text-white">Response Format</h2>
             <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">All successful responses return a JSON object with a <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">data</code> property containing the requested information.</p>
-            <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>{
+            <pre class="mt-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 p-3 rounded-md overflow-x-auto"><code>{
   "data": {
     // Response data here
   }
 }</code></pre>
 
             <p class="mt-4 text-sm text-neutral-600 dark:text-neutral-300">Error responses include an <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">error</code> property with a description of the error.</p>
-            <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>{
+            <pre class="mt-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 p-3 rounded-md overflow-x-auto"><code>{
   "error": "Error message"
 }</code></pre>
           </div>
