@@ -180,10 +180,10 @@
  %>
  <div class="px-4 sm:px-8 mt-8">
     <% sections.forEach(section => { %>
-      <div class="al-card p-6 mb-6">
-        <h2 class="al-section-title mb-4"><%= section.title %></h2>
+      <div class="al-card p-5 sm:p-6 mb-6">
+        <h2 class="al-section-title pb-3 mb-4 border-b" style="border-color:var(--theme-border)"><%= section.title %></h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <%
             const items = section.items || [];
 
@@ -203,14 +203,14 @@
               if (value.includes(':cpu')) value = value.replace(':cpu', `${server.Cpu}%`);
               if (value.includes(':disk')) value = value.replace(':disk', `${server.Storage} MB`);
           %>
-            <div>
-              <h3 class="text-sm font-medium mb-2" style="color:var(--theme-text)"><%= item.label %></h3>
+            <div class="rounded-lg px-3.5 py-3 min-w-0" style="background:var(--theme-bg-secondary)">
+              <h3 class="text-[11px] font-medium mb-1.5 truncate" style="color:var(--theme-text-muted)"><%= item.label %></h3>
               <% if (item.type === 'link') { %>
-                <a href="<%= item.url %>" class="hover:text-neutral-300 transition" style="color:var(--theme-text-muted)"><%= value %></a>
+                <a href="<%= item.url %>" class="block text-sm font-medium truncate transition hover:opacity-75" style="color:var(--theme-accent)" title="<%= value %>"><%= value %></a>
               <% } else if (item.type === 'button') { %>
-                <button type="button" onclick="<%= item.onClick %>" class="hover:text-neutral-300 transition" style="color:var(--theme-text-muted)"><%= value %></button>
+                <button type="button" onclick="<%= item.onClick %>" class="block max-w-full text-sm font-medium truncate transition hover:opacity-75" style="color:var(--theme-accent)" title="<%= value %>"><%= value %></button>
               <% } else { %>
-                <p style="color:var(--theme-text-muted)"><%= value %></p>
+                <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong)" title="<%= value %>"><%= value %></p>
               <% } %>
             </div>
           <% }); %>
