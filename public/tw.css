@@ -134,12 +134,6 @@
   .al-dot-offline { @apply inline-block w-2 h-2 rounded-full shrink-0; background: var(--theme-danger); }
   .al-dot-warning { @apply inline-block w-2 h-2 rounded-full shrink-0; background: var(--theme-warning); }
 
-  /* Live status indicator (dashboard cards) */
-  .al-live-indicator { @apply inline-flex items-center gap-1 text-[10px] font-medium shrink-0; color: var(--theme-success); }
-  .al-live-indicator .al-dot-online { @apply w-1.5 h-1.5; }
-  .al-live-indicator.is-stale { color: var(--theme-text-muted); }
-  .al-live-indicator.is-stale .al-dot-online { background: var(--theme-text-muted); }
-
   /* Skeleton */
   .al-skeleton {
     @apply rounded-lg relative overflow-hidden;
@@ -453,7 +447,10 @@ input[type="button"]:disabled {
    Every popup uses .al-sheet-overlay (fixed wrapper) + .al-sheet-panel
    (card): centered dialog on >=640px, full-width bottom sheet below.
    One shared scrim — no inline rgba() backdrops anywhere. Wrappers are
-   hidden via the `hidden` class or Animate's .open/.al-modal-overlay. */
+   hidden via the `hidden` class or Animate's .open/.al-modal-overlay.
+   Lives in @layer components so the `hidden`/`flex` display utilities
+   can toggle it. */
+@layer components {
 .al-sheet-overlay {
   @apply fixed inset-0 z-50 flex items-center justify-center;
   background: rgba(0, 0, 0, 0.5);
@@ -482,3 +479,18 @@ input[type="button"]:disabled {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
 }
+}
+
+/* Live indicator (dashboard cards) — in components layer so `hidden`
+   (utility) can actually hide it; previously its inline-flex display
+   always beat the utility and the pill showed on every card. */
+@layer components {
+  .al-live-indicator { @apply inline-flex items-center gap-1 text-[10px] font-medium shrink-0; color: var(--theme-success); }
+  .al-live-indicator .al-dot-online { @apply w-1.5 h-1.5; }
+  .al-live-indicator.is-stale { color: var(--theme-text-muted); }
+  .al-live-indicator.is-stale .al-dot-online { background: var(--theme-text-muted); }
+}
+
+/* Tables — scroll horizontally on narrow screens instead of bursting
+   the layout; width 100% when there's room. */
+.al-table { display: block; overflow-x: auto; }
