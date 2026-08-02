@@ -19,6 +19,10 @@ export interface ServerVariable {
   type: 'boolean' | 'text' | 'number';
   default: string | number | boolean;
   value: string | number | boolean;
+  rules?: string;
+  rules_field?: string;
+  rulesField?: string;
+  rulesMessage?: string;
 }
 
 export const serverPageInclude = {
