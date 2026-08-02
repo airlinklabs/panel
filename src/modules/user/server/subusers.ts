@@ -5,6 +5,7 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
+import { sendSubUserInvite } from '../../../handlers/utils/core/mailer';
 import { serverPageInclude } from './shared';
 
 const PERMISSION_LABELS: Record<string, string> = {
@@ -157,6 +158,16 @@ export function registerSubUserRoutes(router: Router): void {
         });
 
         await logActivity(req, 'subuser:create', { serverId: String(server.UUID), metadata: { targetUserId: target.id } });
+
+        if (target.email) {
+          await sendSubUserInvite({
+            to: target.email,
+            panelName: 'Airlink',
+            serverName: server.name,
+            inviteUrl: `${process.env.PANEL_URL ?? ''}/server/${server.UUID}`,
+          });
+        }
+
         res.json({ success: true, message: `${target.username || target.email} added as a subuser.` });
         return;
       } catch (error) {

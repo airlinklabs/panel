@@ -4,7 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { queueer } from '../../handlers/queueer';
-import { getParamAsNumber } from '../../utils/typeHelpers';
+import { getParamAsNumber, getParamAsString } from '../../utils/typeHelpers';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import {
   getUsedExternalPorts,
@@ -22,6 +22,7 @@ import {
   withNodePortLock,
 } from '../../handlers/utils/server/allocations';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
+import { sendServerSuspended } from '../../handlers/utils/core/mailer';
 
 
 const adminModule: Module = {
@@ -849,6 +850,19 @@ let minPorts = 0;
 
           logger.info(`Server ${serverId} suspended by user ${userId}`);
           await logActivity(req, 'server:suspend', { serverId: String(server.UUID), metadata: { name: server.name } });
+
+const owner = server.ownerId
+            ? await prisma.users.findUnique({ where: { id: Number(server.ownerId) }, select: { email: true } })
+            : null;
+          if (owner?.email) {
+            await sendServerSuspended({
+              to: owner.email,
+              panelName: 'Airlink',
+              serverName: server.name,
+              panelUrl: process.env.PANEL_URL ?? '',
+            });
+          }
+
           res.json({ success: true, message: 'Server suspended' });
         } catch (error: unknown) {
           logger.error('Error suspending server:', error);
