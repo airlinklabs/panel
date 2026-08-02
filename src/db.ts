@@ -2,6 +2,8 @@ import { PrismaClient } from './generated/prisma/client';
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import fs from 'fs';
 import path from 'path';
+import Database from 'better-sqlite3';
+import logger from './handlers/logger';
 
 // Load .env early so DATABASE_URL is available when the adapter is created.
 const envPath = path.resolve(process.cwd(), '.env');
@@ -38,7 +40,24 @@ function resolveDbUrl(raw: string): string {
 const rawUrl = process.env.DATABASE_URL || 'file:./storage/dev.db';
 const resolvedUrl = resolveDbUrl(rawUrl);
 
-const adapter = new PrismaBetterSqlite3({ url: resolvedUrl });
+// Configure the SQLite file once so every future connection inherits it:
+// WAL journal mode (pairs with the busy timeout so concurrent reads/writes
+// don't throw SQLITE_BUSY) and NORMAL synchronous for a good durability vs.
+// latency trade-off. journal_mode persists in the DB file itself.
+try {
+  const dbPath = resolvedUrl.slice('file:'.length);
+  const setup = new Database(dbPath, { fileMustExist: false });
+  setup.pragma('journal_mode = WAL');
+  setup.pragma('synchronous = NORMAL');
+  setup.close();
+} catch (error) {
+    // Defer to the adapter if the file isn't reachable yet.
+    logger.warn('Could not initialise SQLite journal mode.', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+const adapter = new PrismaBetterSqlite3({ url: resolvedUrl, timeout: 5000 });
 const prisma = new PrismaClient({ adapter });
 
 export default prisma;
