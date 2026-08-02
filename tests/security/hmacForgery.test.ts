@@ -10,7 +10,7 @@ function sign(key: string, method: string, path: string, body: string, ts: numbe
 }
 
 function timingSafeEqual(a: Buffer, b: Buffer): boolean {
-  if (a.length !== b.length) return false;
+  if (a.length !== b.length) {return false;}
   return crypto.timingSafeEqual(a, b);
 }
 

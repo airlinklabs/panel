@@ -83,7 +83,7 @@ describe('assertNodeCapacity', () => {
 
   it('skips excluded server from calculation', async () => {
     mockPrisma.server.findMany.mockImplementation(({ where }: any) => {
-      if (where?.NOT?.UUID === 'exclude-me') return Promise.resolve([]);
+      if (where?.NOT?.UUID === 'exclude-me') {return Promise.resolve([]);}
       return Promise.resolve([{ Memory: 4096, Cpu: 100, Storage: 51200 }]);
     });
 

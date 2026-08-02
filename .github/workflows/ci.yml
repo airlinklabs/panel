@@ -8,8 +8,18 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep ci --config .semgrep.yml --error --verbose
+
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest

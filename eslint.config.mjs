@@ -3,26 +3,32 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
-// Default ESLint and TypeScript ESLint configs
 export default tseslint.config(
   eslint.configs.recommended,
   tseslint.configs.recommended,
+  tseslint.configs.strict,
+  tseslint.configs.stylistic,
   {
     rules: {
-      // Relax some strict rules to make it less strict
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-unused-expressions': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn'], // Warn about unused vars instead of error
-      'no-console': 'warn', // Allow console logs, just give a warning
-      'no-debugger': 'warn', // Allow debugger, just give a warning
-      '@typescript-eslint/no-explicit-any': 'off',
-      'eqeqeq': 'off', // Allow loose equality comparisons (== instead of ===)
-      'curly': 'off', // Allow omitting curly braces for single-line blocks
-      'semi': ['warn', 'always'], // Warn about missing semicolons
-      'quotes': ['warn', 'single'], // Warn about using single quotes (can also allow double)
-      'indent': ['warn', 2], // Warn if indentation is not 2 spaces
-      'prefer-const': 'warn', // Warn if a variable is not `const` when possible
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-require-imports': 'off',
+      'no-console': 'warn',
+      'no-debugger': 'error',
+      'eqeqeq': ['error', 'always'],
+      'curly': ['error', 'all'],
+      'semi': ['error', 'always'],
+      'quotes': ['warn', 'single'],
+      'indent': ['warn', 2],
+      'prefer-const': 'error',
+      'no-var': 'error',
+      'object-shorthand': 'error',
+      'prefer-template': 'warn',
+      'no-throw-literal': 'error',
+      'no-return-await': 'warn',
+      '@typescript-eslint/consistent-type-imports': 'warn',
+      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      '@typescript-eslint/no-dynamic-delete': 'error',
     },
     languageOptions: {
       globals: {

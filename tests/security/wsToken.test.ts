@@ -33,21 +33,22 @@ function issueWsToken(serverId: string, userId: number): string {
 }
 
 function verifyWsToken(token: string | null | undefined): { serverId: string; userId: number } | null {
-  if (!token || typeof token !== 'string') return null;
+  if (!token || typeof token !== 'string') {return null;}
   const parts = token.split('.');
-  if (parts.length !== 2) return null;
-
-  const [payload, sig] = [parts[0]!, parts[1]!];
+  if (parts.length !== 2) {return null;}
+  const payload = parts[0];
+  const sig = parts[1];
+  if (!payload || !sig) {return null;}
   const expected = crypto.createHmac('sha256', secret()).update(payload).digest('base64url');
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
-  if (a.length !== b.length) return null;
-  if (!crypto.timingSafeEqual(a, b)) return null;
+  if (a.length !== b.length) {return null;}
+  if (!crypto.timingSafeEqual(a, b)) {return null;}
 
   try {
     const decoded = JSON.parse(b64urlDecode(payload).toString('utf8'));
-    if (decoded.v !== VERSION || typeof decoded.srv !== 'string' || typeof decoded.usr !== 'number') return null;
-    if (typeof decoded.exp !== 'number' || decoded.exp < Date.now()) return null;
+    if (decoded.v !== VERSION || typeof decoded.srv !== 'string' || typeof decoded.usr !== 'number') {return null;}
+    if (typeof decoded.exp !== 'number' || decoded.exp < Date.now()) {return null;}
     return { serverId: decoded.srv, userId: decoded.usr };
   } catch {
     return null;

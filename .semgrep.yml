@@ -1,0 +1,24 @@
+rules:
+  # OWASP Top 10
+  - p/owasp-top-ten
+
+  # TypeScript best practices
+  - p/typescript
+
+  # Node.js security
+  - p/node
+
+  # Express.js security
+  - p/express
+
+  # Security audit (r2c)
+  - p/security-audit
+
+  # Secrets detection
+  - p/secrets
+
+  # React (for EJS/view templates)
+  - p/react
+
+  # Default recommended
+  - p/default
