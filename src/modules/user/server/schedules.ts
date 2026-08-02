@@ -33,13 +33,16 @@ function parsePayload(raw: string): Record<string, unknown> {
   }
 }
 
-async function loadOwnedServer(serverId: string, userId: number) {
-  return prisma.server
-    .findUnique({
-      where: { UUID: getParamAsString(serverId) },
-      include: serverPageInclude,
-    })
-    .then((server) => (server && server.ownerId === userId ? server : null));
+async function loadServerForUser(serverId: string, userId: number, req: Request) {
+  const server = await prisma.server.findUnique({
+    where: { UUID: getParamAsString(serverId) },
+    include: serverPageInclude,
+  });
+  if (!server) return null;
+  if (server.ownerId === userId || (req.session?.user?.isAdmin ?? false)) return server;
+  const subUser = (req as any).subUser as { permissions?: string | null } | undefined;
+  if (subUser) return server;
+  return null;
 }
 
 export function registerScheduleRoutes(router: Router): void {
@@ -59,7 +62,7 @@ export function registerScheduleRoutes(router: Router): void {
           return;
         }
 
-        const server = await loadOwnedServer(String(serverId), user.id);
+        const server = await loadServerForUser(String(serverId), user.id, req);
         if (!server) {
           res.status(403).json({ error: 'Server not found or access denied.' });
           return;
@@ -127,7 +130,7 @@ export function registerScheduleRoutes(router: Router): void {
           return;
         }
 
-        const server = await loadOwnedServer(String(serverId), user.id);
+        const server = await loadServerForUser(String(serverId), user.id, req);
         if (!server) {
           res.status(403).json({ error: 'Server not found or access denied.' });
           return;
@@ -173,7 +176,7 @@ export function registerScheduleRoutes(router: Router): void {
           return;
         }
 
-        const server = await loadOwnedServer(String(serverId), user.id);
+        const server = await loadServerForUser(String(serverId), user.id, req);
         if (!server) {
           res.status(403).json({ error: 'Server not found or access denied.' });
           return;
@@ -226,7 +229,7 @@ export function registerScheduleRoutes(router: Router): void {
           return;
         }
 
-        const server = await loadOwnedServer(String(serverId), user.id);
+        const server = await loadServerForUser(String(serverId), user.id, req);
         if (!server) {
           res.status(403).json({ error: 'Server not found or access denied.' });
           return;
@@ -292,7 +295,7 @@ export function registerScheduleRoutes(router: Router): void {
           return;
         }
 
-        const server = await loadOwnedServer(String(serverId), user.id);
+        const server = await loadServerForUser(String(serverId), user.id, req);
         if (!server) {
           res.status(403).json({ error: 'Server not found or access denied.' });
           return;
@@ -348,7 +351,7 @@ export function registerScheduleRoutes(router: Router): void {
           return;
         }
 
-        const server = await loadOwnedServer(String(serverId), user.id);
+        const server = await loadServerForUser(String(serverId), user.id, req);
         if (!server) {
           res.status(403).json({ error: 'Server not found or access denied.' });
           return;
@@ -401,7 +404,7 @@ export function registerScheduleRoutes(router: Router): void {
           return;
         }
 
-        const server = await loadOwnedServer(String(serverId), user.id);
+        const server = await loadServerForUser(String(serverId), user.id, req);
         if (!server) {
           res.status(403).json({ error: 'Server not found or access denied.' });
           return;
