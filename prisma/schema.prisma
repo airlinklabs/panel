@@ -91,6 +91,7 @@ model Server {
   schedules        Schedule[]
   databases        ServerDatabase[]
   activityLogs     ActivityLog[]
+  allocations      Allocation[]
 }
 
 model DatabaseHost {
@@ -165,6 +166,21 @@ model Images {
   servers         Server[]
 }
 
+model Allocation {
+  id        Int      @id @default(autoincrement())
+  nodeId    Int
+  ip        String   @default("")
+  port      Int
+  serverId  String?  // null = available, else claimed by a server
+  createdAt DateTime @default(now())
+
+  node   Node    @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  server Server? @relation(fields: [serverId], references: [UUID], onDelete: SetNull)
+
+  @@unique([nodeId, ip, port])
+  @@index([nodeId, serverId])
+}
+
 model Node {
   id                  Int        @id @default(autoincrement())
   name                String
@@ -184,6 +200,7 @@ model Node {
   location            Location?  @relation(fields: [locationId], references: [id])
   servers             Server[]
   databaseHosts       DatabaseHost[]
+  allocations         Allocation[]
 }
 
 model Location {

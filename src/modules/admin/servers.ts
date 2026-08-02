@@ -15,6 +15,12 @@ import {
   validatePortAssignments,
 } from '../../handlers/utils/server/ports';
 import { assertNodeCapacity } from '../../handlers/utils/server/resourceCheck';
+import {
+  claimNodePorts,
+  getNodePortPool,
+  releaseServerAllocations,
+  withNodePortLock,
+} from '../../handlers/utils/server/allocations';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
 
 
@@ -180,13 +186,11 @@ const adminModule: Module = {
 
           const submittedPorts = normalizeServerPorts(ports);
           const minPorts = parseImagePortRequirements(selectedImage.portRequirements).length;
-          const allocatedPorts = server.nodeId === parseInt(nodeId)
-            ? JSON.parse(server.node.allocatedPorts || '[]')
-            : JSON.parse((await prisma.node.findUnique({ where: { id: parseInt(nodeId) } }))?.allocatedPorts || '[]');
+          const pool = await getNodePortPool(parseInt(nodeId));
           const existingServers = await prisma.server.findMany({
             where: { nodeId: parseInt(nodeId), NOT: { id: serverId } },
           });
-          const portError = validatePortAssignments(submittedPorts, allocatedPorts, getUsedExternalPorts(existingServers), minPorts);
+          const portError = validatePortAssignments(submittedPorts, pool, getUsedExternalPorts(existingServers), minPorts);
           if (portError) {
             res.status(400).json({ error: portError });
             return;
@@ -233,6 +237,17 @@ const adminModule: Module = {
 
           // Update allowStartupEdit field using raw SQL
           await prisma.$executeRaw`UPDATE "Server" SET "allowStartupEdit" = ${allowStartupEdit === 'true'} WHERE "id" = ${serverId}`;
+
+          // Reconcile port claims: if the node changed, release old claims, then
+          // claim the server's new ports (idempotent when nothing changed).
+          try {
+            if (server.nodeId !== parseInt(nodeId)) {
+              await releaseServerAllocations(server.UUID);
+            }
+            await claimNodePorts(parseInt(nodeId), submittedPorts.map((p) => p.externalPort), server.UUID);
+          } catch (err) {
+            logger.error('Error syncing allocation claims:', err);
+          }
 
           // If server is being suspended, stop it
           if (suspensionChanged && newSuspendedState) {
@@ -341,58 +356,50 @@ const adminModule: Module = {
         }
 
         // Validate that the selected port is allocated to the node and not already in use
-        try {
-          const node = await prisma.node.findUnique({
-            where: { id: parseInt(nodeId) }
-          });
-
-          if (!node) {
-            res.status(400).send('Selected node not found');
-            return;
-          }
-
-          let allocatedPorts = [];
+let minPorts = 0;
           try {
-            if (node.allocatedPorts) {
-              allocatedPorts = JSON.parse(node.allocatedPorts);
+            const node = await prisma.node.findUnique({
+              where: { id: parseInt(nodeId) }
+            });
+
+            if (!node) {
+              res.status(400).send('Selected node not found');
+              return;
             }
+
+            const pool = await getNodePortPool(parseInt(nodeId));
+
+            const existingServers = await prisma.server.findMany({
+              where: {
+                nodeId: parseInt(nodeId)
+              }
+            });
+
+            const image = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
+            if (!image) {
+              res.status(400).send('Image not found');
+              return;
+            }
+            const submittedPorts = ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`);
+            minPorts = parseImagePortRequirements(image.portRequirements).length;
+            const portError = validatePortAssignments(submittedPorts, pool, getUsedExternalPorts(existingServers), minPorts);
+            if (portError) {
+              res.status(400).send(portError);
+              return;
+            }
+
+            await assertNodeCapacity(
+              node,
+              parseInt(Memory) || 1024,
+              parseInt(Cpu) || 100,
+              parseInt(Storage) || 20480,
+            );
           } catch (error) {
-            logger.error('Error parsing allocated ports:', error);
-            res.status(500).send('Error validating port allocation');
+            const message = error instanceof Error ? error.message : 'Error validating port allocation';
+            logger.error('Error validating server resources:', error);
+            res.status(400).send(message);
             return;
           }
-
-          const existingServers = await prisma.server.findMany({
-            where: {
-              nodeId: parseInt(nodeId)
-            }
-          });
-
-          const image = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
-          if (!image) {
-            res.status(400).send('Image not found');
-            return;
-          }
-          const submittedPorts = ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`);
-          const minPorts = parseImagePortRequirements(image.portRequirements).length;
-          const portError = validatePortAssignments(submittedPorts, allocatedPorts, getUsedExternalPorts(existingServers), minPorts);
-          if (portError) {
-            res.status(400).send(portError);
-            return;
-          }
-
-          await assertNodeCapacity(
-            node,
-            parseInt(Memory) || 1024,
-            parseInt(Cpu) || 100,
-            parseInt(Storage) || 20480,
-          );
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Error validating port allocation';
-          logger.error('Error validating server resources:', error);
-          res.status(400).send(message);
-          return;
-        }
 
         const Port = serializeServerPorts(ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`));
 
@@ -459,28 +466,52 @@ const adminModule: Module = {
             return { ...imgVar, value: submitted?.value ?? imgVar.default_value ?? '' };
           });
 
-          // Create server
-          const createdServer = await prisma.server.create({
-            data: {
-              name,
-              description,
-              ownerId: userId,
-              nodeId: parseInt(nodeId),
-              imageId: parseInt(imageId),
-              Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
-              Memory: (parseInt(Memory) || 1024),
-              Swap: Swap !== undefined && Swap !== '' ? parseInt(Swap) || 0 : 0,
-              Cpu: parseInt(Cpu) || 100,
-              databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : 5,
-              Storage: parseInt(Storage) || 20480,
-              Variables: JSON.stringify(mergedVariables),
-              StartCommand,
-              dockerImage: JSON.stringify(imageDocker),
-            },
-          });
+          // Create server — under a per-node lock so the port pool doesn't race
+          // with other concurrent creates on the same node.
+          const submittedExternal = (ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`))
+            .map((p) => p.externalPort);
 
-          // Update allowStartupEdit field using raw SQL
-          await prisma.$executeRaw`UPDATE "Server" SET "allowStartupEdit" = ${allowStartupEdit === 'true'} WHERE "id" = ${createdServer.id}`;
+          let createdServer;
+          try {
+            createdServer = await withNodePortLock(parseInt(nodeId), async () => {
+              const livePool = await getNodePortPool(parseInt(nodeId));
+              const liveServers = await prisma.server.findMany({ where: { nodeId: parseInt(nodeId) } });
+              const recheck = validatePortAssignments(
+                ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`),
+                livePool,
+                getUsedExternalPorts(liveServers),
+                minPorts,
+              );
+              if (recheck) throw new Error(recheck);
+
+              const created = await prisma.server.create({
+                data: {
+                  name,
+                  description,
+                  ownerId: userId,
+                  nodeId: parseInt(nodeId),
+                  imageId: parseInt(imageId),
+                  Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
+                  Memory: (parseInt(Memory) || 1024),
+                  Swap: Swap !== undefined && Swap !== '' ? parseInt(Swap) || 0 : 0,
+                  Cpu: parseInt(Cpu) || 100,
+                  databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : 5,
+                  Storage: parseInt(Storage) || 20480,
+                  Variables: JSON.stringify(mergedVariables),
+                  StartCommand,
+                  dockerImage: JSON.stringify(imageDocker),
+                },
+              });
+
+              await prisma.$executeRaw`UPDATE "Server" SET "allowStartupEdit" = ${allowStartupEdit === 'true'} WHERE "id" = ${created.id}`;
+              await claimNodePorts(parseInt(nodeId), submittedExternal, created.UUID).catch(() => {});
+              return created;
+            });
+          } catch (error) {
+            logger.error('Error creating server:', error);
+            res.status(400).send(error instanceof Error ? error.message : 'Failed to create server.');
+            return;
+          }
 
           queueer.addTask(async () => {
             const servers = await prisma.server.findMany({
@@ -750,6 +781,7 @@ const adminModule: Module = {
               });
               await tx.server.delete({ where: { id: serverId } });
             });
+            await releaseServerAllocations(server.UUID).catch(() => {});
 
             logger.info(`Server ${serverId} successfully deleted`);
             await logActivity(req, 'server:delete', { serverId: String(server.UUID), metadata: { name: server.name, nodeId: server.nodeId } });

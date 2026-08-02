@@ -398,6 +398,7 @@ export type ServerWhereInput = {
   schedules?: Prisma.ScheduleListRelationFilter
   databases?: Prisma.ServerDatabaseListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
+  allocations?: Prisma.AllocationListRelationFilter
 }
 
 export type ServerOrderByWithRelationInput = {
@@ -433,6 +434,7 @@ export type ServerOrderByWithRelationInput = {
   schedules?: Prisma.ScheduleOrderByRelationAggregateInput
   databases?: Prisma.ServerDatabaseOrderByRelationAggregateInput
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
+  allocations?: Prisma.AllocationOrderByRelationAggregateInput
 }
 
 export type ServerWhereUniqueInput = Prisma.AtLeast<{
@@ -471,6 +473,7 @@ export type ServerWhereUniqueInput = Prisma.AtLeast<{
   schedules?: Prisma.ScheduleListRelationFilter
   databases?: Prisma.ServerDatabaseListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
+  allocations?: Prisma.AllocationListRelationFilter
 }, "id" | "UUID">
 
 export type ServerOrderByWithAggregationInput = {
@@ -560,6 +563,7 @@ export type ServerCreateInput = {
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateInput = {
@@ -592,6 +596,7 @@ export type ServerUncheckedCreateInput = {
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerUpdateInput = {
@@ -623,6 +628,7 @@ export type ServerUpdateInput = {
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateInput = {
@@ -655,6 +661,7 @@ export type ServerUncheckedUpdateInput = {
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateManyInput = {
@@ -961,6 +968,22 @@ export type ServerUncheckedUpdateManyWithoutImageNestedInput = {
   deleteMany?: Prisma.ServerScalarWhereInput | Prisma.ServerScalarWhereInput[]
 }
 
+export type ServerCreateNestedOneWithoutAllocationsInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutAllocationsInput, Prisma.ServerUncheckedCreateWithoutAllocationsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutAllocationsInput
+  connect?: Prisma.ServerWhereUniqueInput
+}
+
+export type ServerUpdateOneWithoutAllocationsNestedInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutAllocationsInput, Prisma.ServerUncheckedCreateWithoutAllocationsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutAllocationsInput
+  upsert?: Prisma.ServerUpsertWithoutAllocationsInput
+  disconnect?: Prisma.ServerWhereInput | boolean
+  delete?: Prisma.ServerWhereInput | boolean
+  connect?: Prisma.ServerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ServerUpdateToOneWithWhereWithoutAllocationsInput, Prisma.ServerUpdateWithoutAllocationsInput>, Prisma.ServerUncheckedUpdateWithoutAllocationsInput>
+}
+
 export type ServerCreateNestedManyWithoutNodeInput = {
   create?: Prisma.XOR<Prisma.ServerCreateWithoutNodeInput, Prisma.ServerUncheckedCreateWithoutNodeInput> | Prisma.ServerCreateWithoutNodeInput[] | Prisma.ServerUncheckedCreateWithoutNodeInput[]
   connectOrCreate?: Prisma.ServerCreateOrConnectWithoutNodeInput | Prisma.ServerCreateOrConnectWithoutNodeInput[]
@@ -1103,6 +1126,7 @@ export type ServerCreateWithoutOwnerInput = {
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutOwnerInput = {
@@ -1134,6 +1158,7 @@ export type ServerUncheckedCreateWithoutOwnerInput = {
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutOwnerInput = {
@@ -1217,6 +1242,7 @@ export type ServerCreateWithoutDatabasesInput = {
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutDatabasesInput = {
@@ -1248,6 +1274,7 @@ export type ServerUncheckedCreateWithoutDatabasesInput = {
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutDatabasesInput = {
@@ -1294,6 +1321,7 @@ export type ServerUpdateWithoutDatabasesInput = {
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutDatabasesInput = {
@@ -1325,6 +1353,7 @@ export type ServerUncheckedUpdateWithoutDatabasesInput = {
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutSchedulesInput = {
@@ -1355,6 +1384,7 @@ export type ServerCreateWithoutSchedulesInput = {
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutSchedulesInput = {
@@ -1386,6 +1416,7 @@ export type ServerUncheckedCreateWithoutSchedulesInput = {
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutSchedulesInput = {
@@ -1432,6 +1463,7 @@ export type ServerUpdateWithoutSchedulesInput = {
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutSchedulesInput = {
@@ -1463,6 +1495,7 @@ export type ServerUncheckedUpdateWithoutSchedulesInput = {
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutImageInput = {
@@ -1493,6 +1526,7 @@ export type ServerCreateWithoutImageInput = {
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutImageInput = {
@@ -1524,6 +1558,7 @@ export type ServerUncheckedCreateWithoutImageInput = {
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutImageInput = {
@@ -1549,6 +1584,148 @@ export type ServerUpdateWithWhereUniqueWithoutImageInput = {
 export type ServerUpdateManyWithWhereWithoutImageInput = {
   where: Prisma.ServerScalarWhereInput
   data: Prisma.XOR<Prisma.ServerUpdateManyMutationInput, Prisma.ServerUncheckedUpdateManyWithoutImageInput>
+}
+
+export type ServerCreateWithoutAllocationsInput = {
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Swap?: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  backupLimit?: number
+  databaseLimit?: number
+  sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
+  node: Prisma.NodeCreateNestedOneWithoutServersInput
+  owner: Prisma.UsersCreateNestedOneWithoutServersInput
+  image: Prisma.ImagesCreateNestedOneWithoutServersInput
+  backups?: Prisma.BackupCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
+  schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
+  databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+}
+
+export type ServerUncheckedCreateWithoutAllocationsInput = {
+  id?: number
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Swap?: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  backupLimit?: number
+  databaseLimit?: number
+  ownerId: number
+  nodeId: number
+  imageId: number
+  sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
+  backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
+  schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
+  databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+}
+
+export type ServerCreateOrConnectWithoutAllocationsInput = {
+  where: Prisma.ServerWhereUniqueInput
+  create: Prisma.XOR<Prisma.ServerCreateWithoutAllocationsInput, Prisma.ServerUncheckedCreateWithoutAllocationsInput>
+}
+
+export type ServerUpsertWithoutAllocationsInput = {
+  update: Prisma.XOR<Prisma.ServerUpdateWithoutAllocationsInput, Prisma.ServerUncheckedUpdateWithoutAllocationsInput>
+  create: Prisma.XOR<Prisma.ServerCreateWithoutAllocationsInput, Prisma.ServerUncheckedCreateWithoutAllocationsInput>
+  where?: Prisma.ServerWhereInput
+}
+
+export type ServerUpdateToOneWithWhereWithoutAllocationsInput = {
+  where?: Prisma.ServerWhereInput
+  data: Prisma.XOR<Prisma.ServerUpdateWithoutAllocationsInput, Prisma.ServerUncheckedUpdateWithoutAllocationsInput>
+}
+
+export type ServerUpdateWithoutAllocationsInput = {
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
+  node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
+  owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
+  image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
+  backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
+  schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
+  databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+}
+
+export type ServerUncheckedUpdateWithoutAllocationsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Swap?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  ownerId?: Prisma.IntFieldUpdateOperationsInput | number
+  nodeId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageId?: Prisma.IntFieldUpdateOperationsInput | number
+  sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
+  backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
+  schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
+  databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutNodeInput = {
@@ -1579,6 +1756,7 @@ export type ServerCreateWithoutNodeInput = {
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutNodeInput = {
@@ -1610,6 +1788,7 @@ export type ServerUncheckedCreateWithoutNodeInput = {
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutNodeInput = {
@@ -1665,6 +1844,7 @@ export type ServerCreateWithoutFolderInput = {
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutFolderInput = {
@@ -1696,6 +1876,7 @@ export type ServerUncheckedCreateWithoutFolderInput = {
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutFolderInput = {
@@ -1742,6 +1923,7 @@ export type ServerUpdateWithoutFolderInput = {
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutFolderInput = {
@@ -1773,6 +1955,7 @@ export type ServerUncheckedUpdateWithoutFolderInput = {
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutBackupsInput = {
@@ -1803,6 +1986,7 @@ export type ServerCreateWithoutBackupsInput = {
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutBackupsInput = {
@@ -1834,6 +2018,7 @@ export type ServerUncheckedCreateWithoutBackupsInput = {
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutBackupsInput = {
@@ -1880,6 +2065,7 @@ export type ServerUpdateWithoutBackupsInput = {
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutBackupsInput = {
@@ -1911,6 +2097,7 @@ export type ServerUncheckedUpdateWithoutBackupsInput = {
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutSftpCredentialInput = {
@@ -1941,6 +2128,7 @@ export type ServerCreateWithoutSftpCredentialInput = {
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutSftpCredentialInput = {
@@ -1972,6 +2160,7 @@ export type ServerUncheckedCreateWithoutSftpCredentialInput = {
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutSftpCredentialInput = {
@@ -2018,6 +2207,7 @@ export type ServerUpdateWithoutSftpCredentialInput = {
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutSftpCredentialInput = {
@@ -2049,6 +2239,7 @@ export type ServerUncheckedUpdateWithoutSftpCredentialInput = {
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutSubUsersInput = {
@@ -2079,6 +2270,7 @@ export type ServerCreateWithoutSubUsersInput = {
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutSubUsersInput = {
@@ -2110,6 +2302,7 @@ export type ServerUncheckedCreateWithoutSubUsersInput = {
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutSubUsersInput = {
@@ -2156,6 +2349,7 @@ export type ServerUpdateWithoutSubUsersInput = {
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutSubUsersInput = {
@@ -2187,6 +2381,7 @@ export type ServerUncheckedUpdateWithoutSubUsersInput = {
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutActivityLogsInput = {
@@ -2217,6 +2412,7 @@ export type ServerCreateWithoutActivityLogsInput = {
   subUsers?: Prisma.SubUserCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutActivityLogsInput = {
@@ -2248,6 +2444,7 @@ export type ServerUncheckedCreateWithoutActivityLogsInput = {
   subUsers?: Prisma.SubUserUncheckedCreateNestedManyWithoutServerInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutServerInput
   databases?: Prisma.ServerDatabaseUncheckedCreateNestedManyWithoutServerInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutActivityLogsInput = {
@@ -2294,6 +2491,7 @@ export type ServerUpdateWithoutActivityLogsInput = {
   subUsers?: Prisma.SubUserUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutActivityLogsInput = {
@@ -2325,6 +2523,7 @@ export type ServerUncheckedUpdateWithoutActivityLogsInput = {
   subUsers?: Prisma.SubUserUncheckedUpdateManyWithoutServerNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateManyOwnerInput = {
@@ -2379,6 +2578,7 @@ export type ServerUpdateWithoutOwnerInput = {
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutOwnerInput = {
@@ -2410,6 +2610,7 @@ export type ServerUncheckedUpdateWithoutOwnerInput = {
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateManyWithoutOwnerInput = {
@@ -2488,6 +2689,7 @@ export type ServerUpdateWithoutImageInput = {
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutImageInput = {
@@ -2519,6 +2721,7 @@ export type ServerUncheckedUpdateWithoutImageInput = {
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateManyWithoutImageInput = {
@@ -2597,6 +2800,7 @@ export type ServerUpdateWithoutNodeInput = {
   schedules?: Prisma.ScheduleUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutNodeInput = {
@@ -2628,6 +2832,7 @@ export type ServerUncheckedUpdateWithoutNodeInput = {
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutServerNestedInput
   databases?: Prisma.ServerDatabaseUncheckedUpdateManyWithoutServerNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateManyWithoutNodeInput = {
@@ -2665,6 +2870,7 @@ export type ServerCountOutputType = {
   schedules: number
   databases: number
   activityLogs: number
+  allocations: number
 }
 
 export type ServerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2673,6 +2879,7 @@ export type ServerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   schedules?: boolean | ServerCountOutputTypeCountSchedulesArgs
   databases?: boolean | ServerCountOutputTypeCountDatabasesArgs
   activityLogs?: boolean | ServerCountOutputTypeCountActivityLogsArgs
+  allocations?: boolean | ServerCountOutputTypeCountAllocationsArgs
 }
 
 /**
@@ -2720,6 +2927,13 @@ export type ServerCountOutputTypeCountActivityLogsArgs<ExtArgs extends runtime.T
   where?: Prisma.ActivityLogWhereInput
 }
 
+/**
+ * ServerCountOutputType without action
+ */
+export type ServerCountOutputTypeCountAllocationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AllocationWhereInput
+}
+
 
 export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2754,6 +2968,7 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   schedules?: boolean | Prisma.Server$schedulesArgs<ExtArgs>
   databases?: boolean | Prisma.Server$databasesArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Server$activityLogsArgs<ExtArgs>
+  allocations?: boolean | Prisma.Server$allocationsArgs<ExtArgs>
   _count?: boolean | Prisma.ServerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["server"]>
 
@@ -2850,6 +3065,7 @@ export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   schedules?: boolean | Prisma.Server$schedulesArgs<ExtArgs>
   databases?: boolean | Prisma.Server$databasesArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Server$activityLogsArgs<ExtArgs>
+  allocations?: boolean | Prisma.Server$allocationsArgs<ExtArgs>
   _count?: boolean | Prisma.ServerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ServerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2876,6 +3092,7 @@ export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     schedules: Prisma.$SchedulePayload<ExtArgs>[]
     databases: Prisma.$ServerDatabasePayload<ExtArgs>[]
     activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
+    allocations: Prisma.$AllocationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -3304,6 +3521,7 @@ export interface Prisma__ServerClient<T, Null = never, ExtArgs extends runtime.T
   schedules<T extends Prisma.Server$schedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   databases<T extends Prisma.Server$databasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$databasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerDatabasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityLogs<T extends Prisma.Server$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  allocations<T extends Prisma.Server$allocationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$allocationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AllocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3909,6 +4127,30 @@ export type Server$activityLogsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.ActivityLogScalarFieldEnum | Prisma.ActivityLogScalarFieldEnum[]
+}
+
+/**
+ * Server.allocations
+ */
+export type Server$allocationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Allocation
+   */
+  select?: Prisma.AllocationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Allocation
+   */
+  omit?: Prisma.AllocationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AllocationInclude<ExtArgs> | null
+  where?: Prisma.AllocationWhereInput
+  orderBy?: Prisma.AllocationOrderByWithRelationInput | Prisma.AllocationOrderByWithRelationInput[]
+  cursor?: Prisma.AllocationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AllocationScalarFieldEnum | Prisma.AllocationScalarFieldEnum[]
 }
 
 /**

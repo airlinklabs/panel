@@ -6,6 +6,7 @@ import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { syncNodeAllocations } from '../../handlers/utils/server/allocations';
 
 
 function generateApiKey(length: number): string {
@@ -28,6 +29,8 @@ type NodeWithInstances = {
   overallocateMemory: number;
   overallocateDisk: number;
   overallocateCpu: number;
+  allocationCount?: number;
+  allocationsInUse?: number;
   locationId: number | null;
   address: string;
   port: number;
@@ -57,10 +60,17 @@ async function listNodes(res: Response, includeServers = false) {
       const usedCpu = instances.reduce((sum, s) => sum + s.Cpu, 0);
       const usedDisk = instances.reduce((sum, s) => sum + s.Storage, 0);
 
+      const [allocationTotal, inUse] = await Promise.all([
+        prisma.allocation.count({ where: { nodeId: node.id } }),
+        prisma.allocation.count({ where: { nodeId: node.id, serverId: { not: null } } }),
+      ]);
+
       const nodeWithInstances: NodeWithInstances = {
         ...node,
         instances,
         ...(includeServers ? { servers: instances } : {}),
+        allocationCount: allocationTotal,
+        allocationsInUse: inUse,
         usage: {
           memory: node.ram > 0 ? Math.round((usedMemory / (node.ram * 1024)) * 100) : 0,
           cpu: node.cpu > 0 ? Math.round((usedCpu / node.cpu) * 100) : 0,
@@ -255,8 +265,9 @@ const adminModule: Module = {
         }
 
         const allocatedPorts = req.body.allocatedPorts || '[]';
+        let parsedPorts: number[] = [];
         try {
-          const parsedPorts = JSON.parse(allocatedPorts);
+          parsedPorts = JSON.parse(allocatedPorts);
           if (!Array.isArray(parsedPorts)) {
             throw new Error('Allocated ports must be an array');
           }
@@ -304,6 +315,8 @@ const adminModule: Module = {
               createdAt: new Date(),
             },
           });
+
+          await syncNodeAllocations(node.id, parsedPorts).catch(() => {});
 
           res.status(200).json({ message: 'Node created successfully.', node });
           return;
@@ -486,6 +499,7 @@ const adminModule: Module = {
           const overallocateDisk = parseInt(req.body.overallocateDisk);
           const overallocateCpu = parseInt(req.body.overallocateCpu);
           const locationId = req.body.locationId ? parseInt(req.body.locationId) : null;
+          let parsedPorts: number[] = [];
 
           if (
             [overallocateMemory, overallocateDisk, overallocateCpu].some(
@@ -521,7 +535,7 @@ const adminModule: Module = {
 
           // Validate allocated ports
           try {
-            const parsedPorts = JSON.parse(allocatedPorts);
+            parsedPorts = JSON.parse(allocatedPorts);
             if (!Array.isArray(parsedPorts)) {
               throw new Error('Allocated ports must be an array');
             }
@@ -555,6 +569,8 @@ const adminModule: Module = {
               allocatedPorts,
             },
           });
+
+          await syncNodeAllocations(nodeId, parsedPorts).catch(() => {});
 
           res.status(200).json({ message: 'Node updated successfully.', node });
           return;

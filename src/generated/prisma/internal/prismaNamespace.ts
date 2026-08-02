@@ -406,6 +406,7 @@ export const ModelName = {
   Schedule: 'Schedule',
   ScheduleTask: 'ScheduleTask',
   Images: 'Images',
+  Allocation: 'Allocation',
   Node: 'Node',
   Location: 'Location',
   settings: 'settings',
@@ -435,7 +436,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "passwordReset" | "session" | "server" | "databaseHost" | "serverDatabase" | "schedule" | "scheduleTask" | "images" | "node" | "location" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential" | "subUser" | "activityLog"
+    modelProps: "users" | "passwordReset" | "session" | "server" | "databaseHost" | "serverDatabase" | "schedule" | "scheduleTask" | "images" | "allocation" | "node" | "location" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential" | "subUser" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1102,6 +1103,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ImagesCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ImagesCountAggregateOutputType> | number
+        }
+      }
+    }
+    Allocation: {
+      payload: Prisma.$AllocationPayload<ExtArgs>
+      fields: Prisma.AllocationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AllocationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AllocationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload>
+        }
+        findFirst: {
+          args: Prisma.AllocationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AllocationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload>
+        }
+        findMany: {
+          args: Prisma.AllocationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload>[]
+        }
+        create: {
+          args: Prisma.AllocationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload>
+        }
+        createMany: {
+          args: Prisma.AllocationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AllocationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload>[]
+        }
+        delete: {
+          args: Prisma.AllocationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload>
+        }
+        update: {
+          args: Prisma.AllocationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload>
+        }
+        deleteMany: {
+          args: Prisma.AllocationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AllocationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AllocationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload>[]
+        }
+        upsert: {
+          args: Prisma.AllocationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllocationPayload>
+        }
+        aggregate: {
+          args: Prisma.AllocationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAllocation>
+        }
+        groupBy: {
+          args: Prisma.AllocationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AllocationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AllocationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AllocationCountAggregateOutputType> | number
         }
       }
     }
@@ -2330,6 +2405,18 @@ export const ImagesScalarFieldEnum = {
 export type ImagesScalarFieldEnum = (typeof ImagesScalarFieldEnum)[keyof typeof ImagesScalarFieldEnum]
 
 
+export const AllocationScalarFieldEnum = {
+  id: 'id',
+  nodeId: 'nodeId',
+  ip: 'ip',
+  port: 'port',
+  serverId: 'serverId',
+  createdAt: 'createdAt'
+} as const
+
+export type AllocationScalarFieldEnum = (typeof AllocationScalarFieldEnum)[keyof typeof AllocationScalarFieldEnum]
+
+
 export const NodeScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -2778,6 +2865,7 @@ export type GlobalOmitConfig = {
   schedule?: Prisma.ScheduleOmit
   scheduleTask?: Prisma.ScheduleTaskOmit
   images?: Prisma.ImagesOmit
+  allocation?: Prisma.AllocationOmit
   node?: Prisma.NodeOmit
   location?: Prisma.LocationOmit
   settings?: Prisma.settingsOmit

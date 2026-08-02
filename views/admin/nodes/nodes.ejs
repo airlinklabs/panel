@@ -118,6 +118,14 @@
                     </div></td>
                   <td class="al-table-td"><%= node.instances ? node.instances.length : 0 %></td>
                   <td class="al-table-td">
+                    <% const totalAlloc = node.allocationCount ?? 0; const usedAlloc = node.allocationsInUse ?? 0; %>
+                    <div class="text-xs" style="color:var(--theme-text-muted)">
+                      <span class="inline-flex items-center gap-1">
+                        <%- icon('git-branch', { class: 'size-3', strokeWidth: 1.5 }) %><%= usedAlloc %>/<%= totalAlloc %> used
+                      </span>
+                    </div>
+                  </td>
+                  <td class="al-table-td">
                     <% const memPct = node.usage ? node.usage.memory : 0; %>
                     <div class="flex items-center gap-2">
                       <div class="w-24 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden">

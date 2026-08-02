@@ -63,6 +63,11 @@ export type ScheduleTask = Prisma.ScheduleTaskModel
  */
 export type Images = Prisma.ImagesModel
 /**
+ * Model Allocation
+ * 
+ */
+export type Allocation = Prisma.AllocationModel
+/**
  * Model Node
  * 
  */

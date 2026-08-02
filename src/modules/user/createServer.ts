@@ -7,37 +7,24 @@ import { queueer } from '../../handlers/queueer';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import { assertNodeCapacity } from '../../handlers/utils/server/resourceCheck';
 import {
+  claimNodePorts,
+  getNodePortPool,
+  releaseServerAllocations,
+  withNodePortLock,
+} from '../../handlers/utils/server/allocations';
+import {
   getUsedExternalPorts,
   parseImagePortRequirements,
   serializeServerPorts,
 } from '../../handlers/utils/server/ports';
 
-function pickAvailablePorts(allocatedPorts: number[], usedPorts: number[], count: number): number[] {
+function pickAvailablePorts(pool: number[], usedPorts: number[], count: number): number[] {
   const picked: number[] = [];
-  for (const port of allocatedPorts) {
+  for (const port of pool) {
     if (!usedPorts.includes(port)) picked.push(port);
     if (picked.length === count) return picked;
   }
   return picked;
-}
-
-// Serialize port assignment + DB insert per node so concurrent
-// create requests can't pick the same external port.
-const portMutexes = new Map<number, Promise<void>>();
-
-async function withNodePortLock<T>(nodeId: number, task: () => Promise<T>): Promise<T> {
-  const prev = portMutexes.get(nodeId) ?? Promise.resolve();
-  let release!: () => void;
-  const current = new Promise<void>((resolve) => { release = resolve; });
-  const tail = prev.catch(() => {}).then(() => current);
-  portMutexes.set(nodeId, tail);
-  await prev.catch(() => {});
-  try {
-    return await task();
-  } finally {
-    release();
-    if (portMutexes.get(nodeId) === tail) portMutexes.delete(nodeId);
-  }
 }
 
 async function resolveUserServerLimit(userId: number, settings: any): Promise<number> {
@@ -168,13 +155,6 @@ const userCreateServerModule: Module = {
           return res.status(400).json({ error: error instanceof Error ? error.message : 'Node capacity exceeded.' });
         }
 
-        let allocatedPorts: number[] = [];
-        try {
-          if (node.allocatedPorts) allocatedPorts = JSON.parse(node.allocatedPorts);
-        } catch {
-          return res.status(500).json({ error: 'Node port configuration is invalid.' });
-        }
-
         const image = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
         if (!image) return res.status(400).json({ error: 'Image not found.' });
 
@@ -202,8 +182,9 @@ const userCreateServerModule: Module = {
         }
 
         const { assignedPorts, createdServer }: { assignedPorts: number[]; createdServer: any } = await withNodePortLock(node.id, async () => {
+          const pool = await getNodePortPool(node.id);
           const existingServers = await prisma.server.findMany({ where: { nodeId: node.id } });
-          const picked = pickAvailablePorts(allocatedPorts, getUsedExternalPorts(existingServers), requiredPortCount);
+          const picked = pickAvailablePorts(pool, getUsedExternalPorts(existingServers), requiredPortCount);
           if (picked.length < requiredPortCount) {
             throw new Error(`No available ports on the selected node. ${requiredPortCount} port(s) required.`);
           }
@@ -237,6 +218,8 @@ const userCreateServerModule: Module = {
               dockerImage: JSON.stringify(imageDocker),
             },
           });
+
+          await claimNodePorts(node.id, picked, created.UUID).catch(() => {});
 
           return { assignedPorts: picked, createdServer: created };
         });
@@ -401,6 +384,7 @@ const userCreateServerModule: Module = {
           }
         }
 
+        await releaseServerAllocations(server.UUID).catch(() => {});
         await prisma.server.delete({ where: { UUID: server.UUID } });
         return res.json({ success: true });
       } catch (error) {

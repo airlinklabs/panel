@@ -60,6 +60,7 @@ export const ModelName = {
   Schedule: 'Schedule',
   ScheduleTask: 'ScheduleTask',
   Images: 'Images',
+  Allocation: 'Allocation',
   Node: 'Node',
   Location: 'Location',
   settings: 'settings',
@@ -240,6 +241,18 @@ export const ImagesScalarFieldEnum = {
 } as const
 
 export type ImagesScalarFieldEnum = (typeof ImagesScalarFieldEnum)[keyof typeof ImagesScalarFieldEnum]
+
+
+export const AllocationScalarFieldEnum = {
+  id: 'id',
+  nodeId: 'nodeId',
+  ip: 'ip',
+  port: 'port',
+  serverId: 'serverId',
+  createdAt: 'createdAt'
+} as const
+
+export type AllocationScalarFieldEnum = (typeof AllocationScalarFieldEnum)[keyof typeof AllocationScalarFieldEnum]
 
 
 export const NodeScalarFieldEnum = {
