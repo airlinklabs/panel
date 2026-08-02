@@ -12,6 +12,7 @@ export type ActivityEvent =
   | 'server:stop'
   | 'server:kill'
   | 'server:restart'
+  | 'server:transfer'
   | 'file:create'
   | 'file:delete'
   | 'file:rename'

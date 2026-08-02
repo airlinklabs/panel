@@ -263,6 +263,42 @@
             </div>
           </div>
 
+          <div class="al-card">
+            <h2 class="al-card-header">Server Transfer</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <div class="flex items-center gap-3 mb-4">
+                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-purple-100 text-purple-500 dark:bg-purple-500/15 dark:text-purple-400">
+                    <%- icon('arrow-right-left', { size: 20, class: 'shrink-0' }) %>
+                  </span>
+                  <div>
+                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Transfer Server</p>
+                    <p class="text-xs text-neutral-500">Move this server to a different node</p>
+                  </div>
+                </div>
+                <button type="button" id="transferServerBtn" class="al-btn-secondary w-full" <%= server.Installing ? 'disabled' : '' %>>
+                  <%- icon('arrow-right-left', { size: 14, class: 'shrink-0' }) %>
+                  Transfer to another node
+                </button>
+                <% if (server.Installing) { %>
+                  <p class="text-xs text-amber-500 mt-2">Server is currently installing and cannot be transferred.</p>
+                <% } %>
+              </div>
+              <div>
+                <div id="transferStatus" class="hidden rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+                  <div class="flex items-center gap-2 mb-2">
+                    <div class="animate-spin rounded-full h-4 w-4 border-2 border-purple-500 border-t-transparent"></div>
+                    <span id="transferStatusText" class="text-sm font-medium">Transfer in progress...</span>
+                  </div>
+                  <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mt-2">
+                    <div id="transferProgressBar" class="bg-purple-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                  </div>
+                  <p id="transferStatusDetail" class="text-xs text-neutral-500 mt-2"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </form>
       </div>
     </div>
@@ -272,6 +308,81 @@
 <%- include('../../components/portsAllocator') %>
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
+
+<!-- Transfer Modal -->
+<div id="transferModal" class="al-sheet-overlay fixed inset-0 z-50 hidden">
+  <div class="flex items-end sm:items-center justify-center min-h-screen p-0 sm:p-4">
+    <div class="fixed inset-0" id="transferModalBackdrop"></div>
+    <div id="transferModalPanel" class="al-sheet-panel relative border rounded-t-2xl sm:rounded-2xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-hidden" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+
+      <div class="flex justify-between items-start px-4 sm:px-6 py-4 border-b" style="border-color:var(--theme-border);">
+        <div>
+          <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Transfer Server</h3>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Move "<%= server.name %>" to another node</p>
+        </div>
+        <button type="button" onclick="closeTransferModal()" class="al-btn-ghost mt-0.5 min-w-[44px] min-h-[44px] flex items-center justify-center">
+          <%- icon('x', { size: 20, class: 'shrink-0' }) %>
+        </button>
+      </div>
+
+      <div class="px-4 sm:px-6 py-4 sm:py-5 overflow-y-auto max-h-[70vh]">
+        <div class="space-y-4">
+          <div>
+            <label class="al-label">
+              <%- icon('server', { size: 14, class: 'shrink-0' }) %>
+              Destination Node:
+            </label>
+            <select id="transferTargetNode" class="al-input w-full">
+              <option value="">Select a node...</option>
+              <% nodes.forEach(node => { %>
+                <% if (node.id !== server.nodeId) { %>
+                  <option value="<%= node.id %>" data-address="<%= node.address %>"><%= node.name %> (<%= node.address %>)</option>
+                <% } %>
+              <% }); %>
+            </select>
+          </div>
+
+          <div>
+            <label class="al-label">
+              <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
+              Ports:
+            </label>
+            <div id="transferPortsContainer" class="space-y-2">
+              <p class="text-xs text-neutral-500">Select a node first to see available ports.</p>
+            </div>
+            <button type="button" id="addTransferPortBtn" class="al-btn-secondary mt-2 w-full hidden">
+              <%- icon('plus', { size: 14, class: 'shrink-0' }) %>
+              Add port
+            </button>
+          </div>
+
+          <div class="rounded-lg p-3" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+            <div class="flex items-start gap-2">
+              <%- icon('info', { size: 16, class: 'shrink-0 mt-0.5', style: 'color:var(--theme-accent)' }) %>
+              <div>
+                <p class="text-xs font-medium" style="color:var(--theme-text-strong);">What happens during transfer?</p>
+                <ul class="text-xs mt-1 space-y-1" style="color:var(--theme-text-muted);">
+                  <li>1. Server is stopped on the current node</li>
+                  <li>2. Files are archived and streamed to the destination</li>
+                  <li>3. Server is restored and installed on the new node</li>
+                  <li>4. Server is started on the destination node</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 px-4 sm:px-6 py-4 border-t" style="border-color:var(--theme-border);">
+        <button type="button" onclick="closeTransferModal()" class="al-btn-secondary flex-1">Cancel</button>
+        <button type="button" id="confirmTransferBtn" class="al-btn-primary flex-1" disabled>
+          <%- icon('arrow-right-left', { size: 14, class: 'shrink-0' }) %>
+          Transfer Server
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <style>
 #editServerForm .al-card { overflow: visible; }
@@ -470,5 +581,277 @@ function generateRandomName() {
       }
     });
   });
+</script>
+
+<script nonce="<%- nonce %>">
+  // ── Transfer Logic ─────────────────────────────────────────────────────
+  (function() {
+    const transferBtn = document.getElementById('transferServerBtn');
+    const transferModal = document.getElementById('transferModal');
+    const transferModalBackdrop = document.getElementById('transferModalBackdrop');
+    const transferModalPanel = document.getElementById('transferModalPanel');
+    const transferTargetNode = document.getElementById('transferTargetNode');
+    const transferPortsContainer = document.getElementById('transferPortsContainer');
+    const addTransferPortBtn = document.getElementById('addTransferPortBtn');
+    const confirmTransferBtn = document.getElementById('confirmTransferBtn');
+    const transferStatusDiv = document.getElementById('transferStatus');
+    const transferStatusText = document.getElementById('transferStatusText');
+    const transferProgressBar = document.getElementById('transferProgressBar');
+    const transferStatusDetail = document.getElementById('transferStatusDetail');
+
+    let transferPorts = [];
+    let nodesData = {};
+    let pollInterval = null;
+
+    const statusSteps = {
+      'pending': { pct: 5, text: 'Queued...' },
+      'stopping': { pct: 15, text: 'Stopping server on source node...' },
+      'archiving': { pct: 30, text: 'Archiving server files...' },
+      'transferring': { pct: 50, text: 'Streaming data to destination...' },
+      'restoring': { pct: 70, text: 'Restoring files on destination...' },
+      'installing': { pct: 85, text: 'Installing server on destination...' },
+      'updating-db': { pct: 92, text: 'Updating database records...' },
+      'starting': { pct: 97, text: 'Starting server on destination...' },
+      'completed': { pct: 100, text: 'Transfer complete!' },
+      'failed': { pct: 0, text: 'Transfer failed' },
+    };
+
+    async function fetchNodesData() {
+      try {
+        const response = await fetch('/admin/nodes/list');
+        const nodes = await response.json();
+        nodes.forEach(node => {
+          let ports = [];
+          try { ports = JSON.parse(node.allocatedPorts || '[]'); } catch {}
+          // Also include ports from allocation table
+          if (node.allocations && Array.isArray(node.allocations)) {
+            node.allocations.forEach(a => {
+              if (!ports.includes(a.port)) ports.push(a.port);
+            });
+          }
+          nodesData[node.id] = { ...node, parsedPorts: ports.sort((a,b) => a-b) };
+        });
+      } catch (err) {
+        console.error('Failed to fetch nodes:', err);
+      }
+    }
+
+    function getUsedPortsForNode(nodeId) {
+      const node = nodesData[nodeId];
+      if (!node) return new Set();
+      const used = new Set();
+      (node.servers || []).forEach(server => {
+        // Skip the current server being transferred
+        if (server.id === <%= server.id %>) return;
+        try {
+          JSON.parse(server.Ports || '[]').forEach(portInfo => {
+            const external = Number(portInfo.externalPort || String(portInfo.Port || '').split(':')[0]);
+            if (!isNaN(external)) used.add(external);
+          });
+        } catch {}
+      });
+      return used;
+    }
+
+    function renderTransferPorts() {
+      const nodeId = transferTargetNode.value;
+      if (!nodeId) return;
+      const node = nodesData[nodeId];
+      if (!node) return;
+
+      const usedPorts = getUsedPortsForNode(parseInt(nodeId));
+      const availablePorts = (node.parsedPorts || [])
+        .filter(port => !usedPorts.has(port) || transferPorts.some(p => p.externalPort === port));
+
+      if (transferPorts.length === 0) {
+        // Initialize with current server ports
+        try {
+          transferPorts = JSON.parse('<%- server.Ports %>').map((p, i) => ({
+            name: p.name || 'Port ' + (i + 1),
+            internalPort: Number(p.internalPort || String(p.Port || '').split(':')[1] || String(p.Port || '').split(':')[0]),
+            externalPort: Number(p.externalPort || String(p.Port || '').split(':')[0]),
+            primary: Boolean(p.primary || i === 0),
+          }));
+        } catch {
+          transferPorts = [{ name: 'Port 1', internalPort: 25565, externalPort: 25565, primary: true }];
+        }
+      }
+
+      let html = '';
+      transferPorts.forEach((port, idx) => {
+        const portOptions = availablePorts.map(p =>
+          `<option value="${p}" ${p === port.externalPort ? 'selected' : ''}>${node.address}:${p}</option>`
+        ).join('');
+
+        html += `
+          <div class="flex items-center gap-2 transfer-port-row" data-idx="${idx}">
+            <select class="al-input flex-1 transfer-port-select" data-idx="${idx}">
+              ${portOptions}
+            </select>
+            <input type="number" class="al-input w-20 transfer-port-internal" data-idx="${idx}" value="${port.internalPort}" placeholder="Internal">
+            <label class="flex items-center gap-1 text-xs shrink-0">
+              <input type="checkbox" class="transfer-port-primary" data-idx="${idx}" ${port.primary ? 'checked' : ''}> Primary
+            </label>
+            <button type="button" onclick="removeTransferPort(${idx})" class="al-btn-ghost p-1 shrink-0" style="color:var(--theme-danger);">
+              <%- icon('x', { size: 14 }) %>
+            </button>
+          </div>
+        `;
+      });
+
+      transferPortsContainer.innerHTML = html || '<p class="text-xs text-neutral-500">No ports configured.</p>';
+      addTransferPortBtn.classList.toggle('hidden', transferPorts.length === 0);
+      updateConfirmButton();
+    }
+
+    window.removeTransferPort = function(idx) {
+      transferPorts.splice(idx, 1);
+      renderTransferPorts();
+    };
+
+    function collectPortsFromUI() {
+      const selects = document.querySelectorAll('.transfer-port-select');
+      const internals = document.querySelectorAll('.transfer-port-internal');
+      const primaries = document.querySelectorAll('.transfer-port-primary');
+      transferPorts = [];
+      selects.forEach((sel, i) => {
+        transferPorts.push({
+          name: 'Port ' + (i + 1),
+          externalPort: parseInt(sel.value) || 0,
+          internalPort: parseInt(internals[i]?.value) || parseInt(sel.value) || 25565,
+          primary: primaries[i]?.checked || false,
+        });
+      });
+    }
+
+    function updateConfirmButton() {
+      const nodeId = transferTargetNode.value;
+      const hasPorts = transferPorts.length > 0 && transferPorts.every(p => p.externalPort > 0);
+      confirmTransferBtn.disabled = !nodeId || !hasPorts;
+    }
+
+    // Event listeners
+    transferBtn.addEventListener('click', function() {
+      transferModal.classList.remove('hidden');
+      transferModal.classList.add('flex');
+      if (typeof Animate !== 'undefined') Animate.openModal(transferModal, transferModalPanel);
+    });
+
+    window.closeTransferModal = function() {
+      if (typeof Animate !== 'undefined') {
+        Animate.closeModal(transferModal, transferModalPanel, () => {
+          transferModal.classList.add('hidden');
+          transferModal.classList.remove('flex');
+        });
+      } else {
+        transferModal.classList.add('hidden');
+        transferModal.classList.remove('flex');
+      }
+    };
+
+    transferTargetNode.addEventListener('change', function() {
+      transferPorts = []; // Reset ports when node changes
+      renderTransferPorts();
+      updateConfirmButton();
+    });
+
+    addTransferPortBtn.addEventListener('click', function() {
+      collectPortsFromUI();
+      const nodeId = transferTargetNode.value;
+      const node = nodesData[nodeId];
+      if (!node) return;
+      const usedPorts = getUsedPortsForNode(parseInt(nodeId));
+      const usedByTransfer = new Set(transferPorts.map(p => p.externalPort));
+      const nextPort = (node.parsedPorts || []).find(p => !usedPorts.has(p) && !usedByTransfer.has(p));
+      transferPorts.push({
+        name: 'Port ' + (transferPorts.length + 1),
+        externalPort: nextPort || 25565,
+        internalPort: nextPort || 25565,
+        primary: false,
+      });
+      renderTransferPorts();
+    });
+
+    confirmTransferBtn.addEventListener('click', async function() {
+      collectPortsFromUI();
+      const nodeId = transferTargetNode.value;
+      if (!nodeId || transferPorts.length === 0) return;
+
+      confirmTransferBtn.disabled = true;
+      confirmTransferBtn.textContent = 'Starting transfer...';
+
+      try {
+        const response = await fetch('/admin/servers/<%= server.id %>/transfer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetNodeId: parseInt(nodeId), ports: transferPorts }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to start transfer');
+        }
+
+        closeTransferModal();
+        startTransferPolling();
+        showToast('Transfer started!', 'success');
+      } catch (err) {
+        showToast('Failed to start transfer: ' + (err.message || 'unknown error'), 'error');
+        confirmTransferBtn.disabled = false;
+        confirmTransferBtn.innerHTML = '<%- icon("arrow-right-left", { size: 14, class: "shrink-0" }) %>Transfer Server';
+      }
+    });
+
+    function startTransferPolling() {
+      transferStatusDiv.classList.remove('hidden');
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(pollTransferStatus, 3000);
+      pollTransferStatus();
+    }
+
+    async function pollTransferStatus() {
+      try {
+        const response = await fetch('/admin/servers/<%= server.id %>/transfer/status');
+        const state = await response.json();
+
+        if (state.status === 'idle') {
+          transferStatusDiv.classList.add('hidden');
+          clearInterval(pollInterval);
+          return;
+        }
+
+        const step = statusSteps[state.status] || { pct: 0, text: state.status };
+        transferProgressBar.style.width = step.pct + '%';
+        transferStatusText.textContent = step.text;
+        transferStatusDetail.textContent = state.error || '';
+
+        if (state.status === 'completed') {
+          transferProgressBar.classList.remove('bg-purple-500');
+          transferProgressBar.classList.add('bg-green-500');
+          clearInterval(pollInterval);
+          setTimeout(() => { window.location.reload(); }, 2000);
+        } else if (state.status === 'failed') {
+          transferProgressBar.classList.remove('bg-purple-500');
+          transferProgressBar.classList.add('bg-red-500');
+          clearInterval(pollInterval);
+        }
+      } catch {
+        // Ignore poll errors
+      }
+    }
+
+    // Check on page load if a transfer is in progress
+    fetch('/admin/servers/<%= server.id %>/transfer/status')
+      .then(r => r.json())
+      .then(state => {
+        if (state.status && state.status !== 'idle' && state.status !== 'completed' && state.status !== 'failed') {
+          startTransferPolling();
+        }
+      })
+      .catch(() => {});
+
+    fetchNodesData();
+  })();
 </script>
 

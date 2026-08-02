@@ -23,6 +23,7 @@ import {
 } from '../../handlers/utils/server/allocations';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import { sendServerSuspended } from '../../handlers/utils/core/mailer';
+import { startTransfer, getTransferState } from '../../handlers/utils/server/serverTransfer';
 
 
 const adminModule: Module = {
@@ -909,6 +910,98 @@ const owner = server.ownerId
         } catch (error: unknown) {
           logger.error('Error unsuspending server:', error);
           res.status(500).json({ error: 'Failed to unsuspend server' });
+        }
+      },
+    );
+
+    // ── Server Transfer ──────────────────────────────────────────────────
+
+    router.post(
+      '/admin/servers/:id/transfer',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+          }
+
+          const serverId = getParamAsNumber(req.params.id);
+          if (isNaN(serverId)) {
+            res.status(400).json({ error: 'Invalid server ID' });
+            return;
+          }
+
+          const { targetNodeId, ports } = req.body;
+          if (!targetNodeId || !Array.isArray(ports) || ports.length === 0) {
+            res.status(400).json({ error: 'Missing targetNodeId or ports' });
+            return;
+          }
+
+          const targetNodeIdNum = parseInt(targetNodeId);
+          if (isNaN(targetNodeIdNum)) {
+            res.status(400).json({ error: 'Invalid target node ID' });
+            return;
+          }
+
+          const normalizedPorts = ports.map((p: any) => ({
+            name: p.name || `Port ${p.externalPort}`,
+            internalPort: parseInt(p.internalPort) || parseInt(p.externalPort) || 25565,
+            externalPort: parseInt(p.externalPort) || 25565,
+            primary: p.primary === true,
+          }));
+
+          const state = await startTransfer(serverId, targetNodeIdNum, normalizedPorts, req);
+
+          await logActivity(req, 'server:transfer', {
+            serverId: String(state.serverUUID),
+            metadata: {
+              name: state.serverName,
+              fromNodeId: state.sourceNodeId,
+              toNodeId: state.targetNodeId,
+            },
+          });
+
+          res.json({ success: true, transferId: serverId });
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : 'Failed to start transfer';
+          logger.error('Error starting transfer:', error);
+          res.status(400).json({ error: message });
+        }
+      },
+    );
+
+    router.get(
+      '/admin/servers/:id/transfer/status',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const serverId = getParamAsNumber(req.params.id);
+          if (isNaN(serverId)) {
+            res.status(400).json({ error: 'Invalid server ID' });
+            return;
+          }
+
+          const state = getTransferState(serverId);
+          if (!state) {
+            res.json({ status: 'idle' });
+            return;
+          }
+
+          res.json({
+            status: state.status,
+            error: state.error,
+            startedAt: state.startedAt,
+            completedAt: state.completedAt,
+            serverName: state.serverName,
+            sourceNodeId: state.sourceNodeId,
+            targetNodeId: state.targetNodeId,
+          });
+        } catch (error: unknown) {
+          logger.error('Error getting transfer status:', error);
+          res.status(500).json({ error: 'Failed to get transfer status' });
         }
       },
     );
