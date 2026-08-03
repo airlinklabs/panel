@@ -30,7 +30,7 @@
       <%- include('../components/csrf') %>
       <div class="space-y-4">
         <div>
-          <label class="auth-label" for="token">6-digit code</label>
+          <label class="auth-label" for="token" id="tokenLabel">6-digit code</label>
           <input id="token" name="token" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code"
             required autofocus class="auth-input" placeholder="••••••" style="text-align:center;font-size:20px;letter-spacing:0.4em;font-family:monospace">
         </div>
@@ -42,6 +42,10 @@
         </button>
       </div>
     </form>
+
+    <p class="text-sm text-center mt-4" style="color:var(--theme-text-muted)">
+      <button type="button" id="toggleRecovery" class="font-medium hover:underline" style="color:var(--theme-text-link)">Use a recovery code instead</button>
+    </p>
 
     <p class="text-sm text-center mt-6" style="color:var(--theme-text-muted)">
       Lost access to your authenticator app?
@@ -57,6 +61,37 @@
     requestAnimationFrame(function () {
       document.getElementById('authPanel').classList.add('visible');
     });
+  });
+
+  var recoveryMode = false;
+  var tokenInput = document.getElementById('token');
+  var tokenLabel = document.getElementById('tokenLabel');
+  var toggleBtn = document.getElementById('toggleRecovery');
+
+  toggleBtn.addEventListener('click', function () {
+    recoveryMode = !recoveryMode;
+    if (recoveryMode) {
+      tokenInput.type = 'text';
+      tokenInput.removeAttribute('inputmode');
+      tokenInput.removeAttribute('pattern');
+      tokenInput.maxLength = 14;
+      tokenInput.autocomplete = 'off';
+      tokenInput.placeholder = 'XXXX-XXXX-XXXX';
+      tokenInput.value = '';
+      tokenLabel.textContent = 'Recovery code';
+      toggleBtn.textContent = 'Use the 6-digit code instead';
+    } else {
+      tokenInput.type = 'text';
+      tokenInput.setAttribute('inputmode', 'numeric');
+      tokenInput.setAttribute('pattern', '[0-9]*');
+      tokenInput.maxLength = 6;
+      tokenInput.autocomplete = 'one-time-code';
+      tokenInput.placeholder = '••••••';
+      tokenInput.value = '';
+      tokenLabel.textContent = '6-digit code';
+      toggleBtn.textContent = 'Use a recovery code instead';
+    }
+    tokenInput.focus();
   });
 
   document.getElementById('verifyForm').addEventListener('submit', async function (e) {

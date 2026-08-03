@@ -110,6 +110,7 @@ export const UsersScalarFieldEnum = {
   lockedUntil: 'lockedUntil',
   totpSecret: 'totpSecret',
   totpEnabled: 'totpEnabled',
+  totpRecoveryCodes: 'totpRecoveryCodes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

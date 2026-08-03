@@ -73,6 +73,26 @@
             <p class="mt-1.5">Supported apps: Google Authenticator, Authy, 1Password, Bitwarden and other TOTP-compatible apps.</p>
           </div>
         </div>
+
+        <div id="recoveryCodesPanel" class="al-card p-6 max-w-xl mx-auto hidden">
+          <div class="flex items-start gap-3">
+            <div class="shrink-0">
+              <%- icon('key-round', { class: 'w-5 h-5', strokeWidth: 1.5, style: 'color:var(--theme-accent)' }) %>
+            </div>
+            <div>
+              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Save your recovery codes</h2>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">Each code works exactly once. If you lose your authenticator app, use one of these to sign in — then generate new ones. They are only shown now, so store them somewhere safe.</p>
+            </div>
+          </div>
+          <div id="recoveryCodesList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4"></div>
+          <div class="flex items-center justify-between mt-5 gap-3">
+            <button type="button" id="copyRecoveryCodes" class="al-btn-ghost text-sm inline-flex items-center gap-1.5">
+              <%- icon('copy', { size: 14 }) %>
+              Copy all
+            </button>
+            <button type="button" id="ackRecoveryCodes" class="al-btn-primary text-sm px-5">I've saved them</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -89,12 +109,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const feedback = document.getElementById('feedback');
   const tokenInput = document.getElementById('totpToken');
   const copySecretBtn = document.getElementById('copySecret');
+  const recoveryPanel = document.getElementById('recoveryCodesPanel');
+  const recoveryList = document.getElementById('recoveryCodesList');
+  let recoveryCodes = [];
 
   copySecretBtn.addEventListener('click', () => {
     navigator.clipboard.writeText('<%= secretBase32 %>').then(
       () => showToast('Secret key copied to clipboard.', 'success'),
       () => showToast('Could not copy secret key.', 'error'),
     );
+  });
+
+  document.getElementById('copyRecoveryCodes').addEventListener('click', () => {
+    navigator.clipboard.writeText(recoveryCodes.join('\n')).then(
+      () => showToast('Recovery codes copied.', 'success'),
+      () => showToast('Could not copy recovery codes.', 'error'),
+    );
+  });
+
+  document.getElementById('ackRecoveryCodes').addEventListener('click', () => {
+    window.location.href = '/account';
   });
 
   form.addEventListener('submit', async (e) => {
@@ -110,7 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (res.ok && data.success) {
         showToast('Two-factor authentication enabled.', 'success');
-        setTimeout(() => { window.location.href = '/account'; }, 1200);
+        recoveryCodes = data.recoveryCodes || [];
+        recoveryList.innerHTML = recoveryCodes.map(code =>
+          '<code class="select-all rounded-lg px-3 py-2 text-xs font-mono text-center" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)">' + code + '</code>'
+        ).join('');
+        form.closest('.al-card').classList.add('hidden');
+        recoveryPanel.classList.remove('hidden');
+        document.getElementById('recoveryCodesPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
         feedback.textContent = data.error || 'Something went wrong. Try again.';
         feedback.classList.remove('hidden');

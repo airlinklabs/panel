@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import bcrypt from 'bcryptjs';
+import { createHash, randomBytes } from 'node:crypto';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import logger from '../../handlers/logger';
@@ -16,6 +17,7 @@ declare module 'express-session' {
 }
 
 const TOTP_ISSUER = 'Airlink';
+const RECOVERY_CODE_COUNT = 10;
 
 function createTotp(secretBase32: string, label: string): OTPAuth.TOTP {
   return new OTPAuth.TOTP({
@@ -29,6 +31,41 @@ function normalizeToken(token: unknown): string | null {
   if (typeof token !== 'string') return null;
   const clean = token.replace(/[\s-]/g, '');
   return /^\d{6}$/.test(clean) ? clean : null;
+}
+
+function normalizeRecoveryCode(token: unknown): string | null {
+  if (typeof token !== 'string') return null;
+  const clean = token.replace(/[\s-]/g, '').toUpperCase();
+  return /^[A-F0-9]{12}$/.test(clean) ? clean : null;
+}
+
+function hashRecoveryCode(code: string): string {
+  return createHash('sha256').update(code).digest('hex');
+}
+
+function formatRecoveryCode(raw: string): string {
+  return `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8, 12)}`;
+}
+
+function generateRecoveryCodes(count = RECOVERY_CODE_COUNT): string[] {
+  return Array.from({ length: count }, () => randomBytes(6).toString('hex').toUpperCase());
+}
+
+async function consumeRecoveryCode(userId: number, code: string): Promise<boolean> {
+  const user = await prisma.users.findUnique({ where: { id: userId } });
+  if (!user?.totpRecoveryCodes) return false;
+
+  const stored = JSON.parse(user.totpRecoveryCodes) as string[];
+  const hashed = hashRecoveryCode(code);
+  const idx = stored.indexOf(hashed);
+  if (idx === -1) return false;
+
+  stored.splice(idx, 1);
+  await prisma.users.update({
+    where: { id: userId },
+    data: { totpRecoveryCodes: stored.length ? JSON.stringify(stored) : null },
+  });
+  return true;
 }
 
 const twoFactorModule: Module = {
@@ -110,13 +147,23 @@ const twoFactorModule: Module = {
             return res.status(400).json({ error: 'Invalid code. Try again.' });
           }
 
+          const codes = generateRecoveryCodes();
+
           await prisma.users.update({
             where: { id: user.id },
-            data: { totpSecret: pendingSecret, totpEnabled: true },
+            data: {
+              totpSecret: pendingSecret,
+              totpEnabled: true,
+              totpRecoveryCodes: JSON.stringify(codes.map(hashRecoveryCode)),
+            },
           });
 
           delete req.session.pendingTotpSecret;
-          res.json({ success: true, message: 'Two-factor authentication enabled.' });
+          res.json({
+            success: true,
+            message: 'Two-factor authentication enabled.',
+            recoveryCodes: codes.map(formatRecoveryCode),
+          });
           return;
         } catch (error) {
           logger.error('2FA enable error:', error);
@@ -149,7 +196,7 @@ const twoFactorModule: Module = {
 
           await prisma.users.update({
             where: { id: user.id },
-            data: { totpSecret: null, totpEnabled: false },
+            data: { totpSecret: null, totpEnabled: false, totpRecoveryCodes: null },
           });
 
           res.json({ success: true, message: 'Two-factor authentication disabled.' });
@@ -184,8 +231,9 @@ const twoFactorModule: Module = {
       }
 
       const cleanToken = normalizeToken(token);
-      if (!cleanToken) {
-        return res.status(400).json({ error: 'Enter a valid 6-digit code.' });
+      const recoveryCode = normalizeRecoveryCode(token);
+      if (!cleanToken && !recoveryCode) {
+        return res.status(400).json({ error: 'Enter a valid 6-digit code or recovery code.' });
       }
 
       try {
@@ -195,7 +243,10 @@ const twoFactorModule: Module = {
         }
 
         const totp = createTotp(user.totpSecret, user.email);
-        if (totp.validate({ token: cleanToken, window: 1 }) === null) {
+        const totpValid = cleanToken && totp.validate({ token: cleanToken, window: 1 }) !== null;
+        const recoveryValid = recoveryCode && (await consumeRecoveryCode(user.id, recoveryCode));
+
+        if (!totpValid && !recoveryValid) {
           return res.status(400).json({ error: 'Invalid code. Try again.' });
         }
 

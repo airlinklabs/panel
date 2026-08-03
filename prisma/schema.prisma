@@ -25,6 +25,7 @@ model Users {
   lockedUntil   DateTime?
   totpSecret    String?
   totpEnabled   Boolean          @default(false)
+  totpRecoveryCodes String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
