@@ -2,7 +2,7 @@
   <%- include('../components/toast') %>
     <main class="min-h-screen">
       <div class="flex min-h-screen">
-        <% if (typeof user !== 'undefined') { %>
+        <% if (user != null) { %>
         <div class="hidden lg:block w-60 h-full">
           <%- include('../components/template') %>
         </div>

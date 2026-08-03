@@ -11,6 +11,7 @@
     </div>
 
     <!-- Static: user info — clicking goes to account page -->
+    <% if (user != null) { %>
     <a href="/account" id="sidebar-account-link" class="sidebar-special-link flex items-center space-x-4 py-4 px-4 border-y shrink-0 transition-colors group" style="border-color:var(--theme-nav-border);">
       <img class="h-8 w-8 rounded-xl shrink-0" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
       <div class="min-w-0">
@@ -23,6 +24,7 @@
         <p id="sidebar-description" class="text-xs truncate" style="color:var(--theme-text-muted);"><%= user.description %></p>
       </div>
     </a>
+    <% } %>
 
     <!-- Scrollable nav -->
     <nav class="flex-1 overflow-y-auto">
@@ -51,7 +53,7 @@
               </li>
             <% }); } %>
 
-            <% if (user.isAdmin === true) { %>
+            <% if (user != null && user.isAdmin === true) { %>
               <p class="pl-8 text-xs font-medium pt-6 pb-2" style="color:var(--theme-nav-text);"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>
 
               <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span>Core</span></p>
