@@ -12,7 +12,7 @@ type CheckInstallationResult = {
 
 // In-memory cache so repeated calls within the same request cycle or across
 // rapid page navigations don't all hit the daemon independently.
-const cache = new Map<string, { data: string; timestamp: number }>();
+const cache = new Map<string, { state: string; error?: string; timestamp: number }>();
 const CACHE_TTL_MS = 8000;
 
 export async function checkForServerInstallation(
@@ -38,9 +38,10 @@ export async function checkForServerInstallation(
     const cached = cache.get(serverId);
     if (cached && now - cached.timestamp < CACHE_TTL_MS) {
       return {
-        installed: cached.data === 'installed',
-        state: cached.data,
-        failed: cached.data === 'failed',
+        installed: cached.state === 'installed',
+        state: cached.state,
+        failed: cached.state === 'failed',
+        error: cached.error,
       };
     }
 
@@ -49,7 +50,7 @@ export async function checkForServerInstallation(
       return { installed: false, state: 'offline' };
     }
 
-    const response = await daemonRequest<{ state?: string }>({
+    const response = await daemonRequest<{ state?: string; error?: string }>({
       nodeAddress: server.node.address,
       nodePort: server.node.port,
       nodeKey: server.node.key,
@@ -59,9 +60,10 @@ export async function checkForServerInstallation(
     });
 
     const state = response.data.state;
+    const installError = response.data.error;
     const isInstalled = state === 'installed';
 
-    cache.set(serverId, { data: state ?? '', timestamp: now });
+    cache.set(serverId, { state: state ?? '', error: installError, timestamp: now });
 
     // Keep the DB in sync so next page load hits the fast path above.
     await prisma.server.update({
@@ -69,7 +71,7 @@ export async function checkForServerInstallation(
       data: { Installing: !isInstalled },
     });
 
-    return { installed: isInstalled, state, failed: state === 'failed' };
+    return { installed: isInstalled, state, failed: state === 'failed', error: installError };
   } catch (error: any) {
     if (isHttpError(error) && error.status === 404) {
       return { installed: false, state: 'not_found' };

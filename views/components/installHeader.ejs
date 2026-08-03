@@ -1,12 +1,12 @@
 <% if (typeof installed !== 'undefined') { %>
 <% if (installed.failed) { %>
-<div class="mx-4 sm:mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
+<div class="mx-4 sm:mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-start gap-3">
   <div class="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--theme-danger-bg);">
     <%- icon('x', { class: 'h-4 w-4 text-red-500 dark:text-red-400', strokeWidth: 2 }) %>
   </div>
-  <div class="min-w-0">
+  <div class="flex-1 min-w-0">
     <p class="text-sm font-medium text-neutral-800 dark:text-neutral-200">Installation failed</p>
-    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Check the server logs or contact an administrator.</p>
+    <p id="installFailReason" class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 break-words"><%= installed.error || 'Check the server logs or contact an administrator.' %></p>
   </div>
 </div>
 <% } else if (!installed.installed && !installed.error) { %>
@@ -24,6 +24,9 @@
       <p id="installStateText" class="text-xs text-neutral-500 dark:text-neutral-400 truncate">Waiting for daemon…</p>
     </div>
   </div>
+  <button id="installRetryBtn" class="hidden shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors" style="background:var(--theme-accent);color:var(--theme-accent-foreground);">
+    Retry install
+  </button>
 </div>
 
 <script nonce="<%- nonce %>">
@@ -33,6 +36,10 @@
   var spinnerEl  = document.getElementById('installSpinner');
   var iconWrap   = document.getElementById('installIconWrap');
   var banner     = document.getElementById('installBanner');
+  var retryBtn   = document.getElementById('installRetryBtn');
+
+  var startTime = Date.now();
+  var finished  = false;
 
   var proto   = location.protocol === 'https:' ? 'wss' : 'ws';
   var evtWsUrl = proto + '://' + location.host + '/events/' + serverUUID;
@@ -54,54 +61,85 @@
     if (parsed.data.message) stateText.textContent = parsed.data.message;
   };
 
-  function markDone() {
-    evtSock.close();
-    clearInterval(poller);
-    stateText.textContent = 'Installation complete';
-    if (spinnerEl) {
-      spinnerEl.classList.remove('animate-spin', 'text-neutral-500');
-      spinnerEl.setAttribute('stroke', 'currentColor');
-      spinnerEl.setAttribute('stroke-width', '2');
-      spinnerEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>';
-      spinnerEl.classList.add('text-emerald-500');
-    }
+  function setIcon(kind) {
+    if (!spinnerEl) return;
+    spinnerEl.classList.remove('animate-spin', 'text-neutral-500');
+    spinnerEl.setAttribute('stroke', 'currentColor');
+    spinnerEl.setAttribute('stroke-width', '2');
+    var paths = {
+      done: '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>',
+      fail: '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>'
+    };
+    spinnerEl.innerHTML = paths[kind];
+    spinnerEl.classList.add(kind === 'done' ? 'text-emerald-500' : 'text-red-500');
     if (iconWrap) {
-      iconWrap.style.background = 'var(--theme-success-bg)';
+      iconWrap.style.background = kind === 'done' ? 'var(--theme-success-bg)' : 'var(--theme-danger-bg)';
       iconWrap.className = 'h-8 w-8 rounded-lg flex items-center justify-center shrink-0';
     }
+  }
+
+  function markDone() {
+    if (finished) return;
+    finished = true;
+    stateText.textContent = 'Installation complete';
+    setIcon('done');
     setTimeout(function() { window.location.reload(); }, 1600);
   }
 
-  function markFailed() {
-    evtSock.close();
-    clearInterval(poller);
+  function markFailed(reason) {
+    if (finished) return;
+    finished = true;
     stateText.textContent = 'Installation failed';
-    if (spinnerEl) {
-      spinnerEl.classList.remove('animate-spin', 'text-neutral-500');
-      spinnerEl.setAttribute('stroke', 'currentColor');
-      spinnerEl.setAttribute('stroke-width', '2');
-      spinnerEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>';
-      spinnerEl.classList.add('text-red-500');
+    setIcon('fail');
+    if (reason) {
+      stateText.textContent = 'Installation failed: ' + reason;
+      stateText.classList.remove('truncate');
+      stateText.classList.add('whitespace-normal', 'break-words');
     }
-    if (iconWrap) {
-      iconWrap.style.background = 'var(--theme-danger-bg)';
-      iconWrap.className = 'h-8 w-8 rounded-lg flex items-center justify-center shrink-0';
-    }
+    if (retryBtn) retryBtn.classList.remove('hidden');
   }
 
+  // Graduated heartbeat: reassure, then nudge once an install runs long.
+  var lastMessage = 'Waiting for daemon…';
+  function heartbeat() {
+    var elapsed = Math.floor((Date.now() - startTime) / 1000);
+    var text;
+    if (elapsed > 120)      text = 'Taking longer than expected — large images can take a while.';
+    else if (elapsed > 30)  text = 'Still installing — most servers are ready in under two minutes.';
+    else                    text = lastMessage;
+    stateText.textContent = text;
+  }
+
+  retryBtn.addEventListener('click', function() {
+    retryBtn.disabled = true;
+    retryBtn.textContent = 'Retrying…';
+    fetch('/server/' + encodeURIComponent(serverUUID) + '/reinstall', { method: 'POST', credentials: 'same-origin' })
+      .then(function(r) {
+        if (!r.ok) { return r.json().then(function(d) { throw new Error(d.error || 'Reinstall failed'); }); }
+        window.location.reload();
+      })
+      .catch(function(err) {
+        retryBtn.disabled = false;
+        retryBtn.textContent = 'Retry install';
+        if (window.modal && window.modal.alert) window.modal.alert(String(err.message || err));
+      });
+  });
+
   function poll() {
+    if (finished) return;
     fetch('/server/' + serverUUID + '/status')
       .then(function(r) { return r.json(); })
       .then(function(data) {
         var state = data.state || (data.installed ? 'installed' : data.failed ? 'failed' : 'installing');
         if (state === 'installed') markDone();
-        else if (state === 'failed') markFailed();
+        else if (state === 'failed') markFailed(data.error);
       })
       .catch(function() {});
   }
 
-  var poller = setInterval(poll, 3000);
+  var poller = setInterval(function() { poll(); heartbeat(); }, 3000);
   poll();
+  heartbeat();
   }
 })();
 </script>

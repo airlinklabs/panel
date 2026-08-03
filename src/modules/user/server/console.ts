@@ -137,17 +137,23 @@ export function registerConsoleRoutes(router: Router): void {
             serverUUID: server.UUID,
             nodeKey: node.key,
           }),
-          daemonRequest<{ state?: string }>({
+          daemonRequest<{ state?: string; error?: string }>({
             method: 'GET',
             path: `/container/status/${server.UUID}`,
             nodeAddress: node.address,
             nodePort: node.port,
             nodeKey: node.key,
             timeout: 4000,
-          }).then(r => r.data?.state as string).catch(() => null),
+          })
+            .then(r => ({ state: r.data?.state, error: r.data?.error }))
+            .catch(() => null),
         ]);
 
-        res.status(200).json({ ...serverStatus, state: installResult });
+        res.status(200).json({
+          ...serverStatus,
+          state: installResult?.state,
+          error: installResult?.error,
+        });
         return;
       } catch (error) {
         logger.error('Error fetching server status:', error);
@@ -601,13 +607,13 @@ export function registerConsoleRoutes(router: Router): void {
                 }
                 await prisma.server.update({
                   where: { UUID: getParamAsString(serverId) },
-                  data: { Queued: false },
+                  data: { Queued: false, Installing: false },
                 });
               }
             } else {
               await prisma.server.update({
                 where: { UUID: getParamAsString(serverId) },
-                data: { Queued: false },
+                data: { Queued: false, Installing: false },
               });
             }
           } catch (error) {
@@ -619,7 +625,7 @@ export function registerConsoleRoutes(router: Router): void {
             await prisma.server
               .update({
                 where: { UUID: getParamAsString(serverId) },
-                data: { Queued: false },
+                data: { Queued: false, Installing: false },
               })
               .catch((e) =>
                 logger.error('Error updating server queue status:', e),

@@ -99,7 +99,14 @@ export async function processQueuedServerInstalls(): Promise<void> {
       }
       await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
     } catch (err) {
+      // The daemon never received the install, so nothing will ever flip the
+      // state. Clear both flags so the server surfaces as failed instead of
+      // being stranded as "installing" forever.
       logger.error(`Error sending install request for server ${server.id}:`, err);
+      await prisma.server.update({
+        where: { id: server.id },
+        data: { Queued: false, Installing: false },
+      });
     }
   }
 }
