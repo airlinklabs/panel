@@ -39,7 +39,7 @@
               <li class="nav-item">
                 <a href="/" class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);" data-search="container instances servers" data-match-prefix="/server">
                   <%- icon('layout-dashboard', { class: 'w-5 h-5 mt-0.5' }) %>
-                  <span><%= req.translations.navServers || 'Servers' %></span>
+                  <span><%= req.translations.navDashboard || 'Dashboard' %></span>
                 </a>
               </li>
             <% } else {
@@ -52,6 +52,47 @@
                 </a>
               </li>
             <% }); } %>
+
+            <% if (typeof server !== 'undefined' && server && typeof req !== 'undefined' && req && (req.path || req.originalUrl || '').startsWith('/server/') && global.uiComponentStore) {
+              const srvMenuItems = global.uiComponentStore.getServerMenuItems();
+              const srvIsAdmin = (typeof user !== 'undefined' && user && user.isAdmin === true);
+              const srvIsSub = (typeof req !== 'undefined' && req && req.subUser) ? true : false;
+              const srvEntries = srvMenuItems.filter(item => {
+                if (item.isAdminItem && !srvIsAdmin) return false;
+                if (item.ownerOnly && srvIsSub) return false;
+                if (item.feature && !(typeof features !== 'undefined' && features && features.includes(item.feature))) return false;
+                return true;
+              }).map(item => ({
+                item,
+                url: (item.url || '#').replace(':uuid', server.UUID).replace(':id', server.id),
+              }));
+              const srvGroupOrder = ['run', 'data', 'manage', 'settings'];
+              const srvT = (typeof req !== 'undefined' && req && req.translations) || {};
+              const srvGroupLabel = (g) => {
+                if (g === 'run') return srvT.navGroupRun || 'Run';
+                if (g === 'data') return srvT.navGroupData || 'Data';
+                if (g === 'manage') return srvT.navGroupManage || 'Manage';
+                return srvT.navGroupSettings || 'Settings';
+              };
+              const srvGrouped = srvGroupOrder
+                .map(g => ({ g, entries: srvEntries.filter(e => (e.item.group || 'manage') === g) }))
+                .filter(grp => grp.entries.length > 0);
+              if (srvGrouped.length > 0) {
+            %>
+              <p class="pl-8 text-xs font-medium pt-6 pb-2" style="color:var(--theme-nav-text);"><span class="block truncate"><%= server.name || (srvT.navServerControls || 'Server Controls') %></span></p>
+              <% srvGrouped.forEach(grp => { %>
+                <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span><%= srvGroupLabel(grp.g) %></span></p>
+                <% grp.entries.forEach(entry => { %>
+                  <li class="nav-item">
+                    <a href="<%= entry.url %>" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);" data-server-control-link>
+                      <%= entry.item.icon.replace(/class="[^"]*"/, 'class="w-5 h-5 mt-0.5 shrink-0"') %>
+                      <span><%= entry.item.label %></span>
+                    </a>
+                  </li>
+                <% }); %>
+              <% }); %>
+            <% } %>
+            <% } %>
 
             <% if (user != null && user.isAdmin === true) { %>
               <p class="pl-8 text-xs font-medium pt-6 pb-2" style="color:var(--theme-nav-text);"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>
@@ -224,10 +265,37 @@
   function markActiveNav(path) {
     var pillBg = themeVar('--theme-text', '#171717');
     var pillFg = themeVar('--theme-bg', '#f0f0f0');
+
+    // Server control links: highlight the single best match only
+    var srvLinks = document.querySelectorAll('[data-server-control-link]');
+    var srvBest = null;
+    var bestLen = -1;
+    srvLinks.forEach(function(link) {
+      link.classList.remove('active');
+      link.style.color = '';
+      link.style.background = '';
+      var href = link.getAttribute('href') || '';
+      var matched = path === href || (href !== '/' && path.startsWith(href + '/'));
+      if (matched && href.length > bestLen) {
+        bestLen = href.length;
+        srvBest = link;
+      }
+    });
+    if (srvBest) {
+      srvBest.classList.add('active');
+      srvBest.style.color = pillFg;
+      srvBest.style.background = pillBg;
+      srvBest.style.borderRadius = '0.75rem';
+    }
+
     var links = document.querySelectorAll('.nav-link');
     links.forEach(function(link) {
+      if (link.hasAttribute('data-server-control-link')) return;
       var href = link.getAttribute('href');
       var prefix = link.getAttribute('data-match-prefix');
+      // On a server page the server controls own the highlight — don't
+      // also light up the Dashboard item whose prefix matches /server.
+      if (srvBest && prefix && path.startsWith(prefix)) return;
       var active = false;
       if (href && path === href) {
         active = true;

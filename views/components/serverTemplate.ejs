@@ -1,4 +1,4 @@
-<div class="mt-6 ml-4 sm:ml-8 mb-8">
+<div class="mt-6 ml-4 sm:ml-8 mb-8 sm:hidden">
     <div>
        <%
         const rawMenuItemsMobile = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
@@ -60,23 +60,10 @@
          </div>
        </div>
 
-       <!-- Desktop server nav — grouped, wrapped, no overflow menu -->
-       <div class="hidden relative sm:block">
-          <nav aria-label="Server sections" class="flex flex-wrap gap-x-8 gap-y-2 mt-1.5">
-             <% grouped.forEach(grp => { %>
-             <div class="flex items-center gap-x-2 flex-wrap">
-                <span class="text-[11px] font-semibold uppercase tracking-wide mr-1" style="color:var(--theme-text-faint);"><%= groupLabel(grp.g) %></span>
-                <% grp.entries.forEach(entry => { %>
-                <a href="<%= entry.url %>" class="nav-link2 whitespace-nowrap py-1.5 px-2.5 text-sm transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                   <%= entry.item.label %>
-                </a>
-                <% }); %>
-             </div>
-             <% }); %>
-          </nav>
-       </div>
+       <!-- Server controls live in the sidebar on desktop (see template.ejs);
+            mobile keeps the grouped tab strip below. -->
     </div>
- </div>
+  </div>
 
  <style>
   .nav-link2 { color: var(--theme-text-muted); }
