@@ -1182,10 +1182,33 @@ function openCreateFileModal() {
     }
 
     if (mode === 'folder') {
-      finalPath = finalPath.replace(/\/*$/, '') + '/.airlink_keep';
+      // Prefer the daemon mkdir endpoint (capability-detected via fallback):
+      // on failure, fall back to the keep-file trick so old daemons keep working.
+      closeCreateFileModal();
+      const loader = showLoadingPopup('Creating', 'Creating folder...');
+      try {
+        const parts = finalPath.split('/');
+        const name = parts.pop();
+        const parent = parts.join('/');
+        const res = await fetch('/server/<%= server.UUID %>/files/mkdir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: parent || '/', name }),
+        });
+        loader.close();
+        if (res.ok) {
+          showToast(raw + ' created', 'success');
+          setTimeout(() => location.reload(), 800);
+        } else {
+          showToast('Failed to create folder, retrying with fallback', 'error');
+          tryCreateFolderViaFile(finalPath, raw);
+        }
+      } catch {
+        loader.close();
+        tryCreateFolderViaFile(finalPath, raw);
+      }
+      return;
     }
-
-    closeCreateFileModal();
     const label = mode === 'folder' ? 'Creating folder...' : 'Creating file...';
     const loader = showLoadingPopup('Creating', label);
 
@@ -1237,6 +1260,27 @@ function openCreateFileModal() {
         loader.close(); showToast('Failed to move to target path', 'error');
       }
     } catch { loader.close(); showToast('Error creating file', 'error'); }
+  }
+
+  // Fallback for daemons without /fs/mkdir — create a .airlink_keep file inside.
+  async function tryCreateFolderViaFile(finalPath, raw) {
+    const keepPath = finalPath.replace(/\/*$/, '') + '/.airlink_keep';
+    const encoded = encodeURIComponent(keepPath);
+    try {
+      const res = await fetch('/server/<%= server.UUID %>/files/' + encoded, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: '' }),
+      });
+      if (res.ok) {
+        showToast(raw + ' created', 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast('Failed to create folder', 'error');
+      }
+    } catch {
+      showToast('Error creating folder', 'error');
+    }
   }
 
   // ── confirmRename: input is the full target path ──────────────────────────

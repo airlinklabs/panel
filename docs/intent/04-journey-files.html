@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journey: Bulk File Operations</title>
+<style>
+:root {
+  --bg: #fafafc; --surface: #ffffff; --fg: #18182b; --fg-muted: #65657a;
+  --border: #d8d8e4; --accent: #4338ca;
+  --sans: "Hanken Grotesk", Inter, system-ui, -apple-system, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px;
+  --s5: 20px; --s6: 24px; --s7: 32px; --s8: 48px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #18182b; --surface: #1f1f36; --fg: #f0f0f8; --fg-muted: #8888a8;
+    --border: #2a2a44; --accent: #7c6ff0;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  font-family: var(--sans); background: var(--bg); color: var(--fg);
+  padding: var(--s7); line-height: 1.5; margin: 0;
+}
+h1 { font-size: 18px; margin: 0 0 var(--s2); }
+p.sub { color: var(--fg-muted); font-size: 13px; margin: 0 0 var(--s6); }
+.visual-diagram {
+  margin: 0 0 var(--s5); padding: var(--s5);
+  background: var(--surface); border-radius: 8px;
+  border: 1px solid var(--border); overflow-x: auto;
+}
+.visual-label {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  color: var(--fg-muted); letter-spacing: 0.06em;
+  margin-bottom: var(--s4); text-transform: uppercase;
+}
+.flow-grid {
+  display: grid;
+  grid-template-columns: auto 16px 1fr 16px 1fr 16px 1fr 16px 1fr 16px 1fr;
+  align-items: center; padding: var(--s3) 0; row-gap: var(--s2);
+}
+.flow-node {
+  padding: var(--s2); background: var(--bg);
+  border: 1px solid var(--border); border-radius: 4px;
+  text-align: center; min-width: 0;
+}
+.flow-node-step { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--accent); margin-bottom: 1px; }
+.flow-node-label { font-size: 11px; font-weight: 600; color: var(--fg); }
+.flow-node-detail { font-size: 10px; color: var(--fg-muted); margin-top: 1px; }
+.flow-node-icon { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--accent); }
+.flow-start { border-color: var(--accent); border-width: 2px; padding: var(--s2) var(--s3); }
+.flow-end { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--bg)); }
+.flow-arrow { height: 1px; background: var(--border); position: relative; }
+.flow-arrow::after {
+  content: ''; position: absolute; right: 0; top: -3px;
+  border-left: 4px solid var(--border);
+  border-top: 3px solid transparent; border-bottom: 3px solid transparent;
+}
+.flow-gate { text-align: center; padding-top: var(--s1); }
+.flow-gate-connector { width: 1px; height: 10px; background: var(--border); margin: 0 auto; }
+.flow-gate-diamond {
+  width: 10px; height: 10px; background: var(--surface);
+  border: 1px solid var(--border);
+  transform: rotate(45deg); margin: 0 auto 4px;
+}
+.flow-gate-label { font-size: 10px; font-weight: 600; color: var(--fg-muted); }
+.flow-gate-action { font-size: 10px; color: var(--fg-muted); opacity: 0.6; }
+.flow-metric { margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--border); font-size: 11px; }
+.flow-metric-value { font-weight: 600; color: var(--accent); }
+.flow-metric-label { color: var(--fg-muted); }
+</style>
+</head>
+<body>
+<h1>Journey: Bulk File Operations</h1>
+<p class="sub">The deepest work surface — and the panel's best example of predictable density. This is the reference flow to propagate.</p>
+
+<div class="visual-diagram">
+  <div class="visual-label">Flow: Bulk file operation (reference)</div>
+  <div class="flow-grid">
+    <div class="flow-node flow-start">
+      <div class="flow-node-icon">&#9783;</div>
+      <div class="flow-node-label">Open Files</div>
+      <div class="flow-node-detail">tree/table &middot; search filter</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node">
+      <div class="flow-node-step">1</div>
+      <div class="flow-node-label">Select</div>
+      <div class="flow-node-detail">row checkboxes / select-all &middot; selection persists in session</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node">
+      <div class="flow-node-step">2</div>
+      <div class="flow-node-label">Bulk bar appears</div>
+      <div class="flow-node-detail">floating action bar &middot; count chip ("47 selected")</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node">
+      <div class="flow-node-step">3</div>
+      <div class="flow-node-label">Confirm</div>
+      <div class="flow-node-detail">numbered risk: "Delete 47 files? Can't be undone" &middot; Cancel first</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node">
+      <div class="flow-node-step">4</div>
+      <div class="flow-node-label">Progress + verify</div>
+      <div class="flow-node-detail">toast/bar &middot; list reflects change &middot; success names count</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node flow-end">
+      <div class="flow-node-step">5</div>
+      <div class="flow-node-label">Done</div>
+      <div class="flow-node-detail">recovery path where relevant ("Restore from backups")</div>
+    </div>
+    <div class="flow-gate" style="grid-column: 7; grid-row: 2;">
+      <div class="flow-gate-connector"></div>
+      <div class="flow-gate-diamond"></div>
+      <div class="flow-gate-label">Destructive?</div>
+      <div class="flow-gate-action">confirm with scale &middot; focus Cancel</div>
+    </div>
+  </div>
+  <div class="flow-metric">
+    <span class="flow-metric-value">Keyboard-first</span>
+    <span class="flow-metric-label">&middot; Escape clears selection &middot; Delete bulk-deletes &middot; selection survives navigation</span>
+  </div>
+</div>
+
+<div class="visual-diagram">
+  <div class="visual-label">Flow: Single-file edit (dirty-state guard)</div>
+  <div class="flow-grid">
+    <div class="flow-node flow-start">
+      <div class="flow-node-icon">&#9998;</div>
+      <div class="flow-node-label">Open editor</div>
+      <div class="flow-node-detail">from file table</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node">
+      <div class="flow-node-step">1</div>
+      <div class="flow-node-label">Edit</div>
+      <div class="flow-node-detail">dirty-state indicator appears</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node">
+      <div class="flow-node-step">2</div>
+      <div class="flow-node-label">Navigate away?</div>
+      <div class="flow-node-detail">guard: "You have unsaved changes" &middot; save / discard / stay</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node">
+      <div class="flow-node-step">3</div>
+      <div class="flow-node-label">Save</div>
+      <div class="flow-node-detail">toast confirms &middot; list reflects change</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node flow-end">
+      <div class="flow-node-step">4</div>
+      <div class="flow-node-label">Done</div>
+      <div class="flow-node-detail">dirty state cleared</div>
+    </div>
+    <div class="flow-gate" style="grid-column: 5; grid-row: 2;">
+      <div class="flow-gate-connector"></div>
+      <div class="flow-gate-diamond"></div>
+      <div class="flow-gate-label">Unsaved?</div>
+      <div class="flow-gate-action">guard on navigate-away &middot; HIGH if absent today</div>
+    </div>
+  </div>
+  <div class="flow-metric">
+    <span class="flow-metric-value">Open question</span>
+    <span class="flow-metric-label">&middot; verify whether file.ejs has a dirty-state guard today (pending /specify)</span>
+  </div>
+</div>
+</body>
+</html>

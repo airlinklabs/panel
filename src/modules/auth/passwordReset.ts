@@ -5,7 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import logger from '../../handlers/logger';
-import { sendMail } from '../../handlers/utils/core/mailer';
+import { sendPasswordReset } from '../../handlers/utils/core/mailer';
 import { getClientIp } from '../../utils/ip';
 
 // 3 requests per hour per IP — enough for a legitimate user, too few for abuse.
@@ -64,20 +64,11 @@ const passwordResetModule: Module = {
 
             const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${token}`;
 
-            await sendMail(
-              user.email,
-              'Password reset request',
-              `
-                <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;border:1px solid #e5e5e5;border-radius:12px">
-                  <h2 style="margin-top:0;color:#171717">Password reset</h2>
-                  <p style="color:#525252">A password reset was requested for your account on ${process.env.NAME || 'Airlink'}. This link expires in 1 hour.</p>
-                  <p style="margin:24px 0">
-                    <a href="${resetUrl}" style="display:inline-block;background:#171717;color:#ffffff;text-decoration:none;padding:11px 22px;border-radius:10px;font-weight:600">Reset password</a>
-                  </p>
-                  <p style="color:#a3a3a3;font-size:12px">If you did not request this, you can safely ignore this email.</p>
-                </div>
-              `,
-            );
+            await sendPasswordReset({
+              to: user.email,
+              panelName: process.env.NAME || 'Airlink',
+              resetUrl,
+            });
           }
         } catch (error) {
           logger.error('Password reset request error:', error);

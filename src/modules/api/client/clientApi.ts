@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import CronParser from 'cron-parser';
 import { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../handlers/logger';
@@ -15,13 +16,22 @@ function jsonError(res: Response, error: string, status = 400): void {
   res.status(status).json({ error });
 }
 
+function nextRunFromCron(cron: string, timeOffset = 0): Date {
+  const clock = new Date(Date.now() + timeOffset * 60_000);
+  return CronParser.parse(cron, { currentDate: clock }).next().toDate();
+}
+
 async function resolveServerForUser(serverId: string, userId: number) {
   const server = await prisma.server.findUnique({
     where: { UUID: serverId },
     include: { node: true },
   });
   if (!server) return null;
-  if (server.ownerId !== userId) return null;
+  if (server.ownerId === userId) return server;
+  const subUser = await prisma.subUser.findFirst({
+    where: { serverId: server.UUID, userId },
+  });
+  if (!subUser) return null;
   return server;
 }
 
@@ -460,10 +470,14 @@ const clientApiModule: Module = {
             id: true,
             name: true,
             cron: true,
-            action: true,
-            payload: true,
             enabled: true,
+            nextRunAt: true,
+            lastRunAt: true,
             createdAt: true,
+            tasks: {
+              orderBy: { order: 'asc' },
+              select: { id: true, action: true, payload: true, order: true },
+            },
           },
           orderBy: { createdAt: 'desc' },
         });
@@ -496,16 +510,35 @@ const clientApiModule: Module = {
         if (!['command', 'power', 'backup'].includes(action)) {
           return jsonError(res, 'action must be command, power, or backup');
         }
+        if (action === 'power') {
+          const parsed = (() => {
+            try {
+              return JSON.parse(payload ?? '{}');
+            } catch {
+              return {};
+            }
+          })() as { action?: string };
+          if (!parsed.action || !['start', 'stop', 'restart', 'kill'].includes(parsed.action)) {
+            return jsonError(res, 'power payload must include a valid action');
+          }
+        }
 
         const schedule = await prisma.schedule.create({
           data: {
             name,
             cron,
-            action,
-            payload: payload ?? null,
-            serverId: server.UUID,
             enabled: true,
+            nextRunAt: nextRunFromCron(cron.trim()),
+            serverId: server.UUID,
+            tasks: {
+              create: {
+                order: 0,
+                action,
+                payload: payload ?? '{}',
+              },
+            },
           },
+          include: { tasks: { orderBy: { order: 'asc' } } },
         });
 
         await logActivity(req, 'schedule:create' as any, {

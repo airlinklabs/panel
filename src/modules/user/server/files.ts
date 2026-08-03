@@ -193,6 +193,61 @@ export function registerFilesRoutes(router: Router): void {
   );
 
   router.post(
+    '/server/:id/files/mkdir',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
+    async (req: Request, res: Response) => {
+      const serverId = req.params?.id;
+      const relativePath = typeof req.body?.path === 'string' ? req.body.path : '/';
+      const folderName = req.body?.name;
+
+      if (typeof folderName !== 'string' || !folderName.trim() || folderName.includes('..')) {
+        res.status(400).json({ error: 'Invalid folder name.' });
+        return;
+      }
+      if (typeof relativePath === 'string' && !isPathSafe(relativePath) && relativePath !== '/') {
+        res.status(400).json({ error: 'Invalid path.' });
+        return;
+      }
+
+      try {
+        if (!serverId) {
+          res.status(400).json({ error: 'Server ID is required.' });
+          return;
+        }
+
+        const context = await loadAuthenticatedServerContext(req);
+        if (sendMissingServerContext(res, context)) {
+          return;
+        }
+        const { server } = context;
+
+        const response = await daemonRequest<{ message?: string }>({
+          method: 'POST',
+          path: '/fs/mkdir',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          body: {
+            id: serverId,
+            path: relativePath,
+            folderName: folderName.trim(),
+          },
+        });
+
+        if (response.status === 200) {
+          res.json({ success: true });
+        } else {
+          res.status(response.status).json({ error: response.data?.message || 'Failed to create folder' });
+        }
+      } catch (error: any) {
+        logger.error('Error creating folder:', error);
+        res.status(502).json({ error: 'Failed to create folder' });
+      }
+    },
+  );
+
+  router.post(
     '/server/:id/zip',
     isAuthenticatedForServer('id'),
     requireSubUserPermission('files'),

@@ -87,3 +87,20 @@ export async function sendSubUserInvite(input: {
     ],
   }));
 }
+
+export async function sendPasswordReset(input: {
+  to: string;
+  panelName: string;
+  resetUrl: string;
+}): Promise<boolean> {
+  const subject = `[${input.panelName}] Password reset request`;
+  return sendMail(input.to, subject, emailShell({
+    title: 'Password reset',
+    panelName: input.panelName,
+    body: [
+      `A password reset was requested for your account. This link expires in 1 hour.`,
+      `<a href="${esc(input.resetUrl)}" style="display:inline-block;background:#171717;color:#ffffff;text-decoration:none;padding:11px 22px;border-radius:10px;font-weight:600">Reset password</a>`,
+      `If you did not request this, you can safely ignore this email.`,
+    ],
+  }));
+}

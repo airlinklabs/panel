@@ -191,6 +191,8 @@ require.config({
   let wordWrapEnabled = false;
   let minimapEnabled = false;
   let themeMode = 'auto'; // 'auto', 'light', or 'dark'
+  let isDirty = false;
+  let allowNavigation = false;
   const serverUuid = <%- JSON.stringify(server.UUID) %>;
   const editorFilePath = <%- JSON.stringify(file.path || '') %>;
   const saveUrl = `/server/${serverUuid}/files/${encodeURIComponent(editorFilePath)}`;
@@ -309,6 +311,11 @@ require.config({
       document.getElementById('editor-status').textContent = `Line: ${e.position.lineNumber}, Column: ${e.position.column}`;
     });
 
+    // Track unsaved changes — dirty flag guards navigation and close
+    editor.onDidChangeModelContent(function() {
+      if (!isDirty) isDirty = true;
+    });
+
     // Set file info in the status bar
     document.getElementById('file-info').textContent = '<%= fileExtension %>' || 'plaintext';
 
@@ -389,10 +396,21 @@ require.config({
 
       if (!response.ok) throw new Error('Failed to save file');
 
+      isDirty = false;
       showToast('File saved.', 'success');
     } catch (error) {
       console.error('Error saving file:', error);
+      // Content is never cleared on failure — offer Retry instead
       showToast('Failed to save file', 'error');
+      if (window.modal) {
+        window.modal.confirm({
+          title: 'Save failed',
+          body: 'Your changes are still in the editor. Try saving again?',
+          danger: false,
+          confirmLabel: 'Retry',
+          onConfirm: function () { saveFile(); },
+        });
+      }
     } finally {
       saveBtn.disabled = false;
       saveBtn.innerHTML = `
@@ -411,6 +429,41 @@ require.config({
       event.preventDefault();
       await saveFile();
     }
+  });
+
+  // ── Unsaved-changes guard ─────────────────────────────────────────────────
+  // beforeunload covers tab close / hard navigation; in-app links get a
+  // Cancel-first confirm ("Keep editing" stays focused — never traps).
+  window.addEventListener('beforeunload', function (event) {
+    if (!isDirty || allowNavigation) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+
+  function guardNavigation(href) {
+    if (!isDirty || allowNavigation) return;
+    if (window.modal) {
+      event.preventDefault();
+      event.stopPropagation();
+      window.modal.confirm({
+        title: 'Unsaved changes',
+        body: 'You have unsaved changes in this file. Leave anyway?',
+        confirmLabel: 'Discard',
+        onConfirm: function () {
+          allowNavigation = true;
+          window.location.href = href;
+        },
+      });
+    }
+  }
+
+  document.addEventListener('click', function (event) {
+    if (!isDirty || allowNavigation) return;
+    const anchor = event.target.closest('a[href]');
+    if (!anchor) return;
+    const href = anchor.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+    guardNavigation(href);
   });
 </script>
 

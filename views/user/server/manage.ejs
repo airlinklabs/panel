@@ -197,7 +197,7 @@
                 <canvas id="statusChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
                   <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.Status %>:</h2>
-                  <p id="status" class="mt-1 text-lg font-medium tracking-tight leading-snug" style="color:var(--theme-text-strong)">-</p>
+                  <p id="status" role="status" aria-live="polite" class="mt-1 text-lg font-medium tracking-tight leading-snug" style="color:var(--theme-text-strong)">-</p>
                   <p id="status-msg" class="text-xs font-medium mt-0.5 leading-snug transition-all duration-300 opacity-0 translate-y-1 pointer-events-none" style="color:var(--theme-text-muted)"></p>
                 </div>
               </div>
@@ -529,6 +529,19 @@ function connectWebSocket() {
     openConsoleSocket();
 }
 
+function setDaemonOfflineBanner(offline) {
+    const row = document.getElementById('daemonOfflineWarningRow');
+    if (!row) return;
+    if (offline) {
+        row.classList.remove('hidden');
+        lockInput('Console paused — daemon offline');
+        writeConsole('system', 'error', 'Console paused — daemon offline');
+    } else {
+        row.classList.add('hidden');
+        unlockInput();
+    }
+}
+
 async function openConsoleSocket() {
     try {
         const token = await getWsConnectToken('<%= server.UUID %>');
@@ -539,8 +552,7 @@ async function openConsoleSocket() {
             reconnectAttempts = 0;
             reconnectInterval = 2000;
             wsErrorCount = 0;
-            const row = document.getElementById('daemonOfflineWarningRow');
-            if (row) row.classList.add('hidden');
+            setDaemonOfflineBanner(false);
 
             if (!historyLoaded) {
                 historyLoaded = true;
@@ -559,8 +571,7 @@ async function openConsoleSocket() {
         socket.onerror = () => {
             wsErrorCount++;
             if (wsErrorCount >= 3) {
-                const row = document.getElementById('daemonOfflineWarningRow');
-                if (row) row.classList.remove('hidden');
+                setDaemonOfflineBanner(true);
             }
         };
 
@@ -671,8 +682,7 @@ connectWebSocket();
                 if (text.includes('airlinkd server appears to be down')) {
                     socket.close();
                     wsErrorCount = 3;
-                    const row = document.getElementById('daemonOfflineWarningRow');
-                    if (row) row.classList.remove('hidden');
+                    setDaemonOfflineBanner(true);
                     return;
                 }
                 if (text.includes('Working on')) {
@@ -699,8 +709,7 @@ connectWebSocket();
         if (text.includes('airlinkd server appears to be down')) {
             socket.close();
             wsErrorCount = 3;
-            const row = document.getElementById('daemonOfflineWarningRow');
-            if (row) row.classList.remove('hidden');
+            setDaemonOfflineBanner(true);
             return;
         }
         if (text.includes('Working on')) {
@@ -893,6 +902,7 @@ connectWebSocket();
           confirmLabel: '<%= req.translations.restartServer || "Restart Server" %>',
           onConfirm: async () => {
           const serverUUID = '<%= server.UUID %>';
+          deliberateStop = true;
           setStatusText('Restarting', 'var(--theme-warning)');
           setStatusLog('Sending restart request...');
           updateStatusChart('warning', 0.1, 0.2);
@@ -908,7 +918,7 @@ connectWebSocket();
               const { type, message } = parsed.data;
               setStatusLog(message, type);
               writeConsole('daemon', 'info', message);
-              if (type === 'started') { unlockInput(); clearButtonLoading(restartButton); }
+              if (type === 'started') { unlockInput(); clearButtonLoading(restartButton); if (typeof term !== 'undefined') term.scrollToBottom(); }
               if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); clearButtonLoading(restartButton); }
           };
 
@@ -969,6 +979,7 @@ connectWebSocket();
           confirmLabel: '<%= req.translations.stopServer || "Stop Server" %>',
           onConfirm: async () => {
 
+          deliberateStop = true;
           setStatusText('Stopping', 'var(--theme-danger)');
           setStatusLog('Sending stop command...');
           updateStatusChart('danger', 0.1, 0.2);
@@ -1121,7 +1132,10 @@ connectWebSocket();
                 if (!stats.data) { return; }
 
                 if (stats.data.running === false) {
-                    if (!lifecycleActive) setAllStatsOffline();
+                    if (!lifecycleActive) {
+                        setAllStatsOffline();
+                        surfaceStoppedState(stats.data);
+                    }
                     return;
                 }
 
@@ -1326,6 +1340,39 @@ connectWebSocket();
     // When true, the lifecycle stream owns the status card — stats polling must not overwrite it.
     let lifecycleActive = false;
     let statusMsgFadeTimer = null;
+    // True when the user (or a lifecycle event) deliberately stopped the server.
+    // A stop with this flag set is never labeled a crash.
+    let deliberateStop = false;
+
+    // ── Crash vs. stop surfacing (S-2) ─────────────────────────────────────
+    // Never fabricate: an exit code labels the crash precisely, 137 gets the
+    // OOM hint, no exit code gets an honest "stopped unexpectedly" fallback.
+    function crashReasonLabel(exitCode) {
+        if (exitCode === 137) return 'Server crashed (exit 137 — likely out of memory)';
+        if (typeof exitCode === 'number') return 'Server crashed (exit ' + exitCode + ')';
+        return 'Stopped unexpectedly — open logs to see why.';
+    }
+
+    function surfaceStoppedState(data) {
+        if (deliberateStop) { deliberateStop = false; return; }
+        const reason = crashReasonLabel(data && data.exitCode);
+        setStatusText(reason, 'var(--theme-danger)');
+        updateStatusChart('danger', 0.1, 0.2);
+        const msgEl = document.getElementById('status-msg');
+        if (msgEl) {
+            const link = document.createElement('a');
+            link.href = '/server/<%= server.UUID %>/logs';
+            link.textContent = 'Open logs';
+            link.className = 'underline underline-offset-2 hover:opacity-75';
+            msgEl.textContent = '';
+            msgEl.appendChild(link);
+            msgEl.className = 'text-xs font-medium mt-0.5 leading-snug transition-all duration-300';
+            msgEl.style.color = 'var(--theme-danger)';
+            msgEl.classList.remove('opacity-0', 'translate-y-1', 'pointer-events-none');
+        }
+        writeConsole('daemon', 'error', reason);
+        showToast(reason, 'error');
+    }
 
     // Color map: lifecycle event type → text color token
     const statusColors = {
@@ -1494,8 +1541,8 @@ if (parsed.event !== 'lifecycle') return;
             setStatusLog(message, type);
             writeConsole('daemon', 'info', message);
             if (lockingStates.has(type)) { lockInput('Waiting...'); }
-            if (type === 'started') { unlockInput(); setStatusLog(null); }
-            if (type === 'stopped' || type === 'killed') { setStatusLog(null); }
+            if (type === 'started') { unlockInput(); setStatusLog(null); if (typeof term !== 'undefined') term.scrollToBottom(); }
+            if (type === 'stopped' || type === 'killed') { deliberateStop = true; setStatusLog(null); }
             if (type === 'error') { unlockInput(); setStatusLog(null); }
         };
         }).catch(() => {});

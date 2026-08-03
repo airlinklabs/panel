@@ -33,7 +33,26 @@
       }
     }
     
-    return originalFetch.call(this, url, options);
+    const promise = originalFetch.call(this, url, options);
+
+    // Session-expiry surfacing — a 401 on a page request means the session
+    // died mid-work. Tell the user instead of failing silently. API routes
+    // are exempt (a bad API key is a real auth error, not an expired session).
+    promise.then((res) => {
+      if (res.status === 401 && !String(url).startsWith('/api/')) {
+        const cleanUrl = typeof url === 'string' ? url : url && url.href ? url.href : '';
+        if (cleanUrl === window.location.pathname) return;
+        if (window.showToast) {
+          showToast('Your session expired. Please sign in again.', 'error');
+        }
+        if (!window.__sessionExpiryRedirecting) {
+          window.__sessionExpiryRedirecting = true;
+          setTimeout(() => { window.location.href = '/login'; }, 1500);
+        }
+      }
+    }).catch(() => {});
+
+    return promise;
   };
 
   // Add CSRF token to XMLHttpRequest
