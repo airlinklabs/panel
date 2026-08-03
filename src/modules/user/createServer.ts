@@ -83,6 +83,25 @@ const userCreateServerModule: Module = {
         const nodes = await prisma.node.findMany();
         const images = await prisma.images.findMany();
 
+        const nodeHeadroom: Record<number, unknown> = {};
+        for (const n of nodes) {
+          const agg = await prisma.server.aggregate({
+            where: { nodeId: n.id },
+            _sum: { Memory: true, Cpu: true, Storage: true },
+          });
+          nodeHeadroom[n.id] = {
+            ram: n.ram,
+            cpu: n.cpu,
+            disk: n.disk,
+            overMemory: n.overallocateMemory,
+            overCpu: n.overallocateCpu,
+            overDisk: n.overallocateDisk,
+            usedMemory: agg._sum.Memory ?? 0,
+            usedCpu: agg._sum.Cpu ?? 0,
+            usedStorage: agg._sum.Storage ?? 0,
+          };
+        }
+
         res.render('user/create-server', {
           user,
           req,
@@ -92,6 +111,7 @@ const userCreateServerModule: Module = {
           serverLimit,
           currentCount,
           resourceLimits,
+          nodeHeadroom,
         });
       } catch (error) {
         logger.error('Error loading user create server page:', error);

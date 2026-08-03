@@ -107,6 +107,11 @@
                 </select>
                 <div class="custom-select" data-for="nodeId"></div>
               </div>
+              <div id="nodeHeadroom" class="hidden space-y-2.5 rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900/60 p-4">
+                <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Node headroom</p>
+                <div id="nodeHeadroomRows" class="space-y-2.5"></div>
+                <p id="headroomHint" class="text-[11px] text-neutral-400"></p>
+              </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="al-label" for="imageId">Image</label>
@@ -241,5 +246,6 @@
 <%- include('../components/loadingPopup') %>
 
 <script nonce="<%- nonce %>" src="/javascript/user/create-server.js"></script>
+<script nonce="<%- nonce %>">window.__nodeHeadroom = <%- JSON.stringify(nodeHeadroom) %>;</script>
 
 <%- include('../components/footer') %>

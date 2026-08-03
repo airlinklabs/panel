@@ -76,6 +76,64 @@
     this.classList.remove('invalid');
   });
 
+  // ── Live node headroom budget (P-6) ──────────────────────────────
+  function fmtMb(mb) {
+    if (!isFinite(mb)) return '';
+    return mb >= 1024 ? String(Math.round((mb / 1024) * 10) / 10) + ' GB' : Math.round(mb) + ' MB';
+  }
+
+  function headroomRow(label, used, current, cap, unit, fmt) {
+    const total = used + current;
+    const pct = cap > 0 ? (total / cap) * 100 : 0;
+    const over = total > cap;
+    const row = document.createElement('div');
+    const color = over ? 'var(--theme-danger)' : pct >= 80 ? 'var(--theme-warning, #d97706)' : 'var(--theme-accent)';
+    row.className = 'space-y-1';
+    row.innerHTML =
+      '<div class="flex items-center justify-between text-[11px]">' +
+        '<span class="text-neutral-500 dark:text-neutral-400 font-medium">' + label + '</span>' +
+        '<span class="font-mono ' + (over ? 'text-red-500 dark:text-red-400' : 'text-neutral-500 dark:text-neutral-400') + '">' +
+          fmt(used) + ' in use' + (current > 0 ? ' + ' + fmt(current) + ' here' : '') + ' / ' + fmt(cap) + '</span>' +
+      '</div>' +
+      '<div class="h-1.5 rounded-full overflow-hidden" style="background:var(--theme-border-subtle, rgba(128,128,128,0.25))">' +
+        '<div class="h-full rounded-full transition-all duration-200" style="width:' + Math.min(100, pct) + '%;background:' + color + '"></div>' +
+      '</div>';
+    return row;
+  }
+
+  function refreshHeadroom() {
+    const wrap = document.getElementById('nodeHeadroom');
+    const rowsEl = document.getElementById('nodeHeadroomRows');
+    const hint = document.getElementById('headroomHint');
+    const data = (window.__nodeHeadroom || {})[document.getElementById('nodeId').value];
+    if (!data) { wrap.classList.add('hidden'); return; }
+
+    const mem = parseInt(document.getElementById('Memory').value) || 0;
+    const cpu = parseInt(document.getElementById('Cpu').value) || 0;
+    const st  = parseInt(document.getElementById('Storage').value) || 0;
+
+    const rows = [];
+    if (data.ram > 0)  rows.push(headroomRow('RAM',  data.usedMemory, mem, data.ram * 1024 * (1 + data.overMemory / 100), 'MB', fmtMb));
+    if (data.cpu > 0)  rows.push(headroomRow('CPU',  data.usedCpu,    cpu, data.cpu * (1 + data.overCpu / 100),          '%',  function (v) { return Math.round(v) + '%'; }));
+    if (data.disk > 0) rows.push(headroomRow('Disk', data.usedStorage, st, data.disk * 1024 * (1 + data.overDisk / 100),  'MB', fmtMb));
+
+    if (!rows.length) { wrap.classList.add('hidden'); return; }
+    rowsEl.innerHTML = '';
+    rows.forEach(r => rowsEl.appendChild(r));
+    const over = data.overMemory > 0 || data.overCpu > 0 || data.overDisk > 0;
+    hint.textContent = over ? 'Node capacity includes overallocation.' : '';
+    wrap.classList.remove('hidden');
+  }
+
+  document.getElementById('nodeId').addEventListener('change', refreshHeadroom);
+  ['MemoryDisplay', 'Cpu', 'SwapDisplay', 'StorageDisplay'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', refreshHeadroom);
+  });
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.closest && e.target.closest('.al-format-switcher')) refreshHeadroom();
+  });
+  refreshHeadroom();
+
   function showConfirm(title, body) {
     return new Promise(resolve => {
       window.modal.confirm({
