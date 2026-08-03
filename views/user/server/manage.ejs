@@ -616,6 +616,7 @@ async function openConsoleSocket() {
 }
 
 function scheduleReconnect() {
+    if (pageHidden) return;
     isReconnecting = true;
     reconnectAttempts++;
 
@@ -624,7 +625,25 @@ function scheduleReconnect() {
     if (reconnectAttempts <= maxReconnectAttempts) {
         reconnectTimer = setTimeout(() => {
 
-            connectWebSocket();
+connectWebSocket();
+
+// Background throttle — close the console socket while the tab is hidden,
+// pause reconnect timers, and reconnect immediately when the tab returns.
+let pageHidden = document.visibilityState === 'hidden';
+document.addEventListener('visibilitychange', () => {
+    pageHidden = document.visibilityState === 'hidden';
+    if (pageHidden) {
+        isReconnecting = false;
+        if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+        if (socket) {
+            try { socket.close(1000, 'page hidden'); } catch {}
+            socket = null;
+        }
+    } else {
+        isReconnecting = false;
+        connectWebSocket();
+    }
+});
         }, backoffTime);
     } else {
 
