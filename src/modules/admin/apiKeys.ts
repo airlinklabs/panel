@@ -154,7 +154,7 @@ const coreModule: Module = {
       isAuthenticated(true, 'airlink.admin.apikeys.create'),
       async (req: Request, res: Response) => {
         try {
-          const { name, description, permissions } = req.body;
+          const { name, description, permissions } = req.body ?? {};
 
           if (!name) {
             res.status(400).json({ error: 'API key name is required' });
