@@ -26,6 +26,7 @@ export interface ServerMenuItem {
   isActive?: (path: string) => boolean;
   isDefault?: boolean;
   ownerOnly?: boolean;
+  group?: string;
 }
 
 export interface ServerSection {
@@ -220,7 +221,8 @@ export function initializeDefaultUIComponents(): void {
     icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 mb-0.5 inline-flex mr-1"><path fill-rule="evenodd" d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm3.97.97a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Zm4.28 4.28a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" clip-rule="evenodd" /></svg>',
     url: '/server/:uuid',
     priority: 100,
-    isDefault: true
+    isDefault: true,
+    group: 'run'
   });
 
   uiComponentStore.addSidebarItem({
@@ -254,7 +256,8 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/servers/edit/:id',
     priority: 55,
     isAdminItem: true,
-    isDefault: true
+    isDefault: true,
+    group: 'settings'
   });
 
   uiComponentStore.addServerMenuItem({
@@ -263,7 +266,8 @@ export function initializeDefaultUIComponents(): void {
     icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 mb-0.5 inline-flex mr-1"><path d="M19.906 9c.382 0 .749.057 1.094.162V9a3 3 0 0 0-3-3h-3.879a.75.75 0 0 1-.53-.22L11.47 3.66A2.25 2.25 0 0 0 9.879 3H6a3 3 0 0 0-3 3v3.162A3.756 3.756 0 0 1 4.094 9h15.812ZM4.094 10.5a2.25 2.25 0 0 0-2.227 2.568l.857 6A2.25 2.25 0 0 0 4.951 21H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-2.227-2.568H4.094Z" /></svg>',
     url: '/server/:uuid/files',
     priority: 90,
-    isDefault: true
+    isDefault: true,
+    group: 'data'
   });
 
   uiComponentStore.addServerMenuItem({
@@ -273,7 +277,8 @@ export function initializeDefaultUIComponents(): void {
     url: '/server/:uuid/players',
     priority: 80,
     feature: 'players',
-    isDefault: true
+    isDefault: true,
+    group: 'run'
   });
 
   uiComponentStore.addServerMenuItem({
@@ -282,7 +287,8 @@ export function initializeDefaultUIComponents(): void {
     icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" /></svg>',
     url: '/server/:uuid/schedules',
     priority: 78,
-    isDefault: true
+    isDefault: true,
+    group: 'data'
   });
 
   uiComponentStore.addServerMenuItem({
@@ -292,7 +298,8 @@ export function initializeDefaultUIComponents(): void {
     url: '/server/:uuid/worlds',
     priority: 75,
     feature: 'worlds',
-    isDefault: true
+    isDefault: true,
+    group: 'manage'
   });
 
   uiComponentStore.addServerMenuItem({
@@ -301,7 +308,8 @@ export function initializeDefaultUIComponents(): void {
     icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" /></svg>',
     url: '/server/:uuid/startup',
     priority: 70,
-    isDefault: true
+    isDefault: true,
+    group: 'manage'
   });
 
   uiComponentStore.addServerMenuItem({
@@ -310,7 +318,8 @@ export function initializeDefaultUIComponents(): void {
     icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" /></svg>',
     url: '/server/:uuid/backups',
     priority: 65,
-    isDefault: true
+    isDefault: true,
+    group: 'data'
   });
 
   uiComponentStore.addServerMenuItem({
@@ -319,7 +328,8 @@ export function initializeDefaultUIComponents(): void {
     icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg>',
     url: '/server/:uuid/subusers',
     priority: 62,
-    ownerOnly: true
+    ownerOnly: true,
+    group: 'manage'
   });
 
   uiComponentStore.addServerMenuItem({
@@ -328,7 +338,8 @@ export function initializeDefaultUIComponents(): void {
     icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" /></svg>',
     url: '/server/:uuid/databases',
     priority: 64,
-    isDefault: true
+    isDefault: true,
+    group: 'data'
   });
 
 uiComponentStore.addServerMenuItem({
@@ -337,7 +348,8 @@ uiComponentStore.addServerMenuItem({
     icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 mb-0.5 inline-flex mr-1"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.028.352-.087.43l-.723.595a1.875 1.875 0 0 0 .375 3.163l1.158.575c.09.045.138.14.148.245.02.2.031.4.031.602 0 .087.026.169.071.242l.105-.02.178 1.072c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.074c.02-.12.093-.218.213-.255.3-.1.599-.216.898-.34.343-.109.678-.218.993-.342.303-.12.497.202.497.202l.624.543a1.875 1.875 0 0 0 2.395-.038l1.117-.9 1.474 1.197.642 1.972c.01.071-.062.13-.144.13H22.5v1.5a1.125 1.125 0 0 0 1.125 1.125h.75a2.25 2.25 0 0 1 2.25 2.25v2.25a1.875 1.875 0 0 1-1.875 1.875H12.75a1.875 1.875 0 0 1-1.875-1.875v-2.25a2.25 2.25 0 0 1 2.25-2.25h.75a1.125 1.125 0 0 0 1.125-1.125v-0.1a1.875 1.875 0 0 1 1.875-1.875Z" /></svg>',
     url: '/server/:uuid/settings',
     priority: 60,
-    isDefault: true
+    isDefault: true,
+    group: 'settings'
   });
 
   uiComponentStore.addSidebarItem({

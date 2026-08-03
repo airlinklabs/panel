@@ -43,7 +43,7 @@
         const cleanUrl = typeof url === 'string' ? url : url && url.href ? url.href : '';
         if (cleanUrl === window.location.pathname) return;
         if (window.showToast) {
-          showToast('Your session expired. Please sign in again.', 'error');
+          showToast(window.__sessionExpiredMsg || 'Your session expired. Please sign in again.', 'error');
         }
         if (!window.__sessionExpiryRedirecting) {
           window.__sessionExpiryRedirecting = true;

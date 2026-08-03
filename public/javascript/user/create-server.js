@@ -76,72 +76,16 @@
     this.classList.remove('invalid');
   });
 
-  const overlay      = document.getElementById('confirmOverlay');
-  const confirmTitle = document.getElementById('confirmTitle');
-  const confirmBody  = document.getElementById('confirmBody');
-  const confirmOk    = document.getElementById('confirmOk');
-  const confirmCancel = document.getElementById('confirmCancel');
-  let confirmResolve = null;
-  let lastFocusedBeforeConfirm = null;
-
-  function trapConfirmFocus(e) {
-    if (e.key !== 'Tab') return;
-    const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  }
-
   function showConfirm(title, body) {
     return new Promise(resolve => {
-      lastFocusedBeforeConfirm = document.activeElement;
-      confirmTitle.textContent = title;
-      confirmBody.textContent  = body;
-      overlay.classList.add('open');
-      Animate.openModal(overlay, overlay.querySelector('.confirm-box'));
-      confirmResolve = resolve;
-      // Focus the cancel button (safe default)
-      setTimeout(function() { confirmCancel.focus(); }, 0);
-      // Add keyboard handlers
-      overlay._keydownHandler = function(e) {
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          closeConfirm(false);
-          return;
-        }
-        trapConfirmFocus(e);
-      };
-      document.addEventListener('keydown', overlay._keydownHandler);
+      window.modal.confirm({
+        title: title,
+        body: body,
+        confirmLabel: 'Create',
+        onConfirm: resolve,
+      });
     });
   }
-
-  function closeConfirm(result) {
-    overlay.classList.add('closing');
-    const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
-    Animate.closeModal(overlay, overlay.querySelector('.confirm-box'), done);
-    if (overlay._keydownHandler) {
-      document.removeEventListener('keydown', overlay._keydownHandler);
-      overlay._keydownHandler = null;
-    }
-    if (confirmResolve) confirmResolve(result);
-    confirmResolve = null;
-    // Restore focus
-    if (lastFocusedBeforeConfirm && typeof lastFocusedBeforeConfirm.focus === 'function') {
-      lastFocusedBeforeConfirm.focus();
-      lastFocusedBeforeConfirm = null;
-    }
-  }
-
-  confirmOk.addEventListener('click', () => closeConfirm(true));
-  confirmCancel.addEventListener('click', () => closeConfirm(false));
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeConfirm(false); });
 
   document.getElementById('createBtn').addEventListener('click', async function () {
     const btn     = this;

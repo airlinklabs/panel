@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="h-full js-loading" lang="en">
+<html class="h-full js-loading" lang="<%= (req && req.lang) || 'en' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
     <script nonce="<%- nonce %>" src="/js/csrf.js"></script>
+    <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
     <script nonce="<%- nonce %>" src="/javascript/shared/format-switcher.js"></script>
     <script nonce="<%- nonce %>" src="/javascript/shared/animations.js"></script>
     <script nonce="<%- nonce %>" src="/javascript/shared/custom-select.js"></script>

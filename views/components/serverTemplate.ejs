@@ -11,165 +11,83 @@
         });
         const currentPath = (typeof req !== 'undefined' && req && (req.path || req.originalUrl)) ? req.path : '';
         const isCurrentItem = (url) => url && url !== '#' && (currentPath === url || (url !== '/' && currentPath.startsWith(url + '/')));
-        const MAX_NAV_ITEMS = 5;
-        let navBarItems = [];
-        let navOverflowItems = [];
-        if (menuItemsMobile && menuItemsMobile.length > 0) {
-          const mapped = menuItemsMobile
-            .filter(item => !item.feature || (typeof features !== 'undefined' && features.includes(item.feature)))
-            .map(item => ({
-              item,
-              url: (item.url || '#').replace(':uuid', server.UUID).replace(':id', server.id),
-            }));
-          const activeIndex = mapped.findIndex(entry => isCurrentItem(entry.url));
-          navBarItems = mapped.slice(0, MAX_NAV_ITEMS);
-          navOverflowItems = mapped.slice(MAX_NAV_ITEMS);
-          if (activeIndex >= MAX_NAV_ITEMS && activeIndex !== -1) {
-            navBarItems = [...mapped.slice(0, MAX_NAV_ITEMS - 1), mapped[activeIndex]];
-            navOverflowItems = [...mapped.slice(MAX_NAV_ITEMS - 1, activeIndex), ...mapped.slice(activeIndex + 1)];
-          }
-        }
+        const navEntries = menuItemsMobile
+          .filter(item => !item.feature || (typeof features !== 'undefined' && features.includes(item.feature)))
+          .map(item => ({
+            item,
+            url: (item.url || '#').replace(':uuid', server.UUID).replace(':id', server.id),
+          }));
+        const GROUP_ORDER = ['run', 'data', 'manage', 'settings'];
+        const groupLabel = (g) => {
+          const t = (typeof req !== 'undefined' && req && req.translations) || {};
+          if (g === 'run') return t.navGroupRun || 'Run';
+          if (g === 'data') return t.navGroupData || 'Data';
+          if (g === 'manage') return t.navGroupManage || 'Manage';
+          if (g === 'settings') return t.navGroupSettings || 'Settings';
+          return null;
+        };
+        const grouped = GROUP_ORDER
+          .map(g => ({ g, entries: navEntries.filter(e => (e.item.group || 'manage') === g) }))
+          .filter(grp => grp.entries.length > 0);
+        const activeEntry = navEntries.find(entry => isCurrentItem(entry.url));
+        const activeGroup = activeEntry ? (activeEntry.item.group || 'manage') : GROUP_ORDER[0];
        %>
-       <!-- Mobile server nav — shows on small screens, hides on sm+ -->
-       <div class="block sm:hidden overflow-x-auto mt-3">
-         <div class="flex gap-1 min-w-max pb-2">
-           <% if (!navBarItems || navBarItems.length === 0) { %>
-           <a href="/server/<%= server.UUID %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
-             <%- icon('terminal', { class: 'size-4' }) %>
-             Console
-           </a>
-           <a href="/server/<%= server.UUID %>/files" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
-             <%- icon('folder', { class: 'size-4' }) %>
-             Files
-           </a>
-           <% if (features.includes('players')) { %>
-           <a href="/server/<%= server.UUID %>/players" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
-             <%- icon('users', { class: 'size-4' }) %>
-             Players
-           </a>
-           <% } %>
-           <% if (features.includes('worlds')) { %>
-           <a href="/server/<%= server.UUID %>/worlds" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
-             <%- icon('globe', { class: 'size-4' }) %>
-             Worlds
-           </a>
-           <% } %>
-           <a href="/server/<%= server.UUID %>/startup" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
-             <%- icon('play', { class: 'size-4' }) %>
-             Startup
-           </a>
-           <a href="/server/<%= server.UUID %>/settings" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
-             <%- icon('settings', { class: 'size-4' }) %>
-             Settings
-           </a>
-           <% } else {
-              navBarItems.forEach(entry => {
-           %>
-           <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %> style="color:var(--theme-text-muted);">
-             <%- entry.item.icon %>
-             <%= entry.item.label %>
-           </a>
-           <% }); } %>
-           <% if (navOverflowItems.length > 0) { %>
-           <div class="relative" data-more-menu>
-             <button type="button" data-more-btn aria-expanded="false" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
-               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4"><path fill-rule="evenodd" d="M4.5 12a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm6 0a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm6 0a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clip-rule="evenodd" /></svg>
-               More
-             </button>
-             <div data-more-panel class="absolute left-0 top-full mt-1 z-50 hidden min-w-44 rounded-xl border p-1.5 shadow-lg" style="background:var(--theme-bg-card);border-color:var(--theme-border);">
-               <% navOverflowItems.forEach(entry => { %>
-               <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm whitespace-nowrap truncate transition hover:bg-neutral-100 dark:hover:bg-white/5" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
-                 <%- entry.item.icon %>
-                 <%= entry.item.label %>
-               </a>
-               <% }); %>
-             </div>
+       <!-- Mobile server nav — groups as tabs, members shown under the active tab -->
+       <div class="block sm:hidden mt-3">
+         <% if (grouped.length > 1) { %>
+         <div class="flex gap-1 overflow-x-auto pb-2" role="tablist" aria-label="Server sections">
+           <% grouped.forEach(grp => { %>
+           <button type="button" role="tab" aria-selected="<%= grp.g === activeGroup ? 'true' : 'false' %>"
+             data-nav-group-tab="<%= grp.g %>"
+             class="nav-group-tab flex items-center gap-1.5 py-1.5 px-3 text-sm rounded-xl border transition whitespace-nowrap"
+             style="color:var(--theme-text-muted); border-color:transparent;">
+             <%= groupLabel(grp.g) %>
+           </button>
+           <% }); %>
+         </div>
+         <% } %>
+         <div class="flex flex-wrap gap-1">
+           <% grouped.forEach(grp => { %>
+           <div data-nav-group="<%= grp.g %>" class="<%= grp.g === activeGroup ? '' : 'hidden' %> flex flex-wrap gap-1">
+             <% grp.entries.forEach(entry => { %>
+             <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
+               <%- entry.item.icon %>
+               <%= entry.item.label %>
+             </a>
+             <% }); %>
            </div>
-           <% } %>
+           <% }); %>
          </div>
        </div>
 
+       <!-- Desktop server nav — grouped, wrapped, no overflow menu -->
        <div class="hidden relative sm:block">
-          <nav class="flex relative">
-             <ul role="list" class="flex min-w-full mt-1.5 flex-none gap-x-2 text-sm font-normal leading-6 text-neutral-600 dark:text-neutral-400">
-                <% if (!navBarItems || navBarItems.length === 0) { %>
-                <li class="transition">
-                   <a href="/server/<%= server.UUID %>" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                     <%- icon('terminal', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
-                      Console
-                   </a>
-                </li>
-                <li class="transition">
-                   <a href="/server/<%= server.UUID %>/files" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                     <%- icon('folder', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
-                       Files
-                    </a>
-                </li>
-                <% if (features.includes('players')) { %>
-                <li class="transition">
-                  <a href="/server/<%= server.UUID %>/players" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                     <%- icon('users', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
-                      Players
-                   </a>
-               </li>
-               <% } %>
-               <% if (features.includes('worlds')) { %>
-                <li class="transition">
-                  <a href="/server/<%= server.UUID %>/worlds" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                     <%- icon('globe', { class: 'size-5 mb-0.5 inline-flex mr-1', strokeWidth: 1.5 }) %>
-                      Worlds
-                   </a>
-               </li>
-               <% } %>
-               <li class="transition">
-                <a href="/server/<%= server.UUID %>/startup" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                  <%- icon('play', { class: 'size-5 mb-0.5 inline-flex mr-1', strokeWidth: 1.5 }) %>
-
-                    Startup
-                 </a>
-              </li>
-              <li class="transition">
-                 <a href="/server/<%= server.UUID %>/settings" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                  <%- icon('settings', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
-                    Settings
-                 </a>
-              </li>
-
-              <% } else {
-                 navBarItems.forEach(entry => {
-              %>
-                 <li class="transition flex-shrink-0">
-                   <a href="<%= entry.url %>" class="nav-link2 whitespace-nowrap py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
-                     <%- entry.item.icon %>
-                     <%= entry.item.label %>
-                   </a>
-                 </li>
-              <% }); } %>
-              <% if (navOverflowItems.length > 0) { %>
-              <li class="relative" data-more-menu>
-                <button type="button" data-more-btn aria-expanded="false" class="nav-link2 whitespace-nowrap py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl" style="color:var(--theme-text-muted);">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 mb-0.5 inline-flex mr-1"><path fill-rule="evenodd" d="M4.5 12a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm6 0a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm6 0a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clip-rule="evenodd" /></svg>
-                  More
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3.5 mb-0.5 inline-flex ml-1"><path fill-rule="evenodd" d="M12.53 16.28a.75.75 0 0 1-1.06 0l-7.5-7.5a.75.75 0 0 1 1.06-1.06L12 14.69l6.97-6.97a.75.75 0 1 1 1.06 1.06l-7.5 7.5Z" clip-rule="evenodd" /></svg>
-                </button>
-                <div data-more-panel class="absolute right-0 top-full mt-1 z-50 hidden min-w-44 rounded-xl border p-1.5 shadow-lg" style="background:var(--theme-bg-card);border-color:var(--theme-border);">
-                  <% navOverflowItems.forEach(entry => { %>
-                  <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm whitespace-nowrap truncate transition hover:bg-neutral-100 dark:hover:bg-white/5" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
-                    <%- entry.item.icon %>
-                    <%= entry.item.label %>
-                  </a>
-                  <% }); %>
-                </div>
-              </li>
-              <% } %>
-             </ul>
+          <nav aria-label="Server sections" class="flex flex-wrap gap-x-8 gap-y-2 mt-1.5">
+             <% grouped.forEach(grp => { %>
+             <div class="flex items-center gap-x-2 flex-wrap">
+                <span class="text-[11px] font-semibold uppercase tracking-wide mr-1" style="color:var(--theme-text-faint);"><%= groupLabel(grp.g) %></span>
+                <% grp.entries.forEach(entry => { %>
+                <a href="<%= entry.url %>" class="nav-link2 whitespace-nowrap py-1.5 px-2.5 text-sm transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                   <%= entry.item.label %>
+                </a>
+                <% }); %>
+             </div>
+             <% }); %>
           </nav>
        </div>
     </div>
  </div>
 
  <style>
-  [data-more-panel] a[data-active="true"] { background: var(--theme-bg-secondary); color: var(--theme-text-strong); font-weight: 500; }
+  .nav-link2 { color: var(--theme-text-muted); }
+  .nav-link2[data-active="true"] {
+    background: color-mix(in srgb, var(--theme-accent) 10%, transparent);
+    color: var(--theme-accent);
+    font-weight: 500;
+  }
+  .nav-group-tab[data-active-group="true"] {
+    background: color-mix(in srgb, var(--theme-accent) 10%, transparent);
+  }
  </style>
 
  <!-- Server Sections -->
@@ -256,67 +174,35 @@
        syncActiveLink();
      }
 
-     window.addEventListener('popstate', syncActiveLink);
-     document.addEventListener('al:navigated', syncActiveLink);
+      window.addEventListener('popstate', syncActiveLink);
+      document.addEventListener('al:navigated', syncActiveLink);
 
-      // More dropdown toggles — scoped to this include's container.
-      // Panels float to <body> with fixed positioning on open: the mobile
-      // nav is an overflow-x scroll container, which clips absolute children.
-      function hideMorePanel(panel) {
-        if (panel._paAnchor) {
-          panel._paAnchor.appendChild(panel);
-          panel.removeAttribute('style');
-        }
-        panel.classList.add('hidden');
-        if (panel._paBtn) panel._paBtn.setAttribute('aria-expanded', 'false');
-      }
+      // Mobile group tabs — show the active group's items, keep the current
+      // path's group selected on load.
+      var tabButtons = root.querySelectorAll('[data-nav-group-tab]');
+      var groups = root.querySelectorAll('[data-nav-group]');
 
-      function closeMoreMenus(except) {
-        root.querySelectorAll('[data-more-panel]').forEach(function(panel) {
-          if (panel === except) return;
-          hideMorePanel(panel);
+      function selectGroup(name) {
+        groups.forEach(function(group) {
+          group.classList.toggle('hidden', group.getAttribute('data-nav-group') !== name);
         });
-      }
-
-      root.querySelectorAll('[data-more-menu]').forEach(function(menu) {
-        var btn = menu.querySelector('[data-more-btn]');
-        var panel = menu.querySelector('[data-more-panel]');
-        if (!btn || !panel) return;
-        panel._paAnchor = menu;
-        panel._paBtn = btn;
-
-        btn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          var willOpen = panel.classList.contains('hidden');
-          closeMoreMenus(panel);
-          if (!willOpen) return;
-
-          var rect = btn.getBoundingClientRect();
-          var gap = 6;
-          var maxWidth = Math.min(320, window.innerWidth - 24);
-          var left = Math.min(rect.left, window.innerWidth - maxWidth - 12);
-          if (left < 12) left = 12;
-          panel.style.position = 'fixed';
-          panel.style.maxWidth = maxWidth + 'px';
-          panel.style.left = left + 'px';
-          var spaceBelow = window.innerHeight - rect.bottom - gap;
-          var spaceAbove = rect.top - gap;
-          if (spaceBelow < 160 && spaceAbove > spaceBelow) {
-            panel.style.bottom = (window.innerHeight - rect.top + gap) + 'px';
+        tabButtons.forEach(function(btn) {
+          var on = btn.getAttribute('data-nav-group-tab') === name;
+          btn.setAttribute('aria-selected', on ? 'true' : 'false');
+          if (on) {
+            btn.style.color = 'var(--theme-accent)';
+            btn.style.borderColor = 'var(--theme-accent)';
           } else {
-            panel.style.top = (rect.bottom + gap) + 'px';
+            btn.style.color = 'var(--theme-text-muted)';
+            btn.style.borderColor = 'transparent';
           }
-          document.body.appendChild(panel);
-          panel.classList.remove('hidden');
-          btn.setAttribute('aria-expanded', 'true');
+        });
+      }
+
+      tabButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          selectGroup(btn.getAttribute('data-nav-group-tab'));
         });
       });
-
-      root.querySelectorAll('[data-more-panel] a').forEach(function(link) {
-        link.addEventListener('click', function() { closeMoreMenus(null); });
-      });
-
-      document.addEventListener('click', function() { closeMoreMenus(null); });
-      document.addEventListener('al:navigated', function() { closeMoreMenus(null); });
    })();
   </script>

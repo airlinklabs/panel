@@ -1185,7 +1185,7 @@ function openCreateFileModal() {
       // Prefer the daemon mkdir endpoint (capability-detected via fallback):
       // on failure, fall back to the keep-file trick so old daemons keep working.
       closeCreateFileModal();
-      const loader = showLoadingPopup('Creating', 'Creating folder...');
+      const loader = showLoadingPopup('Creating', req.translations.creatingFolder || 'Creating folder...');
       try {
         const parts = finalPath.split('/');
         const name = parts.pop();
@@ -1197,10 +1197,10 @@ function openCreateFileModal() {
         });
         loader.close();
         if (res.ok) {
-          showToast(raw + ' created', 'success');
+          showToast(raw + (req.translations.createdSuffix || ' created'), 'success');
           setTimeout(() => location.reload(), 800);
         } else {
-          showToast('Failed to create folder, retrying with fallback', 'error');
+          showToast(req.translations.folderCreateFailedFallback || 'Failed to create folder, retrying with fallback', 'error');
           tryCreateFolderViaFile(finalPath, raw);
         }
       } catch {
@@ -1209,7 +1209,7 @@ function openCreateFileModal() {
       }
       return;
     }
-    const label = mode === 'folder' ? 'Creating folder...' : 'Creating file...';
+    const label = mode === 'folder' ? (req.translations.creatingFolder || 'Creating folder...') : (req.translations.creatingFile || 'Creating file...');
     const loader = showLoadingPopup('Creating', label);
 
     const hasSlash = finalPath.includes('/');
@@ -1225,11 +1225,11 @@ function openCreateFileModal() {
         });
         if (res.ok) {
           loader.updateProgress(100, 'Done!');
-          setTimeout(() => { loader.close(); showToast(raw + ' created', 'success'); setTimeout(() => location.reload(), 800); }, 400);
+          setTimeout(() => { loader.close(); showToast(raw + (req.translations.createdSuffix || ' created'), 'success'); setTimeout(() => location.reload(), 800); }, 400);
         } else {
-          loader.close(); showToast('Failed to create file', 'error');
+          loader.close(); showToast(req.translations.fileCreateFailed || 'Failed to create file', 'error');
         }
-      } catch { loader.close(); showToast('Error creating file', 'error'); }
+      } catch { loader.close(); showToast(req.translations.fileCreateError || 'Error creating file', 'error'); }
       return;
     }
 
@@ -1244,9 +1244,9 @@ function openCreateFileModal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: '' }),
       });
-      if (!res1.ok) { loader.close(); showToast('Failed to create file', 'error'); return; }
+      if (!res1.ok) { loader.close(); showToast(req.translations.fileCreateFailed || 'Failed to create file', 'error'); return; }
 
-      loader.updateProgress(50, 'Moving to target path...');
+      loader.updateProgress(50, req.translations.movingToTarget || 'Moving to target path...');
 
       const res2 = await fetch('/server/<%= server.UUID %>/rename', {
         method: 'POST',
@@ -1255,11 +1255,11 @@ function openCreateFileModal() {
       });
       if (res2.ok) {
         loader.updateProgress(100, 'Done!');
-        setTimeout(() => { loader.close(); showToast(raw + ' created', 'success'); setTimeout(() => location.reload(), 800); }, 400);
+        setTimeout(() => { loader.close(); showToast(raw + (req.translations.createdSuffix || ' created'), 'success'); setTimeout(() => location.reload(), 800); }, 400);
       } else {
-        loader.close(); showToast('Failed to move to target path', 'error');
+        loader.close(); showToast(req.translations.moveToTargetFailed || 'Failed to move to target path', 'error');
       }
-    } catch { loader.close(); showToast('Error creating file', 'error'); }
+    } catch { loader.close(); showToast(req.translations.fileCreateError || 'Error creating file', 'error'); }
   }
 
   // Fallback for daemons without /fs/mkdir — create a .airlink_keep file inside.
@@ -1273,13 +1273,13 @@ function openCreateFileModal() {
         body: JSON.stringify({ content: '' }),
       });
       if (res.ok) {
-        showToast(raw + ' created', 'success');
+        showToast(raw + (req.translations.createdSuffix || ' created'), 'success');
         setTimeout(() => location.reload(), 800);
       } else {
-        showToast('Failed to create folder', 'error');
+        showToast(req.translations.folderCreateFailed || 'Failed to create folder', 'error');
       }
     } catch {
-      showToast('Error creating folder', 'error');
+      showToast(req.translations.folderCreateError || 'Error creating folder', 'error');
     }
   }
 

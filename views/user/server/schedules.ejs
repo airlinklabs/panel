@@ -300,7 +300,7 @@
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 const serverId = '<%= server.UUID %>';
 
-const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m, t) => alert(m) };
+const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m) => console.warn('[schedules]', m) };
 
 function getFocusableElements(panel) {
   return Array.from((panel || document).querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'))
@@ -747,27 +747,32 @@ window.toggleTasks = (scheduleId) => {
 };
 
 window.runSchedule = async (scheduleId, name) => {
-  if (!window.modal || typeof window.modal.confirm !== 'function') {
-    if (!confirm('Run schedule "' + name + '" now?')) return;
-  } else {
-    await new Promise(resolve => {
-      window.modal.confirm({ title: 'Run schedule', body: 'Run "' + name + '" now? Its tasks will execute immediately.', confirmLabel: 'Run', onConfirm: resolve });
+  const t = req.translations;
+  await new Promise(resolve => {
+    window.modal.confirm({
+      title: t.runScheduleTitle || 'Run schedule',
+      body: (t.runScheduleBodyBefore || 'Run "') + name + (t.runScheduleBodyAfter || '" now? Its tasks will execute immediately.'),
+      confirmLabel: t.runLabel || 'Run',
+      onConfirm: resolve,
     });
-  }
+  });
   const result = await api('/server/' + serverId + '/schedules/' + scheduleId + '/run', 'POST');
-  if (result) { showToast('Schedule run triggered.', 'success'); setTimeout(() => location.reload(), 1200); }
+  if (result) { showToast(t.scheduleRunTriggered || 'Schedule run triggered.', 'success'); setTimeout(() => location.reload(), 1200); }
 };
 
 window.deleteSchedule = async (scheduleId, name) => {
-  if (!window.modal || typeof window.modal.confirm !== 'function') {
-    if (!confirm('Delete schedule "' + name + '"?')) return;
-  } else {
-    await new Promise(resolve => {
-      window.modal.confirm({ title: 'Delete schedule', body: 'Delete "' + name + '"? This cannot be undone.', danger: true, confirmLabel: 'Delete', onConfirm: resolve });
+  const t = req.translations;
+  await new Promise(resolve => {
+    window.modal.confirm({
+      title: t.deleteScheduleTitle || 'Delete schedule',
+      body: (t.scheduleDeleteBodyBefore || 'Delete "') + name + (t.scheduleDeleteBodyAfter || '"? This cannot be undone.'),
+      danger: true,
+      confirmLabel: t.deleteLabel || 'Delete',
+      onConfirm: resolve,
     });
-  }
+  });
   const result = await api('/server/' + serverId + '/schedules/' + scheduleId, 'DELETE');
-  if (result) { showToast('Schedule deleted.', 'success'); setTimeout(() => location.reload(), 900); }
+  if (result) { showToast(t.scheduleDeleted || 'Schedule deleted.', 'success'); setTimeout(() => location.reload(), 900); }
 };
 
 const pendingTasks = {};

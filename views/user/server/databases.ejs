@@ -209,7 +209,7 @@ const t = <%= JSON.stringify(req.translations) %>;
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 const serverId = '<%= server.UUID %>';
 
-const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m, t) => alert(m) };
+const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m) => console.warn('[databases]', m) };
 
 function getFocusableElements(panel) {
   return Array.from((panel || document).querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'))

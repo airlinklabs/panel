@@ -64,7 +64,7 @@
 
 <script nonce="<%- nonce %>">
 (function () {
-  const toast = window.showToast || function (m, t) { alert(m); };
+  const toast = window.showToast || function (m) { console.warn('[locations]', m); };
 
   document.getElementById('createLocationBtn').addEventListener('click', async () => {
     const name = document.getElementById('locName').value.trim();
@@ -87,7 +87,15 @@
 
   document.querySelectorAll('.delete-location-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Delete location "' + btn.dataset.name + '"?')) return;
+      await new Promise(resolve => {
+        window.modal.confirm({
+          title: req.translations.deleteLocationTitle || 'Delete location',
+          body: (req.translations.deleteLocationBodyBefore || 'Delete "') + btn.dataset.name + (req.translations.deleteLocationBodyAfter || '"? Servers in it will lose their grouping.'),
+          danger: true,
+          confirmLabel: req.translations.deleteLabel || 'Delete',
+          onConfirm: resolve,
+        });
+      });
       const r = await fetch('/admin/location/' + btn.dataset.id, { method: 'DELETE' });
       const d = await r.json();
       if (r.ok) {

@@ -1348,9 +1348,10 @@ connectWebSocket();
     // Never fabricate: an exit code labels the crash precisely, 137 gets the
     // OOM hint, no exit code gets an honest "stopped unexpectedly" fallback.
     function crashReasonLabel(exitCode) {
-        if (exitCode === 137) return 'Server crashed (exit 137 — likely out of memory)';
-        if (typeof exitCode === 'number') return 'Server crashed (exit ' + exitCode + ')';
-        return 'Stopped unexpectedly — open logs to see why.';
+        const t = req.translations;
+        if (exitCode === 137) return t.serverCrashedOom || 'Server crashed (exit 137 — likely out of memory)';
+        if (typeof exitCode === 'number') return (t.serverCrashedExit || 'Server crashed (exit ') + exitCode + ')';
+        return null;
     }
 
     function surfaceStoppedState(data) {
@@ -1362,7 +1363,7 @@ connectWebSocket();
         if (msgEl) {
             const link = document.createElement('a');
             link.href = '/server/<%= server.UUID %>/logs';
-            link.textContent = 'Open logs';
+            link.textContent = req.translations.openLogs || 'Open logs';
             link.className = 'underline underline-offset-2 hover:opacity-75';
             msgEl.textContent = '';
             msgEl.appendChild(link);

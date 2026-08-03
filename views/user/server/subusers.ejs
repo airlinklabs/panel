@@ -269,7 +269,7 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
 const serverId = '<%= server.UUID %>';
 let editingSubUserId = null;
 
-const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m, t) => alert(m) };
+const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m) => console.warn('[subusers]', m) };
 
 function openModal(id) {
   const el = document.getElementById(id);
@@ -343,20 +343,16 @@ document.getElementById('confirmEditSubUser')?.addEventListener('click', async (
 });
 
 window.removeSubUser = async (id, name) => {
-  if (!window.modal || typeof window.modal.confirm !== 'function') {
-    const ok = confirm('Remove ' + name + ' from this server?');
-    if (!ok) return;
-  } else {
-    await new Promise(resolve => {
-      window.modal.confirm({
-        title: 'Remove subuser',
-        body: 'Remove ' + name + ' from this server? They will lose access immediately.',
-        danger: true,
-        confirmLabel: 'Remove',
-        onConfirm: resolve,
-      });
+  const t = req.translations;
+  await new Promise(resolve => {
+    window.modal.confirm({
+      title: t.removeSubuserTitle || 'Remove subuser',
+      body: (t.removeSubuserBodyBefore || 'Remove ') + name + (t.removeSubuserBodyAfter || ' from this server? They will lose access immediately.'),
+      danger: true,
+      confirmLabel: t.removeLabel || 'Remove',
+      onConfirm: resolve,
     });
-  }
+  });
   const result = await api('/server/' + serverId + '/subusers/' + id, 'DELETE');
   if (result) {
     showToast('Subuser removed.', 'success');
