@@ -312,7 +312,7 @@ Every item carries: ID, priority, phase, primary files (panel `views/`/`src/`, d
 
 **Parallel:** R-4 addon-author interviews + artifact audit (does the contract match reality?).
 
-**Status (2026-08):** X-1 ✅ `2e4ece01` (al-pagination + search wiring, pager hides under 50 rows) · X-2 ✅ audited — power/copy-IP/terminal+send all first-screenful on mobile, ≤3 taps holds · X-3 ✅ `7b916624` (tab-hidden WS close, pause reconnect, resume on return) · X-4 ✅ audited — every view is its own stable route, files deep-links via `?path=` · X-5 ✅ `f36863a7` (`docs/addon-ui-contract.md` published) · X-6 ✅ `9e36e36f` (SWR caches for node health + server snapshots; warm loads skip daemon round-trips) · X-7 ✅ `3e2eb678` (Web Locks console-ownership guard, view-only tabs).
+**Status (2026-08):** X-1 ✅ `2e4ece01` (al-pagination + search wiring, pager hides under 50 rows) · X-2 ✅ audited — power/copy-IP/terminal+send all first-screenful on mobile, ≤3 taps holds · X-3 ✅ `7b916624` (tab-hidden WS close, pause reconnect, resume on return) · X-4 ✅ audited — every view is its own stable route, files deep-links via `?path=` · X-5 ✅ `f36863a7` (`docs/addon-ui-contract.md` published) · X-6 ✅ `9e36e36f` (SWR caches for node health + server snapshots; warm loads skip daemon round-trips) · X-7 ✅ `3e2eb678` (Web Locks console-ownership guard, view-only tabs) · X-8/9/10 ✅ `6e139350` (backup-name + breadcrumb truncation; hover-reveal audit clean).
 
 **Exit gate:** files page holds at 10k entries; mobile incident ≤3 taps on a real device; API: subusers, startup, websocket token all work; addon contract published and 1-2 addons migrated; advertised API routes == registered routes; daemon ships restart/mkdir/bulk-rm/key-rotation/logs and a compiled binary.
 
