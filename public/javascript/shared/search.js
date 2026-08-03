@@ -252,10 +252,24 @@ function renderResults(items, term) {
   searchInput.setAttribute('aria-activedescendant', '');
 
   if (!items.length) {
+    const wrap = document.createElement('div');
+    wrap.className = 'flex flex-col items-center gap-2 px-4 py-8 text-center';
+
+    const iconEl = document.createElement('div');
+    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-8 h-8 mx-auto mb-1" style="color:var(--theme-text-faint);"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 11.25h6" /></svg>';
+    wrap.appendChild(iconEl);
+
     const msg = document.createElement('p');
-    msg.textContent = 'No results.';
-    msg.className   = 'text-sm text-neutral-500 dark:text-neutral-400 px-3 py-4 text-center';
-    searchResults.appendChild(msg);
+    msg.className = 'text-sm font-medium text-neutral-600 dark:text-neutral-300';
+    msg.textContent = (searchOverlay.dataset.emptyTitle || 'No results for') + ' "' + term + '"';
+    wrap.appendChild(msg);
+
+    const hint = document.createElement('p');
+    hint.className = 'text-xs text-neutral-500 dark:text-neutral-400 max-w-xs';
+    hint.textContent = searchOverlay.dataset.emptyHint || 'Try a different term, or search for a server, user, node, or page.';
+    wrap.appendChild(hint);
+
+    searchResults.appendChild(wrap);
     searchInput.setAttribute('aria-expanded', 'true');
     return;
   }

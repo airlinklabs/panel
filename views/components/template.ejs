@@ -291,6 +291,8 @@
   <!-- Search popup -->
   <div id="searchOverlay" class="al-sheet-overlay fixed inset-0 z-50 hidden items-start justify-center p-4"
     role="dialog" aria-modal="true" aria-label="<%= req.translations.navSearch || 'Search' %>"
+    data-empty-title="<%= req.translations.searchEmptyTitle || 'No results for' %>"
+    data-empty-hint="<%= req.translations.searchEmptyHint || 'Try a different term, or search for a server, user, node, or page.' %>"
     style="background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); padding-top:14vh;">
     <div id="searchPanel" class="al-sheet-panel w-full max-w-xl rounded-2xl border overflow-hidden shadow-2xl"
       style="border-color:var(--theme-border); background:var(--theme-bg-card); box-shadow:0 25px 60px -12px rgba(0,0,0,0.35);">

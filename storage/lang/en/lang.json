@@ -457,5 +457,7 @@
   "navGroupRun": "Run",
   "navGroupData": "Data",
   "navGroupManage": "Manage",
-  "navGroupSettings": "Settings"
+  "navGroupSettings": "Settings",
+  "searchEmptyTitle": "No results for",
+  "searchEmptyHint": "Try a different term, or search for a server, user, node, or page."
 }
