@@ -85,7 +85,7 @@
                 <% grp.entries.forEach(entry => { %>
                   <li class="nav-item">
                     <a href="<%= entry.url %>" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);" data-server-control-link>
-                      <%= entry.item.icon.replace(/class="[^"]*"/, 'class="w-5 h-5 mt-0.5 shrink-0"') %>
+                      <%- entry.item.icon.replace(/class="[^"]*"/, 'class="w-5 h-5 mt-0.5 shrink-0"') %>
                       <span><%= entry.item.label %></span>
                     </a>
                   </li>
@@ -94,7 +94,7 @@
             <% } %>
             <% } %>
 
-            <% if (user != null && user.isAdmin === true) { %>
+            <% if (user != null && user.isAdmin === true && !(typeof req !== 'undefined' && req && (req.path || req.originalUrl || '').startsWith('/server/'))) { %>
               <p class="pl-8 text-xs font-medium pt-6 pb-2" style="color:var(--theme-nav-text);"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>
 
               <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span>Core</span></p>

@@ -12,7 +12,7 @@
         { label: 'Databases' }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
-      <div class="px-4 sm:px-8 pt-4">
+      <div class="px-4 sm:px-8 pt-4 pb-2 sm:pb-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div class="flex-1 min-w-0">
             <%- include('../../components/serverHeader') %>
@@ -66,7 +66,7 @@
       <div id="server-page-body">
 
       <!-- Databases -->
-      <div class="px-6 space-y-4">
+      <div class="px-6 space-y-4 mt-8">
         <% if (hosts.length === 0) { %>
           <div class="al-alert-danger mb-5">
             <%- icon('database', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>

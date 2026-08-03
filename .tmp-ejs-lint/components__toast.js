@@ -1,0 +1,224 @@
+/* inline script 1 */
+
+  (function () {
+    if (window.createToastSystem) return;
+
+    const colorMap = {
+      error:   'var(--theme-danger)',
+      success: 'var(--theme-success)',
+      warning: 'var(--theme-warning)',
+      loading: 'var(--theme-info)',
+      info:    'var(--theme-info)',
+    };
+
+    const iconMap = {
+      error: '<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clip-rule="evenodd"/></svg>',
+      success: '<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd"/></svg>',
+      warning: '<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>',
+      loading: '<svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><circle class="opacity-75" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="31.4 31.4" stroke-dashoffset="0"></circle></svg>',
+      info: '<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>',
+      check: '<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd"/></svg>',
+      x: '<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clip-rule="evenodd"/></svg>',
+    };
+
+    window.createToastSystem = () => {
+      let toastContainer = document.getElementById('toast-container');
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'fixed top-4 right-4 z-50 flex flex-col gap-2 max-sm:left-4 max-sm:right-4';
+        toastContainer.setAttribute('aria-live', 'polite');
+        toastContainer.setAttribute('aria-atomic', 'false');
+        toastContainer.setAttribute('role', 'status');
+        document.body.appendChild(toastContainer);
+      }
+
+      const showToast = (message, type = 'error', opts = {}) => {
+        const progressMode = opts.progress === true || type === 'loading';
+
+        const toast = document.createElement('div');
+        toast.className = 'al-toast px-4 py-3 rounded-xl shadow-lg flex flex-row items-start gap-3';
+        toast.style.background = 'var(--theme-bg-card)';
+        toast.style.border = '1px solid var(--theme-border)';
+        toast.style.transform = 'translateX(calc(100% + 1rem))';
+        toast.style.opacity = '0';
+        toast.style.maxWidth = '400px';
+        toast.style.touchAction = 'none';
+        toast.style.cursor = 'grab';
+        toast.style.userSelect = 'none';
+        toast.style.overflowWrap = 'break-word';
+        toast.style.transition = 'transform var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), opacity var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1))';
+        toast.style.willChange = 'transform, opacity';
+        toast.style.color = 'var(--theme-text)';
+
+        const icon = document.createElement('span');
+        icon.className = 'mt-0.5 shrink-0';
+        icon.style.color = colorMap[type] || colorMap.info;
+        icon.innerHTML = iconMap[type] || iconMap.info;
+        toast.appendChild(icon);
+
+        const body = document.createElement('div');
+        body.className = 'flex-1 min-w-0';
+        toast.appendChild(body);
+
+        const messageSpan = document.createElement('div');
+        messageSpan.className = 'font-medium text-sm leading-relaxed';
+        messageSpan.style.color = 'var(--theme-text)';
+        messageSpan.textContent = message;
+        body.appendChild(messageSpan);
+
+        const progressRow = document.createElement('div');
+        progressRow.className = 'hidden items-center gap-2 mt-2';
+        const barTrack = document.createElement('div');
+        barTrack.className = 'h-1 flex-1 rounded overflow-hidden';
+        barTrack.style.background = 'var(--theme-border)';
+        const barFill = document.createElement('div');
+        barFill.className = 'h-full rounded transition-all duration-300';
+        barFill.style.background = 'var(--theme-info)';
+        barFill.style.width = '0%';
+        barTrack.appendChild(barFill);
+        const pctLabel = document.createElement('span');
+        pctLabel.className = 'text-[10px] tabular-nums shrink-0';
+        pctLabel.style.color = 'var(--theme-text-muted)';
+        pctLabel.textContent = '0%';
+        progressRow.appendChild(barTrack);
+        progressRow.appendChild(pctLabel);
+        body.appendChild(progressRow);
+
+        toastContainer.appendChild(toast);
+
+        requestAnimationFrame(() => {
+          toast.style.transform = 'translateX(0)';
+          toast.style.opacity = '1';
+        });
+
+        let removed = false;
+        let dismissTimer = null;
+        let currentMessage = message;
+        let completed = false;
+
+        const removeToast = () => {
+          if (removed) return;
+          removed = true;
+          if (dismissTimer) clearTimeout(dismissTimer);
+          toast.style.transition = 'transform var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)), opacity var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1))';
+          toast.style.transform = 'translateX(calc(100% + 1rem))';
+          toast.style.opacity = '0';
+          setTimeout(() => {
+            if (toast.parentNode) toastContainer.removeChild(toast);
+          }, 200);
+        };
+
+        const scheduleDismiss = (ms) => {
+          if (dismissTimer) clearTimeout(dismissTimer);
+          if (ms > 0) dismissTimer = setTimeout(removeToast, ms);
+        };
+
+        const setType = (t) => {
+          type = t;
+          toast.style.color = colorMap[t] || colorMap.info;
+          icon.innerHTML = iconMap[t] || iconMap.info;
+        };
+
+        const setMessage = (msg) => {
+          currentMessage = msg;
+          messageSpan.textContent = msg;
+        };
+
+        const updateProgress = (percent, msg) => {
+          if (removed) return;
+          if (typeof msg === 'string') setMessage(msg);
+          progressRow.classList.remove('hidden');
+          progressRow.classList.add('flex');
+          const p = Math.max(0, Math.min(100, Number(percent) || 0));
+          barFill.style.width = p + '%';
+          pctLabel.textContent = Math.round(p) + '%';
+          if (p >= 100) complete(true);
+        };
+
+        const complete = (success, msg) => {
+          if (removed || completed) return;
+          completed = true;
+          if (typeof msg === 'string') setMessage(msg);
+          progressRow.classList.remove('hidden');
+          progressRow.classList.add('flex');
+          barFill.style.width = '100%';
+          pctLabel.textContent = '100%';
+          barFill.style.background = success ? 'var(--theme-success)' : 'var(--theme-danger)';
+          if (success) setType('success');
+          else setType('error');
+          icon.innerHTML = success ? iconMap.check : iconMap.x;
+          scheduleDismiss(success ? 1600 : 4000);
+        };
+
+        // Swipe to dismiss — hold and drag right
+        let dragging = false;
+        let startX = null;
+        let currentDx = 0;
+
+        const finishDrag = (commit) => {
+          dragging = false;
+          toast.style.cursor = 'grab';
+          if (commit) {
+            toast.style.transition = 'transform 0.25s ease-in, opacity 0.25s ease-in';
+            toast.style.transform = 'translateX(120%)';
+            toast.style.opacity = '0';
+            setTimeout(removeToast, 250);
+            return;
+          }
+          toast.style.transition = 'transform 0.3s cubic-bezier(0.16,1,0.3,1)';
+          toast.style.transform = 'translateX(0)';
+          setTimeout(() => { toast.style.transition = ''; }, 300);
+        };
+
+        toast.addEventListener('pointerdown', (e) => {
+          if (e.button !== undefined && e.button !== 0) return;
+          dragging = true;
+          startX = e.clientX;
+          currentDx = 0;
+          toast.style.cursor = 'grabbing';
+          toast.style.transition = 'none';
+          toast.setPointerCapture(e.pointerId);
+        });
+
+        toast.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const dx = e.clientX - startX;
+          currentDx = dx;
+          if (dx > 0) {
+            toast.style.transform = 'translateX(' + dx + 'px) rotate(' + dx * 0.02 + 'deg)';
+          } else {
+            toast.style.transform = 'translateX(' + dx * 0.3 + 'px)';
+          }
+        });
+
+        toast.addEventListener('pointerup', (e) => {
+          if (!dragging) return;
+          const threshold = Math.max(toast.offsetWidth * 0.4, 80);
+          finishDrag(currentDx > threshold);
+        });
+        toast.addEventListener('pointercancel', () => {
+          if (!dragging) return;
+          finishDrag(false);
+        });
+
+        if (!progressMode) scheduleDismiss(typeof opts.duration === 'number' ? opts.duration : 5000);
+
+        return {
+          updateProgress: updateProgress,
+          update: updateProgress,
+          setMessage: setMessage,
+          setType: setType,
+          complete: complete,
+          close: removeToast,
+        };
+      };
+
+      return { showToast };
+    };
+
+    const { showToast } = window.createToastSystem();
+    window.showToast = showToast;
+    window.showProgressToast = (message, opts) => showToast(message, 'loading', Object.assign({ progress: true }, opts || {}));
+    window.showLoadingToast = (message) => showToast(message, 'loading');
+  })();

@@ -1,0 +1,444 @@
+/* inline script 1 */
+
+(function () {
+  const pd = document.getElementById('page-data').dataset;
+  const tI18n = null;
+  const INSTALLED = new Set(JSON.parse(pd.installedSlugs || '[]'));
+  const infoIconHtml = pd.infoIcon;
+  let allAddons = [];
+  let currentAddon = null;
+  let activeTag = 'all';
+  let discussionCounts = {};
+
+  function esc(s) {
+    if (typeof s !== 'string') return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function badgeClass(s) {
+    if (s === 'beta') return 's-badge s-badge-beta';
+    if (s === 'wip')  return 's-badge s-badge-wip';
+    return 's-badge s-badge-working';
+  }
+
+  // ── Load ─────────────────────────────────────────────────────────
+
+  async function loadStore() {
+    const loading = document.getElementById('storeLoading');
+    const grid    = document.getElementById('storeGrid');
+    const errEl   = document.getElementById('storeError');
+
+    loading.style.display = '';
+    grid.classList.add('hidden');
+    errEl.classList.add('hidden');
+
+    try {
+      const [listRes, discRes] = await Promise.all([
+        fetch('/admin/addons/store/list'),
+        fetch('/admin/addons/store/discussions'),
+      ]);
+      const listData = await listRes.json();
+      if (!listData.success) throw new Error(listData.message || 'Failed to load');
+
+      const discData = await discRes.json();
+      discussionCounts = (discData.success && discData.counts) ? discData.counts : {};
+
+      allAddons = listData.addons || [];
+      allAddons.sort((a, b) => {
+        const ca = discussionCounts[a.id.toLowerCase()] || 0;
+        const cb = discussionCounts[b.id.toLowerCase()] || 0;
+        if (cb !== ca) return cb - ca;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+
+      buildTags();
+      loading.style.display = 'none';
+      render(allAddons);
+    } catch (err) {
+      loading.style.display = 'none';
+      document.getElementById('storeErrorMsg').textContent = err.message;
+      errEl.classList.remove('hidden');
+    }
+  }
+
+  function buildTags() {
+    const tags = new Set();
+    allAddons.forEach(a => (a.tags || []).forEach(t => tags.add(t)));
+
+    const wrap = document.getElementById('tagFilters');
+    wrap.innerHTML = '';
+
+    const mkBtn = (label, tag, active) => {
+      const b = document.createElement('button');
+      b.dataset.tag = tag;
+      b.textContent = label;
+      b.className = 's-tag cursor-pointer transition';
+      if (active) b.classList.add('on');
+      wrap.appendChild(b);
+    };
+
+    mkBtn('All', 'all', true);
+    tags.forEach(t => mkBtn(t, t, false));
+
+    wrap.addEventListener('click', e => {
+      const btn = e.target.closest('[data-tag]');
+      if (!btn) return;
+      activeTag = btn.dataset.tag;
+      wrap.querySelectorAll('[data-tag]').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      render(filtered());
+    });
+  }
+
+  function filtered() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    return allAddons.filter(a => {
+      const tagOk = activeTag === 'all' || (a.tags || []).includes(activeTag);
+      const qOk   = !q || (a.name||'').toLowerCase().includes(q) || (a.description||'').toLowerCase().includes(q) || (a.author||'').toLowerCase().includes(q);
+      return tagOk && qOk;
+    });
+  }
+
+  function render(list) {
+    const grid  = document.getElementById('storeGrid');
+    const empty = document.getElementById('storeEmpty');
+
+    if (!list.length) {
+      grid.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+    grid.classList.remove('hidden');
+    empty.classList.add('hidden');
+
+    grid.innerHTML = list.map(a => {
+      const inst = INSTALLED.has(a.id);
+      const count = discussionCounts[a.id.toLowerCase()] || 0;
+      const tags = (a.tags || []).slice(0, 3).map(t => `<span class="s-tag">${esc(t)}</span>`).join('');
+
+      return `<div class="s-card" data-id="${esc(a.id)}">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div class="s-icon" id="si-${esc(a.id)}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span class="s-name">${esc(a.name)}</span>
+              ${inst ? '<span class="s-badge s-badge-installed">null</span>' : ''}
+              <span class="${badgeClass(a.status)}" style="margin-left:auto;">${esc(a.status||'working')}</span>
+            </div>
+            <p class="s-meta">${('null').replace('{author}', esc(a.author||'Unknown'))} · ${esc(a.version||'')}</p>
+          </div>
+        </div>
+        <p class="s-desc">${esc(a.description)}</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">${tags}</div>
+          ${count > 0 ? `<span class="s-count"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="s-count-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>${count}</span>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    // lazy-load icons
+    list.forEach(a => {
+      if (!a.icon) return;
+      const wrap = document.getElementById('si-' + a.id);
+      if (!wrap) return;
+      const img = new Image();
+      img.style.cssText = 'width:22px;height:22px;object-fit:contain;display:block;';
+      img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
+      img.src = a.icon;
+    });
+
+    grid.querySelectorAll('.s-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const a = allAddons.find(x => x.id === card.dataset.id);
+        if (a) openModal(a);
+      });
+    });
+  }
+
+  document.getElementById('searchInput').addEventListener('input', () => render(filtered()));
+  document.getElementById('clearSearch').addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    render(filtered());
+  });
+
+  // ── Modal ─────────────────────────────────────────────────────────
+
+  function openModal(addon) {
+    currentAddon = addon;
+    const inst = INSTALLED.has(addon.id);
+
+    // Icon
+    const iconEl = document.getElementById('mIcon');
+    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="s-icon-svg"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>';
+    if (addon.icon) {
+      const img = new Image();
+      img.style.cssText = 'width:22px;height:22px;object-fit:contain;display:block;';
+      img.onload = () => { iconEl.innerHTML = ''; iconEl.appendChild(img); };
+      img.src = addon.icon;
+    }
+
+    document.getElementById('mName').textContent = addon.name || '';
+    const statusEl = document.getElementById('mStatus');
+    statusEl.textContent = addon.status || 'working';
+    statusEl.className = badgeClass(addon.status);
+    document.getElementById('mMeta').textContent = `by ${addon.author || 'Unknown'} · v${addon.version || ''}`;
+    document.getElementById('mDesc').textContent = addon.longDescription || addon.description || 'No description available.';
+    document.getElementById('mGhBtn').href = addon.github || `https://github.com/airlinklabs/addons/tree/main/${addon.id}`;
+
+    // Features
+    const featEl = document.getElementById('mFeatures');
+    featEl.innerHTML = '';
+    if ((addon.features || []).length) {
+      const lbl = document.createElement('p');
+      lbl.style.cssText = 'font-size:11px;color:var(--theme-text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
+      lbl.textContent = 'Features';
+      featEl.appendChild(lbl);
+      addon.features.forEach(f => {
+        const row = document.createElement('div');
+        row.className = 'feat-row';
+        row.innerHTML = `<div class="feat-dot"></div><span>${esc(f)}</span>`;
+        featEl.appendChild(row);
+      });
+    }
+
+    // Steps — static install guide
+    const stepsEl = document.getElementById('mSteps');
+    stepsEl.innerHTML = '';
+    (addon.installSteps || []).forEach((step, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'm-step';
+      const cmds = (step.commands || []).map(c => `<code>${esc(c)}</code>`).join('');
+      wrap.innerHTML = `
+        <div class="m-step-n">${i + 1}</div>
+        <div class="m-step-body">
+          <div class="m-step-title">${esc(step.title || '')}</div>
+          <div class="m-code">${cmds}</div>
+        </div>`;
+      stepsEl.appendChild(wrap);
+    });
+
+    if (addon.installNote) {
+      const note = document.createElement('div');
+      note.className = 'm-note';
+      note.innerHTML = infoIconHtml + '<span>' + esc(addon.installNote) + '</span>';
+      stepsEl.appendChild(note);
+    }
+
+    // Action button state
+    setActionBtn(inst);
+
+    // Reset to overview tab, hide progress
+    switchTab('overview');
+    document.getElementById('mProgress').style.display = 'none';
+    document.getElementById('mLog').innerHTML = '';
+
+    const overlay = document.getElementById('mOverlay');
+    overlay.classList.add('open');
+    Animate.openModal(overlay, overlay.querySelector('.m-dialog'));
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    const overlay = document.getElementById('mOverlay');
+    overlay.classList.add('closing');
+    const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
+    Animate.closeModal(overlay, overlay.querySelector('.m-dialog'), done);
+    document.body.style.overflow = '';
+    document.getElementById('mGiscus').innerHTML = '';
+    currentAddon = null;
+  }
+
+  function setActionBtn(installed) {
+    const btn = document.getElementById('mActionBtn');
+    const lbl = document.getElementById('mActionLabel');
+    if (installed) {
+      btn.className = 'm-btn-remove';
+      btn.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>';
+      lbl.textContent = tI18n.uninstall || 'Uninstall';
+    } else {
+      btn.className = 'm-btn-install';
+      btn.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>';
+      lbl.textContent = tI18n.install || 'Install';
+    }
+    btn.disabled = false;
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.m-tab').forEach(t => {
+      const on = t.dataset.tab === name;
+      t.classList.toggle('on', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.setAttribute('tabindex', on ? '0' : '-1');
+    });
+    document.querySelectorAll('.m-pane').forEach(p => p.classList.toggle('on', p.id === `m-pane-${name}`));
+  }
+
+  document.getElementById('mClose').addEventListener('click', closeModal);
+  document.getElementById('mOverlay').addEventListener('click', e => { if (e.target.id === 'mOverlay') closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  const mTabList = document.querySelector('.m-tabs');
+  if (mTabList) {
+    mTabList.addEventListener('keydown', e => {
+      const tabs = Array.from(mTabList.querySelectorAll('.m-tab'));
+      const currentIndex = tabs.findIndex(t => t === document.activeElement);
+      if (currentIndex === -1) return;
+      let newIndex = currentIndex;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIndex = (currentIndex + 1) % tabs.length; }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIndex = (currentIndex - 1 + tabs.length) % tabs.length; }
+      else if (e.key === 'Home') { e.preventDefault(); newIndex = 0; }
+      else if (e.key === 'End') { e.preventDefault(); newIndex = tabs.length - 1; }
+      if (newIndex !== currentIndex) { tabs[newIndex].focus(); switchTab(tabs[newIndex].dataset.tab); }
+    });
+  }
+
+  document.querySelectorAll('.m-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      switchTab(tab.dataset.tab);
+      if (tab.dataset.tab === 'reviews' && currentAddon) loadGiscus(currentAddon.id);
+    });
+  });
+
+  function loadGiscus(addonId) {
+    const c = document.getElementById('mGiscus');
+    c.innerHTML = '';
+    const repo = 'null';
+    const repoId = 'null';
+    const category = 'null';
+    const categoryId = 'null';
+    if (!repo || !repoId || !category || !categoryId || categoryId.indexOf('YOUR_') === 0) {
+      c.innerHTML = '<div class="text-xs leading-relaxed" style="color:var(--theme-text-muted);">Reviews aren&#39;t configured for this installation yet. Ask your admin to connect a giscus discussion repo to enable them.</div>';
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = 'https://giscus.app/client.js';
+    s.setAttribute('data-repo', repo);
+    s.setAttribute('data-repo-id', repoId);
+    s.setAttribute('data-category', category);
+    s.setAttribute('data-category-id', categoryId);
+    s.setAttribute('data-mapping', 'specific');
+    s.setAttribute('data-term', addonId);
+    s.setAttribute('data-strict', '1');
+    s.setAttribute('data-reactions-enabled', '1');
+    s.setAttribute('data-emit-metadata', '0');
+    s.setAttribute('data-input-position', 'bottom');
+    s.setAttribute('data-theme', 'dark');
+    s.setAttribute('data-lang', 'en');
+    s.setAttribute('data-loading', 'lazy');
+    s.crossOrigin = 'anonymous';
+    s.async = true;
+    c.appendChild(s);
+  }
+
+  // ── Install / Uninstall ───────────────────────────────────────────
+
+  document.getElementById('mActionBtn').addEventListener('click', async function () {
+    if (!currentAddon) return;
+    const slug = currentAddon.id;
+    const installing = !INSTALLED.has(slug);
+
+    if (!installing) {
+      this.disabled = true;
+      document.getElementById('mActionLabel').textContent = 'Removing...';
+      try {
+        const res  = await fetch('/admin/addons/store/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug }) });
+        const data = await res.json();
+        if (data.success) {
+          INSTALLED.delete(slug);
+          showToast(data.message, 'success');
+          closeModal();
+          render(filtered());
+        } else {
+          showToast(data.message || 'Failed to uninstall', 'error');
+          setActionBtn(true);
+        }
+      } catch {
+        showToast('Something went wrong.', 'error');
+        setActionBtn(true);
+      }
+      return;
+    }
+
+    // Switch to install tab and show progress
+    switchTab('install');
+
+    const progEl   = document.getElementById('mProgress');
+    const progBar  = document.getElementById('mProgBar');
+    const progLbl  = document.getElementById('mProgLabel');
+    const progPct  = document.getElementById('mProgPct');
+    const logEl    = document.getElementById('mLog');
+
+    progEl.style.display = '';
+    logEl.innerHTML = '';
+    progBar.style.width = '0%';
+    progLbl.textContent = 'Starting...';
+    progPct.textContent = '0%';
+    this.disabled = true;
+    document.getElementById('mActionLabel').textContent = 'Installing...';
+
+    let stepN = 0;
+
+    function log(text, cls) {
+      const line = document.createElement('div');
+      line.className = `m-log-line ${cls || ''}`;
+      line.innerHTML = `<span class="s-arrow">›</span><span>${esc(text)}</span>`;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    try {
+      const res = await fetch('/admin/addons/store/install', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug }) });
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      const est = 6;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const parts = buf.split('\n\n');
+        buf = parts.pop();
+
+        for (const part of parts) {
+          const raw = part.replace(/^data: /, '').trim();
+          if (!raw) continue;
+          try {
+            const evt = JSON.parse(raw);
+            if (evt.type === 'step') {
+              stepN++;
+              const pct = Math.min(Math.round((stepN / est) * 90), 90);
+              progBar.style.width = pct + '%';
+              progPct.textContent = pct + '%';
+              progLbl.textContent = evt.stepTitle || 'Running...';
+              if (evt.cmd) log(`${evt.stepTitle}: ${evt.cmd}`);
+            } else if (evt.type === 'done') {
+              progBar.style.width = '100%';
+              progPct.textContent = '100%';
+              progLbl.textContent = 'Installed';
+              log(evt.message, 'ok');
+              INSTALLED.add(slug);
+              setActionBtn(true);
+              showToast(evt.message, 'success');
+              render(filtered());
+            } else if (evt.type === 'error') {
+              log(evt.message, 'err');
+              progLbl.textContent = 'Failed';
+              showToast(evt.message, 'error');
+              setActionBtn(false);
+            }
+          } catch {}
+        }
+      }
+    } catch (err) {
+      console.error('Addon install error:', err);
+      log('Installation failed. Try again.', 'err');
+      showToast('Installation failed', 'error');
+      setActionBtn(false);
+    }
+  });
+
+  loadStore();
+})();

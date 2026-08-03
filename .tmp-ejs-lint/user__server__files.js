@@ -1,497 +1,5 @@
-<%- include('../../components/header', { title: 'Files' }) %>
-<style>
-  .al-file-panel { contain: layout paint; }
-  .al-file-row {
-    animation: al-file-row-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: calc(var(--i, 0) * 18ms);
-  }
-  .al-file-row:hover .al-file-icon { transform: translateY(-1px); }
-  .al-file-row.is-selected { background: var(--theme-bg-secondary, rgb(245 245 245)); }
-  .dark .al-file-row.is-selected { background: var(--theme-bg-hover, rgb(255 255 255 / 0.04)); }
-  .al-file-icon { transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms ease; }
+/* inline script 1 */
 
-  @keyframes al-file-row-in {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .al-file-row { animation: none; }
-    .al-file-icon { transition-duration: 0.01ms !important; }
-  }
-</style>
-
-<%
-function getFileIcon(category) {
-  const iconNames = {
-    'Configuration Files': 'file-code',
-    'Documents': 'file-text',
-    'Folder': 'folder',
-    'Images': 'image',
-    'No Category': 'file',
-  };
-  const name = iconNames[category] || 'file';
-  return `<span class="al-file-icon size-6">${icon(name, { class: 'size-6' })}</span>`;
-}
-
-function isImageFile(filename) {
-  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff'];
-  const extension = filename.split('.').pop().toLowerCase();
-  return imageExtensions.includes(extension);
-}
-
-function escAttr(val) {
-  return String(val)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-function escJS(val) {
-  return String(val)
-    .replace(/\\/g, '\\\\')
-    .replace(/'/g, "\\'")
-    .replace(/"/g, '\\"')
-    .replace(/</g, '\\x3c')
-    .replace(/>/g, '\\x3e');
-}
-%>
-
-<main class="h-screen m-auto text-neutral-800 dark:text-white">
-  <div class="flex h-full">
-    <!-- Sidebar -->
-    <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
-    </div>
-
-    <!-- Content -->
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
-        { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Files' }
-      ] }) %>
-      <!-- Page Header: title + meta left, buttons right -->
-      <div class="px-4 sm:px-8 pt-4 pb-2 sm:pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div class="flex-1 min-w-0">
-            <%- include('../../components/serverHeader') %>
-            <!-- Server meta: image · node · id -->
-            <%- include('../../components/serverMeta') %>
-          </div>
-          <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-          <div class="flex flex-wrap gap-2 shrink-0">
-            <button id="createFile" onclick="openCreateFileModal()" type="button"
-                class="al-btn-secondary">
-                <%- icon('file-plus', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
-                New File
-            </button>
-
-            <button id="uploadFile" onclick="openUploadFileModal()" type="button"
-                class="al-btn-secondary">
-                <%- icon('upload', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
-                Upload File
-            </button>
-
-            <button id="pullFile" onclick="openPullFileModal()" type="button"
-                class="al-btn-secondary">
-                <%- icon('download', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
-                Pull From URL
-            </button>
-
-             <%- include('../../components/sftp', { server: server }) %>
-          </div>
-          <% } %>
-        </div>
-      </div>
-
-      <%- include('../../components/installHeader') %>
-
-      <!-- Daemon down message removed as requested -->
-
-      <!-- Server Template -->
-      <%- include('../../components/serverTemplate') %>
-
-      <div id="server-page-body">
-
-      <!-- Daemon Offline Warning -->
-      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
-      <div class="mx-4 sm:mx-8 mt-4 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl p-4 flex items-center">
-        <div class="flex-shrink-0 mr-3">
-          <%- icon('triangle-alert', { class: 'h-6 w-6', strokeWidth: 2, style: 'color:var(--theme-danger);' }) %>
-        </div>
-        <div>
-          <h3 class="text-sm font-medium" style="color:var(--theme-danger);">Connection Error</h3>
-          <p class="text-xs" style="color:var(--theme-danger);"><%= errorMessage.message %></p>
-          <button type="button" onclick="window.location.reload()" class="al-btn-danger mt-2 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5">
-            <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
-            Retry Connection
-          </button>
-        </div>
-      </div>
-      <% } %>
-
-      <!-- File Table or Daemon Offline Message -->
-      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
-        <!-- Daemon Offline Message -->
-        <div class="px-4 sm:px-8 mt-8">
-          <div class="al-card rounded-xl p-8 text-center">
-            <div class="flex justify-center mb-6">
-              <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-bg-secondary);">
-              <%- icon('wifi-off', { class: 'size-6', strokeWidth: 1.5 }) %>
-              </div>
-            </div>
-            <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)">Node's gone quiet — file management is on hold until it's back.</h2>
-            <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
-              The daemon appears to be offline. File management is unavailable until the connection is restored.
-            </p>
-            <div class="mt-6">
-              <button type="button" onclick="window.location.reload()" class="al-btn-primary px-4 py-2 text-sm rounded-lg inline-flex items-center gap-2">
-                <%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>
-                Retry Connection
-              </button>
-            </div>
-          </div>
-        </div>
-      <% } else { %>
-        <!-- File Table -->
-        <div class="px-4 sm:px-8 mt-8">
-          <div class="al-file-panel overflow-x-auto rounded-xl" style="border:1px solid var(--theme-border);">
-            <table class="min-w-full al-table" style="background:var(--theme-bg-card);">
-
-                    <div class="px-3 py-2.5 flex items-center overflow-hidden">
-        <nav class="flex items-center gap-0 text-xs min-w-0 overflow-hidden">
-          <a class="hover:text-neutral-600 dark:hover:text-neutral-300 transition shrink-0" href="./files" style="color:var(--theme-text-muted)">/home/container/</a><span style="color:var(--theme-text-muted)"></span>
-          <%
-              if (req.query.path) {
-                  const parts = req.query.path.split('/');
-                  let currentPath = '';
-
-                  parts.forEach((part, index) => {
-                      currentPath += part;
-
-                      if (index < parts.length - 1) {
-                          %>
-                          <a href="./files?path=<%= currentPath %>" class="hover:text-neutral-700 dark:hover:text-neutral-200 transition" style="color:var(--theme-text-muted)"><%= part %></a><span class="mx-0.5" style="color:var(--theme-text-muted)">/</span>
-                          <%
-                          currentPath += '/';
-                      } else {
-                          %>
-                          <span class="font-medium" style="color:var(--theme-text-strong)"><%= part %></span>
-                          <%
-                      }
-                  });
-              }
-          %>
-        </nav>
-       </div>
-       <!-- Search/filter bar -->
-       <div class="px-4 py-2 flex items-center gap-2" style="border-bottom:1px solid var(--theme-border);">
-         <%- icon('search', { size: 14, class: 'shrink-0' }) %>
-         <input
-           id="fileSearchInput"
-           type="text"
-           placeholder="Filter files…"
-           class="flex-1 bg-transparent text-sm focus:outline-none"
-           style="color:var(--theme-text-strong);"
-           autocomplete="off"
-           spellcheck="false">
-         <button type="button" id="clearFileSearch" class="hidden p-0.5 rounded transition" aria-label="Clear search filter" style="color:var(--theme-text-muted);">
-           <%- icon('x', { size: 12 }) %>
-         </button>
-       </div>
-        <thead class="al-table-head">
-              <tr>
-                <th class="px-4 py-2.5 text-left w-10">
-                  <input type="checkbox" id="selectAll" class="form-checkbox h-4 w-4 rounded transition file-checkbox">
-                </th>
-                <th class="al-table-th px-4 py-2.5 text-left">Name</th>
-                <th class="al-table-th px-4 py-2.5 text-left w-24">Size</th>
-                <th class="al-table-th px-4 py-2.5 text-left w-32 hidden md:table-cell">Modified</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% files.forEach((file, index) => { %>
-                <tr class="al-file-row al-table-tr cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
-                  <td class="px-4 py-3 w-10">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(new RegExp("^/+", "g"), '') + '/' + file.name : file.name %>">
-                  </td>
-                  <td class="px-4 py-3">
-                    <%
-                      const isImage = file.type !== 'directory' && isImageFile(file.name);
-                      const filePath = currentPath && currentPath !== '/'
-                        ? currentPath.replace(new RegExp("^/+", "g"), '') + '/' + file.name
-                        : file.name;
-                      const fileHref = file.type === 'directory'
-                        ? `/server/${server.UUID}/files?path=${encodeURIComponent(filePath)}`
-                        : isImage
-                          ? '#'
-                          : `/server/${server.UUID}/files/edit/${encodeURIComponent(filePath)}`;
-                      const fileSize = (() => {
-                        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                        let size = file.size;
-                        let unitIndex = 0;
-                        while (size >= 1024 && unitIndex < sizes.length - 1) {
-                          size /= 1024;
-                          unitIndex++;
-                        }
-                        return `${size.toFixed(2)} ${sizes[unitIndex]}`;
-                      })();
-                    %>
-                    <a href="<%= fileHref %>" class="flex items-center gap-2.5 text-sm font-medium hover:text-neutral-600 dark:hover:text-white transition-colors" style="color:var(--theme-text-strong)" <% if (isImage) { %>onclick="event.preventDefault(); showImageViewer('<%= file.name %>', '<%= filePath %>', '<%= fileSize %>', '<%= server.UUID %>');"<% } %>>
-                      <span class="al-file-icon shrink-0" style="color:var(--theme-text-muted)">
-                        <%- getFileIcon(file.type === 'directory' ? 'Folder' : file.category || 'No Category') %>
-                      </span>
-                      <span class="truncate"><%= file.name %></span>
-                    </a>
-                  </td>
-                  <td class="px-4 py-3 text-xs whitespace-nowrap" style="color:var(--theme-text-muted)">
-                    <%= fileSize %>
-                  </td>
-                  <td class="px-4 py-3 text-xs whitespace-nowrap hidden md:table-cell" style="color:var(--theme-text-muted)">
-                    <% if (file.modifiedAt) { %>
-                      <time datetime="<%= new Date(file.modifiedAt).toISOString() %>" class="relative-time"><%= new Date(file.modifiedAt).toLocaleDateString() %></time>
-                    <% } else { %>
-                      <span style="color:var(--theme-text-muted)">—</span>
-                    <% } %>
-                  </td>
-
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-          <%- include('../../components/ui/al-pagination', { total: files.length, pageSize: 50 }) %>
-        </div>
-      </div>
-      <% } %>
-    </div>
-
-    <!-- Modals and stuff -->
-
-   <!-- Floating Action Bar (only show when daemon is online) -->
-   <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed bottom-14 lg:bottom-0 right-0 z-40 py-3.5 px-6 flex items-center justify-between gap-4 left-0 lg:left-60 translate-y-full transition-transform duration-300 ease-out shadow-lg" style="background:var(--theme-bg-card); border-top:1px solid var(--theme-border);">
-     <div class="flex items-center gap-2.5">
-       <%- icon('check-square', { size: 15, class: 'shrink-0' }) %>
-       <span id="selectedFilesCount" class="text-sm font-medium" style="color:var(--theme-text-strong)">0 files selected</span>
-     </div>
-     <div class="flex items-center gap-2">
-       <button type="button" id="massRenameBtn"
-         class="al-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
-         <%- icon('pencil', { size: 13, class: 'shrink-0' }) %>
-         Rename
-       </button>
-       <button type="button" id="massArchiveBtn"
-         class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
-         <%- icon('file-archive', { size: 13, class: 'shrink-0' }) %>
-         Archive
-       </button>
-       <button type="button" id="massDeleteBtn"
-         class="al-btn-danger inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
-         <%- icon('trash-2', { size: 13, class: 'shrink-0' }) %>
-         Delete
-       </button>
-       <button type="button" id="dismissSelectionBtn"
-         class="inline-flex items-center justify-center w-7 h-7 rounded-lg transition ml-1"
-         style="color:var(--theme-text-muted);"
-         title="Deselect all">
-         <%- icon('x', { size: 13 }) %>
-       </button>
-     </div>
-   </div>
-   <% } %>
-  <!-- Move file modal -->
-  <div id="moveModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
-    <div id="moveModalPanel" class="al-sheet-panel rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
-        <div>
-          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Move file</h2>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Enter the destination path. Use / for subdirectories.</p>
-        </div>
-        <button type="button" onclick="closeMoveModal()" class="p-1 rounded-lg transition" aria-label="Close" style="color:var(--theme-text-muted);">
-          <%- icon('x', { size: 16 }) %>
-        </button>
-      </div>
-      <div class="px-5 py-4">
-        <input type="hidden" id="moveSourcePath">
-        <input type="text" id="moveDestPath"
-          class="al-input font-mono"
-          placeholder="path/to/destination/">
-      </div>
-      <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button type="button" onclick="closeMoveModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-          <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Cancel
-        </button>
-        <button type="button" onclick="confirmMove()" class="al-btn-primary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-          <%- icon('move-right', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Move
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Mass Delete Confirmation Modal -->
- <div id="massDeleteModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
-    <div id="massDeleteModalPanel" class="al-sheet-panel rounded-2xl shadow-xl w-full max-w-sm mx-4 will-change-transform" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="px-5 pt-5 pb-4">
-        <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Confirm Mass Deletion</p>
-        <p id="massDeleteMessage" class="text-xs mt-1.5 leading-relaxed" style="color:var(--theme-text-muted)"></p>
-      </div>
-      <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button type="button" onclick="closeMassDeleteModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-          <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Cancel
-        </button>
-        <button type="button" id="confirmMassDelete" class="al-btn-danger px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-          <%- icon('trash-2', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Delete
-        </button>
-      </div>
-    </div>
- </div>
-    <!-- Create file / folder modal -->
-  <div id="createFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
-    <div id="createFileModalPanel" class="al-sheet-panel rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
-        <div>
-          <h2 id="createModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New File</h2>
-          <p id="createModalHint" class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Use / to create files inside new folders.</p>
-        </div>
-        <button type="button" onclick="closeCreateFileModal()" class="p-1 rounded-lg transition" style="color:var(--theme-text-muted);">
-          <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
-        </button>
-      </div>
-      <div class="px-5 py-4">
-        <input type="text" id="FileName" data-mode="file"
-          class="al-input font-mono"
-          placeholder="filename.txt or folder/filename.txt"
-          onkeydown="handleFileNameKeyPress(event)">
-        <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
-      </div>
-      <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button type="button" onclick="closeCreateFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
-          <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Cancel
-        </button>
-        <button type="button" onclick="confirmCreateFile()" class="al-btn-primary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
-          <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Create
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Upload file -->
-  <div id="uploadFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
-    <div id="uploadFileModalPanel" class="al-sheet-panel rounded-2xl p-8 max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-        <h2 class="text-2xl font-medium mb-1" style="color:var(--theme-text-strong)">Upload File</h2>
-        <p class="mb-6" style="color:var(--theme-text-muted)">Select a file to upload to the current directory.</p>
-        <div class="mb-4">
-          <div class="mb-4">
-            <label for="fileInput" class="w-full px-3 py-6 border-2 border-dashed rounded-xl focus:outline-none focus:ring-2 transition text-center cursor-pointer block" style="border-color:var(--theme-border); color:var(--theme-text-strong);" id="dropZone">
-              <%- icon('upload', { class: 'w-10 h-10 mx-auto mb-2', fill: 'currentColor', strokeWidth: 1 }) %>
-              <p style="color:var(--theme-text-muted)">Drag & drop a file here or click to browse</p>
-            </label>
-            <input type="file" id="fileInput" class="hidden" onchange="handleFileInputChange(event)">
-          </div>
-          <div id="filePreview" class="hidden">
-            <div class="flex items-center p-3 rounded-xl" style="background:var(--theme-bg-secondary);">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-3" style="color:var(--theme-text-muted)">
-                <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-              </svg>
-              <div class="flex-1 truncate">
-                <p id="selectedFileName" class="font-medium truncate" style="color:var(--theme-text-strong)"></p>
-                <p id="selectedFileSize" class="text-sm" style="color:var(--theme-text-muted)"></p>
-              </div>
-              <button type="button" onclick="removeSelectedFile()" class="ml-2" aria-label="Remove selected file" style="color:var(--theme-text-muted)">
-                <%- icon('x', { class: 'w-5 h-5' }) %>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="flex justify-end space-x-4">
-          <button type="button" onclick="closeUploadFileModal()" class="al-btn-secondary px-5 py-2 inline-flex items-center gap-2">
-            <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-            Cancel
-          </button>
-          <button type="button" id="uploadButton" class="al-btn-primary w-full md:w-auto px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5" disabled>
-            <%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %>
-            Upload
-          </button>
-        </div>
-    </div>
-  </div>
-
-  <!-- Pull file from URL -->
-  <div id="pullFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
-    <div id="pullFileModalPanel" class="al-sheet-panel rounded-2xl p-8 max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-        <h2 class="text-2xl font-medium mb-1" style="color:var(--theme-text-strong)">Pull File From URL</h2>
-        <p class="mb-6" style="color:var(--theme-text-muted)">Download a file from a public URL into the current directory.</p>
-        <div class="mb-4">
-          <label for="pullUrlInput" class="mb-1.5 block text-xs font-medium" style="color:var(--theme-text-muted)">File URL</label>
-          <input type="url" id="pullUrlInput" class="al-input w-full font-mono" placeholder="https://example.com/file.zip" autocomplete="off" spellcheck="false">
-          <p id="pullUrlPreview" class="mt-2 text-xs font-mono hidden" style="color:var(--theme-text-muted)"></p>
-        </div>
-        <div class="flex justify-end space-x-4">
-          <button type="button" onclick="closePullFileModal()" class="al-btn-secondary px-5 py-2 inline-flex items-center gap-2">
-            <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-            Cancel
-          </button>
-          <button type="button" id="pullButton" class="al-btn-primary w-full md:w-auto px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
-            <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>
-            Pull
-          </button>
-        </div>
-    </div>
-  </div>
-
-  
-      </div><!-- /server-page-body -->
-
-      </div>
-</main>
-
-<%- include('../../components/toast')%>
-<%- include('../../components/loadingPopup')%>
-<%- include('../../components/imageViewer')%>
-
-<!-- Rename Modal -->
-<div id="renameModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
-  <div id="renameModalPanel" class="al-sheet-panel rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-    <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
-      <div>
-        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Rename</h2>
-        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Use / to move the file into a different folder.</p>
-      </div>
-      <button type="button" onclick="closeRenameModal()" class="p-1 rounded-lg transition" aria-label="Close" style="color:var(--theme-text-muted);">
-        <%- icon('x', { class: 'w-4 h-4' }) %>
-      </button>
-    </div>
-    <div class="px-5 py-4">
-      <input type="text" id="newFileName"
-        class="al-input font-mono"
-        placeholder="new-name.txt or subfolder/new-name.txt">
-      <p id="renamePreview" class="mt-2 text-xs font-mono hidden"></p>
-    </div>
-    <input type="hidden" id="currentFileName">
-    <input type="hidden" id="currentFilePath">
-    <div class="flex gap-2 px-5 pb-5 justify-end">
-      <button type="button" onclick="closeRenameModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
-        <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-        Cancel
-      </button>
-      <button type="button" onclick="confirmRename()" class="al-btn-primary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
-        <%- icon('pencil', { class: 'size-3', strokeWidth: 1.5 }) %>
-        Rename
-      </button>
-    </div>
-  </div>
-</div>
-
-<script nonce="<%- nonce %>">
   function handleFileNameKeyPress(event) {
     if (event.key === 'Enter') {
         event.preventDefault();
@@ -518,7 +26,7 @@ function escJS(val) {
       confirmLabel: 'Delete',
       onConfirm: () => {
       const loader = showLoadingPopup('Deleting File', 'Removing file from server...');
-      fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(filePath), { method: 'DELETE' })
+      fetch('/server/null/files/rm/' + encodeURIComponent(filePath), { method: 'DELETE' })
       .then(response => {
         loader.close();
         if (response.ok) {
@@ -538,7 +46,7 @@ function escJS(val) {
   }
 
   function downloadfile(fileName, filePath) {
-    fetch('/server/<%= server.UUID %>/files/download/' + encodeURIComponent(filePath), { method: 'GET' })
+    fetch('/server/null/files/download/' + encodeURIComponent(filePath), { method: 'GET' })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`Error downloading file: ${response.statusText}`);
@@ -661,7 +169,7 @@ function archiveFiles(files) {
     const loader = showLoadingPopup('Creating Archive', 'Preparing files for archiving...');
     loader.updateProgress(20, 'Compressing files...');
 
-    fetch('/server/<%= server.UUID %>/zip', {
+    fetch('/server/null/zip', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -715,7 +223,7 @@ confirmMassDeleteBtn.addEventListener('click', async function() {
   loader.updateProgress(10, 'Processing deletion requests...');
 
   const deletePromises = selectedFiles.map(fileName =>
-    fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(fileName), { method: 'DELETE' })
+    fetch('/server/null/files/rm/' + encodeURIComponent(fileName), { method: 'DELETE' })
   );
 
   try {
@@ -815,7 +323,7 @@ function openCreateFileModal() {
 
         const parentPath = filePath.substring(0, filePath.lastIndexOf('/'));
 
-        const response = await fetch(`/server/<%= server.UUID %>/unzip`, {
+        const response = await fetch(`/server/null/unzip`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -987,7 +495,7 @@ function openCreateFileModal() {
       // Use FormData instead of JSON for more reliable file uploads
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('path', '<%= currentPath %>');
+      formData.append('path', 'null');
       formData.append('fileName', fileName);
 
       loader.updateProgress(30, 'Uploading file...');
@@ -996,7 +504,7 @@ function openCreateFileModal() {
         // Use XMLHttpRequest for better progress tracking and reliability
         const xhr = new XMLHttpRequest();
 
-        xhr.open('POST', `/server/<%= server.UUID %>/upload`, true);
+        xhr.open('POST', `/server/null/upload`, true);
 
         xhr.upload.onprogress = function(e) {
           if (e.lengthComputable) {
@@ -1173,7 +681,7 @@ function openCreateFileModal() {
     const mode = document.getElementById('FileName').getAttribute('data-mode');
     if (!raw) { closeCreateFileModal(); return; }
 
-    const base = '<%= currentPath ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
+    const base = 'null';
     let finalPath;
 
     if (raw.startsWith('/')) {
@@ -1191,7 +699,7 @@ function openCreateFileModal() {
         const parts = finalPath.split('/');
         const name = parts.pop();
         const parent = parts.join('/');
-        const res = await fetch('/server/<%= server.UUID %>/files/mkdir', {
+        const res = await fetch('/server/null/files/mkdir', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ path: parent || '/', name }),
@@ -1219,7 +727,7 @@ function openCreateFileModal() {
       // Simple file in current dir — direct POST
       try {
         const encoded = encodeURIComponent(finalPath);
-        const res = await fetch('/server/<%= server.UUID %>/files/' + encoded, {
+        const res = await fetch('/server/null/files/' + encoded, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: '' }),
@@ -1240,7 +748,7 @@ function openCreateFileModal() {
     const tempPath = base ? base + '/' + tempName : tempName;
 
     try {
-      const res1 = await fetch('/server/<%= server.UUID %>/files/' + encodeURIComponent(tempPath), {
+      const res1 = await fetch('/server/null/files/' + encodeURIComponent(tempPath), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: '' }),
@@ -1249,7 +757,7 @@ function openCreateFileModal() {
 
       loader.updateProgress(50, req.translations.movingToTarget || 'Moving to target path...');
 
-      const res2 = await fetch('/server/<%= server.UUID %>/rename', {
+      const res2 = await fetch('/server/null/rename', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: tempPath, newName: finalPath }),
@@ -1268,7 +776,7 @@ function openCreateFileModal() {
     const keepPath = finalPath.replace(/\/*$/, '') + '/.airlink_keep';
     const encoded = encodeURIComponent(keepPath);
     try {
-      const res = await fetch('/server/<%= server.UUID %>/files/' + encoded, {
+      const res = await fetch('/server/null/files/' + encoded, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: '' }),
@@ -1295,7 +803,7 @@ function openCreateFileModal() {
     const loader = showLoadingPopup('Renaming', 'Processing...');
 
     try {
-      const res = await fetch('/server/<%= server.UUID %>/rename', {
+      const res = await fetch('/server/null/rename', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: filePath, newName: newPath }),
@@ -1411,7 +919,7 @@ function openCreateFileModal() {
     const dest = document.getElementById('moveDestPath').value.trim();
     if (!dest) { showToast('Enter a destination path.', 'error'); return; }
     try {
-      const res = await fetch(`/server/<%- server.UUID %>/files/rename`, {
+      const res = await fetch(`/server/null/files/rename`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
         body:    JSON.stringify({ oldPath: src, newPath: dest }),
@@ -1432,7 +940,7 @@ function openCreateFileModal() {
     const dir  = path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : '';
     const dest = `${dir}${base}_copy${ext}`;
     try {
-      const res = await fetch(`/server/<%- server.UUID %>/files/copy`, {
+      const res = await fetch(`/server/null/files/copy`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
         body:    JSON.stringify({ location: path }),
@@ -1516,7 +1024,7 @@ function openCreateFileModal() {
         name = parsed.pathname.split('/').filter(Boolean).pop() || '';
       } catch {}
       if (!name) { preview.classList.add('hidden'); return; }
-      const base = '<%= currentPath ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
+      const base = 'null';
       preview.textContent = 'Will save as: ' + (base ? base + '/' : '/') + name;
       preview.classList.remove('hidden');
     });
@@ -1538,10 +1046,10 @@ function openCreateFileModal() {
     closePullFileModal();
     const loader = showLoadingPopup('Pulling File', 'Downloading from URL...');
     try {
-      const res = await fetch('/server/<%= server.UUID %>/files/pull', {
+      const res = await fetch('/server/null/files/pull', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
-        body: JSON.stringify({ url, path: '<%= currentPath %>' }),
+        body: JSON.stringify({ url, path: 'null' }),
       });
       const data = await res.json();
       loader.close();
@@ -1556,6 +1064,3 @@ function openCreateFileModal() {
       showToast('Failed to pull file — check the URL and try again.', 'error');
     }
   });
-</script>
-
-<%- include('../../components/footer') %>

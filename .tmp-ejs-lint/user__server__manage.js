@@ -1,404 +1,13 @@
-<%- include('../../components/header', { title: 'Console' }) %>
-<%- include('../../components/serverFeatures') %>
+/* inline script 1 */
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" integrity="sha384-8Xk9wy/gzEDUKrXtrmCFa2bBuK3BpjpDuL/p0SeKQX19Khl/M+lHOgD/CyYf7efP" crossorigin="anonymous" />
-<script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js" integrity="sha384-M169f14mRZOXm3hD/v2Ti0ThIT/RnAQagXA9nlE15yHAtrW19gdePJh/HaTzUOe/" crossorigin="anonymous"></script>
-<script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js" integrity="sha384-iF+jqbuti4XlB64clWgFWYEscb+UnSRv3VgVikGYZu+otNFnSHr7y7NcKfBnGizn" crossorigin="anonymous"></script>
-<script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.11.0/lib/addon-web-links.js" integrity="sha384-Zb/L38m4THfRbsxxv8gWAi8cQ6xcWQnv0BgR0qwbTDwtBDaPi6pkyfgfBIH6C8ZG" crossorigin="anonymous"></script>
-<script nonce="<%- nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js" integrity="sha384-FcQlsUOd0TJjROrBxhJdUhXTUgNJQxTMcxZe6nHbaEfFL1zjQ+bq/uRoBQxb0KMo" crossorigin="anonymous"></script>
+/* inline script 2 */
 
-<style>
-    canvas {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100% !important;
-        height: 100% !important;
-        pointer-events: none;
-    }
+/* inline script 3 */
 
-    #terminal {
-        height: 420px;
-        background: var(--theme-terminal-bg, #141414);
-        overscroll-behavior: contain;
-        touch-action: none;
-    }
+/* inline script 4 */
 
-    #terminal .xterm {
-        padding: 8px;
-        height: 100%;
-    }
+/* inline script 5 */
 
-    #terminal .xterm-viewport {
-        background: var(--theme-terminal-bg, #141414) !important;
-        border-radius: 0;
-    }
-
-    #terminal .xterm-screen {
-        background: var(--theme-terminal-bg, #141414);
-    }
-
-    .console-wrap {
-        animation: console-appear 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    @keyframes console-appear {
-        from { opacity: 0; transform: translateY(6px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Mobile terminal */
-    #mobile-terminal {
-        height: 300px;
-        background: var(--theme-terminal-bg, #141414);
-        overscroll-behavior: contain;
-        touch-action: none;
-    }
-
-    #mobile-terminal .xterm {
-        padding: 6px;
-        height: 100%;
-    }
-
-    #mobile-terminal .xterm-viewport {
-        background: var(--theme-terminal-bg, #141414) !important;
-    }
-
-    #mobile-terminal .xterm-screen {
-        background: var(--theme-terminal-bg, #141414);
-    }
-
-    #mobile-terminal-container {
-        overscroll-behavior: contain;
-        animation: console-appear 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-</style>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     DESKTOP LAYOUT (lg+)
-     ═══════════════════════════════════════════════════════════════ -->
-<main class="hidden lg:block h-screen m-auto text-neutral-800 dark:text-white">
-  <div class="flex h-full">
-    <!-- Sidebar -->
-    <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
-    </div>
-
-    <!-- Content -->
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
-        { label: server.name }
-      ] }) %>
-      <!-- Page Header: title + meta left, buttons right -->
-      <div class="px-8 pt-4">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div class="flex-1 min-w-0">
-            <%- include('../../components/serverHeader') %>
-            <!-- Server meta: image · node · id -->
-            <%- include('../../components/serverMeta') %>
-          </div>
-
-          <!-- Control buttons -->
-          <div class="flex gap-2 shrink-0">
-            <button id="startButton" type="button"
-              <%= server.Suspended ? 'disabled aria-disabled="true"' : '' %>
-              class="al-btn-success rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
-              <%- icon('play', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
-              <%= req.translations.start %>
-            </button>
-            <button id="restartButton" type="button"
-              <%= server.Suspended ? 'disabled aria-disabled="true"' : '' %>
-              class="al-btn-secondary rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
-              <%- icon('refresh-cw', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
-              <%= req.translations.restart %>
-            </button>
-            <button id="stopButton" type="button"
-              <%= server.Suspended ? 'disabled aria-disabled="true"' : '' %>
-              class="al-btn-danger rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
-              <%- icon('square', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
-              <%= req.translations.stop %>
-            </button>
-          </div>
-        </div>
-
-        <!-- Server Suspended Warning -->
-        <% if (server.Suspended) { %>
-        <div class="mt-3 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl px-4 py-3 flex items-center gap-3">
-          <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-danger);' }) %>
-          <div>
-            <p class="text-sm font-medium" style="color:var(--theme-danger);"><%= req.translations.serverSuspended || "This server's been grounded. Reach out to your admin if you think that's a mistake." %></p>
-            <p class="text-xs" style="color:var(--theme-danger);"><%= req.translations.serverSuspendedDesc || 'This server has been suspended by an administrator.' %></p>
-          </div>
-        </div>
-        <% } %>
-
-        <!-- Daemon Offline Warning -->
-        <div id="daemonOfflineWarningRow" class="<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %>hidden<% } %> mt-3">
-          <div id="daemonOfflineWarning" class="bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl px-4 py-3 flex items-center gap-3">
-            <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-danger);' }) %>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon — it might just need a nudge.' %></p>
-            </div>
-            <button type="button" onclick="window.location.reload()" class="al-btn-danger shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition inline-flex items-center gap-1.5">
-              <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
-              Retry Connection
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <%- include('../../components/serverTemplate') %>
-      <%- include('../../components/installHeader') %>
-
-      <div id="server-page-body" class="flex flex-col lg:flex-row px-8 mt-8">
-
-<!-- Left side: Console -->
-<div class="w-full lg:w-2/3 lg:pr-5 flex flex-col min-w-0">
-    <div class="flex flex-col rounded-xl overflow-hidden shadow-lg flex-1 console-wrap border border-neutral-200 dark:border-neutral-700/50">
-        <div class="flex items-center gap-2 px-3 py-2 shrink-0" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
-            <span class="text-[11px] font-medium select-none tracking-wide" style="color:var(--theme-text-muted)">console</span>
-            <span class="flex-1"></span>
-            <span id="consoleReadOnlyNotice" class="hidden text-[11px] font-medium" style="color:var(--theme-text-muted)">View-only — console input is active in another tab</span>
-            <button id="loadHistoryBtn" type="button" class="text-[11px] font-medium rounded-md px-2 py-1 transition-colors inline-flex items-center gap-1" style="color:var(--theme-text-muted)" aria-label="Load recent logs">
-              <%- icon('file-clock', { class: 'size-3', strokeWidth: 1.5 }) %>
-              Load recent logs
-            </button>
-        </div>
-        <div class="flex-1 relative" style="background:var(--theme-bg-card)">
-            <div id="terminal"></div>
-        </div>
-    </div>
-    <div class="relative">
-        <div class="relative">
-            <input id="input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
-                class="w-full px-4 py-3 text-sm rounded-b-xl focus:ring-1 focus:border-transparent placeholder:font-medium bg-transparent relative z-[1]"
-                style="color:var(--theme-text-strong);border-top:1px solid var(--theme-border)">
-            <div id="ghost-text-bg" class="absolute inset-0 px-4 py-3 text-sm pointer-events-none rounded-b-xl overflow-hidden z-0" style="border-top:1px solid var(--theme-border);background:var(--theme-bg-secondary)">
-                <span id="ghost-typed" class="invisible"></span><span id="ghost-suggestion" class="text-neutral-400"></span>
-            </div>
-        </div>
-    </div>
-</div>
-
-        <!-- Right side: Stats Cards -->
-        <div class="w-full lg:w-1/3 mt-4 lg:mt-0 space-y-4 flex flex-col">
-
-            <!-- IP Address Card -->
-            <div class="relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:0">
-                <div class="relative z-10 flex items-start justify-between gap-2">
-                    <div class="min-w-0">
-                        <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %>:</h2>
-                        <p id="server-ip-text" class="mt-1 text-sm font-medium font-mono tracking-tight break-all" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></p>
-                    </div>
-                    <button type="button" id="copy-ip-btn" onclick="copyServerIP()" title="Copy" class="shrink-0 mt-1 rounded-lg p-1.5 transition-colors" style="background:var(--theme-bg-secondary)">
-                        <span id="copy-icon"><%- icon('copy', { class: 'h-3.5 w-3.5', style: 'color:var(--theme-text-muted)' }) %></span>
-                        <span id="check-icon" class="hidden"><%- icon('check', { class: 'h-3.5 w-3.5 text-emerald-500', strokeWidth: 2.5 }) %></span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Status Card -->
-            <div class="relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:1">
-                <canvas id="statusChart" class="absolute inset-0 w-full h-full"></canvas>
-                <div class="relative z-10">
-                  <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.Status %>:</h2>
-                  <p id="status" role="status" aria-live="polite" class="mt-1 text-lg font-medium tracking-tight leading-snug" style="color:var(--theme-text-strong)">-</p>
-                  <p id="status-msg" class="text-xs font-medium mt-0.5 leading-snug transition-all duration-300 opacity-0 translate-y-1 pointer-events-none" style="color:var(--theme-text-muted)"></p>
-                </div>
-              </div>
-
-            <!-- RAM Usage Card -->
-            <div class="relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:2">
-                <canvas id="ramChart" class="absolute inset-0 w-full h-full"></canvas>
-                <div class="relative z-10">
-                    <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.ramUsage %>:</h2>
-                    <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight" style="color:var(--theme-text-strong)">0% (0 MB / 0 MB)</p>
-                </div>
-            </div>
-
-            <!-- CPU Usage Card -->
-            <div class="relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:3">
-                <canvas id="cpuChart" class="absolute inset-0 w-full h-full"></canvas>
-                <div class="relative z-10">
-                    <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.cpuUsage %>:</h2>
-                    <p id="cpuUsage" class="mt-1 text-lg font-medium tracking-tight" style="color:var(--theme-text-strong)">0%</p>
-                </div>
-            </div>
-
-            <!-- Disk Usage Card -->
-            <div class="relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:4">
-                <canvas id="diskChart" class="absolute inset-0 w-full h-full hidden"></canvas>
-                <div class="relative z-10">
-                    <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.diskUsage %>:</h2>
-                    <p id="diskUsage" class="mt-1 text-lg font-medium tracking-tight" style="color:var(--theme-text-strong)">-</p>
-                </div>
-            </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</main>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     MOBILE LAYOUT (< lg) — compact chrome + 2x2 grid + terminal
-     ═══════════════════════════════════════════════════════════════ -->
-<main id="mobile-manage" class="lg:hidden min-h-screen pt-16 text-neutral-800 dark:text-white">
-
-  <div class="px-4">
-    <!-- Server Header + Meta -->
-    <div class="mb-4">
-      <div class="flex items-start justify-between gap-3">
-        <%- include('../../components/serverHeader') %>
-        <div class="shrink-0 text-right mt-0.5 space-y-0.5">
-          <div class="flex items-center justify-end gap-1.5">
-            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 truncate max-w-[110px]"><%= server.image.name %></span>
-            <%- icon('box', { class: 'h-2.5 w-2.5 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
-          </div>
-          <div class="flex items-center justify-end gap-1.5">
-            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 truncate max-w-[110px]"><%= server.node.name %></span>
-            <%- icon('server', { class: 'h-2.5 w-2.5 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
-          </div>
-          <div class="flex items-center justify-end gap-1.5">
-            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono"><%= server.UUID.split('-')[0] %></span>
-            <%- icon('hash', { class: 'h-2.5 w-2.5 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
-          </div>
-        </div>
-      </div>
-
-      <div class="px-0 mt-1">
-        <%- include('../../components/loadingPopup') %>
-      </div>
-
-      <% if (server.Suspended) { %>
-      <div class="mt-3 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl px-3 py-2.5">
-        <%- icon('triangle-alert', { size: 16, class: 'shrink-0', style: 'color:var(--theme-danger);' }) %>
-        <div class="min-w-0">
-          <p class="text-xs font-medium" style="color:var(--theme-danger);">Server suspended</p>
-          <p class="text-[11px] truncate" style="color:var(--theme-danger);">Contact an administrator for assistance.</p>
-        </div>
-      </div>
-      <% } %>
-
-      <div id="mobileDaemonOfflineWarning" class="mt-3 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl px-3 py-2.5<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %> hidden<% } %>">
-        <%- icon('triangle-alert', { size: 16, class: 'shrink-0', style: 'color:var(--theme-danger);' }) %>
-        <div class="min-w-0 flex-1">
-          <p class="text-xs font-medium" style="color:var(--theme-danger);">Connection Error</p>
-          <p class="text-[11px] truncate" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'The daemon appears to be offline.' %></p>
-        </div>
-        <button type="button" onclick="window.location.reload()" class="al-btn-danger shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-lg transition inline-flex items-center gap-1.5">
-          <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Retry
-        </button>
-      </div>
-
-      <!-- Mobile Control Buttons -->
-      <div class="flex gap-2 mt-3">
-        <button id="mobileStartButton" type="button"
-          <%= server.Suspended ? 'disabled' : '' %>
-          class="al-btn-success flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
-          <%- icon('play', { class: 'w-3.5 h-3.5' }) %>
-          <%= req.translations.start %>
-        </button>
-        <button id="mobileRestartButton" type="button"
-          <%= server.Suspended ? 'disabled' : '' %>
-          class="al-btn-secondary flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
-          <%- icon('refresh-cw', { class: 'w-3.5 h-3.5' }) %>
-          <%= req.translations.restart %>
-        </button>
-        <button id="mobileStopButton" type="button"
-          <%= server.Suspended ? 'disabled' : '' %>
-          class="al-btn-danger flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
-          <%- icon('square', { class: 'w-3.5 h-3.5' }) %>
-          <%= req.translations.stop %>
-        </button>
-      </div>
-    </div>
-
-    <%- include('../../components/serverTemplate') %>
-  </div>
-
-  <%- include('../../components/installHeader') %>
-
-  <div class="px-4 pb-20">
-    <!-- IP Address -->
-    <div class="mt-3 mb-3">
-      <div class="rounded-xl px-3 py-2.5 flex items-center gap-2" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm)">
-        <%- icon('globe', { class: 'h-4 w-4 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
-        <span class="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 shrink-0"><%= req.translations.addressIP %>:</span>
-        <span class="text-xs font-medium font-mono text-neutral-800 dark:text-white truncate flex-1" id="mobile-server-ip-text"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></span>
-        <button type="button" id="mobile-copy-ip-btn" onclick="copyMobileServerIP()" class="shrink-0 rounded-md p-1 transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">
-          <svg id="mobile-copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 text-neutral-600 dark:text-neutral-300">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          <svg id="mobile-check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3.5 w-3.5 text-emerald-500 hidden">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Mobile Terminal -->
-    <div class="rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700/50">
-      <div class="flex items-center px-3 py-2 shrink-0" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
-        <span class="text-[11px] font-medium select-none tracking-wide" style="color:var(--theme-text-muted)">console</span>
-      </div>
-      <div id="mobile-terminal-container" class="w-full relative">
-        <div id="mobile-terminal"></div>
-      </div>
-      <div class="relative" style="border-top:1px solid var(--theme-border)">
-        <p id="consoleReadOnlyNoticeMobile" class="hidden text-[11px] px-4 py-1.5 m-0" style="color:var(--theme-text-muted)">View-only — console input is active in another tab</p>
-        <input id="mobile-input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
-          class="w-full px-4 py-3 text-sm outline-none placeholder:font-medium" style="background:var(--theme-bg-card);color:var(--theme-text-strong)">
-      </div>
-    </div>
-
-    <!-- Mobile Stats Grid (2x2) -->
-    <div class="grid grid-cols-2 gap-3 mt-3">
-      <!-- Status -->
-      <div class="relative overflow-hidden rounded-xl px-3 py-3 min-h-[5rem]" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:0">
-        <canvas id="mobileStatusChart"></canvas>
-        <div class="relative z-10">
-          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= req.translations.Status %></p>
-          <p id="mobile-status" class="mt-0.5 text-base font-semibold leading-tight" style="color:var(--theme-text-strong)">--</p>
-          <p id="mobile-status-log-text" class="text-[10px] truncate hidden" style="color:var(--theme-text-muted)"></p>
-        </div>
-      </div>
-      <!-- RAM -->
-      <div class="relative overflow-hidden rounded-xl px-3 py-3 min-h-[5rem]" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:1">
-        <canvas id="mobileRamChart"></canvas>
-        <div class="relative z-10">
-          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= req.translations.ramUsage %></p>
-          <p id="mobile-ramUsage" class="mt-0.5 text-xs font-medium leading-tight break-all" style="color:var(--theme-text-strong)">0%</p>
-        </div>
-      </div>
-      <!-- CPU -->
-      <div class="relative overflow-hidden rounded-xl px-3 py-3 min-h-[5rem]" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:2">
-        <canvas id="mobileCpuChart"></canvas>
-        <div class="relative z-10">
-          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= req.translations.cpuUsage %></p>
-          <p id="mobile-cpuUsage" class="mt-0.5 text-base font-semibold leading-tight" style="color:var(--theme-text-strong)">0%</p>
-        </div>
-      </div>
-      <!-- Disk -->
-      <div class="relative overflow-hidden rounded-xl px-3 py-3 min-h-[5rem]" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:3">
-        <canvas id="mobileDiskChart" class="hidden"></canvas>
-        <div class="relative z-10">
-          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= req.translations.diskUsage %></p>
-          <p id="mobile-diskUsage" class="mt-0.5 text-xs font-medium leading-tight break-all" style="color:var(--theme-text-strong)">--</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</main>
-
-<%- include('../../components/toast') %>
-
-<%- include('../../components/footer') %>
-
-<script nonce="<%- nonce %>">
 function themeVar(name, fallback) {
   const v = getComputedStyle(document.documentElement).getPropertyValue('--theme-' + name).trim();
   return v || fallback;
@@ -508,7 +117,7 @@ if (loadHistoryBtn) {
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
-    const path = '/console/<%= server.UUID %>';
+    const path = '/console/null';
 
     const socketUrl = `${protocol}//${host}${path}`;
 
@@ -526,7 +135,7 @@ if (loadHistoryBtn) {
         return _wsTokenCache.promise;
     }
     function openTimedSocket(url, serverId) {
-        return getWsConnectToken(serverId || '<%= server.UUID %>').then((token) => new WebSocket(url + '?token=' + encodeURIComponent(token)));
+        return getWsConnectToken(serverId || 'null').then((token) => new WebSocket(url + '?token=' + encodeURIComponent(token)));
     }
 
     let socket;
@@ -574,7 +183,7 @@ function setDaemonOfflineBanner(offline) {
 
 async function openConsoleSocket() {
     try {
-        const token = await getWsConnectToken('<%= server.UUID %>');
+        const token = await getWsConnectToken('null');
         socket = new WebSocket(socketUrl + '?token=' + encodeURIComponent(token));
 
         socket.onopen = () => {
@@ -586,7 +195,7 @@ async function openConsoleSocket() {
 
             if (!historyLoaded) {
                 historyLoaded = true;
-                fetch(`/server/<%= server.UUID %>/logs`)
+                fetch(`/server/null/logs`)
                     .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
                     .then((data) => {
                         const lines = data.lines || [];
@@ -662,7 +271,7 @@ function updateConsoleOwnerUI() {
         updateConsoleOwnerUI();
         return;
     }
-    window.navigator.locks.request('al-console-input:<%= server.UUID %>', function () {
+    window.navigator.locks.request('al-console-input:null', function () {
         consoleOwner = true;
         updateConsoleOwnerUI();
         return new Promise(function () {});
@@ -882,7 +491,7 @@ connectWebSocket();
     function unlockInput() {
         if (!consoleInput) return;
         consoleInput.disabled = !consoleOwner;
-        consoleInput.placeholder = '<%= req.translations.typeACommand || "Type a command..." %>';
+        consoleInput.placeholder = 'null';
     }
 
     function setButtonLoading(btn, label) {
@@ -901,9 +510,9 @@ connectWebSocket();
         }
     }
 
-    <% if (!server.Suspended) { %>
+    ;
     startButton.addEventListener('click', async () => {
-        const serverUUID = '<%= server.UUID %>';
+        const serverUUID = 'null';
 
         setStatusText('Starting', 'var(--theme-warning)');
         setStatusLog('Sending start request...');
@@ -969,23 +578,23 @@ connectWebSocket();
                 showToast("Couldn't wake the server. Try again?", 'error');
             });
     });
-    <% } else { %>
+    ;
     startButton.addEventListener('click', () => {
         showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
     });
-    <% } %>
+    ;
 
     const restartButton = document.getElementById('restartButton');
-    <% if (!server.Suspended) { %>
+    ;
     restartButton.addEventListener('click', () => {
-        const serverUUID = '<%= server.UUID %>';
+        const serverUUID = 'null';
         window.modal.confirm({
-          title: '<%= req.translations.confirmRestartServer || "Restart server?" %>',
-          body: '<%= req.translations.confirmRestartDesc || "Everyone gets disconnected. You sure?" %>',
+          title: 'null',
+          body: 'null',
           danger: false,
-          confirmLabel: '<%= req.translations.restartServer || "Restart Server" %>',
+          confirmLabel: 'null',
           onConfirm: async () => {
-          const serverUUID = '<%= server.UUID %>';
+          const serverUUID = 'null';
           deliberateStop = true;
           setStatusText('Restarting', 'var(--theme-warning)');
           setStatusLog('Sending restart request...');
@@ -1054,21 +663,21 @@ connectWebSocket();
           }
         });
     });
-    <% } else { %>
+    ;
     restartButton.addEventListener('click', () => {
         showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
     });
-    <% } %>
+    ;
 
     const stopButton = document.getElementById('stopButton');
-    <% if (!server.Suspended) { %>
+    ;
     stopButton.addEventListener('click', () => {
-        const serverUUID = '<%= server.UUID %>';
+        const serverUUID = 'null';
         window.modal.confirm({
-          title: '<%= req.translations.confirmStopServer || "Stop server?" %>',
-          body: '<%= req.translations.confirmStopDesc || "Everyone gets disconnected. You sure?" %>',
+          title: 'null',
+          body: 'null',
           danger: true,
-          confirmLabel: '<%= req.translations.stopServer || "Stop Server" %>',
+          confirmLabel: 'null',
           onConfirm: async () => {
 
           deliberateStop = true;
@@ -1132,11 +741,11 @@ connectWebSocket();
           }
         });
     });
-    <% } else { %>
+    ;
     stopButton.addEventListener('click', () => {
         showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
     });
-    <% } %>
+    ;
 
     document.addEventListener('DOMContentLoaded', () => {
         const inputElement = document.getElementById('input');
@@ -1152,17 +761,17 @@ connectWebSocket();
             handleKeyUp(event);
         });
 
-        <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
+        ;
         // Lazy-load the autocomplete module only after the page is idle.
         // This keeps it off the critical path and away from parse/eval during load.
         inputElement.addEventListener('focus', function loadAutocomplete() {
             inputElement.removeEventListener('focus', loadAutocomplete);
             import('/js/mc-autocomplete.js').then(mod => {
-                mod.fetchPlayersIfNeeded('<%= server.UUID %>');
+                mod.fetchPlayersIfNeeded('null');
                 mod.initDesktop(inputElement);
             });
         }, { once: true });
-        <% } %>
+        ;
     });
 
     // Stubs so the keydown handler doesn't throw before the module loads.
@@ -1213,7 +822,7 @@ connectWebSocket();
             }
         }
 
-        openTimedSocket(`${protocol}//${host}/status/<%= server.UUID %>`, '<%= server.UUID %>')
+        openTimedSocket(`${protocol}//${host}/status/null`, 'null')
             .then((ws) => {
                 statsWs = ws;
 
@@ -1344,7 +953,7 @@ connectWebSocket();
 
     function updateRamUsage(stats) {
     const ramStatsUsage = stats?.data?.memory?.usage || 0;
-    const ramStatsLimit = stats?.data?.memory?.limit || <%- server.Memory %> * 1024 * 1024;
+    const ramStatsLimit = stats?.data?.memory?.limit || null * 1024 * 1024;
     let ramUsagePercent = Number(stats?.data?.memory?.percentage) || 0;
     const ramUsageInMB = ramStatsUsage / 1024 / 1024;
     const ramLimitInMB = ramStatsLimit / 1024 / 1024;
@@ -1370,7 +979,7 @@ connectWebSocket();
             cpuUsagePercent = 0;
         }
 
-        const cpuAllocPct = <%- server.Cpu %> || 100;
+        const cpuAllocPct = null || 100;
         const cores = Math.max(1, Math.round(cpuAllocPct / 100));
         const cpuOfAlloc = cpuAllocPct > 0
             ? Math.round(Math.min(100, (cpuUsagePercent / cpuAllocPct) * 100))
@@ -1454,7 +1063,7 @@ connectWebSocket();
         const msgEl = document.getElementById('status-msg');
         if (msgEl) {
             const link = document.createElement('a');
-            link.href = '/server/<%= server.UUID %>/logs';
+            link.href = '/server/null/logs';
             link.textContent = req.translations.openLogs || 'Open logs';
             link.className = 'underline underline-offset-2 hover:opacity-75';
             msgEl.textContent = '';
@@ -1563,10 +1172,10 @@ connectWebSocket();
         updateStatusChart('danger', 0.1, 0.2);
 
         // Update RAM usage
-        document.getElementById('ramUsage').textContent = `${Math.round(0)}% (0 MB / ${formatRam(<%- server.Memory %> * 1024 * 1024)})`;
+        document.getElementById('ramUsage').textContent = `${Math.round(0)}% (0 MB / ${formatRam(null * 1024 * 1024)})`;
 
         // Update CPU usage
-        const cpuAllocPct = <%- server.Cpu %>;
+        const cpuAllocPct = null;
         const cpuCores = (cpuAllocPct / 100).toFixed(1);
         document.getElementById('cpuUsage').textContent = `${Math.round(0)}% of ${cpuCores} core${cpuCores === '1.0' ? '' : 's'}`;
 
@@ -1609,9 +1218,9 @@ connectWebSocket();
     // Writes them to the console terminal and manages input lock state
     (function () {
         const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-        const base = `${proto}://${location.host}/events/<%= server.UUID %>`;
+        const base = `${proto}://${location.host}/events/null`;
 
-        getWsConnectToken('<%= server.UUID %>').then((token) => {
+        getWsConnectToken('null').then((token) => {
             const lcSock = new WebSocket(base + '?token=' + encodeURIComponent(token));
 
             const stateMap = {
@@ -1772,20 +1381,19 @@ if (parsed.event !== 'lifecycle') return;
         var mobileStopBtn = document.getElementById('mobileStopButton');
 
         if (mobileStartBtn) {
-            <% if (!server.Suspended) { %>
+            ;
             mobileStartBtn.addEventListener('click', function () { startButton.click(); });
-            <% } %>
+            ;
         }
         if (mobileRestartBtn) {
-            <% if (!server.Suspended) { %>
+            ;
             mobileRestartBtn.addEventListener('click', function () { restartButton.click(); });
-            <% } %>
+            ;
         }
         if (mobileStopBtn) {
-            <% if (!server.Suspended) { %>
+            ;
             mobileStopBtn.addEventListener('click', function () { stopButton.click(); });
-            <% } %>
+            ;
         }
     })();
 
-</script>
