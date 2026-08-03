@@ -261,6 +261,7 @@ function escJS(val) {
               <% }) %>
             </tbody>
           </table>
+          <%- include('../../components/ui/al-pagination', { total: files.length, pageSize: 50 }) %>
         </div>
       </div>
       <% } %>
@@ -1360,13 +1361,24 @@ function openCreateFileModal() {
     const clearBtn = document.getElementById('clearFileSearch');
     if (!input) return;
 
+    const applyFilter = (q) => {
+      const rowMatches = (row) => {
+        const name = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() ?? '';
+        return !q || name.includes(q);
+      };
+      if (window.__alPagination && typeof window.__alPagination.setFilter === 'function') {
+        window.__alPagination.setFilter(rowMatches);
+        return;
+      }
+      document.querySelectorAll('tbody tr.al-file-row').forEach(row => {
+        row.style.display = rowMatches(row) ? '' : 'none';
+      });
+    };
+
     input.addEventListener('input', () => {
       const q = input.value.toLowerCase().trim();
       clearBtn.classList.toggle('hidden', !q);
-      document.querySelectorAll('tbody tr.al-file-row').forEach(row => {
-        const name = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() ?? '';
-        row.style.display = (!q || name.includes(q)) ? '' : 'none';
-      });
+      applyFilter(q);
     });
 
     clearBtn.addEventListener('click', () => {
