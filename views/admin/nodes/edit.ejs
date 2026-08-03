@@ -102,7 +102,14 @@
                   <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
                   <%= req.translations.cpu %>
                 </label>
-                <input id="nodeProcessor" value="<%= node.cpu %>" class="al-input" placeholder="Informational only">
+                <input type="hidden" id="nodeCpuValue" value="<%= node.cpu %>">
+                <div class="flex items-stretch gap-0">
+                  <input id="nodeProcessor" value="" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="nodeProcessor" data-hidden="nodeCpuValue"
+                    data-units="1:%,100:Cores" data-default-unit="Cores">Cores</button>
+                </div>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">1 core = 100%</p>
               </div>
             </div>
           </div>

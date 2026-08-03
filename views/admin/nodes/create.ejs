@@ -97,12 +97,19 @@
                   <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
                   <%= req.translations.cpu %>
                 </label>
+                <input type="hidden" id="nodeCpuValue" value="">
                 <div class="flex gap-2 items-center">
-                  <input id="nodeProcessor" class="al-input flex-1" placeholder="Informational only">
+                  <div class="flex items-stretch flex-1 gap-0">
+                    <input id="nodeProcessor" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+                    <button type="button" class="al-format-switcher" data-format-switcher
+                      data-display="nodeProcessor" data-hidden="nodeCpuValue"
+                      data-units="1:%,100:Cores" data-default-unit="Cores">Cores</button>
+                  </div>
                   <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
                     <input type="checkbox" id="nodeProcessorAll" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white focus:ring-0"> All
                   </label>
                 </div>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">1 core = 100%</p>
               </div>
             </div>
           </div>
@@ -179,6 +186,36 @@
         </form>
       </div>
 
+      <div id="nodeSetupPanel" class="hidden">
+        <div class="al-card p-5 sm:p-6 space-y-5">
+          <div class="flex items-start gap-3">
+            <div class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-accent) 12%, transparent); color:var(--theme-accent);">
+              <%- icon('radio-tower', { class: 'size-5' }) %>
+            </div>
+            <div>
+              <h2 class="al-card-header mb-1">Node created — one step left</h2>
+              <p class="text-sm" style="color:var(--theme-text-muted)">Your node is saved in the panel. Before servers can run on it, install and configure the daemon on that machine with the credentials below. Keep the key secret — it is the only thing that proves a daemon belongs to this panel.</p>
+            </div>
+          </div>
+
+          <div>
+            <p class="al-label mb-2">Daemon config — paste into <code class="text-xs">storage/config.json</code> on the node</p>
+            <div class="rounded-xl border p-4 text-xs font-mono whitespace-pre overflow-x-auto" style="background:var(--theme-bg-secondary); border-color:var(--theme-border);" id="daemonConfigBlock"></div>
+            <button id="copyDaemonConfig" type="button" class="al-btn-secondary mt-2"><%- icon('copy', { class: 'size-3.5', strokeWidth: 1.5 }) %><span id="copyDaemonConfigLabel">Copy config</span></button>
+          </div>
+
+          <div>
+            <p class="al-label mb-2">Or configure on the command line</p>
+            <div class="rounded-xl border p-3 text-xs font-mono overflow-x-auto" style="background:var(--theme-bg-secondary); border-color:var(--theme-border);" id="daemonCliCommand"></div>
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-1">
+            <button id="verifyDaemonBtn" type="button" class="al-btn-primary"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>I've done this — verify connection</button>
+            <a href="/admin/nodes" class="al-btn-secondary">Back to Nodes</a>
+          </div>
+          <p id="daemonVerifyResult" class="hidden text-sm font-medium"></p>
+        </div>
+      </div>
     </div>
   </div>
 </main>

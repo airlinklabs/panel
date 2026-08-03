@@ -180,7 +180,7 @@
     const nodeData = {
       name: document.getElementById('nodeName').value,
       ram: gbValue('nodeRamValue', 'nodeRam'),
-      cpu: document.getElementById('nodeProcessor').value,
+      cpu: document.getElementById('nodeCpuValue').value,
       disk: gbValue('nodeDiskValue', 'nodeDisk'),
       address: document.getElementById('nodeAddress').value,
       port: document.getElementById('nodePort').value,

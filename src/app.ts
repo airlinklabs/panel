@@ -21,6 +21,7 @@ import {
 import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
 import { startScheduler } from './handlers/schedulerWorker';
 import { initEggCatalogue } from './handlers/eggCatalogueService';
+import { reenqueueQueuedInstalls } from './handlers/installQueue';
 import crypto from 'crypto';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -556,6 +557,7 @@ app.use(errorPageHandler);
     const server = app.listen(port, () => {
       startPlayerStatsCollection();
       startScheduler();
+      reenqueueQueuedInstalls();
       // Clone/pull egg repos on startup; auto-refreshes every 2 days
       initEggCatalogue().catch(err => logger.warn(`Store catalogue init failed: ${err?.message || err}`));
     });

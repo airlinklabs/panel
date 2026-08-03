@@ -435,6 +435,49 @@ const adminModule: Module = {
       },
     );
 
+    router.post(
+      '/admin/node/:id/verify',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const nodeId = getParamAsNumber(req.params.id);
+          const node = await prisma.node.findUnique({ where: { id: nodeId } });
+          if (!node) {
+            res.status(404).json({ message: 'Node not found.' });
+            return;
+          }
+
+          const result = await daemonRequest<{ status?: string; versionRelease?: string; remote?: string; error?: string }>({
+            nodeAddress: node.address,
+            nodePort: node.port,
+            nodeKey: node.key,
+            method: 'GET',
+            path: '/',
+            timeout: 10000,
+          });
+
+          res.status(200).json({
+            connected: result.status === 200,
+            status: result.data?.status || null,
+            version: result.data?.versionRelease || null,
+            remote: result.data?.remote ?? null,
+            error: result.data?.error ?? null,
+          });
+        } catch (error: any) {
+          const cause = error?.cause?.code || error?.code || error?.message || '';
+          const friendly =
+            typeof cause === 'string' && cause.includes('ECONNREFUSED')
+              ? 'No daemon is listening on that address and port yet. Start the daemon, then try again.'
+              : cause.includes('ENOTFOUND') || cause.includes('EAI_AGAIN')
+                ? 'That address does not resolve. Check the hostname or IP you entered.'
+                : cause.includes('timed out')
+                  ? 'The daemon did not answer in time. Check the address, port, and firewall.'
+                  : `Could not reach the daemon: ${cause || 'unknown error'}`;
+          res.status(200).json({ connected: false, error: friendly });
+        }
+      },
+    );
+
     router.get(
       '/admin/node/:id',
       isAuthenticated(true),

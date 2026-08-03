@@ -5,6 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { queueer } from '../../handlers/queueer';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { processQueuedServerInstalls } from '../../handlers/installQueue';
 import { assertNodeCapacity } from '../../handlers/utils/server/resourceCheck';
 import {
   claimNodePorts,
@@ -142,6 +143,30 @@ const userCreateServerModule: Module = {
         if (isNaN(storage) || storage < 128 || storage > resourceLimits.maxStorage) {
           return res.status(400).json({ error: `Storage must be between 128 and ${resourceLimits.maxStorage} MB.` });
         }
+
+        const used = await prisma.server.aggregate({
+          where: { ownerId: userId },
+          _sum: { Memory: true, Cpu: true, Storage: true },
+        });
+        const usedMemory = used._sum.Memory ?? 0;
+        const usedCpu = used._sum.Cpu ?? 0;
+        const usedStorage = used._sum.Storage ?? 0;
+
+        if (usedMemory + memory > resourceLimits.maxMemory) {
+          return res.status(400).json({
+            error: `Memory allocation would exceed your limit of ${resourceLimits.maxMemory} MB (${usedMemory} MB already in use).`,
+          });
+        }
+        if (usedCpu + cpu > resourceLimits.maxCpu) {
+          return res.status(400).json({
+            error: `CPU allocation would exceed your limit of ${resourceLimits.maxCpu}% (${usedCpu}% already in use).`,
+          });
+        }
+        if (usedStorage + storage > resourceLimits.maxStorage) {
+          return res.status(400).json({
+            error: `Storage allocation would exceed your limit of ${resourceLimits.maxStorage} MB (${usedStorage} MB already in use).`,
+          });
+        }
         if (isNaN(swap) || swap < -1) {
           return res.status(400).json({ error: 'Swap must be -1 (unlimited), 0 (disabled), or a positive MB value.' });
         }
@@ -224,108 +249,7 @@ const userCreateServerModule: Module = {
           return { assignedPorts: picked, createdServer: created };
         });
 
-        queueer.addTask(async () => {
-          const servers = await prisma.server.findMany({
-            where: { Queued: true },
-            include: { image: true, node: true },
-          });
-
-          for (const server of servers) {
-            if (!server.Variables) {
-              await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
-              continue;
-            }
-
-            let serverEnv: any[];
-            try {
-              const rawVars = JSON.parse(server.Variables);
-              serverEnv = rawVars.map((v: any) => ({
-                env: String(v.env_variable ?? v.env ?? ''),
-                value: v.value ?? v.default_value ?? '',
-              }));
-              let serverPort = assignedPorts[0];
-              try {
-                const parsedPorts = JSON.parse(server.Ports);
-                const primary = parsedPorts.find((p: any) => p.primary);
-                if (primary?.Port) {
-                  serverPort = parseInt(String(primary.Port).split(':')[0] ?? '');
-                }
-              } catch { /* keep fallback */ }
-              serverEnv.push({ env: 'SERVER_PORT', value: serverPort });
-              serverEnv.push({ env: 'SERVER_MEMORY', value: String(server.Memory) });
-              serverEnv.push({ env: 'SERVER_CPU',    value: String(server.Cpu) });
-            } catch (err) {
-              logger.error(`Error parsing Variables for server ${server.id}:`, err);
-              await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
-              continue;
-            }
-
-            const env = serverEnv.reduce((acc: any, curr: any) => {
-              acc[curr.env] = curr.value;
-              return acc;
-            }, {});
-
-            if (!server.image?.scripts) {
-              await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
-              continue;
-            }
-
-            let scripts: Record<string, unknown>;
-            try {
-              scripts = JSON.parse(server.image.scripts);
-            } catch (err) {
-              logger.error(`Error parsing scripts for server ${server.id}:`, err);
-              await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
-              continue;
-            }
-
-            try {
-              if (scripts.installation && typeof scripts.installation === 'object') {
-                const inst = scripts.installation as { script: string; container: string; entrypoint: string };
-                await daemonRequest({
-                  nodeAddress: server.node.address,
-                  nodePort: server.node.port,
-                  nodeKey: server.node.key,
-                  method: 'POST',
-                  path: '/container/installer',
-                  body: { id: server.UUID, script: inst.script, container: inst.container, entrypoint: inst.entrypoint || 'bash', env },
-                  timeout: 600000,
-                });
-              } else if (Array.isArray(scripts.install)) {
-                // Pass the docker image so the daemon can pull it during install
-                // rather than waiting until the first Start click.
-                let dockerImageValue: string | undefined;
-                try {
-                  const parsed = JSON.parse(server.dockerImage || '{}');
-                  dockerImageValue = Object.values(parsed)[0] as string | undefined;
-                } catch { /* leave undefined */ }
-
-                await daemonRequest({
-                  nodeAddress: server.node.address,
-                  nodePort: server.node.port,
-                  nodeKey: server.node.key,
-                  method: 'POST',
-                  path: '/container/install',
-                  body: {
-                    id: server.UUID,
-                    image: dockerImageValue,
-                    env,
-                    scripts: (scripts.install as any[]).map((s: any) => ({
-                      url: s.url,
-                      onStartup: s.onStart,
-                      ALVKT: s.ALVKT,
-                      fileName: s.fileName,
-                    })),
-                  },
-                  timeout: 600000,
-                });
-              }
-              await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
-            } catch (err) {
-              logger.error(`Error sending install request for server ${server.id}:`, err);
-            }
-          }
-        });
+        queueer.addTask(processQueuedServerInstalls);
 
         return res.status(200).json({ success: true, serverUUID: createdServer.UUID });
       } catch (error) {

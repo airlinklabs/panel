@@ -125,7 +125,7 @@
     const nodeData = {
       name: document.getElementById('nodeName').value,
       ram: ramAll ? 'all' : gbValue('nodeRamValue'),
-      cpu: cpuAll ? 'all' : document.getElementById('nodeProcessor').value,
+      cpu: cpuAll ? 'all' : document.getElementById('nodeCpuValue').value,
       disk: diskAll ? 'all' : gbValue('nodeDiskValue'),
       address: document.getElementById('nodeAddress').value,
       port: document.getElementById('nodePort').value,
@@ -157,15 +157,13 @@
         loader.updateProgress(100, 'Node created!');
         setTimeout(() => {
           loader.close();
-          showToast('Node\'s up and running.', 'success');
-          setTimeout(() => {
-            window.location.href = '/admin/nodes?err=none';
-          }, 1000);
+          showToast('Node created.', 'success');
+          showSetupPanel(data.node);
         }, 500);
       } else {
         loader.close();
         const data = await response.json().catch(() => ({}));
-        showToast(data.error || 'Failed to create node.', 'error');
+        showToast(data.error || data.message || 'Failed to create node.', 'error');
       }
     } catch (error) {
       loader.close();
@@ -173,6 +171,72 @@
       showToast('Error creating node. Try again.', 'error');
     }
   });
+
+  function showSetupPanel(node) {
+    const form = document.getElementById('nodeForm');
+    const panel = document.getElementById('nodeSetupPanel');
+    form.classList.add('hidden');
+    panel.classList.remove('hidden');
+
+    const protocol = (window.location.protocol === 'https:' || String(node.enforceDaemonHttps) === 'true') ? 'https' : 'http';
+    const cfg = {
+      daemon: {
+        address: node.address,
+        port: node.port,
+        key: node.key,
+      },
+    };
+    document.getElementById('daemonConfigBlock').textContent = JSON.stringify(cfg, null, 2);
+    document.getElementById('daemonCliCommand').textContent =
+      'configure -- --panel "' + window.location.origin + '" --address "' + node.address + '" --port "' + node.port + '" --key "' + node.key + '"';
+
+    document.getElementById('copyDaemonConfig').addEventListener('click', async () => {
+      const text = document.getElementById('daemonConfigBlock').textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      const label = document.getElementById('copyDaemonConfigLabel');
+      label.textContent = 'Copied!';
+      setTimeout(() => { label.textContent = 'Copy config'; }, 1500);
+    });
+
+    document.getElementById('verifyDaemonBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('verifyDaemonBtn');
+      const result = document.getElementById('daemonVerifyResult');
+      btn.disabled = true;
+      btn.textContent = 'Checking...';
+      result.classList.add('hidden');
+
+      try {
+        const res = await fetch('/admin/node/' + node.id + '/verify', { method: 'POST' });
+        const d = await res.json().catch(() => ({}));
+        result.classList.remove('hidden');
+        if (d.connected) {
+          result.style.color = 'var(--theme-success)';
+          result.textContent = 'Daemon is live' + (d.version ? ' (' + d.version + ')' : '') + '. Key checks out — servers can now run on this node.';
+          showToast('Daemon verified!', 'success');
+          setTimeout(() => { window.location.href = '/admin/nodes?verified=' + node.id; }, 1800);
+        } else {
+          result.style.color = 'var(--theme-danger)';
+          result.textContent = d.error || 'Could not reach the daemon. Check the address, port, and key.';
+        }
+      } catch {
+        result.classList.remove('hidden');
+        result.style.color = 'var(--theme-danger)';
+        result.textContent = 'Verification failed. Check the address, port, and key, then try again.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'I\'ve done this — verify connection';
+      }
+    });
+  }
 
   ['nodeRam', 'nodeDisk', 'nodeProcessor'].forEach(function(id) {
     const checkbox = document.getElementById(id + 'All');

@@ -848,8 +848,16 @@ connectWebSocket();
         };
 
         fetch(`/server/${serverUUID}/power/start`, { method: 'POST' })
-            .then(r => r.json())
-            .then(() => {
+            .then(r => r.json().then(d => ({ ok: r.ok, d })))
+            .then(({ ok, d }) => {
+                if (!ok) {
+                    setStatusLog(null);
+                    showToast((d && d.error) || 'Failed to start the server.', 'error');
+                    unlockInput();
+                    clearButtonLoading(startButton);
+                    evtSocket.close();
+                    return;
+                }
                 let attempts = 0;
                 const maxAttempts = 28;
                 const poll = setInterval(() => {
@@ -923,8 +931,16 @@ connectWebSocket();
           };
 
           fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
-              .then(r => r.json())
-              .then(() => {
+              .then(r => r.json().then(d => ({ ok: r.ok, d })))
+              .then(({ ok, d }) => {
+                  if (!ok) {
+                      setStatusLog(null);
+                      showToast((d && d.error) || 'Failed to restart the server.', 'error');
+                      unlockInput();
+                      clearButtonLoading(restartButton);
+                      evtSocketR.close();
+                      return;
+                  }
                   let attempts = 0;
                   const maxAttempts = 36;
                   const poll = setInterval(() => {
