@@ -129,7 +129,8 @@
                 <div class="p-8 text-center">
                   <%- icon('database', { class: 'mx-auto h-12 w-12', style: 'color:var(--theme-text-muted)' }) %>
                   <h3 class="mt-2 text-sm font-medium" style="color:var(--theme-text-strong)">No backups</h3>
-                  <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">No backups yet. Create one.</p>
+                  <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Backups protect your server's world and files. Create one to get started.</p>
+                  <button type="button" onclick="openCreateBackupModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Create backup</button>
                 </div>
               <% } %>
             </div>
