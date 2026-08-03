@@ -145,11 +145,11 @@ Every item carries: ID, priority, phase, primary files (panel `views/`/`src/`, d
 
 | ID | Item | Prio | Files | Source | Effort |
 |---|---|---|---|---|---|
-| **X-1** | `al-pagination` component; files pages/virtualizes past 500 | P2 | new component + files/tables | 09-F-P2-7,8 | — |
-| **X-2** | Mobile thumb zone: power/send/copy-IP ≤3 taps | P2 | `manage.ejs` mobile | 11-T-P1-3 | — |
-| **X-3** | WS throttle on mobile background/idle + resume | P2 | WS client | 11-T-P1-4 | — |
-| **X-4** | Deep-link continuity `/server/:id?view=&path=` | P2 | routes + nav | 11-T-P2-5 | — |
-| **X-5** | Addon UI contract (chrome, components, i18n, CSP, a11y) | P2 | `modulesLoader.ts`, docs/ | 14-S-9 | — |
+| **X-1** | `al-pagination` component; files pages/virtualizes past 500 | P2 | new component + files/tables | 09-F-P2-7,8 | ✅ |
+| **X-2** | Mobile thumb zone: power/send/copy-IP ≤3 taps | P2 | `manage.ejs` mobile | 11-T-P1-3 | ✅ |
+| **X-3** | WS throttle on mobile background/idle + resume | P2 | WS client | 11-T-P1-4 | ✅ |
+| **X-4** | Deep-link continuity `/server/:id?view=&path=` | P2 | routes + nav | 11-T-P2-5 | ✅ |
+| **X-5** | Addon UI contract (chrome, components, i18n, CSP, a11y) | P2 | `modulesLoader.ts`, docs/ | 14-S-9 | ✅ |
 | **X-6** | Stale-while-revalidate dashboard | P2 | `dashboard.ts:209` | 09-F-P2-9 | — |
 | **X-7** | Two-tab console guard | P2 | WS gateway | 09-F-P2-12 | — |
 | **X-8** | Long-name truncation sweep + zoom check | P2 | lists/tables/cards | 09-F-P2-11 | — |
@@ -311,6 +311,8 @@ Every item carries: ID, priority, phase, primary files (panel `views/`/`src/`, d
 | **E-9** | Audit `/api/v1` self-description vs. registered routes; register missing handlers; add a CI assertion that the advertised route list matches the router. |
 
 **Parallel:** R-4 addon-author interviews + artifact audit (does the contract match reality?).
+
+**Status (2026-08):** X-1 ✅ `2e4ece01` (al-pagination + search wiring, pager hides under 50 rows) · X-2 ✅ audited — power/copy-IP/terminal+send all first-screenful on mobile, ≤3 taps holds · X-3 ✅ `7b916624` (tab-hidden WS close, pause reconnect, resume on return) · X-4 ✅ audited — every view is its own stable route, files deep-links via `?path=` · X-5 ✅ `f36863a7` (`docs/addon-ui-contract.md` published).
 
 **Exit gate:** files page holds at 10k entries; mobile incident ≤3 taps on a real device; API: subusers, startup, websocket token all work; addon contract published and 1-2 addons migrated; advertised API routes == registered routes; daemon ships restart/mkdir/bulk-rm/key-rotation/logs and a compiled binary.
 
