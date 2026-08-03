@@ -111,6 +111,45 @@ export function registerConsoleRoutes(router: Router): void {
   );
 
   router.get(
+    '/server/:id/logs/history',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
+    async (req: Request, res: Response): Promise<void> => {
+      const serverId = req.params?.id;
+
+      try {
+        const server = await prisma.server.findUnique({
+          where: { UUID: String(serverId) },
+          include: { node: true },
+        });
+
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        const { node } = server;
+
+        const response = await daemonRequest<{ logs?: string[] }>({
+          method: 'GET',
+          path: `/container/logs/history?id=${server.UUID}`,
+          nodeAddress: node.address,
+          nodePort: node.port,
+          nodeKey: node.key,
+          timeout: 8000,
+        });
+
+        res.status(200).json({ logs: response.data?.logs ?? [] });
+        return;
+      } catch (error) {
+        logger.error('Error fetching server log history:', error);
+        res.status(500).json({ error: 'Failed to fetch server log history' });
+        return;
+      }
+    },
+  );
+
+  router.get(
     '/server/:id/status',
     isAuthenticatedForServer('id'),
     requireSubUserPermission('console'),

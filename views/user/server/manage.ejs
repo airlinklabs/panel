@@ -158,6 +158,11 @@
     <div class="flex flex-col rounded-xl overflow-hidden shadow-lg flex-1 console-wrap border border-neutral-200 dark:border-neutral-700/50">
         <div class="flex items-center gap-2 px-3 py-2 shrink-0" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
             <span class="text-[11px] font-medium select-none tracking-wide" style="color:var(--theme-text-muted)">console</span>
+            <span class="flex-1"></span>
+            <button id="loadHistoryBtn" type="button" class="text-[11px] font-medium rounded-md px-2 py-1 transition-colors inline-flex items-center gap-1" style="color:var(--theme-text-muted)" aria-label="Load recent logs">
+              <%- icon('file-clock', { class: 'size-3', strokeWidth: 1.5 }) %>
+              Load recent logs
+            </button>
         </div>
         <div class="flex-1 relative" style="background:var(--theme-bg-card)">
             <div id="terminal"></div>
@@ -442,6 +447,29 @@ term.open(document.getElementById('terminal'));
 fitAddon.fit();
 
 window.addEventListener('resize', () => fitAddon.fit());
+
+// Load the last ~500 console lines from disk (survives restarts) for post-mortems.
+const loadHistoryBtn = document.getElementById('loadHistoryBtn');
+if (loadHistoryBtn) {
+    loadHistoryBtn.addEventListener('click', async () => {
+        const btn = loadHistoryBtn;
+        btn.disabled = true;
+        try {
+            const r = await fetch('/server/' + window.location.pathname.split('/')[2] + '/logs/history', { credentials: 'same-origin' });
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.error || 'Failed to load logs');
+            const lines = d.logs || [];
+            term.writeln('');
+            term.writeln('\x1b[90m— ' + lines.length + ' lines from disk —\x1b[0m');
+            lines.forEach(l => term.writeln(l));
+            term.writeln('\x1b[90m— end of saved log —\x1b[0m');
+        } catch (err) {
+            term.writeln('\x1b[31mFailed to load log history: ' + (err.message || err) + '\x1b[0m');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+}
 
 // Intercept wheel events on the terminal so scrolling the console scrolls
 // the terminal buffer rather than the page behind it.
