@@ -159,6 +159,7 @@
         <div class="flex items-center gap-2 px-3 py-2 shrink-0" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
             <span class="text-[11px] font-medium select-none tracking-wide" style="color:var(--theme-text-muted)">console</span>
             <span class="flex-1"></span>
+            <span id="consoleReadOnlyNotice" class="hidden text-[11px] font-medium" style="color:var(--theme-text-muted)">View-only — console input is active in another tab</span>
             <button id="loadHistoryBtn" type="button" class="text-[11px] font-medium rounded-md px-2 py-1 transition-colors inline-flex items-center gap-1" style="color:var(--theme-text-muted)" aria-label="Load recent logs">
               <%- icon('file-clock', { class: 'size-3', strokeWidth: 1.5 }) %>
               Load recent logs
@@ -348,6 +349,7 @@
         <div id="mobile-terminal"></div>
       </div>
       <div class="relative" style="border-top:1px solid var(--theme-border)">
+        <p id="consoleReadOnlyNoticeMobile" class="hidden text-[11px] px-4 py-1.5 m-0" style="color:var(--theme-text-muted)">View-only — console input is active in another tab</p>
         <input id="mobile-input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
           class="w-full px-4 py-3 text-sm outline-none placeholder:font-medium" style="background:var(--theme-bg-card);color:var(--theme-text-strong)">
       </div>
@@ -641,7 +643,33 @@ document.addEventListener('visibilitychange', () => {
         }
     } else {
         isReconnecting = false;
-        connectWebSocket();
+// Two-tab console guard — exactly one tab owns console input; every other
+// tab renders view-only (notices shown, inputs disabled, sends refused).
+// Uses the Web Locks API so ownership transfers automatically when the
+// owning tab closes; browsers without Web Locks behave as before.
+let consoleOwner = false;
+function updateConsoleOwnerUI() {
+    const notices = [document.getElementById('consoleReadOnlyNotice'), document.getElementById('consoleReadOnlyNoticeMobile')];
+    notices.forEach((n) => { if (n) n.classList.toggle('hidden', consoleOwner); });
+    const input = document.getElementById('input');
+    const mInput = document.getElementById('mobile-input');
+    if (input) input.disabled = !consoleOwner;
+    if (mInput) mInput.disabled = !consoleOwner;
+}
+(function acquireConsoleOwnership() {
+    if (!window.navigator.locks || !window.navigator.locks.request) {
+        consoleOwner = true;
+        updateConsoleOwnerUI();
+        return;
+    }
+    window.navigator.locks.request('al-console-input:<%= server.UUID %>', function () {
+        consoleOwner = true;
+        updateConsoleOwnerUI();
+        return new Promise(function () {});
+    });
+})();
+
+connectWebSocket();
     }
 });
         }, backoffTime);
@@ -799,6 +827,7 @@ connectWebSocket();
     }
 
     function sendCommand() {
+        if (!consoleOwner) return;
         const inputElement = document.getElementById('input');
         const command = inputElement.value.trim();
         if (command && socket) {
@@ -852,7 +881,7 @@ connectWebSocket();
 
     function unlockInput() {
         if (!consoleInput) return;
-        consoleInput.disabled = false;
+        consoleInput.disabled = !consoleOwner;
         consoleInput.placeholder = '<%= req.translations.typeACommand || "Type a command..." %>';
     }
 
@@ -1709,6 +1738,7 @@ if (parsed.event !== 'lifecycle') return;
         if (mobileInput) {
             mobileInput.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
+                    if (!consoleOwner) return;
                     var cmd = mobileInput.value.trim();
                     if (cmd && socket) {
                         mobileTerm.write('\u001b[1m\u001b[33m~ \u001b[0m' + cmd + '\r\n');
