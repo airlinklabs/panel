@@ -347,6 +347,14 @@ async function runTransfer(
     // ── Step 8: Start server on destination ────────────────────────────────
     updateStatus(state.serverId, 'starting');
     try {
+      let configFiles: unknown;
+      if (server.image?.config_files) {
+        try {
+          configFiles = JSON.parse(server.image.config_files);
+        } catch {
+          configFiles = undefined;
+        }
+      }
       await daemonRequest({
         nodeAddress: targetNode.address,
         nodePort: targetNode.port,
@@ -363,6 +371,7 @@ async function runTransfer(
           Cpu: server.Cpu,
           Swap: 0,
           Storage: server.Storage,
+          configFiles,
         },
         timeout: 60_000,
       });

@@ -239,7 +239,7 @@ export async function stopServerContainer(
 }
 
 export async function startServerContainer(
-  server: ServerRuntimeConfig,
+  server: ServerRuntimeConfig & Pick<ServerPageServer, 'image'>,
   serverId: string,
   options: {
     dockerImage?: string;
@@ -254,6 +254,15 @@ export async function startServerContainer(
   }
 
   const mounts = options.mounts ?? await resolveServerMounts(serverId);
+
+  let configFiles: unknown;
+  if (server.image?.config_files) {
+    try {
+      configFiles = JSON.parse(server.image.config_files);
+    } catch {
+      configFiles = undefined;
+    }
+  }
 
   await daemonRequest({
     method: 'POST',
@@ -272,6 +281,7 @@ export async function startServerContainer(
       env: buildServerRuntimeEnv(server, options.variables ?? server.Variables),
       StartCommand: options.startCommand ?? server.StartCommand,
       mounts,
+      configFiles,
     },
   });
 }

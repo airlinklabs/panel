@@ -13,7 +13,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 009-9c0-.463-.032-.926-.086-1.376z"></path>
       </svg>
     </button>
-    <% if (typeof user !== 'undefined') { %>
+    <% if (user != null) { %>
     <a href="/account" class="p-1 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center" style="color:var(--theme-text-muted);">
       <img class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
     </a>
@@ -66,7 +66,7 @@
       </a>
       <% }); %>
 
-      <% if (typeof user !== 'undefined' && user.isAdmin === true) { %>
+      <% if (user != null && user.isAdmin === true) { %>
       <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
         <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide" style="color:var(--theme-text-muted);">Admin</p>
         
@@ -124,7 +124,7 @@
       <% } %>
 
       <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
-        <% if (typeof user !== 'undefined') { %>
+        <% if (user != null) { %>
         <a href="/account" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <img class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
           <span class="text-sm">Account</span>
