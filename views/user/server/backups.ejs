@@ -62,7 +62,7 @@
                       <tr class="al-table-tr transition-colors" style="--i:<%= backupIdx++ %>" data-backup-id="<%= backup.UUID %>">
                         <td class="px-6 py-4 whitespace-nowrap">
                           <div class="text-sm font-medium" style="color:var(--theme-text-strong)">
-                            <%= backup.name %>
+                            <span class="truncate inline-block align-bottom max-w-[16rem]" title="<%= backup.name %>"><%= backup.name %></span>
                             <% if (backup.locked) { %>
                               <span class="ml-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium align-middle" style="background:var(--theme-warning-bg, var(--theme-bg-secondary));color:var(--theme-warning, var(--theme-text-muted))">
                                 <%- icon('lock', { class: 'size-2.5', strokeWidth: 2 }) %>

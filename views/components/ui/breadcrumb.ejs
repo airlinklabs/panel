@@ -3,16 +3,16 @@
 <div class="lg:hidden w-full" style="border-bottom:1px solid var(--theme-border);background:var(--theme-bg-secondary);">
   <div class="pr-6 sm:pr-8 pl-0 py-2 opacity-60">
     <nav aria-label="Breadcrumb">
-      <ol class="flex items-center gap-1.5 text-[11px]">
+      <ol class="flex items-center gap-1.5 text-[11px] min-w-0">
         <% items.forEach(function(item, index) { %>
-          <li class="flex items-center gap-1.5">
+          <li class="flex items-center gap-1.5 min-w-0 <%= index === items.length - 1 ? 'flex-1' : 'shrink-0' %>">
             <% if (index > 0) { %>
-              <span style="color:var(--theme-text-placeholder);font-size:10px;">/</span>
+              <span class="shrink-0" style="color:var(--theme-text-placeholder);font-size:10px;">/</span>
             <% } %>
             <% if (item.href && index < items.length - 1) { %>
-              <a href="<%= item.href %>" class="transition" style="color:var(--theme-text-muted);"><%= item.label %></a>
+              <a href="<%= item.href %>" class="transition truncate" style="color:var(--theme-text-muted);"><%= item.label %></a>
             <% } else { %>
-              <span style="color:var(--theme-text-muted);font-weight:500;"><%= item.label %></span>
+              <span class="truncate" style="color:var(--theme-text-muted);font-weight:500;"><%= item.label %></span>
             <% } %>
           </li>
         <% }); %>
@@ -47,6 +47,8 @@
       var span = document.createElement('span');
       span.className = 'truncate whitespace-nowrap font-medium';
       span.style.color = 'var(--theme-text-muted)';
+      span.style.minWidth = '0';
+      span.style.flex = '0 1 auto';
       span.textContent = item.label;
       slot.appendChild(span);
     }
