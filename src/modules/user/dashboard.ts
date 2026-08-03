@@ -72,7 +72,7 @@ const dashboardModule: Module = {
         const endIndex = page * perPage;
 
         let anyNodeOffline = false;
-        const nodeStatuses: Record<number, { online: boolean }> = {};
+        const nodeStatuses: Record<number, { online: boolean; reason?: string }> = {};
 
         for (const server of mergedServers) {
           if (!nodeStatuses[server.node.id]) {
@@ -86,10 +86,19 @@ const dashboardModule: Module = {
                 timeout: 2000,
               });
               nodeStatuses[server.node.id] = { online: true };
-            } catch {
+            } catch (err: any) {
               // Silently handle node offline errors - don't log to console
               // Just mark the node as offline in our status tracking
-              nodeStatuses[server.node.id] = { online: false };
+              const code = err?.code;
+              const reason =
+                code === 'ECONNREFUSED'
+                  ? 'daemon unreachable'
+                  : code === 'ETIMEDOUT' || code === 'ECONNABORTED'
+                    ? 'connection timed out'
+                    : code === 'ENOTFOUND'
+                      ? 'host not found'
+                      : 'unreachable';
+              nodeStatuses[server.node.id] = { online: false, reason };
               anyNodeOffline = true;
             }
           }
@@ -107,6 +116,18 @@ const dashboardModule: Module = {
             : (settings2?.defaultServerLimit ?? 0);
           const canCreateServer = !user.isAdmin && (settings2?.allowUserCreateServer ?? false) && userServerLimit > 0;
 
+          const offlineNodes = mergedServers
+            .filter((s) => !nodeStatuses[s.node.id]?.online)
+            .reduce<Record<number, { name: string; reason: string }>>((acc, s) => {
+              if (!acc[s.node.id]) {
+                acc[s.node.id] = {
+                  name: s.node.name,
+                  reason: nodeStatuses[s.node.id]?.reason ?? 'unreachable',
+                };
+              }
+              return acc;
+            }, {});
+
           return res.render('user/dashboard', {
             errorMessage: {
               message:
@@ -123,6 +144,7 @@ const dashboardModule: Module = {
             totalPages: 1,
             daemonOffline: true,
             nodeStatuses,
+            offlineNodes: Object.values(offlineNodes),
           });
         }
 

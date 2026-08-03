@@ -65,6 +65,19 @@
           <div class="flex-1">
             <p class="font-medium"><%= req.translations.connectionError || 'Connection Error' %></p>
             <p class="text-xs opacity-70 mt-0.5"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
+            <% if (typeof offlineNodes !== 'undefined' && offlineNodes.length > 0) { %>
+            <ul class="text-xs opacity-80 mt-2 space-y-1">
+              <% offlineNodes.forEach(node => { %>
+              <li class="flex items-center gap-1.5">
+                <%- icon('server', { class: 'size-3 shrink-0', strokeWidth: 1.5 }) %>
+                <span class="font-medium"><%= node.name %></span>
+                <span>—</span>
+                <span><%= node.reason %></span>
+              </li>
+              <% }); %>
+            </ul>
+            <p class="text-xs opacity-60 mt-2">The daemon on these nodes isn't responding. Servers on them stay offline until it comes back.</p>
+            <% } %>
           </div>
           <button type="button" onclick="window.location.reload()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.retry || 'Retry' %></button>
         </div>
