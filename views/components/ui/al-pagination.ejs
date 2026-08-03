@@ -1,10 +1,9 @@
 <!--
   al-pagination: paginates a list of table rows without re-rendering.
-  Usage:
-    <%- include('../components/ui/al-pagination', { total: files.length, pageSize: 50 }) %>
-  Place after a <table>. The nearest preceding tbody with rows matching
-  .al-file-row (or a data-tbody selector) is paged client-side. Only
-  rendered when total exceeds pageSize.
+  Include after a <table>, passing { total, pageSize } via the include
+  options. The nearest preceding tbody with rows matching .al-file-row
+  (or a data-tbody selector) is paged client-side. Only rendered when
+  total exceeds pageSize.
 -->
 <% if (typeof total !== 'undefined' && typeof pageSize !== 'undefined' && total > pageSize) { %>
 <div data-pagination class="flex items-center justify-between gap-3 px-4 py-3" data-total="<%= total %>" data-page-size="<%= pageSize %>">
