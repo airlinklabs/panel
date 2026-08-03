@@ -11,6 +11,191 @@ interface ErrorMessage {
   message?: string;
 }
 
+interface ServerSnapshot {
+  status: string;
+  ramUsage: string;
+  cpuUsage: string;
+  ramUsed: string;
+  nodeOffline: boolean;
+}
+
+interface CachedServerSnapshot extends ServerSnapshot {
+  fetchedAt: number;
+}
+
+interface NodeHealth {
+  online: boolean;
+  reason?: string;
+}
+
+interface CachedNodeHealth extends NodeHealth {
+  checkedAt: number;
+}
+
+// Stale-while-revalidate caches. Fresh entries are served without touching
+// the daemon; stale entries are served immediately while a background fetch
+// refreshes them; missing entries are fetched synchronously (cold path).
+const NODE_TTL = 15_000;
+const SERVER_TTL = 8_000;
+const nodeHealthCache = new Map<number, CachedNodeHealth>();
+const serverSnapshotCache = new Map<string, CachedServerSnapshot>();
+const nodeHealthFetches = new Map<number, Promise<CachedNodeHealth>>();
+const serverSnapshotFetches = new Map<string, Promise<CachedServerSnapshot>>();
+
+function errCodeToReason(code?: string): string {
+  return code === 'ECONNREFUSED'
+    ? 'daemon unreachable'
+    : code === 'ETIMEDOUT' || code === 'ECONNABORTED'
+      ? 'connection timed out'
+      : code === 'ENOTFOUND'
+        ? 'host not found'
+        : 'unreachable';
+}
+
+function checkNodeHealth(node: { id: number; address: string; port: number; key: string }): Promise<CachedNodeHealth> {
+  if (nodeHealthFetches.has(node.id)) return nodeHealthFetches.get(node.id)!;
+  const fetch = (async () => {
+    const checkedAt = Date.now();
+    try {
+      await daemonRequest({
+        nodeAddress: node.address,
+        nodePort: node.port,
+        nodeKey: node.key,
+        method: 'GET',
+        path: '/',
+        timeout: 2000,
+      });
+      const health: CachedNodeHealth = { online: true, checkedAt };
+      nodeHealthCache.set(node.id, health);
+      return health;
+    } catch (err: any) {
+      const health: CachedNodeHealth = { online: false, reason: errCodeToReason(err?.code), checkedAt };
+      nodeHealthCache.set(node.id, health);
+      return health;
+    }
+  })();
+  nodeHealthFetches.set(node.id, fetch);
+  fetch.finally(() => nodeHealthFetches.delete(node.id));
+  return fetch;
+}
+
+function fetchServerSnapshot(
+  node: { address: string; port: number; key: string },
+  uuid: string,
+): Promise<CachedServerSnapshot> {
+  if (serverSnapshotFetches.has(uuid)) return serverSnapshotFetches.get(uuid)!;
+  const fetch = (async () => {
+    const fetchedAt = Date.now();
+    const snapshot: CachedServerSnapshot = {
+      status: 'unknown',
+      ramUsage: '0',
+      cpuUsage: '0',
+      ramUsed: '0MB',
+      nodeOffline: true,
+      fetchedAt,
+    };
+    try {
+      const statusResponse = await daemonRequest({
+        nodeAddress: node.address,
+        nodePort: node.port,
+        nodeKey: node.key,
+        method: 'GET',
+        path: '/container/status',
+        params: { id: uuid },
+        timeout: 2000,
+      });
+
+      const isRunning = (statusResponse.data as any)?.running === true;
+      snapshot.status = isRunning ? 'running' : 'stopped';
+      snapshot.nodeOffline = false;
+
+      if (isRunning) {
+        try {
+          const statsResponse = await daemonRequest({
+            nodeAddress: node.address,
+            nodePort: node.port,
+            nodeKey: node.key,
+            method: 'GET',
+            path: '/container/stats',
+            params: { id: uuid },
+            timeout: 2000,
+          });
+
+          if (statsResponse.data) {
+            const rawRam = Number((statsResponse.data as any).memory?.percentage) || 0;
+            const rawCpu = Number((statsResponse.data as any).cpu?.percentage) || 0;
+            snapshot.ramUsage = String(Math.round(rawRam * 100) / 100);
+            snapshot.cpuUsage = String(Math.round(rawCpu * 100) / 100);
+
+            const memUsageBytes = (statsResponse.data as any).memory?.usage || 0;
+            const memUsageMB = memUsageBytes / (1024 * 1024);
+            snapshot.ramUsed = memUsageMB >= 1024
+              ? `${(memUsageMB / 1024).toFixed(1)}GB`
+              : `${memUsageMB.toFixed(0)}MB`;
+          }
+        } catch (statsError) {
+          if (statsError instanceof Error && 'status' in statsError) {
+            const httpErr = statsError as { code?: string };
+            if (
+              httpErr.code !== 'ECONNREFUSED' &&
+              httpErr.code !== 'ETIMEDOUT' &&
+              httpErr.code !== 'ENOTFOUND'
+            ) {
+              logger.error(`Error fetching stats for server ${uuid}:`, statsError);
+            }
+          } else {
+            logger.error(`Error fetching stats for server ${uuid}:`, statsError);
+          }
+        }
+      }
+
+      serverSnapshotCache.set(uuid, snapshot);
+      return snapshot;
+    } catch (error) {
+      logger.error(`Error fetching status for server ${uuid}:`, error);
+      serverSnapshotCache.set(uuid, snapshot);
+      return snapshot;
+    }
+  })();
+  serverSnapshotFetches.set(uuid, fetch);
+  fetch.finally(() => serverSnapshotFetches.delete(uuid));
+  return fetch;
+}
+
+// Serves a node health check from cache when fresh, revalidates in the
+// background when stale, and only touches the daemon synchronously when the
+// cache is empty (cold path).
+function getNodeHealth(
+  node: { id: number; address: string; port: number; key: string },
+  revalidate: boolean,
+): CachedNodeHealth | Promise<CachedNodeHealth> {
+  const cached = nodeHealthCache.get(node.id);
+  if (cached && Date.now() - cached.checkedAt < NODE_TTL) return cached;
+  if (cached) {
+    if (revalidate) {
+      checkNodeHealth(node).catch(() => {});
+    }
+    return cached;
+  }
+  return checkNodeHealth(node);
+}
+
+function getServerSnapshot(
+  node: { address: string; port: number; key: string },
+  server: { UUID: string },
+  revalidate: boolean,
+): CachedServerSnapshot | Promise<CachedServerSnapshot> {
+  const cached = serverSnapshotCache.get(server.UUID);
+  if (cached && Date.now() - cached.fetchedAt < SERVER_TTL) return cached;
+  if (cached) {
+    if (revalidate) {
+      fetchServerSnapshot(node, server.UUID).catch(() => {});
+    }
+    return cached;
+  }
+  return fetchServerSnapshot(node, server.UUID);
+}
+
 const dashboardModule: Module = {
   info: {
     name: 'Dashboard Module',
@@ -72,35 +257,13 @@ const dashboardModule: Module = {
         const endIndex = page * perPage;
 
         let anyNodeOffline = false;
-        const nodeStatuses: Record<number, { online: boolean; reason?: string }> = {};
+        const nodeStatuses: Record<number, NodeHealth> = {};
 
         for (const server of mergedServers) {
           if (!nodeStatuses[server.node.id]) {
-            try {
-              await daemonRequest({
-                nodeAddress: server.node.address,
-                nodePort: server.node.port,
-                nodeKey: server.node.key,
-                method: 'GET',
-                path: '/',
-                timeout: 2000,
-              });
-              nodeStatuses[server.node.id] = { online: true };
-            } catch (err: any) {
-              // Silently handle node offline errors - don't log to console
-              // Just mark the node as offline in our status tracking
-              const code = err?.code;
-              const reason =
-                code === 'ECONNREFUSED'
-                  ? 'daemon unreachable'
-                  : code === 'ETIMEDOUT' || code === 'ECONNABORTED'
-                    ? 'connection timed out'
-                    : code === 'ENOTFOUND'
-                      ? 'host not found'
-                      : 'unreachable';
-              nodeStatuses[server.node.id] = { online: false, reason };
-              anyNodeOffline = true;
-            }
+            const health = await getNodeHealth(server.node, true);
+            nodeStatuses[server.node.id] = health;
+            if (!health.online) anyNodeOffline = true;
           }
         }
 
@@ -149,96 +312,12 @@ const dashboardModule: Module = {
         }
 
         const serversWithStats = await Promise.all(
-          mergedServers.map(async (server) => {
-            try {
-              if (
-                nodeStatuses[server.node.id] &&
-                !nodeStatuses[server.node.id]?.online
-              ) {
-                return {
-                  ...server,
-                  status: 'unknown',
-                  ramUsage: '0',
-                  cpuUsage: '0',
-                  ramUsed: '0MB',
-                  nodeOffline: true,
-                };
-              }
-
-              const statusResponse = await daemonRequest({
-                nodeAddress: server.node.address,
-                nodePort: server.node.port,
-                nodeKey: server.node.key,
-                method: 'GET',
-                path: '/container/status',
-                params: { id: server.UUID },
-                timeout: 2000,
-              });
-
-              const isRunning = (statusResponse.data as any)?.running === true;
-              let ramUsage = '0';
-              let cpuUsage = '0';
-              let ramUsed = '0MB';
-
-              if (isRunning) {
-                try {
-                  const statsResponse = await daemonRequest({
-                    nodeAddress: server.node.address,
-                    nodePort: server.node.port,
-                    nodeKey: server.node.key,
-                    method: 'GET',
-                    path: '/container/stats',
-                    params: { id: server.UUID },
-                    timeout: 2000,
-                  });
-
-                  if (statsResponse.data) {
-                    const rawRam = Number((statsResponse.data as any).memory?.percentage) || 0;
-                    const rawCpu = Number((statsResponse.data as any).cpu?.percentage) || 0;
-                    ramUsage = String(Math.round(rawRam * 100) / 100);
-                    cpuUsage = String(Math.round(rawCpu * 100) / 100);
-
-                    const memUsageBytes = (statsResponse.data as any).memory?.usage || 0;
-                    const memUsageMB = memUsageBytes / (1024 * 1024);
-                    ramUsed = memUsageMB >= 1024
-                      ? `${(memUsageMB / 1024).toFixed(1)}GB`
-                      : `${memUsageMB.toFixed(0)}MB`;
-                  }
-                } catch (statsError) {
-                  if (statsError instanceof Error && 'status' in statsError) {
-                    const httpErr = statsError as { code?: string };
-                    if (
-                      httpErr.code !== 'ECONNREFUSED' &&
-                      httpErr.code !== 'ETIMEDOUT' &&
-                      httpErr.code !== 'ENOTFOUND'
-                    ) {
-                      logger.error(
-                        `Error fetching stats for server ${server.UUID}:`,
-                        statsError,
-                      );
-                    }
-                  } else {
-                    logger.error(
-                      `Error fetching stats for server ${server.UUID}:`,
-                      statsError,
-                    );
-                  }
-                }
-              }
-
-              return {
-                ...server,
-                status: isRunning ? 'running' : 'stopped',
-                ramUsage,
-                cpuUsage,
-                ramUsed,
-                nodeOffline: false,
-              };
-            } catch (error) {
-              logger.error(
-                `Error fetching status for server ${server.UUID}:`,
-                error,
-              );
+          mergedServers.map(async (server, index) => {
+            const revalidate = index >= startIndex && index < endIndex;
+            if (
+              nodeStatuses[server.node.id] &&
+              !nodeStatuses[server.node.id]?.online
+            ) {
               return {
                 ...server,
                 status: 'unknown',
@@ -248,6 +327,17 @@ const dashboardModule: Module = {
                 nodeOffline: true,
               };
             }
+
+            const snapshot = await getServerSnapshot(server.node, server, revalidate);
+
+            return {
+              ...server,
+              status: snapshot.status,
+              ramUsage: snapshot.ramUsage,
+              cpuUsage: snapshot.cpuUsage,
+              ramUsed: snapshot.ramUsed,
+              nodeOffline: snapshot.nodeOffline,
+            };
           }),
         );
 
