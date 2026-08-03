@@ -1,12 +1,17 @@
-<!-- Global confirm modal — window.modal.confirm({ title, body, danger, confirmLabel, onConfirm }) -->
+<!-- Global modal — one modal implementation for the whole panel.
+     Confirmations: window.modal.confirm({ title, body, danger, confirmLabel, onConfirm })
+     Alerts:        window.modal.alert({ title, body })
+     Rich sheets:   window.modal.show({ title, bodyNode, panelClass, onClose })
+                    bodyNode is moved into the shared panel; close with window.modal.close(). -->
 <div id="globalModal" class="al-sheet-overlay al-modal-overlay fixed inset-0 z-50 flex items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0" id="globalModalBackdrop"></div>
   <div id="globalModalPanel" role="dialog" aria-modal="true" aria-labelledby="globalModalTitle" aria-describedby="globalModalBody" tabindex="-1" class="al-sheet-panel al-modal-panel relative border rounded-2xl shadow-lg w-full max-w-sm mx-4" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
-    <div class="px-5 pt-5 pb-4">
+    <div id="globalModalContent" class="overflow-y-auto" style="display:none;"></div>
+    <div id="globalModalSimple" class="px-5 pt-5 pb-4">
       <p id="globalModalTitle" class="text-sm font-semibold leading-snug" style="color:var(--theme-text-strong);"></p>
       <p id="globalModalBody" class="text-xs mt-1.5 leading-relaxed" style="color:var(--theme-text-muted);"></p>
     </div>
-    <div class="flex gap-2 px-5 pb-5 justify-end">
+    <div id="globalModalFooter" class="flex gap-2 px-5 pb-5 justify-end">
       <button type="button" id="globalModalCancel" class="al-btn-secondary inline-flex items-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
       <button type="button" id="globalModalConfirm" class="px-4 py-2 text-xs font-medium rounded-xl text-white transition"></button>
     </div>
@@ -21,15 +26,54 @@
   const panel    = document.getElementById('globalModalPanel');
   const title    = document.getElementById('globalModalTitle');
   const body     = document.getElementById('globalModalBody');
+  const content  = document.getElementById('globalModalContent');
+  const simple   = document.getElementById('globalModalSimple');
+  const footer   = document.getElementById('globalModalFooter');
   const cancel   = document.getElementById('globalModalCancel');
   const confirmBtn  = document.getElementById('globalModalConfirm');
   const backdrop = document.getElementById('globalModalBackdrop');
 
   let currentResolve = null;
   let lastFocused = null;
+  let onCloseHook = null;
+  let richNode = null;
+  let richPanelClass = null;
 
   function focusableElements() {
-    return panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    return Array.from(panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter(el => !el.disabled && el.offsetParent !== null);
+  }
+
+  function lockScroll() {
+    document.body.style.overflow = 'hidden';
+  }
+
+  function unlockScroll() {
+    document.body.style.overflow = '';
+  }
+
+  function showPanel() {
+    overlay.setAttribute('aria-hidden', 'false');
+    document.documentElement.setAttribute('data-modal-open', '');
+    lockScroll();
+    if (window.Animate) Animate.openModal(overlay, panel);
+    else { overlay.classList.add('open'); panel.classList.add('open'); }
+  }
+
+  function hidePanel(done) {
+    const finish = function () {
+      overlay.setAttribute('aria-hidden', 'true');
+      document.documentElement.removeAttribute('data-modal-open');
+      unlockScroll();
+      currentResolve = null;
+      if (lastFocused && typeof lastFocused.focus === 'function') {
+        lastFocused.focus();
+      }
+      lastFocused = null;
+      if (done) done();
+    };
+    if (window.Animate) Animate.closeModal(overlay, panel, finish);
+    else { overlay.classList.remove('open'); panel.classList.remove('open'); finish(); }
   }
 
   function open({ title: t, body: b, danger = true, confirmLabel = 'Confirm', onConfirm }) {
@@ -42,28 +86,52 @@
       : 'px-4 py-2 text-xs font-medium rounded-xl text-white transition al-btn-primary';
 
     currentResolve = onConfirm || null;
+    onCloseHook = null;
+    richNode = null;
 
-    overlay.setAttribute('aria-hidden', 'false');
-    document.documentElement.setAttribute('data-modal-open', '');
-    if (window.Animate) Animate.openModal(overlay, panel);
-    else { overlay.classList.add('open'); panel.classList.add('open'); }
+    content.style.display = 'none';
+    simple.style.display = '';
+    footer.style.display = '';
+    panel.setAttribute('aria-describedby', 'globalModalBody');
+    panel.className = 'al-sheet-panel al-modal-panel relative border rounded-2xl shadow-lg w-full max-w-sm mx-4';
+    panel.style.background = 'var(--theme-bg-card)';
+    panel.style.borderColor = 'var(--theme-border)';
+
+    showPanel();
     // Focus the neutral action first — never land on the destructive
     // confirm (one accidental Enter should not destroy).
     setTimeout(function () { cancel.focus(); }, 0);
   }
 
+  function show({ title: t, bodyNode, panelClass = '', onClose }) {
+    lastFocused = document.activeElement;
+    onCloseHook = onClose || null;
+
+    title.textContent = t || '';
+    panel.setAttribute('aria-describedby', '');
+
+    if (bodyNode) {
+      content.innerHTML = '';
+      bodyNode.style.display = '';
+      content.appendChild(bodyNode);
+    }
+    content.style.display = '';
+    simple.style.display = 'none';
+    footer.style.display = 'none';
+    panel.className = 'al-sheet-panel al-modal-panel relative border rounded-2xl shadow-lg w-full mx-4' + (panelClass ? ' ' + panelClass : '');
+    panel.style.background = 'var(--theme-bg-card)';
+    panel.style.borderColor = 'var(--theme-border)';
+
+    showPanel();
+    setTimeout(function () { panel.focus(); }, 0);
+  }
+
   function close() {
-    const done = function () {
-      overlay.setAttribute('aria-hidden', 'true');
-      document.documentElement.removeAttribute('data-modal-open');
-      currentResolve = null;
-      if (lastFocused && typeof lastFocused.focus === 'function') {
-        lastFocused.focus();
-      }
-      lastFocused = null;
-    };
-    if (window.Animate) Animate.closeModal(overlay, panel, done);
-    else { overlay.classList.remove('open'); panel.classList.remove('open'); done(); }
+    const hook = onCloseHook;
+    onCloseHook = null;
+    hidePanel(function () {
+      if (hook) hook();
+    });
   }
 
   cancel.addEventListener('click', close);
@@ -82,7 +150,7 @@
       return;
     }
     if (event.key !== 'Tab') return;
-    const focusable = Array.from(focusableElements());
+    const focusable = focusableElements();
     if (!focusable.length) {
       event.preventDefault();
       panel.focus();
@@ -99,6 +167,11 @@
     }
   });
 
-  window.modal = { confirm: open };
+  function alert(message) {
+    if (message && typeof message === 'object') open(message);
+    else open({ title: 'Error', body: String(message || '') });
+  }
+
+  window.modal = { confirm: open, alert: alert, show: show, close: close };
 })();
 </script>

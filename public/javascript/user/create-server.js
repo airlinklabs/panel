@@ -47,15 +47,14 @@
         list.appendChild(row);
       });
     }
-    const portsOverlay = document.getElementById('portsOverlay');
-    portsOverlay.classList.add('open');
-    Animate.openModal(portsOverlay, portsOverlay.querySelector('.confirm-box'));
+    window.modal.show({
+      title: 'Assign ports',
+      bodyNode: document.getElementById('portsContent'),
+      panelClass: 'max-w-lg',
+    });
   });
   document.getElementById('portsOk').addEventListener('click', () => {
-    const overlay = document.getElementById('portsOverlay');
-    overlay.classList.add('closing');
-    const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
-    Animate.closeModal(overlay, overlay.querySelector('.confirm-box'), done);
+    window.modal.close();
   });
 
   document.querySelectorAll('.stepper-btn').forEach(btn => {

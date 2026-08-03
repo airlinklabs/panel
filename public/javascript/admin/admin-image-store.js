@@ -151,7 +151,6 @@ function makeGroupRow(g) {
 
 function openGroup(group, imgs) {
   var s = imgs.slice().sort(function(a,b){return a.name.localeCompare(b.name)});
-  document.getElementById('grpTitle').textContent = cap(group);
   document.getElementById('grpCount').textContent = s.length + ' image' + (s.length !== 1 ? 's' : '');
   var list = document.getElementById('grpSubList');
   list.innerHTML = '';
@@ -169,25 +168,21 @@ function openGroup(group, imgs) {
       '</div>' +
       '<button type="button" class="al-btn-secondary px-2 py-1 text-xs font-medium shrink-0">Install</button>';
     row.style.animationDelay = Math.min(i * 20, 300) + 'ms';
-    row.addEventListener('click', function(){closeGroup();openEgg(img)});
-    row.querySelector('button').addEventListener('click', function(e){e.stopPropagation();closeGroup();openEgg(img)});
+    row.addEventListener('click', function(){openEgg(img)});
+    row.querySelector('button').addEventListener('click', function(e){e.stopPropagation();openEgg(img)});
     list.appendChild(row);
   });
   renderMd(imgs[0]?.groupReadme||'', document.getElementById('grpReadme'));
-  const overlay = document.getElementById('groupOverlay');
-  overlay.classList.add('open');
-  Animate.openModal(overlay, overlay.querySelector('.modal-box'));
-  document.body.style.overflow = 'hidden';
+  window.modal.show({
+    title: cap(group),
+    bodyNode: document.getElementById('groupContent'),
+    panelClass: 'max-w-3xl',
+  });
 }
 
 function closeGroup() {
-  const overlay = document.getElementById('groupOverlay');
-  overlay.classList.add('closing');
-  const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
-  Animate.closeModal(overlay, overlay.querySelector('.modal-box'), done);
-  document.body.style.overflow = '';
+  window.modal.close();
 }
-document.getElementById('groupOverlay').addEventListener('click', function(e){if(e.target===e.currentTarget)closeGroup()});
 
 async function getMd() {
   if (mdParse) return mdParse;
@@ -213,7 +208,6 @@ async function renderMd(md, el) {
 
 function openEgg(img) {
   pendingEgg = img;
-  document.getElementById('eggTitle').textContent = img.name;
   var catEl = document.getElementById('eggCat');
   catEl.className = 'text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 ring-1 ring-inset ' + (CAT_CLS[img.category]||'');
   catEl.innerHTML = catDot(img.category, 6) + (CAT_LABEL[img.category]||img.category);
@@ -223,22 +217,17 @@ function openEgg(img) {
   hide('eggErr');
   var btn = document.getElementById('eggInstallBtn');
   btn.innerHTML = 'Install'; btn.disabled = false;
-  const overlay = document.getElementById('eggOverlay');
-  overlay.classList.add('open');
-  Animate.openModal(overlay, overlay.querySelector('.modal-box'));
-  document.body.style.overflow = 'hidden';
+  window.modal.show({
+    title: img.name,
+    bodyNode: document.getElementById('eggContent'),
+    panelClass: 'max-w-lg',
+  });
 }
 
 function closeEgg() {
-  const overlay = document.getElementById('eggOverlay');
-  overlay.classList.add('closing');
-  const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
-  Animate.closeModal(overlay, overlay.querySelector('.modal-box'), done);
-  document.body.style.overflow = '';
+  window.modal.close();
   pendingEgg = null;
 }
-document.getElementById('eggOverlay').addEventListener('click', function(e){if(e.target===e.currentTarget)closeEgg()});
-document.addEventListener('keydown', function(e){if(e.key==='Escape'){closeGroup();closeEgg()}});
 
 async function confirmInstall() {
   if (!pendingEgg) return;
@@ -255,8 +244,9 @@ async function confirmInstall() {
       document.getElementById('eggErrTxt').textContent = body.error || 'Installation failed.';
       show('eggErr'); btn.disabled = false; btn.innerHTML = 'Install'; return;
     }
+    var installedName = pendingEgg.name;
     closeEgg();
-    if (typeof showToast === 'function') showToast('"' + pendingEgg.name + '" installed successfully.', 'success');
+    if (typeof showToast === 'function') showToast('"' + installedName + '" installed successfully.', 'success');
   } catch(err) {
     console.error('Image install error:', err);
     document.getElementById('eggErrTxt').textContent = 'Installation failed. Try again.';

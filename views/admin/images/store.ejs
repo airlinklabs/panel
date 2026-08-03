@@ -4,24 +4,7 @@
 <style>
   ::-webkit-scrollbar { display: none; }
 
-  .modal-overlay {
-    position: fixed; inset: 0; z-index: 50;
-    background: var(--theme-overlay, rgba(0,0,0,0.5));
-    display: flex; align-items: center; justify-content: center; padding: 16px;
-    opacity: 0; pointer-events: none;
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: auto; }
-  .modal-box {
-    background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 12px;
-    width: 100%; display: flex; flex-direction: column;
-    max-height: calc(100vh - 40px);
-    transform: scale(0.96); opacity: 0;
-    overflow: hidden;
-  }
-  html.dark .modal-box { background: var(--theme-bg-card, #1c1c1c); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
-  .modal-overlay.open .modal-box { transform: scale(1); opacity: 1; }
-  .modal-box.group { max-width: 760px; height: 540px; }
-  .modal-box.egg { max-width: 500px; height: 480px; }
+  .modal-sheet { display: flex; flex-direction: column; }
   .modal-two-col { display: flex; flex: 1; overflow: hidden; min-height: 0; }
   .modal-left { width: 250px; min-width: 180px; flex-shrink: 0; border-right: 1px solid var(--theme-border,#e5e5e5); overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
   html.dark .modal-left { border-right-color: var(--theme-border-subtle,rgba(255,255,255,0.06)); }
@@ -182,55 +165,37 @@
   </div>
 </main>
 
-<!-- Group drill-down modal -->
-<div class="modal-overlay" id="groupOverlay">
-  <div class="modal-box group">
-    <div class="flex items-center justify-between px-5 py-3 border-b shrink-0" style="border-color:var(--theme-border)">
-      <div class="flex items-center gap-2 min-w-0">
-        <p id="grpTitle" class="text-sm font-semibold truncate" style="color:var(--theme-text-strong)"></p>
-        <span id="grpCount" class="text-xs shrink-0" style="color:var(--theme-text-muted)"></span>
-      </div>
-      <button type="button" onclick="closeGroup()" class="ml-3 shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" style="color:var(--theme-text-muted)">
-        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
-      </button>
+<!-- Group drill-down content — hosted inside the shared window.modal shell -->
+<div id="groupContent" class="modal-sheet" style="display:none;height:540px;">
+  <div class="flex items-center gap-2 mb-3">
+    <p id="grpCount" class="text-xs shrink-0" style="color:var(--theme-text-muted)"></p>
+  </div>
+  <div class="modal-two-col">
+    <div class="modal-left">
+      <p class="text-[10px] font-semibold uppercase tracking-wider" style="color:var(--theme-text-muted)">Images</p>
+      <div id="grpSubList" class="space-y-1.5"></div>
     </div>
-    <div class="modal-two-col">
-      <div class="modal-left">
-        <p class="text-[10px] font-semibold uppercase tracking-wider" style="color:var(--theme-text-muted)">Images</p>
-        <div id="grpSubList" class="space-y-1.5"></div>
-      </div>
-      <div class="modal-right">
-        <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color:var(--theme-text-muted)">README</p>
-        <div id="grpReadme" class="md-body"></div>
-      </div>
+    <div class="modal-right">
+      <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color:var(--theme-text-muted)">README</p>
+      <div id="grpReadme" class="md-body"></div>
     </div>
   </div>
 </div>
 
-<!-- Image detail / install modal -->
-<div class="modal-overlay" id="eggOverlay">
-  <div class="modal-box egg">
-    <div class="flex items-center justify-between px-5 py-3 border-b shrink-0" style="border-color:var(--theme-border)">
-      <div class="flex items-center gap-2 min-w-0">
-        <p id="eggTitle" class="text-sm font-semibold truncate" style="color:var(--theme-text-strong)"></p>
-        <span id="eggCat" class="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0"></span>
-      </div>
-      <button type="button" onclick="closeEgg()" class="ml-3 shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" style="color:var(--theme-text-muted)">
-        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
-      </button>
+<!-- Image detail / install content — hosted inside the shared window.modal shell -->
+<div id="eggContent" class="modal-sheet" style="display:none;height:480px;">
+  <div class="space-y-1 mb-3">
+    <span id="eggCat" class="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 ring-1 ring-inset"></span>
+    <p id="eggDesc" class="text-xs leading-relaxed" style="color:var(--theme-text-muted)"></p>
+    <p id="eggAuthor" class="text-[11px]" style="color:var(--theme-text-muted)"></p>
+  </div>
+  <div class="modal-single-body">
+    <div class="flex-1 overflow-y-auto min-h-0">
+      <p class="text-[10px] font-semibold uppercase tracking-wider mb-2" style="color:var(--theme-text-muted)">README</p>
+      <div id="eggReadme" class="md-body"></div>
     </div>
-    <div class="modal-single-body">
-      <div class="space-y-1">
-        <p id="eggDesc" class="text-xs leading-relaxed" style="color:var(--theme-text-muted)"></p>
-        <p id="eggAuthor" class="text-[11px]" style="color:var(--theme-text-muted)"></p>
-      </div>
-      <div class="flex-1 overflow-y-auto min-h-0">
-        <p class="text-[10px] font-semibold uppercase tracking-wider mb-2" style="color:var(--theme-text-muted)">README</p>
-        <div id="eggReadme" class="md-body"></div>
-      </div>
-      <div id="eggErr" style="display:none" class="err-box"><p id="eggErrTxt" class="err-txt"></p></div>
-      <button id="eggInstallBtn" onclick="confirmInstall()" type="button" class="al-btn-primary w-full py-2.5 text-sm font-medium" style="flex-shrink:0"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Install</button>
-    </div>
+    <div id="eggErr" style="display:none" class="err-box"><p id="eggErrTxt" class="err-txt"></p></div>
+    <button id="eggInstallBtn" onclick="confirmInstall()" type="button" class="al-btn-primary w-full py-2.5 text-sm font-medium" style="flex-shrink:0"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Install</button>
   </div>
 </div>
 

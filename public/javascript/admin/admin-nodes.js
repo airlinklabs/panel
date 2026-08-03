@@ -58,37 +58,12 @@ async function configure(nodeId) {
 }
 
 function showPopup(command) {
-  const overlay = createOverlay();
-  const popup = createPopup(command);
-
-  overlay.appendChild(popup);
-  document.body.appendChild(overlay);
-
-  setTimeout(() => {
-    overlay.classList.remove('opacity-0');
-    popup.classList.remove('scale-95', 'opacity-0');
-  }, 10);
-
-  const copyBtn = document.getElementById('copyBtn');
-  copyBtn.addEventListener('click', () => copyCommand(copyBtn, command));
-  document.getElementById('doneBtn').addEventListener('click', closePopup);
-}
-
-function createOverlay() {
-  const overlay = document.createElement('div');
-  overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center transition-opacity duration-300 opacity-0';
-  overlay.id = 'modal-overlay';
-  return overlay;
-}
-
-function createPopup(command) {
   const popup = document.createElement('div');
-  popup.className = 'bg-white dark:bg-neutral-800 text-neutral-800 dark:text-white border border-neutral-200 dark:border-white/5 rounded-xl shadow-xl p-6 max-w-2xl w-full mx-4 transform transition-all duration-300 scale-95 opacity-0';
+  popup.style.display = 'none';
   popup.innerHTML = `
     <div class="flex justify-center items-center mb-6">
       ${alIcon('badge-check', 'text-emerald-500', { width: 64, height: 64 })}
     </div>
-    <h2 class="text-2xl font-bold mb-2 text-center">Token Created</h2>
     <p class="mb-4 text-neutral-600 dark:text-neutral-300 text-center">To auto-configure your node, run the following command:</p>
     <pre class="bg-neutral-100 dark:bg-neutral-900 p-3 rounded-xl mb-4 overflow-x-auto"><code id="commandCode" class="text-emerald-500">${command}</code></pre>
     <div class="flex justify-end">
@@ -96,7 +71,20 @@ function createPopup(command) {
       <button id="doneBtn" class="bg-neutral-800 dark:bg-neutral-700 text-white px-4 py-2 rounded-xl hover:bg-neutral-700 dark:hover:bg-neutral-600 transition-colors">Close</button>
     </div>
   `;
-  return popup;
+
+  window.modal.show({
+    title: 'Token Created',
+    bodyNode: popup,
+    panelClass: 'max-w-xl',
+  });
+
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click', () => copyCommand(copyBtn, command));
+  document.getElementById('doneBtn').addEventListener('click', closePopup);
+}
+
+function closePopup() {
+  window.modal.close();
 }
 
 function copyCommand(copyBtn, command) {
@@ -110,12 +98,6 @@ function copyCommand(copyBtn, command) {
       }, 2000);
     })
     .catch(error => { console.error('Failed to copy:', error); showToast('Couldn\'t copy the command. Try again.', 'error'); });
-}
-
-function closePopup() {
-  const overlay = document.getElementById('modal-overlay');
-  overlay.classList.add('opacity-0');
-  setTimeout(() => document.body.removeChild(overlay), 300);
 }
 
 // ── Live node status polling ──────────────────────────────────

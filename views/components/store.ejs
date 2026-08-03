@@ -63,34 +63,13 @@
   @keyframes s-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
   .dark .s-skeleton { background: var(--theme-bg-card, rgba(255,255,255,0.03)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.05)); }
 
-  /* ── Modal ── */
-  .m-overlay {
-    position: fixed; inset: 0;
-    background: var(--theme-overlay, rgba(0,0,0,0.6));
-    z-index: 50;
-    display: flex; align-items: center; justify-content: center;
-    padding: 16px;
-    opacity: 0; pointer-events: none;
-    transition: opacity var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
-  }
-  .m-overlay.open { opacity: 1; pointer-events: auto; }
-  .m-overlay.closing { transition: opacity var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)); }
-  .dark .m-dialog { background: var(--theme-bg-card, #141414); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
-
-  .m-dialog {
-    background: var(--theme-bg-card, #fff);
-    border: 1px solid var(--theme-border, #e5e5e5);
-    border-radius: 14px;
-    width: 100%; max-width: 600px;
-    max-height: 88vh;
+  /* ── Modal (hosted inside the shared window.modal shell) ── */
+  .m-dialog-sheet {
     display: flex; flex-direction: column;
-    transform: translateY(6px);
-    transition: transform var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+    max-height: 88vh;
     overflow: hidden;
+    width: 100%;
   }
-  .m-overlay.open .m-dialog { transform: none; }
-  .m-dialog.closing { transition: transform var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)); }
-  .m-overlay.closing .m-dialog { transform: translateY(6px); }
 
   .m-head {
     padding: 18px 18px 0;
@@ -325,12 +304,9 @@
   </div>
 </main>
 
-<!-- Modal -->
-<div class="m-overlay" id="mOverlay">
-  <div class="m-dialog">
-
-    <!-- Header -->
-    <div class="m-head">
+<!-- Modal content — hosted inside the shared window.modal shell -->
+<div id="mDialogContent" class="m-dialog-sheet" style="display:none;">
+  <div class="m-head">
       <div class="flex items-start gap-3">
         <div class="s-icon" id="mIcon"></div>
         <div class="flex-1 min-w-0">
@@ -394,7 +370,6 @@
 
     </div>
   </div>
-</div>
 
 <div id="page-data" style="display:none"
   data-installed-slugs="<%- JSON.stringify((addons || []).map(a => a.slug)) %>"
@@ -636,20 +611,19 @@
     document.getElementById('mProgress').style.display = 'none';
     document.getElementById('mLog').innerHTML = '';
 
-    const overlay = document.getElementById('mOverlay');
-    overlay.classList.add('open');
-    Animate.openModal(overlay, overlay.querySelector('.m-dialog'));
-    document.body.style.overflow = 'hidden';
+    window.modal.show({
+      title: addon.name || '',
+      bodyNode: document.getElementById('mDialogContent'),
+      panelClass: 'max-w-2xl',
+      onClose: function () {
+        document.getElementById('mGiscus').innerHTML = '';
+        currentAddon = null;
+      },
+    });
   }
 
   function closeModal() {
-    const overlay = document.getElementById('mOverlay');
-    overlay.classList.add('closing');
-    const done = function () { overlay.classList.remove('open'); overlay.classList.remove('closing'); };
-    Animate.closeModal(overlay, overlay.querySelector('.m-dialog'), done);
-    document.body.style.overflow = '';
-    document.getElementById('mGiscus').innerHTML = '';
-    currentAddon = null;
+    window.modal.close();
   }
 
   function setActionBtn(installed) {
@@ -678,8 +652,6 @@
   }
 
   document.getElementById('mClose').addEventListener('click', closeModal);
-  document.getElementById('mOverlay').addEventListener('click', e => { if (e.target.id === 'mOverlay') closeModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
   const mTabList = document.querySelector('.m-tabs');
   if (mTabList) {

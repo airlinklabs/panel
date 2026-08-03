@@ -23,34 +23,6 @@
     font-family: inherit; min-width: 0;
   }
   .dark .stepper-input { color: var(--theme-text, #e5e5e5); }
-
-  /* ── Confirm dialog ──────────────────────────────────────── */
-  .confirm-overlay {
-    position: fixed; inset: 0; z-index: 50;
-    background: var(--theme-overlay, rgba(0,0,0,0.45));
-    display: flex; align-items: center; justify-content: center; padding: 16px;
-    opacity: 0; pointer-events: none;
-    transition: opacity var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
-  }
-  .confirm-overlay.open { opacity: 1; pointer-events: auto; }
-  .confirm-overlay.closing { transition: opacity var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)); }
-  .confirm-box {
-    background: var(--theme-bg-card, white); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 14px;
-    width: 100%; max-width: 360px; padding: 22px;
-    transform: scale(0.96); opacity: 0;
-    transition:
-      transform var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
-      opacity var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
-  }
-  .dark .confirm-box { background: var(--theme-bg-card, #1c1c1c); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
-  .confirm-overlay.open .confirm-box { transform: scale(1); opacity: 1; }
-  .confirm-box.closing {
-    transform: scale(0.97); opacity: 0;
-    transition:
-      transform var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)),
-      opacity var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1));
-  }
-  .confirm-overlay.closing .confirm-box { transform: scale(0.97); opacity: 0; }
 </style>
 
 <main class="h-screen m-auto">
@@ -232,13 +204,10 @@
   </div>
 </main>
 
-<div class="confirm-overlay" id="portsOverlay" role="dialog" aria-modal="true" aria-labelledby="portsOverlayTitle">
-  <div class="confirm-box max-w-lg">
-    <p id="portsOverlayTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-3">Assign ports</p>
-    <div id="requiredPortsList" class="space-y-2"></div>
-    <div class="flex justify-end mt-4">
-      <button type="button" id="portsOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition inline-flex items-center gap-2"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>OK</button>
-    </div>
+<div id="portsContent" style="display:none;">
+  <div id="requiredPortsList" class="space-y-2"></div>
+  <div class="flex justify-end mt-4">
+    <button type="button" id="portsOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition inline-flex items-center gap-2"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>OK</button>
   </div>
 </div>
 

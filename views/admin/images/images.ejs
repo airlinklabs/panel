@@ -3,20 +3,6 @@
 
 <style>
   ::-webkit-scrollbar { display: none; }
-  .modal-overlay {
-    position: fixed; inset: 0; z-index: 50;
-    background: var(--theme-overlay, rgba(0,0,0,0.5));
-    display: flex; align-items: center; justify-content: center; padding: 16px;
-    opacity: 0; pointer-events: none;
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: auto; }
-  .modal-box {
-    background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 12px;
-    width: 100%; max-width: 460px;
-    transform: scale(0.96); opacity: 0;
-  }
-  html.dark .modal-box { background: var(--theme-bg-card, #1c1c1c); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
-  .modal-overlay.open .modal-box { transform: scale(1); opacity: 1; }
   .field-label { font-size: 11px; font-weight: 500; color: var(--theme-text-muted, #737373); display: block; margin-bottom: 5px; }
   html.dark .field-label { color: var(--theme-text, #a3a3a3); }
   .field-input {
@@ -121,46 +107,21 @@
   </div>
 </main>
 
-<!-- Create modal -->
-<div class="modal-overlay" id="createOverlay">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="createModalTitle" tabindex="-1">
-    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5">
-      <div>
-        <p id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.newImageTitle || 'New Image' %></p>
-        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.newImageDesc || 'Configure Docker images and variables after creation.' %></p>
-      </div>
-      <button type="button" onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition" aria-label="Close">
-        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
-      </button>
+<!-- Create content — hosted inside the shared window.modal shell -->
+<div id="createContent" style="display:none;">
+  <form action="/admin/images/create" method="POST" class="flex flex-col gap-4">
+    <div class="grid grid-cols-2 gap-3">
+      <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required placeholder="e.g. Minecraft Java"></div>
+      <div><label class="field-label">Author</label><input class="field-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
+      <div><label class="field-label">Author Name</label><input class="field-input" type="text" name="authorName" placeholder="Your Name"></div>
+      <div class="col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+      <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
     </div>
-    <form action="/admin/images/create" method="POST" class="p-5 flex flex-col gap-4">
-      <div class="grid grid-cols-2 gap-3">
-        <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required placeholder="e.g. Minecraft Java"></div>
-        <div><label class="field-label">Author</label><input class="field-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
-        <div><label class="field-label">Author Name</label><input class="field-input" type="text" name="authorName" placeholder="Your Name"></div>
-        <div class="col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
-        <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
-      </div>
-      <div class="flex gap-2 pt-1">
-        <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
-        <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.createAndEdit || 'Create & Edit' %></button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Delete modal -->
-<div class="modal-overlay" id="deleteOverlay">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" tabindex="-1" style="max-width:380px;">
-    <div class="p-5">
-      <p id="deleteModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1"><%= req.translations.deleteImageTitle || 'Delete image?' %></p>
-      <p id="deleteMsg" class="text-xs text-neutral-500 mb-5"></p>
-      <div class="flex gap-2">
-        <button type="button" onclick="closeDelete()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
-        <button type="button" id="deleteConfirm" class="flex-1 py-2 rounded-xl al-btn-danger">Delete</button>
-      </div>
+    <div class="flex gap-2 pt-1">
+      <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
+      <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.createAndEdit || 'Create & Edit' %></button>
     </div>
-  </div>
+  </form>
 </div>
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-images.js"></script>
