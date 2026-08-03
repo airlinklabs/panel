@@ -67,7 +67,7 @@
 
       <!-- Daemon Offline Warning -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
-      <div class="mx-8 mt-4 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl p-4 flex items-center">
+      <div class="mx-8 mt-8 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl p-4 flex items-center">
         <div class="flex-shrink-0 mr-3">
           <%- icon('triangle-alert', { class: 'h-6 w-6', style: 'color:var(--theme-danger);' }) %>
         </div>
@@ -376,11 +376,7 @@ require.config({
     if (!editor) return;
     const saveBtn = document.getElementById('saveBtn');
     saveBtn.disabled = true;
-    saveBtn.innerHTML = `
-      <svg class="animate-spin h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
+    saveBtn.innerHTML = `<%- icon('loader-circle', { class: 'animate-spin h-4 w-4 mr-1.5', strokeWidth: 2 }) %>
       Saving...
     `;
 
@@ -413,10 +409,7 @@ require.config({
       }
     } finally {
       saveBtn.disabled = false;
-      saveBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-        </svg>
+      saveBtn.innerHTML = `<%- icon('save', { class: 'h-4 w-4 mr-1.5', strokeWidth: 2 }) %>
         Save
       `;
     }

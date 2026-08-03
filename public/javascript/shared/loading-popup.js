@@ -27,16 +27,9 @@
       <div class="p-6">
         <div class="flex items-center gap-3 mb-4">
           <div id="lp-icon" class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--theme-bg-secondary)">
-            <svg id="lp-spinner" class="w-5 h-5 animate-spin" style="color:var(--theme-text-muted)" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <svg id="lp-check" class="w-5 h-5 hidden" style="color:var(--theme-success)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <svg id="lp-error" class="w-5 h-5 hidden" style="color:var(--theme-danger)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
+            ${alIcon('loader-circle', 'w-5 h-5 animate-spin', { id: 'lp-spinner', style: 'color:var(--theme-text-muted)' })}
+            ${alIcon('check', 'w-5 h-5 hidden', { id: 'lp-check', style: 'color:var(--theme-success)', strokeWidth: 2 })}
+            ${alIcon('x', 'w-5 h-5 hidden', { id: 'lp-error', style: 'color:var(--theme-danger)', strokeWidth: 2 })}
           </div>
           <div class="flex-1 min-w-0">
             <h3 id="lp-title" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Loading...</h3>
@@ -115,8 +108,8 @@
     step.className = 'flex items-center gap-2 text-xs';
     step.innerHTML = `
       <span class="step-icon w-4 h-4 rounded-full flex items-center justify-center shrink-0" style="background:var(--theme-border)">
-        ${status === 'done' ? '<svg class="w-2.5 h-2.5" style="color:var(--theme-success)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>' : 
-          status === 'error' ? '<svg class="w-2.5 h-2.5" style="color:var(--theme-danger)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>' :
+        ${status === 'done' ? alIcon('check', 'w-2.5 h-2.5', { style: 'color:var(--theme-success)', strokeWidth: 3 }) : 
+          status === 'error' ? alIcon('x', 'w-2.5 h-2.5', { style: 'color:var(--theme-danger)', strokeWidth: 3 }) :
           '<span class="w-1.5 h-1.5 rounded-full" style="background:var(--theme-text-muted)"></span>'}
       </span>
       <span class="step-text" style="color:var(--theme-text)">${text}</span>
@@ -134,10 +127,10 @@
     if (text) step.el.querySelector('.step-text').textContent = text;
     
     if (status === 'done') {
-      icon.innerHTML = '<svg class="w-2.5 h-2.5" style="color:var(--theme-success)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>';
+      icon.innerHTML = alIcon('check', 'w-2.5 h-2.5', { style: 'color:var(--theme-success)', strokeWidth: 3 });
       icon.style.background = 'var(--theme-success-bg, rgba(16, 185, 129, 0.1))';
     } else if (status === 'error') {
-      icon.innerHTML = '<svg class="w-2.5 h-2.5" style="color:var(--theme-danger)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>';
+      icon.innerHTML = alIcon('x', 'w-2.5 h-2.5', { style: 'color:var(--theme-danger)', strokeWidth: 3 });
       icon.style.background = 'var(--theme-danger-bg, rgba(239, 68, 68, 0.1))';
     } else if (status === 'active') {
       icon.innerHTML = '<span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background:var(--theme-text-strong)"></span>';

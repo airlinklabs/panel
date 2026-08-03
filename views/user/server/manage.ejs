@@ -19,7 +19,7 @@
 
     #terminal {
         height: 420px;
-        background: var(--theme-terminal-bg, #141414);
+        background: var(--theme-bg);
         overscroll-behavior: contain;
         touch-action: none;
     }
@@ -30,12 +30,12 @@
     }
 
     #terminal .xterm-viewport {
-        background: var(--theme-terminal-bg, #141414) !important;
+        background: var(--theme-bg) !important;
         border-radius: 0;
     }
 
     #terminal .xterm-screen {
-        background: var(--theme-terminal-bg, #141414);
+        background: var(--theme-bg);
     }
 
     .console-wrap {
@@ -50,7 +50,7 @@
     /* Mobile terminal */
     #mobile-terminal {
         height: 300px;
-        background: var(--theme-terminal-bg, #141414);
+        background: var(--theme-bg);
         overscroll-behavior: contain;
         touch-action: none;
     }
@@ -61,11 +61,11 @@
     }
 
     #mobile-terminal .xterm-viewport {
-        background: var(--theme-terminal-bg, #141414) !important;
+        background: var(--theme-bg) !important;
     }
 
     #mobile-terminal .xterm-screen {
-        background: var(--theme-terminal-bg, #141414);
+        background: var(--theme-bg);
     }
 
     #mobile-terminal-container {
@@ -329,13 +329,8 @@
         <span class="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 shrink-0"><%= req.translations.addressIP %>:</span>
         <span class="text-xs font-medium font-mono text-neutral-800 dark:text-white truncate flex-1" id="mobile-server-ip-text"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></span>
         <button type="button" id="mobile-copy-ip-btn" onclick="copyMobileServerIP()" class="shrink-0 rounded-md p-1 transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">
-          <svg id="mobile-copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 text-neutral-600 dark:text-neutral-300">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          <svg id="mobile-check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3.5 w-3.5 text-emerald-500 hidden">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
+          <%- icon('copy', { id: 'mobile-copy-icon', class: 'h-3.5 w-3.5 text-neutral-600 dark:text-neutral-300', strokeWidth: 2 }) %>
+          <%- icon('check', { id: 'mobile-check-icon', class: 'h-3.5 w-3.5 text-emerald-500 hidden', strokeWidth: 2.5 }) %>
         </button>
       </div>
     </div>
@@ -406,8 +401,13 @@ function themeVar(name, fallback) {
 
 const termTheme = {
   foreground: '#c5c9d1',
-  background: themeVar('terminal-bg', '#141414'),
+  background: '#141414',
   selectionBackground: '#5DA5D580',
+  cursor: '#c5c9d1',
+  cursorAccent: '#141414'
+};
+
+const darkTermPalette = {
   black: '#1E1E1D',
   brightBlack: '#262625',
   red: '#E54B4B',
@@ -423,10 +423,51 @@ const termTheme = {
   brightBlue: '#82AAFF',
   brightMagenta: '#C792EA',
   brightCyan: '#89DDFF',
-  brightWhite: '#ffffff',
-  cursor: '#c5c9d1',
-  cursorAccent: themeVar('terminal-bg', '#141414')
+  brightWhite: '#ffffff'
 };
+
+const lightTermPalette = {
+  black: '#1E1E1D',
+  brightBlack: '#4D4D4C',
+  red: '#C42B2B',
+  green: '#4B8B3C',
+  yellow: '#9A7B0B',
+  blue: '#2B5FD9',
+  magenta: '#A34FA3',
+  cyan: '#0E7F8F',
+  white: '#383838',
+  brightRed: '#B71C1C',
+  brightGreen: '#3D7A2E',
+  brightYellow: '#7A5E00',
+  brightBlue: '#1E4BB8',
+  brightMagenta: '#8B2F8B',
+  brightCyan: '#096A78',
+  brightWhite: '#000000'
+};
+
+function applyTermTheme() {
+  const isDark = document.documentElement.classList.contains('dark');
+  termTheme.background = themeVar('bg', '#141414');
+  termTheme.foreground = themeVar('text', '#c5c9d1');
+  termTheme.cursor = termTheme.foreground;
+  termTheme.cursorAccent = termTheme.background;
+  Object.assign(termTheme, isDark ? darkTermPalette : lightTermPalette);
+}
+
+applyTermTheme();
+
+// Called by header.ejs on theme toggle — console follows the current mode.
+function setTerminalTheme() {
+  applyTermTheme();
+  if (typeof term !== 'undefined') {
+    term.options.theme = Object.assign({}, termTheme);
+    term.refresh(0, term.rows - 1);
+  }
+  if (typeof mobileTerm !== 'undefined') {
+    mobileTerm.options.theme = Object.assign({}, termTheme);
+    mobileTerm.refresh(0, mobileTerm.rows - 1);
+  }
+}
 
 const term = new Terminal({
   disableStdin: true,

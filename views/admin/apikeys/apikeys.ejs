@@ -115,9 +115,7 @@
           <p id="createApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Set a name and choose what this key is allowed to do.</p>
         </div>
         <button type="button" onclick="hideCreateModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" aria-label="Close create API key dialog">
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <%- icon('x', { class: 'h-4 w-4', strokeWidth: 2 }) %>
         </button>
       </div>
 
@@ -247,9 +245,7 @@
         <p id="editApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Update name, description, and permissions.</p>
       </div>
       <button type="button" onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" aria-label="Close edit API key dialog">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
+        <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
       </button>
     </div>
 

@@ -66,9 +66,7 @@
 
           <!-- Auto-refresh notice -->
           <div class="text-xs text-neutral-500 mb-4 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <%- icon('refresh-cw', { class: 'h-3 w-3 mr-1', strokeWidth: 2 }) %>
             <span>
               Refreshing in <span id="refresh-countdown">30</span> seconds
                 <button type="button" onclick="refreshPlayers()" class="ml-2 transition-colors duration-200 inline-flex items-center" style="color:var(--theme-accent)">
@@ -110,9 +108,7 @@
               <!-- Server Offline Message -->
               <div class="flex justify-center mb-6">
                 <div class="w-16 h-16 rounded-full bg-neutral-200 dark:bg-neutral-700/50 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m3 3 8.735 8.735m0 0a.374.374 0 1 1 .53.53m-.53-.53.53.53m0 0L21 21M14.652 9.348a3.75 3.75 0 0 1 0 5.304m2.121-7.425a6.75 6.75 0 0 1 0 9.546m2.121-11.667c3.808 3.807 3.808 9.98 0 13.788m-9.546-4.242a3.733 3.733 0 0 1-1.06-2.122m-1.061 4.243a6.75 6.75 0 0 1-1.625-6.929m-.496 9.05c-3.068-3.067-3.664-7.67-1.79-11.334M12 12h.008v.008H12V12Z" />
-                  </svg>
+                  <%- icon('wifi-off', { class: 'size-6', strokeWidth: 1.5 }) %>
                 </div>
               </div>
               <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.serverOffline || 'Server Offline' %></h2>
@@ -129,9 +125,7 @@
               <!-- Server Online but No Players Message -->
               <div class="flex justify-center mb-6">
                 <div class="w-16 h-16 rounded-full bg-green-700/20 dark:bg-green-500/15 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                  </svg>
+                  <%- icon('ellipsis', { class: 'h-8 w-8 text-green-400', strokeWidth: 2 }) %>
                 </div>
               </div>
               <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.serverOnline || 'Server is online' %></h2>
@@ -152,9 +146,7 @@
               <!-- Unknown Status Message -->
               <div class="flex justify-center mb-6">
                 <div class="w-16 h-16 rounded-full bg-yellow-700/20 dark:bg-yellow-500/15 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <%- icon('circle-help', { class: 'h-8 w-8 text-yellow-400', strokeWidth: 2 }) %>
                 </div>
               </div>
               <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.statusUnknown || 'Status Unknown' %></h2>

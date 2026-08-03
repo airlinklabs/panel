@@ -317,15 +317,37 @@
     });
   }
 
+  // If the active nav link sits below the sidebar's scrollable fold, bring
+  // it fully into view on page load. If it is the last button (nothing
+  // below it), the scroll clamps to the bottom of the list.
+  function showActiveNavInView() {
+    var activeLink = document.querySelector('#pc-sidebar .nav-link.active, #pc-sidebar [data-server-control-link].active');
+    if (!activeLink) return;
+    var container = activeLink.closest('nav');
+    if (!container) return;
+    var pad = 16;
+    var cTop = container.getBoundingClientRect().top;
+    var cBottom = container.getBoundingClientRect().bottom;
+    var r = activeLink.getBoundingClientRect();
+    if (r.bottom + pad > cBottom) {
+      container.scrollTop = container.scrollTop + (r.bottom + pad - cBottom);
+    } else if (r.top - pad < cTop) {
+      container.scrollTop = container.scrollTop - (cTop - (r.top - pad));
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
+    // Show sidebar first — rects are all zeros while display:none, so the
+    // scroll check below would never fire.
+    document.getElementById('pc-sidebar').style.display = '';
     markSpecialLinks(window.location.pathname);
     markActiveNav(window.location.pathname);
-    // Show sidebar
-    document.getElementById('pc-sidebar').style.display = '';
+    showActiveNavInView();
   });
   document.addEventListener('al:navigated', function () {
     markSpecialLinks(window.location.pathname);
     markActiveNav(window.location.pathname);
+    showActiveNavInView();
   });
 })();
 </script>

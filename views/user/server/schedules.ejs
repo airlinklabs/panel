@@ -794,7 +794,7 @@ function renderPendingTasks(scheduleId) {
       + '<span class="truncate font-mono text-xs" style="color:var(--theme-text)">' + label.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>'
       + (task.timeOffset > 0 ? '<span class="shrink-0 text-[10px] font-medium" style="color:var(--theme-text-muted)">+' + task.timeOffset + 's</span>' : '')
       + '</div>'
-      + '<button type="button" class="al-btn-ghost p-1.5 -mr-1.5 shrink-0" style="color:var(--theme-danger)" aria-label="Remove task"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>';
+      + '<button type="button" class="al-btn-ghost p-1.5 -mr-1.5 shrink-0" style="color:var(--theme-danger)" aria-label="Remove task"><%- icon('x', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %></button>';
     row.querySelector('button').addEventListener('click', () => removePendingTask(scheduleId, i));
     wrap.appendChild(row);
   });

@@ -6,12 +6,8 @@
   </a>
   <div class="flex items-center gap-2">
     <button type="button" id="mobile-theme-toggle" class="p-2 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center" style="color:var(--theme-text-muted);" aria-label="Toggle theme">
-      <svg class="w-4 h-4 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"></path>
-      </svg>
-      <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 009-9c0-.463-.032-.926-.086-1.376z"></path>
-      </svg>
+      <%- icon('sun', { class: 'w-4 h-4 dark:hidden' }) %>
+      <%- icon('moon', { class: 'w-4 h-4 hidden dark:block' }) %>
     </button>
     <% if (user != null) { %>
     <a href="/account" class="p-1 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center" style="color:var(--theme-text-muted);">
@@ -27,6 +23,8 @@
     <%
     const bottomNavItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
     const navToShow = (bottomNavItems || []).slice(0, 4);
+    const onServerPage = (typeof req !== 'undefined' && req && (req.path || req.originalUrl || '').startsWith('/server/'));
+    const isAdminUser = (typeof user !== 'undefined' && user != null && user.isAdmin === true);
     %>
 
     <% navToShow.forEach(function(item) { %>
@@ -59,6 +57,14 @@
       </button>
     </div>
     <div class="px-2 py-2">
+      <% if (onServerPage && isAdminUser) { %>
+      <button type="button" id="mobile-admin-toggle" role="menuitem" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;" data-admin-label="<%= req.translations.navAdminPanel || 'Admin Panel' %>" data-back-label="Back">
+        <span id="mobile-admin-toggle-arrow" class="transition-transform duration-200"><%- icon('chevron-left', { class: 'w-5 h-5' }) %></span>
+        <span id="mobile-admin-toggle-label" class="text-sm"><%= req.translations.navAdminPanel || 'Admin Panel' %></span>
+      </button>
+      <% } %>
+
+      <div id="mobile-more-main"<% if (onServerPage && isAdminUser) { %> class="hidden"<% } %>>
       <% (bottomNavItems || []).slice(4).forEach(function(item) { %>
       <a href="<%= item.url %>" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;" data-match-prefix="<%= item.matchPrefix || '' %>">
         <%- item.icon %>
@@ -66,8 +72,27 @@
       </a>
       <% }); %>
 
-      <% if (user != null && user.isAdmin === true) { %>
       <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
+        <% if (user != null) { %>
+        <a href="/account" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+          <img class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
+          <span class="text-sm">Account</span>
+        </a>
+        <a href="/logout" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+          <%- icon('log-out', { class: 'w-5 h-5' }) %>
+          <span class="text-sm">Logout</span>
+        </a>
+        <% } else { %>
+        <a href="/login" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+          <%- icon('log-in', { class: 'w-5 h-5' }) %>
+          <span class="text-sm">Login</span>
+        </a>
+        <% } %>
+      </div>
+      </div>
+      <div id="mobile-more-admin-pane"<% if (onServerPage && isAdminUser) { %> class="hidden"<% } %>>
+        <% if (isAdminUser) { %>
+        <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
         <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide" style="color:var(--theme-text-muted);">Admin</p>
         
         <!-- Core -->
@@ -122,23 +147,6 @@
         </a>
       </div>
       <% } %>
-
-      <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
-        <% if (user != null) { %>
-        <a href="/account" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
-          <img class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
-          <span class="text-sm">Account</span>
-        </a>
-        <a href="/logout" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 44px;">
-          <%- icon('log-out', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Logout</span>
-        </a>
-        <% } else { %>
-        <a href="/login" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
-          <%- icon('log-in', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Login</span>
-        </a>
-        <% } %>
       </div>
     </div>
   </div>
@@ -192,6 +200,25 @@
   if (btn) btn.addEventListener('click', openSheet);
   if (close) close.addEventListener('click', closeSheet);
   if (backdrop) backdrop.addEventListener('click', closeSheet);
+
+  // On server pages: back button at top of the sheet reveals the admin buttons
+  var adminToggle = document.getElementById('mobile-admin-toggle');
+  var adminPane = document.getElementById('mobile-more-admin-pane');
+  var mainPane = document.getElementById('mobile-more-main');
+  var adminLabel = document.getElementById('mobile-admin-toggle-label');
+
+  if (adminToggle && adminPane && mainPane) {
+    adminToggle.addEventListener('click', function () {
+      var showingAdmin = !adminPane.classList.contains('hidden');
+      adminPane.classList.toggle('hidden', showingAdmin);
+      mainPane.classList.toggle('hidden', !showingAdmin);
+      if (adminLabel) {
+        adminLabel.textContent = showingAdmin
+          ? (adminToggle.getAttribute('data-admin-label') || 'Admin Panel')
+          : (adminToggle.getAttribute('data-back-label') || 'Back');
+      }
+    });
+  }
 
   // Theme toggle for mobile
   if (themeToggle) {

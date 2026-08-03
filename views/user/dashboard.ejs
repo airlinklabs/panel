@@ -84,11 +84,12 @@
         <% } %>
 
         <% if (servers.length === 0 && (!folders || folders.length === 0)) { %>
+        <% var createServerAction = '<a href="' + (user.isAdmin ? '/admin/servers/create' : '/create-server') + '" class="al-btn-primary"><span class="inline-flex items-center gap-1.5">' + icon('plus', { class: 'w-4 h-4' }) + ' Create server</span></a>'; %>
         <%- include('../components/ui/empty-state', {
           iconName: 'server',
           title: req.translations.noServersYet || 'No servers yet',
           description: user.isAdmin ? 'Create your first server to get started.' : (canCreateServer ? 'Create your first server or ask an admin to assign one.' : 'An admin will assign one to you.'),
-          action: user.isAdmin ? '<a href="/admin/servers/create" class="al-btn-primary"><span class="inline-flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Create server</span></a>' : (canCreateServer ? '<a href="/create-server" class="al-btn-primary"><span class="inline-flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Create server</span></a>' : '')
+          action: user.isAdmin || canCreateServer ? createServerAction : ''
         }) %>
         <% } else { %>
 

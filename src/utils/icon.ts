@@ -12,6 +12,8 @@
 const lucideIcons = require('lucide') as Record<string, unknown>;
 
 interface IconOptions {
+  /** Element id (for JS targeting) */
+  id?: string;
   /** Extra CSS classes applied to the <svg> element */
   class?: string;
   /** Override width and height (px) — default 16 */
@@ -81,6 +83,7 @@ export function icon(name: string, opts: IconOptions = {}): string {
   };
 
   if (opts.class)  svgAttrs['class'] = opts.class;
+  if (opts.id)     svgAttrs['id']    = opts.id;
   if (opts.style)  svgAttrs['style'] = opts.style;
   if (opts.label) {
     svgAttrs['role']       = 'img';

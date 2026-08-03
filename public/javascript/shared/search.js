@@ -18,13 +18,13 @@ let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
 const isAdmin = !!document.querySelector('a[href="/admin/overview"]');
 
 const typeIcon = {
-  server: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm3.97.47a.75.75 0 0 1 1.06 0l.97.97.97-.97a.75.75 0 0 1 1.06 1.06l-.97.97.97.97a.75.75 0 1 1-1.06 1.06l-.97-.97-.97.97a.75.75 0 0 1-1.06-1.06l.97-.97-.97-.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>',
-  user:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd"/></svg>',
-  node:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M2.25 4.125c0-1.036.84-1.875 1.875-1.875h5.25c1.036 0 1.875.84 1.875 1.875V17.25a4.5 4.5 0 1 1-9 0V4.125Zm4.5 14.25a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25Z" clip-rule="evenodd"/></svg>',
-  nav:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd"/></svg>',
-  clock:  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 shrink-0 text-neutral-400"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
-  arrow:  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 shrink-0 text-neutral-400"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>',
-  feature: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 0 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813A3.75 3.75 0 0 0 7.466 7.89l.813-2.846A.75.75 0 0 1 9 4.5Z" clip-rule="evenodd"/></svg>',
+  server: alIcon('server', 'w-4 h-4 shrink-0 text-neutral-400'),
+  user:   alIcon('user', 'w-4 h-4 shrink-0 text-neutral-400'),
+  node:   alIcon('hard-drive', 'w-4 h-4 shrink-0 text-neutral-400'),
+  nav:    alIcon('search', 'w-4 h-4 shrink-0 text-neutral-400'),
+  clock:  alIcon('clock', 'w-4 h-4 shrink-0 text-neutral-400'),
+  arrow:  alIcon('arrow-up-right', 'w-4 h-4 shrink-0 text-neutral-400'),
+  feature: alIcon('sparkles', 'w-4 h-4 shrink-0 text-neutral-400'),
 };
 
 function escHtml(t) {
@@ -224,7 +224,7 @@ function showRecommendations() {
       row.innerHTML = typeIcon.clock +
         '<span class="flex-1 min-w-0"><span class="block truncate">' + escHtml(term) + '</span></span>' +
         '<button class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1" data-remove="' + escHtml(term) + '" aria-label="Remove">' +
-          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
+          alIcon('x', 'w-3 h-3') +
         '</button>';
 
       row.addEventListener('click', function(e) {
@@ -256,7 +256,7 @@ function renderResults(items, term) {
     wrap.className = 'flex flex-col items-center gap-2 px-4 py-8 text-center';
 
     const iconEl = document.createElement('div');
-    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-8 h-8 mx-auto mb-1" style="color:var(--theme-text-faint);"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 11.25h6" /></svg>';
+    iconEl.innerHTML = alIcon('search-x', 'w-8 h-8 mx-auto mb-1', { strokeWidth: 1.5, style: 'color:var(--theme-text-faint);' });
     wrap.appendChild(iconEl);
 
     const msg = document.createElement('p');

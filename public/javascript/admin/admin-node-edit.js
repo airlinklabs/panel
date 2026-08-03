@@ -39,7 +39,7 @@
 
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'ml-2 text-neutral-500 hover:text-red-500 transition-colors';
-    deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>';
+    deleteBtn.innerHTML = alIcon('x', 'w-4 h-4', { strokeWidth: 1.5 });
 
     if (isUsed) {
       deleteBtn.disabled = true;

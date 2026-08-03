@@ -288,7 +288,7 @@
 
     var btn = document.getElementById('runScanButton');
     btn.disabled = true;
-    btn.innerHTML = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...';
+    btn.innerHTML = alIcon('loader-circle', 'animate-spin h-4 w-4') + ' Scanning...';
 
     Promise.all(currentServerIds.map(function (id) {
       return fetch('/admin/radar/scan/' + id, {
@@ -330,7 +330,7 @@
       })
       .finally(function () {
         btn.disabled = false;
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg> Run Scan';
+        btn.innerHTML = alIcon('scan-search', 'w-4 h-4', { strokeWidth: 1.5 }) + ' Run Scan';
       });
   }
 
@@ -340,7 +340,7 @@
     var btn = document.getElementById('runVtScanButton');
 
     btn.disabled = true;
-    btn.innerHTML = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Starting...';
+    btn.innerHTML = alIcon('loader-circle', 'animate-spin h-4 w-4') + ' Starting...';
 
     closeRadarScanModal();
 
@@ -409,7 +409,7 @@
       })
       .finally(function () {
         btn.disabled = false;
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Z"/></svg> Upload to VirusTotal';
+        btn.innerHTML = alIcon('shield-check', 'w-4 h-4', { strokeWidth: 1.5 }) + ' Upload to VirusTotal';
       });
   }
 
@@ -470,12 +470,12 @@
     if (malCount === 0) {
       summaryEl.innerHTML =
         '<span class="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">' +
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg>' +
+        '' + alIcon('circle-check', 'w-4 h-4') + '' +
         'Clean — 0/' + total + ' engines flagged</span>' +
         '<a href="' + data.vtLink + '" target="_blank" rel="noopener" class="ml-auto text-xs text-blue-500 hover:underline">Full report →</a>';
       bodyEl.innerHTML =
         '<div class="py-8 text-center">' +
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-8 h-8 mx-auto mb-3 text-emerald-400"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>' +
+        '' + alIcon('shield-check', 'w-8 h-8 mx-auto mb-3 text-emerald-400', { strokeWidth: 1 }) + '' +
         '<p class="text-sm font-medium text-neutral-600 dark:text-neutral-300">No engines flagged anything</p>' +
         '<p class="text-xs text-neutral-400 mt-1">' + total + ' engines scanned the zip</p>' +
         '</div>';
@@ -484,7 +484,7 @@
 
     summaryEl.innerHTML =
       '<span class="inline-flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400 font-medium">' +
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>' +
+      '' + alIcon('triangle-alert', 'w-4 h-4') + '' +
       malCount + '/' + total + ' engines flagged</span>' +
       '<a href="' + data.vtLink + '" target="_blank" rel="noopener" class="ml-auto text-xs text-blue-500 hover:underline">Full report →</a>';
 
@@ -561,11 +561,11 @@
     if (total === 0) {
       summaryEl.innerHTML =
         '<span class="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">' +
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg>' +
+        '' + alIcon('circle-check', 'w-4 h-4') + '' +
         'No suspicious files found</span>';
       bodyEl.innerHTML =
         '<div class="py-8 text-center">' +
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-8 h-8 mx-auto mb-3 text-emerald-400"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>' +
+        '' + alIcon('shield-check', 'w-8 h-8 mx-auto mb-3 text-emerald-400', { strokeWidth: 1 }) + '' +
         '<p class="text-sm font-medium text-neutral-600 dark:text-neutral-300">All clear</p>' +
         '<p class="text-xs text-neutral-400 mt-1">No matches found for any pattern in this script</p>' +
         '</div>';
@@ -575,7 +575,7 @@
     var patternCount = scanResults.results.length;
     summaryEl.innerHTML =
       '<span class="inline-flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400 font-medium">' +
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>' +
+      '' + alIcon('triangle-alert', 'w-4 h-4') + '' +
       total + ' finding' + (total !== 1 ? 's' : '') + ' across ' + patternCount + ' pattern' + (patternCount !== 1 ? 's' : '') + '</span>';
 
     var html = '<div class="space-y-3">';

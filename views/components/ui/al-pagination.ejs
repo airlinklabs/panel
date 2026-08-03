@@ -10,11 +10,11 @@
   <p class="text-xs shrink-0" data-pagination-count style="color:var(--theme-text-muted)"></p>
   <div class="flex items-center gap-1" role="navigation" aria-label="Pagination">
     <button type="button" data-page="prev" class="p-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10" style="color:var(--theme-text-muted)" aria-label="Previous page">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <%- icon('chevron-left', { class: 'w-4 h-4' }) %>
     </button>
     <span class="flex items-center gap-1" data-pagination-window></span>
     <button type="button" data-page="next" class="p-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10" style="color:var(--theme-text-muted)" aria-label="Next page">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+      <%- icon('chevron-right', { class: 'w-4 h-4' }) %>
     </button>
   </div>
 </div>

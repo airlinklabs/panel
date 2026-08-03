@@ -197,3 +197,5 @@ Could not find the include file "../components/ui/al-pagination"
 
  WARN  [43m[37m[1m WARN [0m Tailwind reported warnings { stderr: '≈ tailwindcss v4.3.3\n\nDone in 482ms' }  [2m15:02:26[0m
 
+[32m[nodemon] restarting child process[39m
+[32m[nodemon] restarting child process[39m

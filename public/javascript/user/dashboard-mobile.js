@@ -76,9 +76,7 @@
               <span class="ml-auto shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-md ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400'}">${running ? 'Running' : 'Stopped'}</span>
             </a>
             <button data-uuid="${s.UUID}" class="mob-remove-btn shrink-0 p-2 rounded-lg text-neutral-400 active:bg-red-50 dark:active:bg-red-500/10 active:text-red-500 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
-                <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd"/>
-              </svg>
+              ${alIcon('trash-2', 'w-4 h-4')}
             </button>`;
           row.querySelector('.mob-remove-btn').addEventListener('click', async (e) => {
             e.preventDefault();
@@ -178,7 +176,7 @@
       allFolders.forEach(f => {
         const b = document.createElement('button');
         b.className = 'w-full flex items-center gap-2.5 px-3 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-left active:scale-[0.98] transition-transform';
-        b.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-amber-500 shrink-0"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z"/></svg><span class="text-sm text-neutral-800 dark:text-white">${f.name}</span>`;
+        b.innerHTML = `${alIcon('folder', 'h-4 w-4 text-amber-500 shrink-0')}<span class="text-sm text-neutral-800 dark:text-white">${f.name}</span>`;
         b.addEventListener('click', async () => {
           const r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
           const d = await r.json();

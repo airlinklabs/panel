@@ -117,7 +117,7 @@ function escJS(val) {
 
       <!-- Daemon Offline Warning -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
-      <div class="mx-4 sm:mx-8 mt-4 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl p-4 flex items-center">
+      <div class="mx-4 sm:mx-8 mt-8 bg-red-500/10 border border-red-500/20 dark:bg-red-500/15 rounded-xl p-4 flex items-center">
         <div class="flex-shrink-0 mr-3">
           <%- icon('triangle-alert', { class: 'h-6 w-6', strokeWidth: 2, style: 'color:var(--theme-danger);' }) %>
         </div>
@@ -398,10 +398,7 @@ function escJS(val) {
           </div>
           <div id="filePreview" class="hidden">
             <div class="flex items-center p-3 rounded-xl" style="background:var(--theme-bg-secondary);">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-3" style="color:var(--theme-text-muted)">
-                <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-              </svg>
+              <%- icon('file-text', { class: 'w-6 h-6 mr-3', style: 'color:var(--theme-text-muted)' }) %>
               <div class="flex-1 truncate">
                 <p id="selectedFileName" class="font-medium truncate" style="color:var(--theme-text-strong)"></p>
                 <p id="selectedFileSize" class="text-sm" style="color:var(--theme-text-muted)"></p>
