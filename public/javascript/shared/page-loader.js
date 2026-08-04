@@ -302,6 +302,18 @@
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
+  var LOAD_GUARD_MS = 2000;
+
+  // Reveal the page even if window 'load' never fires (e.g. an external
+  // image or font hangs). Otherwise js-loading + the loader overlay stay
+  // forever and the page looks blank / unclickable.
+  function revealAfterStuckLoad() {
+    if (document.documentElement.classList.contains('js-loading')) {
+      hideOverlaySlow();
+      fadeContentIn();
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initDesktopHighlight(_fromNav);
     initMobileHighlight();
@@ -309,11 +321,16 @@
       revealAfterNav();
     } else {
       if (el('pl-overlay')) startProgress();
+      window.__alLoadGuard = setTimeout(revealAfterStuckLoad, LOAD_GUARD_MS);
     }
   });
 
   window.addEventListener('load', function () {
     if (!_fromNav) {
+      if (window.__alLoadGuard) {
+        clearTimeout(window.__alLoadGuard);
+        window.__alLoadGuard = null;
+      }
       hideOverlaySlow();
       fadeContentIn();
     }
