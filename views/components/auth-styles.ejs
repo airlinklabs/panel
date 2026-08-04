@@ -62,7 +62,7 @@
   .pw-toggle:hover { color: var(--theme-text-strong); }
 
   .pw-strength { height: 3px; border-radius: 2px; background: var(--theme-bg-secondary); margin-top: 8px; overflow: hidden; }
-  .pw-bar { height: 100%; border-radius: 2px; width: 0%; transition: width 0.28s ease, background 0.28s ease; }
+  .pw-bar { height: 100%; border-radius: 2px; transform-origin: left center; transform: scaleX(0); transition: transform 0.28s ease, background 0.28s ease; }
   .pw-hint { font-size: 11px; color: var(--theme-text-muted); margin-top: 5px; min-height: 14px; transition: color 0.2s; }
 
   .cb-row { display: flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; }

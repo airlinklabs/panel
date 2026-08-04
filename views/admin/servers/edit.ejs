@@ -340,7 +340,7 @@
                     <span id="transferStatusText" class="text-sm font-medium">Transfer in progress...</span>
                   </div>
                   <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mt-2">
-                    <div id="transferProgressBar" class="bg-purple-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    <div id="transferProgressBar" class="bg-purple-500 h-2 rounded-full transition-all duration-500" style="transform: scaleX(0); transform-origin: left center"></div>
                   </div>
                   <p id="transferStatusDetail" class="text-xs text-neutral-500 mt-2"></p>
                 </div>
@@ -872,7 +872,7 @@ function generateRandomName() {
         }
 
         const step = statusSteps[state.status] || { pct: 0, text: state.status };
-        transferProgressBar.style.width = step.pct + '%';
+        transferProgressBar.style.transform = 'scaleX(' + (step.pct / 100) + ')';
         transferStatusText.textContent = step.text;
         transferStatusDetail.textContent = state.error || '';
 

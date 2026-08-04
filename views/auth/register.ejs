@@ -97,12 +97,11 @@
     var score = [v.length >= 8, /[A-Za-z]/.test(v), /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)].filter(Boolean).length;
     var colors = ['var(--theme-danger)','var(--theme-warning)','var(--theme-info)','var(--theme-success)'];
     var labels = ['Too short','Weak','Fair','Strong'];
-    var widths = ['25%','50%','75%','100%'];
     var bar  = document.getElementById('pwBar');
     var hint = document.getElementById('pwHint');
-    if (!v) { bar.style.width = '0%'; hint.textContent = '8+ characters, one letter, one number.'; hint.style.color = ''; return; }
+    if (!v) { bar.style.transform = 'scaleX(0)'; hint.textContent = '8+ characters, one letter, one number.'; hint.style.color = ''; return; }
     var idx = Math.max(0, score - 1);
-    bar.style.width = widths[idx]; bar.style.background = colors[idx];
+    bar.style.transform = 'scaleX(' + (['0.25','0.5','0.75','1'][idx]) + ')'; bar.style.background = colors[idx];
     hint.textContent = labels[idx]; hint.style.color = colors[idx];
   });
 

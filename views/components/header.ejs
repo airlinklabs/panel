@@ -67,7 +67,7 @@
     <img src="/assets/logo.svg" alt="" style="width:42px;height:42px;object-fit:contain;border-radius:10px;display:block;" onerror="this.style.display='none'">
     <p style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:14px;font-weight:600;letter-spacing:-0.015em;color:var(--theme-text-strong);" id="pl-title"><%= settings.title %></p>
     <div style="width:128px;height:1.5px;border-radius:2px;overflow:hidden;background:var(--theme-border-subtle);" id="pl-track">
-      <div id="pl-bar" style="height:100%;width:0%;border-radius:2px;transition:width 260ms cubic-bezier(0.4,0,0.2,1);background:var(--theme-text-strong);"></div>
+      <div id="pl-bar" style="height:100%;transform:scaleX(0);transform-origin:left center;border-radius:2px;transition:transform 260ms cubic-bezier(0.4,0,0.2,1);background:var(--theme-text-strong);"></div>
     </div>
     <p id="pl-msg" style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:11px;color:var(--theme-text-muted);letter-spacing:0.01em;transition:opacity 180ms ease;">Preparing your experience...</p>
   </div>

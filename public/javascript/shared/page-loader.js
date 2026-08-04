@@ -269,7 +269,7 @@
     var iv = setInterval(function () {
       if (hiding) { clearInterval(iv); return; }
       pct = Math.min(pct + (82 - pct) * 0.065 + 1.2, 82);
-      if (barEl) barEl.style.width = pct + '%';
+      if (barEl) barEl.style.transform = 'scaleX(' + (pct / 100) + ')';
     }, 90);
   }
 
@@ -279,8 +279,8 @@
     hiding = true;
     if (!barEl) barEl = el('pl-bar');
     if (barEl) {
-      barEl.style.transition = 'width ' + SPRINT_MS + 'ms cubic-bezier(0.16,1,0.3,1)';
-      barEl.style.width = '100%';
+      barEl.style.transition = 'transform ' + SPRINT_MS + 'ms cubic-bezier(0.16,1,0.3,1)';
+      barEl.style.transform = 'scaleX(1)';
     }
     setTimeout(function () {
       var ov2 = el('pl-overlay');

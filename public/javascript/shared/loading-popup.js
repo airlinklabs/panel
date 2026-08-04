@@ -38,7 +38,7 @@
         </div>
         <div id="lp-progress-container" class="mb-4 hidden">
           <div class="h-1.5 rounded-full overflow-hidden" style="background:var(--theme-border)">
-            <div id="lp-progress-fill" class="h-full rounded-full transition-all duration-300" style="width:0%; background:var(--theme-text-strong)"></div>
+            <div id="lp-progress-fill" class="h-full rounded-full transition-all duration-300" style="transform:scaleX(0);transform-origin:left center;background:var(--theme-text-strong)"></div>
           </div>
           <p id="lp-progress-text" class="text-[11px] mt-1.5 text-right" style="color:var(--theme-text-muted)">0%</p>
         </div>
@@ -74,7 +74,7 @@
     document.getElementById('lp-steps').innerHTML = '';
     document.getElementById('lp-cancel').classList.remove('hidden');
     document.getElementById('lp-close').classList.add('hidden');
-    document.getElementById('lp-progress-fill').style.width = '0%';
+    document.getElementById('lp-progress-fill').style.transform = 'scaleX(0)';
     document.getElementById('lp-progress-text').textContent = '0%';
     
     Animate.openModal(overlay, panel);
@@ -96,7 +96,7 @@
   function setProgress(percent, message) {
     var container = document.getElementById('lp-progress-container');
     container.classList.remove('hidden');
-    document.getElementById('lp-progress-fill').style.width = percent + '%';
+    document.getElementById('lp-progress-fill').style.transform = 'scaleX(' + (percent / 100) + ')';
     document.getElementById('lp-progress-text').textContent = Math.round(percent) + '%';
     if (typeof message === 'string' && message) setMessage(message);
   }

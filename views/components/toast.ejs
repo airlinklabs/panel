@@ -73,8 +73,9 @@
         barTrack.style.background = 'var(--theme-border)';
         const barFill = document.createElement('div');
         barFill.className = 'h-full rounded transition-all duration-300';
+        barFill.style.transform = 'scaleX(0)';
+        barFill.style.transformOrigin = 'left center';
         barFill.style.background = 'var(--theme-info)';
-        barFill.style.width = '0%';
         barTrack.appendChild(barFill);
         const pctLabel = document.createElement('span');
         pctLabel.className = 'text-[10px] tabular-nums shrink-0';
@@ -130,7 +131,7 @@
           progressRow.classList.remove('hidden');
           progressRow.classList.add('flex');
           const p = Math.max(0, Math.min(100, Number(percent) || 0));
-          barFill.style.width = p + '%';
+          barFill.style.transform = 'scaleX(' + (p / 100) + ')';
           pctLabel.textContent = Math.round(p) + '%';
           if (p >= 100) complete(true);
         };
@@ -141,7 +142,7 @@
           if (typeof msg === 'string') setMessage(msg);
           progressRow.classList.remove('hidden');
           progressRow.classList.add('flex');
-          barFill.style.width = '100%';
+          barFill.style.transform = 'scaleX(1)';
           pctLabel.textContent = '100%';
           barFill.style.background = success ? 'var(--theme-success)' : 'var(--theme-danger)';
           if (success) setType('success');
