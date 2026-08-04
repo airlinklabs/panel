@@ -117,6 +117,10 @@ const addonsModule: Module = {
       res.status(410).json({ success: false, message: 'Addon store is not available yet.' });
     });
 
+    router.post('/admin/addons/store/uninstall', (_req: Request, res: Response) => {
+      res.status(410).json({ success: false, message: 'Addon store is not available yet.' });
+    });
+
     router.get(
       '/admin/addons/:slug',
       isAuthenticated(true, 'airlink.admin.addons.view'),
