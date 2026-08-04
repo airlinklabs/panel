@@ -81,6 +81,7 @@ async function loadCatalogue() {
     updateCount();
     render();
   } catch(e) {
+    console.error('Failed to load catalogue:', e);
     hide('loadingEl'); show('errorEl');
   }
 }
@@ -90,7 +91,7 @@ async function doRefresh() {
   var st = document.getElementById('statusText');
   if (st) st.textContent = 'Refreshing\u2026';
   var before = 0;
-  try { before = (await(await fetch('/admin/images/store/catalogue')).json()).builtAt || 0; } catch(e) {}
+  try { before = (await(await fetch('/admin/images/store/catalogue')).json()).builtAt || 0; } catch(e) { console.error('Failed to fetch catalogue timestamp:', e); }
   try {
     var refreshRes = await fetch('/admin/images/store/refresh', { method: 'POST' });
     if (!refreshRes.ok) throw new Error('Refresh failed');
@@ -102,7 +103,7 @@ async function doRefresh() {
   }
   for (var i = 0; i < 60; i++) {
     await new Promise(function(r){setTimeout(r,1000)});
-    try { var cur = (await(await fetch('/admin/images/store/catalogue')).json()).builtAt || 0; if (cur !== before) break; } catch(e) {}
+    try { var cur = (await(await fetch('/admin/images/store/catalogue')).json()).builtAt || 0; if (cur !== before) break; } catch(e) { /* polling retry */ }
   }
   allImages = [];
   show('loadingEl'); hide('listEl'); hide('emptyEl');

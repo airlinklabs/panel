@@ -2,6 +2,10 @@ import { isHttpError } from '../../../utils/http';
 import { daemonRequest } from '../core/daemonRequest';
 import logger from '../../logger';
 
+const NODE_STATUS_TIMEOUT_MS = 3000;
+const NODE_STATUS_ONLINE = 'Online';
+const NODE_STATUS_OFFLINE = 'Offline';
+
 interface Node {
   address: string;
   port: number;
@@ -28,12 +32,12 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
       nodeKey: node.key,
       method: 'GET',
       path: '/',
-      timeout: 3000,
+      timeout: NODE_STATUS_TIMEOUT_MS,
     });
 
     const { versionFamily, versionRelease, status, remote } = response.data;
 
-    const finalStatus = status || 'Online';
+    const finalStatus = status || NODE_STATUS_ONLINE;
 
     node.status = finalStatus;
     node.versionFamily = versionFamily;
@@ -43,7 +47,7 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
 
     return node;
   } catch (error) {
-    node.status = 'Offline';
+    node.status = NODE_STATUS_OFFLINE;
 
     if (isHttpError(error)) {
       if (error.status === 0) {

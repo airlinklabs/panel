@@ -2,12 +2,15 @@ import nodemailer from 'nodemailer';
 import prisma from '../../../db';
 import logger from '../../logger';
 
+const DEFAULT_SMTP_PORT = 587;
+const DEFAULT_SMTP_FROM = 'noreply@airlink';
+
 export async function getTransporter() {
   const s = await prisma.settings.findUnique({ where: { id: 1 } });
   if (!s?.smtpHost) throw new Error('SMTP not configured');
   return nodemailer.createTransport({
     host: s.smtpHost,
-    port: s.smtpPort ?? 587,
+    port: s.smtpPort ?? DEFAULT_SMTP_PORT,
     secure: s.smtpSecure,
     auth: {
       user: s.smtpUser ?? '',
@@ -21,7 +24,7 @@ export async function sendMail(to: string, subject: string, html: string): Promi
     const s = await prisma.settings.findUnique({ where: { id: 1 } });
     const t = await getTransporter();
     await t.sendMail({
-      from: s?.smtpFrom ?? 'noreply@airlink',
+      from: s?.smtpFrom ?? DEFAULT_SMTP_FROM,
       to,
       subject,
       html,

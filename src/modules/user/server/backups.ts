@@ -239,10 +239,12 @@ export function registerBackupRoutes(router: Router): void {
             .status(500)
             .json({ error: 'Failed to create backup on daemon' });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Error creating backup:', error);
+        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+        const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
         res.status(500).json({
-          error: `Failed to create backup: ${error?.body?.error || error?.message || 'Failed to create backup'}`,
+          error: `Failed to create backup: ${(errBody?.error as string) || (err.message as string) || 'Failed to create backup'}`,
         });
       }
     },
@@ -397,10 +399,12 @@ export function registerBackupRoutes(router: Router): void {
             .status(500)
             .json({ error: 'Failed to restore backup on daemon' });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Error restoring backup:', error);
+        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+        const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
         res.status(500).json({
-          error: `Failed to restore backup: ${error?.body?.error || error?.message || 'Failed to restore backup'}`,
+          error: `Failed to restore backup: ${(errBody?.error as string) || (err.message as string) || 'Failed to restore backup'}`,
         });
       }
     },
@@ -500,10 +504,12 @@ export function registerBackupRoutes(router: Router): void {
         res.setHeader('Content-Type', 'application/gzip');
 
         downloadResponse.data.pipe(res);
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Error downloading backup:', error);
+        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+        const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
         res.status(500).json({
-          error: `Failed to download backup: ${error?.body?.error || error?.message || 'Failed to download backup'}`,
+          error: `Failed to download backup: ${(errBody?.error as string) || (err.message as string) || 'Failed to download backup'}`,
         });
       }
     },

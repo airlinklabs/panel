@@ -14,52 +14,54 @@
  * button switches to the next unit and converts the displayed value.
  */
 (function () {
+  const ROUND_PRECISION = 100;
+
   function parseUnits(str) {
     return str.split(',').map(function (pair) {
-      var parts = pair.split(':');
+      const parts = pair.split(':');
       return { multiplier: parseFloat(parts[0]), label: parts[1].trim() };
     }).sort(function (a, b) { return a.multiplier - b.multiplier; });
   }
 
   function roundDisplay(v) {
-    var r = Math.round(v * 100) / 100;
+    const r = Math.round(v * ROUND_PRECISION) / ROUND_PRECISION;
     return r === -0 ? 0 : r;
   }
 
   function initSwitcher(btn) {
-    var display = document.getElementById(btn.dataset.display);
-    var hidden  = document.getElementById(btn.dataset.hidden);
-    var units   = parseUnits(btn.dataset.units);
+    const display = document.getElementById(btn.dataset.display);
+    const hidden  = document.getElementById(btn.dataset.hidden);
+    const units   = parseUnits(btn.dataset.units);
     if (!display || !hidden || units.length === 0) return;
 
     function pickUnit() {
-      var v = parseFloat(hidden.value);
+      const v = parseFloat(hidden.value);
       if (!isFinite(v) || v <= 0) {
-        var def = btn.dataset.defaultUnit;
-        for (var i = 0; i < units.length; i++) {
+        const def = btn.dataset.defaultUnit;
+        for (let i = 0; i < units.length; i++) {
           if (units[i].label === def) return units[i];
         }
         return units[0];
       }
-      var chosen = units[0];
+      let chosen = units[0];
       units.forEach(function (u) {
         if (v / u.multiplier >= 1) chosen = u;
       });
       return chosen;
     }
 
-    var current = pickUnit();
+    let current = pickUnit();
 
     function syncDisplay() {
-      var v = parseFloat(hidden.value);
+      const v = parseFloat(hidden.value);
       if (!isFinite(v)) { display.value = ''; return; }
       display.value = roundDisplay(v / current.multiplier);
     }
 
     function syncHidden() {
-      var v = parseFloat(display.value);
+      const v = parseFloat(display.value);
       if (!isFinite(v)) { hidden.value = ''; return; }
-      hidden.value = String(Math.round(v * current.multiplier));
+      hidden.value = '' + Math.round(v * current.multiplier);
     }
 
     function render() {
@@ -68,7 +70,7 @@
 
     btn.addEventListener('click', function () {
       syncHidden();
-      var idx = units.indexOf(current);
+      const idx = units.indexOf(current);
       current = units[(idx + 1) % units.length];
       syncDisplay();
       render();

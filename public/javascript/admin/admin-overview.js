@@ -1,4 +1,11 @@
 (function() {
+  const UPDATE_RELOAD_DELAY_MS = 5000;
+  const UPDATE_CHECK_DELAY_MS = 220;
+  const API_LATENCY_POLL_INTERVAL_MS = 30000;
+  const LATENCY_GOOD_THRESHOLD_MS = 100;
+  const LATENCY_WARNING_THRESHOLD_MS = 300;
+  const LATENCY_MAX_MS = 500;
+
   const pageData = document.getElementById('page-data').dataset;
   const currentVersion = pageData.airlinkVersion;
   const runningLatestVersion = pageData.runningLatestVersion;
@@ -57,7 +64,7 @@
           showToast(data.message || 'Update complete. Restarting.', 'success');
           statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';
           fadeIn(statusDiv);
-          setTimeout(() => window.location.reload(), 5000);
+          setTimeout(() => window.location.reload(), UPDATE_RELOAD_DELAY_MS);
         } catch (error) {
           statusDiv.innerHTML = '<span class="text-red-500">Update failed.</span>';
           fadeIn(statusDiv);
@@ -80,7 +87,7 @@
           el.style.transition = '';
           el.style.opacity = '';
           el.style.transform = '';
-        }, 220);
+        }, UPDATE_CHECK_DELAY_MS);
       });
     });
   }
@@ -93,10 +100,10 @@
       if (response.ok) {
         document.getElementById('apiLatency').textContent = latency + ' ms';
         const bar = document.getElementById('latencyBar');
-        bar.style.width = Math.min((latency / 500) * 100, 100) + '%';
+        bar.style.width = Math.min((latency / LATENCY_MAX_MS) * 100, 100) + '%';
         bar.classList.remove('bg-emerald-500', 'bg-amber-500', 'bg-red-500', 'bg-neutral-400', 'dark:bg-neutral-500');
-        if (latency < 100) bar.classList.add('bg-emerald-500');
-        else if (latency < 300) bar.classList.add('bg-amber-500');
+        if (latency < LATENCY_GOOD_THRESHOLD_MS) bar.classList.add('bg-emerald-500');
+        else if (latency < LATENCY_WARNING_THRESHOLD_MS) bar.classList.add('bg-amber-500');
         else bar.classList.add('bg-red-500');
       }
     } catch (error) {
@@ -105,5 +112,5 @@
   }
 
   measureApiLatency();
-  setInterval(measureApiLatency, 30000);
+  setInterval(measureApiLatency, API_LATENCY_POLL_INTERVAL_MS);
 })();

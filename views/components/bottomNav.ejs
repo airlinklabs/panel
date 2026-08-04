@@ -294,16 +294,16 @@
 
 <script nonce="<%- nonce %>">
 (function () {
-  var btn = document.getElementById('mobile-more-btn');
-  var sheet = document.getElementById('mobile-more-sheet');
-  var serverView = document.getElementById('mobile-more-server-view');
-  var mainPane = document.getElementById('mobile-more-main');
-  var lastFocus = null;
+  const btn = document.getElementById('mobile-more-btn');
+  const sheet = document.getElementById('mobile-more-sheet');
+  const serverView = document.getElementById('mobile-more-server-view');
+  const mainPane = document.getElementById('mobile-more-main');
+  let lastFocus = null;
 
   function showSheetView(name) {
-    var incoming = null;
+    let incoming = null;
     if (serverView) {
-      var toServer = name === 'server';
+      const toServer = name === 'server';
       serverView.classList.toggle('hidden', !toServer);
       serverView.classList.remove('showing');
       if (toServer) incoming = serverView;
@@ -337,14 +337,14 @@
     if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
   }
 
-  if (sheet) {
+    if (sheet) {
     sheet.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') { e.preventDefault(); closeSheet(); return; }
       if (e.key !== 'Tab') return;
-      var focusables = sheet.querySelectorAll('a[href], button:not([disabled])');
+      const focusables = sheet.querySelectorAll('a[href], button:not([disabled])');
       if (focusables.length === 0) return;
-      var first = focusables[0];
-      var last = focusables[focusables.length - 1];
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault(); last.focus();
       } else if (!e.shiftKey && document.activeElement === last) {
@@ -357,19 +357,19 @@
     if (sheet.classList.contains('open')) { closeSheet(); } else { openSheet(); }
   });
 
-  var sheetBackBtn = document.getElementById('mobile-sheet-back-btn');
+  const sheetBackBtn = document.getElementById('mobile-sheet-back-btn');
   if (sheetBackBtn) sheetBackBtn.addEventListener('click', function () { showSheetView('main'); });
-  var sheetGoBackBtn = document.getElementById('mobile-sheet-goback-btn');
+  const sheetGoBackBtn = document.getElementById('mobile-sheet-goback-btn');
   if (sheetGoBackBtn) sheetGoBackBtn.addEventListener('click', function () { showSheetView('server'); });
 
   // Theme toggle for mobile
-  var themeToggle = document.getElementById('mobile-theme-toggle');
+  const themeToggle = document.getElementById('mobile-theme-toggle');
   if (themeToggle) {
     themeToggle.addEventListener('click', function() {
       if (typeof toggleTheme === 'function') {
         toggleTheme();
       } else {
-        var isDark = document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.toggle('dark');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
         window.dispatchEvent(new CustomEvent('al:themechange'));
       }
@@ -382,10 +382,10 @@
   });
 
   // Drag handle: swipe down to close
-  var pill = document.getElementById('mobile-sheet-pill');
-  var dragStartY = 0;
-  var dragStartSheetH = 0;
-  var dragging = false;
+  const pill = document.getElementById('mobile-sheet-pill');
+  let dragStartY = 0;
+  let dragStartSheetH = 0;
+  let dragging = false;
 
   if (pill && sheet) {
     pill.addEventListener('touchstart', function(e) {
@@ -401,8 +401,8 @@
 
     document.addEventListener('touchmove', function(e) {
       if (!dragging) return;
-      var dy = e.touches[0].clientY - dragStartY;
-      var newH = Math.max(0, Math.min(dragStartSheetH, dragStartSheetH + dy));
+      const dy = e.touches[0].clientY - dragStartY;
+      const newH = Math.max(0, Math.min(dragStartSheetH, dragStartSheetH + dy));
       sheet.style.maxHeight = newH + 'px';
     }, { passive: true });
 
@@ -411,7 +411,7 @@
       dragging = false;
       sheet.classList.remove('dragging');
       sheet.style.transition = '';
-      var curH = parseFloat(getComputedStyle(sheet).maxHeight);
+      const curH = parseFloat(getComputedStyle(sheet).maxHeight);
       sheet.style.maxHeight = '';
       if (curH < 80) {
         closeSheet();
@@ -421,10 +421,10 @@
 
   // Highlight active items in the sheet
   function markActiveSheetItems() {
-    var path = window.location.pathname;
-    var items = document.querySelectorAll('#mobile-more-sheet .sheet-item[data-match-prefix]');
+    const path = window.location.pathname;
+    const items = document.querySelectorAll('#mobile-more-sheet .sheet-item[data-match-prefix]');
     items.forEach(function(item) {
-      var prefix = item.getAttribute('data-match-prefix');
+      const prefix = item.getAttribute('data-match-prefix');
       if (prefix && path.startsWith(prefix)) {
         item.classList.add('sheet-active');
       } else {
@@ -432,9 +432,9 @@
       }
     });
     // Server page items: match by href
-    var srvItems = document.querySelectorAll('#mobile-more-server-view a[data-sheet-match-url]');
+    const srvItems = document.querySelectorAll('#mobile-more-server-view a[data-sheet-match-url]');
     srvItems.forEach(function(item) {
-      var href = item.getAttribute('href') || '';
+      const href = item.getAttribute('href') || '';
       if (path === href || path.startsWith(href + '/')) {
         item.classList.add('sheet-active');
       } else {
@@ -445,9 +445,9 @@
 
   // Highlight active mobile nav link
   function markActiveMobile(path) {
-    var links = document.querySelectorAll('.mobile-nav-link[data-match-prefix]');
+    const links = document.querySelectorAll('.mobile-nav-link[data-match-prefix]');
     links.forEach(function(link) {
-      var prefix = link.getAttribute('data-match-prefix');
+      const prefix = link.getAttribute('data-match-prefix');
       if (prefix && path.startsWith(prefix)) {
         link.classList.add('active-mobile');
         link.style.color = 'var(--theme-nav-text-active)';

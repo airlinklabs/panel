@@ -1,7 +1,7 @@
 <% /* skeleton-loader: shows animated placeholder cards while data loads */ %>
 <div class="al-skeleton-loader" role="status" aria-label="Loading">
   <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-    <% for (var i = 0; i < (locals.count || 6); i++) { %>
+    <% for (let i = 0; i < (locals.count || 6); i++) { %>
     <div class="al-card p-4 space-y-3">
       <div class="flex items-center gap-3">
         <div class="al-skeleton w-10 h-10 rounded-lg"></div>

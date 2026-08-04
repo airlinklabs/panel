@@ -145,9 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (res.ok && data.success) {
         showToast('Two-factor authentication enabled.', 'success');
         recoveryCodes = data.recoveryCodes || [];
-        recoveryList.innerHTML = recoveryCodes.map(code =>
-          '<code class="select-all rounded-lg px-3 py-2 text-xs font-mono text-center" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)">' + code + '</code>'
-        ).join('');
+        recoveryList.innerHTML = recoveryCodes.map(code => {
+          const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return '<code class="select-all rounded-lg px-3 py-2 text-xs font-mono text-center" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)">' + escaped + '</code>';
+        }).join('');
         form.closest('.al-card').classList.add('hidden');
         recoveryPanel.classList.remove('hidden');
         document.getElementById('recoveryCodesPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -155,7 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
         feedback.textContent = data.error || 'Something went wrong. Try again.';
         feedback.classList.remove('hidden');
       }
-    } catch {
+    } catch (err) {
+      console.error('Failed to enable 2FA:', err);
       feedback.textContent = 'Something went wrong. Try again.';
       feedback.classList.remove('hidden');
     } finally {

@@ -7,7 +7,7 @@
       <%- include('../../components/template') %>
     </div>
     <!-- Content -->
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Users' }
@@ -60,7 +60,7 @@
           <% users.forEach(function(user) { %>
           <div class="al-card flex items-center gap-3">
             <div class="relative shrink-0">
-              <img loading="lazy" class="w-8 h-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
+              <img loading="lazy" decoding="async" class="w-8 h-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
               <% if (onlineUsers.has(user.username)) { %>
                 <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
                   <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
@@ -103,7 +103,7 @@
                   <td class="al-table-td sm:pl-6">
                     <div class="flex items-center gap-3">
                       <div class="relative shrink-0">
-                        <img loading="lazy" class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
+                        <img loading="lazy" decoding="async" class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
                         <% if (onlineUsers.has(user.username)) { %>
                           <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
                             <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
@@ -153,7 +153,7 @@
 
 <script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
-    var emptyBtn = document.getElementById('createButtonEmpty');
+    const emptyBtn = document.getElementById('createButtonEmpty');
     if (emptyBtn) {
       emptyBtn.addEventListener('click', function() {
         window.location.href = '/admin/users/create';

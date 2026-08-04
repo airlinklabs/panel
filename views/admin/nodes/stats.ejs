@@ -72,7 +72,7 @@
 
 <script nonce="<%- nonce %>" src="/vendor/chartjs/chart.umd.js"></script>
 
-<div id="page-data" style="display:none" data-stats="<%- JSON.stringify(stats.totalStats) || '[]' %>"></div>
+<div id="page-data" style="display:none" data-stats="<%- JSON.stringify(stats.totalStats || []) %>"></div>
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-node-stats.js?v=5"></script>
 

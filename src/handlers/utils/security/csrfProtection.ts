@@ -4,6 +4,8 @@ import crypto from 'crypto';
 import logger from '../../logger';
 import { getClientIp } from '../../../utils/ip';
 
+const CSRF_TOKEN_SIZE = 32;
+
 function ensureCsrfSessionId(req: Request): string {
   const session = req.session as { csrfSessionId?: string } | undefined;
 
@@ -34,7 +36,7 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
   },
-  size: 32,
+  size: CSRF_TOKEN_SIZE,
   getCsrfTokenFromRequest: (req: Request) =>
     (req.headers['csrf-token'] as string) ||
     (req.headers['x-csrf-token'] as string) ||

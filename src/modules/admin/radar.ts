@@ -147,7 +147,7 @@ const radarModule: Module = {
         }
 
         try {
-          const vtResponse = await httpGet<any>(
+          const vtResponse = await httpGet<Record<string, unknown>>(
             `https://www.virustotal.com/api/v3/files/${hash}`,
             {
               headers: { 'x-apikey': apiKey },
@@ -166,14 +166,15 @@ const radarModule: Module = {
             return;
           }
 
-          const attrs = vtResponse.data?.data?.attributes;
+          const vtData = vtResponse.data as Record<string, unknown> | undefined;
+          const attrs = (vtData?.data as Record<string, unknown> | undefined)?.attributes as Record<string, unknown> | undefined;
           if (!attrs) {
             res.json({ success: true, found: false });
             return;
           }
 
-          const stats = attrs.last_analysis_stats || {};
-          const total = Object.values(stats).reduce((a: number, b: unknown) => a + (b as number), 0);
+          const stats = (attrs.last_analysis_stats || {}) as Record<string, number>;
+          const total = Object.values(stats).reduce((a: number, b: number) => a + b, 0);
           const malicious = (stats.malicious || 0) + (stats.suspicious || 0);
 
           res.json({
@@ -182,11 +183,11 @@ const radarModule: Module = {
             hash,
             malicious,
             total,
-            name: attrs.meaningful_name || attrs.name || null,
-            type: attrs.type_description || null,
+            name: String(attrs.meaningful_name || attrs.name || null),
+            type: String(attrs.type_description || null),
             size: attrs.size || null,
             firstSeen: attrs.first_submission_date
-              ? new Date(attrs.first_submission_date * 1000).toISOString().split('T')[0]
+              ? new Date(Number(attrs.first_submission_date) * 1000).toISOString().split('T')[0]
               : null,
             vtLink: `https://www.virustotal.com/gui/file/${hash}`,
           });
@@ -250,18 +251,20 @@ const radarModule: Module = {
 
           // Attach severity from the script pattern definitions to each result
           // so the frontend can colour-code without having to re-derive it
-          if (scanData && Array.isArray((scanData as any).results)) {
+          const scanDataObj = scanData as Record<string, unknown> | undefined;
+          if (scanDataObj && Array.isArray(scanDataObj.results)) {
             const patternMap: Record<string, string> = {};
             for (const p of script.patterns) {
               const key = (p.description || '').toLowerCase();
               if (p.severity) patternMap[key] = p.severity;
             }
 
-            (scanData as any).results = (scanData as any).results.map((result: any) => {
-              const key = (result.pattern?.description || '').toLowerCase();
+            scanDataObj.results = (scanDataObj.results as Array<Record<string, unknown>>).map((result) => {
+              const desc = String(((result.pattern as Record<string, unknown>)?.description) || '');
+              const key = desc.toLowerCase();
               return {
                 ...result,
-                severity: patternMap[key] || deriveSeverity(result.matches?.length ?? 0)
+                severity: patternMap[key] || deriveSeverity((result.matches as unknown[])?.length ?? 0)
               };
             });
           }
@@ -394,16 +397,17 @@ const radarModule: Module = {
 
           // Poll VT up to 8 times, 20s apart (max ~2.7 min wait).
           // VT typically finishes in 30–90s for small zips on free tier.
-          let analysisData: any = null;
+          let analysisData: Record<string, unknown> | null = null;
           for (let attempt = 0; attempt < 8; attempt++) {
             await new Promise(r => setTimeout(r, 20000));
 
-            const pollResponse = await httpGet<any>(
+            const pollResponse = await httpGet<Record<string, unknown>>(
               `https://www.virustotal.com/api/v3/analyses/${analysisId}`,
               { headers: { 'x-apikey': apiKey }, timeout: 15000 }
             );
 
-            const status = pollResponse.data?.data?.attributes?.status;
+            const pollData = pollResponse.data as Record<string, unknown> | undefined;
+            const status = ((pollData?.data as Record<string, unknown> | undefined)?.attributes as Record<string, unknown> | undefined)?.status;
             if (status === 'completed') {
               analysisData = pollResponse.data;
               break;
@@ -420,16 +424,19 @@ const radarModule: Module = {
 
           // The correct GUI URL needs the file's SHA256, not the analysis ID.
           // VT returns it in the analysis response under meta.file_info.sha256.
-          const sha256 = analysisData.meta?.file_info?.sha256 as string | undefined;
+          const meta = analysisData.meta as Record<string, unknown> | undefined;
+          const fileInfo = meta?.file_info as Record<string, unknown> | undefined;
+          const sha256 = fileInfo?.sha256 as string | undefined;
           const vtLink = sha256
             ? `https://www.virustotal.com/gui/file/${sha256}`
             : 'https://www.virustotal.com/gui/home/upload';
 
-          const results = analysisData.data?.attributes?.results || {};
-          const stats = analysisData.data?.attributes?.stats || {};
+          const dataAttrs = (analysisData.data as Record<string, unknown>)?.attributes as Record<string, unknown> | undefined;
+          const results = (dataAttrs?.results || {}) as Record<string, Record<string, unknown>>;
+          const stats = (dataAttrs?.stats || {}) as Record<string, number>;
           const maliciousEngines = Object.entries(results)
-            .filter(([, v]: [string, any]) => v.category === 'malicious' || v.category === 'suspicious')
-            .map(([engine, v]: [string, any]) => ({ engine, result: v.result }));
+            .filter(([, v]) => v.category === 'malicious' || v.category === 'suspicious')
+            .map(([engine, v]) => ({ engine, result: v.result }));
 
           res.json({
             success: true,
@@ -452,6 +459,5 @@ const radarModule: Module = {
     return router;
   }
 };
-
 
 export default radarModule;

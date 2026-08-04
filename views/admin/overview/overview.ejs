@@ -28,13 +28,13 @@
     <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
-    <div id="page-content" class="admin-overview-bg flex-1 overflow-y-auto pt-16"<% if (vcodeBg) { %> style="--vcode-bg: url('<%= vcodeBg %>');"<% } %>>
+    <div id="page-content" class="admin-overview-bg flex-1 overflow-y-auto pt-16 pb-12"<% if (vcodeBg) { %> style="--vcode-bg: url('<%= vcodeBg %>');"<% } %>>
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Overview' }
       ] }) %>
       <div class="al-page-header">
-        <h1 class="al-page-title"><%= req.translations.adminOverviewTitle || 'About' %></h1>
+        <h1 class="al-page-title"><%= req.translations.adminOverviewTitle || 'Overview' %></h1>
         <p class="al-page-desc"><%= req.translations.adminOverviewText || 'Panel information and credits.' %></p>
       </div>
       <div class="al-page-body">

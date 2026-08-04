@@ -3,9 +3,18 @@ import { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import { queueer } from '../../../handlers/queueer';
+import type { Prisma } from '../../../generated/prisma/client';
 import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../../utils/typeHelpers';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+
+const PTERO_MEMORY_MB = 1024;
+const PTERO_DISK_MB = 1024;
+const DEFAULT_MEMORY_MB = 512;
+const DEFAULT_CPU_PERCENT = 100;
+const DEFAULT_STORAGE_MB = 20480;
+const BCRYPT_SALT_ROUNDS = 10;
+const DEFAULT_PAGE_SIZE = 50;
 
 
 const coreModule: Module = {
@@ -24,7 +33,7 @@ const coreModule: Module = {
     async function loadApiKeys() {
       try {
         const keys = await prisma.apiKey.findMany();
-        validKeys = keys.map((key: any) => key.key);
+        validKeys = keys.map((key) => key.key);
       } catch (error) {
         logger.error('Error loading API keys:', error);
       }
@@ -68,16 +77,16 @@ const coreModule: Module = {
             where: filter || {},
           });
 
-          let serverData = null;
+          let serverData: Prisma.ServerGetPayload<{ include: { node: true; owner: true } }>[] = [];
           if (include && include === 'servers') {
             serverData = await prisma.server.findMany({
-              where: { ownerId: { in: users.map((user: any) => user.id) } },
+              where: { ownerId: { in: users.map((user) => user.id) } },
               include: { node: true, owner: true },
             });
           }
 
-          const response = users.map((user: any) => {
-            const userData: any = {
+          const response = users.map((user) => {
+            const userData = {
               object: 'user',
               attributes: {
                 id: user.id,
@@ -86,14 +95,17 @@ const coreModule: Module = {
                 root_admin: user.isAdmin,
               },
               relationships: {
-                servers: [],
+                servers: [] as Array<{
+                  object: string;
+                  attributes: { id: number; name: string; node: typeof serverData[number]['node'] };
+                }>,
               },
             };
 
             if (include && include === 'servers' && serverData) {
               userData.relationships.servers = serverData
-                .filter((server: any) => server.ownerId === user.id)
-                .map((server: any) => ({
+                .filter((server) => server.ownerId === user.id)
+                .map((server) => ({
                   object: 'server',
                   attributes: {
                     id: server.id,
@@ -113,7 +125,7 @@ const coreModule: Module = {
               pagination: {
                 total: users.length,
                 count: users.length,
-                per_page: 50,
+                per_page: DEFAULT_PAGE_SIZE,
                 current_page: 1,
                 total_pages: 1,
                 links: {},
@@ -179,7 +191,7 @@ const coreModule: Module = {
               include: { node: true, owner: true },
             });
 
-            const formattedServers = servers.map((server: any) => ({
+            const formattedServers = servers.map((server) => ({
               attributes: {
                 id: server.id,
                 UUID: server.UUID,
@@ -272,7 +284,7 @@ const coreModule: Module = {
             return;
           }
 
-          const hashedPassword = await bcrypt.hash(password, 10);
+          const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
           const newUser = await prisma.users.create({
             data: {
@@ -318,13 +330,13 @@ const coreModule: Module = {
             return;
           }
 
-          const updatedData: any = {};
+          const updatedData: Record<string, string | undefined> = {};
 
           if (username) updatedData.username = username;
           if (email) updatedData.email = email;
           if (first_name) updatedData.first_name = first_name;
           if (last_name) updatedData.last_name = last_name;
-          if (password) updatedData.password = await bcrypt.hash(password, 10);
+          if (password) updatedData.password = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
           const updatedUser = await prisma.users.update({
             where: { id: userId },
@@ -408,8 +420,8 @@ const coreModule: Module = {
               description: node.name,
               fqdn: node.address,
               scheme: 'http',
-              memory: node.ram,
-              disk: node.disk,
+              memory: node.ram * PTERO_MEMORY_MB,
+              disk: node.disk * PTERO_DISK_MB,
               daemon_listen: node.port,
               created_at: node.createdAt.toISOString(),
               updated_at: node.createdAt.toISOString(),
@@ -423,7 +435,7 @@ const coreModule: Module = {
               pagination: {
                 total: nodes.length,
                 count: nodes.length,
-                per_page: 50,
+                per_page: DEFAULT_PAGE_SIZE,
                 current_page: 1,
                 total_pages: 1,
                 links: {}
@@ -475,8 +487,8 @@ const coreModule: Module = {
               description: node.name,
               fqdn: node.address,
               scheme: 'http',
-              memory: node.ram,
-              disk: node.disk,
+              memory: node.ram * PTERO_MEMORY_MB,
+              disk: node.disk * PTERO_DISK_MB,
               daemon_listen: node.port,
               created_at: node.createdAt.toISOString(),
               updated_at: node.createdAt.toISOString(),
@@ -556,7 +568,7 @@ const coreModule: Module = {
           { length: 100 },
           (_, i) => 25565 + i,
         );
-        const usedPorts = servers.flatMap((server: any) =>
+        const usedPorts = servers.flatMap((server) =>
           JSON.parse(server.Ports).map((portInfo: { Port: string }) =>
             parseInt(portInfo.Port.split(':')[0] ?? ''),
           ),
@@ -599,7 +611,7 @@ const coreModule: Module = {
                 id: imageId,
               },
             })
-            .then((image: any) => {
+            .then((image) => {
               if (!image) {
                 return null;
               }
@@ -650,9 +662,9 @@ const coreModule: Module = {
               nodeId: nodeId,
               imageId: parseInt(imageId),
               Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
-              Memory: parseInt(Memory) || 4,
-              Cpu: parseInt(Cpu) || 2,
-              Storage: parseInt(Storage) || 20480,
+              Memory: parseInt(Memory) || DEFAULT_MEMORY_MB,
+              Cpu: parseInt(Cpu) || DEFAULT_CPU_PERCENT,
+              Storage: parseInt(Storage) || DEFAULT_STORAGE_MB,
               Variables: JSON.stringify(variables) || '[]',
               StartCommand,
               dockerImage: JSON.stringify(imageDocker),
@@ -707,8 +719,8 @@ const coreModule: Module = {
 
               const env = ServerEnv.reduce(
                 (
-                  acc: { [key: string]: any },
-                  curr: { env: string; value: any },
+                  acc: { [key: string]: string },
+                  curr: { env: string; value: string },
                 ) => {
                   acc[curr.env] = curr.value;
                   return acc;
@@ -809,10 +821,11 @@ const coreModule: Module = {
                 path: '/container',
                 body: { id: server.UUID },
               });
-            } catch (err: any) {
+            } catch (err: unknown) {
+              const daemonErr = err as { status?: number; body?: { error?: string } };
               const isGone =
-                err.status === 404 ||
-                (err.body as any)?.error?.includes('not exist');
+                daemonErr.status === 404 ||
+                daemonErr.body?.error?.includes('not exist');
               if (!isGone) {
                 logger.warn(`Could not delete container on daemon: ${err}`);
               }

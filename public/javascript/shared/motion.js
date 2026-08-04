@@ -5,14 +5,17 @@
 (function () {
   'use strict';
 
-  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var EASING = 'cubic-bezier(0.16, 1, 0.3, 1)';
+  const EASING = 'cubic-bezier(0.16, 1, 0.3, 1)';
+  const DEFAULT_DELAY_MULTIPLIER = 50;
+  const GROUP_STAGGER_MS = 40;
+  const FALLBACK_RESOLVE_MS = 600;
+  const EXIT_FALLBACK_MS = 400;
+  const SPA_REATTACH_MS = 50;
 
-  // Transient compositing hint — granted for the duration of the
-  // animation only, never left on at rest (see motion.css).
   function hintWillChange(el) {
-    var anim = el.getAttribute('data-animate') || '';
+    const anim = el.getAttribute('data-animate') || '';
     el.style.willChange = anim === 'blur' ? 'opacity, transform, filter' : 'opacity, transform';
   }
 
@@ -30,7 +33,7 @@
       el.classList.add('motion-visible');
       el.style.animationName = '';
       hintWillChange(el);
-      void el.offsetWidth; // force reflow
+      void el.offsetWidth;
       el.style.animationName = animation || (el.getAttribute('data-animate') || 'fade-up');
       if (duration) el.style.animationDuration = duration + 'ms';
       el.addEventListener('animationend', function handler() {
@@ -38,8 +41,7 @@
         dropWillChange(el);
         resolve();
       }, { once: true });
-      // fallback resolve
-      setTimeout(function () { dropWillChange(el); resolve(); }, 600);
+      setTimeout(function () { dropWillChange(el); resolve(); }, FALLBACK_RESOLVE_MS);
     });
   }
 
@@ -55,28 +57,25 @@
         el.removeEventListener('animationend', handler);
         resolve();
       }, { once: true });
-      setTimeout(resolve, 400);
+      setTimeout(resolve, EXIT_FALLBACK_MS);
     });
   }
 
-  // ── Viewport observer ──────────────────────────────────────────────
-
   function initViewportAnimations() {
     if (prefersReduced) {
-      // Show everything immediately
       document.querySelectorAll('[data-animate]').forEach(function (el) {
         el.style.opacity = '1';
       });
       return;
     }
 
-    var observer = new IntersectionObserver(function (entries) {
+    const observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          var el = entry.target;
-          var delay = parseInt(el.getAttribute('data-animate-delay') || '0', 10);
+          const el = entry.target;
+          const delay = parseInt(el.getAttribute('data-animate-delay') || '0', 10);
           if (delay > 0) {
-            setTimeout(function () { motionAnimate(el); }, delay * 50);
+            setTimeout(function () { motionAnimate(el); }, delay * DEFAULT_DELAY_MULTIPLIER);
           } else {
             motionAnimate(el);
           }
@@ -86,14 +85,10 @@
     }, { threshold: 0, rootMargin: '0px' });
 
     document.querySelectorAll('[data-animate]').forEach(function (el) {
-      // Hide only now, after JS is confirmed running — content is
-      // visible by default without JS (progressive enhancement).
       el.classList.add('will-animate');
       observer.observe(el);
     });
   }
-
-  // ── Group animations ──────────────────────────────────────────────
 
   function initGroupAnimations() {
     if (prefersReduced) {
@@ -103,13 +98,13 @@
       return;
     }
 
-    var observer = new IntersectionObserver(function (entries) {
+    const observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          var group = entry.target;
-          var children = group.children;
+          const group = entry.target;
+          const children = group.children;
           group.classList.remove('will-animate');
-          for (var i = 0; i < children.length; i++) {
+          for (let i = 0; i < children.length; i++) {
             (function (child, index) {
               setTimeout(function () {
                 child.style.animationName = 'motion-slide-up';
@@ -119,7 +114,7 @@
                   child.removeEventListener('animationend', handler);
                   child.style.willChange = '';
                 }, { once: true });
-              }, index * 40);
+              }, index * GROUP_STAGGER_MS);
             })(children[i], i);
           }
           observer.unobserve(group);
@@ -133,8 +128,6 @@
     });
   }
 
-  // ── Programmatic API ──────────────────────────────────────────────
-
   window.motion = {
     animateIn: motionAnimate,
     animateOut: motionAnimateOut,
@@ -144,8 +137,6 @@
       initGroupAnimations();
     }
   };
-
-  // ── Init on DOMContentLoaded ──────────────────────────────────────
 
   function initMotion() {
     requestAnimationFrame(function () {
@@ -160,11 +151,10 @@
     initMotion();
   }
 
-  // Re-init on SPA navigation
   document.addEventListener('al:navigated', function () {
     setTimeout(function () {
       initViewportAnimations();
       initGroupAnimations();
-    }, 50);
+    }, SPA_REATTACH_MS);
   });
 })();

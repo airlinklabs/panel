@@ -4,7 +4,9 @@ const TOKEN_TTL_MS = 60 * 1000;
 const VERSION = 1;
 
 function secret(): string {
-  return process.env.SESSION_SECRET || 'dev-only-insecure-secret-change-me';
+  const s = process.env.SESSION_SECRET;
+  if (!s) throw new Error('SESSION_SECRET environment variable is required');
+  return s;
 }
 
 function b64url(input: Buffer): string {

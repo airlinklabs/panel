@@ -1,9 +1,21 @@
 (function () {
-  document.addEventListener('contextmenu', e => e.preventDefault());
+  'use strict';
 
-  const bridge    = document.getElementById('dashboard-data');
-  const allFolders = JSON.parse(bridge.dataset.folders || '[]');
-  const allServers = JSON.parse(bridge.dataset.servers || '[]');
+  var FOCUS_DELAY = 80;
+  var REMOVE_FOLDER_DELAY = 600;
+  var DRAG_END_DELAY = 50;
+  var ADD_TO_FOLDER_DELAY = 700;
+  var POLL_INTERVAL = 15000;
+
+  var SECONDS_PER_DAY = 86400;
+  var SECONDS_PER_HOUR = 3600;
+  var SECONDS_PER_MINUTE = 60;
+
+  document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  var bridge = document.getElementById('dashboard-data');
+  var allFolders = JSON.parse(bridge.dataset.folders || '[]');
+  var allServers = JSON.parse(bridge.dataset.servers || '[]');
 
   function openOverlay(overlay, panel) {
     overlay.setAttribute('data-open', '');
@@ -11,25 +23,25 @@
   }
 
   function closeOverlay(overlay, panel, after) {
-    const done = function () {
+    var done = function () {
       overlay.removeAttribute('data-open');
       if (after) after();
     };
     Animate.closeModal(overlay, panel, done);
   }
 
-  // ── View toggle ───────────────────────────────────────────
-  const gridView    = document.getElementById('gridView');
-  const listView    = document.getElementById('listView');
-  const gridViewBtn = document.getElementById('gridViewBtn');
-  const listViewBtn = document.getElementById('listViewBtn');
+  var gridView = document.getElementById('gridView');
+  var listView = document.getElementById('listView');
+  var gridViewBtn = document.getElementById('gridViewBtn');
+  var listViewBtn = document.getElementById('listViewBtn');
 
   if (gridView && listView && gridViewBtn && listViewBtn) {
     if (localStorage.getItem('serverViewPreference') === 'list') switchView('list');
-    gridViewBtn.addEventListener('click', () => { switchView('grid'); localStorage.setItem('serverViewPreference', 'grid'); });
-    listViewBtn.addEventListener('click', () => { switchView('list'); localStorage.setItem('serverViewPreference', 'list'); });
+    gridViewBtn.addEventListener('click', function () { switchView('grid'); localStorage.setItem('serverViewPreference', 'grid'); });
+    listViewBtn.addEventListener('click', function () { switchView('list'); localStorage.setItem('serverViewPreference', 'list'); });
+
     function switchView(which) {
-      const target = which === 'grid' ? gridView : listView;
+      var target = which === 'grid' ? gridView : listView;
       gridView.classList.toggle('hidden', which !== 'grid');
       listView.classList.toggle('hidden', which !== 'list');
       gridViewBtn.classList.toggle('vt-active', which === 'grid');
@@ -42,11 +54,11 @@
     }
   }
 
-  document.querySelectorAll('tr[data-href]').forEach(row => {
-    row.addEventListener('click', () => {
+  document.querySelectorAll('tr[data-href]').forEach(function (row) {
+    row.addEventListener('click', function () {
       window.location.href = row.dataset.href;
     });
-    row.addEventListener('keydown', e => {
+    row.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         window.location.href = row.dataset.href;
@@ -54,82 +66,91 @@
     });
   });
 
-  // ── New folder dialog ─────────────────────────────────────
-  const newFolderOverlay  = document.getElementById('newFolderOverlay');
-  const newFolderPanel    = document.getElementById('newFolderPanel');
-  const newFolderName     = document.getElementById('newFolderName');
-  const cancelNewFolder   = document.getElementById('cancelNewFolder');
-  const confirmNewFolder  = document.getElementById('confirmNewFolder');
+  var newFolderOverlay = document.getElementById('newFolderOverlay');
+  var newFolderPanel = document.getElementById('newFolderPanel');
+  var newFolderName = document.getElementById('newFolderName');
+  var cancelNewFolder = document.getElementById('cancelNewFolder');
+  var confirmNewFolder = document.getElementById('confirmNewFolder');
 
-  document.getElementById('newFolderBtn').addEventListener('click', () => {
+  document.getElementById('newFolderBtn').addEventListener('click', function () {
     newFolderName.value = '';
     openOverlay(newFolderOverlay, newFolderPanel);
-    setTimeout(() => newFolderName.focus(), 80);
+    setTimeout(function () { newFolderName.focus(); }, FOCUS_DELAY);
   });
-  cancelNewFolder.addEventListener('click', () => closeOverlay(newFolderOverlay, newFolderPanel));
-  newFolderOverlay.addEventListener('click', e => { if (e.target === newFolderOverlay) closeOverlay(newFolderOverlay, newFolderPanel); });
-  newFolderName.addEventListener('keydown', e => {
+  cancelNewFolder.addEventListener('click', function () { closeOverlay(newFolderOverlay, newFolderPanel); });
+  newFolderOverlay.addEventListener('click', function (e) { if (e.target === newFolderOverlay) closeOverlay(newFolderOverlay, newFolderPanel); });
+  newFolderName.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') confirmNewFolder.click();
     if (e.key === 'Escape') closeOverlay(newFolderOverlay, newFolderPanel);
   });
-  confirmNewFolder.addEventListener('click', async () => {
-    const name = newFolderName.value.trim();
+  confirmNewFolder.addEventListener('click', async function () {
+    var name = newFolderName.value.trim();
     if (!name) return;
     confirmNewFolder.disabled = true;
-    const r = await fetch('/api/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
-    const d = await r.json();
-    confirmNewFolder.disabled = false;
-    if (d.success) { showToast('Folder created.', 'success'); location.reload(); }
-    else showToast(d.error || 'Something went wrong.', 'error');
+    try {
+      var r = await fetch('/api/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name }) });
+      var d = await r.json();
+      confirmNewFolder.disabled = false;
+      if (d.success) { showToast('Folder created.', 'success'); location.reload(); }
+      else showToast(d.error || 'Something went wrong.', 'error');
+    } catch (err) {
+      console.error('Failed to create folder:', err);
+      confirmNewFolder.disabled = false;
+      showToast('Network error. Try again.', 'error');
+    }
   });
 
-  // ── Folder popup (click to open) ──────────────────────────
-  const folderPopupOverlay = document.getElementById('folderPopupOverlay');
-  const folderPopupPanel   = document.getElementById('folderPopupPanel');
-  const folderPopupTitle   = document.getElementById('folderPopupTitle');
-  const folderPopupContent = document.getElementById('folderPopupContent');
-  const deleteFolderBtn    = document.getElementById('deleteFolderBtn');
+  var folderPopupOverlay = document.getElementById('folderPopupOverlay');
+  var folderPopupPanel = document.getElementById('folderPopupPanel');
+  var folderPopupTitle = document.getElementById('folderPopupTitle');
+  var folderPopupContent = document.getElementById('folderPopupContent');
+  var deleteFolderBtn = document.getElementById('deleteFolderBtn');
 
-  let activeFolderId = null;
+  var activeFolderId = null;
 
-  document.querySelectorAll('.folder-card').forEach(card => {
-    card.addEventListener('keydown', e => {
+  document.querySelectorAll('.folder-card').forEach(function (card) {
+    card.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         card.click();
       }
     });
-    card.addEventListener('click', e => {
-      if (e.target.closest('.folder-delete-btn')) return;
-      const memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]');
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('.folder-delete-btn') || e.target.closest('.folder-menu-btn')) return;
+      var memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]');
       activeFolderId = card.dataset.folderId;
       folderPopupTitle.textContent = card.dataset.folderName;
       folderPopupContent.innerHTML = '';
-      const serversIn = allServers.filter(s => memberUUIDs.includes(s.UUID));
+      var serversIn = allServers.filter(function (s) { return memberUUIDs.includes(s.UUID); });
       if (serversIn.length === 0) {
         folderPopupContent.innerHTML = '<p class="text-sm text-neutral-400 col-span-2">No servers — drag a card here to add one.</p>';
       } else {
-        serversIn.forEach(s => {
-          const row = document.createElement('div');
+        serversIn.forEach(function (s) {
+          var row = document.createElement('div');
           row.className = 'flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition';
-          const running = s.status === 'running';
-          row.innerHTML = `
-            <a href="/server/${s.UUID}" class="flex items-center gap-2 flex-1 min-w-0">
-              <span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.name}</span>
-              <span class="ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}">
-                ${running ? 'Running' : 'Stopped'}
-              </span>
-            </a>
-            <button data-uuid="${s.UUID}" class="remove-from-folder-btn shrink-0 w-10 h-10 inline-flex items-center justify-center rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" title="Remove from folder" aria-label="Remove server from folder">
-              ${alIcon('trash-2', 'w-4 h-4')}
-            </button>`;
-          row.querySelector('.remove-from-folder-btn').addEventListener('click', async (e) => {
+          var running = s.status === 'running';
+          row.innerHTML =
+            '<a href="/server/' + s.UUID + '" class="flex items-center gap-2 flex-1 min-w-0">' +
+              '<span class="text-sm font-medium text-neutral-800 dark:text-white truncate">' + s.name + '</span>' +
+              '<span class="ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md ' + (running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400') + '">' +
+                (running ? 'Running' : 'Stopped') +
+              '</span>' +
+            '</a>' +
+            '<button data-uuid="' + s.UUID + '" class="remove-from-folder-btn shrink-0 w-10 h-10 inline-flex items-center justify-center rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" title="Remove from folder" aria-label="Remove server from folder">' +
+              alIcon('trash-2', 'w-4 h-4') +
+            '</button>';
+          row.querySelector('.remove-from-folder-btn').addEventListener('click', async function (e) {
             e.preventDefault();
-            const uuid = e.currentTarget.dataset.uuid;
-            const r = await fetch('/api/folders/servers/' + uuid, { method: 'DELETE' });
-            const d = await r.json();
-            if (d.success) { showToast('Removed from folder.', 'success'); setTimeout(() => location.reload(), 600); }
-            else showToast(d.error || 'Something went wrong.', 'error');
+            var uuid = e.currentTarget.dataset.uuid;
+            try {
+              var r = await fetch('/api/folders/servers/' + uuid, { method: 'DELETE' });
+              var d = await r.json();
+              if (d.success) { showToast('Removed from folder.', 'success'); setTimeout(function () { location.reload(); }, REMOVE_FOLDER_DELAY); }
+              else showToast(d.error || 'Something went wrong.', 'error');
+            } catch (err) {
+              console.error('Failed to remove from folder:', err);
+              showToast('Network error. Try again.', 'error');
+            }
           });
           folderPopupContent.appendChild(row);
         });
@@ -138,148 +159,189 @@
     });
   });
 
-  document.getElementById('closeFolderPopup').addEventListener('click', () => {
-    closeOverlay(folderPopupOverlay, folderPopupPanel, () => { deleteFolderBtn.style.display = ''; });
+  document.getElementById('closeFolderPopup').addEventListener('click', function () {
+    closeOverlay(folderPopupOverlay, folderPopupPanel, function () { deleteFolderBtn.style.display = ''; });
   });
-  folderPopupOverlay.addEventListener('click', e => {
+  folderPopupOverlay.addEventListener('click', function (e) {
     if (e.target === folderPopupOverlay) {
-      closeOverlay(folderPopupOverlay, folderPopupPanel, () => { deleteFolderBtn.style.display = ''; });
+      closeOverlay(folderPopupOverlay, folderPopupPanel, function () { deleteFolderBtn.style.display = ''; });
     }
   });
 
-  // ── Delete folder (custom confirm dialog) ─────────────────
-  const deleteFolderOverlay  = document.getElementById('deleteFolderOverlay');
-  const deleteFolderPanel    = document.getElementById('deleteFolderPanel');
-  const cancelDeleteFolder   = document.getElementById('cancelDeleteFolder');
-  const confirmDeleteFolder  = document.getElementById('confirmDeleteFolder');
+  var deleteFolderOverlay = document.getElementById('deleteFolderOverlay');
+  var deleteFolderPanel = document.getElementById('deleteFolderPanel');
+  var cancelDeleteFolder = document.getElementById('cancelDeleteFolder');
+  var confirmDeleteFolder = document.getElementById('confirmDeleteFolder');
 
-  deleteFolderBtn.addEventListener('click', () => {
+  deleteFolderBtn.addEventListener('click', function () {
     closeOverlay(folderPopupOverlay, folderPopupPanel);
     openOverlay(deleteFolderOverlay, deleteFolderPanel);
   });
 
-  cancelDeleteFolder.addEventListener('click', () => closeOverlay(deleteFolderOverlay, deleteFolderPanel));
-  deleteFolderOverlay.addEventListener('click', e => { if (e.target === deleteFolderOverlay) closeOverlay(deleteFolderOverlay, deleteFolderPanel); });
+  cancelDeleteFolder.addEventListener('click', function () { closeOverlay(deleteFolderOverlay, deleteFolderPanel); });
+  deleteFolderOverlay.addEventListener('click', function (e) { if (e.target === deleteFolderOverlay) closeOverlay(deleteFolderOverlay, deleteFolderPanel); });
 
-  confirmDeleteFolder.addEventListener('click', async () => {
+  confirmDeleteFolder.addEventListener('click', async function () {
     if (!activeFolderId) return;
     confirmDeleteFolder.disabled = true;
-    const r = await fetch('/api/folders/' + activeFolderId, { method: 'DELETE' });
-    const d = await r.json();
-    confirmDeleteFolder.disabled = false;
-    closeOverlay(deleteFolderOverlay, deleteFolderPanel);
-    if (d.success) { showToast('Folder deleted.', 'success'); location.reload(); } else showToast(d.error || 'Couldn\'t delete the folder.', 'error');
+    try {
+      var r = await fetch('/api/folders/' + activeFolderId, { method: 'DELETE' });
+      var d = await r.json();
+      confirmDeleteFolder.disabled = false;
+      closeOverlay(deleteFolderOverlay, deleteFolderPanel);
+      if (d.success) { showToast('Folder deleted.', 'success'); location.reload(); } else showToast(d.error || "Couldn't delete the folder.", 'error');
+    } catch (err) {
+      console.error('Failed to delete folder:', err);
+      confirmDeleteFolder.disabled = false;
+      closeOverlay(deleteFolderOverlay, deleteFolderPanel);
+      showToast('Network error. Try again.', 'error');
+    }
   });
 
-  // ── Drag-and-drop: server card → folder ───────────────────
-  let dragUUID = null;
-  let dragName = null;
-  const ghost  = document.getElementById('drag-ghost');
-  const ghostName = document.getElementById('drag-ghost-name');
+  var dragUUID = null;
+  var dragName = null;
+  var ghost = document.getElementById('drag-ghost');
+  var ghostName = document.getElementById('drag-ghost-name');
+
+  var GHOST_OFFSET_X = 14;
+  var GHOST_OFFSET_Y = 10;
 
   function moveMouse(e) {
-    ghost.style.left = (e.clientX + 14) + 'px';
-    ghost.style.top  = (e.clientY + 10) + 'px';
+    ghost.style.left = (e.clientX + GHOST_OFFSET_X) + 'px';
+    ghost.style.top = (e.clientY + GHOST_OFFSET_Y) + 'px';
   }
 
-  document.querySelectorAll('.server-card[draggable]').forEach(card => {
-    card.addEventListener('dragstart', e => {
+  document.querySelectorAll('.server-card[draggable]').forEach(function (card) {
+    card.addEventListener('dragstart', function (e) {
       dragUUID = card.dataset.serverUuid;
       dragName = card.dataset.serverName;
       ghostName.textContent = dragName;
       ghost.style.display = 'flex';
       card.classList.add('sc-dragging');
       card.dataset.dragging = '1';
-      const blank = document.createElement('canvas');
+      var blank = document.createElement('canvas');
       blank.width = blank.height = 1;
       e.dataTransfer.setDragImage(blank, 0, 0);
       e.dataTransfer.effectAllowed = 'move';
       document.addEventListener('mousemove', moveMouse);
     });
 
-    card.addEventListener('dragend', () => {
+    card.addEventListener('dragend', function () {
       ghost.style.display = 'none';
       card.classList.remove('sc-dragging');
-      document.querySelectorAll('.folder-card').forEach(f => f.classList.remove('fc-drag-over'));
+      document.querySelectorAll('.folder-card').forEach(function (f) { f.classList.remove('fc-drag-over'); });
       document.removeEventListener('mousemove', moveMouse);
-      setTimeout(() => { delete card.dataset.dragging; }, 50);
-      dragUUID = null; dragName = null;
+      setTimeout(function () { delete card.dataset.dragging; }, DRAG_END_DELAY);
+      dragUUID = null;
+      dragName = null;
     });
 
-    card.querySelector('a')?.addEventListener('click', e => {
+    card.querySelector('a').addEventListener('click', function (e) {
       if (card.dataset.dragging) e.preventDefault();
     });
 
-    card.addEventListener('contextmenu', e => {
+    card.addEventListener('contextmenu', function (e) {
       e.preventDefault();
-      document.querySelectorAll('.server-ctx-menu').forEach(m => m.classList.add('hidden'));
-      const menu = card.querySelector('.server-ctx-menu');
+      document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
+      var menu = card.querySelector('.server-ctx-menu');
       if (menu) menu.classList.remove('hidden');
     });
 
-    card.querySelector('a')?.addEventListener('keydown', e => {
+    card.querySelector('a').addEventListener('keydown', function (e) {
       if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
         e.preventDefault();
-        document.querySelectorAll('.server-ctx-menu').forEach(m => m.classList.add('hidden'));
-        const menu = card.querySelector('.server-ctx-menu');
+        document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
+        var menu = card.querySelector('.server-ctx-menu');
         if (menu) {
           menu.classList.remove('hidden');
-          const first = menu.querySelector('button');
+          var first = menu.querySelector('button');
           if (first && first.offsetParent !== null) first.focus();
         }
       }
     });
+
+    var actionsBtn = card.querySelector('.server-actions-btn');
+    if (actionsBtn) {
+      actionsBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var wasHidden = card.querySelector('.server-ctx-menu').classList.contains('hidden');
+        document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
+        if (wasHidden) {
+          var menu = card.querySelector('.server-ctx-menu');
+          if (menu) {
+            menu.classList.remove('hidden');
+            var first = menu.querySelector('button');
+            if (first && first.offsetParent !== null) first.focus();
+          }
+        }
+      });
+    }
   });
 
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.server-ctx-menu').forEach(m => m.classList.add('hidden'));
+  document.addEventListener('click', function () {
+    document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
   });
 
-  document.querySelectorAll('.folder-card').forEach(folderCard => {
-    folderCard.addEventListener('dragover', e => {
+  document.querySelectorAll('.folder-card').forEach(function (folderCard) {
+    folderCard.addEventListener('dragover', function (e) {
       if (!dragUUID) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       folderCard.classList.add('fc-drag-over');
     });
-    folderCard.addEventListener('dragleave', () => folderCard.classList.remove('fc-drag-over'));
-    folderCard.addEventListener('drop', async e => {
+    folderCard.addEventListener('dragleave', function () { folderCard.classList.remove('fc-drag-over'); });
+    folderCard.addEventListener('drop', async function (e) {
       e.preventDefault();
       folderCard.classList.remove('fc-drag-over');
       if (!dragUUID) return;
-      const folderId = folderCard.dataset.folderId;
-      const r = await fetch('/api/folders/' + folderId + '/servers', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serverUUID: dragUUID }),
-      });
-      const d = await r.json();
-      if (d.success) { showToast('"' + dragName + '" added to folder.', 'success'); setTimeout(() => location.reload(), 700); }
-      else showToast(d.error || 'Something went wrong.', 'error');
+      var folderId = folderCard.dataset.folderId;
+      try {
+        var r = await fetch('/api/folders/' + folderId + '/servers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ serverUUID: dragUUID }),
+        });
+        var d = await r.json();
+        if (d.success) { showToast('"' + dragName + '" added to folder.', 'success'); setTimeout(function () { location.reload(); }, ADD_TO_FOLDER_DELAY); }
+        else showToast(d.error || 'Something went wrong.', 'error');
+      } catch (err) {
+        console.error('Failed to add server to folder:', err);
+        showToast('Network error. Try again.', 'error');
+      }
     });
   });
 
-  // ── Right-click context menu: add/remove from folder ──────
-  document.querySelectorAll('.ctx-add-to-folder').forEach(btn => {
-    btn.addEventListener('click', async e => {
+  document.querySelectorAll('.ctx-add-to-folder').forEach(function (btn) {
+    btn.addEventListener('click', async function (e) {
       e.stopPropagation();
-      const uuid = btn.dataset.uuid;
+      var uuid = btn.dataset.uuid;
       if (allFolders.length === 0) { showToast('Create a folder first.', 'error'); return; }
       if (allFolders.length === 1) {
-        const r = await fetch('/api/folders/' + allFolders[0].id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
-        const d = await r.json();
-        if (d.success) { showToast('Added to folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
+        try {
+          var r = await fetch('/api/folders/' + allFolders[0].id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
+          var d = await r.json();
+          if (d.success) { showToast('Added to folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
+        } catch (err) {
+          console.error('Failed to add to folder:', err);
+          showToast('Network error. Try again.', 'error');
+        }
         return;
       }
       openFolderPicker(uuid);
     });
   });
 
-  document.querySelectorAll('.ctx-remove-from-folder').forEach(btn => {
-    btn.addEventListener('click', async e => {
+  document.querySelectorAll('.ctx-remove-from-folder').forEach(function (btn) {
+    btn.addEventListener('click', async function (e) {
       e.stopPropagation();
-      const r = await fetch('/api/folders/servers/' + btn.dataset.uuid, { method: 'DELETE' });
-      const d = await r.json();
-      if (d.success) { showToast('Removed from folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
+      try {
+        var r = await fetch('/api/folders/servers/' + btn.dataset.uuid, { method: 'DELETE' });
+        var d = await r.json();
+        if (d.success) { showToast('Removed from folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
+      } catch (err) {
+        console.error('Failed to remove from folder:', err);
+        showToast('Network error. Try again.', 'error');
+      }
     });
   });
 
@@ -288,40 +350,44 @@
     activeFolderId = null;
     folderPopupTitle.textContent = 'Choose folder';
     folderPopupContent.innerHTML = '';
-    allFolders.forEach(f => {
-      const btn = document.createElement('button');
+    allFolders.forEach(function (f) {
+      var btn = document.createElement('button');
       btn.className = 'flex items-center gap-2.5 w-full text-left bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition';
-      btn.innerHTML = `${alIcon('folder', 'h-4 w-4 text-amber-500 shrink-0')}<span class="text-sm text-neutral-800 dark:text-white">${f.name}</span>`;
-      btn.addEventListener('click', async () => {
-        const r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID }) });
-        const d = await r.json();
-        if (d.success) { showToast('Added to folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
+      btn.innerHTML = alIcon('folder', 'h-4 w-4 text-amber-500 shrink-0') + '<span class="text-sm text-neutral-800 dark:text-white">' + f.name + '</span>';
+      btn.addEventListener('click', async function () {
+        try {
+          var r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: serverUUID }) });
+          var d = await r.json();
+          if (d.success) { showToast('Added to folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
+        } catch (err) {
+          console.error('Failed to add to folder:', err);
+          showToast('Network error. Try again.', 'error');
+        }
       });
       folderPopupContent.appendChild(btn);
     });
     openOverlay(folderPopupOverlay, folderPopupPanel);
   }
 
-  document.addEventListener('keydown', e => {
+  document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
-      document.querySelectorAll('.server-ctx-menu').forEach(m => m.classList.add('hidden'));
+      document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
       closeOverlay(folderPopupOverlay, folderPopupPanel);
       closeOverlay(newFolderOverlay, newFolderPanel);
       closeOverlay(deleteFolderOverlay, deleteFolderPanel);
     }
   });
 
-  // ── Live status polling ────────────────────────────────────
-  var serverUUIDs = allServers.map(function(s) { return s.UUID; });
+  var serverUUIDs = allServers.map(function (s) { return s.UUID; });
   var lastPollAt = null;
 
   function fmtUptime(sec) {
     if (sec === null || typeof sec === 'undefined') return '';
     sec = Math.max(0, Math.floor(sec));
-    var d = Math.floor(sec / 86400);
-    var h = Math.floor((sec % 86400) / 3600);
-    var m = Math.floor((sec % 3600) / 60);
-    var s = sec % 60;
+    var d = Math.floor(sec / SECONDS_PER_DAY);
+    var h = Math.floor((sec % SECONDS_PER_DAY) / SECONDS_PER_HOUR);
+    var m = Math.floor((sec % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
+    var s = sec % SECONDS_PER_MINUTE;
     if (d > 0) return d + 'd ' + h + 'h';
     if (h > 0) return h + 'h ' + m + 'm';
     if (m > 0) return m + 'm ' + s + 's';
@@ -367,16 +433,17 @@
 
   function pollAllServers() {
     lastPollAt = Date.now();
-    Promise.all(serverUUIDs.map(function(uuid) {
+    Promise.all(serverUUIDs.map(function (uuid) {
       return fetch('/server/' + uuid + '/status')
-        .then(function(r) { return r.ok ? r.json() : null; })
-        .catch(function() { return null; });
-    })).then(function(results) {
-      results.forEach(function(status, i) {
-        var card = document.querySelector('[data-server-uuid="' + serverUUIDs[i] + '"]');
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function (err) {
+          console.warn('Failed to poll status for ' + uuid + ':', err);
+          return null;
+        });
+    })).then(function (results) {
+      results.forEach(function (status, i) {
         if (status !== null) {
           applyServerStatus(serverUUIDs[i], status);
-        } else if (card) {
         }
       });
     });
@@ -384,6 +451,6 @@
 
   if (serverUUIDs.length > 0) {
     pollAllServers();
-    setInterval(pollAllServers, 15000);
+    setInterval(pollAllServers, POLL_INTERVAL);
   }
 })();

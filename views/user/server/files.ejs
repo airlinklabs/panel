@@ -66,7 +66,7 @@ function escJS(val) {
     </div>
 
     <!-- Content -->
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
@@ -303,23 +303,23 @@ function escJS(val) {
    <% } %>
   <!-- Move file modal -->
   <div id="moveModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
-    <div id="moveModalPanel" class="al-sheet-panel rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
+    <div id="moveModalPanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+      <div class="flex justify-between items-center px-6 py-4 border-b">
         <div>
           <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Move file</h2>
           <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Enter the destination path. Use / for subdirectories.</p>
         </div>
-        <button type="button" onclick="closeMoveModal()" class="p-1 rounded-lg transition" aria-label="Close" style="color:var(--theme-text-muted);">
-          <%- icon('x', { size: 16 }) %>
+        <button type="button" onclick="closeMoveModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
-      <div class="px-5 py-4">
+      <div class="px-6 py-4 overflow-y-auto flex-grow">
         <input type="hidden" id="moveSourcePath">
         <input type="text" id="moveDestPath"
           class="al-input font-mono"
           placeholder="path/to/destination/">
       </div>
-      <div class="flex gap-2 px-5 pb-5 justify-end">
+      <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closeMoveModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
           <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
           Cancel
@@ -334,12 +334,19 @@ function escJS(val) {
 
   <!-- Mass Delete Confirmation Modal -->
  <div id="massDeleteModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
-    <div id="massDeleteModalPanel" class="al-sheet-panel rounded-2xl shadow-xl w-full max-w-sm mx-4 will-change-transform" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="px-5 pt-5 pb-4">
-        <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Confirm Mass Deletion</p>
-        <p id="massDeleteMessage" class="text-xs mt-1.5 leading-relaxed" style="color:var(--theme-text-muted)"></p>
+    <div id="massDeleteModalPanel" class="al-sheet-panel rounded-2xl shadow-xl w-full max-w-sm mx-4 will-change-transform max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+      <div class="flex justify-between items-center px-6 py-4 border-b">
+        <div>
+          <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Confirm Mass Deletion</p>
+        </div>
+        <button type="button" onclick="closeMassDeleteModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+        </button>
       </div>
-      <div class="flex gap-2 px-5 pb-5 justify-end">
+      <div class="px-6 py-4 overflow-y-auto flex-grow">
+        <p id="massDeleteMessage" class="text-xs leading-relaxed" style="color:var(--theme-text-muted)"></p>
+      </div>
+      <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closeMassDeleteModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
           <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
           Cancel
@@ -353,24 +360,24 @@ function escJS(val) {
  </div>
     <!-- Create file / folder modal -->
   <div id="createFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
-    <div id="createFileModalPanel" class="al-sheet-panel rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
+    <div id="createFileModalPanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+      <div class="flex justify-between items-center px-6 py-4 border-b">
         <div>
           <h2 id="createModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New File</h2>
           <p id="createModalHint" class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Use / to create files inside new folders.</p>
         </div>
-        <button type="button" onclick="closeCreateFileModal()" class="p-1 rounded-lg transition" style="color:var(--theme-text-muted);">
-          <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
+        <button type="button" onclick="closeCreateFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
-      <div class="px-5 py-4">
+      <div class="px-6 py-4 overflow-y-auto flex-grow">
         <input type="text" id="FileName" data-mode="file"
           class="al-input font-mono"
           placeholder="filename.txt or folder/filename.txt"
           onkeydown="handleFileNameKeyPress(event)">
         <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
       </div>
-      <div class="flex gap-2 px-5 pb-5 justify-end">
+      <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closeCreateFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
           <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
           Cancel
@@ -385,9 +392,17 @@ function escJS(val) {
 
   <!-- Upload file -->
   <div id="uploadFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
-    <div id="uploadFileModalPanel" class="al-sheet-panel rounded-2xl p-8 max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-        <h2 class="text-2xl font-medium mb-1" style="color:var(--theme-text-strong)">Upload File</h2>
-        <p class="mb-6" style="color:var(--theme-text-muted)">Select a file to upload to the current directory.</p>
+    <div id="uploadFileModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+      <div class="flex justify-between items-center px-6 py-4 border-b">
+        <div>
+          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Upload File</h2>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Select a file to upload to the current directory.</p>
+        </div>
+        <button type="button" onclick="closeUploadFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+        </button>
+      </div>
+      <div class="px-6 py-4 overflow-y-auto flex-grow">
         <div class="mb-4">
           <div class="mb-4">
             <label for="fileInput" class="w-full px-3 py-6 border-2 border-dashed rounded-xl focus:outline-none focus:ring-2 transition text-center cursor-pointer block" style="border-color:var(--theme-border); color:var(--theme-text-strong);" id="dropZone">
@@ -409,39 +424,49 @@ function escJS(val) {
             </div>
           </div>
         </div>
-        <div class="flex justify-end space-x-4">
-          <button type="button" onclick="closeUploadFileModal()" class="al-btn-secondary px-5 py-2 inline-flex items-center gap-2">
-            <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-            Cancel
-          </button>
-          <button type="button" id="uploadButton" class="al-btn-primary w-full md:w-auto px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5" disabled>
-            <%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %>
-            Upload
-          </button>
-        </div>
+      </div>
+      <div class="flex gap-2 px-6 py-4 border-t justify-end">
+        <button type="button" onclick="closeUploadFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
+          <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
+          Cancel
+        </button>
+        <button type="button" id="uploadButton" class="al-btn-primary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5" disabled>
+          <%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %>
+          Upload
+        </button>
+      </div>
     </div>
   </div>
 
   <!-- Pull file from URL -->
   <div id="pullFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
-    <div id="pullFileModalPanel" class="al-sheet-panel rounded-2xl p-8 max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-        <h2 class="text-2xl font-medium mb-1" style="color:var(--theme-text-strong)">Pull File From URL</h2>
-        <p class="mb-6" style="color:var(--theme-text-muted)">Download a file from a public URL into the current directory.</p>
+    <div id="pullFileModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+      <div class="flex justify-between items-center px-6 py-4 border-b">
+        <div>
+          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Pull File From URL</h2>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Download a file from a public URL into the current directory.</p>
+        </div>
+        <button type="button" onclick="closePullFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+        </button>
+      </div>
+      <div class="px-6 py-4 overflow-y-auto flex-grow">
         <div class="mb-4">
           <label for="pullUrlInput" class="mb-1.5 block text-xs font-medium" style="color:var(--theme-text-muted)">File URL</label>
           <input type="url" id="pullUrlInput" class="al-input w-full font-mono" placeholder="https://example.com/file.zip" autocomplete="off" spellcheck="false">
           <p id="pullUrlPreview" class="mt-2 text-xs font-mono hidden" style="color:var(--theme-text-muted)"></p>
         </div>
-        <div class="flex justify-end space-x-4">
-          <button type="button" onclick="closePullFileModal()" class="al-btn-secondary px-5 py-2 inline-flex items-center gap-2">
-            <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-            Cancel
-          </button>
-          <button type="button" id="pullButton" class="al-btn-primary w-full md:w-auto px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
-            <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>
-            Pull
-          </button>
-        </div>
+      </div>
+      <div class="flex gap-2 px-6 py-4 border-t justify-end">
+        <button type="button" onclick="closePullFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
+          <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
+          Cancel
+        </button>
+        <button type="button" id="pullButton" class="al-btn-primary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+          <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>
+          Pull
+        </button>
+      </div>
     </div>
   </div>
 
@@ -457,17 +482,17 @@ function escJS(val) {
 
 <!-- Rename Modal -->
 <div id="renameModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
-  <div id="renameModalPanel" class="al-sheet-panel rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-    <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--theme-border);">
+  <div id="renameModalPanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+    <div class="flex justify-between items-center px-6 py-4 border-b">
       <div>
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Rename</h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Use / to move the file into a different folder.</p>
       </div>
-      <button type="button" onclick="closeRenameModal()" class="p-1 rounded-lg transition" aria-label="Close" style="color:var(--theme-text-muted);">
-        <%- icon('x', { class: 'w-4 h-4' }) %>
+      <button type="button" onclick="closeRenameModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="px-5 py-4">
+    <div class="px-6 py-4 overflow-y-auto flex-grow">
       <input type="text" id="newFileName"
         class="al-input font-mono"
         placeholder="new-name.txt or subfolder/new-name.txt">
@@ -475,7 +500,7 @@ function escJS(val) {
     </div>
     <input type="hidden" id="currentFileName">
     <input type="hidden" id="currentFilePath">
-    <div class="flex gap-2 px-5 pb-5 justify-end">
+    <div class="flex gap-2 px-6 py-4 border-t justify-end">
       <button type="button" onclick="closeRenameModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
         <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
         Cancel
@@ -973,8 +998,7 @@ function openCreateFileModal() {
     const loader = showLoadingPopup('Uploading File', 'Preparing to upload...');
 
     try {
-      // Check if file size is too large (limit to 100MB)
-      const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+    const MAX_FILE_SIZE = 100 * 1024 * 1024;
       if (fileSize > MAX_FILE_SIZE) {
         loader.close();
         showToast('File is too large. Maximum size is 100MB', 'error');
@@ -1025,7 +1049,7 @@ function openCreateFileModal() {
 
               showToast(errorMessage, 'error');
             } catch (e) {
-              console.error('Error parsing error response:', e);
+      console.error('Error parsing error response:', e);
               showToast(`Failed to upload file: ${xhr.status} ${xhr.statusText}`, 'error');
             }
           }
@@ -1043,8 +1067,7 @@ function openCreateFileModal() {
           showToast('Upload timed out. Try a smaller file.', 'error');
         };
 
-        // Set a longer timeout for large files
-        xhr.timeout = 300000; // 5 minutes
+        xhr.timeout = 300000;
 
         xhr.send(formData);
       } catch (error) {
@@ -1059,7 +1082,6 @@ function openCreateFileModal() {
     }
   }
 
-  // Global variable for selected file
   window.selectedFile = null;
 
   // Direct handler for file input change
@@ -1183,7 +1205,7 @@ function openCreateFileModal() {
       // Prefer the daemon mkdir endpoint (capability-detected via fallback):
       // on failure, fall back to the keep-file trick so old daemons keep working.
       closeCreateFileModal();
-      const loader = showLoadingPopup('Creating', req.translations.creatingFolder || 'Creating folder...');
+      const loader = showLoadingPopup('Creating', '<%= req.translations.creatingFolder || "Creating folder..." %>');
       try {
         const parts = finalPath.split('/');
         const name = parts.pop();
@@ -1195,10 +1217,10 @@ function openCreateFileModal() {
         });
         loader.close();
         if (res.ok) {
-          showToast(raw + (req.translations.createdSuffix || ' created'), 'success');
+          showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success');
           setTimeout(() => location.reload(), 800);
         } else {
-          showToast(req.translations.folderCreateFailedFallback || 'Failed to create folder, retrying with fallback', 'error');
+          showToast('<%= req.translations.folderCreateFailedFallback || "Failed to create folder, retrying with fallback" %>', 'error');
           tryCreateFolderViaFile(finalPath, raw);
         }
       } catch {
@@ -1207,7 +1229,7 @@ function openCreateFileModal() {
       }
       return;
     }
-    const label = mode === 'folder' ? (req.translations.creatingFolder || 'Creating folder...') : (req.translations.creatingFile || 'Creating file...');
+    const label = mode === 'folder' ? ('<%= req.translations.creatingFolder || "Creating folder..." %>') : ('<%= req.translations.creatingFile || "Creating file..." %>');
     const loader = showLoadingPopup('Creating', label);
 
     const hasSlash = finalPath.includes('/');
@@ -1223,11 +1245,11 @@ function openCreateFileModal() {
         });
         if (res.ok) {
           loader.updateProgress(100, 'Done!');
-          setTimeout(() => { loader.close(); showToast(raw + (req.translations.createdSuffix || ' created'), 'success'); setTimeout(() => location.reload(), 800); }, 400);
+          setTimeout(() => { loader.close(); showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success'); setTimeout(() => location.reload(), 800); }, 400);
         } else {
-          loader.close(); showToast(req.translations.fileCreateFailed || 'Failed to create file', 'error');
+          loader.close(); showToast('<%= req.translations.fileCreateFailed || "Failed to create file" %>', 'error');
         }
-      } catch { loader.close(); showToast(req.translations.fileCreateError || 'Error creating file', 'error'); }
+      } catch { loader.close(); showToast('<%= req.translations.fileCreateError || "Error creating file" %>', 'error'); }
       return;
     }
 
@@ -1242,9 +1264,9 @@ function openCreateFileModal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: '' }),
       });
-      if (!res1.ok) { loader.close(); showToast(req.translations.fileCreateFailed || 'Failed to create file', 'error'); return; }
+      if (!res1.ok) { loader.close(); showToast('<%= req.translations.fileCreateFailed || "Failed to create file" %>', 'error'); return; }
 
-      loader.updateProgress(50, req.translations.movingToTarget || 'Moving to target path...');
+      loader.updateProgress(50, '<%= req.translations.movingToTarget || "Moving to target path..." %>');
 
       const res2 = await fetch('/server/<%= server.UUID %>/rename', {
         method: 'POST',
@@ -1253,11 +1275,11 @@ function openCreateFileModal() {
       });
       if (res2.ok) {
         loader.updateProgress(100, 'Done!');
-        setTimeout(() => { loader.close(); showToast(raw + (req.translations.createdSuffix || ' created'), 'success'); setTimeout(() => location.reload(), 800); }, 400);
+        setTimeout(() => { loader.close(); showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success'); setTimeout(() => location.reload(), 800); }, 400);
       } else {
-        loader.close(); showToast(req.translations.moveToTargetFailed || 'Failed to move to target path', 'error');
+        loader.close(); showToast('<%= req.translations.moveToTargetFailed || "Failed to move to target path" %>', 'error');
       }
-    } catch { loader.close(); showToast(req.translations.fileCreateError || 'Error creating file', 'error'); }
+    } catch { loader.close(); showToast('<%= req.translations.fileCreateError || "Error creating file" %>', 'error'); }
   }
 
   // Fallback for daemons without /fs/mkdir — create a .airlink_keep file inside.
@@ -1271,18 +1293,17 @@ function openCreateFileModal() {
         body: JSON.stringify({ content: '' }),
       });
       if (res.ok) {
-        showToast(raw + (req.translations.createdSuffix || ' created'), 'success');
+        showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success');
         setTimeout(() => location.reload(), 800);
       } else {
-        showToast(req.translations.folderCreateFailed || 'Failed to create folder', 'error');
+        showToast('<%= req.translations.folderCreateFailed || "Failed to create folder" %>', 'error');
       }
     } catch {
-      showToast(req.translations.folderCreateError || 'Error creating folder', 'error');
+      showToast('<%= req.translations.folderCreateError || "Error creating folder" %>', 'error');
     }
   }
 
   // ── confirmRename: input is the full target path ──────────────────────────
-  const _origConfirmRename = confirmRename;
   async function confirmRename() {
     const newPath = document.getElementById('newFileName').value.trim();
     const filePath = document.getElementById('currentFilePath').value;
@@ -1427,7 +1448,6 @@ function openCreateFileModal() {
     const ext  = name.includes('.') ? '.' + name.split('.').pop() : '';
     const base = name.includes('.') ? name.slice(0, name.lastIndexOf('.')) : name;
     const dir  = path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : '';
-    const dest = `${dir}${base}_copy${ext}`;
     try {
       const res = await fetch(`/server/<%- server.UUID %>/files/copy`, {
         method:  'POST',
@@ -1435,7 +1455,7 @@ function openCreateFileModal() {
         body:    JSON.stringify({ location: path }),
       });
       if (!res.ok) throw new Error('Copy failed');
-      showToast(`Duplicated as ${dest.split('/').pop()}.`, 'success');
+      showToast(`Duplicated as ${name.split('/').pop()}.`, 'success');
       setTimeout(() => location.reload(), 700);
     } catch {
       showToast('Duplicate failed.', 'error');
@@ -1458,7 +1478,7 @@ function openCreateFileModal() {
   });
 
   (function staggerFileRows() {
-    var rows = document.querySelectorAll('tbody tr');
+    const rows = document.querySelectorAll('tbody tr');
     rows.forEach(function(row, i) {
       row.style.opacity = '0';
       row.style.transform = 'translateY(5px)';
@@ -1511,7 +1531,7 @@ function openCreateFileModal() {
       try {
         const parsed = new URL(url);
         name = parsed.pathname.split('/').filter(Boolean).pop() || '';
-      } catch {}
+      } catch (e) { /* invalid URL, skip preview */ }
       if (!name) { preview.classList.add('hidden'); return; }
       const base = '<%= currentPath ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
       preview.textContent = 'Will save as: ' + (base ? base + '/' : '/') + name;

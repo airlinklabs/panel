@@ -1,15 +1,19 @@
 (function() {
+  const MONACO_FONT_SIZE = 13;
+  const MONACO_TAB_SIZE = 2;
+  const DEFAULT_PORT = 25565;
+
   try {
-    var pageEl = document.getElementById('page-data');
+    const pageEl = document.getElementById('page-data');
     if (!pageEl) { console.error('page-data not found'); return; }
-    var raw = pageEl.textContent.trim();
+    const raw = pageEl.textContent.trim();
     if (!raw) { console.error('page-data empty'); return; }
-    var imageData = JSON.parse(raw);
-    var imageId = imageData.id;
+    const imageData = JSON.parse(raw);
+    const imageId = imageData.id;
 
-    var originalData = JSON.parse(JSON.stringify(imageData));
+    const originalData = JSON.parse(JSON.stringify(imageData));
 
-    var state = {
+    const state = {
       name: imageData.name,
       description: imageData.description,
       author: imageData.author,
@@ -24,7 +28,7 @@
       portRequirements: imageData.portRequirements,
     };
 
-    var monacoEditor = null;
+    let monacoEditor = null;
 
     function renderRawEditor() {
       if (monacoEditor) {
@@ -45,8 +49,8 @@
             automaticLayout: true,
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
-            fontSize: 13,
-            tabSize: 2,
+            fontSize: MONACO_FONT_SIZE,
+            tabSize: MONACO_TAB_SIZE,
           });
         });
       } catch (e) {
@@ -64,17 +68,17 @@
     document.getElementById('field-startup-done').value = state.startup_done;
 
     function renderDockerImages() {
-      var list = document.getElementById('docker-images-list');
+      const list = document.getElementById('docker-images-list');
       list.innerHTML = '';
-      var entries = Object.entries(state.docker_images);
+      const entries = Object.entries(state.docker_images);
       if (entries.length === 0) {
         list.innerHTML = '<p class="text-xs text-neutral-400">No Docker images configured. Click Add Image to add one.</p>';
         return;
       }
       entries.forEach(function(pair) {
-        var label = pair[0], image = pair[1];
-        var idx = entries.indexOf(pair);
-        var row = document.createElement('div');
+        const label = pair[0], image = pair[1];
+        const idx = entries.indexOf(pair);
+        const row = document.createElement('div');
         row.className = 'flex gap-2 items-center';
         row.innerHTML =
           '<input data-docker-label="' + idx + '" type="text" value="' + escHtml(label) + '" placeholder="Label (e.g. java 21)"' +
@@ -92,8 +96,8 @@
 
       list.querySelectorAll('[data-docker-remove]').forEach(function(btn) {
         btn.addEventListener('click', function() {
-          var idx = parseInt(btn.dataset.dockerRemove);
-          var keys = Object.keys(state.docker_images);
+          const idx = parseInt(btn.dataset.dockerRemove);
+          const keys = Object.keys(state.docker_images);
           delete state.docker_images[keys[idx]];
           renderDockerImages();
         });
@@ -107,14 +111,14 @@
     });
 
     function renderVariables() {
-      var list = document.getElementById('variables-list');
+      const list = document.getElementById('variables-list');
       list.innerHTML = '';
       if (!state.variables.length) {
         list.innerHTML = '<p class="text-xs text-neutral-400">No variables defined. Click Add Variable to add one.</p>';
         return;
       }
       state.variables.forEach(function(v, idx) {
-        var card = document.createElement('div');
+        const card = document.createElement('div');
         card.className = 'bg-white dark:bg-neutral-800/60 rounded-xl border border-neutral-200 dark:border-white/5 p-4';
         card.innerHTML =
           '<div class="flex items-center justify-between mb-3">' +
@@ -169,20 +173,20 @@
       renderVariables();
     });
 
-    var installScript = state.scripts.installation || {};
+    const installScript = state.scripts.installation || {};
     document.getElementById('field-install-container').value = installScript.container || '';
     document.getElementById('field-install-entrypoint').value = installScript.entrypoint || 'bash';
     document.getElementById('field-install-script').value = installScript.script || '';
 
     function renderPortRequirements() {
-      var list = document.getElementById('port-requirements-list');
+      const list = document.getElementById('port-requirements-list');
       list.innerHTML = '';
       if (!state.portRequirements.length) {
         list.innerHTML = '<p class="text-xs text-neutral-400">No required ports. Servers can be created without port bindings unless an admin adds ports.</p>';
         return;
       }
       state.portRequirements.forEach(function(port, idx) {
-        var row = document.createElement('div');
+        const row = document.createElement('div');
         row.className = 'grid grid-cols-1 sm:grid-cols-[1fr_140px_auto] gap-2 items-end';
         row.innerHTML =
           '<label class="text-xs text-neutral-500">Port name<input data-port-req="' + idx + '" data-field="name" value="' + escHtml(port.name || '') + '"' +
@@ -202,7 +206,7 @@
     renderPortRequirements();
 
     document.getElementById('add-port-requirement').addEventListener('click', function() {
-      state.portRequirements.push({ name: 'Port ' + (state.portRequirements.length + 1), internalPort: 25565 });
+      state.portRequirements.push({ name: 'Port ' + (state.portRequirements.length + 1), internalPort: DEFAULT_PORT });
       renderPortRequirements();
     });
 
@@ -229,10 +233,10 @@
 
     async function savePayload(payload) {
       try {
-        var r = await fetch('/admin/images/edit/' + imageId, {
+        const r = await fetch('/admin/images/edit/' + imageId, {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
         });
-        var data = await r.json();
+        const data = await r.json();
         if (data.success) {
           showToast('Saved.', 'success');
           originalData = JSON.parse(JSON.stringify(state));
@@ -280,11 +284,11 @@
     };
 
     window.tabHandlers['docker'] = async function() {
-      var newImages = {};
+      const newImages = {};
       document.querySelectorAll('[data-docker-label]').forEach(function(labelInput, idx) {
-        var imageInput = document.querySelector('[data-docker-image="' + idx + '"]');
-        var label = labelInput.value.trim();
-        var img = imageInput.value.trim();
+        const imageInput = document.querySelector('[data-docker-image="' + idx + '"]');
+        const label = labelInput.value.trim();
+        const img = imageInput.value.trim();
         if (label && img) newImages[label] = img;
       });
       state.docker_images = newImages;
@@ -325,7 +329,7 @@
     };
     window.tabLabels['install'] = 'Save';
     window.tabResetHandlers['install'] = function() {
-      var orig = originalData.scripts.installation || {};
+      const orig = originalData.scripts.installation || {};
       state.scripts.installation = { container: orig.container || '', entrypoint: orig.entrypoint || 'bash', script: orig.script || '' };
       document.getElementById('field-install-container').value = state.scripts.installation.container;
       document.getElementById('field-install-entrypoint').value = state.scripts.installation.entrypoint;
@@ -349,7 +353,7 @@
 
     window.tabHandlers['raw'] = async function() {
       if (!monacoEditor) return;
-      var parsed;
+      let parsed;
       try { parsed = JSON.parse(monacoEditor.getValue()); }
       catch (e) { showToast('Invalid JSON: ' + e.message, 'error'); return; }
       await savePayload(parsed);

@@ -1,3 +1,19 @@
+const HOVER_DELAY_MS = 100;
+const MAX_CONCURRENT_PRELOADS = 2;
+const MAX_CACHE_SIZE = 20;
+const VISIBILITY_PRELOAD_DELAY_MS = 500;
+const CACHE_CLEANUP_INTERVAL_MS = 60000;
+const PREFETCH_ROOT_MARGIN = '50px';
+const PREFETCH_THRESHOLD = 0.1;
+const PRELOAD_API_PATH = '/api/page-content';
+
+const CRITICAL_PAGES = [
+  '/admin/overview',
+  '/admin/servers',
+  '/admin/users',
+  '/user/account',
+];
+
 class IntelligentPreloader {
   constructor(router) {
     this.router = router;
@@ -6,17 +22,17 @@ class IntelligentPreloader {
     this.preloadCache = new Map();
     this.hoverTimeouts = new Map();
     this.config = {
-      hoverDelay: 100, // ms to wait before preloading on hover
-      maxConcurrentPreloads: 2,
-      maxCacheSize: 20,
-      preloadOnVisible: true, // preload when links become visible
+      hoverDelay: HOVER_DELAY_MS,
+      maxConcurrentPreloads: MAX_CONCURRENT_PRELOADS,
+      maxCacheSize: MAX_CACHE_SIZE,
+      preloadOnVisible: true,
       preloadPriority: {
         navigation: 1,
         buttons: 2,
-        links: 3
-      }
+        links: 3,
+      },
     };
-    
+
     this.init();
   }
 
@@ -38,12 +54,10 @@ class IntelligentPreloader {
       const priority = this.getLinkPriority(link);
       const linkId = this.getLinkId(link);
 
-      // Clear any existing timeout for this link
       if (this.hoverTimeouts.has(linkId)) {
         clearTimeout(this.hoverTimeouts.get(linkId));
       }
 
-      // Set new timeout
       const timeout = setTimeout(() => {
         this.preloadPage(href, priority, 'hover');
       }, this.config.hoverDelay);
@@ -71,23 +85,21 @@ class IntelligentPreloader {
         if (entry.isIntersecting) {
           const link = entry.target;
           const href = link.getAttribute('href') || link.getAttribute('data-href');
-          
+
           if (this.shouldPreload(href, link)) {
-            // Delay preload to avoid preloading everything immediately
             setTimeout(() => {
-              if (entry.isIntersecting) { // Check again in case user scrolled away
+              if (entry.isIntersecting) {
                 this.preloadPage(href, this.getLinkPriority(link), 'visibility');
               }
-            }, 500);
+            }, VISIBILITY_PRELOAD_DELAY_MS);
           }
         }
       });
     }, {
-      rootMargin: '50px',
-      threshold: 0.1
+      rootMargin: PREFETCH_ROOT_MARGIN,
+      threshold: PREFETCH_THRESHOLD,
     });
 
-    // Observe navigation links
     document.querySelectorAll('a[href], button[data-href]').forEach(link => {
       const href = link.getAttribute('href') || link.getAttribute('data-href');
       if (this.shouldPreload(href, link)) {
@@ -97,15 +109,7 @@ class IntelligentPreloader {
   }
 
   setupPrefetchHints() {
-    // Add prefetch hints for critical pages
-    const criticalPages = [
-      '/admin/overview',
-      '/admin/servers',
-      '/admin/users',
-      '/user/account'
-    ];
-
-    criticalPages.forEach(page => {
+    CRITICAL_PAGES.forEach(page => {
       this.addPrefetchHint(page);
     });
   }
@@ -119,54 +123,44 @@ class IntelligentPreloader {
 
   shouldPreload(href, linkElement) {
     if (!href) return false;
-    
-    // Skip external links
+
     if (href.includes('://') && !href.startsWith(window.location.origin)) return false;
-    
-    // Skip anchors, mailto, tel
+
     if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return false;
-    
-    // Skip if already cached or preloaded
+
     if (this.router.cache.has(href) || this.router.preloadCache.has(href)) return false;
-    
-    // Skip if currently preloading
+
     if (this.preloadingInProgress.has(href)) return false;
-    
-    // Skip if marked as no-preload
-    if (linkElement.hasAttribute('data-no-preload')) return false;
-    
-    // Skip download links
-    if (linkElement.hasAttribute('download')) return false;
-    
+
+    if (linkElement && linkElement.hasAttribute('data-no-preload')) return false;
+
+    if (linkElement && linkElement.hasAttribute('download')) return false;
+
     return true;
   }
 
   getLinkPriority(linkElement) {
-    // Navigation links get highest priority
     if (linkElement.closest('.nav-link, .navigation, .sidebar')) {
       return this.config.preloadPriority.navigation;
     }
-    
-    // Buttons get medium priority
+
     if (linkElement.tagName === 'BUTTON' || linkElement.classList.contains('btn')) {
       return this.config.preloadPriority.buttons;
     }
-    
-    // Regular links get lowest priority
+
     return this.config.preloadPriority.links;
   }
 
   getLinkId(linkElement) {
-    return linkElement.id || 
-           linkElement.getAttribute('href') || 
-           linkElement.getAttribute('data-href') || 
+    return linkElement.id ||
+           linkElement.getAttribute('href') ||
+           linkElement.getAttribute('data-href') ||
            Math.random().toString(36).substr(2, 9);
   }
 
   async preloadPage(href, priority = 3, source = 'manual') {
     if (!this.shouldPreload(href)) return;
 
-    // Check concurrent preload limit
     if (this.preloadingInProgress.size >= this.config.maxConcurrentPreloads) {
       this.preloadQueue.add({ href, priority, source });
       return;
@@ -176,13 +170,13 @@ class IntelligentPreloader {
 
     try {
       console.log(`Preloading ${href} (priority: ${priority}, source: ${source})`);
-      
-      const response = await fetch(`/api/page-content${href}`, {
+
+      const response = await fetch(`${PRELOAD_API_PATH}${href}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
+          'X-Requested-With': 'XMLHttpRequest',
+        },
       });
 
       if (response.ok) {
@@ -192,12 +186,11 @@ class IntelligentPreloader {
           data,
           timestamp: Date.now(),
           priority,
-          source
+          source,
         });
 
-        // Trigger custom event for analytics/debugging
         window.dispatchEvent(new CustomEvent('pagePreloaded', {
-          detail: { href, priority, source, size: JSON.stringify(data).length }
+          detail: { href, priority, source, size: JSON.stringify(data).length },
         }));
       }
     } catch (error) {
@@ -212,9 +205,8 @@ class IntelligentPreloader {
     if (this.preloadQueue.size === 0) return;
     if (this.preloadingInProgress.size >= this.config.maxConcurrentPreloads) return;
 
-    // Sort queue by priority
     const sortedQueue = Array.from(this.preloadQueue).sort((a, b) => a.priority - b.priority);
-    
+
     const next = sortedQueue[0];
     if (next) {
       this.preloadQueue.delete(next);
@@ -226,7 +218,6 @@ class IntelligentPreloader {
     setInterval(() => {
       if (this.preloadCache.size <= this.config.maxCacheSize) return;
 
-      // Remove oldest entries
       const entries = Array.from(this.preloadCache.entries())
         .sort((a, b) => a[1].timestamp - b[1].timestamp);
 
@@ -237,10 +228,9 @@ class IntelligentPreloader {
       });
 
       console.log(`Cleaned up ${toRemove.length} preload cache entries`);
-    }, 60000); // Clean every minute
+    }, CACHE_CLEANUP_INTERVAL_MS);
   }
 
-  // Public API methods
   preloadNow(href) {
     return this.preloadPage(href, 1, 'manual');
   }
@@ -259,8 +249,8 @@ class IntelligentPreloader {
         href,
         priority: info.priority,
         source: info.source,
-        age: Date.now() - info.timestamp
-      }))
+        age: Date.now() - info.timestamp,
+      })),
     };
   }
 
@@ -269,7 +259,6 @@ class IntelligentPreloader {
   }
 }
 
-// Initialize preloader when router is available
 document.addEventListener('DOMContentLoaded', () => {
   if (window.spaRouter) {
     window.preloader = new IntelligentPreloader(window.spaRouter);

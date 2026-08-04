@@ -12,9 +12,6 @@ const uiComponentsModule: Module = {
   },
 
   router: () => {
-
-
-
     // Return an empty router since this module only registers UI components
     return Router();
   },

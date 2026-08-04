@@ -5,11 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
 import logger from '../../handlers/logger';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
-
-
-interface ErrorMessage {
-  message?: string;
-}
+import type { ErrorMessage } from './server/shared';
 
 interface ServerSnapshot {
   status: string;
@@ -69,8 +65,9 @@ function checkNodeHealth(node: { id: number; address: string; port: number; key:
       const health: CachedNodeHealth = { online: true, checkedAt };
       nodeHealthCache.set(node.id, health);
       return health;
-    } catch (err: any) {
-      const health: CachedNodeHealth = { online: false, reason: errCodeToReason(err?.code), checkedAt };
+    } catch (err: unknown) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: unknown }).code) : undefined;
+      const health: CachedNodeHealth = { online: false, reason: errCodeToReason(code), checkedAt };
       nodeHealthCache.set(node.id, health);
       return health;
     }
@@ -107,9 +104,10 @@ function fetchServerSnapshot(
         timeout: 2000,
       });
 
-      const isRunning = (statusResponse.data as any)?.running === true;
+      const data = statusResponse.data as { running?: boolean; status?: string } | undefined;
+      const isRunning = data?.running === true;
       snapshot.status = isRunning ? 'running' : 'stopped';
-      const dockerStatus = (statusResponse.data as any)?.status as string | undefined;
+      const dockerStatus = data?.status;
       snapshot.dockerStatus = typeof dockerStatus === 'string' && dockerStatus.length > 0 ? dockerStatus : null;
       snapshot.nodeOffline = false;
 
@@ -126,12 +124,16 @@ function fetchServerSnapshot(
           });
 
           if (statsResponse.data) {
-            const rawRam = Number((statsResponse.data as any).memory?.percentage) || 0;
-            const rawCpu = Number((statsResponse.data as any).cpu?.percentage) || 0;
+            const statsData = statsResponse.data as {
+              memory?: { percentage?: number; usage?: number };
+              cpu?: { percentage?: number };
+            };
+            const rawRam = Number(statsData.memory?.percentage) || 0;
+            const rawCpu = Number(statsData.cpu?.percentage) || 0;
             snapshot.ramUsage = String(Math.round(rawRam * 100) / 100);
             snapshot.cpuUsage = String(Math.round(rawCpu * 100) / 100);
 
-            const memUsageBytes = (statsResponse.data as any).memory?.usage || 0;
+            const memUsageBytes = statsData.memory?.usage || 0;
             const memUsageMB = memUsageBytes / (1024 * 1024);
             snapshot.ramUsed = memUsageMB >= 1024
               ? `${(memUsageMB / 1024).toFixed(1)}GB`
@@ -177,7 +179,7 @@ function getNodeHealth(
   if (cached && Date.now() - cached.checkedAt < NODE_TTL) return cached;
   if (cached) {
     if (revalidate) {
-      checkNodeHealth(node).catch(() => {});
+      checkNodeHealth(node).catch((err) => logger.warn('Background node health revalidation failed:', err));
     }
     return cached;
   }
@@ -193,7 +195,7 @@ function getServerSnapshot(
   if (cached && Date.now() - cached.fetchedAt < SERVER_TTL) return cached;
   if (cached) {
     if (revalidate) {
-      fetchServerSnapshot(node, server.UUID).catch(() => {});
+      fetchServerSnapshot(node, server.UUID).catch((err) => logger.warn('Background server snapshot revalidation failed:', err));
     }
     return cached;
   }
@@ -256,7 +258,7 @@ const dashboardModule: Module = {
           page = 1;
         }
 
-        const perPage = 8;
+        const perPage = 8 as const;
         const startIndex = (page - 1) * perPage;
         const endIndex = page * perPage;
 

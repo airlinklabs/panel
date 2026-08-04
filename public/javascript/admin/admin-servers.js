@@ -1,18 +1,28 @@
 (function () {
-  var vtEnabled = false;
-  var scanMode = 'builtin';
-  var currentServerIds = [];
-  var radarServerNames = {};
-  var availableScripts = [];
+  const BYTES_PER_KB = 1024;
+  const BYTES_PER_MB = 1048576;
+  const BYTES_PER_GB = 1073741824;
+  const STAGGER_DELAY_MS = 28;
+  const STAGGER_INITIAL_DELAY_MS = 60;
+  const ROW_ANIMATION_DURATION_MS = 240;
+  const TOOLBAR_HIDE_DELAY_MS = 80;
+  const TOOLBAR_TRANSITION_MS = '0.36s cubic-bezier(0.4, 0, 0.2, 1)';
+  const FLIP_THRESHOLD = 1;
+
+  let vtEnabled = false;
+  let scanMode = 'builtin';
+  let currentServerIds = [];
+  let radarServerNames = {};
+  let availableScripts = [];
 
   function getChecked() {
     return Array.from(document.querySelectorAll('.server-checkbox:checked'));
   }
 
-  var sentinelVisible = true;
+  let sentinelVisible = true;
 
   function setFloatingVisible(show) {
-    var el = document.getElementById('floatingToolbar');
+    const el = document.getElementById('floatingToolbar');
     if (show) {
       el.style.opacity = '1';
       el.style.transform = 'translateX(-50%) translateY(0)';
@@ -25,15 +35,15 @@
   }
 
   function flipSiblings(before) {
-    var table = document.getElementById('serverTable');
+    const table = document.getElementById('serverTable');
     if (!table || !before) return;
-    var after = table.getBoundingClientRect();
-    var dy = before.top - after.top;
-    if (Math.abs(dy) < 1) return;
+    const after = table.getBoundingClientRect();
+    const dy = before.top - after.top;
+    if (Math.abs(dy) < FLIP_THRESHOLD) return;
     table.style.transition = 'none';
     table.style.transform = 'translateY(' + dy + 'px)';
     requestAnimationFrame(function () {
-      table.style.transition = 'transform 0.36s cubic-bezier(0.4, 0, 0.2, 1)';
+      table.style.transition = 'transform ' + TOOLBAR_TRANSITION_MS;
       table.style.transform = 'translateY(0)';
       table.addEventListener('transitionend', function cleanup() {
         table.style.transition = '';
@@ -44,10 +54,10 @@
   }
 
   function showInlineToolbar() {
-    var row     = document.getElementById('bulkToolbarRow');
-    var content = document.getElementById('bulkToolbarContent');
-    var table   = document.getElementById('serverTable');
-    var before  = table ? table.getBoundingClientRect() : null;
+    const row     = document.getElementById('bulkToolbarRow');
+    const content = document.getElementById('bulkToolbarContent');
+    const table   = document.getElementById('serverTable');
+    const before  = table ? table.getBoundingClientRect() : null;
     row.style.gridTemplateRows = '1fr';
     requestAnimationFrame(function () {
       flipSiblings(before);
@@ -56,21 +66,21 @@
   }
 
   function hideInlineToolbar() {
-    var row     = document.getElementById('bulkToolbarRow');
-    var content = document.getElementById('bulkToolbarContent');
-    var table   = document.getElementById('serverTable');
-    var before  = table ? table.getBoundingClientRect() : null;
+    const row     = document.getElementById('bulkToolbarRow');
+    const content = document.getElementById('bulkToolbarContent');
+    const table   = document.getElementById('serverTable');
+    const before  = table ? table.getBoundingClientRect() : null;
     content.style.opacity = '0';
     setTimeout(function () {
       row.style.gridTemplateRows = '0fr';
       requestAnimationFrame(function () {
         flipSiblings(before);
       });
-    }, 80);
+    }, TOOLBAR_HIDE_DELAY_MS);
   }
 
   function updateToolbar() {
-    var checked = getChecked();
+    const checked = getChecked();
 
     document.querySelectorAll('.selection-count').forEach(function (el) {
       el.textContent = checked.length + ' selected';
@@ -85,7 +95,7 @@
     }
   }
 
-  var observer = new IntersectionObserver(function (entries) {
+  const observer = new IntersectionObserver(function (entries) {
     sentinelVisible = entries[0].isIntersecting;
     if (getChecked().length > 0) {
       setFloatingVisible(!sentinelVisible);
@@ -115,20 +125,20 @@
   });
 
   function bulkRadarScan() {
-    var checked = getChecked();
+    const checked = getChecked();
     if (!checked.length) return;
-    var ids = checked.map(function (cb) { return cb.value; });
-    var names = {};
+    const ids = checked.map(function (cb) { return cb.value; });
+    const names = {};
     checked.forEach(function (cb) { names[cb.value] = cb.dataset.name || cb.value; });
     radarServerNames = names;
-    var label = checked.length === 1 ? names[ids[0]] : checked.length + ' servers';
+    const label = checked.length === 1 ? names[ids[0]] : checked.length + ' servers';
     openRadarScanModal(ids, label);
   }
 
   function bulkDelete() {
-    var checked = getChecked();
+    const checked = getChecked();
     if (!checked.length) return;
-    var msg = checked.length === 1
+    const msg = checked.length === 1
       ? 'Delete this server? All data will be permanently removed.'
       : 'Delete ' + checked.length + ' servers? All data will be permanently removed.';
     window.modal.confirm({
@@ -137,9 +147,9 @@
       danger: true,
       confirmLabel: 'Delete',
       onConfirm: function () {
-        var ids = checked.map(function (cb) { return cb.value; });
-        var chain = Promise.resolve();
-        var failed = false;
+        const ids = checked.map(function (cb) { return cb.value; });
+        let chain = Promise.resolve();
+        let failed = false;
         ids.forEach(function (id) {
           chain = chain.then(function () {
             return fetch('/admin/server/delete/' + id, { method: 'POST' })
@@ -151,7 +161,7 @@
           showToast('Servers deleted.', 'success');
           window.location.reload();
         })
-             .catch(function () { showToast('Failed to delete servers.', 'error'); });
+             .catch(function (err) { console.error('Bulk delete error:', err); showToast('Failed to delete servers.', 'error'); });
       }
     });
   }
@@ -181,14 +191,14 @@
       vtEnabled = d.enabled;
       if (vtEnabled) document.getElementById('scanModeToggle').classList.remove('hidden');
     })
-    .catch(function () {});
+    .catch(function (err) { console.error('Failed to fetch VT status:', err); });
 
   function setScanMode(mode) {
     scanMode = mode;
-    var builtinBtn = document.getElementById('modeBuiltin');
-    var vtBtn = document.getElementById('modeVT');
-    var active   = 'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all';
-    var inactive = 'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-medium transition-all hover:border-neutral-400 dark:hover:border-neutral-500';
+    const builtinBtn = document.getElementById('modeBuiltin');
+    const vtBtn = document.getElementById('modeVT');
+    const active   = 'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all';
+    const inactive = 'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-medium transition-all hover:border-neutral-400 dark:hover:border-neutral-500';
     if (mode === 'builtin') {
       builtinBtn.className = active;
       vtBtn.className = inactive;
@@ -215,17 +225,17 @@
     document.getElementById('radarRescanBtn').classList.add('hidden');
     document.getElementById('radarPickerPhase').classList.remove('hidden');
     setScanMode('builtin');
-    var radarScanModal = document.getElementById('radarScanModal');
+    const radarScanModal = document.getElementById('radarScanModal');
     radarScanModal.classList.remove('hidden');
     radarScanModal.classList.add('flex');
-    var radarScanPanel = document.getElementById('radarScanPanel');
+    const radarScanPanel = document.getElementById('radarScanPanel');
     Animate.openModal(radarScanModal, radarScanPanel);
     fetchRadarScripts();
   }
 
   function closeRadarScanModal() {
-    var radarScanModal = document.getElementById('radarScanModal');
-    var radarScanPanel = document.getElementById('radarScanPanel');
+    const radarScanModal = document.getElementById('radarScanModal');
+    const radarScanPanel = document.getElementById('radarScanPanel');
     var done = function () {
       radarScanModal.classList.add('hidden');
       radarScanModal.classList.remove('flex');
@@ -245,8 +255,8 @@
   document.getElementById('radarScanModalBackdrop').addEventListener('click', closeRadarScanModal);
 
   function fetchRadarScripts() {
-    var select = document.getElementById('scriptSelect');
-    var runBtn = document.getElementById('runScanButton');
+    const select = document.getElementById('scriptSelect');
+    const runBtn = document.getElementById('runScanButton');
     select.innerHTML = '<option value="">Loading...</option>';
     runBtn.disabled = true;
 
@@ -262,7 +272,7 @@
           return;
         }
         availableScripts.forEach(function (s) {
-          var opt = document.createElement('option');
+          const opt = document.createElement('option');
           opt.value = s.id;
           opt.textContent = s.name;
           select.appendChild(opt);
@@ -274,8 +284,8 @@
   }
 
   function updateScriptDescription() {
-    var id = document.getElementById('scriptSelect').value;
-    var script = availableScripts.find(function (s) { return s.id === id; });
+    const id = document.getElementById('scriptSelect').value;
+    const script = availableScripts.find(function (s) { return s.id === id; });
     document.getElementById('scriptDescription').textContent = script ? script.description : '';
   }
 
@@ -283,10 +293,10 @@
 
   function runRadarScan() {
     if (!currentServerIds.length) return;
-    var scriptId = document.getElementById('scriptSelect').value;
+    const scriptId = document.getElementById('scriptSelect').value;
     if (!scriptId) { showToast('Select a script first', 'error'); return; }
 
-    var btn = document.getElementById('runScanButton');
+    const btn = document.getElementById('runScanButton');
     btn.disabled = true;
     btn.innerHTML = alIcon('loader-circle', 'animate-spin h-4 w-4') + ' Scanning...';
 
@@ -302,11 +312,11 @@
       .then(function (allResults) {
         if (currentServerIds.length > 1) {
           allResults.forEach(function (r) {
-            var name = radarServerNames[r.id] || r.id;
+            const name = radarServerNames[r.id] || r.id;
             if (!r.data.success) {
               showToast(name + ': scan failed', 'error');
             } else {
-              var count = (r.data.results && r.data.results.results || []).reduce(function (s, x) { return s + (x.matches ? x.matches.length : 0); }, 0);
+              const count = (r.data.results && r.data.results.results || []).reduce(function (s, x) { return s + (x.matches ? x.matches.length : 0); }, 0);
               showToast(name + ': ' + (count > 0 ? count + ' finding(s)' : 'clean'), count > 0 ? 'error' : 'success');
             }
           });
@@ -336,20 +346,20 @@
 
   function runVtFileScan() {
     if (!currentServerIds.length) return;
-    var serverId = currentServerIds[0];
-    var btn = document.getElementById('runVtScanButton');
+    const serverId = currentServerIds[0];
+    const btn = document.getElementById('runVtScanButton');
 
     btn.disabled = true;
     btn.innerHTML = alIcon('loader-circle', 'animate-spin h-4 w-4') + ' Starting...';
 
     closeRadarScanModal();
 
-    var p = window.loadingPopupSystem;
+    const p = window.loadingPopupSystem;
     p.open('VirusTotal Scan', 'default');
     p.setProgress(5, 'Requesting file archive from node...');
     p.addStep('Connecting to node');
 
-    var steps = [
+    const steps = [
       { at: 3000,  pct: 12, msg: 'Node zipping plugins, mods and config...',    step: 'Archiving server files' },
       { at: 9000,  pct: 24, msg: 'Uploading archive to VirusTotal...',          step: 'Archive ready — uploading' },
       { at: 16000, pct: 36, msg: 'VirusTotal queuing analysis...',               step: 'Upload complete' },
@@ -358,7 +368,7 @@
       { at: 56000, pct: 72, msg: 'Collecting results...',                        step: 'Engines finishing up' },
       { at: 75000, pct: 82, msg: 'Waiting for final verdicts...',                step: 'Collecting final results' },
     ];
-    var timers = steps.map(function (s) {
+    const timers = steps.map(function (s) {
       return setTimeout(function () { p.setProgress(s.pct, s.msg); p.addStep(s.step); }, s.at);
     });
 
@@ -454,8 +464,8 @@
   }
 
   function renderVtFileScanResults(data) {
-    var summaryEl = document.getElementById('radarSummaryBar');
-    var bodyEl = document.getElementById('radarResultsBody');
+    const summaryEl = document.getElementById('radarSummaryBar');
+    const bodyEl = document.getElementById('radarResultsBody');
     document.getElementById('radarServerTabs').classList.add('hidden');
 
     if (data.pending) {
@@ -464,8 +474,8 @@
       return;
     }
 
-    var malCount = (data.maliciousEngines && data.maliciousEngines.length) || 0;
-    var total = data.totalEngines || 0;
+    const malCount = (data.maliciousEngines && data.maliciousEngines.length) || 0;
+    const total = data.totalEngines || 0;
 
     if (malCount === 0) {
       summaryEl.innerHTML =
@@ -488,7 +498,7 @@
       malCount + '/' + total + ' engines flagged</span>' +
       '<a href="' + data.vtLink + '" target="_blank" rel="noopener" class="ml-auto text-xs text-blue-500 hover:underline">Full report →</a>';
 
-    var html = '<div class="space-y-1">';
+    let html = '<div class="space-y-1">';
     data.maliciousEngines.forEach(function (e) {
       html += '<div class="flex items-center justify-between px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">';
       html += '<span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">' + escapeHtml(e.engine) + '</span>';
@@ -500,9 +510,9 @@
   }
 
   function renderRadarResults(results) {
-    var tabsEl = document.getElementById('radarServerTabs');
-    var bodyEl = document.getElementById('radarResultsBody');
-    var summaryEl = document.getElementById('radarSummaryBar');
+    const tabsEl = document.getElementById('radarServerTabs');
+    const bodyEl = document.getElementById('radarResultsBody');
+    const summaryEl = document.getElementById('radarSummaryBar');
 
     if (!results.length) {
       tabsEl.classList.add('hidden');
@@ -518,9 +528,9 @@
       tabsEl.classList.remove('hidden');
       tabsEl.innerHTML = '';
       results.forEach(function (r, i) {
-        var name = radarServerNames[r.id] || ('Server ' + r.id);
-        var count = countFindings(r.data.results);
-        var tab = document.createElement('button');
+        const name = radarServerNames[r.id] || ('Server ' + r.id);
+        const count = countFindings(r.data.results);
+        const tab = document.createElement('button');
         tab.type = 'button';
         tab.dataset.tabIndex = i;
         tab.className = 'tab-btn shrink-0 px-3 py-1.5 text-xs font-medium rounded-t-lg border border-b-0 transition-colors ' +
@@ -536,7 +546,7 @@
             t.className = 'tab-btn shrink-0 px-3 py-1.5 text-xs font-medium rounded-t-lg border border-b-0 transition-colors bg-neutral-50 dark:bg-neutral-800/40 border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300';
           });
           tab.className = 'tab-btn shrink-0 px-3 py-1.5 text-xs font-medium rounded-t-lg border border-b-0 transition-colors bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700/50 text-neutral-800 dark:text-white';
-          renderSingleServerResults(results[parseInt(tab.dataset.tabIndex)].data.results, bodyEl, summaryEl);
+          renderSingleServerResults(results[i].data.results, bodyEl, summaryEl);
         });
         tabsEl.appendChild(tab);
       });
@@ -550,8 +560,8 @@
   }
 
   function renderSingleServerResults(scanResults, bodyEl, summaryEl) {
-    var total = countFindings(scanResults);
-    var sevStyles = {
+    const total = countFindings(scanResults);
+    const sevStyles = {
       critical: 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400',
       high:     'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
       medium:   'bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
@@ -572,16 +582,16 @@
       return;
     }
 
-    var patternCount = scanResults.results.length;
+    const patternCount = scanResults.results.length;
     summaryEl.innerHTML =
       '<span class="inline-flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400 font-medium">' +
       '' + alIcon('triangle-alert', 'w-4 h-4') + '' +
       total + ' finding' + (total !== 1 ? 's' : '') + ' across ' + patternCount + ' pattern' + (patternCount !== 1 ? 's' : '') + '</span>';
 
-    var html = '<div class="space-y-3">';
+    let html = '<div class="space-y-3">';
     scanResults.results.forEach(function (result) {
-      var sev = result.severity || 'low';
-      var count = result.matches ? result.matches.length : 0;
+      const sev = result.severity || 'low';
+      const count = result.matches ? result.matches.length : 0;
       html += '<div class="rounded-lg border border-neutral-200 dark:border-neutral-700/50 overflow-hidden">';
       html += '<div class="flex items-center justify-between px-3 py-2 bg-neutral-50 dark:bg-neutral-800/60">';
       html += '<div class="min-w-0"><p class="text-xs font-medium text-neutral-700 dark:text-neutral-200">' + escapeHtml(result.pattern.description) + '</p>';
@@ -592,7 +602,7 @@
       html += '</div></div>';
       html += '<ul class="divide-y divide-neutral-100 dark:divide-neutral-700/30">';
       result.matches.forEach(function (match) {
-        var matchId = 'match-' + Math.random().toString(36).slice(2, 9);
+        const matchId = 'match-' + Math.random().toString(36).slice(2, 9);
         html += '<li class="px-3 py-1.5" id="' + matchId + '">';
         html += '<div class="flex items-center justify-between gap-4">';
         html += '<span class="text-xs font-mono text-neutral-600 dark:text-neutral-300 truncate">' + escapeHtml(match.path) + '</span>';
@@ -612,10 +622,10 @@
   }
 
   function formatBytes(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
-    return (bytes / 1073741824).toFixed(1) + ' GB';
+    if (bytes < BYTES_PER_KB) return bytes + ' B';
+    if (bytes < BYTES_PER_MB) return (bytes / BYTES_PER_KB).toFixed(1) + ' KB';
+    if (bytes < BYTES_PER_GB) return (bytes / BYTES_PER_MB).toFixed(1) + ' MB';
+    return (bytes / BYTES_PER_GB).toFixed(1) + ' GB';
   }
 
   function escapeHtml(str) {
@@ -624,7 +634,7 @@
   }
 
   (function () {
-    var rows = document.querySelectorAll('#serverTable tbody tr');
+    const rows = document.querySelectorAll('#serverTable tbody tr');
     rows.forEach(function (row, i) {
       row.style.opacity = '0';
       row.style.transform = 'translateY(4px)';
@@ -637,8 +647,8 @@
           row.style.transition = '';
           row.style.opacity = '';
           row.style.transform = '';
-        }, 240);
-      }, 60 + i * 28);
+        }, ROW_ANIMATION_DURATION_MS);
+      }, STAGGER_INITIAL_DELAY_MS + i * STAGGER_DELAY_MS);
     });
   })();
 

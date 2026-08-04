@@ -33,7 +33,7 @@
       return '<span aria-hidden="true" style="display:inline-block;width:16px;height:16px;"></span>';
     }
     opts = opts || {};
-    var sw = opts.strokeWidth != null ? opts.strokeWidth : 1.75;
+    var sw = opts.strokeWidth != null ? opts.strokeWidth : 1.5;
     var attrs = {
       xmlns: 'http://www.w3.org/2000/svg',
       width: opts.width || 16,

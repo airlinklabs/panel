@@ -5,7 +5,7 @@
     <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
@@ -76,7 +76,7 @@
                       <div class="al-toggle-dot"></div>
                     </div>
                   </label>
-                  <button type="button" data-sched-name="<%= schedule.name %>" onclick="runSchedule(<%= schedule.id %>, this.dataset.schedName)"
+                  <button type="button" data-sched-name="<%= schedule.name.replace(/'/g, "&#39;") %>" onclick="runSchedule(<%= schedule.id %>, this.dataset.schedName)"
                     class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
                     style="color:var(--theme-success);background:var(--theme-success-bg)">
                     <%- icon('play', { class: 'w-3 h-3' }) %>
@@ -88,7 +88,7 @@
                     <%- icon('settings', { class: 'w-3 h-3' }) %>
                     Tasks
                   </button>
-                  <button type="button" data-sched-name="<%= schedule.name %>" onclick="deleteSchedule(<%= schedule.id %>, this.dataset.schedName)"
+                  <button type="button" data-sched-name="<%= schedule.name.replace(/'/g, "&#39;") %>" onclick="deleteSchedule(<%= schedule.id %>, this.dataset.schedName)"
                     class="al-btn-ghost p-1.5 -mr-1.5" style="color:var(--theme-danger)" aria-label="Delete schedule">
                     <%- icon('trash-2', { size: 15 }) %>
                   </button>
@@ -193,16 +193,16 @@
 <!-- New Schedule Modal -->
 <div id="addScheduleModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center p-4" aria-hidden="true">
   <div class="absolute inset-0 bg-transparent" aria-hidden="true" onclick="closeAddScheduleModal()"></div>
-  <div id="addSchedulePanel" class="al-sheet-panel relative w-full max-w-2xl rounded-2xl p-6 max-h-[92dvh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="addScheduleTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-    <div class="flex items-center justify-between mb-5">
+  <div id="addSchedulePanel" class="al-sheet-panel relative w-full max-w-2xl rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="addScheduleTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div class="flex justify-between items-center px-6 py-4 border-b">
       <h3 id="addScheduleTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New schedule</h3>
-      <button type="button" onclick="closeAddScheduleModal()" class="al-btn-ghost p-1.5 -mr-1.5" aria-label="Close">
-        <%- icon('x', { class: 'w-4 h-4' }) %>
+      <button type="button" onclick="closeAddScheduleModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="space-y-4">
+    <div class="px-6 py-4 space-y-4 overflow-y-auto">
       <div>
-        <label class="al-label">Name</label>
+        <label for="schedName" class="al-label">Name</label>
         <input id="schedName" type="text" class="al-input w-full" placeholder="Daily restart" autocomplete="off">
       </div>
       <div>
@@ -218,7 +218,7 @@
         </div>
       </div>
       <div id="schedCronWrap">
-        <label class="al-label">Cron expression</label>
+        <label for="schedCron" class="al-label">Cron expression</label>
         <input id="schedCron" type="text" class="al-input w-full font-mono" placeholder="0 0 * * * *" autocomplete="off" value="0 0 * * * *">
         <p id="schedCronErr" class="hidden mt-1.5 text-[11px]" style="color:var(--theme-danger)">Cron must be 5 or 6 fields — <span class="font-mono">second minute hour day month weekday</span> — with values in range (seconds/minutes 0-59, hours 0-23, day 1-31, month 1-12, weekday 0-7).</p>
         <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Format: <span class="font-mono">second minute hour day month weekday</span> — <span id="cronPreview" class="font-medium" style="color:var(--theme-accent)">every hour</span></p>
@@ -280,7 +280,7 @@
         </div>
         <p class="text-[11px]" aria-live="polite" style="color:var(--theme-text-muted)">Runs <span id="schedVisualDesc" class="font-medium" style="color:var(--theme-accent)">every hour</span> — cron: <span id="schedVisualCron" class="font-mono font-medium" style="color:var(--theme-accent)">0 0 * * * *</span></p>
       </div>
-      <div class="flex gap-2 pt-1">
+      <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closeAddScheduleModal()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
           <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
           Cancel
@@ -747,32 +747,30 @@ window.toggleTasks = (scheduleId) => {
 };
 
 window.runSchedule = async (scheduleId, name) => {
-  const t = req.translations;
   await new Promise(resolve => {
     window.modal.confirm({
-      title: t.runScheduleTitle || 'Run schedule',
-      body: (t.runScheduleBodyBefore || 'Run "') + name + (t.runScheduleBodyAfter || '" now? Its tasks will execute immediately.'),
-      confirmLabel: t.runLabel || 'Run',
+      title: 'Run schedule',
+      body: 'Run "' + name + '" now? Its tasks will execute immediately.',
+      confirmLabel: 'Run',
       onConfirm: resolve,
     });
   });
   const result = await api('/server/' + serverId + '/schedules/' + scheduleId + '/run', 'POST');
-  if (result) { showToast(t.scheduleRunTriggered || 'Schedule run triggered.', 'success'); setTimeout(() => location.reload(), 1200); }
+  if (result) { showToast('Schedule run triggered.', 'success'); setTimeout(() => location.reload(), 1200); }
 };
 
 window.deleteSchedule = async (scheduleId, name) => {
-  const t = req.translations;
   await new Promise(resolve => {
     window.modal.confirm({
-      title: t.deleteScheduleTitle || 'Delete schedule',
-      body: (t.scheduleDeleteBodyBefore || 'Delete "') + name + (t.scheduleDeleteBodyAfter || '"? This cannot be undone.'),
+      title: 'Delete schedule',
+      body: 'Delete "' + name + '"? This cannot be undone.',
       danger: true,
-      confirmLabel: t.deleteLabel || 'Delete',
+      confirmLabel: 'Delete',
       onConfirm: resolve,
     });
   });
   const result = await api('/server/' + serverId + '/schedules/' + scheduleId, 'DELETE');
-  if (result) { showToast(t.scheduleDeleted || 'Schedule deleted.', 'success'); setTimeout(() => location.reload(), 900); }
+  if (result) { showToast('Schedule deleted.', 'success'); setTimeout(() => location.reload(), 900); }
 };
 
 const pendingTasks = {};

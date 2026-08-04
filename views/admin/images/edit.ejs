@@ -49,17 +49,17 @@
             <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Basics</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div>
-                <label class="al-label mb-1.5">Name</label>
+                <label for="field-name" class="al-label mb-1.5">Name</label>
                 <input type="text" id="field-name" value="<%= image.name || '' %>"
                   class="al-input">
               </div>
               <div>
-                <label class="al-label mb-1.5">Author</label>
+                <label for="field-author" class="al-label mb-1.5">Author</label>
                 <input type="text" id="field-author" value="<%= image.author || '' %>"
                   class="al-input">
               </div>
               <div class="sm:col-span-2">
-                <label class="al-label mb-1.5">Description</label>
+                <label for="field-description" class="al-label mb-1.5">Description</label>
                 <textarea id="field-description" rows="2"
                   class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition resize-none"><%= image.description || '' %></textarea>
               </div>
@@ -70,19 +70,19 @@
             <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Process</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div class="sm:col-span-2">
-                <label class="al-label mb-1.5">Startup Command</label>
+                <label for="field-startup" class="al-label mb-1.5">Startup Command</label>
                 <input type="text" id="field-startup" value="<%= image.startup || '' %>" placeholder="e.g. java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}"
                   class="al-input font-mono">
                 <p class="mt-1.5 text-xs text-neutral-400">Use <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">{{VARIABLE_NAME}}</code> to reference egg variables.</p>
               </div>
               <div>
-                <label class="al-label mb-1.5">Stop Command</label>
+                <label for="field-stop" class="al-label mb-1.5">Stop Command</label>
                 <input type="text" id="field-stop" value="<%= image.stop || 'stop' %>" placeholder="stop"
                   class="al-input font-mono">
                 <p class="mt-1.5 text-xs text-neutral-400">Command sent to the container to stop it gracefully.</p>
               </div>
               <div>
-                <label class="al-label mb-1.5">Startup Done Signal</label>
+                <label for="field-startup-done" class="al-label mb-1.5">Startup Done Signal</label>
                 <input type="text" id="field-startup-done" value="<%= image.startup_done || '' %>" placeholder="e.g. For help, type"
                   class="al-input font-mono">
                 <p class="mt-1.5 text-xs text-neutral-400">String in the server output that means the server finished starting.</p>
@@ -137,19 +137,19 @@
             <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Installation Script</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div>
-                <label class="al-label mb-1.5">Container Image</label>
+                <label for="field-install-container" class="al-label mb-1.5">Container Image</label>
                 <input type="text" id="field-install-container" placeholder="e.g. eclipse-temurin:21-jdk-jammy"
                   class="al-input font-mono">
                 <p class="mt-1.5 text-xs text-neutral-400">Docker image the install script runs inside.</p>
               </div>
               <div>
-                <label class="al-label mb-1.5">Entrypoint</label>
+                <label for="field-install-entrypoint" class="al-label mb-1.5">Entrypoint</label>
                 <input type="text" id="field-install-entrypoint" placeholder="bash"
                   class="al-input font-mono">
                 <p class="mt-1.5 text-xs text-neutral-400">Shell that executes the script (usually <code class="font-mono">bash</code>).</p>
               </div>
               <div class="sm:col-span-2">
-                <label class="al-label mb-1.5">Script</label>
+                <label for="field-install-script" class="al-label mb-1.5">Script</label>
                 <textarea id="field-install-script" rows="16" placeholder="#!/bin/bash&#10;# Install script runs inside the container&#10;apt update && apt install -y curl"
                   class="al-input font-mono resize-y"></textarea>
                 <p class="mt-1.5 text-xs text-neutral-400">Files are placed in <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">/mnt/server</code> inside the install container. The script runs as root.</p>
@@ -189,14 +189,14 @@
 
         <script nonce="<%- nonce %>">
         (function(){
-          var tabBtns = document.querySelectorAll('.tab-btn');
-          var tabPanels = document.querySelectorAll('.tab-panel');
-          var tabList = document.querySelector('[role="tablist"]');
-          var saveBtn = document.getElementById('tab-save-btn');
-          var resetBtn = document.getElementById('tab-reset-btn');
+          const tabBtns = document.querySelectorAll('.tab-btn');
+          const tabPanels = document.querySelectorAll('.tab-panel');
+          const tabList = document.querySelector('[role="tablist"]');
+          const saveBtn = document.getElementById('tab-save-btn');
+          const resetBtn = document.getElementById('tab-reset-btn');
           function activate(id) {
             tabBtns.forEach(function(btn) {
-              var on = btn.dataset.tab === id;
+              const on = btn.dataset.tab === id;
               btn.setAttribute('aria-selected', on ? 'true' : 'false');
               btn.setAttribute('tabindex', on ? '0' : '-1');
             });
@@ -213,16 +213,16 @@
             }
           }
           window._rebindTabHandlers = function() {
-            var active = document.querySelector('.tab-btn[aria-selected="true"]');
+            const active = document.querySelector('.tab-btn[aria-selected="true"]');
             if (active) rebind(active.dataset.tab);
           };
           tabBtns.forEach(function(btn) { btn.addEventListener('click', function() { activate(this.dataset.tab); }); });
           if (tabList) {
             tabList.addEventListener('keydown', function(e) {
-              var tabs = Array.from(tabBtns);
-              var currentIndex = tabs.findIndex(function(t) { return t === document.activeElement; });
+              const tabs = Array.from(tabBtns);
+              const currentIndex = tabs.findIndex(function(t) { return t === document.activeElement; });
               if (currentIndex === -1) return;
-              var newIndex = currentIndex;
+              let newIndex = currentIndex;
               if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIndex = (currentIndex + 1) % tabs.length; }
               else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIndex = (currentIndex - 1 + tabs.length) % tabs.length; }
               else if (e.key === 'Home') { e.preventDefault(); newIndex = 0; }

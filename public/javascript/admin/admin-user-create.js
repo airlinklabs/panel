@@ -1,3 +1,10 @@
+const USERNAME_MIN_LENGTH = 3;
+const USERNAME_MAX_LENGTH = 20;
+const PASSWORD_MIN_LENGTH = 8;
+const USERNAME_PATTERN = /^[a-zA-Z0-9]+$/;
+const LETTER_PATTERN = /[A-Za-z]/;
+const NUMBER_PATTERN = /\d/;
+
 const usernameInput = document.getElementById('userUsername');
 const passwordInput = document.getElementById('userPassword');
 const createBtn = document.getElementById('createuserBtn');
@@ -31,8 +38,8 @@ function checkUsername() {
     resetCrit('crit-username-chars');
     return false;
   }
-  const lengthOk = val.length >= 3 && val.length <= 20;
-  const charsOk = /^[a-zA-Z0-9]+$/.test(val);
+  const lengthOk = val.length >= USERNAME_MIN_LENGTH && val.length <= USERNAME_MAX_LENGTH;
+  const charsOk = USERNAME_PATTERN.test(val);
   setCrit('crit-username-length', lengthOk);
   setCrit('crit-username-chars', charsOk);
   return lengthOk && charsOk;
@@ -46,9 +53,9 @@ function checkPassword() {
     resetCrit('crit-number');
     return false;
   }
-  const lengthOk = val.length >= 8;
-  const letterOk = /[A-Za-z]/.test(val);
-  const numberOk = /\d/.test(val);
+  const lengthOk = val.length >= PASSWORD_MIN_LENGTH;
+  const letterOk = LETTER_PATTERN.test(val);
+  const numberOk = NUMBER_PATTERN.test(val);
   setCrit('crit-length', lengthOk);
   setCrit('crit-letter', letterOk);
   setCrit('crit-number', numberOk);
@@ -58,8 +65,10 @@ function checkPassword() {
 usernameInput.addEventListener('input', checkUsername);
 passwordInput.addEventListener('input', checkPassword);
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 createBtn.addEventListener('click', async () => {
-const emailVal = document.getElementById('userEmail').value.trim();
+  const emailVal = document.getElementById('userEmail').value.trim();
   const usernameVal = usernameInput.value.trim();
   const passwordVal = passwordInput.value;
   const isAdmin = document.getElementById('userIsAdminSwitch').checked;
@@ -76,6 +85,10 @@ const emailVal = document.getElementById('userEmail').value.trim();
 
   if (!emailVal || !usernameVal || !passwordVal) {
     showToast('Please fill in all required fields.', 'error');
+    return;
+  }
+  if (!EMAIL_PATTERN.test(emailVal)) {
+    showToast('Please enter a valid email address.', 'error');
     return;
   }
   if (!checkUsername()) {

@@ -1,7 +1,16 @@
 (function () {
+  const ACTIVITY_PERIOD_DAYS = 30;
+  const BAR_HIGH_THRESHOLD = 90;
+  const BAR_MEDIUM_THRESHOLD = 70;
+  const BAR_COLOR_HIGH = '#ef4444';
+  const BAR_COLOR_MEDIUM = '#f97316';
+  const BAR_COLOR_LOW = '#3b82f6';
+  const CHART_BORDER_RADIUS = 4;
+  const MAX_TICKS = 10;
+
   const tabBtns   = document.querySelectorAll('.tab-btn');
   const tabPanels = document.querySelectorAll('.tab-panel');
-  let data        = null;
+  let analyticsData = null;
   let loginChart  = null;
 
   function activateTab(id) {
@@ -39,7 +48,7 @@
 
   function bar(label, value, max) {
     const pct   = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
-    const color = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f97316' : '#3b82f6';
+    const color = pct >= BAR_HIGH_THRESHOLD ? BAR_COLOR_HIGH : pct >= BAR_MEDIUM_THRESHOLD ? BAR_COLOR_MEDIUM : BAR_COLOR_LOW;
     const label2 = max > 0 ? pct + '%' : '—';
     return `<div>
       <div class="flex justify-between text-xs text-neutral-600 dark:text-neutral-400 mb-1.5">
@@ -146,7 +155,7 @@
   function renderActivity(d) {
     const a = d.activity;
     const totalLogins = Object.values(a.loginsByDay).reduce((s, v) => s + v, 0);
-    const avgPerDay   = Math.round(totalLogins / 30);
+    const avgPerDay   = Math.round(totalLogins / ACTIVITY_PERIOD_DAYS);
 
     document.getElementById('ac-users').textContent  = fmt(a.totalUsers);
     document.getElementById('ac-images').textContent = fmt(a.totalImages);
@@ -167,7 +176,7 @@
           backgroundColor: 'rgba(59,130,246,0.5)',
           borderColor:     '#3b82f6',
           borderWidth:     1,
-          borderRadius:    4,
+          borderRadius:    CHART_BORDER_RADIUS,
         }],
       },
       options: {
@@ -175,7 +184,7 @@
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { color: gridColor() }, ticks: { color: textColor(), maxTicksLimit: 10 } },
+          x: { grid: { color: gridColor() }, ticks: { color: textColor(), maxTicksLimit: MAX_TICKS } },
           y: { grid: { color: gridColor() }, ticks: { color: textColor(), stepSize: 1 }, min: 0 },
         },
       },
@@ -200,14 +209,14 @@
     try {
       const res = await fetch('/api/admin/analytics/summary');
       if (!res.ok) throw new Error('Request failed');
-      data = await res.json();
+      analyticsData = await res.json();
 
       loading.classList.add('hidden');
       activateTab('servers');
 
-      renderServers(data);
-      renderNodes(data);
-      renderActivity(data);
+      renderServers(analyticsData);
+      renderNodes(analyticsData);
+      renderActivity(analyticsData);
       showToast('Analytics refreshed. Fresh data.', 'success');
     } catch {
       loading.classList.add('hidden');

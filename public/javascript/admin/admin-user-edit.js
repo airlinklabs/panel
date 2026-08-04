@@ -76,7 +76,7 @@
         }
       } catch (error) {
         loader.close();
-        console.error('Error:', error);
+        console.error('Failed to update user:', error);
         showToast(pd.errorUpdatingUser, 'error');
       }
     });

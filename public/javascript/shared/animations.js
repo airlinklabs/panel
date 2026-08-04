@@ -15,9 +15,9 @@
 (function () {
   if (window.Animate) return;
 
-  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var EXIT_MS = REDUCED ? 0 : 200; /* >= --dur-exit (180ms) and al-sheet-out (200ms) */
-  var openOverlays = [];
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const EXIT_MS = REDUCED ? 0 : 200; /* >= --dur-exit (180ms) and al-sheet-out (200ms) */
+  let openOverlays = [];
 
   function focusables(root) {
     return root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
@@ -58,7 +58,7 @@
       ov.classList.add('hidden');
       ov.classList.remove('flex');
       ov.querySelectorAll('.al-dropdown').forEach(function (dd) { dd.classList.remove('open'); });
-      var btn = ov.querySelector('[aria-expanded="true"]');
+      const btn = ov.querySelector('[aria-expanded="true"]');
       if (btn) btn.setAttribute('aria-expanded', 'false');
     });
 
@@ -89,9 +89,9 @@
     requestAnimationFrame(function () {
       if (!openOverlays.length) return;
       if (openOverlays[openOverlays.length - 1] !== overlay) return;
-      var root = panel || overlay;
-      var first = focusables(root)[0];
-      var target = first || panel || overlay;
+      const root = panel || overlay;
+      const first = focusables(root)[0];
+      const target = first || panel || overlay;
       if (target && typeof target.focus === 'function') {
         try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
       }
@@ -107,14 +107,14 @@
     // confirmations). Re-entrant guard flag prevents a loop when the
     // veto handler itself closes the overlay after confirming.
     if (!overlay._closingVeto && overlay._beforeClose && overlay._beforeClose() === false) return;
-    var idx = openOverlays.indexOf(overlay);
+    const idx = openOverlays.indexOf(overlay);
     if (idx === -1) {
       if (typeof done === 'function') done();
       return;
     }
     overlay._closingVeto = true;
     openOverlays.splice(idx, 1);
-    var lastFocused = overlay._lastFocused || null;
+    const lastFocused = overlay._lastFocused || null;
     overlay._lastFocused = null;
     if (panel) {
       panel.classList.remove('open');
@@ -145,7 +145,7 @@
   /* Close the topmost open popup. */
   function closeTop() {
     if (!openOverlays.length) return;
-    var ov = openOverlays[openOverlays.length - 1];
+    const ov = openOverlays[openOverlays.length - 1];
     closeModal(ov, panelOf(ov));
   }
 
@@ -153,10 +153,10 @@
      trigger is passed its aria-expanded stays in sync. */
   function toggleDropdown(el, force, trigger) {
     if (!el) return;
-    var shouldOpen = force !== undefined ? force : !el.classList.contains('open');
+    const shouldOpen = force !== undefined ? force : !el.classList.contains('open');
     el.classList.toggle('open', shouldOpen);
     if (trigger && typeof trigger.setAttribute === 'function') {
-      trigger.setAttribute('aria-expanded', String(shouldOpen));
+      trigger.setAttribute('aria-expanded', '' + shouldOpen);
     }
   }
 
@@ -179,18 +179,18 @@
     // Surfaces with their own trap (e.g. the global confirm modal)
     // handle it first and preventDefault, so skip those.
     if (e.key === 'Tab' && openOverlays.length && !e.defaultPrevented) {
-      var top = openOverlays[openOverlays.length - 1];
-      var root = panelOf(top) || top;
-      var f = Array.prototype.slice.call(focusables(root));
-      var active = document.activeElement;
+      const top = openOverlays[openOverlays.length - 1];
+      const root = panelOf(top) || top;
+      const f = Array.prototype.slice.call(focusables(root));
+      const active = document.activeElement;
       if (!f.length) return;
       if (!root.contains(active)) {
         e.preventDefault();
         try { f[0].focus({ preventScroll: true }); } catch (err) { f[0].focus(); }
         return;
       }
-      var first = f[0];
-      var last = f[f.length - 1];
+      const first = f[0];
+      const last = f[f.length - 1];
       if (e.shiftKey && active === first) {
         e.preventDefault();
         try { last.focus({ preventScroll: true }); } catch (err) { last.focus(); }

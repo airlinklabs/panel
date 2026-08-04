@@ -48,7 +48,7 @@ export interface ServerSectionItem {
   url?: string;
 }
 
-class UIComponentStore {
+export class UIComponentStore {
   private sidebarItems: SidebarItem[] = [];
   private serverMenuItems: ServerMenuItem[] = [];
   private serverSections: ServerSection[] = [];
@@ -351,15 +351,6 @@ uiComponentStore.addServerMenuItem({
     priority: 60,
     isDefault: true,
     group: 'settings'
-  });
-
-  uiComponentStore.addSidebarItem({
-    id: 'mounts',
-    label: 'Mounts',
-    icon: icon('box', { class: 'w-5 h-5 mt-0.5' }),
-    url: '/admin/mounts',
-    priority: 45,
-    isAdminItem: true
   });
 }
 

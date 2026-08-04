@@ -13,7 +13,7 @@
       <div class="al-page-header mb-5">
         <div class="flex items-center gap-4">
           <div class="relative shrink-0">
-            <img id="avatar-preview"
+            <img loading="lazy" decoding="async" id="avatar-preview"
               src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>"
               alt="Avatar"
               class="h-12 w-12 rounded-xl border object-cover" style="border-color:var(--theme-border);">
@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch(`/check-username?username=${encodeURIComponent(val)}`);
         const { exists } = await res.json();
         usernameFb.textContent = exists ? '<%= req.translations.usernameTaken || "Username taken" %>' : '<%= req.translations.usernameIsNotTaken || "Username available" %>';
-      } catch {}
+      } catch (err) { console.error('Username check failed:', err); }
     }, 500);
   });
 
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { valid } = await res.json();
         pwFeedback.textContent = valid ? '<%= req.translations.correctPassword || "Correct" %>' : '<%= req.translations.incorrectPassword || "Incorrect password" %>';
         newPwInput.disabled = !valid;
-      } catch { pwFeedback.textContent = 'Could not validate'; newPwInput.disabled = true; }
+      } catch (err) { console.error('Password validation failed:', err); pwFeedback.textContent = 'Could not validate'; newPwInput.disabled = true; }
     }, 500);
   });
 
@@ -288,7 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
   avatarInput?.addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2 MB', 'error'); return; }
+      const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+      if (file.size > MAX_AVATAR_SIZE) { showToast('Image must be under 2 MB', 'error'); return; }
     const reader = new FileReader();
     reader.onload = evt => openCropPopup(evt.target.result, csrfToken);
     reader.readAsDataURL(file);
@@ -323,7 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         showToast(data.error || 'Failed to disable 2FA.', 'error');
       }
-    } catch { showToast('Something went wrong.', 'error'); }
+    } catch (err) {
+      console.error('Failed to disable 2FA:', err);
+      showToast('Something went wrong.', 'error');
+    }
     btn.disabled = false;
   });
 
@@ -436,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Profile picture updated.', 'success');
             close();
           } else showToast('Failed to upload', 'error');
-        } catch { showToast('Failed to upload', 'error'); }
+        } catch (err) { console.error('Avatar upload failed:', err); showToast('Failed to upload', 'error'); }
       }, 'image/png');
     });
   }

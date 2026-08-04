@@ -1,3 +1,6 @@
+const AUTO_HOST_RELOAD_DELAY_MS = 900;
+const DEFAULT_DB_PORT = 3306;
+
 function showConfirmModal(title, message, onConfirm) {
   window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Delete', onConfirm });
 }
@@ -12,7 +15,7 @@ async function autoGenerateHost() {
     const result = await response.json();
     if (result.success) {
       showToast(result.created ? 'Host generated and connection verified.' : 'Host already exists. Connection verified.', 'success');
-      setTimeout(() => window.location.reload(), 900);
+      setTimeout(() => window.location.reload(), AUTO_HOST_RELOAD_DELAY_MS);
     } else {
       showToast(result.error || 'Failed to auto-generate host', 'error');
       if (btn) btn.disabled = false;
@@ -87,7 +90,7 @@ async function deleteHost(hostId) {
     const data = {
       name: document.getElementById('hostName').value.trim(),
       host: document.getElementById('hostAddress').value.trim(),
-      port: document.getElementById('hostPort').value || 3306,
+      port: document.getElementById('hostPort').value || DEFAULT_DB_PORT,
       username: document.getElementById('hostUser').value.trim(),
       password: document.getElementById('hostPassword').value,
       nodeId: document.getElementById('hostNode')?.value || '',

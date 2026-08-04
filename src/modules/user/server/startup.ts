@@ -128,9 +128,10 @@ export function registerStartupRoutes(router: Router): void {
         let serverVariables: ServerVariable[] = [];
         if (server.Variables) {
           try {
-            serverVariables = JSON.parse(
-              server.Variables,
-            ) as ServerVariable[];
+            const parsed: unknown = JSON.parse(server.Variables);
+            if (Array.isArray(parsed)) {
+              serverVariables = parsed;
+            }
           } catch (error) {
             logger.error('Error parsing server variables:', error);
           }
@@ -171,17 +172,7 @@ export function registerStartupRoutes(router: Router): void {
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
-      let startCommand;
-      const contentType = req.headers['content-type'] || '';
-
-      if (contentType.includes('application/json')) {
-        startCommand = req.body.startCommand;
-      } else {
-        startCommand = req.body.startCommand;
-        logger.info(
-          `Processing form data for startup command: ${startCommand}`,
-        );
-      }
+      const startCommand = req.body.startCommand;
 
       logger.info(
         `Updating startup command for server ${serverId}: ${startCommand}`,
@@ -534,7 +525,10 @@ export function registerStartupRoutes(router: Router): void {
       let definitions: ServerVariable[] = [];
       if (storedServer?.Variables) {
         try {
-          definitions = JSON.parse(storedServer.Variables) as ServerVariable[];
+          const parsed: unknown = JSON.parse(storedServer.Variables);
+          if (Array.isArray(parsed)) {
+            definitions = parsed;
+          }
         } catch {
           logger.error('Error parsing stored variables for validation');
         }

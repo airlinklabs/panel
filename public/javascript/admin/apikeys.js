@@ -1,3 +1,7 @@
+const API_KEY_DELETE_RELOAD_DELAY_MS = 700;
+const STAGGER_DELAY_MS = 30;
+const ROW_ANIMATION_DURATION_MS = 200;
+
 function showConfirmModal(title, message, onConfirm) {
   const modal = document.createElement('div');
   modal.className = 'fixed inset-0 bg-black/60 z-50 flex items-center justify-center';
@@ -26,7 +30,7 @@ function confirmDeleteApiKey(keyId) {
     }).then(function(res) {
       if (res.ok) {
         showToast('API key deleted', 'success');
-        setTimeout(function() { location.reload(); }, 700);
+        setTimeout(function() { location.reload(); }, API_KEY_DELETE_RELOAD_DELAY_MS);
         return;
       }
       return res.json().then(function(data) {
@@ -51,7 +55,7 @@ function confirmDeleteApiKey(keyId) {
 }
 
 (function staggerRows() {
-  var rows = document.querySelectorAll('tbody tr');
+  const rows = document.querySelectorAll('tbody tr');
   rows.forEach(function(row, i) {
     row.style.opacity = '0';
     row.style.transform = 'translateY(5px)';
@@ -60,7 +64,7 @@ function confirmDeleteApiKey(keyId) {
       row.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
       row.style.opacity = '1';
       row.style.transform = 'translateY(0)';
-      setTimeout(function() { row.style.transition = ''; row.style.opacity = ''; row.style.transform = ''; }, 200);
-    }, i * 30);
+      setTimeout(function() { row.style.transition = ''; row.style.opacity = ''; row.style.transform = ''; }, ROW_ANIMATION_DURATION_MS);
+    }, i * STAGGER_DELAY_MS);
   });
 })();

@@ -77,7 +77,7 @@ const adminModule: Module = {
                 airlinkCodename = String(cfg.meta.codename);
               }
             }
-          } catch (error) {
+          } catch (error: unknown) {
             logger.error('Error reading storage/config.json for codename:', error);
           }
 
@@ -91,7 +91,7 @@ const adminModule: Module = {
                   vcodeBg = '/assets/vcode/' + match;
                 }
               }
-            } catch (error) {
+            } catch (error: unknown) {
               logger.error('Error scanning vcode assets:', error);
             }
           }
@@ -109,7 +109,7 @@ const adminModule: Module = {
             airlinkCodename,
             vcodeBg,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
@@ -126,7 +126,7 @@ const adminModule: Module = {
         try {
           const updateInfo = await checkForUpdates();
           res.json(updateInfo);
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error checking for updates:', error);
           res.status(500).json({ error: 'Error checking for updates' });
         }
@@ -145,17 +145,15 @@ const adminModule: Module = {
           } else {
             res.status(500).json({ error: 'Error performing update' });
           }
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error performing update:', error);
           res.status(500).json({ error: 'Error performing update' });
         }
       },
     );
 
-
     return router;
   },
 };
-
 
 export default adminModule;

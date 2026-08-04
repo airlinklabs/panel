@@ -18,6 +18,13 @@ import {
   getImageFeatures,
 } from './shared';
 
+interface FsFileEntry {
+  name: string;
+  type: 'file' | 'directory';
+  size?: number;
+  modified?: string;
+}
+
 export function registerFilesRoutes(router: Router): void {
   /*
    * File system : Files
@@ -60,7 +67,7 @@ export function registerFilesRoutes(router: Router): void {
           return;
         }
 
-        const filesResponse = await daemonRequest<any[]>({
+        const filesResponse = await daemonRequest<FsFileEntry[]>({
           method: 'GET',
           path: '/fs/list',
           nodeAddress: server.node.address,
@@ -69,12 +76,12 @@ export function registerFilesRoutes(router: Router): void {
           params: { id: server.UUID, path },
         });
 
-        let files = filesResponse.data as any[];
-        files = typeof files === 'string' ? JSON.parse(files) : files;
+        let files: FsFileEntry[] = filesResponse.data as FsFileEntry[];
+        files = typeof files === 'string' ? JSON.parse(files as unknown as string) : files;
 
-        files = files.filter((file: any) => file.name !== 'airlink');
+        files = files.filter((file) => file.name !== 'airlink');
 
-        files = files.sort((a: any, b: any) => {
+        files = files.sort((a, b) => {
           if (a.type === 'directory' && b.type === 'file') {
             return -1;
           } else if (a.type === 'file' && b.type === 'directory') {
@@ -99,12 +106,13 @@ export function registerFilesRoutes(router: Router): void {
           serverStatus,
           settings,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errCode = error && typeof error === 'object' && 'code' in error ? String((error as { code: unknown }).code) : undefined;
         if (
-          error?.code !== 'ECONNREFUSED' &&
-          error?.code !== 'ETIMEDOUT' &&
-          error?.code !== 'ENOTFOUND' &&
-          error?.code !== 'ERR_BAD_RESPONSE'
+          errCode !== 'ECONNREFUSED' &&
+          errCode !== 'ETIMEDOUT' &&
+          errCode !== 'ENOTFOUND' &&
+          errCode !== 'ERR_BAD_RESPONSE'
         ) {
           logger.error('Error fetching files:', error);
         }
@@ -240,7 +248,7 @@ export function registerFilesRoutes(router: Router): void {
         } else {
           res.status(response.status).json({ error: response.data?.message || 'Failed to create folder' });
         }
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Error creating folder:', error);
         res.status(502).json({ error: 'Failed to create folder' });
       }
@@ -298,11 +306,11 @@ export function registerFilesRoutes(router: Router): void {
         } else {
           res.status(response.status).json({ error: response.data?.message || 'Failed to zip files' });
         }
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Error zipping files:', error);
         res
           .status(500)
-          .json({ error: 'Failed to zip files: ' + (error?.message || 'An unexpected error occurred.') });
+          .json({ error: 'Failed to zip files: ' + (error instanceof Error ? error.message : 'An unexpected error occurred.') });
       }
     },
   );
@@ -363,18 +371,19 @@ export function registerFilesRoutes(router: Router): void {
               details: response.data,
             });
           }
-        } catch (innerError: any) {
+        } catch (innerError: unknown) {
+          const inner = innerError && typeof innerError === 'object' ? innerError as Record<string, unknown> : {};
           logger.error('Error during unzip request:', {
             error: innerError,
-            response: innerError?.body,
-            status: innerError?.status,
+            response: inner.body,
+            status: inner.status,
           });
         }
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Error unzipping files:', error);
         res
           .status(500)
-          .json({ error: 'Failed to unzip files: ' + (error?.message || 'An unexpected error occurred.') });
+          .json({ error: 'Failed to unzip files: ' + (error instanceof Error ? error.message : 'An unexpected error occurred.') });
       }
     },
   );
@@ -436,10 +445,12 @@ export function registerFilesRoutes(router: Router): void {
           await logActivity(req, 'file:delete', { serverId: String(server.UUID), metadata: { path: filePath } });
           res.json({ success: true });
           return;
-        } catch (deleteError: any) {
-          const statusCode = deleteError?.status || 500;
+        } catch (deleteError: unknown) {
+          const del = deleteError && typeof deleteError === 'object' ? deleteError as Record<string, unknown> : {};
+          const statusCode = (del.status as number) || 500;
+          const body = del.body && typeof del.body === 'object' ? del.body as Record<string, unknown> : undefined;
           const errorMessage =
-            deleteError?.body?.error || deleteError?.message || 'Failed to delete file';
+            (body?.error as string) || (del.message as string) || 'Failed to delete file';
 
           logger.error(
             `Error deleting ${filePath}: ${errorMessage}`,
@@ -661,20 +672,22 @@ export function registerFilesRoutes(router: Router): void {
               path: relativePath,
             });
           }
-        } catch (error: any) {
-          if (error?.status && error?.body) {
+        } catch (error: unknown) {
+          const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+          const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
+          if (err.status && errBody) {
             logger.error(
-              `Error uploading file - Status: ${error.status}, Data:`,
-              error.body,
+              `Error uploading file - Status: ${err.status}, Data:`,
+              errBody,
             );
-            res.status(error.status).json({
-              error: error.body?.error || 'Failed to upload file',
-              details: error.body,
+            res.status(err.status as number).json({
+              error: (errBody.error as string) || 'Failed to upload file',
+              details: errBody,
             });
-          } else if (error?.message) {
+          } else if (err.message) {
             logger.error(
               'Error uploading file - No response received:',
-              error.message,
+              err.message,
             );
             res.status(500).json({
               error:
@@ -683,7 +696,7 @@ export function registerFilesRoutes(router: Router): void {
           } else {
             logger.error(
               'Error uploading file - Request setup error:',
-              error?.message || error,
+              error,
             );
             res
               .status(500)
@@ -768,10 +781,12 @@ export function registerFilesRoutes(router: Router): void {
           file: pullResponse.data.file,
           path: pullResponse.data.path,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Error pulling file from URL:', error);
+        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+        const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
         res.status(500).json({
-          error: error?.body?.error || error?.message || 'Failed to pull file from URL',
+          error: (errBody?.error as string) || (err.message as string) || 'Failed to pull file from URL',
         });
       }
     },

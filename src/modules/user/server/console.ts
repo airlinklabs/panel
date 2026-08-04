@@ -19,6 +19,12 @@ import {
   restartServerContainer,
 } from './shared';
 
+const LOG_HISTORY_TIMEOUT_MS = 8_000;
+const STATUS_TIMEOUT_MS = 4_000;
+const CONSOLE_LOG_TIMEOUT_MS = 5_000;
+const STOP_STATE_TTL_MS = 120_000;
+const RESTART_DELAY_MS = 2_000;
+
 export function registerConsoleRoutes(router: Router): void {
   router.get(
     '/server/:id',
@@ -88,7 +94,7 @@ export function registerConsoleRoutes(router: Router): void {
     requireSubUserPermission('console'),
     async (req: Request, res: Response): Promise<void> => {
       try {
-        const serverId = req.params?.id as string;
+        const serverId = getParamAsString(req.params?.id);
         const user = req.session?.user;
         if (!user?.id || !serverId) {
           res.status(401).json({ error: 'Unauthorized' });
@@ -136,7 +142,7 @@ export function registerConsoleRoutes(router: Router): void {
           nodeAddress: node.address,
           nodePort: node.port,
           nodeKey: node.key,
-          timeout: 8000,
+          timeout: LOG_HISTORY_TIMEOUT_MS,
         });
 
         res.status(200).json({ logs: response.data?.logs ?? [] });
@@ -182,7 +188,7 @@ export function registerConsoleRoutes(router: Router): void {
             nodeAddress: node.address,
             nodePort: node.port,
             nodeKey: node.key,
-            timeout: 4000,
+            timeout: STATUS_TIMEOUT_MS,
           })
             .then(r => ({ state: r.data?.state, error: r.data?.error }))
             .catch(() => null),
@@ -226,7 +232,7 @@ export function registerConsoleRoutes(router: Router): void {
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
-          timeout: 5000,
+          timeout: CONSOLE_LOG_TIMEOUT_MS,
         });
 
         res.json({ lines: response.data?.lines ?? [] });
@@ -321,7 +327,7 @@ export function registerConsoleRoutes(router: Router): void {
                   `Cleared stopping state for server ${serverId} after timeout`,
                 );
               }
-            }, 120000);
+            }, STOP_STATE_TTL_MS);
 
             res.status(200).json({
               success: true,
@@ -343,9 +349,10 @@ export function registerConsoleRoutes(router: Router): void {
             logger.info('Container stopped successfully: ' + serverId);
             await logActivity(req, 'server:stop', { serverId: String(serverId) });
             return;
-          } catch (stopError: any) {
+          } catch (stopError: unknown) {
+            const stopErr = stopError as { status?: number } | undefined;
             if (
-              stopError?.status === 404
+              stopErr?.status === 404
             ) {
               logger.info(
                 'Container already stopped or not found: ' + serverId,
@@ -383,7 +390,7 @@ export function registerConsoleRoutes(router: Router): void {
           }
 
           try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, RESTART_DELAY_MS));
             await startServerContainer(server, String(serverId));
           } catch (error) {
             if (error instanceof Error && error.message === 'Docker image not found.') {
@@ -541,7 +548,7 @@ export function registerConsoleRoutes(router: Router): void {
                 ) as import('./shared').ServerVariable[];
 
                 const ports = JSON.parse(serverToReinstall.Ports);
-                const primaryPort = ports.find((p: any) => p.primary);
+                const primaryPort = ports.find((p: { primary?: boolean; Port?: string }) => p.primary);
                 if (primaryPort) {
                   ServerEnv.push({
                     env: 'SERVER_PORT',
@@ -560,7 +567,7 @@ export function registerConsoleRoutes(router: Router): void {
             }
 
             const env = ServerEnv.reduce(
-              (acc: { [key: string]: any }, curr: import('./shared').ServerVariable) => {
+              (acc: Record<string, string | number | boolean>, curr: import('./shared').ServerVariable) => {
                 if (
                   curr.env &&
                   curr.value !== undefined &&
@@ -635,14 +642,15 @@ export function registerConsoleRoutes(router: Router): void {
                   where: { UUID: getParamAsString(serverId) },
                   data: { Queued: false },
                 });
-              } catch (error: any) {
+              } catch (error: unknown) {
                 logger.error(
                   `Error during reinstallation of server ${serverId}:`,
                   error,
                 );
-                if (error?.status) {
-                  logger.error(`Response status: ${error.status}`);
-                  logger.error('Response data:', error?.body);
+                const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+                if (err.status) {
+                  logger.error(`Response status: ${err.status}`);
+                  logger.error('Response data:', err.body);
                 }
                 await prisma.server.update({
                   where: { UUID: getParamAsString(serverId) },

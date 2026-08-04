@@ -2,6 +2,7 @@
 import prisma from '../db';
 import logger from './logger';
 import { daemonRequest } from './utils/core/daemonRequest';
+import { parseServerPorts } from './utils/server/ports';
 
 
 // Interval in milliseconds (5 minutes)
@@ -27,8 +28,8 @@ export async function collectPlayerStats(): Promise<void> {
       servers.map(async (server) => {
         try {
           // Parse ports to find the primary port
-          const ports = JSON.parse(server.Ports || '[]') as Array<{ primary?: boolean; Port?: string }>;
-          const primaryPort = ports.find((p) => p.primary)?.Port;
+          const ports = parseServerPorts(server.Ports);
+          const primaryPort = ports.find((p) => p.primary)?.externalPort?.toString();
 
           if (!primaryPort) {
             return {

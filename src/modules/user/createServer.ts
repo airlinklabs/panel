@@ -18,6 +18,7 @@ import {
   parseImagePortRequirements,
   serializeServerPorts,
 } from '../../handlers/utils/server/ports';
+import type { ServerVariable } from './server/shared';
 
 function pickAvailablePorts(pool: number[], usedPorts: number[], count: number): number[] {
   const picked: number[] = [];
@@ -28,19 +29,33 @@ function pickAvailablePorts(pool: number[], usedPorts: number[], count: number):
   return picked;
 }
 
-async function resolveUserServerLimit(userId: number, settings: any): Promise<number> {
+const DEFAULT_MAX_MEMORY_MB = 512;
+const DEFAULT_MAX_CPU_PERCENT = 100;
+const DEFAULT_MAX_STORAGE_MB = 5120;
+const MIN_MEMORY_MB = 128;
+const MIN_CPU_PERCENT = 50;
+const MIN_STORAGE_MB = 128;
+const DEFAULT_BACKUP_LIMIT = 5;
+const DEFAULT_DATABASE_LIMIT = 5;
+
+interface PortAllocation {
+  assignedPorts: number[];
+  createdServer: { UUID: string; id: number };
+}
+
+async function resolveUserServerLimit(userId: number, settings: { defaultServerLimit?: number | null } | null): Promise<number> {
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) return 0;
   if (user.serverLimit !== null && user.serverLimit !== undefined) return user.serverLimit;
   return settings?.defaultServerLimit ?? 0;
 }
 
-async function resolveUserResourceLimits(userId: number, settings: any) {
+async function resolveUserResourceLimits(userId: number, settings: { defaultMaxMemory?: number | null; defaultMaxCpu?: number | null; defaultMaxStorage?: number | null } | null) {
   const user = await prisma.users.findUnique({ where: { id: userId } });
   return {
-    maxMemory: user?.maxMemory ?? settings?.defaultMaxMemory ?? 512,
-    maxCpu: user?.maxCpu ?? settings?.defaultMaxCpu ?? 100,
-    maxStorage: user?.maxStorage ?? settings?.defaultMaxStorage ?? 5120,
+    maxMemory: user?.maxMemory ?? settings?.defaultMaxMemory ?? DEFAULT_MAX_MEMORY_MB,
+    maxCpu: user?.maxCpu ?? settings?.defaultMaxCpu ?? DEFAULT_MAX_CPU_PERCENT,
+    maxStorage: user?.maxStorage ?? settings?.defaultMaxStorage ?? DEFAULT_MAX_STORAGE_MB,
   };
 }
 
@@ -154,14 +169,14 @@ const userCreateServerModule: Module = {
         const storage = parseInt(Storage);
         const swap = Swap !== undefined && Swap !== '' ? parseInt(Swap) : 0;
 
-        if (isNaN(memory) || memory < 128 || memory > resourceLimits.maxMemory) {
-          return res.status(400).json({ error: `Memory must be between 128 and ${resourceLimits.maxMemory} MB.` });
+        if (isNaN(memory) || memory < MIN_MEMORY_MB || memory > resourceLimits.maxMemory) {
+          return res.status(400).json({ error: `Memory must be between ${MIN_MEMORY_MB} and ${resourceLimits.maxMemory} MB.` });
         }
-        if (isNaN(cpu) || cpu < 50 || cpu > resourceLimits.maxCpu) {
-          return res.status(400).json({ error: `CPU must be between 50 and ${resourceLimits.maxCpu}% (50% = half a core).` });
+        if (isNaN(cpu) || cpu < MIN_CPU_PERCENT || cpu > resourceLimits.maxCpu) {
+          return res.status(400).json({ error: `CPU must be between ${MIN_CPU_PERCENT} and ${resourceLimits.maxCpu}% (${MIN_CPU_PERCENT}% = half a core).` });
         }
-        if (isNaN(storage) || storage < 128 || storage > resourceLimits.maxStorage) {
-          return res.status(400).json({ error: `Storage must be between 128 and ${resourceLimits.maxStorage} MB.` });
+        if (isNaN(storage) || storage < MIN_STORAGE_MB || storage > resourceLimits.maxStorage) {
+          return res.status(400).json({ error: `Storage must be between ${MIN_STORAGE_MB} and ${resourceLimits.maxStorage} MB.` });
         }
 
         const used = await prisma.server.aggregate({
@@ -206,27 +221,33 @@ const userCreateServerModule: Module = {
         const portRequirements = parseImagePortRequirements(image.portRequirements);
         const requiredPortCount = Math.max(1, portRequirements.length);
 
-        let dockerImages: any[] = [];
+        let dockerImages: Record<string, string>[] = [];
         try {
-          dockerImages = JSON.parse(image.dockerImages || '[]');
+          const parsed: unknown = JSON.parse(image.dockerImages || '[]');
+          if (Array.isArray(parsed)) {
+            dockerImages = parsed;
+          }
         } catch {
           return res.status(500).json({ error: 'Image docker configuration is invalid.' });
         }
 
-        const imageDocker = dockerImages.find((img: any) => Object.keys(img).includes(dockerImage));
+        const imageDocker = dockerImages.find((img) => Object.keys(img).includes(dockerImage));
         if (!imageDocker) return res.status(400).json({ error: 'Docker image variant not found.' });
 
         const startCommand = image.startup;
         if (!startCommand) return res.status(500).json({ error: 'Image has no startup command.' });
 
-        let imageVariables: any[] = [];
+        let imageVariables: ServerVariable[] = [];
         try {
-          imageVariables = JSON.parse(image.variables || '[]');
+          const parsed: unknown = JSON.parse(image.variables || '[]');
+          if (Array.isArray(parsed)) {
+            imageVariables = parsed;
+          }
         } catch {
           imageVariables = [];
         }
 
-        const { assignedPorts, createdServer }: { assignedPorts: number[]; createdServer: any } = await withNodePortLock(node.id, async () => {
+        const { assignedPorts, createdServer }: PortAllocation = await withNodePortLock(node.id, async () => {
           const pool = await getNodePortPool(node.id);
           const existingServers = await prisma.server.findMany({ where: { nodeId: node.id } });
           const picked = pickAvailablePorts(pool, getUsedExternalPorts(existingServers), requiredPortCount);
@@ -256,8 +277,8 @@ const userCreateServerModule: Module = {
               Swap: swap,
               Cpu: cpu,
               Storage: storage,
-              backupLimit: 5,
-              databaseLimit: 5,
+              backupLimit: DEFAULT_BACKUP_LIMIT,
+              databaseLimit: DEFAULT_DATABASE_LIMIT,
               Variables: JSON.stringify(imageVariables),
               StartCommand: startCommand,
               dockerImage: JSON.stringify(imageDocker),
@@ -314,10 +335,12 @@ const userCreateServerModule: Module = {
               path: '/container',
               body: { id: server.UUID },
             });
-          } catch (err: any) {
+          } catch (err: unknown) {
+            const errObj = err && typeof err === 'object' ? err as Record<string, unknown> : {};
+            const errBody = errObj.body && typeof errObj.body === 'object' ? errObj.body as Record<string, unknown> : undefined;
             const isGone =
-              err.status === 404 ||
-              (err.body as any)?.error?.includes('not exist');
+              errObj.status === 404 ||
+              (errBody?.error as string)?.includes('not exist');
 
             if (!isGone) {
               logger.error('Error deleting container from daemon:', err);

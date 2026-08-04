@@ -5,7 +5,7 @@
     <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
@@ -171,14 +171,14 @@
 <!-- Add Database Modal -->
 <div id="addDatabaseModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0 bg-transparent" aria-hidden="true" onclick="closeAddDatabaseModal()"></div>
-  <div id="addDatabasePanel" class="al-sheet-panel relative w-full max-w-md mx-4 rounded-2xl shadow-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addDatabaseTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border)">
-    <div class="flex items-center justify-between mb-5">
+  <div id="addDatabasePanel" class="al-sheet-panel relative w-full max-w-md mx-4 rounded-2xl shadow-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="addDatabaseTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border)">
+    <div class="flex justify-between items-center px-6 py-4 border-b">
       <h3 id="addDatabaseTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h3>
-      <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-ghost p-1.5 -mr-1.5" aria-label="Close">
-        <%- icon('x', { class: 'w-4 h-4' }) %>
+      <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="space-y-4">
+    <div class="px-6 py-4 space-y-4 overflow-y-auto">
       <div>
         <label class="al-label"><%= req.translations.databaseHostLabel || 'Database host' %></label>
         <select id="dbHostSelect" class="al-input w-full">
@@ -188,7 +188,7 @@
         </select>
         <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)"><%= req.translations.dbProvisionHint || 'A database, user and password will be provisioned on this host.' %></p>
       </div>
-      <div class="flex gap-2 pt-1">
+      <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
           <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
           <%= req.translations.cancel || 'Cancel' %>
@@ -301,6 +301,7 @@ window.rotatePassword = async (id) => {
   window.modal.confirm({
     title: t.rotatePasswordTitle || 'Rotate password',
     body: t.rotatePasswordConfirm || 'Generate a new password for this database user? Existing connections will be dropped.',
+    danger: true,
     confirmLabel: t.rotate || 'Rotate',
     onConfirm: async () => {
       try {

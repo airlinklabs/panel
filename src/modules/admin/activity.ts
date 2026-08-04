@@ -82,7 +82,7 @@ const activityModule: Module = {
             totalPages: Math.max(Math.ceil(total / ACTIVITY_PAGE_SIZE), 1),
             total,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching activity log:', error);
           res.status(500).json({ message: 'Error fetching activity log.' });
         }

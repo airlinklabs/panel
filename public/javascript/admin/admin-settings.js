@@ -1,3 +1,8 @@
+const DEFAULT_SMTP_PORT = 587;
+const DEFAULT_UPLOAD_LIMIT = 100;
+const RELOAD_DELAY_MS = 1200;
+const BAN_RELOAD_DELAY_MS = 800;
+
 (function () {
   function post(url, body, btn) {
     var orig = btn ? btn.textContent : '';
@@ -25,9 +30,9 @@
   /* ── Appearance ──────────────────────────── */
   window.tabHandlers['appearance'] = function() {
     if (!formAppearance) return;
-    var btn = document.getElementById('tab-save-btn');
-    var fd = new FormData(formAppearance);
-    post('/admin/settings', fd, btn).then(function() { setTimeout(function() { location.reload(); }, 1200); });
+    const btn = document.getElementById('tab-save-btn');
+    const fd = new FormData(formAppearance);
+    post('/admin/settings', fd, btn).then(function() { setTimeout(function() { location.reload(); }, RELOAD_DELAY_MS); });
   };
   window.tabLabels['appearance'] = 'Save';
   window.tabResetHandlers['appearance'] = function() {
@@ -40,7 +45,7 @@
         fetch('/admin/settings/reset', { method: 'POST' })
           .then(function(r) { return r.json(); })
           .then(function(d) {
-            if (d.success) { showToast('Settings reset to defaults.', 'success'); setTimeout(function() { location.reload(); }, 1200); }
+            if (d.success) { showToast('Settings reset to defaults.', 'success'); setTimeout(function() { location.reload(); }, RELOAD_DELAY_MS); }
             else showToast(d.error || 'Failed', 'error');
           })
           .catch(function() { showToast('Something went wrong.', 'error'); });
@@ -50,19 +55,19 @@
 
   /* ── Servers ─────────────────────────────── */
   window.tabHandlers['servers'] = function() {
-    var btn = document.getElementById('tab-save-btn');
+    const btn = document.getElementById('tab-save-btn');
     post('/admin/settings/server-policy', {
       allowUserCreateServer: document.getElementById('allowUserCreateServer').checked,
       allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
-      defaultServerLimit:    parseInt(document.getElementById('defaultServerLimit').value, 10),
-      defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value,   10),
-      defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value,      10),
-      defaultMaxStorage:     parseInt(document.getElementById('defaultMaxStorage').value,  10),
-      defaultMaxDatabases:   parseInt(document.getElementById('defaultMaxDatabases').value, 10),
-      defaultOverallocateMemory: parseInt(document.getElementById('defaultOverallocateMemory').value, 10),
-      defaultOverallocateDisk:   parseInt(document.getElementById('defaultOverallocateDisk').value, 10),
-      defaultOverallocateCpu:    parseInt(document.getElementById('defaultOverallocateCpu').value, 10),
-      uploadLimit:           parseInt(document.getElementById('uploadLimitInput').value,   10) || 100,
+      defaultServerLimit:    parseInt(document.getElementById('defaultServerLimit').value, 10) || 0,
+      defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value,   10) || 0,
+      defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value,      10) || 0,
+      defaultMaxStorage:     parseInt(document.getElementById('defaultMaxStorage').value,  10) || 0,
+      defaultMaxDatabases:   parseInt(document.getElementById('defaultMaxDatabases').value, 10) || 0,
+      defaultOverallocateMemory: parseInt(document.getElementById('defaultOverallocateMemory').value, 10) || 0,
+      defaultOverallocateDisk:   parseInt(document.getElementById('defaultOverallocateDisk').value, 10) || 0,
+      defaultOverallocateCpu:    parseInt(document.getElementById('defaultOverallocateCpu').value, 10) || 0,
+      uploadLimit:           parseInt(document.getElementById('uploadLimitInput').value,   10) || DEFAULT_UPLOAD_LIMIT,
     }, btn);
   };
   window.tabLabels['servers'] = 'Save';
@@ -70,15 +75,15 @@
 
   /* ── Security ────────────────────────────── */
   window.tabHandlers['security'] = function() {
-    var btn = document.getElementById('tab-save-btn');
+    const btn = document.getElementById('tab-save-btn');
     btn.disabled = true; btn.textContent = 'Saving\u2026';
 
     Promise.all([
       post('/admin/settings/security', {
         rateLimitEnabled:    document.getElementById('rateLimitEnabled').checked,
-        rateLimitRpm:        parseInt(document.getElementById('rateLimitRpm').value, 10),
-        loginMaxAttempts:    parseInt(document.getElementById('loginMaxAttempts').value, 10),
-        loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes').value, 10),
+        rateLimitRpm:        parseInt(document.getElementById('rateLimitRpm').value, 10) || 0,
+        loginMaxAttempts:    parseInt(document.getElementById('loginMaxAttempts').value, 10) || 0,
+        loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes').value, 10) || 0,
         enforceDaemonHttps:  document.getElementById('enforceDaemonHttps').checked,
         require2faForAdmins: document.getElementById('require2faForAdmins').checked,
         behindReverseProxy:  document.getElementById('behindReverseProxy').checked,
@@ -93,7 +98,7 @@
       })()),
       post('/admin/settings/smtp', {
         smtpHost:     document.getElementById('smtpHost').value.trim() || null,
-        smtpPort:     parseInt(document.getElementById('smtpPort').value, 10) || 587,
+        smtpPort:     parseInt(document.getElementById('smtpPort').value, 10) || DEFAULT_SMTP_PORT,
         smtpUser:     document.getElementById('smtpUser').value.trim() || null,
         smtpPassword: document.getElementById('smtpPassword').value || null,
         smtpFrom:     document.getElementById('smtpFrom').value.trim() || null,
@@ -110,7 +115,8 @@
       }),
     ]).then(function() {
       btn.disabled = false; btn.textContent = 'Save';
-    }).catch(function() {
+    }).catch(function(err) {
+      console.error('Security settings save error:', err);
       btn.disabled = false; btn.textContent = 'Save';
     });
   };
@@ -119,9 +125,9 @@
 
   /* ── SMTP test ──────────────────────────── */
   document.getElementById('smtpTestBtn').addEventListener('click', function () {
-    var btn = this;
-    var result = document.getElementById('smtpTestResult');
-    var orig = btn.innerHTML;
+    const btn = this;
+    const result = document.getElementById('smtpTestResult');
+    const orig = btn.innerHTML;
     btn.disabled = true;
     btn.textContent = 'Testing\u2026';
     result.classList.add('hidden');
@@ -142,9 +148,9 @@
 
   /* ── S3 test ──────────────────────────── */
   document.getElementById('s3TestBtn').addEventListener('click', function () {
-    var btn = this;
-    var result = document.getElementById('s3TestResult');
-    var orig = btn.innerHTML;
+    const btn = this;
+    const result = document.getElementById('s3TestResult');
+    const orig = btn.innerHTML;
     btn.disabled = true;
     btn.textContent = 'Testing\u2026';
     result.classList.add('hidden');
@@ -165,7 +171,7 @@
 
   /* ── IP banning (not tab-specific) ───────── */
   document.getElementById('banIpBtn').addEventListener('click', function () {
-    var ip = document.getElementById('banIpInput').value.trim();
+    const ip = document.getElementById('banIpInput').value.trim();
     if (!ip) return showToast('Enter an IP address', 'error');
     fetch('/admin/settings/ban-ip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ip }) })
       .then(function(r) { return r.json(); })
@@ -173,7 +179,7 @@
         if (!d.success) throw new Error(d.error || 'Failed');
         document.getElementById('banIpInput').value = '';
         showToast('IP banned. Bye bye.', 'success');
-        setTimeout(function() { location.reload(); }, 800);
+        setTimeout(function() { location.reload(); }, BAN_RELOAD_DELAY_MS);
       })
       .catch(function(err) { showToast(err.message || 'Failed', 'error'); });
   });
@@ -186,7 +192,7 @@
       .then(function(d) {
         if (!d.success) throw new Error(d.error || 'Failed');
         showToast('IP unbanned. Welcome back.', 'success');
-        setTimeout(function() { location.reload(); }, 800);
+        setTimeout(function() { location.reload(); }, BAN_RELOAD_DELAY_MS);
       })
       .catch(function(err) { showToast(err.message || 'Failed', 'error'); });
   });

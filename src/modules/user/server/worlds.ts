@@ -40,7 +40,7 @@ export function registerWorldsRoutes(router: Router): void {
 
         try {
           const serverStatusInput = getServerStatusInput(server);
-          const response = await daemonRequest<any[]>({
+          const response = await daemonRequest<{ name: string; type: string }[]>({
             method: 'GET',
             path: '/fs/list',
             nodeAddress: server.node.address,
@@ -75,12 +75,15 @@ export function registerWorldsRoutes(router: Router): void {
             req,
             settings,
           });
-        } catch (fileRequestError: any) {
+        } catch (fileRequestError: unknown) {
+          const errCode = fileRequestError && typeof fileRequestError === 'object' && 'code' in fileRequestError
+            ? String((fileRequestError as { code: unknown }).code)
+            : undefined;
           if (
-            fileRequestError?.code !== 'ECONNREFUSED' &&
-            fileRequestError?.code !== 'ETIMEDOUT' &&
-            fileRequestError?.code !== 'ENOTFOUND' &&
-            fileRequestError?.code !== 'ERR_BAD_RESPONSE'
+            errCode !== 'ECONNREFUSED' &&
+            errCode !== 'ETIMEDOUT' &&
+            errCode !== 'ENOTFOUND' &&
+            errCode !== 'ERR_BAD_RESPONSE'
           ) {
             logger.error('Error fetching files:', fileRequestError);
           }

@@ -1,3 +1,8 @@
+const REFRESH_INTERVAL_MS = 300000;
+const DATA_COLLECTION_DELAY_MS = 1000;
+const CHART_TICK_COLOR = '#FFFFFF';
+const CHART_GRID_COLOR = 'rgba(255, 255, 255, 0.1)';
+
 const ctx = document.getElementById('playerChart').getContext('2d');
 const playerChart = new Chart(ctx, {
   type: 'line',
@@ -27,7 +32,7 @@ const playerChart = new Chart(ctx, {
     plugins: {
       legend: {
         labels: {
-          color: '#FFFFFF'
+          color: CHART_TICK_COLOR
         }
       },
       tooltip: {
@@ -41,7 +46,7 @@ const playerChart = new Chart(ctx, {
     scales: {
       x: {
         ticks: {
-          color: '#FFFFFF',
+          color: CHART_TICK_COLOR,
           maxRotation: 45,
           minRotation: 45,
           callback: function(value, index, values) {
@@ -53,26 +58,26 @@ const playerChart = new Chart(ctx, {
           }
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)'
+          color: CHART_GRID_COLOR
         }
       },
       y: {
         position: 'right',
         beginAtZero: true,
         ticks: {
-          color: '#FFFFFF',
+          color: CHART_TICK_COLOR,
           padding: 10,
           font: {
             weight: 'bold'
           }
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)'
+          color: CHART_GRID_COLOR
         },
         title: {
           display: true,
           text: 'Players',
-          color: '#FFFFFF',
+          color: CHART_TICK_COLOR,
           font: {
             size: 12
           }
@@ -169,7 +174,7 @@ async function fetchPlayerData() {
 
 fetchPlayerData();
 
-const refreshInterval = setInterval(fetchPlayerData, 300000);
+const refreshInterval = setInterval(fetchPlayerData, REFRESH_INTERVAL_MS);
 
 document.getElementById('refreshBtn').addEventListener('click', fetchPlayerData);
 
@@ -183,7 +188,7 @@ async function triggerDataCollection() {
     if (data.success) {
       console.log('Player statistics collected successfully');
       showToast('Player statistics collected.', 'success');
-      setTimeout(fetchPlayerData, 1000);
+      setTimeout(fetchPlayerData, DATA_COLLECTION_DELAY_MS);
     } else {
       console.error('Error collecting player statistics:', data.error);
       showToast(data.error || 'Failed to collect statistics.', 'error');

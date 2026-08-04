@@ -15,6 +15,20 @@ let lastQuery      = '';
 let panelClosing   = false;
 let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
 
+const SEARCH_DEBOUNCE_MS = 150;
+const CLOSE_ANIMATION_MS = 230;
+const MAX_RECENT_SEARCHES = 5;
+const MIN_RECENT_LENGTH = 2;
+const FUZZY_MIN_TOKEN_LENGTH = 4;
+const FUZZY_MAX_LENGTH_DIFF = 1;
+
+const SCORE_EXACT    = 100;
+const SCORE_PREFIX   = 80;
+const SCORE_CONTAINS = 60;
+const SCORE_ALL_TOKENS = 45;
+const SCORE_ANY_TOKEN  = 30;
+const SCORE_FUZZY      = 15;
+
 const isAdmin = !!document.querySelector('a[href="/admin/overview"]');
 
 const typeIcon = {
@@ -41,10 +55,10 @@ function highlightMatch(text, term) {
 }
 
 function saveRecentSearch(term) {
-  if (!term || term.length < 2) return;
+  if (!term || term.length < MIN_RECENT_LENGTH) return;
   recentSearches = recentSearches.filter(function(s) { return s !== term; });
   recentSearches.unshift(term);
-  if (recentSearches.length > 5) recentSearches = recentSearches.slice(0, 5);
+  if (recentSearches.length > MAX_RECENT_SEARCHES) recentSearches = recentSearches.slice(0, MAX_RECENT_SEARCHES);
   localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
 }
 
@@ -70,23 +84,23 @@ function normalize(s) {
 }
 
 function fuzzyIncludes(token, haystack) {
-  if (token.length < 4) return false;
+  if (token.length < FUZZY_MIN_TOKEN_LENGTH) return false;
   const words = haystack.split(/\s+/);
   for (const w of words) {
-    if (Math.abs(w.length - token.length) > 1) continue;
+    if (Math.abs(w.length - token.length) > FUZZY_MAX_LENGTH_DIFF) continue;
     if (levenshtein(w, token) <= 1) return true;
   }
   return false;
 }
 
 function scoreTerm(term, hay) {
-  if (hay === term) return 100;
-  if (hay.startsWith(term)) return 80;
-  if (hay.includes(term)) return 60;
+  if (hay === term) return SCORE_EXACT;
+  if (hay.startsWith(term)) return SCORE_PREFIX;
+  if (hay.includes(term)) return SCORE_CONTAINS;
   const tokens = term.split(' ');
-  if (tokens.length > 1 && tokens.every(t => hay.includes(t))) return 45;
-  if (tokens.some(t => hay.includes(t))) return 30;
-  if (tokens.some(t => fuzzyIncludes(t, hay))) return 15;
+  if (tokens.length > 1 && tokens.every(t => hay.includes(t))) return SCORE_ALL_TOKENS;
+  if (tokens.some(t => hay.includes(t))) return SCORE_ANY_TOKEN;
+  if (tokens.some(t => fuzzyIncludes(t, hay))) return SCORE_FUZZY;
   return 0;
 }
 
@@ -140,6 +154,9 @@ const pageCatalog = (function() {
   return pages;
 })();
 
+const CATALOG_RESULT_LIMIT = 4;
+const NAV_RESULT_LIMIT = 5;
+
 function getCatalogResults(term) {
   const tNorm = normalize(term);
   const scored = [];
@@ -151,7 +168,7 @@ function getCatalogResults(term) {
     }
   });
   scored.sort(function(a, b) { return b.score - a.score; });
-  return scored.slice(0, 4);
+  return scored.slice(0, CATALOG_RESULT_LIMIT);
 }
 
 function getNavResults(term) {
@@ -173,7 +190,7 @@ function getNavResults(term) {
     }
   });
   scored.sort(function(a, b) { return b.score - a.score; });
-  return scored.slice(0, 5);
+  return scored.slice(0, NAV_RESULT_LIMIT);
 }
 
 function showRecommendations() {
@@ -255,9 +272,9 @@ function renderResults(items, term) {
     const wrap = document.createElement('div');
     wrap.className = 'flex flex-col items-center gap-2 px-4 py-8 text-center';
 
-    const iconEl = document.createElement('div');
-    iconEl.innerHTML = alIcon('search-x', 'w-8 h-8 mx-auto mb-1', { strokeWidth: 1.5, style: 'color:var(--theme-text-faint);' });
-    wrap.appendChild(iconEl);
+    const iconContainer = document.createElement('div');
+    iconContainer.innerHTML = alIcon('search-x', 'w-8 h-8 mx-auto mb-1', { strokeWidth: 1.5, style: 'color:var(--theme-text-faint);' });
+    wrap.appendChild(iconContainer);
 
     const msg = document.createElement('p');
     msg.className = 'text-sm font-medium text-neutral-600 dark:text-neutral-300';
@@ -389,7 +406,7 @@ function closeSearch() {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   searchPanel.classList.remove('open');
   if (reduced) done();
-  else setTimeout(done, 230);
+  else setTimeout(done, CLOSE_ANIMATION_MS);
 }
 
 searchButton.addEventListener('click', function() {
@@ -409,7 +426,7 @@ searchInput.addEventListener('input', function() {
     showRecommendations();
     return;
   }
-  searchTimeout = setTimeout(function() { doSearch(term); }, 150);
+  searchTimeout = setTimeout(function() { doSearch(term); }, SEARCH_DEBOUNCE_MS);
 });
 
 searchInput.addEventListener('keydown', function(e) {

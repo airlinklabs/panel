@@ -1,28 +1,26 @@
 (function () {
   if (window.loadingPopupSystem) return;
 
-  var overlay = null;
-  var panel = null;
-  var stepsContainer = null;
-  var progressBar = null;
-  var progressFill = null;
-  var messageEl = null;
-  var iconEl = null;
-  var currentSteps = [];
-  var currentStepIndex = -1;
+  const OVERLAY_Z_INDEX = 9999;
+  const OVERLAY_BG = 'rgba(0,0,0,0.5)';
+
+  let overlay = null;
+  let panel = null;
+  let currentSteps = [];
+  let currentStepIndex = -1;
 
   function createOverlay() {
     if (overlay) return;
-    
+
     overlay = document.createElement('div');
     overlay.id = 'loadingPopupOverlay';
     overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center al-modal-overlay';
-    overlay.style.background = 'rgba(0,0,0,0.5)';
-    
+    overlay.style.background = OVERLAY_BG;
+
     panel = document.createElement('div');
     panel.className = 'bg-white dark:bg-[#1c1c1c] rounded-2xl shadow-2xl w-full max-w-sm mx-4 al-modal-panel';
     panel.style.border = '1px solid var(--theme-border)';
-    
+
     panel.innerHTML = `
       <div class="p-6">
         <div class="flex items-center gap-3 mb-4">
@@ -49,14 +47,14 @@
         <button id="lp-close" class="px-4 py-2 text-xs font-medium rounded-xl transition hidden" style="background:var(--theme-btn-primary-bg); color:var(--theme-btn-primary-text)">Done</button>
       </div>
     `;
-    
+
     overlay.appendChild(panel);
     document.body.appendChild(overlay);
-    
+
     document.getElementById('lp-cancel').addEventListener('click', function() {
       hideLoadingPopup();
     });
-    
+
     document.getElementById('lp-close').addEventListener('click', function() {
       hideLoadingPopup();
     });
@@ -66,7 +64,7 @@
     createOverlay();
     currentSteps = [];
     currentStepIndex = -1;
-    
+
     document.getElementById('lp-spinner').classList.remove('hidden');
     document.getElementById('lp-check').classList.add('hidden');
     document.getElementById('lp-error').classList.add('hidden');
@@ -76,7 +74,7 @@
     document.getElementById('lp-close').classList.add('hidden');
     document.getElementById('lp-progress-fill').style.transform = 'scaleX(0)';
     document.getElementById('lp-progress-text').textContent = '0%';
-    
+
     Animate.openModal(overlay, panel);
   }
 
@@ -94,7 +92,7 @@
   }
 
   function setProgress(percent, message) {
-    var container = document.getElementById('lp-progress-container');
+    const container = document.getElementById('lp-progress-container');
     container.classList.remove('hidden');
     document.getElementById('lp-progress-fill').style.transform = 'scaleX(' + (percent / 100) + ')';
     document.getElementById('lp-progress-text').textContent = Math.round(percent) + '%';
@@ -103,12 +101,12 @@
 
   function addStep(text, status) {
     status = status || 'pending';
-    var stepsEl = document.getElementById('lp-steps');
-    var step = document.createElement('div');
+    const stepsEl = document.getElementById('lp-steps');
+    const step = document.createElement('div');
     step.className = 'flex items-center gap-2 text-xs';
     step.innerHTML = `
       <span class="step-icon w-4 h-4 rounded-full flex items-center justify-center shrink-0" style="background:var(--theme-border)">
-        ${status === 'done' ? alIcon('check', 'w-2.5 h-2.5', { style: 'color:var(--theme-success)', strokeWidth: 3 }) : 
+        ${status === 'done' ? alIcon('check', 'w-2.5 h-2.5', { style: 'color:var(--theme-success)', strokeWidth: 3 }) :
           status === 'error' ? alIcon('x', 'w-2.5 h-2.5', { style: 'color:var(--theme-danger)', strokeWidth: 3 }) :
           '<span class="w-1.5 h-1.5 rounded-full" style="background:var(--theme-text-muted)"></span>'}
       </span>
@@ -121,11 +119,11 @@
 
   function updateStep(index, status, text) {
     if (index < 0 || index >= currentSteps.length) return;
-    var step = currentSteps[index];
-    var icon = step.el.querySelector('.step-icon');
-    
+    const step = currentSteps[index];
+    const icon = step.el.querySelector('.step-icon');
+
     if (text) step.el.querySelector('.step-text').textContent = text;
-    
+
     if (status === 'done') {
       icon.innerHTML = alIcon('check', 'w-2.5 h-2.5', { style: 'color:var(--theme-success)', strokeWidth: 3 });
       icon.style.background = 'var(--theme-success-bg, rgba(16, 185, 129, 0.1))';
@@ -142,7 +140,7 @@
     document.getElementById('lp-spinner').classList.add('hidden');
     document.getElementById('lp-cancel').classList.add('hidden');
     document.getElementById('lp-close').classList.remove('hidden');
-    
+
     if (success) {
       document.getElementById('lp-check').classList.remove('hidden');
       if (message) setMessage(message);
@@ -162,7 +160,6 @@
     updateStep: updateStep,
     complete: complete,
     setIcon: function() {},
-    setProgress: setProgress
   };
 
   window.showLoadingPopup = function(title, message) {
@@ -175,6 +172,6 @@
       close: hide
     };
   };
-  
+
   window.hideLoadingPopup = hide;
 })();

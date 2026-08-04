@@ -5,7 +5,7 @@
     <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
@@ -95,7 +95,7 @@
                               Download
                             </button>
                             <button type="button"
-                              onclick="restoreBackup('<%= backup.UUID %>', '<%= backup.name %>')"
+                              onclick="restoreBackup('<%= backup.UUID %>', '<%= backup.name.replace(/'/g, "\\'") %>')"
                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                               style="color:var(--theme-success);background:var(--theme-success-bg)"
                             >
@@ -103,7 +103,7 @@
                               Restore
                             </button>
                             <button type="button"
-                              onclick="toggleBackupLock('<%= backup.UUID %>', '<%= backup.name %>', <%= backup.locked ? 'true' : 'false' %>)"
+                              onclick="toggleBackupLock('<%= backup.UUID %>', '<%= backup.name.replace(/'/g, "\\'") %>', <%= backup.locked ? 'true' : 'false' %>)"
                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                               style="<%= backup.locked ? 'color:var(--theme-warning);background:var(--theme-warning-bg, var(--theme-bg-secondary))' : 'color:var(--theme-text-muted);background:var(--theme-bg-secondary)' %>"
                             >
@@ -111,7 +111,7 @@
                               <%= backup.locked ? 'Unlock' : 'Lock' %>
                             </button>
                             <button type="button"
-                              onclick="deleteBackup('<%= backup.UUID %>', '<%= backup.name %>')"
+                              onclick="deleteBackup('<%= backup.UUID %>', '<%= backup.name.replace(/'/g, "\\'") %>')"
                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                               style="<%= backup.locked ? 'opacity:40;pointer-events:none;color:var(--theme-danger);background:var(--theme-danger-bg)' : 'color:var(--theme-danger);background:var(--theme-danger-bg)' %>"
                               <%= backup.locked ? 'disabled title="Locked backups cannot be deleted until unlocked"' : '' %>
@@ -148,19 +148,24 @@
 
 <!-- Create Backup Modal -->
 <div id="createBackupModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
-  <div id="createBackupModalPanel" class="al-sheet-panel border rounded-2xl shadow-lg w-full max-w-sm mx-4 will-change-transform" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
-    <div class="px-5 pt-5 pb-4 border-b" style="border-color:var(--theme-border)">
-      <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Create Backup</p>
-      <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Choose a name for this backup.</p>
+  <div id="createBackupModalPanel" class="al-sheet-panel border rounded-2xl shadow-lg w-full max-w-sm mx-4 will-change-transform max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
+    <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border)">
+      <div>
+        <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Create Backup</p>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Choose a name for this backup.</p>
+      </div>
+      <button type="button" onclick="closeCreateBackupModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
     </div>
-    <div class="px-5 py-4">
+    <div class="px-6 py-4 overflow-y-auto flex-grow">
       <input type="text"
         id="backupName"
         class="al-input"
         placeholder="<%= req.translations.enterBackupName || 'Enter backup name' %>"
         onkeydown="handleBackupNameKeyPress(event)">
     </div>
-    <div class="flex gap-2 px-5 pb-5 justify-end">
+    <div class="flex gap-2 px-6 py-4 border-t justify-end">
       <button type="button" onclick="closeCreateBackupModal()" class="al-btn-secondary inline-flex items-center gap-1.5">
         <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
         Cancel
@@ -324,7 +329,8 @@ function addBackupRow(backup) {
   const sizeTd = document.createElement('td');
   sizeTd.className = 'px-6 py-4 whitespace-nowrap';
   const sizeText = backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown';
-  sizeTd.innerHTML = `<div class="text-sm" style="color:var(--theme-text-muted)">${sizeText}</div>`;
+  const safeSizeText = sizeText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  sizeTd.innerHTML = `<div class="text-sm" style="color:var(--theme-text-muted)">${safeSizeText}</div>`;
   tr.appendChild(sizeTd);
 
   const createdTd = document.createElement('td');

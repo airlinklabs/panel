@@ -1,18 +1,42 @@
 (function () {
 
-  var NAV_FLAG    = 'al_nav';
-  var FADE_OUT_MS = 160;
-  var STAGGER_MS  = 65;
-  var CHILD_DUR   = 480;
-  var EASE_OUT    = 'cubic-bezier(0.4,0,1,1)';
-  var EASE_IN     = 'cubic-bezier(0.16,1,0.3,1)';
+  const NAV_FLAG    = 'al_nav';
+  const FADE_OUT_MS = 160;
+  const STAGGER_MS  = 65;
+  const CHILD_DUR   = 480;
+  const EASE_OUT    = 'cubic-bezier(0.4,0,1,1)';
+  const EASE_IN     = 'cubic-bezier(0.16,1,0.3,1)';
+  const SPRINT_MS   = 340;
+  const HOLD_MS     = 160;
+  const OV_FADE_MS  = 240;
+  const LOAD_GUARD_MS = 2000;
+  const EXACT_MATCH_SCORE = 9999;
+
+  const COLOR_DARK_BG    = '#171717';
+  const COLOR_LIGHT_BG   = '#f0f0f0';
+  const COLOR_DARK_TEXT  = '#171717';
+  const COLOR_LIGHT_TEXT = '#f0f0f0';
+  const COLOR_DARK_LOGO_BG  = '#f0f0f0';
+  const COLOR_LIGHT_LOGO_BG = '#000000';
+
+  const PROGRESS_CEILING  = 82;
+  const PROGRESS_DECAY    = 0.065;
+  const PROGRESS_INCREMENT = 1.2;
+  const PROGRESS_INTERVAL_MS = 90;
+  const CLEARANCE_OVERHEAD_MS = 40;
+
+  const ACTIVE_BORDER_RADIUS = '0.75rem';
+  const PILL_TRANSITION = 'transform 0.22s cubic-bezier(0.4,0,0.2,1), height 0.18s ease, opacity 0.15s ease';
+
+  const MOBILE_ACTIVE_CLASSES = ['text-neutral-900', 'dark:text-white', 'active-mobile'];
+  const MOBILE_INACTIVE_CLASSES = ['text-neutral-500', 'dark:text-neutral-400'];
 
   // ── Read nav flag before any paint ───────────────────────────────────────
-  var _fromNav = (function () {
+  const _fromNav = (function () {
     try {
-      var v = sessionStorage.getItem(NAV_FLAG);
+      const v = sessionStorage.getItem(NAV_FLAG);
       if (v) { sessionStorage.removeItem(NAV_FLAG); return true; }
-    } catch {}
+    } catch { /* sessionStorage unavailable */ }
     return false;
   })();
 
@@ -31,7 +55,7 @@
   }
 
   function isNavLink(a) {
-    var href = a && a.getAttribute('href');
+    const href = a && a.getAttribute('href');
     if (!href || href === '#' || href.startsWith('#')) return false;
     if (href.startsWith('mailto:') || href.startsWith('tel:')) return false;
     if (a.hasAttribute('download') || a.target === '_blank') return false;
@@ -40,7 +64,7 @@
   }
 
   function markNavigation() {
-    try { sessionStorage.setItem(NAV_FLAG, '1'); } catch {}
+    try { sessionStorage.setItem(NAV_FLAG, '1'); } catch { /* sessionStorage unavailable */ }
   }
 
   // ── Animated element ──────────────────────────────────────────────────────
@@ -49,17 +73,14 @@
     return el('server-page-body') || el('page-content') || null;
   }
 
-  // Returns the children of the container that should animate.
-  // Skips fixed-positioned chrome elements (mobile topbar, bottom nav, sheets).
   function getAnimatableChildren(container) {
     return Array.from(container.children).filter(function (child) {
-      var cls = child.className || '';
+      const cls = child.className || '';
       if (cls.indexOf('mobile-top-bar') !== -1) return false;
       if (cls.indexOf('mobile-bottom-nav') !== -1) return false;
       if (cls.indexOf('mobile-more-sheet') !== -1) return false;
       if (cls.indexOf('mobile-server-chrome') !== -1) return false;
-      // Skip any element whose computed position is fixed
-      var pos = window.getComputedStyle(child).position;
+      const pos = window.getComputedStyle(child).position;
       if (pos === 'fixed') return false;
       return true;
     });
@@ -69,8 +90,8 @@
 
   function animateOut(c) {
     if (!c) return;
-    var children = getAnimatableChildren(c);
-    var targets  = children.length ? children : [c];
+    const children = getAnimatableChildren(c);
+    const targets  = children.length ? children : [c];
     targets.forEach(function (t) {
       t.style.transition = 'opacity ' + FADE_OUT_MS + 'ms ' + EASE_OUT + ', transform ' + FADE_OUT_MS + 'ms ' + EASE_OUT;
       t.style.opacity    = '0';
@@ -81,33 +102,26 @@
   function animateIn(c) {
     if (!c) return;
 
-    var children = getAnimatableChildren(c);
+    const children = getAnimatableChildren(c);
 
-    // Pin every child to its hidden start state with inline styles FIRST.
-    // This must happen before we remove js-loading, so the moment the CSS
-    // rule stops applying the inline style already holds the same value —
-    // no flash, no jitter.
     children.forEach(function (child) {
       child.style.transition = 'none';
       child.style.opacity    = '0';
       child.style.transform  = 'translateY(14px)';
     });
 
-    // Now safe to drop the CSS pre-hide class — inline styles are holding.
     document.documentElement.classList.remove('js-loading');
 
-    // Make sure the wrapper itself is fully visible.
     c.style.transition = 'none';
     c.style.opacity    = '1';
     c.style.transform  = '';
 
     if (!children.length) return;
 
-    // One reflow so the browser registers the pinned start state.
     void c.offsetHeight;
 
     children.forEach(function (child, i) {
-      var delay = i * STAGGER_MS;
+      const delay = i * STAGGER_MS;
       child.style.transition =
         'opacity ' + CHILD_DUR + 'ms ' + EASE_IN + ' ' + delay + 'ms, ' +
         'transform ' + CHILD_DUR + 'ms ' + EASE_IN + ' ' + delay + 'ms';
@@ -115,7 +129,7 @@
       child.style.transform = 'translateY(0)';
     });
 
-    var totalDur = (children.length - 1) * STAGGER_MS + CHILD_DUR + 40;
+    const totalDur = (children.length - 1) * STAGGER_MS + CHILD_DUR + CLEARANCE_OVERHEAD_MS;
     setTimeout(function () {
       children.forEach(function (child) {
         child.style.transition = '';
@@ -139,12 +153,16 @@
 
   // ── Reveal after navigation ───────────────────────────────────────────────
 
+  let barEl = null;
+  let hiding = false;
+
   function revealAfterNav() {
     document.documentElement.style.opacity      = '';
     document.documentElement.style.pointerEvents = '';
-    var ov = el('pl-overlay');
+    const ov = el('pl-overlay');
     if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
-    barEl = null; hiding = false;
+    barEl = null;
+    hiding = false;
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         animateIn(getAnimEl());
@@ -155,15 +173,17 @@
   // ── Desktop sidebar highlight ─────────────────────────────────────────────
 
   function findDesktopActiveLink(path) {
-    var best = null, bestLen = 0;
+    let best = null;
+    let bestLen = 0;
     document.querySelectorAll('.nav-link').forEach(function (link) {
-      var href        = normalizePath(link.getAttribute('href') || '');
-      var matchPrefix = link.getAttribute('data-match-prefix');
+      const href        = normalizePath(link.getAttribute('href') || '');
+      const matchPrefix = link.getAttribute('data-match-prefix');
       if (!href) return;
-      if (path === href) { best = link; bestLen = 9999; return; }
+      if (path === href) { best = link; bestLen = EXACT_MATCH_SCORE; return; }
       if (matchPrefix) {
         if (path.startsWith(matchPrefix) && matchPrefix.length > bestLen) {
-          best = link; bestLen = matchPrefix.length;
+          best = link;
+          bestLen = matchPrefix.length;
         }
         return;
       }
@@ -174,13 +194,13 @@
   }
 
   function getPillTop(link) {
-    var ul = link.closest('ul');
+    const ul = link.closest('ul');
     if (!ul) return 0;
     return link.getBoundingClientRect().top - ul.getBoundingClientRect().top + ul.scrollTop;
   }
 
   function setDesktopActiveLink(link) {
-    var isDark = document.documentElement.classList.contains('dark');
+    const isDark = document.documentElement.classList.contains('dark');
     document.querySelectorAll('.nav-link').forEach(function (l) {
       l.classList.remove('active', 'font-medium');
       l.style.color = '';
@@ -188,38 +208,32 @@
     });
     if (!link) return;
     link.classList.add('active', 'font-medium');
-    link.style.color = isDark ? '#171717' : '#f0f0f0';
-    link.style.background = isDark ? '#f0f0f0' : '#171717';
-    link.style.borderRadius = '0.75rem';
+    link.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
+    link.style.background = isDark ? COLOR_LIGHT_BG : COLOR_DARK_BG;
+    link.style.borderRadius = ACTIVE_BORDER_RADIUS;
   }
 
   function movePill(link, animate) {
-    var bg = el('active-background');
+    const bg = el('active-background');
     if (!bg || !link) return;
-    var top = getPillTop(link);
-    var h   = link.getBoundingClientRect().height;
-    bg.style.transition = animate
-      ? 'transform 0.22s cubic-bezier(0.4,0,0.2,1), height 0.18s ease, opacity 0.15s ease'
-      : 'none';
+    const top = getPillTop(link);
+    const h   = link.getBoundingClientRect().height;
+    bg.style.transition = animate ? PILL_TRANSITION : 'none';
     bg.style.height    = h + 'px';
     bg.style.transform = 'translateY(' + top + 'px)';
     bg.style.opacity   = '1';
   }
 
   function initDesktopHighlight(fromNav) {
-    var bg = el('active-background');
+    const bg = el('active-background');
     if (!bg) return;
-    // The sidebar starts hidden (inline display:none) and is revealed by
-    // template.ejs's own DOMContentLoaded handler, which runs after this one.
-    // Measuring a display:none element yields zero-height rects, so retry
-    // until the sidebar is actually visible.
-    var sb = el('pc-sidebar');
+    const sb = el('pc-sidebar');
     if (sb && sb.style.display === 'none') {
       setTimeout(function () { initDesktopHighlight(fromNav); }, 0);
       return;
     }
-    var path   = normalizePath(window.location.pathname);
-    var active = findDesktopActiveLink(path);
+    const path   = normalizePath(window.location.pathname);
+    const active = findDesktopActiveLink(path);
     setDesktopActiveLink(active);
     if (!active) { bg.style.opacity = '0'; return; }
     bg.style.transition = 'none';
@@ -230,9 +244,9 @@
       bg.style.opacity    = '1';
     }
     setTimeout(function () {
-      if (el('active-background')) {
-        el('active-background').style.transition =
-          'transform 0.22s cubic-bezier(0.4,0,0.2,1), height 0.18s ease, opacity 0.15s ease';
+      const bgEl = el('active-background');
+      if (bgEl) {
+        bgEl.style.transition = PILL_TRANSITION;
       }
     }, fromNav ? 0 : 200);
   }
@@ -240,18 +254,18 @@
   // ── Mobile nav highlight ──────────────────────────────────────────────────
 
   function initMobileHighlight() {
-    var path = normalizePath(window.location.pathname);
+    const path = normalizePath(window.location.pathname);
     document.querySelectorAll('.mobile-nav-link').forEach(function (link) {
-      var href     = normalizePath(link.getAttribute('href') || '');
-      var mPrefix  = link.getAttribute('data-match-prefix');
-      var mAlso    = link.getAttribute('data-match-prefix-also');
-      var mExact   = link.getAttribute('data-match-exact') === 'true';
-      var active   = false;
+      const href     = normalizePath(link.getAttribute('href') || '');
+      const mPrefix  = link.getAttribute('data-match-prefix');
+      const mAlso    = link.getAttribute('data-match-prefix-also');
+      const mExact   = link.getAttribute('data-match-exact') === 'true';
+      let active     = false;
       if (mPrefix)     active = path.startsWith(mPrefix);
       else if (mExact) active = path === href;
       else             active = path === href || (href !== '/' && path.startsWith(href));
       if (!active && mAlso && path.startsWith(mAlso)) active = true;
-      link.classList.remove('text-neutral-500', 'dark:text-neutral-400', 'text-neutral-900', 'dark:text-white', 'active-mobile');
+      link.classList.remove(...MOBILE_INACTIVE_CLASSES, ...MOBILE_ACTIVE_CLASSES);
       link.classList.add(active ? 'text-neutral-900' : 'text-neutral-500');
       link.classList.add(active ? 'dark:text-white'  : 'dark:text-neutral-400');
       if (active) link.classList.add('active-mobile');
@@ -260,21 +274,18 @@
 
   // ── Initial overlay ───────────────────────────────────────────────────────
 
-  var SPRINT_MS = 340, HOLD_MS = 160, OV_FADE_MS = 240;
-  var barEl = null, hiding = false;
-
   function startProgress() {
     barEl = el('pl-bar');
-    var pct = 0;
-    var iv = setInterval(function () {
+    let pct = 0;
+    const iv = setInterval(function () {
       if (hiding) { clearInterval(iv); return; }
-      pct = Math.min(pct + (82 - pct) * 0.065 + 1.2, 82);
+      pct = Math.min(pct + (PROGRESS_CEILING - pct) * PROGRESS_DECAY + PROGRESS_INCREMENT, PROGRESS_CEILING);
       if (barEl) barEl.style.transform = 'scaleX(' + (pct / 100) + ')';
-    }, 90);
+    }, PROGRESS_INTERVAL_MS);
   }
 
   function hideOverlaySlow() {
-    var ov = el('pl-overlay');
+    const ov = el('pl-overlay');
     if (!ov || hiding) return;
     hiding = true;
     if (!barEl) barEl = el('pl-bar');
@@ -283,30 +294,26 @@
       barEl.style.transform = 'scaleX(1)';
     }
     setTimeout(function () {
-      var ov2 = el('pl-overlay');
+      const ov2 = el('pl-overlay');
       if (!ov2) return;
       ov2.style.transition = 'opacity ' + OV_FADE_MS + 'ms ease';
       ov2.style.opacity = '0';
-      var inner = el('pl-inner');
+      const inner = el('pl-inner');
       if (inner) {
         inner.style.transition = 'opacity ' + (OV_FADE_MS - 40) + 'ms ease';
         inner.style.opacity = '0';
       }
       setTimeout(function () {
-        var ov3 = el('pl-overlay');
+        const ov3 = el('pl-overlay');
         if (ov3 && ov3.parentNode) ov3.parentNode.removeChild(ov3);
-        barEl = null; hiding = false;
+        barEl = null;
+        hiding = false;
       }, OV_FADE_MS);
     }, SPRINT_MS + HOLD_MS);
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-  var LOAD_GUARD_MS = 2000;
-
-  // Reveal the page even if window 'load' never fires (e.g. an external
-  // image or font hangs). Otherwise js-loading + the loader overlay stay
-  // forever and the page looks blank / unclickable.
   function revealAfterStuckLoad() {
     if (document.documentElement.classList.contains('js-loading')) {
       hideOverlaySlow();
@@ -348,7 +355,7 @@
 
   document.addEventListener('click', function (e) {
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return;
-    var a = e.target && e.target.closest && e.target.closest('a[href]');
+    const a = e.target && e.target.closest && e.target.closest('a[href]');
     if (!isNavLink(a)) return;
     if (a.classList.contains('nav-link')) {
       setDesktopActiveLink(a);
@@ -356,32 +363,32 @@
     }
     if (a.classList.contains('mobile-nav-link')) {
       document.querySelectorAll('.mobile-nav-link').forEach(function (l) {
-        l.classList.remove('text-neutral-900', 'dark:text-white', 'active-mobile');
-        l.classList.add('text-neutral-500', 'dark:text-neutral-400');
+        l.classList.remove(...MOBILE_ACTIVE_CLASSES);
+        l.classList.add(...MOBILE_INACTIVE_CLASSES);
       });
-      a.classList.remove('text-neutral-500', 'dark:text-neutral-400');
-      a.classList.add('text-neutral-900', 'dark:text-white', 'active-mobile');
+      a.classList.remove(...MOBILE_INACTIVE_CLASSES);
+      a.classList.add(...MOBILE_ACTIVE_CLASSES);
     }
     markNavigation();
     fadeContentOut();
   }, true);
 
   window.addEventListener('al:themechange', function () {
-    var path = normalizePath(window.location.pathname);
-    var isDark = document.documentElement.classList.contains('dark');
-    var active = findDesktopActiveLink(path);
+    const path = normalizePath(window.location.pathname);
+    const isDark = document.documentElement.classList.contains('dark');
+    const active = findDesktopActiveLink(path);
     setDesktopActiveLink(active);
     if (active) movePill(active, false);
     initMobileHighlight();
-    var accountLink = document.getElementById('sidebar-account-link');
+    const accountLink = document.getElementById('sidebar-account-link');
     if (accountLink) {
-      var onAccount = path === '/account' || path.startsWith('/account/');
-      var userText = accountLink.querySelector('#sidebar-username');
+      const onAccount = path === '/account' || path.startsWith('/account/');
+      const userText = accountLink.querySelector('#sidebar-username');
       if (onAccount) {
-        accountLink.style.background = isDark ? '#f0f0f0' : '#171717';
-        accountLink.style.color = isDark ? '#171717' : '#f0f0f0';
+        accountLink.style.background = isDark ? COLOR_DARK_BG : COLOR_LIGHT_BG;
+        accountLink.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
         accountLink.style.fontWeight = '700';
-        if (userText) userText.parentElement.style.color = isDark ? '#171717' : '#f0f0f0';
+        if (userText) userText.parentElement.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
       } else {
         accountLink.style.background = '';
         accountLink.style.color = '';
@@ -389,21 +396,21 @@
         if (userText) userText.parentElement.style.color = '';
       }
     }
-    var logo = document.getElementById('sidebar-logo-link');
+    const logo = document.getElementById('sidebar-logo-link');
     if (logo) {
-      var onCredits = path === '/credits' || path.startsWith('/credits/');
-      var logoBlock = document.getElementById('sidebar-logo-block');
-      var logoTitle = logo.querySelector('h1');
-      var logoImg = logo.querySelector('img');
+      const onCredits = path === '/credits' || path.startsWith('/credits/');
+      const logoBlock = document.getElementById('sidebar-logo-block');
+      const logoTitle = logo.querySelector('h1');
+      const logoImg = logo.querySelector('img');
       if (onCredits) {
         if (logoBlock) {
-          logoBlock.style.background = isDark ? '#f0f0f0' : '#000000';
-          logoBlock.style.borderRadius = '0.75rem';
+          logoBlock.style.background = isDark ? COLOR_DARK_LOGO_BG : COLOR_LIGHT_LOGO_BG;
+          logoBlock.style.borderRadius = ACTIVE_BORDER_RADIUS;
         }
-        logo.style.color = isDark ? '#171717' : '#f0f0f0';
-        if (logoImg) logoImg.style.background = '#000000';
+        logo.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
+        if (logoImg) logoImg.style.background = COLOR_LIGHT_LOGO_BG;
         if (logoTitle) {
-          logoTitle.style.color = isDark ? '#171717' : '#f0f0f0';
+          logoTitle.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
           logoTitle.style.fontWeight = '700';
         }
       } else {

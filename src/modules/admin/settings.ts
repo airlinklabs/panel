@@ -12,6 +12,18 @@ import AdmZip from 'adm-zip';
 import nodemailer from 'nodemailer';
 import { testS3Connection } from '../../handlers/utils/core/s3Client';
 
+const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
+const BCRYPT_SALT_ROUNDS = 12;
+
+const MIME_TYPE_ALLOWLIST = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/svg+xml',
+  'image/x-icon',
+  'image/vnd.microsoft.icon',
+] as const;
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dirs: Record<string, string> = {
@@ -34,16 +46,15 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   if (file.fieldname === 'themeFile') {
     const ext = path.extname(file.originalname).toLowerCase();
     return cb(null, ext === '.zip' || file.mimetype.includes('zip'));
   }
-  const ok = ['image/jpeg','image/png','image/gif','image/svg+xml','image/x-icon','image/vnd.microsoft.icon'];
-  cb(null, ok.includes(file.mimetype));
+  cb(null, (MIME_TYPE_ALLOWLIST as readonly string[]).includes(file.mimetype));
 };
 
-const upload = multer({ storage, fileFilter, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({ storage, fileFilter, limits: { fileSize: MAX_UPLOAD_SIZE_BYTES } });
 
 function installThemeZip(zipPath: string): { success: boolean; error?: string } {
   const themesDir = path.join(process.cwd(), 'public', 'themes', 'user');
@@ -66,9 +77,10 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
     fs.copyFileSync(lightPath, path.join(themeDir, 'light.css'));
     fs.copyFileSync(darkPath, path.join(themeDir, 'dark.css'));
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof SyntaxError) return { success: false, error: 'info.json contains invalid JSON.' };
-    if (err.message?.startsWith('Theme zip')) return { success: false, error: err.message };
+    const errMsg = err instanceof Error ? err.message : '';
+    if (errMsg.startsWith('Theme zip')) return { success: false, error: errMsg };
     return { success: false, error: 'Failed to extract theme zip.' };
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -76,10 +88,19 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
   }
 }
 
-function loadUserThemes() {
+type UserTheme = {
+  name: string;
+  lightPath: string;
+  darkPath: string;
+  path: string;
+  builtin: boolean;
+  author?: string;
+};
+
+function loadUserThemes(): UserTheme[] {
   const dir = path.join(process.cwd(), 'public', 'themes', 'user');
   if (!fs.existsSync(dir)) return [];
-  const themes: any[] = [];
+  const themes: UserTheme[] = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     const infoPath  = path.join(dir, entry.name, 'info.json');
@@ -104,7 +125,7 @@ function loadUserThemes() {
 // Upsert the settings row — creates it with defaults if it doesn't exist,
 // then applies the partial update. This means every save is safe even on a
 // fresh DB, and never overwrites fields it didn't intend to touch.
-async function saveSettings(data: Record<string, any>) {
+async function saveSettings(data: Record<string, unknown>) {
   return prisma.settings.upsert({
     where:  { id: 1 },
     update: data,
@@ -174,7 +195,7 @@ const adminModule: Module = {
           ];
 
           res.render('admin/settings/settings', { user, req, settings, allThemes });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error loading settings page:', error);
           res.redirect('/login');
         }
@@ -197,7 +218,7 @@ const adminModule: Module = {
           zip.addFile('dark.css',  Buffer.from('/* dark mode theme */\n:root {}\n'));
           zip.writeZip(archivePath);
           res.download(archivePath, 'example-theme.zip', () => fs.rmSync(archivePath, { force: true }));
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error generating example theme:', error);
           res.status(500).json({ error: 'Failed to generate example theme.' });
         }
@@ -225,7 +246,7 @@ const adminModule: Module = {
             if (!result.success) return res.status(400).json({ success: false, error: result.error });
           }
 
-          const data: Record<string, any> = {};
+          const data: Record<string, unknown> = {};
 
           if (typeof raw.title === 'string') data.title = raw.title;
           if (typeof raw.allowRegistration !== 'undefined') {
@@ -263,7 +284,7 @@ const adminModule: Module = {
 
           if (Object.keys(data).length > 0) await saveSettings(data);
           return res.json({ success: true });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error saving appearance settings:', error);
           res.status(500).json({ success: false, error: 'Failed to save settings.' });
           return;
@@ -277,7 +298,7 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
-          const data: Record<string, any> = {
+          const data: Record<string, unknown> = {
             allowRegistration: req.body.allowRegistration === true,
           };
           if (req.body.uploadLimit) {
@@ -288,7 +309,7 @@ const adminModule: Module = {
           }
           await saveSettings(data);
           res.json({ success: true });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error saving general settings:', error);
           res.status(500).json({ success: false, error: 'Failed to save settings.' });
         }
@@ -320,7 +341,7 @@ const adminModule: Module = {
             return res.status(400).json({ success: false, error: 'Lockout must be between 1 and 1440 minutes.' });
           }
 
-          const securityData: Record<string, any> = {
+          const securityData: Record<string, unknown> = {
             rateLimitEnabled,
             rateLimitRpm,
             loginMaxAttempts,
@@ -336,7 +357,7 @@ const adminModule: Module = {
           await saveSettings(securityData);
           await refreshSecurityCache();
           return res.json({ success: true });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error saving security settings:', error);
           res.status(500).json({ success: false, error: 'Failed to save settings.' });
           return;
@@ -374,7 +395,7 @@ const adminModule: Module = {
           if ([defaultOverallocateMemory, defaultOverallocateDisk, defaultOverallocateCpu].some((v) => isNaN(v) || v < 0 || v > 10000))
             return res.status(400).json({ success: false, error: 'Overallocation defaults must be between 0 and 10000%.' });
 
-          const serverPolicyData: Record<string, any> = {
+          const serverPolicyData: Record<string, unknown> = {
             allowUserCreateServer,
             allowUserDeleteServer,
             defaultServerLimit,
@@ -391,7 +412,7 @@ const adminModule: Module = {
           }
           await saveSettings(serverPolicyData);
           return res.json({ success: true });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error saving server policy:', error);
           res.status(500).json({ success: false, error: 'Failed to save server policy.' });
           return;
@@ -410,7 +431,7 @@ const adminModule: Module = {
             return res.status(400).json({ success: false, error: 'SMTP port must be between 1 and 65535.' });
           }
 
-          const smtpData: Record<string, any> = {
+          const smtpData: Record<string, unknown> = {
             smtpHost:     typeof req.body.smtpHost === 'string' ? req.body.smtpHost.trim() || null : null,
             smtpPort,
             smtpUser:     typeof req.body.smtpUser === 'string' ? req.body.smtpUser.trim() || null : null,
@@ -420,7 +441,7 @@ const adminModule: Module = {
           };
           await saveSettings(smtpData);
           return res.json({ success: true });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error saving SMTP settings:', error);
           res.status(500).json({ success: false, error: 'Failed to save SMTP settings.' });
           return;
@@ -446,7 +467,7 @@ const adminModule: Module = {
           });
           await transporter.verify();
           return res.json({ success: true, message: 'SMTP connection verified.' });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('SMTP test failed:', error);
           res.status(500).json({ success: false, error: 'SMTP connection failed.' });
           return;
@@ -460,7 +481,7 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
-          const s3Data: Record<string, any> = {
+          const s3Data: Record<string, unknown> = {
             s3Enabled:    req.body.s3Enabled === true || req.body.s3Enabled === 'true',
             s3Endpoint:   typeof req.body.s3Endpoint === 'string' ? req.body.s3Endpoint.trim() || null : null,
             s3Region:     typeof req.body.s3Region === 'string' ? req.body.s3Region.trim() || null : null,
@@ -471,7 +492,7 @@ const adminModule: Module = {
           };
           await saveSettings(s3Data);
           return res.json({ success: true });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error saving S3 settings:', error);
           res.status(500).json({ success: false, error: 'Failed to save S3 settings.' });
           return;
@@ -490,7 +511,7 @@ const adminModule: Module = {
             return res.json({ success: true, message: `S3 connection verified (${result.latency}ms).` });
           }
           return res.status(500).json({ success: false, error: result.error || 'S3 connection failed.' });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('S3 test failed:', error);
           res.status(500).json({ success: false, error: 'S3 connection failed.' });
           return;
@@ -515,7 +536,7 @@ const adminModule: Module = {
             await saveSettings({ bannedIps: JSON.stringify(banned) });
           }
           return res.json({ success: true, banned });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error banning IP:', error);
           res.status(500).json({ success: false, error: 'Failed to ban IP.' });
           return;
@@ -537,7 +558,7 @@ const adminModule: Module = {
           try { banned = JSON.parse(settings?.bannedIps || '[]'); } catch { banned = []; }
           await saveSettings({ bannedIps: JSON.stringify(banned.filter(b => b !== ip)) });
           return res.json({ success: true, banned: banned.filter(b => b !== ip) });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error unbanning IP:', error);
           res.status(500).json({ success: false, error: 'Failed to unban IP.' });
           return;
@@ -566,7 +587,7 @@ const adminModule: Module = {
           const dest           = path.join(process.cwd(), 'public', 'favicon.ico');
           if (fs.existsSync(defaultFavicon)) fs.copyFileSync(defaultFavicon, dest);
           res.json({ success: true });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error resetting settings:', error);
           res.status(500).json({ success: false, error: 'Failed to reset settings.' });
         }

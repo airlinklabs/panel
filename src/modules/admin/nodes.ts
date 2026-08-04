@@ -7,18 +7,15 @@ import logger from '../../handlers/logger';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import { syncNodeAllocations } from '../../handlers/utils/server/allocations';
+import { generateApiKey } from '../../utils/apiKey';
 
-
-function generateApiKey(length: number): string {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters[randomIndex];
-  }
-  return result;
-}
+const UNLIMITED_RESOURCE = 'all';
+const MIN_PORT_NUMBER = 1024;
+const MAX_PORT_NUMBER = 65535;
+const MIN_NODE_PORT = 1025;
+const NAME_MIN_LENGTH = 3;
+const NAME_MAX_LENGTH = 50;
+const NODE_KEY_LENGTH = 32;
 
 type NodeWithInstances = {
   id: number;
@@ -36,8 +33,8 @@ type NodeWithInstances = {
   port: number;
   key: string;
   createdAt: Date;
-  instances: any[];
-  servers?: any[]; // For port allocation UI
+  instances: Awaited<ReturnType<typeof prisma.server.findMany>>;
+  servers?: Awaited<ReturnType<typeof prisma.server.findMany>>;
   usage?: {
     memory: number;
     cpu: number;
@@ -86,7 +83,7 @@ async function listNodes(res: Response, includeServers = false) {
     }
 
     return nodesWithStatus;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error fetching nodes:', error);
     res.status(500).json({ message: 'Error fetching nodes.' });
     return;
@@ -119,7 +116,6 @@ const adminModule: Module = {
 
           const nodes = await listNodes(res);
 
-          const instance = await prisma.server.findMany();
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
@@ -129,9 +125,8 @@ const adminModule: Module = {
             req,
             settings,
             nodes,
-            instance,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
@@ -156,7 +151,7 @@ const adminModule: Module = {
           });
           const locations = await prisma.location.findMany();
           res.render('admin/nodes/create', { user, req, settings, nodes, locations });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
@@ -181,7 +176,7 @@ const adminModule: Module = {
         const locationId = req.body.locationId ? parseInt(req.body.locationId) : null;
 
         // 'all' from the UI means unlimited → store 0
-        const parseLimit = (v: unknown): number => (v === 'all' ? 0 : parseFloat(String(v ?? '')));
+        const parseLimit = (v: unknown): number => (v === UNLIMITED_RESOURCE ? 0 : parseFloat(String(v ?? '')));
 
         // Fall back to the global defaults (set in admin settings) when the form
         // leaves overallocation empty or the field isn't sent.
@@ -190,7 +185,7 @@ const adminModule: Module = {
         const defOvDisk = settings?.defaultOverallocateDisk ?? 0;
         const defOvCpu = settings?.defaultOverallocateCpu ?? 0;
         const rawOv = (v: unknown, d: number): number =>
-          v === undefined || v === null || String(v).trim() === '' || String(v) === 'all'
+          v === undefined || v === null || String(v).trim() === '' || String(v) === UNLIMITED_RESOURCE
             ? d
             : parseFloat(String(v));
         const overallocateMemory = rawOv(req.body.overallocateMemory, defOvMem);
@@ -217,9 +212,9 @@ const adminModule: Module = {
         if (!name || typeof name !== 'string') {
           res.status(400).json({ message: 'Name must be a string.' });
           return;
-        } else if (name.length < 3 || name.length > 50) {
+        } else if (name.length < NAME_MIN_LENGTH || name.length > NAME_MAX_LENGTH) {
           res.status(400).json({
-            message: 'Name must be between 3 and 50 characters long.',
+            message: `Name must be between ${NAME_MIN_LENGTH} and ${NAME_MAX_LENGTH} characters long.`,
           });
           return;
         }
@@ -255,12 +250,12 @@ const adminModule: Module = {
         if (
           !port ||
           isNaN(parseInt(port)) ||
-          parseInt(port) <= 1024 ||
-          parseInt(port) > 65535
+          parseInt(port) <= MIN_PORT_NUMBER ||
+          parseInt(port) > MAX_PORT_NUMBER
         ) {
           res
             .status(400)
-            .json({ message: 'Port must be a number between 1025 and 65535.' });
+            .json({ message: `Port must be a number between ${MIN_NODE_PORT} and ${MAX_PORT_NUMBER}.` });
           return;
         }
 
@@ -272,13 +267,14 @@ const adminModule: Module = {
             throw new Error('Allocated ports must be an array');
           }
           for (const p of parsedPorts) {
-            if (typeof p !== 'number' || p < 1024 || p > 65535) {
-              throw new Error('Each port must be a number between 1024 and 65535');
+            if (typeof p !== 'number' || p < MIN_PORT_NUMBER || p > MAX_PORT_NUMBER) {
+              throw new Error(`Each port must be a number between ${MIN_PORT_NUMBER} and ${MAX_PORT_NUMBER}`);
             }
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : 'Unknown error';
           res.status(400).json({
-            message: 'Invalid allocated ports format: ' + (error.message || 'Unknown error'),
+            message: 'Invalid allocated ports format: ' + message,
           });
           return;
         }
@@ -320,7 +316,7 @@ const adminModule: Module = {
 
           res.status(200).json({ message: 'Node created successfully.', node });
           return;
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error when creating the node:', error);
           res.status(500).json({ message: 'Error when creating the node.' });
           return;
@@ -388,11 +384,11 @@ const adminModule: Module = {
                 ? 'Node and associated instances deleted successfully.'
                 : 'Node deleted successfully.',
             });
-          } catch (error) {
+          } catch (error: unknown) {
             logger.error('Error when deleting the node:', error);
             res.status(500).json({ message: 'Error when deleting the node.' });
           }
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
@@ -428,7 +424,7 @@ const adminModule: Module = {
                 '"',
             );
           return;
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
@@ -463,10 +459,11 @@ const adminModule: Module = {
             remote: result.data?.remote ?? null,
             error: result.data?.error ?? null,
           });
-        } catch (error: any) {
-          const cause = error?.cause?.code || error?.code || error?.message || '';
+        } catch (error: unknown) {
+          const errObj = error as Record<string, unknown> | undefined;
+          const cause = String((errObj?.cause as Record<string, unknown>)?.code || errObj?.code || errObj?.message || '');
           const friendly =
-            typeof cause === 'string' && cause.includes('ECONNREFUSED')
+            cause.includes('ECONNREFUSED')
               ? 'No daemon is listening on that address and port yet. Start the daemon, then try again.'
               : cause.includes('ENOTFOUND') || cause.includes('EAI_AGAIN')
                 ? 'That address does not resolve. Check the hostname or IP you entered.'
@@ -511,7 +508,7 @@ const adminModule: Module = {
           const locations = await prisma.location.findMany();
 
           res.render('admin/nodes/edit', { node, user, req, settings, locations });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
@@ -531,10 +528,13 @@ const adminModule: Module = {
 
           const nodeId = getParamAsNumber(req.params.id);
 
+          const parseEditLimit = (v: unknown): number =>
+            v === UNLIMITED_RESOURCE || v === 'all' ? 0 : parseFloat(String(v ?? ''));
+
           const name = req.body.name;
-          const ram = parseInt(req.body.ram);
-          const cpu = parseInt(req.body.cpu);
-          const disk = parseInt(req.body.disk);
+          const ram = parseEditLimit(req.body.ram);
+          const cpu = parseEditLimit(req.body.cpu);
+          const disk = parseEditLimit(req.body.disk);
           const address = req.body.address;
           const port = parseInt(req.body.port);
           const allocatedPorts = req.body.allocatedPorts || '[]';
@@ -563,15 +563,15 @@ const adminModule: Module = {
 
           if (
             !name ||
-            isNaN(ram) ||
-            isNaN(cpu) ||
-            isNaN(disk) ||
+            (ram !== 0 && (isNaN(ram) || ram <= 0)) ||
+            (cpu !== 0 && (isNaN(cpu) || cpu <= 0)) ||
+            (disk !== 0 && (isNaN(disk) || disk <= 0)) ||
             !address ||
             !port
           ) {
             res.status(400).json({
               message:
-                'All fields are required and numeric values must be valid numbers.',
+                'All fields are required and numeric values must be valid positive numbers (or "all" for unlimited).',
             });
             return;
           }
@@ -585,13 +585,14 @@ const adminModule: Module = {
 
             // Validate each port
             for (const port of parsedPorts) {
-              if (typeof port !== 'number' || port < 1024 || port > 65535) {
-                throw new Error('Each port must be a number between 1024 and 65535');
+              if (typeof port !== 'number' || port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER) {
+                throw new Error(`Each port must be a number between ${MIN_PORT_NUMBER} and ${MAX_PORT_NUMBER}`);
               }
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Unknown error';
             res.status(400).json({
-              message: 'Invalid allocated ports format: ' + (error.message || 'Unknown error'),
+              message: 'Invalid allocated ports format: ' + message,
             });
             return;
           }
@@ -617,7 +618,7 @@ const adminModule: Module = {
 
           res.status(200).json({ message: 'Node updated successfully.', node });
           return;
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error when updating the node:', error);
           res.status(500).json({ message: 'Error when updating the node.' });
           return;
@@ -643,7 +644,7 @@ const adminModule: Module = {
           });
           res.status(200).json({ message: 'Node maintenance mode updated.', node: updated });
           return;
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error toggling node maintenance mode:', error);
           res.status(500).json({ message: 'Error toggling node maintenance mode.' });
           return;
@@ -684,7 +685,7 @@ const adminModule: Module = {
             path: '/stats',
           });
 
-          stats = response.data as Record<string, unknown>;
+          stats = (response.data ?? {}) as Record<string, unknown>;
         } catch {
           stats = { error: 'Unable to fetch stats from the node.' };
         }
@@ -692,10 +693,8 @@ const adminModule: Module = {
       }
     );
 
-
     return router;
   },
 };
-
 
 export default adminModule;

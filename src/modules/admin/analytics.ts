@@ -6,7 +6,6 @@ import logger from '../../handlers/logger';
 import { registerPermission } from '../../handlers/permissions';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 
-
 registerPermission('airlink.admin.analytics.view');
 
 const analyticsModule: Module = {
@@ -34,7 +33,7 @@ const analyticsModule: Module = {
           ]);
           if (!user) return res.redirect('/login');
           res.render('admin/analytics/analytics', { user, req, settings, title: 'Analytics' });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error loading analytics page:', error);
           res.redirect('/admin/overview');
         }
@@ -115,8 +114,8 @@ const analyticsModule: Module = {
                   ram:            node.ram,
                   cpu:            node.cpu,
                   disk:           node.disk,
-                  versionFamily:  (r.data as any)?.versionFamily ?? null,
-                  versionRelease: (r.data as any)?.versionRelease ?? null,
+                  versionFamily:  (r.data as Record<string, unknown>)?.versionFamily ?? null,
+                  versionRelease: (r.data as Record<string, unknown>)?.versionRelease ?? null,
                 };
               } catch {
                 return {
@@ -170,7 +169,7 @@ const analyticsModule: Module = {
               playerHistory,
             },
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching analytics summary:', error);
           res.status(500).json({ error: 'Failed to fetch analytics' });
         }

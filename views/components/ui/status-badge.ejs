@@ -1,6 +1,6 @@
 <% /* status-badge: { status: online|offline|starting|stopping|installing|suspended } */
-var s = (locals.status || 'offline').toLowerCase();
-var configs = {
+const s = (locals.status || 'offline').toLowerCase();
+const configs = {
   online:     { cls: 'al-badge-online',  label: 'Online' },
   offline:    { cls: 'al-badge-offline', label: 'Offline' },
   starting:   { cls: 'al-badge-warning', label: 'Starting' },
@@ -8,9 +8,9 @@ var configs = {
   installing: { cls: 'al-badge-info',    label: 'Installing' },
   suspended:  { cls: 'al-badge-offline', label: 'Suspended' },
 };
-var cfg = configs[s] || configs.offline;
+const cfg = configs[s] || configs.offline;
 %>
 <span class="<%= cfg.cls %>">
-  <span class="al-dot-<%= s === 'online' ? 'online' : s.startsWith('s') && s !== 'suspended' ? 'warning' : 'offline' %>"></span>
+  <span class="al-dot-<%= s === 'online' ? 'online' : ['starting','stopping'].includes(s) ? 'warning' : 'offline' %>"></span>
   <%= locals.label || cfg.label %>
 </span>

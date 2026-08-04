@@ -59,7 +59,9 @@ Primary actions and active selection use `--theme-accent`; text on accent uses `
 
 ### Theme variable system
 
-Full `--theme-*` CSS custom property set (56+ variables) overrides Tailwind defaults. Built-in themes: Default Dark, Default Light, Solarized Dark, Solarized Light, Material UI. User themes in `/public/themes/user/`.
+Full `--theme-*` CSS custom property set (64+ variables) overrides Tailwind defaults. Built-in themes: Default Dark, Default Light, Solarized Dark, Solarized Light, Material UI. User themes in `/public/themes/user/`.
+
+Active states (sidebar pill, settings tabs, toggles, radios, checkboxes) use `--theme-accent` / `--theme-accent-text` so every theme controls its own active identity.
 
 ---
 
@@ -129,7 +131,7 @@ Base unit: `0.25rem` (4px). All utilities are multiples.
 ### Layout
 
 - **Desktop:** Fixed left sidebar (`w-56`) + scrollable content (`lg:pl-56`)
-- **Mobile:** Frosted top bar (`backdrop-blur-xl`) + bottom nav rail + content
+- **Mobile:** Frosted top bar (`backdrop-blur-xl`) + bottom nav rail + content; touch targets ≥44×44px
 - **Grid:** `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` for card grids
 - **Responsive:** `repeat(auto-fit, minmax(280px, 1fr))` for fluid grids
 
@@ -205,7 +207,7 @@ Exit animations: 200ms.
 
 **Library:** Lucide (server-side rendered via `icon()` helper)
 
-**Defaults:** `stroke-width: 1.75`, `stroke-linecap: round`, `stroke-linejoin: round`, `fill: none`
+**Defaults:** `stroke-width: 1.5`, `stroke-linecap: round`, `stroke-linejoin: round`, `fill: none`
 
 **Sizes:** 12px (inline), 16px (default), 20px (nav), 32px (large)
 

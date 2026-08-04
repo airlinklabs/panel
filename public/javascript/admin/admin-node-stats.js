@@ -1,4 +1,8 @@
 (function() {
+  const CPU_MAX = 100;
+  const CHART_TICK_COLOR = '#FFFFFF';
+  const CHART_GRID_COLOR = 'rgba(255, 255, 255, 0.1)';
+
   const stats = JSON.parse(document.getElementById('page-data').dataset.stats || '[]');
 
   function parseRam(ramString) {
@@ -33,17 +37,16 @@
       responsive: false,
       maintainAspectRatio: false,
       plugins: {
-        legend: { labels: { color: '#FFFFFF' } }
+        legend: { labels: { color: CHART_TICK_COLOR } }
       },
       scales: {
-        x: { ticks: { color: '#FFFFFF' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
-        y: { suggestedMax: ramMax, beginAtZero: true, ticks: { color: '#FFFFFF' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }
+        x: { ticks: { color: CHART_TICK_COLOR }, grid: { color: CHART_GRID_COLOR } },
+        y: { suggestedMax: ramMax, beginAtZero: true, ticks: { color: CHART_TICK_COLOR }, grid: { color: CHART_GRID_COLOR } }
       }
     }
   });
 
   const cpuData = stats.length ? stats.map(stat => parseCpu(stat.Cores)) : [0, 0, 0];
-  const cpuMax = 100;
 
   const ctxCpu = document.getElementById('cpuChart').getContext('2d');
   const cpuChart = new Chart(ctxCpu, {
@@ -65,11 +68,11 @@
       responsive: false,
       maintainAspectRatio: false,
       plugins: {
-        legend: { labels: { color: '#FFFFFF' } }
+        legend: { labels: { color: CHART_TICK_COLOR } }
       },
       scales: {
-        x: { ticks: { color: '#FFFFFF' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
-        y: { suggestedMax: cpuMax, beginAtZero: true, ticks: { color: '#FFFFFF' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }
+        x: { ticks: { color: CHART_TICK_COLOR }, grid: { color: CHART_GRID_COLOR } },
+        y: { suggestedMax: CPU_MAX, beginAtZero: true, ticks: { color: CHART_TICK_COLOR }, grid: { color: CHART_GRID_COLOR } }
       }
     }
   });

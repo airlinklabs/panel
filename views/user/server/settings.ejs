@@ -5,7 +5,7 @@
     <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
@@ -250,7 +250,7 @@
         const r = await fetch('/server/' + serverUuid + '/settings/allocations');
         const data = await r.json();
         if (data.allocated) renderAllocations(data);
-      } catch { if (allocList) allocList.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">Could not load allocations.</p>'; }
+      } catch (err) { console.error('Failed to load allocations:', err); if (allocList) allocList.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">Could not load allocations.</p>'; }
     }
 
     window.releaseAllocation = async function(port) {

@@ -273,7 +273,7 @@
         <div class="flex items-center gap-3 mb-5 flex-wrap">
           <div class="relative">
             <%- icon('search', { class: 'w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 pointer-events-none', strokeWidth: 1.5 }) %>
-            <input id="searchInput" type="text" placeholder="<%= req.translations.searchAddons || 'Search addons...' %>"
+            <input id="store-search-input" type="text" placeholder="<%= req.translations.searchAddons || 'Search addons...' %>" aria-label="Search addons"
               class="bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl pl-8 pr-4 py-1.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-600 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition w-56" />
           </div>
           <div id="tagFilters" class="flex gap-1.5 flex-wrap"></div>
@@ -469,7 +469,7 @@
   }
 
   function filtered() {
-    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const q = document.getElementById('store-search-input').value.trim().toLowerCase();
     return allAddons.filter(a => {
       const tagOk = activeTag === 'all' || (a.tags || []).includes(activeTag);
       const qOk   = !q || (a.name||'').toLowerCase().includes(q) || (a.description||'').toLowerCase().includes(q) || (a.author||'').toLowerCase().includes(q);
@@ -524,7 +524,7 @@
       const img = new Image();
       img.style.cssText = 'width:22px;height:22px;object-fit:contain;display:block;';
       img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
-      img.src = a.icon;
+      if (a.icon && /^(https?:|\/)/.test(a.icon)) img.src = a.icon;
     });
 
     grid.querySelectorAll('.s-card').forEach(card => {
@@ -535,9 +535,9 @@
     });
   }
 
-  document.getElementById('searchInput').addEventListener('input', () => render(filtered()));
+  document.getElementById('store-search-input').addEventListener('input', () => render(filtered()));
   document.getElementById('clearSearch').addEventListener('click', () => {
-    document.getElementById('searchInput').value = '';
+    document.getElementById('store-search-input').value = '';
     render(filtered());
   });
 
@@ -550,7 +550,7 @@
     // Icon
     const iconEl = document.getElementById('mIcon');
     iconEl.innerHTML = '<%- icon('settings', { class: 's-icon-svg', strokeWidth: 1.5 }) %>';
-    if (addon.icon) {
+    if (addon.icon && /^(https?:|\/)/.test(addon.icon)) {
       const img = new Image();
       img.style.cssText = 'width:22px;height:22px;object-fit:contain;display:block;';
       img.onload = () => { iconEl.innerHTML = ''; iconEl.appendChild(img); };
@@ -563,7 +563,7 @@
     statusEl.className = badgeClass(addon.status);
     document.getElementById('mMeta').textContent = `by ${addon.author || 'Unknown'} · v${addon.version || ''}`;
     document.getElementById('mDesc').textContent = addon.longDescription || addon.description || 'No description available.';
-    document.getElementById('mGhBtn').href = addon.github || `https://github.com/airlinklabs/addons/tree/main/${addon.id}`;
+    document.getElementById('mGhBtn').href = (addon.github && /^(https?:)/.test(addon.github)) ? addon.github : `https://github.com/airlinklabs/addons/tree/main/${addon.id}`;
 
     // Features
     const featEl = document.getElementById('mFeatures');
@@ -804,7 +804,9 @@
               showToast(evt.message, 'error');
               setActionBtn(false);
             }
-          } catch {}
+          } catch (parseErr) {
+            console.warn('Addon store SSE parse error:', parseErr);
+          }
         }
       }
     } catch (err) {

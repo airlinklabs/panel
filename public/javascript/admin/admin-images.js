@@ -1,3 +1,6 @@
+const IMAGE_DELETE_RELOAD_DELAY_MS = 700;
+const IMAGE_IMPORT_RELOAD_DELAY_MS = 800;
+
 function handleRowClick(e, url) { if (!e.target.closest('button,a')) window.location = url; }
 
 function openCreate() {
@@ -29,7 +32,7 @@ function closeDelete() {
 async function deleteImage() {
   if (!_deleteId) return;
   const res = await fetch('/admin/images/delete/' + _deleteId, { method: 'DELETE' });
-  if (res.ok) { showToast('Image deleted.', 'success'); setTimeout(() => location.reload(), 700); }
+  if (res.ok) { showToast('Image deleted.', 'success'); setTimeout(() => location.reload(), IMAGE_DELETE_RELOAD_DELAY_MS); }
   else { showToast('Failed.', 'error'); }
 }
 
@@ -55,7 +58,7 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/admin/images/upload', true);
       xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.onload = () => xhr.status === 200 ? (showToast('Image uploaded.', 'success'), setTimeout(() => location.reload(), 800)) : showToast('Upload failed.', 'error');
+      xhr.onload = () => xhr.status === 200 ? (showToast('Image uploaded.', 'success'), setTimeout(() => location.reload(), IMAGE_IMPORT_RELOAD_DELAY_MS)) : showToast('Upload failed.', 'error');
       xhr.onerror = () => showToast('Upload failed.', 'error');
       xhr.send(e.target.result);
     };
@@ -84,7 +87,7 @@ if (importUrlBtn) {
       const d = await r.json();
       if (r.ok && d.success) {
         showToast(d.message || 'Image imported.', 'success');
-        setTimeout(() => location.reload(), 800);
+        setTimeout(() => location.reload(), IMAGE_IMPORT_RELOAD_DELAY_MS);
       } else {
         showToast(d.error || 'Import failed.', 'error');
       }

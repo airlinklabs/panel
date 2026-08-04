@@ -7,6 +7,10 @@ import logger from '../../handlers/logger';
 import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 
+const USERNAME_REGEX = /^[a-zA-Z0-9]{3,20}$/;
+const PASSWORD_MIN_LENGTH = 8;
+const BCRYPT_SALT_ROUNDS = 12;
+
 
 async function listUsers(res: Response) {
   try {
@@ -17,7 +21,7 @@ async function listUsers(res: Response) {
     });
 
     return users;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error fetching users:', error);
     res.status(500).json({ message: 'Error fetching users.' });
     return;
@@ -60,7 +64,7 @@ const adminModule: Module = {
             users,
             onlineUsers,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
@@ -82,7 +86,7 @@ const adminModule: Module = {
           });
 
           res.render('admin/users/create', { user, req, settings });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
@@ -102,14 +106,14 @@ const adminModule: Module = {
           return;
         }
 
-        if (!/^[a-zA-Z0-9]{3,20}$/.test(username)) {
+        if (!USERNAME_REGEX.test(username)) {
           res.status(400).json({
             message: 'Username must be 3–20 characters and contain only letters and numbers.',
           });
           return;
         }
 
-        if (password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+        if (password.length < PASSWORD_MIN_LENGTH || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
           res.status(400).json({
             message: 'Password must be at least 8 characters and contain at least one letter and one number.',
           });
@@ -136,7 +140,7 @@ const adminModule: Module = {
             data: {
               email,
               username,
-              password: await bcrypt.hash(password, 12),
+              password: await bcrypt.hash(password, BCRYPT_SALT_ROUNDS),
               isAdmin: isAdminBool,
               serverLimit: serverLimit === '' || serverLimit === null || serverLimit === undefined ? null : parseInt(serverLimit, 10),
               maxMemory: maxMemory === '' || maxMemory === null || maxMemory === undefined ? null : parseInt(maxMemory, 10),
@@ -148,7 +152,7 @@ const adminModule: Module = {
 
           res.status(200).json({ message: 'User created successfully.' });
           return;
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error creating user:', error);
           res
             .status(500)
@@ -183,7 +187,7 @@ const adminModule: Module = {
           });
 
           res.render('admin/users/user', { user, req, settings, dataUser });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
@@ -216,7 +220,7 @@ const adminModule: Module = {
           });
 
           res.render('admin/users/edit', { user, req, settings, dataUser });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
@@ -246,7 +250,7 @@ const adminModule: Module = {
           });
 
           res.status(200).json({ message: 'User deleted successfully.' });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error deleting user:', error);
           return res.redirect('/login');
         }
@@ -307,7 +311,7 @@ const adminModule: Module = {
           }
 
           // Prepare update data
-          const updateData: any = {};
+          const updateData: Record<string, unknown> = {};
 
           if (email) updateData.email = email;
           if (username) updateData.username = username;
@@ -337,7 +341,7 @@ const adminModule: Module = {
 
           // Handle password update if provided
           if (password && password.trim() !== '') {
-            updateData.password = await bcrypt.hash(password, 12);
+            updateData.password = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
           }
 
           // Update user
@@ -347,7 +351,7 @@ const adminModule: Module = {
           });
 
           res.status(200).json({ message: 'User updated successfully' });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error updating user:', error);
           res.status(500).json({ error: 'Internal server error' });
         }
@@ -357,6 +361,5 @@ const adminModule: Module = {
     return router;
   },
 };
-
 
 export default adminModule;

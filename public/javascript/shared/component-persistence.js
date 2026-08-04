@@ -1,3 +1,15 @@
+const STATIC_SELECTORS = [
+  '#sidebar',
+  '#topbar',
+  '#footer',
+  '.sidebar',
+  '.topbar',
+  '.footer',
+  '[data-persist="true"]',
+];
+
+const COMPONENT_PREFIX = 'component_';
+
 class ComponentPersistence {
   constructor() {
     this.staticComponents = new Map();
@@ -11,15 +23,7 @@ class ComponentPersistence {
   }
 
   identifyStaticComponents() {
-    const staticSelectors = [
-      '#sidebar',
-      '#topbar', 
-      '#footer',
-      '.sidebar',
-      '.topbar',
-      '.footer',
-      '[data-persist="true"]'
-    ];
+    STATIC_SELECTORS.forEach(selector => {
 
     staticSelectors.forEach(selector => {
       const elements = document.querySelectorAll(selector);
@@ -38,7 +42,7 @@ class ComponentPersistence {
   }
 
   generateComponentId(selector) {
-    return 'component_' + selector.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Date.now();
+    return COMPONENT_PREFIX + selector.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Date.now();
   }
 
   captureComponentState(element) {

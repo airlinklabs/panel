@@ -13,6 +13,9 @@
   --theme-border-subtle:       #e4e4e4;
   --theme-border-input:        #c8c8c8;
   --theme-border-accent:       #171717;
+  --theme-border-strong:       #171717;
+  --theme-btn-border:          #d8d8d8;
+  --theme-danger-border:       rgba(220,38,38,0.30);
 
   /* Text */
   --theme-text:                #404040;
@@ -29,6 +32,8 @@
   --theme-accent-hover:        #262626;
   --theme-accent-text:         #ffffff;
   --theme-accent-subtle:       #f0f0f0;
+  --theme-accent-foreground:   #ffffff;
+  --theme-primary:             #0a0a0a;
 
   /* Nav chrome */
   --theme-nav-bg:              #ffffff;
@@ -41,12 +46,16 @@
   /* Status (keep semantic color — status can never be color-free) */
   --theme-success:             #15803d;
   --theme-success-bg:          #f0fdf4;
+  --theme-success-text:        #15803d;
   --theme-warning:             #b45309;
   --theme-warning-bg:          #fffbeb;
+  --theme-warning-text:        #b45309;
   --theme-danger:              #dc2626;
   --theme-danger-bg:           #fef2f2;
   --theme-info:                #2563eb;
   --theme-info-bg:             #eff6ff;
+  --theme-info-text:           #2563eb;
+  --theme-text-faint:          #696969;
 
   /* Table */
   --theme-table-header-bg:     #f5f5f5;

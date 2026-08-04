@@ -202,7 +202,9 @@
           const port = parseInt(portInfo.Port.split(':')[0]);
           if (!isNaN(port)) usedPortsList.push(port);
         });
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[nodes/edit] Failed to parse ports for server', server.id, e);
+      }
     });
   }
 %>

@@ -1,25 +1,14 @@
 (function() {
+  const PORT_MIN = 1024;
+  const PORT_MAX = 65535;
+  const PORT_STAGGER_MS = 30;
+  const PORT_OUT_DURATION_MS = 160;
+
   const pd = document.getElementById('page-data').dataset;
   let allocatedPorts = JSON.parse(pd.allocatedPorts || '[]');
   const usedPortsSet = new Set(JSON.parse(pd.usedPorts || '[]'));
 
   function getUsedPorts() { return usedPortsSet; }
-
-  function renderAllocatedPorts() {
-    const portsList = document.getElementById('allocatedPortsList');
-    portsList.innerHTML = '';
-    if (allocatedPorts.length === 0) {
-      const emptyMessage = document.createElement('div');
-      emptyMessage.className = 'col-span-4 text-sm text-neutral-500 italic';
-      emptyMessage.textContent = 'No ports allocated yet. Add ports that will be available for servers.';
-      portsList.appendChild(emptyMessage);
-      return;
-    }
-    const usedPorts = getUsedPorts();
-    allocatedPorts.forEach(port => {
-      portsList.appendChild(buildPortTag(port, usedPorts));
-    });
-  }
 
   function buildPortTag(port, usedPorts) {
     const isUsed = usedPorts.has(port);
@@ -72,15 +61,15 @@
     el.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
     el.style.opacity = '0';
     el.style.transform = 'translateY(-4px)';
-    setTimeout(cb, 160);
+    setTimeout(cb, PORT_OUT_DURATION_MS);
   }
 
   function addPort(input) {
     const usedPorts = getUsedPorts();
     if (input.includes('-')) {
       const [start, end] = input.split('-').map(p => parseInt(p.trim()));
-      if (isNaN(start) || isNaN(end) || start >= end || start < 1024 || end > 65535) {
-        showToast('Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between 1024 and 65535.', 'error');
+      if (isNaN(start) || isNaN(end) || start >= end || start < PORT_MIN || end > PORT_MAX) {
+        showToast('Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between ' + PORT_MIN + ' and ' + PORT_MAX + '.', 'error');
         return;
       }
       for (let port = start; port <= end; port++) {
@@ -88,8 +77,8 @@
       }
     } else {
       const port = parseInt(input.trim());
-      if (isNaN(port) || port < 1024 || port > 65535) {
-        showToast('Invalid port. Port must be between 1024 and 65535.', 'error');
+      if (isNaN(port) || port < PORT_MIN || port > PORT_MAX) {
+        showToast('Invalid port. Port must be between ' + PORT_MIN + ' and ' + PORT_MAX + '.', 'error');
         return;
       }
       if (!allocatedPorts.includes(port)) allocatedPorts.push(port);
@@ -102,7 +91,7 @@
     allocatedPorts.forEach((port, i) => {
       const tag = buildPortTag(port, usedPorts);
       portsList.appendChild(tag);
-      setTimeout(() => animatePortIn(tag), i * 30);
+      setTimeout(() => animatePortIn(tag), i * PORT_STAGGER_MS);
     });
   }
 
@@ -113,7 +102,7 @@
       return;
     }
 
-    allocatedPorts = allocatedPorts.filter(p => p !== port);
+    allocatedPorts = allocatedPorts.filter(p => p !== Number(port));
     const portsList = document.getElementById('allocatedPortsList');
     portsList.innerHTML = '';
     if (allocatedPorts.length === 0) {
@@ -155,6 +144,10 @@
     const hidden = document.getElementById(hiddenId);
     if (hidden) {
       const v = parseFloat(hidden.value);
+      if (hidden.value.trim() === '' || isNaN(v)) {
+        showToast('Value is required.', 'error');
+        return '';
+      }
       return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
     }
     return document.getElementById(fallbackId).value;
@@ -174,6 +167,7 @@
         });
       } catch (err) {
         console.error('Failed to save maintenance mode:', err);
+        showToast('Failed to save maintenance mode.', 'error');
       }
     }
 
@@ -191,6 +185,9 @@
       locationId: document.getElementById('nodeLocation').value
     };
 
+    if (!nodeData.ram) { showToast('RAM is required.', 'error'); return; }
+    if (!nodeData.disk) { showToast('Disk is required.', 'error'); return; }
+
     try {
       const response = await fetch('/admin/node/' + pd.nodeId + '/edit', {
         method: 'PUT',
@@ -199,7 +196,6 @@
       });
 
       if (response.ok) {
-        console.log('Node updated:', await response.json());
         showToast('Node updated. Looking good.', 'success');
         setTimeout(() => {
           window.location.href = '/admin/nodes?err=none';
@@ -226,7 +222,7 @@
     allocatedPorts.forEach((port, i) => {
       const tag = buildPortTag(port, usedPorts);
       portsList.appendChild(tag);
-      setTimeout(() => animatePortIn(tag), i * 25);
+      setTimeout(() => animatePortIn(tag), i * PORT_STAGGER_MS);
     });
   })();
 })();

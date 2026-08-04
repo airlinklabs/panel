@@ -34,9 +34,9 @@ function normalizeImageData(raw: Record<string, unknown>) {
     author: String(raw.author ?? ''),
     authorName: String(raw.authorName ?? ''),
     startup: String(raw.startup ?? ''),
-    stop: String((raw as any).stop ?? ''),
-    startup_done: String((raw as any).startup_done ?? ''),
-    config_files: String((raw as any).config_files ?? ''),
+    stop: String(raw.stop ?? ''),
+    startup_done: String(raw.startup_done ?? ''),
+    config_files: String(raw.config_files ?? ''),
     meta: JSON.stringify(raw.meta ?? {}),
     dockerImages: JSON.stringify(dockerImagesArray),
     info: JSON.stringify(raw.info ?? {}),
@@ -71,7 +71,7 @@ const adminModule: Module = {
           const images = await prisma.images.findMany();
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           res.render('admin/images/images', { user, req, settings, images });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching images:', error);
           return res.redirect('/login');
         }
@@ -131,7 +131,7 @@ const adminModule: Module = {
               return;
             }
             payload = JSON.parse(text);
-          } catch (error) {
+          } catch (error: unknown) {
             logger.error('Failed to fetch egg from URL:', error);
             res.status(400).json({ success: false, error: 'Failed to fetch egg from URL' });
             return;
@@ -154,7 +154,7 @@ const adminModule: Module = {
             const created = await prisma.images.create({ data });
             res.status(200).json({ success: true, message: 'Image created successfully', id: created.id });
           }
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error importing image from URL:', error);
           res.status(500).json({ success: false, error: 'Failed to import egg from URL' });
         }
@@ -192,7 +192,7 @@ const adminModule: Module = {
             logger.info(`Created image: ${data.name}`);
             res.status(200).json({ success: true, message: 'Image created successfully', id: created.id });
           }
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error processing image upload:', error);
           res.status(500).json({ success: false, error: 'Failed to process the uploaded file' });
         }
@@ -231,7 +231,7 @@ const adminModule: Module = {
           const image = await prisma.images.create({ data });
           logger.info(`Created image: ${name}`);
           res.redirect(`/admin/images/edit/${image.id}?success=true`);
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error creating image:', error);
           res.status(500).send('Failed to create image.');
         }
@@ -262,19 +262,37 @@ const adminModule: Module = {
             } else if (typeof parsed === 'object') {
               dockerImages = parsed;
             }
-          } catch { /* keep empty */ }
+          } catch {
+            dockerImages = {};
+          }
 
           let variables: unknown[] = [];
-          try { variables = JSON.parse(image.variables || '[]'); } catch { /* keep empty */ }
+          try {
+            variables = JSON.parse(image.variables || '[]');
+          } catch {
+            variables = [];
+          }
 
           let scripts: Record<string, unknown> = {};
-          try { scripts = JSON.parse(image.scripts || '{}'); } catch { /* keep empty */ }
+          try {
+            scripts = JSON.parse(image.scripts || '{}');
+          } catch {
+            scripts = {};
+          }
 
           let info: Record<string, unknown> = {};
-          try { info = JSON.parse(image.info || '{}'); } catch { /* keep empty */ }
+          try {
+            info = JSON.parse(image.info || '{}');
+          } catch {
+            info = {};
+          }
 
           let portRequirements: unknown[] = [];
-          try { portRequirements = JSON.parse(image.portRequirements || '[]'); } catch { /* keep empty */ }
+          try {
+            portRequirements = JSON.parse(image.portRequirements || '[]');
+          } catch {
+            portRequirements = [];
+          }
 
           const parsedImage = {
             ...image,
@@ -292,7 +310,7 @@ const adminModule: Module = {
             image: parsedImage,
             imageJson: JSON.stringify(parsedImage, null, 2),
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error loading image for edit:', error);
           return res.redirect('/admin/images?error=Failed+to+load+image');
         }
@@ -326,7 +344,7 @@ const adminModule: Module = {
           } else {
             res.redirect(`/admin/images/edit/${req.params.id}?success=true`);
           }
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error updating image:', error);
           res.status(500).json({ error: 'Failed to update image' });
         }
@@ -365,10 +383,10 @@ const adminModule: Module = {
             author: image.author,
             startup: image.startup,
             config: {
-              files: (() => { try { return JSON.parse((image as any).config_files || '{}'); } catch { return {}; } })(),
-              startup: { done: (image as any).startup_done || '' },
+              files: (() => { try { return JSON.parse(image.config_files || '{}'); } catch { return {}; } })(),
+              startup: { done: image.startup_done || '' },
               logs: {},
-              stop: (image as any).stop || 'stop',
+              stop: image.stop || 'stop',
             },
             docker_images: dockerImagesRaw,
             variables: (() => { try { return JSON.parse(image.variables || '[]'); } catch { return []; } })(),
@@ -380,14 +398,14 @@ const adminModule: Module = {
                 } catch { return null; }
               })(),
             },
-            portRequirements: (() => { try { return JSON.parse((image as any).portRequirements || '[]'); } catch { return []; } })(),
+            portRequirements: (() => { try { return JSON.parse(image.portRequirements || '[]'); } catch { return []; } })(),
           };
 
           const filename = `${(image.name || 'image').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
           res.setHeader('Content-Type', 'application/json');
           res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
           res.send(JSON.stringify(exported, null, 2));
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error exporting image:', error);
           res.status(500).json({ error: 'Failed to export image' });
         }
@@ -416,7 +434,7 @@ const adminModule: Module = {
           await prisma.images.delete({ where: { id } });
           logger.info(`Deleted image: ${image.name} (ID: ${id})`);
           res.status(200).send('Image deleted successfully.');
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error deleting image:', error);
           res.status(500).send('Failed to delete image.');
         }
@@ -434,7 +452,7 @@ const adminModule: Module = {
           if (!user) return res.redirect('/login');
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           res.render('admin/images/store', { user, req, settings });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error rendering store:', error);
           return res.redirect('/admin/images');
         }
@@ -452,7 +470,7 @@ const adminModule: Module = {
           const data = getCatalogue();
           res.setHeader('Cache-Control', 'private, max-age=300');
           res.status(200).json(data);
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error serving store catalogue:', error);
           res.status(500).json({ error: 'Failed to load store catalogue.' });
         }
@@ -489,7 +507,7 @@ const adminModule: Module = {
           const image = await prisma.images.create({ data: normalized });
           logger.info(`Installed image from store: ${image.name} (ID: ${image.id})`);
           res.status(200).json({ message: `"${image.name}" installed successfully.`, id: image.id });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error installing image from store:', error);
           res.status(500).json({ error: 'Failed to install image.' });
         }
@@ -505,7 +523,7 @@ const adminModule: Module = {
           // Don't await — let it run in background and return immediately
           forceRefresh().catch(err => logger.warn(`Store force refresh failed: ${err?.message || err}`));
           res.status(200).json({ message: 'Refresh started. The catalogue will update in the background.' });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Failed to start image store refresh:', error);
           res.status(500).json({ error: 'Failed to start refresh.' });
         }

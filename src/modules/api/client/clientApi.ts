@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import CronParser from 'cron-parser';
 import { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../handlers/logger';
@@ -7,18 +6,20 @@ import { apiValidator } from '../../../handlers/utils/api/apiValidator';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
+import { nextRunFromCron } from '../../../utils/cron';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function jsonError(res: Response, error: string, status = 400): void {
-  res.status(status).json({ error });
+type AuthenticatedRequest = Request & { apiKey?: { userId?: number } };
+
+function getApiKeyUserId(req: Request): number | undefined {
+  return (req as AuthenticatedRequest).apiKey?.userId;
 }
 
-function nextRunFromCron(cron: string, timeOffset = 0): Date {
-  const clock = new Date(Date.now() + timeOffset * 60_000);
-  return CronParser.parse(cron, { currentDate: clock }).next().toDate();
+function jsonError(res: Response, error: string, status = 400): void {
+  res.status(status).json({ error });
 }
 
 async function resolveServerForUser(serverId: string, userId: number) {
@@ -62,7 +63,7 @@ const clientApiModule: Module = {
 
     router.get('/api/client/servers', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const servers = await prisma.server.findMany({
@@ -89,7 +90,7 @@ const clientApiModule: Module = {
 
     router.get('/api/client/servers/:id', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -120,7 +121,7 @@ const clientApiModule: Module = {
 
     router.post('/api/client/servers/:id/power', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -147,7 +148,7 @@ const clientApiModule: Module = {
           timeout: 30000,
         });
 
-        await logActivity(req, `server:${action}` as any, {
+        await logActivity(req, `server:${action}` as Parameters<typeof logActivity>[1], {
           serverId: server.UUID,
           metadata: { source: 'client-api' },
         });
@@ -165,7 +166,7 @@ const clientApiModule: Module = {
 
     router.get('/api/client/servers/:id/files', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -193,7 +194,7 @@ const clientApiModule: Module = {
 
     router.get('/api/client/servers/:id/files/content', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -222,7 +223,7 @@ const clientApiModule: Module = {
 
     router.post('/api/client/servers/:id/files/content', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -256,7 +257,7 @@ const clientApiModule: Module = {
 
     router.delete('/api/client/servers/:id/files', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -290,7 +291,7 @@ const clientApiModule: Module = {
 
     router.post('/api/client/servers/:id/files/rename', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -328,7 +329,7 @@ const clientApiModule: Module = {
 
     router.get('/api/client/servers/:id/backups', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -356,7 +357,7 @@ const clientApiModule: Module = {
 
     router.post('/api/client/servers/:id/backups', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -413,7 +414,7 @@ const clientApiModule: Module = {
 
     router.delete('/api/client/servers/:id/backups/:backupId', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -457,7 +458,7 @@ const clientApiModule: Module = {
 
     router.get('/api/client/servers/:id/schedules', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -491,7 +492,7 @@ const clientApiModule: Module = {
 
     router.post('/api/client/servers/:id/schedules', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -541,7 +542,7 @@ const clientApiModule: Module = {
           include: { tasks: { orderBy: { order: 'asc' } } },
         });
 
-        await logActivity(req, 'schedule:create' as any, {
+        await logActivity(req, 'schedule:create' as Parameters<typeof logActivity>[1], {
           serverId: server.UUID,
           metadata: { name, cron, action, source: 'client-api' },
         });
@@ -555,7 +556,7 @@ const clientApiModule: Module = {
 
     router.delete('/api/client/servers/:id/schedules/:scheduleId', async (req: Request, res: Response) => {
       try {
-        const userId = (req as any).apiKey?.userId as number | undefined;
+        const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
 
         const serverId = getParamAsString(req.params.id);
@@ -572,7 +573,7 @@ const clientApiModule: Module = {
 
         await prisma.schedule.delete({ where: { id: scheduleId } });
 
-        await logActivity(req, 'schedule:delete' as any, {
+        await logActivity(req, 'schedule:delete' as Parameters<typeof logActivity>[1], {
           serverId: server.UUID,
           metadata: { name: schedule.name, source: 'client-api' },
         });

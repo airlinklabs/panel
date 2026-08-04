@@ -56,28 +56,35 @@
 <div id="mountModal" class="al-sheet-overlay fixed inset-0 z-50 hidden">
   <div class="flex items-end sm:items-center justify-center min-h-screen p-0 sm:p-4">
     <div class="fixed inset-0" onclick="closeMountModal()"></div>
-    <div class="al-sheet-panel relative border rounded-t-2xl sm:rounded-2xl shadow-lg max-w-lg w-full p-6" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
-      <h3 class="text-sm font-semibold mb-4" style="color:var(--theme-text-strong)">New mount</h3>
-      <div class="space-y-4">
-        <div>
-          <label class="al-label">Name</label>
-          <input id="mountName" class="al-input" placeholder="Shared plugins">
-        </div>
-        <div>
-          <label class="al-label">Source (host path)</label>
-          <input id="mountSource" class="al-input" placeholder="/data/shared/plugins">
-        </div>
-        <div>
-          <label class="al-label">Target (container path)</label>
-          <input id="mountTarget" class="al-input" placeholder="/home/container/plugins">
-        </div>
-        <label class="flex items-center gap-2 text-sm cursor-pointer" style="color:var(--theme-text-strong)">
-          <input id="mountReadOnly" type="checkbox" class="al-input h-4 w-4"> Read-only
-        </label>
+    <div id="mountModalPanel" class="al-sheet-panel relative border rounded-2xl shadow-lg max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+      <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
+        <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">New mount</h3>
+        <button type="button" onclick="closeMountModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+        </button>
       </div>
-      <div class="flex gap-2 mt-6">
-        <button type="button" onclick="closeMountModal()" class="al-btn-secondary flex-1">Cancel</button>
-        <button type="button" id="saveMountBtn" class="al-btn-primary flex-1">Create mount</button>
+      <div class="px-6 py-4 overflow-y-auto flex-1">
+        <div class="space-y-4">
+          <div>
+            <label class="al-label">Name</label>
+            <input id="mountName" class="al-input" placeholder="Shared plugins">
+          </div>
+          <div>
+            <label class="al-label">Source (host path)</label>
+            <input id="mountSource" class="al-input" placeholder="/data/shared/plugins">
+          </div>
+          <div>
+            <label class="al-label">Target (container path)</label>
+            <input id="mountTarget" class="al-input" placeholder="/home/container/plugins">
+          </div>
+          <label class="flex items-center gap-2 text-sm cursor-pointer" style="color:var(--theme-text-strong)">
+            <input id="mountReadOnly" type="checkbox" class="al-input h-4 w-4"> Read-only
+          </label>
+        </div>
+      </div>
+      <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
+        <button type="button" onclick="closeMountModal()" class="al-btn-secondary">Cancel</button>
+        <button type="button" id="saveMountBtn" class="al-btn-primary">Create mount</button>
       </div>
     </div>
   </div>
@@ -87,18 +94,36 @@
 
 <script nonce="<%- nonce %>">
 document.getElementById('newMountBtn').addEventListener('click', () => {
-  document.getElementById('mountModal').classList.remove('hidden');
-  document.getElementById('mountModal').classList.add('flex');
+  const modal = document.getElementById('mountModal');
+  const panel = document.getElementById('mountModalPanel');
+  if (window.Animate) Animate.openModal(modal, panel);
+  else { modal.classList.remove('hidden'); modal.classList.add('flex'); }
 });
 function closeMountModal() {
-  document.getElementById('mountModal').classList.add('hidden');
-  document.getElementById('mountModal').classList.remove('flex');
+  const modal = document.getElementById('mountModal');
+  const panel = document.getElementById('mountModalPanel');
+  if (window.Animate) {
+    Animate.closeModal(modal, panel, () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    });
+  } else {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
 }
 document.getElementById('saveMountBtn').addEventListener('click', async () => {
+  const name = document.getElementById('mountName').value.trim();
+  const source = document.getElementById('mountSource').value.trim();
+  const target = document.getElementById('mountTarget').value.trim();
+  if (!name || !source || !target) {
+    showToast('Name, source, and target are required.', 'error');
+    return;
+  }
   const body = {
-    name: document.getElementById('mountName').value,
-    source: document.getElementById('mountSource').value,
-    target: document.getElementById('mountTarget').value,
+    name: name,
+    source: source,
+    target: target,
     readOnly: document.getElementById('mountReadOnly').checked,
   };
   const r = await fetch('/admin/mounts', {

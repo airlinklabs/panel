@@ -55,7 +55,7 @@ const adminModule: Module = {
             },
           });
           return res.status(200).json({ success: true });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error creating mount:', error);
           return res.status(500).json({ success: false, error: 'Failed to create mount.' });
         }
@@ -71,7 +71,7 @@ const id = parseInt(String(req.params?.id), 10);
         try {
           await prisma.mount.delete({ where: { id } });
           return res.status(200).json({ success: true });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error deleting mount:', error);
           return res.status(500).json({ success: false, error: 'Failed to delete mount.' });
         }

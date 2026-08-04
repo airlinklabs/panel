@@ -7,6 +7,7 @@ import { registerPermission } from '../../handlers/permissions';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import crypto from 'crypto';
 import { apiEndpoints } from '../api/v1/apiDocs';
+import { generateApiKey } from '../../utils/apiKey';
 
 const MAX_API_KEYS_PER_USER = 25;
 
@@ -28,17 +29,6 @@ registerPermission('airlink.admin.apikeys.create');
 registerPermission('airlink.admin.apikeys.delete');
 registerPermission('airlink.admin.apikeys.edit');
 registerPermission('airlink.admin.api.docs.view');
-
-function generateApiKey(length: number): string {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters[randomIndex];
-  }
-  return result;
-}
 
 const coreModule: Module = {
   info: {
@@ -79,7 +69,7 @@ const coreModule: Module = {
             user: req.session.user,
             req,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error rendering API documentation:', error);
           res.status(500).render('error', {
             error: 'Failed to load API documentation',
@@ -139,7 +129,7 @@ const coreModule: Module = {
             created: typeof req.query.created === 'string' ? req.query.created : null,
             req,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching API keys:', error);
           res.status(500).render('error', {
             error: 'Failed to fetch API keys',
@@ -193,7 +183,7 @@ const coreModule: Module = {
           } else {
             res.redirect('/admin/apikeys');
           }
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error creating API key:', error);
           res.status(500).json({ error: 'Failed to create API key' });
         }
@@ -212,7 +202,7 @@ const coreModule: Module = {
           });
 
           res.redirect('/admin/apikeys');
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error deleting API key:', error);
           res.status(500).json({ error: 'Failed to delete API key' });
         }
@@ -244,7 +234,7 @@ const coreModule: Module = {
           });
 
           res.redirect('/admin/apikeys');
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error toggling API key status:', error);
           res.status(500).json({ error: 'Failed to toggle API key status' });
         }
@@ -279,7 +269,7 @@ const coreModule: Module = {
           });
 
           res.redirect('/admin/apikeys');
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error updating API key:', error);
           res.status(500).json({ error: 'Failed to update API key' });
         }

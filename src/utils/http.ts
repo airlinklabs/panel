@@ -1,4 +1,26 @@
 import { URL } from 'url';
+import type { Readable } from 'stream';
+
+const CONTENT_TYPE_JSON = 'application/json';
+const CONTENT_TYPE_TEXT = 'text/plain';
+const HEADER_AUTHORIZATION = 'Authorization';
+const HEADER_CONTENT_TYPE = 'Content-Type';
+const BASIC_AUTH_PREFIX = 'Basic ';
+const PROTOCOL_HTTP = 'http:';
+const PROTOCOL_HTTPS = 'https:';
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+export type ResponseType = 'json' | 'text' | 'arraybuffer' | 'stream';
+
+export interface HttpRequestOptions {
+  body?: unknown;
+  headers?: Record<string, string>;
+  params?: Record<string, string | number | boolean | undefined>;
+  auth?: { username: string; password: string };
+  timeout?: number;
+  responseType?: ResponseType;
+  signal?: AbortSignal;
+}
 
 export interface HttpError extends Error {
   status: number;
@@ -24,7 +46,7 @@ function validateUrl(urlStr: string): URL {
   } catch {
     throw new Error(`Invalid URL: ${urlStr}`);
   }
-  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+  if (parsed.protocol !== PROTOCOL_HTTP && parsed.protocol !== PROTOCOL_HTTPS) {
     throw new Error(`Blocked protocol: ${parsed.protocol}`);
   }
   return parsed;
@@ -43,49 +65,45 @@ function buildUrl(baseUrl: string, path: string, params?: Record<string, string 
 }
 
 function buildBasicAuth(username: string, password: string): string {
-  return 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
+  return BASIC_AUTH_PREFIX + Buffer.from(`${username}:${password}`).toString('base64');
+}
+
+function isStreamLike(body: unknown): body is Readable {
+  return typeof body === 'object' && body !== null && 'pipe' in body;
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get('content-type') ?? '';
-  if (contentType.includes('application/json')) {
+  if (contentType.includes(CONTENT_TYPE_JSON)) {
     return response.json() as Promise<T>;
   }
-  return response.text() as unknown as T;
+  return response.text() as T;
 }
 
 async function request<T = unknown>(
-  method: string,
+  method: HttpMethod,
   url: string,
-  options: {
-    body?: unknown;
-    headers?: Record<string, string>;
-    params?: Record<string, string | number | boolean | undefined>;
-    auth?: { username: string; password: string };
-    timeout?: number;
-    responseType?: 'json' | 'text' | 'arraybuffer' | 'stream';
-    signal?: AbortSignal;
-  } = {},
+  options: HttpRequestOptions = {},
 ): Promise<HttpResponse<T>> {
-  const { body, headers: customHeaders, params, auth, timeout, signal } = options;
+  const { body, headers: customHeaders, params, auth, timeout, signal, responseType = 'json' } = options;
 
   validateUrl(url);
 
   const headers: Record<string, string> = {};
 
   if (auth) {
-    headers['Authorization'] = buildBasicAuth(auth.username, auth.password);
+    headers[HEADER_AUTHORIZATION] = buildBasicAuth(auth.username, auth.password);
   }
 
-  if (body !== undefined && body !== null && options.responseType !== 'stream') {
+  if (body !== undefined && body !== null && responseType !== 'stream') {
     if (typeof body === 'string') {
-      headers['Content-Type'] = 'text/plain';
+      headers[HEADER_CONTENT_TYPE] = CONTENT_TYPE_TEXT;
     } else if (Buffer.isBuffer(body)) {
       // Don't set content type for buffers (likely form data streams)
-    } else if (typeof body === 'object' && 'pipe' in (body as Record<string, unknown>)) {
+    } else if (isStreamLike(body)) {
       // Stream — don't set content type, let it be handled by caller
     } else {
-      headers['Content-Type'] = 'application/json';
+      headers[HEADER_CONTENT_TYPE] = CONTENT_TYPE_JSON;
     }
   }
 
@@ -110,7 +128,7 @@ async function request<T = unknown>(
         fetchOptions.body = body;
       } else if (Buffer.isBuffer(body)) {
         fetchOptions.body = body;
-      } else if (typeof body === 'object' && 'pipe' in (body as Record<string, unknown>)) {
+      } else if (isStreamLike(body)) {
         fetchOptions.body = body as unknown as ReadableStream;
       } else {
         fetchOptions.body = JSON.stringify(body);
@@ -120,8 +138,7 @@ async function request<T = unknown>(
     const response = await fetch(finalUrl, fetchOptions);
 
     let data: T;
-    if (options.responseType === 'stream') {
-      // For stream responses, return the response body as a Node.js readable stream
+    if (responseType === 'stream') {
       const nodeStream = await import('stream');
       const webStream = response.body;
       if (webStream) {
@@ -136,19 +153,19 @@ async function request<T = unknown>(
               }
               this.push(null);
             } catch (err) {
-              this.destroy(err as Error);
+              this.destroy(err instanceof Error ? err : new Error(String(err)));
             }
           },
         });
-        data = readable as unknown as T;
+        data = readable as T;
       } else {
         data = null as T;
       }
-    } else if (options.responseType === 'arraybuffer') {
+    } else if (responseType === 'arraybuffer') {
       const buffer = Buffer.from(await response.arrayBuffer());
-      data = buffer as unknown as T;
-    } else if (options.responseType === 'text') {
-      data = (await response.text()) as unknown as T;
+      data = buffer as T;
+    } else if (responseType === 'text') {
+      data = (await response.text()) as T;
     } else {
       data = await parseResponse<T>(response);
     }
@@ -175,7 +192,7 @@ async function request<T = unknown>(
 
 export async function httpGet<T = unknown>(
   url: string,
-  options: Omit<Parameters<typeof request>[2], 'body'> = {},
+  options: Omit<HttpRequestOptions, 'body'> = {},
 ): Promise<HttpResponse<T>> {
   return request<T>('GET', url, options);
 }
@@ -183,7 +200,7 @@ export async function httpGet<T = unknown>(
 export async function httpPost<T = unknown>(
   url: string,
   body?: unknown,
-  options: Omit<Parameters<typeof request>[2], 'body'> = {},
+  options: Omit<HttpRequestOptions, 'body'> = {},
 ): Promise<HttpResponse<T>> {
   return request<T>('POST', url, { ...options, body });
 }
@@ -191,7 +208,7 @@ export async function httpPost<T = unknown>(
 export async function httpPut<T = unknown>(
   url: string,
   body?: unknown,
-  options: Omit<Parameters<typeof request>[2], 'body'> = {},
+  options: Omit<HttpRequestOptions, 'body'> = {},
 ): Promise<HttpResponse<T>> {
   return request<T>('PUT', url, { ...options, body });
 }
@@ -199,7 +216,7 @@ export async function httpPut<T = unknown>(
 export async function httpPatch<T = unknown>(
   url: string,
   body?: unknown,
-  options: Omit<Parameters<typeof request>[2], 'body'> = {},
+  options: Omit<HttpRequestOptions, 'body'> = {},
 ): Promise<HttpResponse<T>> {
   return request<T>('PATCH', url, { ...options, body });
 }
@@ -207,7 +224,7 @@ export async function httpPatch<T = unknown>(
 export async function httpDelete<T = unknown>(
   url: string,
   body?: unknown,
-  options: Omit<Parameters<typeof request>[2], 'body'> = {},
+  options: Omit<HttpRequestOptions, 'body'> = {},
 ): Promise<HttpResponse<T>> {
   return request<T>('DELETE', url, { ...options, body });
 }

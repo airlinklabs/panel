@@ -9,9 +9,7 @@ import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 
 registerPermission('airlink.admin.playerstats.view');
 
-interface ErrorMessage {
-  message?: string;
-}
+type ErrorMessage = { message?: string };
 
 const adminModule: Module = {
   info: {
@@ -51,7 +49,7 @@ const adminModule: Module = {
             req,
             settings,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching player stats:', error);
           errorMessage.message = 'Error fetching player statistics.';
           return res.render('admin/playerstats/playerstats', {
@@ -81,7 +79,7 @@ const adminModule: Module = {
             servers.map(async (server) => {
               try {
                 const ports = JSON.parse(server.Ports || '[]');
-                const primaryPort = ports.find((p: any) => p.primary)?.Port;
+                const primaryPort = ports.find((p: { primary?: boolean; Port?: string }) => p.primary)?.Port;
 
                 if (!primaryPort) {
                   return {
@@ -111,10 +109,10 @@ const adminModule: Module = {
                 return {
                   serverId: server.UUID,
                   serverName: server.name,
-                  playerCount: (response.data as any)?.onlinePlayers || 0,
-                  maxPlayers: (response.data as any)?.maxPlayers || 0,
-                  online: (response.data as any)?.online || false,
-                  version: (response.data as any)?.version || 'Unknown'
+                  playerCount: Number((response.data as Record<string, unknown>)?.onlinePlayers) || 0,
+                  maxPlayers: Number((response.data as Record<string, unknown>)?.maxPlayers) || 0,
+                  online: Boolean((response.data as Record<string, unknown>)?.online),
+                  version: String((response.data as Record<string, unknown>)?.version || 'Unknown')
                 };
               } catch {
                 return {
@@ -148,7 +146,7 @@ const adminModule: Module = {
             totalServers: servers.length,
             historicalData
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Failed to fetch player statistics:', error);
           res.status(500).json({ error: 'Failed to fetch player statistics' });
         }
@@ -162,7 +160,7 @@ const adminModule: Module = {
         try {
           await collectPlayerStats();
           res.json({ success: true, message: 'Player statistics collected successfully' });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Failed to collect player statistics:', error);
           res.status(500).json({ error: 'Failed to collect player statistics' });
         }

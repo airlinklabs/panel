@@ -1,3 +1,6 @@
+const MIN_PORT = 1;
+const MAX_PORT = 65535;
+
 export interface ServerPortAssignment {
   name: string;
   internalPort: number;
@@ -19,7 +22,7 @@ export interface ImagePortRequirement {
 }
 
 export function isValidPort(port: number): boolean {
-  return Number.isInteger(port) && port >= 1 && port <= 65535;
+  return Number.isInteger(port) && port >= MIN_PORT && port <= MAX_PORT;
 }
 
 export function parseImagePortRequirements(raw: string | null | undefined): ImagePortRequirement[] {
@@ -37,11 +40,16 @@ export function parseImagePortRequirements(raw: string | null | undefined): Imag
   }
 }
 
+function isServerPortRecord(value: unknown): value is ServerPortRecord {
+  return typeof value === 'object' && value !== null;
+}
+
 export function parseServerPorts(raw: string | null | undefined): ServerPortAssignment[] {
   try {
-    const parsed = JSON.parse(raw || '[]') as ServerPortRecord[];
+    const parsed = JSON.parse(raw || '[]');
     if (!Array.isArray(parsed)) return [];
     return parsed
+      .filter(isServerPortRecord)
       .map((port, index) => {
         const legacyParts = typeof port.Port === 'string' ? port.Port.split(':') : [];
         const externalPort = Number(port.externalPort ?? legacyParts[0] ?? port.Port);

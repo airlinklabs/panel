@@ -155,7 +155,7 @@
                   <%= req.translations.Image %>:</label>
                 <select id="serverImage" name="imageId" class="hidden">
                   <% images.forEach(image => { %>
-                    <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages %>' data-variables='<%= image.variables %>' data-port-requirements='<%= image.portRequirements || "[]" %>'>
+                    <option value="<%= image.id %>" data-docker-images='<%- JSON.stringify(image.dockerImages) %>' data-variables='<%- JSON.stringify(image.variables) %>' data-port-requirements='<%- JSON.stringify(image.portRequirements || []) %>'>
                       <%= image.name %>
                     </option>
                   <% }); %>
@@ -247,11 +247,13 @@
         const nodes = await response.json();
         nodes.forEach(node => {
           let ports = [];
-          try { if (node.allocatedPorts) ports = JSON.parse(node.allocatedPorts); } catch (e) {}
+          try { if (node.allocatedPorts) ports = JSON.parse(node.allocatedPorts); } catch (e) {
+            console.warn('[servers/create] Failed to parse allocated ports for node', node.id, e);
+          }
           nodesData[node.id] = { ...node, parsedPorts: ports };
         });
         updatePortsForSelectedNode();
-      } catch (error) { console.error('Error fetching nodes:', error); }
+      } catch (error) { console.error('[servers/create] Error fetching nodes:', error); }
     }
 
     function updatePortsForSelectedNode() {
@@ -272,7 +274,9 @@
                 if (!isNaN(port)) usedPorts.add(port);
               });
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn('[servers/create] Failed to parse used ports for server', server.id, e);
+          }
         });
       }
       availablePorts = node.parsedPorts.filter(port => !usedPorts.has(port)).map(port => ({ port, label: `${nodeAddress}:${port}` }));
@@ -288,13 +292,14 @@
 
     function ensureMinimumPortRows() {
       const requirements = getPortRequirements();
+      const DEFAULT_PORT = 25565;
       const min = requirements.length;
       while (assignedPorts.length < min) {
         const req = requirements[assignedPorts.length] || {};
         assignedPorts.push({
           name: req.name || `Port ${assignedPorts.length + 1}`,
-          internalPort: Number(req.internalPort || 25565),
-          externalPort: availablePorts.find(item => !assignedPorts.some(port => Number(port.externalPort) === item.port))?.port || '',
+          internalPort: req.internalPort || DEFAULT_PORT,
+          externalPort: availablePorts.find(item => !assignedPorts.some(port => port.externalPort === item.port))?.port || '',
           primary: assignedPorts.length === 0
         });
       }

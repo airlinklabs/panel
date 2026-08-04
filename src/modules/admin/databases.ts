@@ -41,7 +41,7 @@ const databasesModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           res.render('admin/databases/databases', { hosts, user, settings, req });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error rendering database hosts page:', error);
           res.redirect('/admin/overview');
         }
@@ -81,7 +81,7 @@ const databasesModule: Module = {
             },
           });
           res.redirect('/admin/databases?err=none');
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error creating database host:', error);
           res.redirect('/admin/databases/create?err=create_failed');
         }
@@ -110,7 +110,7 @@ const databasesModule: Module = {
           }
           const result = await testDatabaseHost(host);
           return res.json({ success: result.success, created, hostId: host.id, latency: result.latency, error: result.error });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error auto-generating database host:', error);
           return res.status(500).json({ success: false, error: 'Failed to auto-generate database host.' });
         }
@@ -124,7 +124,7 @@ const databasesModule: Module = {
         try {
           const { created } = await ensureS3Bucket();
           return res.json({ success: true, created });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error auto-generating S3 bucket:', error);
           const message = error instanceof Error ? error.message : 'Failed to auto-generate S3 bucket.';
           const unconfigured = message.includes('S3 not configured');
@@ -148,7 +148,7 @@ const databasesModule: Module = {
           }
           const result = await testDatabaseHost(host);
           return res.json(result);
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error testing database host:', error);
           return res.status(500).json({ success: false, error: 'Failed to test database host.' });
         }
@@ -167,7 +167,7 @@ const databasesModule: Module = {
           }
           await prisma.databaseHost.delete({ where: { id } });
           return res.json({ success: true });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error deleting database host:', error);
           return res.status(500).json({ success: false, error: 'Failed to delete database host.' });
         }

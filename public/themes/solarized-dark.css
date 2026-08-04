@@ -36,6 +36,9 @@
   --theme-border-subtle:    rgba(131, 148, 150, 0.08);
   --theme-border-input:     #1e5566;
   --theme-border-accent:    rgba(38, 139, 210, 0.30);
+  --theme-border-strong:    rgba(38, 139, 210, 0.30);
+  --theme-btn-border:       #164450;
+  --theme-danger-border:    rgba(220, 50, 47, 0.30);
 
   /* --- Text --- */
   --theme-text:             #839496;
@@ -52,16 +55,22 @@
   --theme-accent-hover:     #3a9fde;
   --theme-accent-text:      #fdf6e3;
   --theme-accent-subtle:    rgba(38, 139, 210, 0.12);
+  --theme-accent-foreground:#fdf6e3;
+  --theme-primary:          #268bd2;
 
   /* --- Status colours --- */
   --theme-success:          #859900;
   --theme-success-bg:       rgba(133, 153, 0, 0.12);
+  --theme-success-text:     #859900;
   --theme-warning:          #b58900;
   --theme-warning-bg:       rgba(181, 137, 0, 0.12);
+  --theme-warning-text:     #b58900;
   --theme-danger:           #dc322f;
   --theme-danger-bg:        rgba(220, 50, 47, 0.12);
   --theme-info:             #2aa198;
   --theme-info-bg:          rgba(42, 161, 152, 0.12);
+  --theme-info-text:        #2aa198;
+  --theme-text-faint:       #586e75;
 
   /* --- Nav chrome (sidebar + mobile bars) --- */
   --theme-nav-bg:           #002030;

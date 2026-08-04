@@ -77,13 +77,13 @@ input[type="checkbox"]:not(.sr-only) {
 }
 
 input[type="checkbox"]:not(.sr-only):checked {
-  background-color: #d4d4d4;
-  border-color: #d4d4d4;
-  accent-color: #0a0a0a;
+  background-color: var(--theme-accent, #ffffff);
+  border-color: var(--theme-accent, #ffffff);
+  accent-color: var(--theme-accent-text, #0a0a0a);
 }
 
 .dark input[type="checkbox"]:not(.sr-only):checked {
-  background-color: #3f3f46;
-  border-color: #3f3f46;
-  accent-color: #ffffff;
+  background-color: var(--theme-accent);
+  border-color: var(--theme-accent);
+  accent-color: var(--theme-accent-text);
 }

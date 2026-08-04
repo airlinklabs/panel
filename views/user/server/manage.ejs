@@ -2,10 +2,10 @@
 <%- include('../../components/serverFeatures') %>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" integrity="sha384-8Xk9wy/gzEDUKrXtrmCFa2bBuK3BpjpDuL/p0SeKQX19Khl/M+lHOgD/CyYf7efP" crossorigin="anonymous" />
-<script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js" integrity="sha384-M169f14mRZOXm3hD/v2Ti0ThIT/RnAQagXA9nlE15yHAtrW19gdePJh/HaTzUOe/" crossorigin="anonymous"></script>
-<script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js" integrity="sha384-iF+jqbuti4XlB64clWgFWYEscb+UnSRv3VgVikGYZu+otNFnSHr7y7NcKfBnGizn" crossorigin="anonymous"></script>
-<script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.11.0/lib/addon-web-links.js" integrity="sha384-Zb/L38m4THfRbsxxv8gWAi8cQ6xcWQnv0BgR0qwbTDwtBDaPi6pkyfgfBIH6C8ZG" crossorigin="anonymous"></script>
-<script nonce="<%- nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js" integrity="sha384-FcQlsUOd0TJjROrBxhJdUhXTUgNJQxTMcxZe6nHbaEfFL1zjQ+bq/uRoBQxb0KMo" crossorigin="anonymous"></script>
+<script nonce="<%- nonce %>" defer src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js" integrity="sha384-M169f14mRZOXm3hD/v2Ti0ThIT/RnAQagXA9nlE15yHAtrW19gdePJh/HaTzUOe/" crossorigin="anonymous"></script>
+<script nonce="<%- nonce %>" defer src="/vendor/xterm-addon-fit.js"></script>
+<script nonce="<%- nonce %>" defer src="/vendor/xterm-addon-web-links.js"></script>
+<script nonce="<%- nonce %>" defer src="/vendor/chartjs/chart.umd.js"></script>
 
 <style>
     canvas {
@@ -85,7 +85,7 @@
     </div>
 
     <!-- Content -->
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
         { label: server.name }
@@ -171,7 +171,7 @@
     </div>
     <div class="relative">
         <div class="relative">
-            <input id="input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
+            <input id="input" type="text" autocomplete="off" aria-label="Console input" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
                 class="w-full px-4 py-3 text-sm rounded-b-xl focus:ring-1 focus:border-transparent placeholder:font-medium bg-transparent relative z-[1]"
                 style="color:var(--theme-text-strong);border-top:1px solid var(--theme-border)">
             <div id="ghost-text-bg" class="absolute inset-0 px-4 py-3 text-sm pointer-events-none rounded-b-xl overflow-hidden z-0" style="border-top:1px solid var(--theme-border);background:var(--theme-bg-secondary)">
@@ -345,7 +345,7 @@
       </div>
       <div class="relative" style="border-top:1px solid var(--theme-border)">
         <p id="consoleReadOnlyNoticeMobile" class="hidden text-[11px] px-4 py-1.5 m-0" style="color:var(--theme-text-muted)">View-only — console input is active in another tab</p>
-        <input id="mobile-input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
+        <input id="mobile-input" type="text" autocomplete="off" aria-label="Console input" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
           class="w-full px-4 py-3 text-sm outline-none placeholder:font-medium" style="background:var(--theme-bg-card);color:var(--theme-text-strong)">
       </div>
     </div>
@@ -579,6 +579,8 @@ let reconnectInterval = 2000;
 let reconnectTimer = null;
 let wsErrorCount = 0;  // only show offline banner after sustained failures
 let historyLoaded = false; // only fetch log history once per page load
+let pageHidden = document.visibilityState === 'hidden';
+let consoleOwner = false;
 
 function connectWebSocket() {
     if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
@@ -593,7 +595,7 @@ function connectWebSocket() {
     isReconnecting = true;
 
     if (socket) {
-        try { socket.close(); } catch {}
+        try { socket.close(); } catch (e) { console.warn('WebSocket close failed:', e); }
         socket = null;
     }
 
@@ -672,14 +674,14 @@ connectWebSocket();
 
 // Background throttle — close the console socket while the tab is hidden,
 // pause reconnect timers, and reconnect immediately when the tab returns.
-let pageHidden = document.visibilityState === 'hidden';
+pageHidden = document.visibilityState === 'hidden';
 document.addEventListener('visibilitychange', () => {
     pageHidden = document.visibilityState === 'hidden';
     if (pageHidden) {
         isReconnecting = false;
         if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
         if (socket) {
-            try { socket.close(1000, 'page hidden'); } catch {}
+            try { socket.close(1000, 'page hidden'); } catch (e) { console.warn('WebSocket close failed:', e); }
             socket = null;
         }
     } else {
@@ -688,7 +690,6 @@ document.addEventListener('visibilitychange', () => {
 // tab renders view-only (notices shown, inputs disabled, sends refused).
 // Uses the Web Locks API so ownership transfers automatically when the
 // owning tab closes; browsers without Web Locks behave as before.
-let consoleOwner = false;
 function updateConsoleOwnerUI() {
     const notices = [document.getElementById('consoleReadOnlyNotice'), document.getElementById('consoleReadOnlyNoticeMobile')];
     notices.forEach((n) => { if (n) n.classList.toggle('hidden', consoleOwner); });
@@ -814,7 +815,7 @@ connectWebSocket();
                         writeConsole('system', 'error', msg2);
                         return;
                     }
-                } catch {}
+                } catch (e) { /* non-JSON data, render as plain text */ }
                 term.write(maskPrompts(text));
             });
             return;
@@ -841,7 +842,7 @@ connectWebSocket();
                 writeConsole('system', 'error', msg2);
                 return;
             }
-        } catch {}
+        } catch (e) { /* non-JSON data, render as plain text */ }
         term.write(maskPrompts(text));
     }
 
@@ -861,7 +862,7 @@ connectWebSocket();
 
     function restartWebSocket() {
         if (socket) {
-            try { socket.close(); } catch {}
+            try { socket.close(); } catch (e) { console.warn('WebSocket close failed:', e); }
             socket = null;
         }
         setTimeout(connectWebSocket, 500);
@@ -1249,9 +1250,9 @@ connectWebSocket();
         if (statsWs) {
             try {
                 statsWs.close();
-            } catch (e) {
-
-            }
+        } catch (e) {
+            console.error('Stats WebSocket close error:', e);
+        }
         }
 
         openTimedSocket(`${protocol}//${host}/status/<%= server.UUID %>`, '<%= server.UUID %>')
@@ -1426,8 +1427,9 @@ connectWebSocket();
     }
 
     function updateDiskUsage(stats) {
+        const DISK_LIMIT_MB = 10 * 1024;
         const diskUsageRaw = parseFloat(stats.data.storage.usage) || 0;
-        const diskLimitRaw = 10 * 1024;
+        const diskLimitRaw = DISK_LIMIT_MB;
         const diskPct = Math.round(diskUsageRaw / diskLimitRaw * 100);
         document.getElementById('diskUsage').textContent = `${diskPct}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${formatBytes(diskLimitRaw * 1024 * 1024)})`;
     }
@@ -1481,9 +1483,8 @@ connectWebSocket();
     // Never fabricate: an exit code labels the crash precisely, 137 gets the
     // OOM hint, no exit code gets an honest "stopped unexpectedly" fallback.
     function crashReasonLabel(exitCode) {
-        const t = req.translations;
-        if (exitCode === 137) return t.serverCrashedOom || 'Server crashed (exit 137 — likely out of memory)';
-        if (typeof exitCode === 'number') return (t.serverCrashedExit || 'Server crashed (exit ') + exitCode + ')';
+        if (exitCode === 137) return '<%= req.translations.serverCrashedOom || "Server crashed (exit 137 — likely out of memory)" %>';
+        if (typeof exitCode === 'number') return '<%= req.translations.serverCrashedExit || "Server crashed (exit " %>' + exitCode + ')';
         return null;
     }
 
@@ -1496,7 +1497,7 @@ connectWebSocket();
         if (msgEl) {
             const link = document.createElement('a');
             link.href = '/server/<%= server.UUID %>/logs';
-            link.textContent = req.translations.openLogs || 'Open logs';
+            link.textContent = '<%= req.translations.openLogs || "Open logs" %>';
             link.className = 'underline underline-offset-2 hover:opacity-75';
             msgEl.textContent = '';
             msgEl.appendChild(link);
@@ -1638,7 +1639,7 @@ connectWebSocket();
     function isValidJson(str) {
         try {
             JSON.parse(str);
-        } catch (e) {
+        } catch {
             return false;
         }
         return true;
@@ -1686,14 +1687,14 @@ if (parsed.event !== 'lifecycle') return;
     // MOBILE LAYOUT — separate terminal, charts, buttons
     // ═══════════════════════════════════════════════════════════════
     (function () {
-        var mobileEl = document.getElementById('mobile-manage');
+        const mobileEl = document.getElementById('mobile-manage');
         if (!mobileEl) return;
 
         // Only init mobile terminal if the element exists and is visible
-        var mobileTermEl = document.getElementById('mobile-terminal');
+        const mobileTermEl = document.getElementById('mobile-terminal');
         if (!mobileTermEl) return;
 
-        var mobileTerm = new Terminal({
+        const mobileTerm = new Terminal({
             disableStdin: true,
             lineHeight: 1.3,
             fontFamily: 'Menlo, Monaco, Consolas, monospace',
@@ -1703,9 +1704,9 @@ if (parsed.event !== 'lifecycle') return;
             convertEol: true
         });
 
-        var mobileFitAddon = new FitAddon.FitAddon();
+        const mobileFitAddon = new FitAddon.FitAddon();
         mobileTerm.loadAddon(mobileFitAddon);
-        var mobileWebLinksAddon = new WebLinksAddon.WebLinksAddon();
+        const mobileWebLinksAddon = new WebLinksAddon.WebLinksAddon();
         mobileTerm.loadAddon(mobileWebLinksAddon);
         mobileTerm.open(mobileTermEl);
 
@@ -1719,10 +1720,10 @@ if (parsed.event !== 'lifecycle') return;
 
         // Touch scroll for mobile terminal
         (function () {
-            var touchStartY = 0;
+            let touchStartY = 0;
             mobileTermEl.addEventListener('touchstart', function (e) { touchStartY = e.touches[0].clientY; }, { passive: true });
             mobileTermEl.addEventListener('touchmove', function (e) {
-                var dy = touchStartY - e.touches[0].clientY;
+                const dy = touchStartY - e.touches[0].clientY;
                 touchStartY = e.touches[0].clientY;
                 e.preventDefault();
                 e.stopPropagation();
@@ -1731,33 +1732,33 @@ if (parsed.event !== 'lifecycle') return;
         })();
 
         // Mobile charts
-        var mobileStatusChart = createBackgroundChart('mobileStatusChart');
-        var mobileRamChart = createBackgroundChart('mobileRamChart');
-        var mobileCpuChart = createBackgroundChart('mobileCpuChart');
-        var mobileDiskChart = createBackgroundChart('mobileDiskChart', 'doughnut');
+        const mobileStatusChart = createBackgroundChart('mobileStatusChart');
+        const mobileRamChart = createBackgroundChart('mobileRamChart');
+        const mobileCpuChart = createBackgroundChart('mobileCpuChart');
+        const mobileDiskChart = createBackgroundChart('mobileDiskChart', 'doughnut');
 
         // Share the same WebSocket for stats — update mobile elements too
-        var origUpdateRam = updateRamUsage;
-        var origUpdateCpu = updateCpuUsage;
-        var origUpdateDisk = updateDiskUsage;
-        var origUpdateStatus = updateStatus;
+        const origUpdateRam = updateRamUsage;
+        const origUpdateCpu = updateCpuUsage;
+        const origUpdateDisk = updateDiskUsage;
+        const origUpdateStatus = updateStatus;
 
         // Patch update functions to also update mobile elements
-        var origSetStatusText = setStatusText;
+        const origSetStatusText = setStatusText;
         function patchedSetStatusText(text, colorVar) {
             origSetStatusText(text, colorVar);
-            var el = document.getElementById('mobile-status');
+            const el = document.getElementById('mobile-status');
             if (el) { el.textContent = text; el.className = 'mt-0.5 text-base font-semibold leading-tight'; el.style.color = colorVar; }
         }
 
-        var origSetStatusLog = setStatusLog;
+        const origSetStatusLog = setStatusLog;
         function patchedSetStatusLog(msg, eventType) {
             origSetStatusLog(msg, eventType);
-            var logEl = document.getElementById('mobile-status-log-text');
+            const logEl = document.getElementById('mobile-status-log-text');
             if (!logEl) return;
             if (msg === null) { logEl.textContent = ''; logEl.classList.add('hidden'); return; }
-            var label = (statusCardLabels[eventType] || msg);
-            var color = (statusColors[eventType] || {}).cls || 'var(--theme-text-muted)';
+            const label = (statusCardLabels[eventType] || msg);
+            const color = (statusColors[eventType] || {}).cls || 'var(--theme-text-muted)';
             logEl.textContent = label;
             logEl.className = 'text-[10px] font-medium truncate';
             logEl.style.color = color;
@@ -1765,22 +1766,22 @@ if (parsed.event !== 'lifecycle') return;
         }
 
         // Override to also write to mobile terminal
-        var origWriteConsole = writeConsole;
+        const origWriteConsole = writeConsole;
         function mobileWriteConsole(prefix, type, message) {
             origWriteConsole(prefix, type, message);
-            var ansi = { system: '\x1b[33m', error: '\x1b[31m', info: '\x1b[34m', success: '\x1b[32m', normal: '\x1b[0m' };
-            var color = ansi[type.toLowerCase()] || '\x1b[0m';
-            var prefixText = (prefix && type !== 'normal') ? '[' + prefix + '] ' : '';
+            const ansi = { system: '\x1b[33m', error: '\x1b[31m', info: '\x1b[34m', success: '\x1b[32m', normal: '\x1b[0m' };
+            const color = ansi[type.toLowerCase()] || '\x1b[0m';
+            const prefixText = (prefix && type !== 'normal') ? '[' + prefix + '] ' : '';
             mobileTerm.write(color + prefixText + '\x1b[37m' + message + '\x1b[0m\r\n');
         }
 
         // Mobile input handling
-        var mobileInput = document.getElementById('mobile-input');
+        const mobileInput = document.getElementById('mobile-input');
         if (mobileInput) {
             mobileInput.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     if (!consoleOwner) return;
-                    var cmd = mobileInput.value.trim();
+                    const cmd = mobileInput.value.trim();
                     if (cmd && socket) {
                         mobileTerm.write('\u001b[1m\u001b[33m~ \u001b[0m' + cmd + '\r\n');
                         socket.send(JSON.stringify({ event: 'CMD', command: cmd }));
@@ -1796,7 +1797,7 @@ if (parsed.event !== 'lifecycle') return;
 
         // Mobile copy IP
         window.copyMobileServerIP = function () {
-            var ipText = document.getElementById('mobile-server-ip-text').textContent.trim();
+            const ipText = document.getElementById('mobile-server-ip-text').textContent.trim();
             navigator.clipboard.writeText(ipText).then(function () {
                 document.getElementById('mobile-copy-icon').classList.add('hidden');
                 document.getElementById('mobile-check-icon').classList.remove('hidden');
@@ -1808,9 +1809,9 @@ if (parsed.event !== 'lifecycle') return;
         };
 
         // Mobile button handlers
-        var mobileStartBtn = document.getElementById('mobileStartButton');
-        var mobileRestartBtn = document.getElementById('mobileRestartButton');
-        var mobileStopBtn = document.getElementById('mobileStopButton');
+        const mobileStartBtn = document.getElementById('mobileStartButton');
+        const mobileRestartBtn = document.getElementById('mobileRestartButton');
+        const mobileStopBtn = document.getElementById('mobileStopButton');
 
         if (mobileStartBtn) {
             <% if (!server.Suspended) { %>

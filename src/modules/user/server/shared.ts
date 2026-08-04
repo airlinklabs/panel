@@ -9,6 +9,8 @@ declare global {
   var serverStoppingStates: { [key: string]: boolean };
 }
 
+const DAEMON_AUTH_USERNAME = 'Airlink';
+
 export interface ErrorMessage {
   message?: string;
 }
@@ -143,7 +145,7 @@ export function getServerDaemonAddress(server: Pick<ServerPageServer, 'node'>, p
 
 export function getServerDaemonAuth(server: Pick<ServerPageServer, 'node'>): { username: string; password: string } {
   return {
-    username: 'Airlink',
+    username: DAEMON_AUTH_USERNAME,
     password: server.node.key,
   };
 }
@@ -157,7 +159,7 @@ export function getServerStatusInput(server: Pick<ServerPageServer, 'UUID' | 'no
   };
 }
 
-export function getImageFeatures(image: any): string[] {
+export function getImageFeatures(image: { info?: string | null } | null | undefined): string[] {
   if (!image) return [];
   try {
     const info = typeof image.info === 'string' ? JSON.parse(image.info) : image.info;
@@ -170,9 +172,10 @@ export function getImageFeatures(image: any): string[] {
 export function buildEnvVariables(variables: string | null | ServerVariable[]): Record<string, string> {
   if (!variables) return {};
   try {
-    const vars = Array.isArray(variables) ? variables : JSON.parse(variables) as any[];
+    const parsed: unknown = Array.isArray(variables) ? variables : JSON.parse(variables);
+    if (!Array.isArray(parsed)) return {};
     const env: Record<string, string> = {};
-    for (const v of vars) {
+    for (const v of parsed) {
       const key = v.env_variable || v.env;
       if (!key) continue;
       const raw = v.value !== undefined ? v.value : (v.default_value ?? '');
@@ -293,8 +296,7 @@ async function resolveServerMounts(
     .findMany({
       where: { serverId },
       include: { mount: true },
-    })
-    .catch(() => []);
+    });
   if (serverMounts.length === 0) return undefined;
   return serverMounts.map((sm) => ({
     source: sm.mount.source,

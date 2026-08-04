@@ -4,6 +4,7 @@ import prisma from '../../../db';
 import { httpGet, httpPost, httpPut, httpPatch, httpDelete, type HttpResponse } from '../../../utils/http';
 
 const SIGNATURE_WINDOW_S = 30;
+const NONCE_BYTE_LENGTH = 16;
 
 let cachedScheme: 'http' | 'https' = 'http';
 let schemeCachedAt = 0;
@@ -49,7 +50,7 @@ function serializeRequestBody(data: unknown): string {
   if (data == null) return '';
   if (typeof data === 'string') return data;
   if (Buffer.isBuffer(data)) return '';
-  if (typeof data === 'object' && data !== null && 'pipe' in (data as Record<string, unknown>)) {
+  if (typeof data === 'object' && data !== null && typeof (data as Record<string, unknown>).pipe === 'function') {
     return '';
   }
   try {
@@ -66,7 +67,7 @@ function signRequest(
   key: string,
 ): { timestamp: string; signature: string; nonce: string; payloadVersion: string } {
   const timestamp = Math.floor(Date.now() / 1000);
-  const nonce = crypto.randomBytes(16).toString('hex');
+  const nonce = crypto.randomBytes(NONCE_BYTE_LENGTH).toString('hex');
   const serializedBody = serializeRequestBody(body);
 
   let urlPath: string;

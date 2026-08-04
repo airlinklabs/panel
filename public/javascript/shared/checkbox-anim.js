@@ -1,20 +1,32 @@
 (function () {
 
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const CHECKBOX_SCALE_UP   = 'scale(1.3)';
+  const CHECKBOX_SCALE_DOWN = 'scale(0.75)';
+  const CHECKBOX_SCALE_REST = 'scale(1)';
+  const TRANSITION_VALUE    = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
+  const BOUNCE_MS           = 160;
+  const SETTLE_MS           = 200;
+  const SPA_REATTACH_MS     = 80;
+
   function animateCheckbox(cb) {
-    cb.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
-    // Checked: scale up spring pop. Unchecked: slight shrink then back.
-    cb.style.transform = cb.checked ? 'scale(1.3)' : 'scale(0.75)';
+    if (prefersReduced) {
+      cb.style.transform = '';
+      return;
+    }
+    cb.style.transition = TRANSITION_VALUE;
+    cb.style.transform = cb.checked ? CHECKBOX_SCALE_UP : CHECKBOX_SCALE_DOWN;
     setTimeout(function () {
-      cb.style.transform = 'scale(1)';
+      cb.style.transform = CHECKBOX_SCALE_REST;
       setTimeout(function () {
         cb.style.transition = '';
         cb.style.transform  = '';
-      }, 200);
-    }, 160);
+      }, SETTLE_MS);
+    }, BOUNCE_MS);
   }
 
   function attachTo(cb) {
-    // Skip sr-only toggle-switch checkboxes (they're hidden and drive CSS peers)
     if (cb.classList.contains('sr-only')) return;
     if (cb.dataset.cbAnim) return;
     cb.dataset.cbAnim = '1';
@@ -25,20 +37,17 @@
     document.querySelectorAll('input[type="checkbox"]').forEach(attachTo);
   }
 
-  // Attach on load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', attachAll);
   } else {
     attachAll();
   }
 
-  // Re-attach after SPA navigation (new checkboxes may be added)
   document.addEventListener('al:navigated', function () {
-    setTimeout(attachAll, 80);
+    setTimeout(attachAll, SPA_REATTACH_MS);
   });
 
-  // Also watch for dynamically added checkboxes (file lists, etc.)
-  var mo = new MutationObserver(function (mutations) {
+  const mo = new MutationObserver(function (mutations) {
     mutations.forEach(function (m) {
       m.addedNodes.forEach(function (node) {
         if (node.nodeType !== 1) return;
@@ -55,7 +64,6 @@
     mo.observe(document.body, { childList: true, subtree: true });
   });
 
-  // Expose so pages can call it for programmatic toggles (e.g. row click)
   window.animateCheckbox = animateCheckbox;
 
 })();

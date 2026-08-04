@@ -37,7 +37,7 @@
     <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-0 lg:pb-0">
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
@@ -163,14 +163,14 @@
 
 <!-- Add Subuser Modal -->
 <div id="addSubUserModal" class="al-sheet-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="al-sheet-panel w-full max-w-lg rounded-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="addSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-    <div class="flex items-center justify-between mb-4">
+  <div class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="addSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div class="flex justify-between items-center px-6 py-4 border-b">
       <h3 id="addSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Add subuser</h3>
-      <button type="button" onclick="closeModal('addSubUserModal')" aria-label="Close" class="p-2.5 rounded-lg text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
+      <button type="button" onclick="closeModal('addSubUserModal')" aria-label="Close" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
     </div>
-    <div class="space-y-4">
+    <div class="px-6 py-4 space-y-4 overflow-y-auto">
       <div>
-        <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">User email</label>
+        <label for="addSubUserEmail" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">User email</label>
         <input id="addSubUserEmail" type="email" class="al-input w-full" placeholder="friend@example.com" autocomplete="off">
       </div>
       <div>
@@ -199,7 +199,7 @@
           <% }); %>
         </div>
       </div>
-      <div class="flex gap-2 pt-1">
+      <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closeModal('addSubUserModal')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
           <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
           Cancel
@@ -215,13 +215,15 @@
 
 <!-- Edit Subuser Modal -->
 <div id="editSubUserModal" class="al-sheet-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="al-sheet-panel w-full max-w-lg rounded-2xl p-6" role="dialog" aria-modal="true" aria-labelledby="editSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-    <div class="flex items-center justify-between mb-1">
-      <h3 id="editSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Edit permissions</h3>
-      <button type="button" onclick="closeModal('editSubUserModal')" aria-label="Close" class="p-2.5 rounded-lg text-neutral-400 hover:text-neutral-200"><%- icon('x', { class: 'w-4 h-4' }) %></button>
+  <div class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="editSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div class="flex justify-between items-center px-6 py-4 border-b">
+      <div>
+        <h3 id="editSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Edit permissions</h3>
+        <p id="editSubUserName" class="text-xs mt-0.5" style="color:var(--theme-text-muted)"></p>
+      </div>
+      <button type="button" onclick="closeModal('editSubUserModal')" aria-label="Close" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
     </div>
-    <p id="editSubUserName" class="text-xs mb-4" style="color:var(--theme-text-muted)"></p>
-    <div class="space-y-4">
+    <div class="px-6 py-4 space-y-4 overflow-y-auto">
       <div>
         <div class="flex items-center justify-between mb-2">
           <label class="block text-xs font-medium" style="color:var(--theme-text-muted)">Permissions</label>
@@ -248,7 +250,7 @@
           <% }); %>
         </div>
       </div>
-      <div class="flex gap-2 pt-1">
+      <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closeModal('editSubUserModal')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
           <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
           Cancel
@@ -343,13 +345,12 @@ document.getElementById('confirmEditSubUser')?.addEventListener('click', async (
 });
 
 window.removeSubUser = async (id, name) => {
-  const t = req.translations;
   await new Promise(resolve => {
     window.modal.confirm({
-      title: t.removeSubuserTitle || 'Remove subuser',
-      body: (t.removeSubuserBodyBefore || 'Remove ') + name + (t.removeSubuserBodyAfter || ' from this server? They will lose access immediately.'),
+      title: 'Remove subuser',
+      body: 'Remove ' + name + ' from this server? They will lose access immediately.',
       danger: true,
-      confirmLabel: t.removeLabel || 'Remove',
+      confirmLabel: 'Remove',
       onConfirm: resolve,
     });
   });

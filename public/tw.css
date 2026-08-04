@@ -177,23 +177,18 @@
   .al-alert-info    { @apply rounded-xl px-4 py-3 text-sm flex items-start gap-3; background: var(--theme-info-bg); color: var(--theme-info); border: 1px solid color-mix(in oklch, var(--theme-info) 20%, transparent); }
 
   /* Section divider label */
-  .al-section-label { @apply text-[10px] font-semibold uppercase tracking-widest mb-2; color: var(--theme-text-muted); }
+  .al-section-label { @apply text-[11px] font-semibold uppercase tracking-widest mb-2; color: var(--theme-text-muted); }
 
-  /* Radio selection — active state inverts with theme: white in dark, black in light */
-  .al-radio-active { border-color: #171717; background: #f4f4f5; }
-  .dark .al-radio-active { border-color: #f0f0f0; background: rgba(255,255,255,0.06); }
-  .al-radio-ring-active { border-color: #171717; }
-  .dark .al-radio-ring-active { border-color: #f0f0f0; }
-  .al-radio-dot-active { background: #171717; }
-  .dark .al-radio-dot-active { background: #f0f0f0; }
+  /* Radio selection — active state uses theme accent */
+  .al-radio-active { border-color: var(--theme-accent); background: var(--theme-accent-subtle); }
+  .al-radio-ring-active { border-color: var(--theme-accent); }
+  .al-radio-dot-active { background: var(--theme-accent); }
 
-  /* Toggle switch — activated: white track + black knob in dark, opposite in light */
+  /* Toggle switch — activated: accent track + accent-text dot */
   .al-toggle-track { @apply w-10 h-[22px] rounded-full flex items-center p-0.5 transition-colors cursor-pointer; background: var(--theme-toggle-bg, var(--theme-border)); border: 1px solid var(--theme-btn-border, var(--theme-border)); }
-  .peer:checked ~ .al-toggle-track { background: #171717; }
-  .dark .peer:checked ~ .al-toggle-track { background: #f0f0f0; }
+  .peer:checked ~ .al-toggle-track { background: var(--theme-accent); }
   .al-toggle-dot   { @apply w-[18px] h-[18px] rounded-full transition-transform shadow-sm; background: var(--theme-accent-text); }
-  .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); background: #f0f0f0; }
-  .dark .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); background: #171717; }
+  .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); background: var(--theme-accent-text); }
 
   /* Legacy aliases — kept for backward compat */
   .al-ui-surface {
@@ -210,6 +205,42 @@
 
   .al-ui-muted {
     @apply text-neutral-600 dark:text-neutral-400;
+  }
+}
+
+/* ── Theme-aware native input overrides ───────────────────────
+   Tailwind CSS v4 forms plugin hardcodes white backgrounds and a
+   blue focus ring. These overrides come AFTER the plugin in source
+   order, so they win within the same cascade layer. */
+@layer base {
+  input:where([type='text']), input:where(:not([type])),
+  input:where([type='email']), input:where([type='url']),
+  input:where([type='password']), input:where([type='number']),
+  input:where([type='date']), input:where([type='datetime-local']),
+  input:where([type='month']), input:where([type='search']),
+  input:where([type='tel']), input:where([type='time']),
+  input:where([type='week']), select, select:where([multiple]), textarea {
+    background-color: var(--theme-bg-input, #fff);
+    border-color: var(--theme-border-input, oklch(55.1% 0.027 264.364));
+    border-radius: var(--theme-radius-input, 0.75rem);
+    color: var(--theme-text-strong, #171717);
+  }
+
+  input:where([type='text']):focus, input:where(:not([type])):focus,
+  input:where([type='email']):focus, input:where([type='url']):focus,
+  input:where([type='password']):focus, input:where([type='number']):focus,
+  input:where([type='date']):focus, input:where([type='datetime-local']):focus,
+  input:where([type='month']):focus, input:where([type='search']):focus,
+  input:where([type='tel']):focus, input:where([type='time']):focus,
+  input:where([type='week']):focus, select:focus, select:where([multiple]):focus, textarea:focus {
+    border-color: var(--theme-border-accent);
+    box-shadow: 0 0 0 3px var(--theme-accent-subtle);
+    --tw-ring-color: transparent;
+    outline: none;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--theme-text-placeholder, oklch(55.1% 0.027 264.364));
   }
 }
 
@@ -397,57 +428,38 @@
   .pa-row { animation: none; }
 }
 
-/* ── Settings tab highlight — inverted active state ────────────
-   Active pill: black in light mode, white in dark mode. Text on
-   the pill inverts to keep contrast. */
+/* ── Settings tab highlight — theme-driven active state ────────
+   Active pill uses --theme-accent / --theme-accent-text so every
+   theme (Solarized, Material, user) controls its own active identity. */
 #sliding-background {
-  background: #171717;
-  border-color: #171717;
+  background: var(--theme-accent) !important;
+  border-color: var(--theme-accent) !important;
   box-shadow: 0 1px 3px rgba(0,0,0,0.18);
 }
 .dark #sliding-background {
-  background: #f0f0f0;
-  border-color: #f0f0f0;
   box-shadow: 0 1px 4px rgba(255,255,255,0.18);
 }
-.nav-link2.nav2-active { color: #f0f0f0; }
-.dark .nav-link2.nav2-active { color: #171717; }
+.nav-link2.nav2-active { color: var(--theme-accent-text); }
 
-/* Server subnav (serverTemplate) — same inverted active pill */
+/* Server subnav (serverTemplate) — same active pill */
 .nav-link2[data-active="true"] {
-  background: #171717 !important;
-  border-color: #171717 !important;
+  background: var(--theme-accent) !important;
+  border-color: var(--theme-accent) !important;
   box-shadow: none !important;
-  color: #f0f0f0 !important;
+  color: var(--theme-accent-text) !important;
   font-weight: 700 !important;
 }
-.dark .nav-link2[data-active="true"] {
-  background: #f0f0f0 !important;
-  border-color: #f0f0f0 !important;
-  box-shadow: none !important;
-  color: #171717 !important;
-}
 
-/* Sidebar sliding pill + mobile bottom nav — same inverted highlight.
-   Boosted specificity + !important to win over theme overrides, which
-   set the old subtle --theme-bg-active-nav on #active-background. */
+/* Sidebar sliding pill + mobile bottom nav — same active highlight.
+   !important resolves the specificity from earlier theme overrides. */
 html #active-background {
-  background: #171717 !important;
-  border: 1px solid #171717 !important;
-}
-html.dark body #active-background {
-  background: #f0f0f0 !important;
-  border: 1px solid #f0f0f0 !important;
+  background: var(--theme-accent) !important;
+  border: 1px solid var(--theme-accent) !important;
 }
 html .mobile-nav-link.active-mobile {
-  background: #171717 !important;
+  background: var(--theme-accent) !important;
   border-radius: 0.75rem;
-  color: #f0f0f0 !important;
-}
-html.dark body .mobile-nav-link.active-mobile {
-  background: #f0f0f0 !important;
-  border-radius: 0.75rem;
-  color: #171717 !important;
+  color: var(--theme-accent-text) !important;
 }
 
 /* Sidebar background and vertical divider (starts below the topbar so it
@@ -460,23 +472,14 @@ html.dark body .mobile-nav-link.active-mobile {
   background-repeat: no-repeat;
 }
 
-/* Icons inside the active sidebar link follow the inverted text color
-   (themes force var(--theme-nav-icon) on .nav-link svg) */
+/* Icons inside the active sidebar link follow the theme accent text color */
 html .nav-link.active svg {
-  color: #f0f0f0 !important;
-}
-html.dark body .nav-link.active svg {
-  color: #171717 !important;
+  color: var(--theme-accent-text) !important;
 }
 
-/* Active sidebar link text — inverted, wins over the themes' forced
-   var(--theme-nav-text-active) which made text unreadable on the pill */
+/* Active sidebar link text — theme-driven, wins over --theme-nav-text-active */
 html .nav-link.active {
-  color: #f0f0f0 !important;
-  font-weight: 700 !important;
-}
-html.dark body .nav-link.active {
-  color: #171717 !important;
+  color: var(--theme-accent-text) !important;
   font-weight: 700 !important;
 }
 

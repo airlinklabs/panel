@@ -63,7 +63,7 @@ const addonsModule: Module = {
           });
 
           res.render('admin/addons/addons', { user, req, settings, addons: addonsWithMeta, addonTableExists, errorMessage: {} });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching addons:', error);
           return res.redirect('/admin/overview');
         }
@@ -77,7 +77,7 @@ const addonsModule: Module = {
         try {
           const addons = await getAllAddons();
           res.json({ success: true, addons });
-        } catch (error: any) {
+        } catch (error: unknown) {
           logger.error('Error fetching addon list:', error);
           res.status(500).json({ success: false, message: 'Failed to fetch addons' });
         }
@@ -97,7 +97,7 @@ const addonsModule: Module = {
           const addons = await getAllAddons();
 
           res.render('admin/addons/store', { user, req, settings, addons, errorMessage: {} });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error rendering addon store:', error);
           return res.redirect('/admin/addons');
         }
@@ -151,7 +151,7 @@ const addonsModule: Module = {
             commands,
             settings: settingsMap,
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           logger.error('Error fetching addon:', error);
           return res.status(500).json({ success: false, message: 'Failed to fetch addon' });
         }
@@ -173,7 +173,7 @@ const addonsModule: Module = {
           } else {
             res.status(500).json({ success: false, message: result.message || 'Failed to update addon status' });
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           logger.error('Error toggling addon status:', error);
           res.status(500).json({ success: false, message: 'Failed to update addon status' });
         }
@@ -187,7 +187,7 @@ const addonsModule: Module = {
         try {
           const result = await reloadAddons(req.app);
           res.json({ success: result.success, message: result.message });
-        } catch (error: any) {
+        } catch (error: unknown) {
           logger.error('Error reloading addons:', error);
           res.status(500).json({ success: false, message: 'Failed to reload addons' });
         }
@@ -242,7 +242,7 @@ const addonsModule: Module = {
           }
 
           return res.json({ success: true, message: 'Settings saved' });
-        } catch (error: any) {
+        } catch (error: unknown) {
           logger.error('Error saving addon settings:', error);
           return res.status(500).json({ success: false, message: 'Failed to save addon settings' });
         }
@@ -260,7 +260,7 @@ const addonsModule: Module = {
           const key = `${slug}:${command}`;
           const result = await commandRegistry.execute(key, args);
           res.json({ success: true, output: result });
-        } catch (error: any) {
+        } catch (error: unknown) {
           logger.error('Error executing addon command:', error);
           res.status(500).json({ success: false, message: 'Failed to execute addon command' });
         }
@@ -287,7 +287,7 @@ const addonsModule: Module = {
           });
 
           return res.json({ success: true, message: `Capability "${capability}" ${enabled ? 'enabled' : 'disabled'}` });
-        } catch (error: any) {
+        } catch (error: unknown) {
           logger.error('Error updating addon capability:', error);
           return res.status(500).json({ success: false, message: 'Failed to update addon capability' });
         }
@@ -316,7 +316,7 @@ const addonsModule: Module = {
           await reloadAddons(req.app);
 
           return res.json({ success: true, message: `Addon "${slug}" uninstalled` });
-        } catch (error: any) {
+        } catch (error: unknown) {
           logger.error('Error uninstalling addon:', error);
           return res.status(500).json({ success: false, message: 'Failed to uninstall addon' });
         }

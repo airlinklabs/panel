@@ -110,7 +110,12 @@ const sftpModule: Module = {
             timeout: 15000,
           });
 
-          const { username, password, port, expiresAt } = response.data as any;
+          const { username, password, port, expiresAt } = response.data as {
+            username: string;
+            password: string;
+            port: number;
+            expiresAt: string | null;
+          };
           const host = server.node.address;
           const hashedPassword = await bcrypt.hash(password, 12);
 

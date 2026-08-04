@@ -1,6 +1,8 @@
 import { isHttpError } from '../../../utils/http';
 import { daemonRequest } from '../core/daemonRequest';
 
+const SERVER_STATUS_TIMEOUT_MS = 3000;
+
 interface ServerInfo {
   nodeAddress: string;
   nodePort: number;
@@ -33,7 +35,7 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
       method: 'GET',
       path: '/container/status',
       params: { id: serverInfo.serverUUID },
-      timeout: 3000,
+      timeout: SERVER_STATUS_TIMEOUT_MS,
     });
 
     const data = response.data;

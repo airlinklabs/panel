@@ -89,10 +89,10 @@
     btn.addEventListener('click', async () => {
       await new Promise(resolve => {
         window.modal.confirm({
-          title: req.translations.deleteLocationTitle || 'Delete location',
-          body: (req.translations.deleteLocationBodyBefore || 'Delete "') + btn.dataset.name + (req.translations.deleteLocationBodyAfter || '"? Servers in it will lose their grouping.'),
+          title: 'Delete location',
+          body: 'Delete "' + btn.dataset.name + '"? Servers in it will lose their grouping.',
           danger: true,
-          confirmLabel: req.translations.deleteLabel || 'Delete',
+          confirmLabel: 'Delete',
           onConfirm: resolve,
         });
       });

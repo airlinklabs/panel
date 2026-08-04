@@ -362,19 +362,19 @@
 <div id="transferModal" class="al-sheet-overlay fixed inset-0 z-50 hidden">
   <div class="flex items-end sm:items-center justify-center min-h-screen p-0 sm:p-4">
     <div class="fixed inset-0" id="transferModalBackdrop"></div>
-    <div id="transferModalPanel" class="al-sheet-panel relative border rounded-t-2xl sm:rounded-2xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-hidden" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+    <div id="transferModalPanel" class="al-sheet-panel relative border rounded-2xl shadow-lg max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
 
-      <div class="flex justify-between items-start px-4 sm:px-6 py-4 border-b" style="border-color:var(--theme-border);">
+      <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
         <div>
           <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Transfer Server</h3>
           <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Move "<%= server.name %>" to another node</p>
         </div>
-        <button type="button" onclick="closeTransferModal()" class="al-btn-ghost mt-0.5 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Close">
-          <%- icon('x', { size: 20, class: 'shrink-0' }) %>
+        <button type="button" onclick="closeTransferModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
 
-      <div class="px-4 sm:px-6 py-4 sm:py-5 overflow-y-auto max-h-[70vh]">
+      <div class="px-6 py-4 overflow-y-auto max-h-[70vh]">
         <div class="space-y-4">
           <div>
             <label class="al-label">
@@ -422,9 +422,9 @@
         </div>
       </div>
 
-      <div class="flex gap-2 px-4 sm:px-6 py-4 border-t" style="border-color:var(--theme-border);">
-        <button type="button" onclick="closeTransferModal()" class="al-btn-secondary flex-1">Cancel</button>
-        <button type="button" id="confirmTransferBtn" class="al-btn-primary flex-1" disabled>
+      <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
+        <button type="button" onclick="closeTransferModal()" class="al-btn-secondary">Cancel</button>
+        <button type="button" id="confirmTransferBtn" class="al-btn-primary" disabled>
           <%- icon('arrow-right-left', { size: 14, class: 'shrink-0' }) %>
           Transfer Server
         </button>
@@ -472,11 +472,12 @@ function generateRandomName() {
     let nodesData = {};
     let availablePorts = [];
     let assignedPorts = <%- JSON.stringify((() => { try { return JSON.parse(server.Ports || '[]'); } catch { return []; } })()) %>.map((port, index) => {
-      const parts = String(port.Port || '').split(':');
+      const portStr = port.Port || '';
+      const parts = portStr.split(':');
       return {
         name: port.name || `Port ${index + 1}`,
-        internalPort: Number(port.internalPort || parts[1] || parts[0]),
-        externalPort: Number(port.externalPort || parts[0]),
+        internalPort: port.internalPort || parseInt(parts[1]) || parseInt(parts[0]) || 0,
+        externalPort: port.externalPort || parseInt(parts[0]) || 0,
         primary: Boolean(port.primary || index === 0),
       };
     });
@@ -486,7 +487,9 @@ function generateRandomName() {
       const nodes = await response.json();
       nodes.forEach(node => {
         let ports = [];
-        try { ports = JSON.parse(node.allocatedPorts || '[]'); } catch {}
+        try { ports = JSON.parse(node.allocatedPorts || '[]'); } catch (e) {
+          console.warn('[servers/edit] Failed to parse allocated ports for node', node.id, e);
+        }
         nodesData[node.id] = { ...node, parsedPorts: ports };
       });
       updatePortsForSelectedNode();
@@ -500,10 +503,12 @@ function generateRandomName() {
         if (server.id === <%= server.id %>) return;
         try {
           JSON.parse(server.Ports || '[]').forEach(portInfo => {
-            const external = Number(portInfo.externalPort || String(portInfo.Port || '').split(':')[0]);
+            const external = portInfo.externalPort || parseInt(String(portInfo.Port || '').split(':')[0]);
             if (!isNaN(external)) usedPorts.add(external);
           });
-        } catch {}
+        } catch (e) {
+          console.warn('[servers/edit] Failed to parse used ports for server', server.id, e);
+        }
       });
       availablePorts = (node.parsedPorts || [])
         .filter(port => !usedPorts.has(port) || assignedPorts.some(item => Number(item.externalPort) === port))
@@ -519,12 +524,13 @@ function generateRandomName() {
 
     function ensureMinimumPortRows() {
       const requirements = getPortRequirements();
+      const DEFAULT_PORT = 25565;
       while (assignedPorts.length < requirements.length) {
         const req = requirements[assignedPorts.length] || {};
         assignedPorts.push({
           name: req.name || `Port ${assignedPorts.length + 1}`,
-          internalPort: Number(req.internalPort || 25565),
-          externalPort: availablePorts.find(item => !assignedPorts.some(port => Number(port.externalPort) === item.port))?.port || '',
+          internalPort: req.internalPort || DEFAULT_PORT,
+          externalPort: availablePorts.find(item => !assignedPorts.some(port => port.externalPort === item.port))?.port || '',
           primary: assignedPorts.length === 0
         });
       }
@@ -587,7 +593,7 @@ function generateRandomName() {
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
       data.ports = assignedPorts;
-      data.mountIds = formData.getAll('mountIds').map(v => Number(v.valueOf()));
+      data.mountIds = formData.getAll('mountIds').map(v => parseInt(v, 10));
 
       // Handle checkbox values
       if (!formData.has('allowStartupEdit')) {
@@ -653,6 +659,8 @@ function generateRandomName() {
     let nodesData = {};
     let pollInterval = null;
 
+    const DEFAULT_PORT = 25565;
+
     const statusSteps = {
       'pending': { pct: 5, text: 'Queued...' },
       'stopping': { pct: 15, text: 'Stopping server on source node...' },
@@ -672,7 +680,9 @@ function generateRandomName() {
         const nodes = await response.json();
         nodes.forEach(node => {
           let ports = [];
-          try { ports = JSON.parse(node.allocatedPorts || '[]'); } catch {}
+          try { ports = JSON.parse(node.allocatedPorts || '[]'); } catch (e) {
+            console.warn('[servers/edit] Failed to parse allocated ports for node', node.id, e);
+          }
           // Also include ports from allocation table
           if (node.allocations && Array.isArray(node.allocations)) {
             node.allocations.forEach(a => {
@@ -682,7 +692,7 @@ function generateRandomName() {
           nodesData[node.id] = { ...node, parsedPorts: ports.sort((a,b) => a-b) };
         });
       } catch (err) {
-        console.error('Failed to fetch nodes:', err);
+        console.error('[servers/edit] Failed to fetch nodes:', err);
       }
     }
 
@@ -695,10 +705,12 @@ function generateRandomName() {
         if (server.id === <%= server.id %>) return;
         try {
           JSON.parse(server.Ports || '[]').forEach(portInfo => {
-            const external = Number(portInfo.externalPort || String(portInfo.Port || '').split(':')[0]);
+            const external = portInfo.externalPort || parseInt(String(portInfo.Port || '').split(':')[0]);
             if (!isNaN(external)) used.add(external);
           });
-        } catch {}
+        } catch (e) {
+          console.warn('[servers/edit] Failed to parse used ports for server', server.id, e);
+        }
       });
       return used;
     }
@@ -716,21 +728,27 @@ function generateRandomName() {
       if (transferPorts.length === 0) {
         // Initialize with current server ports
         try {
-          transferPorts = JSON.parse('<%- server.Ports %>').map((p, i) => ({
+          transferPorts = JSON.parse(<%- JSON.stringify(server.Ports || '[]') %>).map((p, i) => ({
             name: p.name || 'Port ' + (i + 1),
-            internalPort: Number(p.internalPort || String(p.Port || '').split(':')[1] || String(p.Port || '').split(':')[0]),
-            externalPort: Number(p.externalPort || String(p.Port || '').split(':')[0]),
+            internalPort: p.internalPort || parseInt(String(p.Port || '').split(':')[1]) || parseInt(String(p.Port || '').split(':')[0]) || DEFAULT_PORT,
+            externalPort: p.externalPort || parseInt(String(p.Port || '').split(':')[0]) || DEFAULT_PORT,
             primary: Boolean(p.primary || i === 0),
           }));
         } catch {
-          transferPorts = [{ name: 'Port 1', internalPort: 25565, externalPort: 25565, primary: true }];
+          transferPorts = [{ name: 'Port 1', internalPort: DEFAULT_PORT, externalPort: DEFAULT_PORT, primary: true }];
         }
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
       }
 
       let html = '';
       transferPorts.forEach((port, idx) => {
         const portOptions = availablePorts.map(p =>
-          `<option value="${p}" ${p === port.externalPort ? 'selected' : ''}>${node.address}:${p}</option>`
+          `<option value="${p}" ${p === port.externalPort ? 'selected' : ''}>${escapeHtml(node.address)}:${p}</option>`
         ).join('');
 
         html += `
@@ -768,7 +786,7 @@ function generateRandomName() {
         transferPorts.push({
           name: 'Port ' + (i + 1),
           externalPort: parseInt(sel.value) || 0,
-          internalPort: parseInt(internals[i]?.value) || parseInt(sel.value) || 25565,
+          internalPort: parseInt(internals[i]?.value) || parseInt(sel.value) || DEFAULT_PORT,
           primary: primaries[i]?.checked || false,
         });
       });
@@ -815,8 +833,8 @@ function generateRandomName() {
       const nextPort = (node.parsedPorts || []).find(p => !usedPorts.has(p) && !usedByTransfer.has(p));
       transferPorts.push({
         name: 'Port ' + (transferPorts.length + 1),
-        externalPort: nextPort || 25565,
-        internalPort: nextPort || 25565,
+        externalPort: nextPort || DEFAULT_PORT,
+        internalPort: nextPort || DEFAULT_PORT,
         primary: false,
       });
       renderTransferPorts();
@@ -886,8 +904,8 @@ function generateRandomName() {
           transferProgressBar.classList.add('bg-red-500');
           clearInterval(pollInterval);
         }
-      } catch {
-        // Ignore poll errors
+      } catch (err) {
+        console.warn('[servers/edit] Transfer poll failed:', err);
       }
     }
 
@@ -899,7 +917,7 @@ function generateRandomName() {
           startTransferPolling();
         }
       })
-      .catch(() => {});
+      .catch(err => console.warn('[servers/edit] Failed to check transfer status:', err));
 
     fetchNodesData();
   })();

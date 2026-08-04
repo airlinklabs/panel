@@ -25,6 +25,13 @@ import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import { sendServerSuspended } from '../../handlers/utils/core/mailer';
 import { startTransfer, getTransferState } from '../../handlers/utils/server/serverTransfer';
 
+const DEFAULT_SERVER_PORT = 25565;
+const DEFAULT_SERVER_PORT_RANGE = `${DEFAULT_SERVER_PORT}:${DEFAULT_SERVER_PORT}`;
+const INSTALL_TIMEOUT_MS = 600_000;
+const DEFAULT_STOP_COMMAND = 'stop';
+const DEFAULT_DATABASE_LIMIT = 5;
+const DEFAULT_BACKUP_LIMIT = 5;
+const SUSPENDED_TRUE = 'true';
 
 const adminModule: Module = {
   info: {
@@ -186,7 +193,7 @@ const adminModule: Module = {
 
           // Check if suspension status is changing
           const currentSuspendedState = server.Suspended;
-          const newSuspendedState = Suspended === 'true';
+          const newSuspendedState = Suspended === SUSPENDED_TRUE;
           const suspensionChanged = currentSuspendedState !== newSuspendedState;
 
           const selectedImage = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
@@ -222,7 +229,7 @@ const adminModule: Module = {
               parseInt(Storage),
               server.UUID,
             );
-          } catch (error) {
+          } catch (error: unknown) {
             res.status(400).json({ error: error instanceof Error ? error.message : 'Node capacity exceeded.' });
             return;
           }
@@ -240,8 +247,8 @@ const adminModule: Module = {
               Cpu: parseInt(Cpu),
               Storage: parseInt(Storage),
               StartCommand,
-              databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : 5,
-              backupLimit: backupLimit !== undefined && backupLimit !== '' ? Math.max(0, parseInt(backupLimit) || 0) : 5,
+              databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : DEFAULT_DATABASE_LIMIT,
+              backupLimit: backupLimit !== undefined && backupLimit !== '' ? Math.max(0, parseInt(backupLimit) || 0) : DEFAULT_BACKUP_LIMIT,
               backupIgnoreList: typeof backupIgnoreList === 'string' ? backupIgnoreList.trim() : '',
               Ports: serializeServerPorts(submittedPorts),
               Suspended: newSuspendedState,
@@ -258,7 +265,7 @@ const adminModule: Module = {
               await releaseServerAllocations(server.UUID);
             }
             await claimNodePorts(parseInt(nodeId), submittedPorts.map((p) => p.externalPort), server.UUID);
-          } catch (err) {
+          } catch (err: unknown) {
             logger.error('Error syncing allocation claims:', err);
           }
 
@@ -275,7 +282,7 @@ const adminModule: Module = {
                 path: '/container/stop',
                 body: {
                   id: String(server.UUID),
-                  stopCmd: server.image?.stop || 'stop',
+                  stopCmd: server.image?.stop || DEFAULT_STOP_COMMAND,
                 },
               });
 
@@ -371,7 +378,7 @@ const adminModule: Module = {
           allowStartupEdit,
         } = req.body;
 
-        const userId = +ownerId;
+        const userId = parseInt(String(ownerId), 10);
         if (
           !name ||
           !description ||
@@ -383,116 +390,108 @@ const adminModule: Module = {
           !Storage ||
           !userId
         ) {
-          res.status(400).send('Missing required fields');
+          res.status(400).json({ error: 'Missing required fields' });
           return;
         }
 
         // Validate that the selected port is allocated to the node and not already in use
-let minPorts = 0;
-          try {
-            const node = await prisma.node.findUnique({
-              where: { id: parseInt(nodeId) }
-            });
+        let minPorts = 0;
+        try {
+          const node = await prisma.node.findUnique({
+            where: { id: parseInt(nodeId) }
+          });
 
-            if (!node) {
-              res.status(400).send('Selected node not found');
-              return;
+          if (!node) {
+            res.status(400).json({ error: 'Selected node not found' });
+            return;
+          }
+
+          if (node.maintenanceMode) {
+            res.status(400).json({ error: 'Cannot create a server on a node under maintenance' });
+            return;
+          }
+
+          const pool = await getNodePortPool(parseInt(nodeId));
+
+          const existingServers = await prisma.server.findMany({
+            where: {
+              nodeId: parseInt(nodeId)
             }
+          });
 
-            if (node.maintenanceMode) {
-              res.status(400).send('Cannot create a server on a node under maintenance');
-              return;
-            }
+          const image = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
+          if (!image) {
+            res.status(400).json({ error: 'Image not found' });
+            return;
+          }
 
-            const pool = await getNodePortPool(parseInt(nodeId));
+          const submittedPorts = ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`);
+          minPorts = parseImagePortRequirements(image.portRequirements).length;
+          const portError = validatePortAssignments(submittedPorts, pool, getUsedExternalPorts(existingServers), minPorts);
+          if (portError) {
+            res.status(400).json({ error: portError });
+            return;
+          }
 
-            const existingServers = await prisma.server.findMany({
-              where: {
-                nodeId: parseInt(nodeId)
-              }
-            });
-
-            const image = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
-            if (!image) {
-              res.status(400).send('Image not found');
-              return;
-            }
-            const submittedPorts = ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`);
-            minPorts = parseImagePortRequirements(image.portRequirements).length;
-            const portError = validatePortAssignments(submittedPorts, pool, getUsedExternalPorts(existingServers), minPorts);
-            if (portError) {
-              res.status(400).send(portError);
-              return;
-            }
-
-            await assertNodeCapacity(
-              node,
-              parseInt(Memory) || 1024,
-              parseInt(Cpu) || 100,
-              parseInt(Storage) || 20480,
-            );
-          } catch (error) {
+          await assertNodeCapacity(
+            node,
+            parseInt(Memory) || 1024,
+            parseInt(Cpu) || 100,
+            parseInt(Storage) || 20480,
+          );
+        } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'Error validating port allocation';
             logger.error('Error validating server resources:', error);
-            res.status(400).send(message);
+            res.status(400).json({ error: message });
             return;
           }
 
         const Port = serializeServerPorts(ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`));
 
         try {
-          const dockerImages = await prisma.images
-            .findUnique({
-              where: {
-                id: parseInt(imageId),
-              },
-            })
-            .then((image: any) => {
-              if (!image) {
-                return null;
-              }
-              return image.dockerImages;
-            });
-
-          if (!dockerImages) {
-            res.status(400).send('Docker image not found');
-            return;
-          }
-
-          const imagesDocker = JSON.parse(dockerImages);
-
-          type ImageDocker = { [key: string]: string };
-
-          const imageDocker: ImageDocker | undefined = imagesDocker.find(
-            (image: ImageDocker) => Object.keys(image).includes(dockerImage),
-          );
-
-          if (!imageDocker) {
-            res.status(400).send('Docker image not found');
-            return;
-          }
-
-          const image = await prisma.images.findUnique({
+          const selectedImage = await prisma.images.findUnique({
             where: {
               id: parseInt(imageId),
             },
           });
 
-          if (!image) {
-            res.status(400).send('Image not found');
+          if (!selectedImage) {
+            res.status(400).json({ error: 'Image not found' });
             return;
           }
 
-          const StartCommand = image.startup;
+          const dockerImagesRaw = selectedImage.dockerImages;
+          if (!dockerImagesRaw) {
+            res.status(400).json({ error: 'Docker image not found' });
+            return;
+          }
+
+          type ImageDocker = { [key: string]: string };
+
+          const imagesDocker: ImageDocker[] = JSON.parse(dockerImagesRaw);
+          const imageDocker: ImageDocker | undefined = imagesDocker.find(
+            (image: ImageDocker) => Object.keys(image).includes(dockerImage),
+          );
+
+          if (!imageDocker) {
+            res.status(400).json({ error: 'Docker image not found' });
+            return;
+          }
+
+          const StartCommand = selectedImage.startup;
 
           if (!StartCommand) {
-            res.status(400).send('Image startup command not found');
+            res.status(400).json({ error: 'Image startup command not found' });
             return;
           }
 
           // Merge submitted variable values into the egg variable definitions
           let imageVariables: Record<string, unknown>[] = [];
-          try { imageVariables = JSON.parse(image.variables || '[]'); } catch { /* keep empty */ }
+          try {
+            imageVariables = JSON.parse(selectedImage.variables || '[]');
+          } catch {
+            imageVariables = [];
+          }
 
           const submittedVars = Array.isArray(variables) ? variables : [];
           const mergedVariables = imageVariables.map((imgVar: Record<string, unknown>) => {
@@ -541,10 +540,12 @@ let minPorts = 0;
               });
 
               await prisma.$executeRaw`UPDATE "Server" SET "allowStartupEdit" = ${allowStartupEdit === 'true'} WHERE "id" = ${created.id}`;
-              await claimNodePorts(parseInt(nodeId), submittedExternal, created.UUID).catch(() => {});
+              await claimNodePorts(parseInt(nodeId), submittedExternal, created.UUID).catch((err: unknown) => {
+                logger.warn(`Failed to claim ports for server ${created.UUID}: ${err instanceof Error ? err.message : err}`);
+              });
               return created;
             });
-          } catch (error) {
+          } catch (error: unknown) {
             logger.error('Error creating server:', error);
             res.status(400).send(error instanceof Error ? error.message : 'Failed to create server.');
             return;
@@ -570,20 +571,20 @@ let minPorts = 0;
                 continue;
               }
 
-              let ServerEnv;
+              let ServerEnv: Array<{ env: string; value: unknown }>;
               try {
-                ServerEnv = JSON.parse(server.Variables);
+                const parsed: unknown[] = JSON.parse(server.Variables);
 
                 // Normalize variable shape — Pterodactyl uses env_variable, legacy uses env
-                ServerEnv = ServerEnv.map((v: Record<string, unknown>) => ({
+                ServerEnv = (parsed as Record<string, unknown>[]).map((v) => ({
                   env: String(v.env_variable ?? v.env ?? ''),
                   value: v.value ?? v.default_value ?? '',
                 }));
 
                 let serverPort = String(parseServerPorts(Port)[0]?.externalPort ?? '');
                 try {
-                  const parsedPorts = JSON.parse(server.Ports);
-                  const primary = parsedPorts.find((p: any) => p.primary);
+                  const parsedPorts: Array<{ Port: string; primary?: boolean }> = JSON.parse(server.Ports);
+                  const primary = parsedPorts.find((p) => p.primary);
                   if (primary?.Port) {
                     serverPort = String(primary.Port).split(':')[0] ?? '';
                   }
@@ -620,8 +621,8 @@ let minPorts = 0;
 
               const env = ServerEnv.reduce(
                 (
-                  acc: { [key: string]: any },
-                  curr: { env: string; value: any },
+                  acc: Record<string, unknown>,
+                  curr: { env: string; value: unknown },
                 ) => {
                   acc[curr.env] = curr.value;
                   return acc;
@@ -642,11 +643,7 @@ let minPorts = 0;
                 try {
                   // Pterodactyl egg format: scripts.installation has script, container, entrypoint
                   if (scripts.installation && typeof scripts.installation === 'object') {
-                    const installation = scripts.installation as {
-                      script: string;
-                      container: string;
-                      entrypoint: string;
-                    };
+                    const installation = scripts.installation as Record<string, string>;
 
                     await daemonRequest({
                       nodeAddress: server.node.address,
@@ -684,7 +681,7 @@ let minPorts = 0;
                         id: server.UUID,
                         image: dockerImageValue,
                         env,
-                        scripts: (scripts.install as any[]).map((s: any) => ({
+                        scripts: (scripts.install as Array<Record<string, unknown>>).map((s) => ({
                           url: s.url,
                           onStartup: s.onStart,
                           ALVKT: s.ALVKT,
@@ -694,7 +691,7 @@ let minPorts = 0;
                     });
 
                     if (scripts.native && typeof scripts.native === 'object') {
-                      const native = scripts.native as { CMD: string; container: string };
+                      const native = scripts.native as Record<string, string>;
                       await daemonRequest({
                         nodeAddress: server.node.address,
                         nodePort: server.node.port,
@@ -721,11 +718,11 @@ let minPorts = 0;
             }
           });
 
-          res.status(200).send('Server created successfully');
+          res.status(200).json({ success: true, message: 'Server created successfully' });
           await logActivity(req, 'server:create', { serverId: String(createdServer.UUID), metadata: { name, nodeId: createdServer.nodeId } });
         } catch (error: unknown) {
           logger.error('Error creating server:', error);
-          res.status(500).send('Error creating server');
+          res.status(500).json({ error: 'Error creating server' });
         }
       },
     );
@@ -746,7 +743,7 @@ let minPorts = 0;
 
           const serverId = getParamAsNumber(id);
           if (isNaN(serverId)) {
-            res.status(400).send('Invalid server ID');
+            res.status(400).json({ error: 'Invalid server ID' });
             return;
           }
 
@@ -756,7 +753,7 @@ let minPorts = 0;
           });
 
           if (!server) {
-            res.status(404).send('Server not found');
+            res.status(404).json({ error: 'Server not found' });
             return;
           }
 
@@ -779,11 +776,12 @@ let minPorts = 0;
                 });
 
                 if (response.status !== 200) {
+                  const responseData = response.data as Record<string, unknown> | undefined;
                   const isNotFound =
                     response.status === 404 ||
-                    (response.data && typeof response.data === 'object' && 'error' in response.data &&
-                     typeof (response.data as any).error === 'string' &&
-                     (response.data as any).error.includes('not exist'));
+                    (responseData && typeof responseData === 'object' && 'error' in responseData &&
+                     typeof responseData.error === 'string' &&
+                     responseData.error.includes('not exist'));
 
                   if (isNotFound) {
                     logger.warn(`Container ${server.UUID} not found on daemon, proceeding with database cleanup`);
@@ -827,13 +825,12 @@ let minPorts = 0;
           } catch (error: unknown) {
             logger.error('Error deleting server:', error);
             const errorMessage = error instanceof Error ? error.message : String(error);
-            res.status(500).send(`Failed to delete server: ${errorMessage}`);
+            res.status(500).json({ error: `Failed to delete server: ${errorMessage}` });
             return;
           }
         } catch (error: unknown) {
           logger.error('Error in delete server route:', error);
-          res.status(500).send('Error deleting server');
-          return;
+          res.status(500).json({ error: 'Error deleting server' });
         }
       },
     );
@@ -887,7 +884,7 @@ let minPorts = 0;
           logger.info(`Server ${serverId} suspended by user ${userId}`);
           await logActivity(req, 'server:suspend', { serverId: String(server.UUID), metadata: { name: server.name } });
 
-const owner = server.ownerId
+          const owner = server.ownerId
             ? await prisma.users.findUnique({ where: { id: Number(server.ownerId) }, select: { email: true } })
             : null;
           if (owner?.email) {
@@ -981,10 +978,10 @@ const owner = server.ownerId
             return;
           }
 
-          const normalizedPorts = ports.map((p: any) => ({
-            name: p.name || `Port ${p.externalPort}`,
-            internalPort: parseInt(p.internalPort) || parseInt(p.externalPort) || 25565,
-            externalPort: parseInt(p.externalPort) || 25565,
+          const normalizedPorts = ports.map((p: Record<string, unknown>) => ({
+            name: String(p.name || `Port ${p.externalPort}`),
+            internalPort: parseInt(String(p.internalPort)) || parseInt(String(p.externalPort)) || DEFAULT_SERVER_PORT,
+            externalPort: parseInt(String(p.externalPort)) || DEFAULT_SERVER_PORT,
             primary: p.primary === true,
           }));
 
@@ -1044,6 +1041,5 @@ const owner = server.ownerId
     return router;
   },
 };
-
 
 export default adminModule;

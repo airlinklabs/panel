@@ -48,6 +48,8 @@ export interface NormalizedImageData {
   variables: string;
 }
 
+const DEFAULT_INSTALL_CONTAINER = 'alpine:3.18';
+
 export function isPterodactylEgg(data: Record<string, unknown>): boolean {
   const meta = data.meta as Record<string, unknown> | undefined;
   return !!(meta && meta.version === 'PTDL_v2');
@@ -90,7 +92,7 @@ export function parseEgg(raw: Record<string, unknown>): ParsedEgg {
   if (installationRaw) {
     installScript = {
       script: String(installationRaw.script ?? ''),
-      container: String(installationRaw.container ?? 'alpine:3.18'),
+      container: String(installationRaw.container ?? DEFAULT_INSTALL_CONTAINER),
       entrypoint: String(installationRaw.entrypoint ?? 'bash'),
     };
   }

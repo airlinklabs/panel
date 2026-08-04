@@ -63,10 +63,10 @@
     });
   });
 
-  var recoveryMode = false;
-  var tokenInput = document.getElementById('token');
-  var tokenLabel = document.getElementById('tokenLabel');
-  var toggleBtn = document.getElementById('toggleRecovery');
+  let recoveryMode = false;
+  const tokenInput = document.getElementById('token');
+  const tokenLabel = document.getElementById('tokenLabel');
+  const toggleBtn = document.getElementById('toggleRecovery');
 
   toggleBtn.addEventListener('click', function () {
     recoveryMode = !recoveryMode;
@@ -96,29 +96,29 @@
 
   document.getElementById('verifyForm').addEventListener('submit', async function (e) {
     e.preventDefault();
-    var submitBtn = document.getElementById('submitBtn');
+    const submitBtn = document.getElementById('submitBtn');
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
 
-    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    var token = document.getElementById('token').value.trim();
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const token = document.getElementById('token').value.trim();
 
     try {
-      var res = await fetch('/2fa', {
+      const res = await fetch('/2fa', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
         body: JSON.stringify({ token: token }),
       });
-      var data = await res.json();
+      const data = await res.json();
       if (res.ok && data.success) {
         window.location.href = data.redirect || '/';
         return;
       }
-      var fb = document.getElementById('feedback');
+      const fb = document.getElementById('feedback');
       fb.textContent = data.error || 'Invalid code. Try again.';
       fb.classList.remove('hidden');
     } catch (err) {
-      var fb2 = document.getElementById('feedback');
+      const fb2 = document.getElementById('feedback');
       fb2.textContent = 'Something went wrong. Try again.';
       fb2.classList.remove('hidden');
     }

@@ -9,10 +9,20 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import validator from 'validator';
+import type { ErrorMessage } from './server/shared';
+
+const AVATAR_MAX_SIZE_BYTES = 2 * 1024 * 1024;
+const DESCRIPTION_MAX_LENGTH = 255;
+const USERNAME_MIN_LENGTH = 3;
+const USERNAME_MAX_LENGTH = 32;
+const BCRYPT_SALT_ROUNDS = 10;
+const COOKIE_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
+
+const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'es', 'pt', 'it', 'ru', 'zh', 'ja', 'ta'] as const;
 
 const avatarStorage = multer.diskStorage({
   destination: (req, _file, cb) => {
-    const username = (req as any).session?.user?.username;
+    const username = req.session?.user?.username;
     if (!username) return cb(new Error('Not authenticated'), '');
 
     const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
@@ -44,13 +54,9 @@ const avatarUpload = multer({
       cb(new Error('Only image files are allowed.'));
     }
   },
-  limits: { fileSize: 2 * 1024 * 1024 },
+  limits: { fileSize: AVATAR_MAX_SIZE_BYTES },
 });
 
-
-interface ErrorMessage {
-  message?: string;
-}
 
 const accountModule: Module = {
   info: {
@@ -118,7 +124,7 @@ const accountModule: Module = {
           return;
         }
 
-        const cleanDesc = validator.trim(String(description).slice(0, 255));
+        const cleanDesc = validator.trim(String(description).slice(0, DESCRIPTION_MAX_LENGTH));
         if (cleanDesc.length === 0) {
           res.status(400).send('Description cannot be empty.');
           return;
@@ -163,8 +169,8 @@ const accountModule: Module = {
 
         const cleanUsername = validator.trim(String(newUsername));
         if (!validator.isAlphanumeric(cleanUsername, 'en-US', { ignore: '_-' }) ||
-            !validator.isLength(cleanUsername, { min: 3, max: 32 })) {
-          res.status(400).send('Username must be 3–32 characters and contain only letters, numbers, underscores, or hyphens.');
+            !validator.isLength(cleanUsername, { min: USERNAME_MIN_LENGTH, max: USERNAME_MAX_LENGTH })) {
+          res.status(400).send(`Username must be ${USERNAME_MIN_LENGTH}–${USERNAME_MAX_LENGTH} characters and contain only letters, numbers, underscores, or hyphens.`);
           return;
         }
 
@@ -263,7 +269,7 @@ const accountModule: Module = {
             return;
           }
 
-          const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+          const hashedNewPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
 
           await prisma.users.update({
             where: { id: userId },
@@ -373,8 +379,7 @@ const accountModule: Module = {
         }
 
         // Validate language is supported
-        const supportedLanguages = ['en', 'fr', 'de', 'es', 'pt', 'it', 'ru', 'zh', 'ja', 'ta'];
-        if (!supportedLanguages.includes(language)) {
+        if (!(SUPPORTED_LANGUAGES as readonly string[]).includes(language)) {
           res.status(400).send('Unsupported language.');
           return;
         }
@@ -382,7 +387,7 @@ const accountModule: Module = {
         try {
           // Set the language cookie
           res.cookie('lang', language, {
-            maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
+            maxAge: COOKIE_MAX_AGE_MS,
             httpOnly: true,
             sameSite: 'strict'
           });
@@ -407,7 +412,7 @@ const accountModule: Module = {
 
         try {
           const userId = req.session?.user?.id;
-          const username = (req as any).session?.user?.username;
+          const username = req.session?.user?.username;
           const avatarPath = `/uploads/avatars/${username}/${req.file.filename}`;
 
           await prisma.users.update({
@@ -429,7 +434,12 @@ const accountModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const username = (req as any).session?.user?.username;
+          const username = req.session?.user?.username;
+
+          if (!username) {
+            res.status(400).json({ message: 'User not authenticated.' });
+            return;
+          }
 
           const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
           if (fs.existsSync(userDir)) {
@@ -464,7 +474,7 @@ const accountModule: Module = {
             prisma.settings.findUnique({ where: { id: 1 } }),
           ]);
           if (!user) return res.redirect('/login');
-          const pkg = JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'package.json'), 'utf-8'));
+          const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'));
           res.render('user/credits', { user, req, settings, version: pkg.version });
         } catch (error) {
           logger.error('Error loading credits page:', error);

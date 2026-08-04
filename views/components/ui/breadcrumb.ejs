@@ -1,7 +1,7 @@
 <% /* breadcrumb: { items: [{ label, href? }] } */ %>
 <% if (locals.items && items.length > 0) { %>
 <div class="lg:hidden w-full" style="border-bottom:1px solid var(--theme-border);background:var(--theme-bg-secondary);">
-  <div class="pr-6 sm:pr-8 pl-0 py-2 opacity-60">
+  <div class="pr-6 sm:pr-8 pl-0 py-2">
     <nav aria-label="Breadcrumb">
       <ol class="flex items-center gap-1.5 text-[11px] min-w-0">
         <% items.forEach(function(item, index) { %>
@@ -10,9 +10,9 @@
               <span class="shrink-0" style="color:var(--theme-text-placeholder);font-size:10px;">/</span>
             <% } %>
             <% if (item.href && index < items.length - 1) { %>
-              <a href="<%= item.href %>" class="transition truncate" style="color:var(--theme-text-muted);"><%= item.label %></a>
+              <a href="<%= item.href %>" class="transition truncate text-neutral-500 dark:text-neutral-400" style="color:var(--theme-text-muted);"><%= item.label %></a>
             <% } else { %>
-              <span class="truncate" style="color:var(--theme-text-muted);font-weight:500;"><%= item.label %></span>
+              <span class="truncate text-neutral-500 dark:text-neutral-400" style="color:var(--theme-text-muted);font-weight:500;"><%= item.label %></span>
             <% } %>
           </li>
         <% }); %>
@@ -22,14 +22,14 @@
 </div>
 <script nonce="<%- nonce %>">
 (function () {
-  var slot = document.getElementById('topbar-breadcrumbs');
+  const slot = document.getElementById('topbar-breadcrumbs');
   if (!slot) return;
-  var items = <%- JSON.stringify(items).replace(/</g, '\\x3c') %>;
+  const items = <%- JSON.stringify(items).replace(/</g, '\\x3c') %>;
   slot.classList.remove('hidden');
   slot.innerHTML = '';
   items.forEach(function (item, i) {
     if (i > 0) {
-      var sep = document.createElement('span');
+      const sep = document.createElement('span');
       sep.className = 'mx-1 shrink-0';
       sep.style.color = 'var(--theme-text-placeholder)';
       sep.style.fontSize = '11px';
@@ -37,14 +37,14 @@
       slot.appendChild(sep);
     }
     if (item.href && i < items.length - 1) {
-      var a = document.createElement('a');
+      const a = document.createElement('a');
       a.href = item.href;
       a.className = 'transition whitespace-nowrap';
       a.style.color = 'var(--theme-text-muted)';
       a.textContent = item.label;
       slot.appendChild(a);
     } else {
-      var span = document.createElement('span');
+      const span = document.createElement('span');
       span.className = 'truncate whitespace-nowrap font-medium';
       span.style.color = 'var(--theme-text-muted)';
       span.style.minWidth = '0';

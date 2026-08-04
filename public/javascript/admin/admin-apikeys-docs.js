@@ -17,7 +17,7 @@ if (selectedApiKey) {
   }
 }
 
-if (selectedApiKey) {
+if (selectedApiKey && apiKeySelect) {
   for (let i = 0; i < apiKeySelect.options.length; i++) {
     if (apiKeySelect.options[i].value === selectedApiKey) {
       apiKeySelect.selectedIndex = i;

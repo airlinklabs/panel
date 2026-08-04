@@ -1,18 +1,34 @@
 (function () {
 
-  // Pages that need a full hard navigation — can't survive a DOM swap.
-  var HARD_NAV = [
+  const HARD_NAV = [
     /^\/server\/[^/]+$/,  // console: xterm + live WebSocket
     /^\/auth\//,
     /^\/logout/,
     /^\/install/,
   ];
 
-  var SLOW_MS = 150;
-  var navigating = false;
+  const SLOW_MS = 150;
+  const BAR_MAX_PERCENT = 72;
+  const BAR_DECAY_RATE = 500;
+  const BAR_THRESHOLD = 71;
+  const BAR_TRANSITION_MS = 300;
+  const BAR_FADE_DELAY_MS = 150;
+  const BAR_FADE_MS = 220;
+  const EXACT_MATCH_SCORE = 9999;
+  const CONTENT_FADE_OUT_MS = 100;
+  const CONTENT_FADE_IN_MS = 155;
+  const CONTENT_SETTLE_MS = 105;
+  const PILL_TRANSITION = 'transform 0.38s cubic-bezier(0.16,1,0.3,1), height 0.2s ease, opacity 0.15s ease';
+  const ACTIVE_BORDER_RADIUS = '0.75rem';
+  const COLOR_DARK_TEXT  = '#171717';
+  const COLOR_LIGHT_TEXT = '#f0f0f0';
+  const COLOR_DARK_BG    = '#f0f0f0';
+  const COLOR_LIGHT_BG   = '#171717';
+
+  let navigating = false;
 
   function isHardNav(pathname) {
-    for (var i = 0; i < HARD_NAV.length; i++) {
+    for (let i = 0; i < HARD_NAV.length; i++) {
       if (HARD_NAV[i].test(pathname)) return true;
     }
     return false;
@@ -20,7 +36,7 @@
 
   function skipLink(a, e) {
     if (!a) return true;
-    var h = a.getAttribute('href');
+    const h = a.getAttribute('href');
     if (!h || h === '#' || h.charAt(0) === '#') return true;
     if (h.indexOf('mailto:') === 0 || h.indexOf('tel:') === 0) return true;
     if (a.hasAttribute('download') || a.target === '_blank') return true;
@@ -31,7 +47,7 @@
 
   // ── Progress bar ──────────────────────────────────────────────────────────
 
-  var bar = null, barTimer = null, barRaf = null;
+  let bar = null, barTimer = null, barRaf = null;
 
   function barStart() {
     if (bar) return;
@@ -41,13 +57,13 @@
       + (document.documentElement.classList.contains('dark') ? '#fff' : '#171717')
       + ';width:0%;';
     document.body.appendChild(bar);
-    var t0 = Date.now();
+    const t0 = Date.now();
     (function tick() {
       if (!bar) return;
-      var p = 72 * (1 - Math.exp(-(Date.now() - t0) / 500));
-      bar.style.transition = 'width 0.3s ease';
+      const p = BAR_MAX_PERCENT * (1 - Math.exp(-(Date.now() - t0) / BAR_DECAY_RATE));
+      bar.style.transition = 'width ' + BAR_TRANSITION_MS + 'ms ease';
       bar.style.width = p + '%';
-      if (p < 71) barRaf = requestAnimationFrame(tick);
+      if (p < BAR_THRESHOLD) barRaf = requestAnimationFrame(tick);
     })();
   }
 
@@ -57,12 +73,12 @@
     if (barRaf) { cancelAnimationFrame(barRaf); barRaf = null; }
     bar.style.transition = 'width 0.15s ease';
     bar.style.width = '100%';
-    var b = bar; bar = null;
+    const b = bar; bar = null;
     setTimeout(function () {
       b.style.transition = 'opacity 0.2s ease';
       b.style.opacity = '0';
-      setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 220);
-    }, 150);
+      setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, BAR_FADE_MS);
+    }, BAR_FADE_DELAY_MS);
   }
 
   function barCancel() {
@@ -78,13 +94,8 @@
   }
 
   // ── Script execution ──────────────────────────────────────────────────────
-  // All page scripts have been converted from DOMContentLoaded wrappers to
-  // IIFEs, so they run immediately when injected.
-  //
-  // External scripts (CDN libs like Chart.js) load sequentially so that
-  // inline scripts depending on them run only after those libs are ready.
 
-  var seenSrc = new Set();
+  const seenSrc = new Set();
 
   function trackExisting() {
     document.querySelectorAll('script[src]').forEach(function (s) {
@@ -95,20 +106,19 @@
   function runScripts(scriptEls) {
     if (!scriptEls || !scriptEls.length) return Promise.resolve();
 
-    var ext = scriptEls.filter(function (s) { return !!(s.getAttribute('src')); });
-    var inl = scriptEls.filter(function (s) { return !(s.getAttribute('src')); });
+    const ext = scriptEls.filter(function (s) { return !!(s.getAttribute('src')); });
+    const inl = scriptEls.filter(function (s) { return !(s.getAttribute('src')); });
 
-    // Load external scripts in order first
-    var chain = ext.reduce(function (p, old) {
+    const chain = ext.reduce(function (p, old) {
       return p.then(function () {
         return new Promise(function (resolve) {
-          var rawSrc = old.getAttribute('src') || '';
-          var abs;
+          const rawSrc = old.getAttribute('src') || '';
+          let abs;
           try { abs = new URL(rawSrc, window.location.origin).href; }
           catch { abs = rawSrc; }
           if (seenSrc.has(abs)) { resolve(); return; }
           seenSrc.add(abs);
-          var s = document.createElement('script');
+          const s = document.createElement('script');
           Array.from(old.attributes).forEach(function (a) { s.setAttribute(a.name, a.value); });
           s.onload = resolve;
           s.onerror = function () { console.warn('[nav] failed to load', abs); resolve(); };
@@ -117,13 +127,12 @@
       });
     }, Promise.resolve());
 
-    // Then execute inline scripts — they are now IIFEs so run immediately on inject
     return chain.then(function () {
       inl.forEach(function (old) {
-        var code = old.textContent || '';
+        const code = old.textContent || '';
         if (!code.trim()) return;
         try {
-          var s = document.createElement('script');
+          const s = document.createElement('script');
           s.textContent = code;
           document.head.appendChild(s);
           if (s.parentNode) s.parentNode.removeChild(s);
@@ -135,24 +144,21 @@
   }
 
   // ── Script collection ─────────────────────────────────────────────────────
-  // Collect scripts from:
-  // 1. Inside #page-content in the parsed doc (stagger animations etc.)
-  // 2. Body children after </main> (the main page script block + toast include)
 
   function collectScripts(newDoc) {
-    var scripts = [];
-    var seen = new WeakSet();
+    const scripts = [];
+    const seen = new WeakSet();
 
     function add(el) {
       if (!seen.has(el)) { seen.add(el); scripts.push(el); }
     }
 
-    var pc = newDoc.getElementById('page-content');
+    const pc = newDoc.getElementById('page-content');
     if (pc) pc.querySelectorAll('script').forEach(add);
 
-    var body = newDoc.body;
+    const body = newDoc.body;
     if (body) {
-      var afterMain = false;
+      let afterMain = false;
       body.childNodes.forEach(function (node) {
         if (node.nodeName === 'MAIN') { afterMain = true; return; }
         if (!afterMain) return;
@@ -167,9 +173,9 @@
   // ── Sidebar active indicator ──────────────────────────────────────────────
 
   function updateNav(newPath) {
-    var bg = document.getElementById('active-background');
-    var best = null, bestLen = 0;
-    var isDark = document.documentElement.classList.contains('dark');
+    const bg = document.getElementById('active-background');
+    let best = null, bestLen = 0;
+    const isDark = document.documentElement.classList.contains('dark');
 
     function norm(p) {
       try { return new URL(p, window.location.origin).pathname.replace(/\/+$/, '') || '/'; }
@@ -181,10 +187,10 @@
       link.classList.remove('active', 'font-medium');
       link.style.color = '';
       link.style.background = '';
-      var href = norm(link.getAttribute('href') || '');
-      var prefix = link.getAttribute('data-match-prefix');
+      const href = norm(link.getAttribute('href') || '');
+      const prefix = link.getAttribute('data-match-prefix');
       if (!href) return;
-      if (newPath === href) { best = link; bestLen = 9999; }
+      if (newPath === href) { best = link; bestLen = EXACT_MATCH_SCORE; }
       else if (prefix && newPath.startsWith(prefix) && prefix.length > bestLen) {
         best = link; bestLen = prefix.length;
       }
@@ -193,9 +199,8 @@
       }
     });
 
-    // Also check the account link and logout (they sit outside .nav-link list)
-    var accountLink = document.querySelector('a[href="/account"]');
-    var logoutLink  = document.querySelector('a[href="/logout"]');
+    const accountLink = document.querySelector('a[href="/account"]');
+    const logoutLink  = document.querySelector('a[href="/logout"]');
 
     [accountLink, logoutLink].forEach(function (link) {
       if (!link) return;
@@ -203,53 +208,50 @@
       link.style.background = '';
       link.style.color = '';
       link.style.fontWeight = '';
-      var userText = link.querySelector('#sidebar-username');
+      const userText = link.querySelector('#sidebar-username');
       if (userText) userText.parentElement.style.color = '';
     });
 
     if (best) {
       best.classList.add('active', 'font-medium');
-      best.style.color = isDark ? '#171717' : '#f0f0f0';
-      best.style.background = isDark ? '#f0f0f0' : '#171717';
-      best.style.borderRadius = '0.75rem';
+      best.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
+      best.style.background = isDark ? COLOR_DARK_BG : COLOR_LIGHT_BG;
+      best.style.borderRadius = ACTIVE_BORDER_RADIUS;
       if (bg) {
-        var r   = best.getBoundingClientRect();
-        var ul  = best.closest('ul');
+        const r   = best.getBoundingClientRect();
+        const ul  = best.closest('ul');
         if (ul) {
-          var top = r.top - ul.getBoundingClientRect().top + ul.scrollTop;
-          bg.style.transition = 'transform 0.38s cubic-bezier(0.16,1,0.3,1), height 0.2s ease, opacity 0.15s ease';
+          const top = r.top - ul.getBoundingClientRect().top + ul.scrollTop;
+          bg.style.transition = PILL_TRANSITION;
           bg.style.height     = r.height + 'px';
           bg.style.transform  = 'translateY(' + top + 'px)';
           bg.style.opacity    = '1';
         }
       }
     } else {
-      // Check if account or logout page is active and move blob there
-      var specialMatch = null;
+      let specialMatch = null;
       if (accountLink && (newPath === '/account' || newPath.startsWith('/account'))) specialMatch = accountLink;
       else if (logoutLink && newPath.startsWith('/logout')) specialMatch = logoutLink;
 
       if (specialMatch && bg) {
-        var r2 = specialMatch.getBoundingClientRect();
-        var sidebar = document.getElementById('pc-sidebar2');
+        const r2 = specialMatch.getBoundingClientRect();
+        const sidebar = document.getElementById('pc-sidebar2');
         if (sidebar) {
-          var sTop = r2.top - sidebar.getBoundingClientRect().top + sidebar.scrollTop;
-          bg.style.transition = 'transform 0.38s cubic-bezier(0.16,1,0.3,1), height 0.2s ease, opacity 0.15s ease';
+          const sTop = r2.top - sidebar.getBoundingClientRect().top + sidebar.scrollTop;
+          bg.style.transition = PILL_TRANSITION;
           bg.style.height     = r2.height + 'px';
           bg.style.transform  = 'translateY(' + sTop + 'px)';
           bg.style.opacity    = '1';
-          // Widen blob to full sidebar width for these full-width items
           bg.style.left   = '0';
           bg.style.width  = '100%';
           bg.style.borderRadius = '0';
         }
-        specialMatch.style.color = isDark ? '#171717' : '#f0f0f0';
-        specialMatch.style.background = isDark ? '#f0f0f0' : '#171717';
+        specialMatch.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
+        specialMatch.style.background = isDark ? COLOR_DARK_BG : COLOR_LIGHT_BG;
         specialMatch.style.fontWeight = '700';
-        var userText = specialMatch.querySelector('#sidebar-username');
-        if (userText) userText.parentElement.style.color = isDark ? '#171717' : '#f0f0f0';
+        const userText = specialMatch.querySelector('#sidebar-username');
+        if (userText) userText.parentElement.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
       } else if (bg) {
-        // Reset width/shape in case we came from a special item
         bg.style.left         = '';
         bg.style.width        = '';
         bg.style.borderRadius = '';
@@ -258,7 +260,6 @@
       }
     }
 
-    // Reset blob shape when on a normal nav link
     if (best && bg) {
       bg.style.left         = '';
       bg.style.width        = '';
@@ -266,7 +267,7 @@
     }
 
     document.querySelectorAll('.nav-link2').forEach(function (link) {
-      var href = link.getAttribute('href') || '';
+      const href = link.getAttribute('href') || '';
       link.setAttribute('data-active', newPath.startsWith(href) ? 'true' : 'false');
     });
   }
@@ -274,7 +275,7 @@
   // ── CSS sync ──────────────────────────────────────────────────────────────
 
   function syncStyles(newDoc) {
-    var have = new Set();
+    const have = new Set();
     document.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) { have.add(l.href); });
     newDoc.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
       if (!have.has(l.href)) document.head.appendChild(document.importNode(l, true));
@@ -284,31 +285,29 @@
   // ── DOM swap ──────────────────────────────────────────────────────────────
 
   function doSwap(newDoc, url) {
-    var newPath = new URL(url, window.location.origin).pathname;
+    const newPath = new URL(url, window.location.origin).pathname;
     document.title = newDoc.title || document.title;
     syncStyles(newDoc);
 
-    var scripts = collectScripts(newDoc);
+    const scripts = collectScripts(newDoc);
 
-    var newContent = newDoc.getElementById('page-content');
-    var oldContent = document.getElementById('page-content');
+    const newContent = newDoc.getElementById('page-content');
+    const oldContent = document.getElementById('page-content');
 
-    var target, newEl;
+    let target, newEl;
 
     if (oldContent && newContent) {
-      // Desktop: only swap #page-content — sidebar and topbar are untouched
-      var imp = document.importNode(newContent, true);
+      const imp = document.importNode(newContent, true);
       imp.querySelectorAll('script').forEach(function (s) {
         if (s.parentNode) s.parentNode.removeChild(s);
       });
       target = oldContent;
       newEl  = imp;
     } else {
-      // Mobile / no page-content id: swap whole <main>
-      var oldMain = document.querySelector('main');
-      var newMain = newDoc.querySelector('main');
+      const oldMain = document.querySelector('main');
+      const newMain = newDoc.querySelector('main');
       if (!oldMain || !newMain) { window.location.href = url; return Promise.resolve(); }
-      var impMain = document.importNode(newMain, true);
+      const impMain = document.importNode(newMain, true);
       impMain.querySelectorAll('script').forEach(function (s) {
         if (s.parentNode) s.parentNode.removeChild(s);
       });
@@ -316,17 +315,14 @@
       newEl  = impMain;
     }
 
-    // Fade out old content
-    target.style.transition = 'opacity 0.1s ease';
+    target.style.transition = 'opacity ' + CONTENT_FADE_OUT_MS + 'ms ease';
     target.style.opacity = '0';
 
     return new Promise(function (resolve) {
       setTimeout(function () {
-        // Swap element in DOM
         target.parentNode.replaceChild(newEl, target);
         updateNav(newPath);
 
-        // Fade in
         newEl.style.opacity = '0';
         newEl.style.transition = 'opacity 0.15s ease';
 
@@ -336,17 +332,16 @@
             setTimeout(function () {
               newEl.style.transition = '';
               newEl.style.opacity = '';
-              try { newEl.scrollTop = 0; } catch {}
+              try { newEl.scrollTop = 0; } catch { /* noop */ }
 
-              // Run scripts after DOM is visible and settled
               runScripts(scripts).then(resolve).catch(function (e) {
                 console.warn('[nav] runScripts error', e);
                 resolve();
               });
-            }, 155);
+            }, CONTENT_FADE_IN_MS);
           });
         });
-      }, 105);
+      }, CONTENT_SETTLE_MS);
     });
   }
 
@@ -373,7 +368,7 @@
       })
       .then(function (html) {
         if (html === null) return;
-        var newDoc = new DOMParser().parseFromString(html, 'text/html');
+        const newDoc = new DOMParser().parseFromString(html, 'text/html');
         if (push !== false) history.pushState({ url: url }, '', url);
         return doSwap(newDoc, url);
       })
@@ -390,15 +385,15 @@
   window.__transitionsActive = true;
 
   document.addEventListener('click', function (e) {
-    var a = e.target && e.target.closest && e.target.closest('a[href]');
+    const a = e.target && e.target.closest && e.target.closest('a[href]');
     if (skipLink(a, e)) return;
 
-    var href = a.getAttribute('href');
-    var parsed;
+    const href = a.getAttribute('href');
+    let parsed;
     try { parsed = new URL(href, window.location.origin); } catch { return; }
     if (parsed.origin !== window.location.origin) return;
 
-    var path = parsed.pathname + parsed.search + parsed.hash;
+    const path = parsed.pathname + parsed.search + parsed.hash;
     if (isHardNav(parsed.pathname)) return;
 
     e.preventDefault();
@@ -412,8 +407,8 @@
   // ── Back / forward ────────────────────────────────────────────────────────
 
   window.addEventListener('popstate', function (e) {
-    var url = (e.state && e.state.url) || window.location.pathname;
-    var parsed;
+    const url = (e.state && e.state.url) || window.location.pathname;
+    let parsed;
     try { parsed = new URL(url, window.location.origin); } catch { window.location.href = url; return; }
     if (isHardNav(parsed.pathname)) { window.location.href = url; return; }
     navigate(url, false);

@@ -1,34 +1,41 @@
 (function () {
 
-  var MOVE_MS  = 340;
-  var EASE_MOVE = 'cubic-bezier(0.4, 0, 0.2, 1)';
+  const MOVE_MS  = 340;
+  const EASE_MOVE = 'cubic-bezier(0.4, 0, 0.2, 1)';
+  const DEFAULT_DURATION = 260;
+  const DEFAULT_STAGGER = 40;
+  const POSITION_THRESHOLD = 1;
+  const SPA_REATTACH_MS = 60;
 
-  var animating = new WeakSet();
+  const animating = new WeakSet();
+
+  const SKIP_TAGS = new Set(['CANVAS', 'SVG', 'IMG', 'BUTTON', 'INPUT', 'SELECT', 'SCRIPT', 'STYLE', 'A']);
+  const SKIP_CLASS_FRAGMENTS = [
+    'mobile-top-bar',
+    'mobile-bottom-nav',
+    'mobile-more-sheet',
+    'animate-spin',
+    'nav-link',
+    'no-anim',
+    'collapsible-row',
+  ];
+  const SKIP_IDS = new Set(['pl-overlay', 'pl-bar', 'active-background']);
 
   function shouldSkip(el) {
     if (!el || el.nodeType !== 1) return true;
-    var tag = el.tagName;
-    if (tag === 'CANVAS' || tag === 'SVG'    || tag === 'IMG' ||
-        tag === 'BUTTON' || tag === 'INPUT'   || tag === 'SELECT' ||
-        tag === 'SCRIPT' || tag === 'STYLE'   || tag === 'A') return true;
-    var cls = el.className || '';
-    if (cls.indexOf('mobile-top-bar')    !== -1) return true;
-    if (cls.indexOf('mobile-bottom-nav') !== -1) return true;
-    if (cls.indexOf('mobile-more-sheet') !== -1) return true;
-    if (cls.indexOf('animate-spin')      !== -1) return true;
-    if (cls.indexOf('nav-link')          !== -1) return true;
-    if (cls.indexOf('no-anim')           !== -1) return true;
-    if (cls.indexOf('collapsible-row')   !== -1) return true;
-    var id = el.id;
-    if (id === 'pl-overlay' || id === 'pl-bar' || id === 'active-background') return true;
+    const tag = el.tagName;
+    if (SKIP_TAGS.has(tag)) return true;
+    const cls = el.className || '';
+    if (SKIP_CLASS_FRAGMENTS.some(frag => cls.indexOf(frag) !== -1)) return true;
+    const id = el.id;
+    if (SKIP_IDS.has(id)) return true;
     if (window.getComputedStyle(el).position === 'fixed') return true;
     return false;
   }
 
-  // Snapshot sibling positions before a DOM change, then FLIP them after.
   function snapSiblings(parent) {
     if (!parent) return new Map();
-    var map = new Map();
+    const map = new Map();
     Array.from(parent.children).forEach(function (child) {
       if (!shouldSkip(child) && !animating.has(child)) {
         map.set(child, child.getBoundingClientRect());
@@ -40,10 +47,10 @@
   function flipSiblings(snap) {
     snap.forEach(function (first, el) {
       if (animating.has(el)) return;
-      var last = el.getBoundingClientRect();
-      var dy = first.top  - last.top;
-      var dx = first.left - last.left;
-      if (Math.abs(dy) < 1 && Math.abs(dx) < 1) return;
+      const last = el.getBoundingClientRect();
+      const dy = first.top  - last.top;
+      const dx = first.left - last.left;
+      if (Math.abs(dy) < POSITION_THRESHOLD && Math.abs(dx) < POSITION_THRESHOLD) return;
       animating.add(el);
       el.animate([
         { transform: 'translate(' + dx + 'px,' + dy + 'px)' },
@@ -55,26 +62,24 @@
     });
   }
 
-  var mo = new MutationObserver(function (mutations) {
+  const mo = new MutationObserver(function (mutations) {
     mutations.forEach(function (m) {
       if (m.type === 'childList') {
-        var snap = snapSiblings(m.target);
+        const snap = snapSiblings(m.target);
         requestAnimationFrame(function () { flipSiblings(snap); });
       }
 
       if (m.type === 'attributes') {
-        var el = m.target;
+        const el = m.target;
         if (shouldSkip(el)) return;
-        // Don't FLIP siblings when the changed element is inside a no-anim container —
-        // those elements manage their own animation (e.g. max-height transitions).
         if (el.closest && el.closest('.no-anim')) return;
-        var snap2 = snapSiblings(el.parentElement);
+        const snap2 = snapSiblings(el.parentElement);
         requestAnimationFrame(function () { flipSiblings(snap2); });
       }
     });
   });
 
-  var OBS_OPTS = {
+  const OBS_OPTS = {
     childList:       true,
     subtree:         true,
     attributes:      true,
@@ -82,8 +87,8 @@
   };
 
   function init() {
-    var pc  = document.getElementById('page-content');
-    var spb = document.getElementById('server-page-body');
+    const pc  = document.getElementById('page-content');
+    const spb = document.getElementById('server-page-body');
     if (pc)  mo.observe(pc,  OBS_OPTS);
     if (spb) mo.observe(spb, OBS_OPTS);
   }
@@ -95,16 +100,13 @@
   }
 
   document.addEventListener('al:navigated', function () {
-    setTimeout(init, 60);
+    setTimeout(init, SPA_REATTACH_MS);
   });
 
-  // Public API for addon views that don't set dontfuckinganimateme.
-  // Call window.airlinkAnimate(el) on any element to run the standard
-  // entrance animation: fade in + slight upward slide.
   window.airlinkAnimate = function (el, options) {
     if (!el || el.nodeType !== 1) return;
-    var duration = (options && options.duration) || 260;
-    var delay    = (options && options.delay)    || 0;
+    const duration = (options && options.duration) || DEFAULT_DURATION;
+    const delay    = (options && options.delay)    || 0;
     el.animate(
       [
         { opacity: 0, transform: 'translateY(8px)' },
@@ -114,15 +116,13 @@
     );
   };
 
-  // Animate all direct children of a container element.
-  // Each child staggers by 40ms so they cascade rather than all pop at once.
   window.airlinkAnimateChildren = function (container, options) {
     if (!container || container.nodeType !== 1) return;
-    var baseDelay = (options && options.baseDelay) || 0;
-    var stagger   = (options && options.stagger)   || 40;
+    const baseDelay = (options && options.baseDelay) || 0;
+    const stagger   = (options && options.stagger)   || DEFAULT_STAGGER;
     Array.from(container.children).forEach(function (child, i) {
       window.airlinkAnimate(child, {
-        duration: (options && options.duration) || 260,
+        duration: (options && options.duration) || DEFAULT_DURATION,
         delay: baseDelay + i * stagger,
       });
     });

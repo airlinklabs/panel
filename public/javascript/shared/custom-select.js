@@ -13,6 +13,12 @@
   if (window.__customSelectLoaded) return;
   window.__customSelectLoaded = true;
 
+  const DROPDOWN_MAX_HEIGHT = '200px';
+  const DROPDOWN_GAP = 6;
+  const DROPDOWN_MIN_SPACE_BELOW = 140;
+  const CLOSE_ANIMATION_MS = 200;
+  const SPA_REATTACH_MS = 80;
+
   function buildCustomSelect(container) {
     if (container.dataset.built) return;
     const select = document.getElementById(container.dataset.for);
@@ -77,7 +83,7 @@
       Array.from(dropdown.children).forEach(function (item) {
         item.classList.toggle('selected', item.dataset.value === select.value);
         if (item.hasAttribute('aria-selected')) {
-          item.setAttribute('aria-selected', String(item.dataset.value === select.value));
+          item.setAttribute('aria-selected', '' + (item.dataset.value === select.value));
         }
       });
     }
@@ -93,7 +99,7 @@
         item.dataset.value = opt.value;
         if (!opt.disabled) {
           item.setAttribute('role', 'option');
-          item.setAttribute('aria-selected', String(opt.value === select.value));
+          item.setAttribute('aria-selected', '' + (opt.value === select.value));
           item.setAttribute('id', dropdown.id + '-o' + select.options.length + '-' + (item.dataset.value || '').replace(/[^a-z0-9]/gi, ''));
           item.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -153,11 +159,11 @@
       dropdown.style.position = 'fixed';
       dropdown.style.left = rect.left + 'px';
       dropdown.style.width = rect.width + 'px';
-      dropdown.style.maxHeight = '200px';
-      const spaceBelow = window.innerHeight - rect.bottom - 6;
-      const spaceAbove = rect.top - 6;
+      dropdown.style.maxHeight = DROPDOWN_MAX_HEIGHT;
+      const spaceBelow = window.innerHeight - rect.bottom - DROPDOWN_GAP;
+      const spaceAbove = rect.top - DROPDOWN_GAP;
       let opensUp = false;
-      if (spaceBelow < 140 && spaceAbove > spaceBelow) {
+      if (spaceBelow < DROPDOWN_MIN_SPACE_BELOW && spaceAbove > spaceBelow) {
         dropdown.style.top = 'auto';
         dropdown.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
         opensUp = true;
@@ -212,7 +218,7 @@
       setTimeout(function () {
         dropdown.classList.remove('closing');
         done();
-      }, 200);
+      }, CLOSE_ANIMATION_MS);
     }
 
     trigger.addEventListener('click', function (e) {
@@ -264,7 +270,7 @@
   } else {
     attachAll();
   }
-  document.addEventListener('al:navigated', function () { setTimeout(function () { attachAll(); }, 80); });
+  document.addEventListener('al:navigated', function () { setTimeout(function () { attachAll(); }, SPA_REATTACH_MS); });
 
   window.buildCustomSelect = buildCustomSelect;
 })();

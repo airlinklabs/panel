@@ -7,12 +7,15 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
+  type ServerPageServer,
   getServerStatusInput,
   getImageFeatures,
 } from './shared';
 
+type PlayerServer = Pick<ServerPageServer, 'UUID' | 'Ports' | 'node' | 'image'>;
+
 export function registerPlayersRoutes(router: Router): void {
-  async function fetchPlayerData(server: any, primaryPort: string) {
+  async function fetchPlayerData(server: PlayerServer, primaryPort: string) {
     let players: Array<{ name: string; uuid: string }> = [];
     let serverInfo = {
       maxPlayers: 0,
@@ -74,11 +77,12 @@ export function registerPlayersRoutes(router: Router): void {
         logger.warn(`No valid data returned for server ${server.UUID}`);
         hadFetchError = true;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errCode = error && typeof error === 'object' && 'code' in error ? String((error as { code: unknown }).code) : undefined;
       if (
-        error?.code !== 'ECONNREFUSED' &&
-        error?.code !== 'ETIMEDOUT' &&
-        error?.code !== 'ENOTFOUND'
+        errCode !== 'ECONNREFUSED' &&
+        errCode !== 'ETIMEDOUT' &&
+        errCode !== 'ENOTFOUND'
       ) {
         logger.error(
           `Error fetching players from daemon for server ${server.UUID}:`,
@@ -111,8 +115,8 @@ export function registerPlayersRoutes(router: Router): void {
 
         const primaryPort = server.Ports
           ? JSON.parse(server.Ports)
-            .filter((Port: any) => Port.primary)
-            .map((Port: any) => Port.Port.split(':')[1])
+            .filter((Port: { primary?: boolean }) => Port.primary)
+            .map((Port: { Port: string }) => Port.Port.split(':')[1])
             .pop()
           : '';
 
@@ -164,8 +168,8 @@ export function registerPlayersRoutes(router: Router): void {
 
         const primaryPort = server.Ports
           ? JSON.parse(server.Ports)
-            .filter((Port: any) => Port.primary)
-            .map((Port: any) => Port.Port.split(':')[1])
+            .filter((Port: { primary?: boolean }) => Port.primary)
+            .map((Port: { Port: string }) => Port.Port.split(':')[1])
             .pop()
           : '';
 

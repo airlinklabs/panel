@@ -13,7 +13,7 @@
     <!-- Static: user info — clicking goes to account page -->
     <% if (user != null) { %>
     <a href="/account" id="sidebar-account-link" class="sidebar-special-link flex items-center space-x-4 py-4 px-4 border-y shrink-0 transition-colors group" style="border-color:var(--theme-nav-border);">
-      <img class="h-8 w-8 rounded-xl shrink-0" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
+      <img loading="lazy" decoding="async" class="h-8 w-8 rounded-xl shrink-0" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
       <div class="min-w-0">
         <p class="text-sm font-medium truncate transition-colors" style="color:var(--theme-text-strong);">
           <span id="sidebar-username"><%= user.username %></span>
@@ -258,25 +258,25 @@
 
 <script nonce="<%- nonce %>">
 (function () {
-  var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
-  ws.addEventListener('error', function () {});
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
+  ws.addEventListener('error', function () { /* WebSocket errors are handled by reconnection logic */ });
 
   function themeVar(name, fallback) {
-    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     return v || fallback;
   }
 
   // Highlight account/logout when on those pages
   function markSpecialLinks(path) {
-    var pillBg = themeVar('--theme-text', '#171717');
-    var pillFg = themeVar('--theme-bg', '#f0f0f0');
-    var account = document.getElementById('sidebar-account-link');
-    var logout  = document.getElementById('sidebar-logout-link');
-    var logo = document.getElementById('sidebar-logo-link');
+    const pillBg = themeVar('--theme-text', '#171717');
+    const pillFg = themeVar('--theme-bg', '#f0f0f0');
+    const account = document.getElementById('sidebar-account-link');
+    const logout  = document.getElementById('sidebar-logout-link');
+    const logo = document.getElementById('sidebar-logo-link');
     if (account) {
-      var onAccount = path === '/account' || path.startsWith('/account/');
-      var userText = account.querySelector('#sidebar-username');
+      const onAccount = path === '/account' || path.startsWith('/account/');
+      const userText = account.querySelector('#sidebar-username');
       if (onAccount) {
         account.style.background = pillBg;
         account.style.color = pillFg;
@@ -290,10 +290,10 @@
       }
     }
     if (logo) {
-      var onCredits = path === '/credits' || path.startsWith('/credits/');
-      var logoBlock = document.getElementById('sidebar-logo-block');
-      var logoTitle = logo.querySelector('h1');
-      var logoImg = logo.querySelector('img');
+      const onCredits = path === '/credits' || path.startsWith('/credits/');
+      const logoBlock = document.getElementById('sidebar-logo-block');
+      const logoTitle = logo.querySelector('h1');
+      const logoImg = logo.querySelector('img');
       if (onCredits) {
         if (logoBlock) {
           logoBlock.style.background = pillBg;
@@ -325,19 +325,18 @@
 
   // Mark active nav link
   function markActiveNav(path) {
-    var pillBg = themeVar('--theme-text', '#171717');
-    var pillFg = themeVar('--theme-bg', '#f0f0f0');
+    const pillBg = themeVar('--theme-text', '#171717');
+    const pillFg = themeVar('--theme-bg', '#f0f0f0');
 
-    // Server control links: highlight the single best match only
-    var srvLinks = document.querySelectorAll('[data-server-control-link]');
-    var srvBest = null;
-    var bestLen = -1;
+    const srvLinks = document.querySelectorAll('[data-server-control-link]');
+    let srvBest = null;
+    let bestLen = -1;
     srvLinks.forEach(function(link) {
       link.classList.remove('active');
       link.style.color = '';
       link.style.background = '';
-      var href = link.getAttribute('href') || '';
-      var matched = path === href || (href !== '/' && path.startsWith(href + '/'));
+      const href = link.getAttribute('href') || '';
+      const matched = path === href || (href !== '/' && path.startsWith(href + '/'));
       if (matched && href.length > bestLen) {
         bestLen = href.length;
         srvBest = link;
@@ -350,15 +349,15 @@
       srvBest.style.borderRadius = '0.75rem';
     }
 
-    var links = document.querySelectorAll('.nav-link');
+    const links = document.querySelectorAll('.nav-link');
     links.forEach(function(link) {
       if (link.hasAttribute('data-server-control-link')) return;
-      var href = link.getAttribute('href');
-      var prefix = link.getAttribute('data-match-prefix');
+      const href = link.getAttribute('href');
+      const prefix = link.getAttribute('data-match-prefix');
       // On a server page the server controls own the highlight — don't
       // also light up the Dashboard item whose prefix matches /server.
       if (srvBest && prefix && path.startsWith(prefix)) return;
-      var active = false;
+      let active = false;
       if (href && path === href) {
         active = true;
       } else if (prefix && path.startsWith(prefix)) {
@@ -383,14 +382,14 @@
   // it fully into view on page load. If it is the last button (nothing
   // below it), the scroll clamps to the bottom of the list.
   function showActiveNavInView() {
-    var activeLink = document.querySelector('#pc-sidebar .nav-link.active, #pc-sidebar [data-server-control-link].active');
+    const activeLink = document.querySelector('#pc-sidebar .nav-link.active, #pc-sidebar [data-server-control-link].active');
     if (!activeLink) return;
-    var container = activeLink.closest('nav');
+    const container = activeLink.closest('nav');
     if (!container) return;
-    var pad = 16;
-    var cTop = container.getBoundingClientRect().top;
-    var cBottom = container.getBoundingClientRect().bottom;
-    var r = activeLink.getBoundingClientRect();
+    const pad = 16;
+    const cTop = container.getBoundingClientRect().top;
+    const cBottom = container.getBoundingClientRect().bottom;
+    const r = activeLink.getBoundingClientRect();
     if (r.bottom + pad > cBottom) {
       container.scrollTop = container.scrollTop + (r.bottom + pad - cBottom);
     } else if (r.top - pad < cTop) {
@@ -399,17 +398,17 @@
   }
 
   function showSidebarView(name) {
-    var serverView = document.getElementById('sidebar-server-view');
-    var mainView = document.getElementById('sidebar-main-view');
-    var incoming = null;
+    const serverView = document.getElementById('sidebar-server-view');
+    const mainView = document.getElementById('sidebar-main-view');
+    let incoming = null;
     if (serverView) {
-      var toServer = name === 'server';
+      const toServer = name === 'server';
       serverView.classList.toggle('hidden', !toServer);
       serverView.classList.remove('showing');
       if (toServer) incoming = serverView;
     }
     if (mainView) {
-      var toMain = name !== 'server';
+      const toMain = name !== 'server';
       mainView.classList.toggle('hidden', !toMain);
       mainView.classList.remove('showing');
       if (toMain) incoming = mainView;
@@ -421,9 +420,9 @@
   }
 
   function wireSidebarViewToggle() {
-    var backBtn = document.getElementById('sidebar-back-btn');
+    const backBtn = document.getElementById('sidebar-back-btn');
     if (backBtn) backBtn.addEventListener('click', function () { showSidebarView('main'); });
-    var goBackBtn = document.getElementById('sidebar-goback-btn');
+    const goBackBtn = document.getElementById('sidebar-goback-btn');
     if (goBackBtn) goBackBtn.addEventListener('click', function () { showSidebarView('server'); });
   }
 
@@ -446,8 +445,8 @@
         showSidebarView('server');
       } else {
         showSidebarView('main');
-        var toggles = document.querySelectorAll('.sidebar-view-toggle');
-        for (var t = 0; t < toggles.length; t++) toggles[t].style.display = 'none';
+        const toggles = document.querySelectorAll('.sidebar-view-toggle');
+        for (let t = 0; t < toggles.length; t++) toggles[t].style.display = 'none';
       }
     }
   });
@@ -471,7 +470,7 @@
         </div>
 
       <!-- Admin breadcrumbs (desktop) -->
-      <div id="topbar-breadcrumbs" class="hidden lg:flex items-center justify-center min-w-0 flex-1 text-[11px] opacity-60" style="color:var(--theme-text-muted);"></div>
+      <div id="topbar-breadcrumbs" class="hidden lg:flex items-center justify-center min-w-0 flex-1 text-[11px] text-neutral-500 dark:text-neutral-400" style="color:var(--theme-text-muted);"></div>
 
       <!-- Theme toggle switch -->
       <div class="flex items-center shrink-0 ml-2">
@@ -492,7 +491,7 @@
       style="border-color:var(--theme-border); background:var(--theme-bg-card); box-shadow:0 25px 60px -12px rgba(0,0,0,0.35);">
       <div class="flex items-center gap-3 px-4 py-3.5 border-b" style="border-color:var(--theme-border);">
         <%- icon('search', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
-        <input id="searchInput" type="text"
+        <input id="searchInput" type="text" aria-label="Search"
           placeholder="<%= req.translations.navSearch || 'Search' %>..."
           class="flex-1 bg-transparent outline-none text-sm min-w-0"
           style="color:var(--theme-text-strong);"
@@ -511,7 +510,7 @@
     </div>
   </div>
 </div>
-<script nonce="<%- nonce %>" src="/javascript/shared/search.js?v=5"></script>
+<script nonce="<%- nonce %>" defer src="/javascript/shared/search.js?v=5"></script>
 <style>
 @keyframes search-pop-in  { from { opacity:0; transform:scale(0.92); } to { opacity:1; transform:scale(1); } }
 @keyframes search-pop-out { from { opacity:1; transform:scale(1); } to { opacity:0; transform:scale(0.92); } }
@@ -554,7 +553,7 @@
 </style>
 <script nonce="<%- nonce %>">
 (function() {
-  var btn = document.getElementById('theme-toggle-topbar');
+  const btn = document.getElementById('theme-toggle-topbar');
   btn.addEventListener('click', function() {
     if (typeof toggleTheme === 'function') toggleTheme();
   });
@@ -562,7 +561,7 @@
 </script>
 <script nonce="<%- nonce %>">
 (function () {
-  var ov = document.getElementById('pl-overlay');
+  const ov = document.getElementById('pl-overlay');
   if (!ov) return;
   ov.style.left   = '224px';
   ov.style.top    = '64px';

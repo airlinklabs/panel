@@ -34,7 +34,7 @@ const locationsModule: Module = {
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
           res.render('admin/locations/locations', { user, req, settings, locations });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching locations:', error);
           res.status(500).json({ message: 'Error fetching locations.' });
         }
@@ -76,7 +76,7 @@ const locationsModule: Module = {
           });
 
           res.status(200).json({ message: 'Location created successfully.', location });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error creating location:', error);
           res.status(500).json({ message: 'Error creating location.' });
         }
@@ -104,7 +104,7 @@ const locationsModule: Module = {
 
           await prisma.location.delete({ where: { id: locationId } });
           res.status(200).json({ message: 'Location deleted successfully.' });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error deleting location:', error);
           res.status(500).json({ message: 'Error deleting location.' });
         }

@@ -175,10 +175,12 @@ const coreModule: Module = {
         const tokenFieldOrs = (fields: string[]) =>
           tokens.flatMap((t) => fields.map((f) => ({ [f]: { contains: t } })));
 
+        const whereClause = user.isAdmin
+          ? { OR: tokenFieldOrs(['name', 'description', 'UUID']) }
+          : { ownerId: userId, OR: tokenFieldOrs(['name', 'description', 'UUID']) };
+
         let servers = await prisma.server.findMany({
-          where: (user.isAdmin
-            ? { OR: tokenFieldOrs(['name', 'description', 'UUID']) }
-            : { ownerId: userId, OR: tokenFieldOrs(['name', 'description', 'UUID']) }) as any,
+          where: whereClause as never,
           select: { UUID: true, name: true, description: true },
           take: 30,
         });

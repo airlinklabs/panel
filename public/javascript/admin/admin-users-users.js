@@ -1,4 +1,7 @@
 (function() {
+  const STAGGER_DELAY_MS = 30;
+  const ROW_ANIMATION_DURATION_MS = 200;
+
   const pageData = document.getElementById('page-data').dataset;
 
   function handleRowClick(event, url) {
@@ -34,7 +37,7 @@
   };
 
   (function staggerRows() {
-    var rows = document.querySelectorAll('#userTable tbody tr');
+    const rows = document.querySelectorAll('#userTable tbody tr');
     rows.forEach(function(row, i) {
       row.style.opacity = '0';
       row.style.transform = 'translateY(5px)';
@@ -47,8 +50,8 @@
           row.style.transition = '';
           row.style.opacity = '';
           row.style.transform = '';
-        }, 200);
-      }, i * 30);
+        }, ROW_ANIMATION_DURATION_MS);
+      }, i * STAGGER_DELAY_MS);
     });
   })();
 })();

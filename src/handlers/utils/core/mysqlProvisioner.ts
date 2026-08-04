@@ -4,6 +4,9 @@ import type { DatabaseHost, ServerDatabase } from '../../../generated/prisma/cli
 
 const IDENTIFIER_RE = /^[A-Za-z0-9_]+$/;
 const GENERATED_PASSWORD_RE = /^[0-9a-f]{24}$/;
+const DB_NAME_SLICE_LEN = 16;
+const DB_USER_SLICE_LEN = 12;
+const DB_PASS_RANDOM_BYTES = 12;
 
 export interface DatabaseCredentials {
   databaseName: string;
@@ -46,9 +49,9 @@ async function connect(host: DatabaseHost): Promise<mysql.Connection> {
 
 export async function provisionDatabase(host: DatabaseHost, serverId: string): Promise<DatabaseCredentials> {
   const hex = serverId.replace(/-/g, '');
-  const dbName = `airlink_${hex.slice(0, 16)}`;
-  const dbUser = `al_${hex.slice(0, 12)}`;
-  const dbPass = crypto.randomBytes(12).toString('hex');
+  const dbName = `airlink_${hex.slice(0, DB_NAME_SLICE_LEN)}`;
+  const dbUser = `al_${hex.slice(0, DB_USER_SLICE_LEN)}`;
+  const dbPass = crypto.randomBytes(DB_PASS_RANDOM_BYTES).toString('hex');
 
   assertSafeIdentifier(dbName, 'Database name');
   assertSafeIdentifier(dbUser, 'Database user');
@@ -85,7 +88,7 @@ export async function deprovisionDatabase(host: DatabaseHost, db: ServerDatabase
 export async function rotateDatabasePassword(host: DatabaseHost, db: ServerDatabase): Promise<string> {
   assertSafeIdentifier(db.databaseUser, 'Database user');
 
-  const newPassword = crypto.randomBytes(12).toString('hex');
+  const newPassword = crypto.randomBytes(DB_PASS_RANDOM_BYTES).toString('hex');
   assertSafePassword(newPassword);
   const conn = await connect(host);
   try {

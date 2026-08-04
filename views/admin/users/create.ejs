@@ -118,12 +118,12 @@
             <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Leave blank to use the global defaults set in Admin &rarr; Settings &rarr; Servers.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
+                <label for="serverLimit" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
                 <input type="number" id="serverLimit" name="serverLimit" min="0" max="100" placeholder="Use global default" class="al-input">
                 <p class="mt-1 text-xs text-neutral-500">Max servers this user can create. 0 = cannot create.</p>
               </div>
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory</label>
+                <label for="maxMemoryDisplay" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory</label>
                 <input type="hidden" id="maxMemory" name="maxMemory" value="">
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="maxMemoryDisplay" min="128" max="65536" placeholder="Use global default"
@@ -134,11 +134,11 @@
                 </div>
               </div>
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="text-neutral-400 font-normal text-xs">(%)</span></label>
+                <label for="maxCpu" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="text-neutral-400 font-normal text-xs">(%)</span></label>
                 <input type="number" id="maxCpu" name="maxCpu" min="10" max="10000" placeholder="Use global default" class="al-input">
               </div>
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage</label>
+                <label for="maxStorageDisplay" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage</label>
                 <input type="hidden" id="maxStorage" name="maxStorage" value="">
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="maxStorageDisplay" min="1" max="10000" placeholder="Use global default"
@@ -149,7 +149,7 @@
                 </div>
               </div>
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
+                <label for="maxDatabases" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
                 <input type="number" id="maxDatabases" name="maxDatabases" min="0" max="100000" placeholder="Use global default" class="al-input">
                 <p class="mt-1 text-xs text-neutral-500">Total databases across all servers. 0 = unlimited.</p>
               </div>

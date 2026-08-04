@@ -436,8 +436,8 @@ interface SidebarItem {
   link: string;
 }
 
-interface GlobalWithCustomProperties extends NodeJS.Global {
-  uiComponentStore: typeof import('./handlers/uiComponentHandler').uiComponentStore;
+interface GlobalWithCustomProperties {
+  uiComponentStore: InstanceType<typeof import('./handlers/uiComponentHandler').UIComponentStore>;
   appName: string;
   airlinkVersion: string;
   airlinkCodename: string;

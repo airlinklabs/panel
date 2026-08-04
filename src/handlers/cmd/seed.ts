@@ -2,17 +2,6 @@ import { createInterface } from 'readline';
 import { httpGet } from '../../utils/http';
 import prisma from '../../db';
 
-/**
- * Validates the seed data before inserting it into the database
- * @param data The seed data to validate
- * @returns True if the data is valid, false otherwise
- */
-export function* validateSeedData(data: any[]): Generator<boolean> {
-  yield true;
-  yield data.length > 0;
-  return data.length > 0;
-}
-
 const IMAGES_URL =
   'https://raw.githubusercontent.com/airlinklabs/images/refs/heads/main/index.json';
 const FIELD_MAPPING: Record<string, string> = {
@@ -25,12 +14,12 @@ const rl = createInterface({
 });
 
 interface ImageData {
-  meta: Record<string, any>;
-  dockerImages: Record<string, any>;
-  info: Record<string, any>;
-  scripts: Record<string, any>;
-  variables: Record<string, any>;
-  [key: string]: any;
+  meta: Record<string, unknown>;
+  dockerImages: Record<string, string>;
+  info: Record<string, unknown>;
+  scripts: Record<string, unknown>;
+  variables: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 class Seeder {
@@ -42,7 +31,7 @@ class Seeder {
     });
   }
 
-  private mapFields(data: Record<string, any>): Record<string, any> {
+  private mapFields(data: Record<string, unknown>): Record<string, unknown> {
     return Object.entries(data).reduce(
       (acc, [key, value]) => ({
         ...acc,
@@ -52,7 +41,7 @@ class Seeder {
     );
   }
 
-  private stringifyJsonFields(image: Record<string, any>): Record<string, any> {
+  private stringifyJsonFields(image: Record<string, unknown>): Record<string, unknown> {
     const jsonFields = ['meta', 'dockerImages', 'info', 'scripts', 'variables'];
 
     if (!image.dockerImages && image.docker_images) {
@@ -80,7 +69,7 @@ class Seeder {
     }
   }
 
-  private async fetchAndProcessImages(): Promise<Record<string, any>[]> {
+  private async fetchAndProcessImages(): Promise<Record<string, unknown>[]> {
     console.info(`Fetching image index from ${IMAGES_URL}...`);
     const response = await httpGet<string[]>(IMAGES_URL);
     const imageUrls = response.data;
@@ -129,9 +118,10 @@ class Seeder {
       console.info('Starting seeding process...');
 
       for (const image of processedImages) {
-        if (existingImageMap.has(image.name)) {
+        const existingImage = existingImageMap.get(String(image.name));
+        if (existingImage) {
           await prisma.images.update({
-            where: { id: existingImageMap.get(image.name)!.id },
+            where: { id: existingImage.id },
             data: image
           });
           updatedCount++;

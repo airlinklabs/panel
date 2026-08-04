@@ -109,28 +109,28 @@
   <div class="fixed inset-0 bg-transparent" aria-hidden="true" onclick="hideCreateModal()"></div>
   <div id="createApiKeyPanel" class="al-sheet-panel relative my-auto mx-4 rounded-2xl shadow-xl w-full max-w-2xl" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
 
-      <div class="flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
+      <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
         <div>
-          <h3 id="createApiKeyTitle" class="text-sm font-semibold text-neutral-900 dark:text-white"><%= req.translations.createNewApiKey || 'Create API Key' %></h3>
-          <p id="createApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Set a name and choose what this key is allowed to do.</p>
+          <h3 id="createApiKeyTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= req.translations.createNewApiKey || 'Create API Key' %></h3>
+          <p id="createApiKeyDescription" class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Set a name and choose what this key is allowed to do.</p>
         </div>
-        <button type="button" onclick="hideCreateModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" aria-label="Close create API key dialog">
-          <%- icon('x', { class: 'h-4 w-4', strokeWidth: 2 }) %>
+        <button type="button" onclick="hideCreateModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="Close">
+          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
 
-      <form id="createApiKeyForm" action="/admin/apikeys/create" method="POST" class="px-6 py-5 space-y-5">
+      <form id="createApiKeyForm" action="/admin/apikeys/create" method="POST" class="px-6 py-4 space-y-5">
         <%- include('../../components/csrf') %>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label for="name" class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"><%= req.translations.apiKeyName || 'Name' %></label>
+            <label for="name" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyName || 'Name' %></label>
             <input type="text" name="name" id="name" required
               class="block w-full rounded-xl px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition"
               placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
           </div>
           <div>
-            <label for="description" class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"><%= req.translations.apiKeyDescriptionLabel || 'Description' %> <span class="text-neutral-400 font-normal">(optional)</span></label>
+            <label for="description" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyDescriptionLabel || 'Description' %> <span style="color:var(--theme-text-placeholder);" class="font-normal">(optional)</span></label>
             <input type="text" name="description" id="description"
               class="block w-full rounded-xl px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition"
               placeholder="What is this key used for?">
@@ -138,7 +138,7 @@
         </div>
 
         <div>
-          <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-2">Presets</p>
+          <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);">Presets</p>
           <div class="flex flex-wrap gap-2">
             <button type="button" data-preset="full-admin"
               class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5">
@@ -174,7 +174,7 @@
         </div>
 
         <div>
-          <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-2">Permissions</p>
+          <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);">Permissions</p>
           <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
             <% ['servers', 'users', 'nodes', 'settings'].forEach(category => { %>
               <div class="rounded-xl border border-neutral-200 dark:border-neutral-700/60 overflow-hidden">
@@ -216,7 +216,7 @@
           </div>
         </div>
 
-        <div class="flex justify-end gap-2 pt-1 border-t border-neutral-200 dark:border-neutral-700/60">
+        <div class="flex gap-2 py-4 border-t justify-end" style="border-color:var(--theme-border);">
           <button type="button" onclick="hideCreateModal()"
             class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition active:scale-95 inline-flex items-center gap-2">
             <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
@@ -236,34 +236,34 @@
 
 <div id="editApiKeyModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0 bg-transparent" id="editApiKeyModalBackdrop"></div>
-  <div id="editApiKeyModalPanel" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1" class="al-sheet-panel relative rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+  <div id="editApiKeyModalPanel" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1" class="al-sheet-panel relative rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
 
     <!-- Header -->
-    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 shrink-0">
+    <div class="flex justify-between items-center px-6 py-4 border-b shrink-0" style="border-color:var(--theme-border);">
       <div>
-        <p id="editApiKeyTitle" class="text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.editApiKey || 'Edit API Key' %></p>
-        <p id="editApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Update name, description, and permissions.</p>
+        <p id="editApiKeyTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= req.translations.editApiKey || 'Edit API Key' %></p>
+        <p id="editApiKeyDescription" class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Update name, description, and permissions.</p>
       </div>
-      <button type="button" onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" aria-label="Close edit API key dialog">
-        <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
+      <button type="button" onclick="hideEditModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
 
     <!-- Body -->
     <form id="editApiKeyForm" action="/admin/apikeys/edit/0" method="POST" class="flex flex-col min-h-0 flex-1">
       <%- include('../../components/csrf') %>
-      <div class="px-5 py-4 overflow-y-auto flex-1 space-y-4">
+      <div class="px-6 py-4 overflow-y-auto flex-1 space-y-4">
 
         <!-- Name + description -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1"><%= req.translations.apiKeyName || 'Name' %></label>
+            <label class="block text-xs font-medium mb-1" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyName || 'Name' %></label>
             <input type="text" name="name" id="edit-name" required
               class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700/50 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition"
               placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
           </div>
           <div>
-            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1"><%= req.translations.apiKeyDescriptionLabel || 'Description' %></label>
+            <label class="block text-xs font-medium mb-1" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyDescriptionLabel || 'Description' %></label>
             <input type="text" name="description" id="edit-description"
               class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700/50 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition"
               placeholder="<%= req.translations.apiKeyDescriptionPlaceholder || 'Used for server management' %>">
@@ -282,7 +282,7 @@
           <% ['servers', 'users', 'nodes', 'settings'].forEach(cat => { %>
           <div class="rounded-xl border border-neutral-200 dark:border-neutral-700/50 overflow-hidden">
             <div class="flex items-center justify-between px-4 py-2.5 bg-neutral-50 dark:bg-neutral-800/60">
-              <p class="text-xs font-semibold text-neutral-700 dark:text-neutral-200 capitalize"><%= cat %></p>
+              <p class="text-xs font-semibold capitalize" style="color:var(--theme-text-muted);"><%= cat %></p>
               <button type="button" class="edit-select-category text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition" data-category="<%= cat %>">Select all</button>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 px-4 py-3">
@@ -301,7 +301,7 @@
       </div>
 
       <!-- Footer -->
-      <div class="flex gap-2 px-5 py-4 border-t border-neutral-200 dark:border-neutral-700/60 justify-end shrink-0">
+      <div class="flex gap-2 px-6 py-4 border-t justify-end shrink-0" style="border-color:var(--theme-border);">
         <button type="button" onclick="hideEditModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition inline-flex items-center gap-2"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> Cancel</button>
         <button type="submit" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 transition inline-flex items-center gap-2"><%- icon('save', { class: 'size-3', strokeWidth: 1.5 }) %> Save changes</button>
       </div>
@@ -312,15 +312,22 @@
 <% if (created) { %>
 <div id="createdKeyModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0 bg-transparent"></div>
-  <div id="createdKeyPanel" role="dialog" aria-modal="true" aria-labelledby="createdKeyTitle" tabindex="-1" class="al-sheet-panel relative rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
-    <h3 id="createdKeyTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">API key created</h3>
-    <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-4">Copy it now — for security, this is the only time the full key is shown.</p>
-    <div class="flex items-center gap-2 rounded-xl px-3 py-2.5 mb-4" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
-      <code class="flex-1 text-xs font-mono break-all" style="color:var(--theme-text-strong)"><%= created %></code>
+  <div id="createdKeyPanel" role="dialog" aria-modal="true" aria-labelledby="createdKeyTitle" tabindex="-1" class="al-sheet-panel relative rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+    <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
+      <h3 id="createdKeyTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);">API key created</h3>
+      <button type="button" onclick="hideCreatedKeyModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
     </div>
-    <div class="flex justify-end gap-2">
-      <button type="button" onclick="hideCreatedKeyModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition inline-flex items-center gap-2"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> Close</button>
-      <button type="button" onclick="copyCreatedKey()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition inline-flex items-center gap-2"><%- icon('copy', { class: 'size-3', strokeWidth: 1.5 }) %> Copy key</button>
+    <div class="px-6 py-4">
+      <p class="text-xs mb-4" style="color:var(--theme-text-muted);">Copy it now — for security, this is the only time the full key is shown.</p>
+      <div class="flex items-center gap-2 rounded-xl px-3 py-2.5" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+        <code class="flex-1 text-xs font-mono break-all" style="color:var(--theme-text-strong)"><%= created %></code>
+      </div>
+    </div>
+    <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
+      <button type="button" onclick="hideCreatedKeyModal()" class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %> Close</button>
+      <button type="button" onclick="copyCreatedKey()" class="al-btn-primary"><%- icon('copy', { class: 'size-4', strokeWidth: 1.5 }) %> Copy key</button>
     </div>
   </div>
 </div>
@@ -621,7 +628,9 @@
         return true;
       }
       let msg = 'Something went wrong. Try again.';
-      try { const data = await res.json(); msg = data.error || data.message || msg; } catch (e) {}
+      try { const data = await res.json(); msg = data.error || data.message || msg; } catch (e) {
+        console.warn('[apikeys] Failed to parse error response:', e);
+      }
       showToast(msg, 'error');
       return false;
     } catch (e) {

@@ -3,6 +3,8 @@ import logger from './logger';
 import { daemonRequest } from './utils/core/daemonRequest';
 import { queueer } from './queueer';
 
+const INSTALL_TIMEOUT_MS = 600_000;
+
 export async function processQueuedServerInstalls(): Promise<void> {
   const servers = await prisma.server.findMany({
     where: { Queued: true },
@@ -15,17 +17,17 @@ export async function processQueuedServerInstalls(): Promise<void> {
       continue;
     }
 
-    let serverEnv: any[];
+    let serverEnv: { env: string; value: string | number }[];
     try {
-      const rawVars = JSON.parse(server.Variables);
-      serverEnv = rawVars.map((v: any) => ({
-        env: String(v.env_variable ?? v.env ?? ''),
-        value: v.value ?? v.default_value ?? '',
+      const rawVars = JSON.parse(server.Variables) as Record<string, unknown>[];
+      serverEnv = rawVars.map((v) => ({
+        env: String((v as Record<string, unknown>).env_variable ?? (v as Record<string, unknown>).env ?? ''),
+        value: String((v as Record<string, unknown>).value ?? (v as Record<string, unknown>).default_value ?? ''),
       }));
       let serverPort: string | number = '';
       try {
         const parsedPorts = JSON.parse(server.Ports);
-        const primary = parsedPorts.find((p: any) => p.primary);
+        const primary = parsedPorts.find((p: Record<string, unknown>) => p.primary);
         if (primary?.Port) {
           serverPort = parseInt(String(primary.Port).split(':')[0] ?? '');
         }
@@ -39,10 +41,10 @@ export async function processQueuedServerInstalls(): Promise<void> {
       continue;
     }
 
-    const env = serverEnv.reduce((acc: any, curr: any) => {
-      acc[curr.env] = curr.value;
-      return acc;
-    }, {});
+      const env = serverEnv.reduce<Record<string, string | number>>((acc, curr) => {
+        acc[curr.env] = curr.value;
+        return acc;
+      }, {});
 
     if (!server.image?.scripts) {
       await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
@@ -68,7 +70,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
           method: 'POST',
           path: '/container/installer',
           body: { id: server.UUID, script: inst.script, container: inst.container, entrypoint: inst.entrypoint || 'bash', env },
-          timeout: 600000,
+          timeout: INSTALL_TIMEOUT_MS,
         });
       } else if (Array.isArray(scripts.install)) {
         let dockerImageValue: string | undefined;
@@ -87,14 +89,14 @@ export async function processQueuedServerInstalls(): Promise<void> {
             id: server.UUID,
             image: dockerImageValue,
             env,
-            scripts: (scripts.install as any[]).map((s: any) => ({
-              url: s.url,
+            scripts: (scripts.install as Record<string, unknown>[]).map((s) => ({
+              url: s.url as string,
               onStartup: s.onStart,
               ALVKT: s.ALVKT,
               fileName: s.fileName,
             })),
           },
-          timeout: 600000,
+          timeout: INSTALL_TIMEOUT_MS,
         });
       }
       await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });

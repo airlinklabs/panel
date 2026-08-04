@@ -1,4 +1,12 @@
 (function() {
+  const PORT_MIN = 1024;
+  const PORT_MAX = 65535;
+  const ANIMATION_DURATION_MS = 200;
+  const PORT_STAGGER_MS = 30;
+  const PORT_OUT_DURATION_MS = 160;
+  const COPY_RESET_DELAY_MS = 1500;
+  const VERIFY_DELAY_MS = 1800;
+
   let allocatedPorts = [];
 
   function renderAllocatedPorts() {
@@ -47,7 +55,7 @@
         el.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
         el.style.opacity = '1';
         el.style.transform = 'translateY(0)';
-        setTimeout(function() { el.style.transition = ''; }, 200);
+        setTimeout(function() { el.style.transition = ''; }, ANIMATION_DURATION_MS);
       });
     });
   }
@@ -56,14 +64,14 @@
     el.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
     el.style.opacity = '0';
     el.style.transform = 'translateY(-4px)';
-    setTimeout(cb, 160);
+    setTimeout(cb, PORT_OUT_DURATION_MS);
   }
 
   function addPort(input) {
     if (input.includes('-')) {
       const [start, end] = input.split('-').map(p => parseInt(p.trim()));
-      if (isNaN(start) || isNaN(end) || start >= end || start < 1024 || end > 65535) {
-        showToast('Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between 1024 and 65535.', 'error');
+      if (isNaN(start) || isNaN(end) || start >= end || start < PORT_MIN || end > PORT_MAX) {
+        showToast('Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between ' + PORT_MIN + ' and ' + PORT_MAX + '.', 'error');
         return;
       }
       for (let port = start; port <= end; port++) {
@@ -71,8 +79,8 @@
       }
     } else {
       const port = parseInt(input.trim());
-      if (isNaN(port) || port < 1024 || port > 65535) {
-        showToast('Invalid port. Port must be between 1024 and 65535.', 'error');
+      if (isNaN(port) || port < PORT_MIN || port > PORT_MAX) {
+        showToast('Invalid port. Port must be between ' + PORT_MIN + ' and ' + PORT_MAX + '.', 'error');
         return;
       }
       if (!allocatedPorts.includes(port)) allocatedPorts.push(port);
@@ -82,7 +90,7 @@
     renderAllocatedPorts();
 
     const tags = document.querySelectorAll('#allocatedPortsList > div[data-port]');
-    tags.forEach((tag, i) => setTimeout(() => animatePortIn(tag), i * 30));
+    tags.forEach((tag, i) => setTimeout(() => animatePortIn(tag), i * PORT_STAGGER_MS));
   }
 
   function removePort(port) {
@@ -112,9 +120,12 @@
 
   function gbValue(hiddenId) {
     const hidden = document.getElementById(hiddenId);
-    if (!hidden) return '';
-    const v = parseFloat(hidden.value);
-    return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
+    if (hidden) {
+      const v = parseFloat(hidden.value);
+      if (!hidden.value || isNaN(v)) return '';
+      return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
+    }
+    return '';
   }
 
   document.getElementById('createNodeBtn').addEventListener('click', async () => {
@@ -141,6 +152,10 @@
       showToast('Please fill in all required fields.', 'error');
       return;
     }
+
+    if (!ramAll && !nodeData.ram) { showToast('RAM is required when not unlimited.', 'error'); return; }
+    if (!diskAll && !nodeData.disk) { showToast('Disk is required when not unlimited.', 'error'); return; }
+    if (!cpuAll && !nodeData.cpu) { showToast('CPU is required when not unlimited.', 'error'); return; }
 
     const loader = showLoadingPopup('Creating Node', 'Initializing node creation...');
     loader.updateProgress(20, 'Sending node configuration...');
@@ -204,7 +219,7 @@
       }
       const label = document.getElementById('copyDaemonConfigLabel');
       label.textContent = 'Copied!';
-      setTimeout(() => { label.textContent = 'Copy config'; }, 1500);
+      setTimeout(() => { label.textContent = 'Copy config'; }, COPY_RESET_DELAY_MS);
     });
 
     document.getElementById('verifyDaemonBtn').addEventListener('click', async () => {
@@ -222,7 +237,7 @@
           result.style.color = 'var(--theme-success)';
           result.textContent = 'Daemon is live' + (d.version ? ' (' + d.version + ')' : '') + '. Key checks out — servers can now run on this node.';
           showToast('Daemon verified!', 'success');
-          setTimeout(() => { window.location.href = '/admin/nodes?verified=' + node.id; }, 1800);
+          setTimeout(() => { window.location.href = '/admin/nodes?verified=' + node.id; }, VERIFY_DELAY_MS);
         } else {
           result.style.color = 'var(--theme-danger)';
           result.textContent = d.error || 'Could not reach the daemon. Check the address, port, and key.';

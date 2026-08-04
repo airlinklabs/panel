@@ -20,36 +20,35 @@ import {
   withNodePortLock,
   getNodePortPool,
   syncNodeAllocations,
-  claimNodePorts,
-  releaseServerAllocations,
-  releaseNodePorts,
 } from '../../../handlers/utils/server/allocations';
 import {
   provisionDatabase,
   deprovisionDatabase,
-  rotateDatabasePassword,
 } from '../../../handlers/utils/core/mysqlProvisioner';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
-import CronParser from 'cron-parser';
 import { validateVariableRules } from '../../user/server/startup';
 import { apiEndpoints } from './apiDocs';
+import { nextRunFromCron, isValidCron } from '../../../utils/cron';
 
 const POWER_ACTIONS = ['start', 'stop', 'restart', 'kill'] as const;
 const TASK_ACTIONS = ['command', 'power', 'backup'] as const;
 
-function isValidCron(cron: string): boolean {
-  try {
-    CronParser.parse(cron);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function nextRunFromCron(cron: string, timeOffset = 0): Date {
-  const clock = new Date(Date.now() + timeOffset * 60_000);
-  return CronParser.parse(cron, { currentDate: clock }).next().toDate();
-}
+const BCRYPT_SALT_ROUNDS = 10;
+const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_MEMORY_MB = 512;
+const DEFAULT_SWAP_MB = 0;
+const DEFAULT_CPU_PERCENT = 100;
+const DEFAULT_STORAGE_MB = 5120;
+const DEFAULT_NODE_PORT = 3001;
+const DEFAULT_SFTP_PORT = 3003;
+const MIN_PORT_NUMBER = 1024;
+const MAX_PORT_NUMBER = 65535;
+const MIN_TIME_OFFSET = -1440;
+const MAX_TIME_OFFSET = 1440;
+const BACKUP_TIMEOUT_MS = 300_000;
+const SHORT_TIMEOUT_MS = 30_000;
+const STREAM_TIMEOUT_MS = 120_000;
+const DAEMON_REQUEST_TIMEOUT_MS = 15_000;
 
 function s3KeyFor(serverId: string, uuid: string): string {
   return `backups/${serverId}/${uuid}.tar.gz`;
@@ -57,7 +56,7 @@ function s3KeyFor(serverId: string, uuid: string): string {
 
 async function apiAudit(req: Request, event: string, serverId?: string, metadata?: Record<string, unknown>): Promise<void> {
   try {
-    await logActivity(req, event as any, {
+    await logActivity(req, event as Parameters<typeof logActivity>[1], {
       serverId,
       metadata,
     });
@@ -182,7 +181,7 @@ const coreModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const page = Number(req.query.page) || 1;
-          const perPage = Number(req.query.per_page) || 25;
+          const perPage = Number(req.query.per_page) || DEFAULT_PAGE_SIZE;
 
           const users = await prisma.users.findMany({
             select: {
@@ -274,7 +273,7 @@ const coreModule: Module = {
             return;
           }
 
-          const hashedPassword = await bcrypt.hash(password, 10);
+          const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
           const user = await prisma.users.create({
             data: {
@@ -357,7 +356,7 @@ const coreModule: Module = {
           if (username !== undefined) data.username = username;
           if (isAdmin !== undefined) data.isAdmin = isAdmin;
           if (description !== undefined) data.description = description;
-          if (password !== undefined) data.password = await bcrypt.hash(password, 10);
+          if (password !== undefined) data.password = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
           const user = await prisma.users.update({
             where: { id: userId },
@@ -412,7 +411,7 @@ const coreModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const page = Number(req.query.page) || 1;
-          const perPage = Number(req.query.per_page) || 25;
+          const perPage = Number(req.query.per_page) || DEFAULT_PAGE_SIZE;
 
           const servers = await prisma.server.findMany({
             include: {
@@ -524,10 +523,10 @@ const coreModule: Module = {
               nodeId,
               imageId,
               Ports: Ports ?? '[]',
-              Memory: Memory ?? 512,
-              Swap: Swap ?? 0,
-              Cpu: Cpu ?? 100,
-              Storage: Storage ?? 5120,
+              Memory: Memory ?? DEFAULT_MEMORY_MB,
+              Swap: Swap ?? DEFAULT_SWAP_MB,
+              Cpu: Cpu ?? DEFAULT_CPU_PERCENT,
+              Storage: Storage ?? DEFAULT_STORAGE_MB,
               Variables: Variables ?? null,
               StartCommand: StartCommand ?? image.startup,
               dockerImage: dockerImage ?? null,
@@ -687,10 +686,11 @@ const coreModule: Module = {
                 path: '/container',
                 body: { id: existing.UUID },
               });
-            } catch (err: any) {
+            } catch (err: unknown) {
+              const daemonErr = err as { status?: number; body?: { error?: string } };
               const isGone =
-                err.status === 404 ||
-                (err.body as any)?.error?.includes('not exist');
+                daemonErr.status === 404 ||
+                daemonErr.body?.error?.includes('not exist');
               if (!isGone) {
                 logger.warn(`Could not delete container on daemon: ${err}`);
               }
@@ -715,7 +715,7 @@ const coreModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const page = Number(req.query.page) || 1;
-          const perPage = Number(req.query.per_page) || 25;
+          const perPage = Number(req.query.per_page) || DEFAULT_PAGE_SIZE;
 
           const nodes = await prisma.node.findMany({
             select: {
@@ -805,12 +805,12 @@ const coreModule: Module = {
             data: {
               name,
               address: address ?? '127.0.0.1',
-              port: port ?? 3001,
+              port: port ?? DEFAULT_NODE_PORT,
               ram: ram ?? 0,
               cpu: cpu ?? 0,
               disk: disk ?? 0,
               key,
-              sftpPort: sftpPort ?? 3003,
+              sftpPort: sftpPort ?? DEFAULT_SFTP_PORT,
             },
             select: {
               id: true,
@@ -1059,7 +1059,7 @@ const coreModule: Module = {
               id: serverId,
               name: name.trim(),
             },
-            timeout: 300000,
+            timeout: BACKUP_TIMEOUT_MS,
           });
 
           if (!response.data.success || !response.data.backup) {
@@ -1150,9 +1150,10 @@ const coreModule: Module = {
 
           await apiAudit(req, 'backup:create', serverId, { name: name.trim(), uuid: backup.UUID });
           res.status(201).json({ data: { ...backup, size: backup.size ? backup.size.toString() : '0' } });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const err = error as { body?: { error?: string }; message?: string };
           logger.error('Error creating backup:', error);
-          res.status(500).json({ error: `Failed to create backup: ${error?.body?.error || error?.message || 'Failed to create backup'}` });
+          res.status(500).json({ error: `Failed to create backup: ${err.body?.error || err.message || 'Failed to create backup'}` });
           return;
         }
       }
@@ -1263,7 +1264,7 @@ const coreModule: Module = {
               nodePort: server.node.port,
               nodeKey: server.node.key,
               body: { backupPath },
-            }).catch((e) => logger.warn(`Failed to delete temporary restore file: ${e}`));
+            }).catch((e: unknown) => logger.warn(`Failed to delete temporary restore file: ${e}`));
           }
 
           if (!response.data.success) {
@@ -1273,9 +1274,10 @@ const coreModule: Module = {
 
           await apiAudit(req, 'backup:restore', serverId, { name: backup.name, uuid: backup.UUID });
           res.json({ data: { success: true } });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const err = error as { body?: { error?: string }; message?: string };
           logger.error('Error restoring backup:', error);
-          res.status(500).json({ error: `Failed to restore backup: ${error?.body?.error || error?.message || 'Failed to restore backup'}` });
+          res.status(500).json({ error: `Failed to restore backup: ${err.body?.error || err.message || 'Failed to restore backup'}` });
           return;
         }
       }
@@ -1793,7 +1795,7 @@ const coreModule: Module = {
             for (const v of variables as Array<Record<string, unknown>>) {
               const def = defByEnv.get(String(v.env));
               const rulesSource = def ? { ...def, name: def.env, env: def.env, ...(v as object) } : v;
-              const err = validateVariableRules(rulesSource as any, String(v.value ?? ''));
+              const err = validateVariableRules(rulesSource as unknown as import('../../user/server/shared').ServerVariable, String(v.value ?? ''));
               if (err) {
                 res.status(400).json({ error: 'Variable validation failed.', fields: [{ key: v.env, error: err }] });
                 return;
@@ -1808,9 +1810,10 @@ const coreModule: Module = {
 
           await apiAudit(req, 'server:update-startup', serverId);
           res.json({ data: { success: true } });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const err = error as { body?: { error?: string }; message?: string };
           logger.error('Error updating startup:', error);
-          res.status(500).json({ error: `Failed to update startup: ${error?.body?.error || error?.message || 'Failed to update startup'}` });
+          res.status(500).json({ error: `Failed to update startup: ${err.body?.error || err.message || 'Failed to update startup'}` });
           return;
         }
       }
@@ -1875,7 +1878,7 @@ const coreModule: Module = {
           return;
         }
         const parsedOffset = parseInt(String(timeOffset ?? '0'), 10);
-        const offset = Number.isNaN(parsedOffset) ? 0 : Math.min(Math.max(parsedOffset, -1440), 1440);
+        const offset = Number.isNaN(parsedOffset) ? 0 : Math.min(Math.max(parsedOffset, MIN_TIME_OFFSET), MAX_TIME_OFFSET);
 
         try {
           const server = await prisma.server.findUnique({ where: { UUID: serverId } });
@@ -1928,7 +1931,7 @@ const coreModule: Module = {
           let offset = schedule.timeOffset ?? 0;
           if (timeOffset !== undefined) {
             const parsed = parseInt(String(timeOffset), 10);
-            offset = Number.isNaN(parsed) ? 0 : Math.min(Math.max(parsed, -1440), 1440);
+            offset = Number.isNaN(parsed) ? 0 : Math.min(Math.max(parsed, MIN_TIME_OFFSET), MAX_TIME_OFFSET);
           }
 
           const wantEnabled = enabled === true || enabled === 'true';
@@ -2131,8 +2134,8 @@ const coreModule: Module = {
           }
 
           const parsedPort = parseInt(String(port), 10);
-          if (isNaN(parsedPort) || parsedPort < 1024 || parsedPort > 65535) {
-            res.status(422).json({ error: 'Port must be a number between 1024 and 65535' });
+          if (isNaN(parsedPort) || parsedPort < MIN_PORT_NUMBER || parsedPort > MAX_PORT_NUMBER) {
+            res.status(422).json({ error: `Port must be a number between ${MIN_PORT_NUMBER} and ${MAX_PORT_NUMBER}` });
             return;
           }
 
@@ -2212,7 +2215,7 @@ const coreModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const page = Number(req.query.page) || 1;
-          const perPage = Number(req.query.per_page) || 25;
+          const perPage = Number(req.query.per_page) || DEFAULT_PAGE_SIZE;
 
           const images = await prisma.images.findMany({
             select: {
@@ -2411,7 +2414,7 @@ const coreModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const page = Number(req.query.page) || 1;
-          const perPage = Number(req.query.per_page) || 25;
+          const perPage = Number(req.query.per_page) || DEFAULT_PAGE_SIZE;
 
           const locations = await prisma.location.findMany({
             include: { _count: { select: { nodes: true } } },

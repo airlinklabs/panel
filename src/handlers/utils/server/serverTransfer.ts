@@ -1,4 +1,5 @@
 import prisma from '../../../db';
+import type { Prisma } from '../../../generated/prisma/client';
 import logger from '../../logger';
 import { daemonRequest } from '../core/daemonRequest';
 import {
@@ -134,8 +135,10 @@ export async function startTransfer(
   return state;
 }
 
+type ServerWithRelations = Prisma.ServerGetPayload<{ include: { node: true; image: true } }>;
+
 async function runTransfer(
-  server: { id: number; UUID: string; name: string; nodeId: number; Memory: number; Cpu: number; Storage: number; Variables: string | null; dockerImage: string | null; Ports: string; image: any; node: any },
+  server: ServerWithRelations,
   targetNode: { id: number; address: string; port: number; key: string },
   targetPorts: { externalPort: number; internalPort: number; primary: boolean; name: string }[],
   state: TransferState,
@@ -257,8 +260,8 @@ async function runTransfer(
 
         // Add SERVER_PORT from ports
         try {
-          const parsedPorts = JSON.parse(server.Ports);
-          const primary = parsedPorts.find((p: any) => p.primary);
+          const parsedPorts = JSON.parse(server.Ports) as Array<{ primary?: boolean; Port?: string; externalPort?: number }>;
+          const primary = parsedPorts.find((p) => p.primary);
           if (primary?.Port) {
             env['SERVER_PORT'] = String(primary.externalPort || String(primary.Port).split(':')[0]);
           }
@@ -308,7 +311,7 @@ async function runTransfer(
             id: server.UUID,
             image: dockerImageValue,
             env,
-            scripts: (scripts.install as any[]).map((s: any) => ({
+            scripts: (scripts.install as Array<{ url?: string; onStart?: string; ALVKT?: string; fileName?: string }>).map((s) => ({
               url: s.url,
               onStartup: s.onStart,
               ALVKT: s.ALVKT,
