@@ -40,7 +40,7 @@
             <div id="sidebar-main-view" class="sidebar-view<%= isServerPage ? ' hidden' : '' %>">
             <% if (isServerPage) { %>
               <li class="nav-item sidebar-view-item" style="--i:0">
-                <button type="button" id="sidebar-goback-btn" class="sidebar-view-toggle nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 min-h-9 w-full rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);">
+                <button type="button" id="sidebar-goback-btn" class="sidebar-view-toggle nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 min-h-[44px] w-full rounded-xl text-sm leading-6 font-normal transition-all duration-200 active:scale-95" style="color:var(--theme-nav-text);">
                   <%- icon('arrow-left', { class: 'w-5 h-5 mt-0.5' }) %>
                   <span><%= srvNavT.navGoBack || 'Go Back' %></span>
                 </button>
@@ -178,7 +178,7 @@
             %>
             <div id="sidebar-server-view" class="sidebar-view showing">
               <li class="nav-item">
-                <button type="button" id="sidebar-back-btn" class="sidebar-view-toggle nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 min-h-9 w-full rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);">
+                <button type="button" id="sidebar-back-btn" class="sidebar-view-toggle nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 min-h-[44px] w-full rounded-xl text-sm leading-6 font-normal transition-all duration-200 active:scale-95" style="color:var(--theme-nav-text);">
                   <%- icon('arrow-left', { class: 'w-5 h-5 mt-0.5' }) %>
                   <span><%= srvT.navBack || 'Back' %></span>
                 </button>
