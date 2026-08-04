@@ -7,9 +7,9 @@
     <meta name="csrf-token" content="<%= csrfToken %>">
     <% } %>
     <title><%= settings.title %> - <%= title %></title>
-    <link rel="stylesheet" href="/styles.css?v=4">
-    <link rel="stylesheet" href="/layout-animations.css">
-    <link rel="stylesheet" href="/styles/motion.css">
+    <link rel="stylesheet" href="/styles.css?v=5">
+    <link rel="stylesheet" href="/layout-animations.css?v=5">
+    <link rel="stylesheet" href="/styles/motion.css?v=5">
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <!-- Default themes — always loaded, always the base layer -->
@@ -24,15 +24,15 @@
     <% } %>
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
-    <script nonce="<%- nonce %>" src="/js/csrf.js"></script>
-    <script nonce="<%- nonce %>" src="/js/shared/al-icon.js"></script>
+    <script nonce="<%- nonce %>" src="/js/csrf.js?v=5"></script>
+    <script nonce="<%- nonce %>" src="/js/shared/al-icon.js?v=5"></script>
     <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
-    <script nonce="<%- nonce %>" src="/javascript/shared/format-switcher.js"></script>
-    <script nonce="<%- nonce %>" src="/javascript/shared/animations.js"></script>
-    <script nonce="<%- nonce %>" src="/javascript/shared/custom-select.js"></script>
-    <script nonce="<%- nonce %>" src="/javascript/shared/page-loader.js"></script>
-    <script nonce="<%- nonce %>" src="/javascript/shared/checkbox-anim.js"></script>
-    <script nonce="<%- nonce %>" src="/javascript/shared/layout-animations.js"></script>
+    <script nonce="<%- nonce %>" src="/javascript/shared/format-switcher.js?v=5"></script>
+    <script nonce="<%- nonce %>" src="/javascript/shared/animations.js?v=5"></script>
+    <script nonce="<%- nonce %>" src="/javascript/shared/custom-select.js?v=5"></script>
+    <script nonce="<%- nonce %>" src="/javascript/shared/page-loader.js?v=5"></script>
+    <script nonce="<%- nonce %>" src="/javascript/shared/checkbox-anim.js?v=5"></script>
+    <script nonce="<%- nonce %>" src="/javascript/shared/layout-animations.js?v=5"></script>
     <style>
       * { scrollbar-width: thin; scrollbar-color: var(--theme-border) transparent; }
       ::-webkit-scrollbar { width: 8px; height: 8px; }
