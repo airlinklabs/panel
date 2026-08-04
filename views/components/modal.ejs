@@ -3,7 +3,7 @@
      Alerts:        window.modal.alert({ title, body })
      Rich sheets:   window.modal.show({ title, bodyNode, panelClass, onClose })
                     bodyNode is moved into the shared panel; close with window.modal.close(). -->
-<div id="globalModal" class="al-sheet-overlay al-modal-overlay fixed inset-0 z-50 flex items-center justify-center" aria-hidden="true">
+<div id="globalModal" class="al-sheet-overlay al-modal-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0" id="globalModalBackdrop"></div>
   <div id="globalModalPanel" role="dialog" aria-modal="true" aria-labelledby="globalModalTitle" aria-describedby="globalModalBody" tabindex="-1" class="al-sheet-panel al-modal-panel relative border rounded-2xl shadow-lg w-full max-w-sm mx-4" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <div id="globalModalContent" class="overflow-y-auto" style="display:none;"></div>
