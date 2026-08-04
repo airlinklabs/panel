@@ -185,7 +185,6 @@ function hideLoading() {
 function showConfirmation(title, message, onConfirm) {
   window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Confirm', onConfirm });
 }
-document.getElementById('confirmation-cancel') && document.getElementById('confirmation-cancel').addEventListener && null;
 
 // Modal functions
 function openCreateBackupModal() {

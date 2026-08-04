@@ -123,16 +123,11 @@
 
 <script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
-    // Hide loading indicator when worlds are loaded
-    const loadingIndicator = document.getElementById('loadingIndicator');
     const noWorldsMessage = document.getElementById('noWorldsMessage');
     const serverTable = document.getElementById('serverTable');
 
-    // Hide loading indicator after a short delay to prevent flickering
+    // Show appropriate content based on worlds availability
     setTimeout(() => {
-      document.getElementById('loadingIndicatorRow') && document.getElementById('loadingIndicatorRow').classList.remove('open');
-
-      // Show appropriate content based on worlds availability
       if (<%= worlds.length %> > 0) {
         document.getElementById('serverTableRow') && document.getElementById('serverTableRow').classList.add('open');
         document.getElementById('noWorldsMessageRow') && document.getElementById('noWorldsMessageRow').classList.remove('open');

@@ -23,10 +23,13 @@ const SKIP_JS = new Set(['modrinth-admin-mobile.js']);
 
 const root = join(__dirname, '..');
 
+const viewsOnly: string[] = [];
+
 function allSourceFiles(): string[] {
   const skip = new Set(['.tmp-ejs-lint']);
   const files: string[] = [];
   walk(join(root, 'views'), files, skip);
+  viewsOnly.push(...walk(join(root, 'views'), [], skip));
   walk(join(root, 'public', 'javascript'), files, skip);
   const addonViews = join(root, 'storage', 'addons');
   if (existsSync(addonViews)) {
@@ -86,5 +89,30 @@ describe('element id integrity', () => {
       const content = contents.get(file)!;
       expect(content).not.toMatch(/getElementById\(['"]server-started-at['"]\)/);
     }
+  });
+
+  it('inline scripts in views only reference ids defined in that view', () => {
+    const offenders: string[] = [];
+    for (const file of viewsOnly) {
+      const content = contents.get(file)!;
+      const localIds = new Set<string>();
+      for (const m of content.matchAll(/id="([^"]+)"/g)) localIds.add(m[1]);
+      // shared includes known to own their ids
+      for (const shared of ['pl-overlay', 'topbar-breadcrumbs', 'sidebar-username', 'toast-container']) {
+        localIds.add(shared);
+      }
+      for (const m of content.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)) {
+        const code = m[1];
+        for (const g of code.matchAll(/getElementById\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+          const id = g[1];
+          if (localIds.has(id)) continue;
+          // created dynamically inside this same file
+          const created = new RegExp(`id\\s*[=:]\\s*['"]${escapeRegExp(id)}['"]`);
+          if (created.test(content)) continue;
+          offenders.push(`${file.replace(root + '/', '')} -> ${id}`);
+        }
+      }
+    }
+    expect([...new Set(offenders)]).toEqual([]);
   });
 });
