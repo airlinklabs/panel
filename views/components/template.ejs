@@ -39,24 +39,24 @@
             %>
             <div id="sidebar-main-view" class="sidebar-view<%= isServerPage ? ' hidden' : '' %>">
             <% if (isServerPage) { %>
-              <li class="nav-item">
-                <button type="button" id="sidebar-goback-btn" class="sidebar-view-toggle nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);">
+              <li class="nav-item sidebar-view-item" style="--i:0">
+                <button type="button" id="sidebar-goback-btn" class="sidebar-view-toggle nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 min-h-9 w-full rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);">
                   <%- icon('arrow-left', { class: 'w-5 h-5 mt-0.5' }) %>
                   <span><%= srvNavT.navGoBack || 'Go Back' %></span>
                 </button>
               </li>
             <% } %>
             <% if (!sidebarItems || sidebarItems.length === 0) { %>
-              <li class="nav-item">
+              <li class="nav-item sidebar-view-item" style="--i:0">
                 <a href="/" class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);" data-search="container instances servers" data-match-prefix="/server">
                   <%- icon('layout-dashboard', { class: 'w-5 h-5 mt-0.5' }) %>
                   <span><%= req.translations.navDashboard || 'Dashboard' %></span>
                 </a>
               </li>
             <% } else {
-              sidebarItems.forEach(item => {
+              sidebarItems.forEach((item, i) => {
             %>
-              <li class="nav-item">
+              <li class="nav-item sidebar-view-item" style="--i:<%= i + 1 %>">
                 <a href="<%= item.url %>" class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);"<% if (item.matchPrefix) { %> data-match-prefix="<%= item.matchPrefix %>"<% } %>>
                   <%- item.icon %>
                   <span><%= item.label %></span>
@@ -65,81 +65,82 @@
             <% }); } %>
             
             <% if (user != null && user.isAdmin === true) { %>
+            <% let adminAnimIdx = 0; %>
                           <p class="pl-8 text-xs font-medium pt-6 pb-2" style="color:var(--theme-nav-text);"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>
 
                           <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span>Core</span></p>
-                          <li>
-                            <a href="/admin/overview" searchdata="admin overview control" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/overview" searchdata="admin overview control" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('layout-grid', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span><%= req.translations.navOverview || 'Overview' %></span>
                             </a>
                           </li>
-                          <li>
-                            <a href="/admin/servers" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/servers" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('server', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span><%= req.translations.navServers || 'Servers' %></span>
                             </a>
                           </li>
-                          <li>
-                            <a href="/admin/users" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/users" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('users', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span><%= req.translations.navUsers || 'Users' %></span>
                             </a>
                           </li>
 
                           <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span>Infrastructure</span></p>
-                          <li>
-                            <a href="/admin/nodes" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/nodes" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('network', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span><%= req.translations.navNodes || 'Nodes' %></span>
                             </a>
                           </li>
-                          <li>
-                            <a href="/admin/locations" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/locations" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('map-pin', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span><%= req.translations.navLocations || 'Locations' %></span>
                             </a>
                           </li>
-                          <li>
-                            <a href="/admin/activity" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/activity" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('activity', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span>Activity Log</span>
                             </a>
                           </li>
-                          <li>
-                            <a href="/admin/images" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/images" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('box', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span><%= req.translations.navImages || 'Images' %></span>
                             </a>
                           </li>
 
                           <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span>Extensions</span></p>
-                          <li>
-                            <a href="/admin/addons" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/addons" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('puzzle', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span><%= req.translations.navAddons || 'Addons' %></span>
                             </a>
                           </li>
-                          <li>
-                            <a href="/admin/apikeys" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/apikeys" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('key', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span><%= req.translations.navApiKeys || 'API Keys' %></span>
                             </a>
                           </li>
 
                           <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span>Configuration</span></p>
-                          <li>
-                            <a href="/admin/settings" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/settings" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('settings', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span><%= req.translations.navSettings || 'Settings' %></span>
                             </a>
                           </li>
 
-                          <% if (adminMenuItems && adminMenuItems.length > 0) {
-                            adminMenuItems.forEach(item => {
-                          %>
-                          <li>
-                            <a href="<%= item.url %>" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+              <% if (adminMenuItems && adminMenuItems.length > 0) {
+                adminMenuItems.forEach(item => {
+              %>
+              <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+                <a href="<%= item.url %>" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- item.icon %>
                               <span><%= item.label %></span>
                             </a>
@@ -177,7 +178,7 @@
             %>
             <div id="sidebar-server-view" class="sidebar-view showing">
               <li class="nav-item">
-                <button type="button" id="sidebar-back-btn" class="sidebar-view-toggle nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);">
+                <button type="button" id="sidebar-back-btn" class="sidebar-view-toggle nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 min-h-9 w-full rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);">
                   <%- icon('arrow-left', { class: 'w-5 h-5 mt-0.5' }) %>
                   <span><%= srvT.navBack || 'Back' %></span>
                 </button>
@@ -206,26 +207,39 @@
 
     <style>
     /* Server/main sidebar view switching */
-    @keyframes sidebar-view-in {
-      from { opacity: 0; transform: translateX(-10px); }
-      to   { opacity: 1; transform: translateX(0); }
+    @keyframes sidebar-view-fade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
     #sidebar-server-view.showing, #sidebar-main-view.showing {
-      animation: sidebar-view-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: sidebar-view-fade 140ms ease-out both;
     }
+    /* Normal sidebar items swipe in from the left */
+    #sidebar-main-view .sidebar-view-item { opacity: 0; }
+    #sidebar-main-view.showing .sidebar-view-item {
+      animation: sidebar-swipe-left 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: min(calc(var(--i, 0) * 25ms), 320ms);
+    }
+    /* Server buttons swipe in from the right */
     #sidebar-server-view .server-anim-in { opacity: 0; }
     #sidebar-server-view.showing .server-anim-in {
-      animation: sidebar-item-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: sidebar-swipe-right 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
       animation-delay: calc(var(--i, 0) * 30ms);
     }
-    @keyframes sidebar-item-in {
-      from { opacity: 0; transform: translateX(-10px); }
+    @keyframes sidebar-swipe-left {
+      from { opacity: 0; transform: translateX(-16px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes sidebar-swipe-right {
+      from { opacity: 0; transform: translateX(16px); }
       to   { opacity: 1; transform: translateX(0); }
     }
     @media (prefers-reduced-motion: reduce) {
       #sidebar-server-view.showing, #sidebar-main-view.showing,
-      #sidebar-server-view.showing .server-anim-in { animation: none; }
-      #sidebar-server-view .server-anim-in { opacity: 1; }
+      #sidebar-server-view.showing .server-anim-in,
+      #sidebar-main-view.showing .sidebar-view-item { animation: none; }
+      #sidebar-server-view .server-anim-in,
+      #sidebar-main-view .sidebar-view-item { opacity: 1; }
     }
     </style>
 

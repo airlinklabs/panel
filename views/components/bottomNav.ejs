@@ -25,6 +25,8 @@
     const navToShow = (bottomNavItems || []).slice(0, 4);
     const onServerPage = (typeof req !== 'undefined' && req && (req.path || req.originalUrl || '').startsWith('/server/'));
     const isAdminUser = (typeof user !== 'undefined' && user != null && user.isAdmin === true);
+    const mT = (typeof req !== 'undefined' && req && req.translations) || {};
+    let mSheetHasServerView = false;
     %>
 
     <% navToShow.forEach(function(item) { %>
@@ -47,7 +49,28 @@
   <style>
     #mobile-more-sheet { transition: transform var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)); }
     #mobile-more-sheet.closing { transition: transform var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)); }
-    @media (prefers-reduced-motion: reduce) { #mobile-more-sheet, #mobile-more-sheet.closing { transition: none; } }
+    @keyframes sheet-view-fade { from { opacity: 0; } to { opacity: 1; } }
+    #mobile-more-server-view.showing, #mobile-more-main.showing { animation: sheet-view-fade 140ms ease-out both; }
+    #mobile-more-main .sheet-anim-item { opacity: 0; }
+    #mobile-more-main.showing .sheet-anim-item {
+      animation: sheet-swipe-left 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: min(calc(var(--i, 0) * 25ms), 300ms);
+    }
+    #mobile-more-server-view .server-anim-in { opacity: 0; }
+    #mobile-more-server-view.showing .server-anim-in {
+      animation: sheet-swipe-right 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: calc(var(--i, 0) * 30ms);
+    }
+    @keyframes sheet-swipe-left { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes sheet-swipe-right { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+    @media (prefers-reduced-motion: reduce) {
+      #mobile-more-sheet, #mobile-more-sheet.closing { transition: none; }
+      #mobile-more-server-view.showing, #mobile-more-main.showing,
+      #mobile-more-server-view.showing .server-anim-in,
+      #mobile-more-main.showing .sheet-anim-item { animation: none; }
+      #mobile-more-server-view .server-anim-in,
+      #mobile-more-main .sheet-anim-item { opacity: 1; }
+    }
   </style>
   <div class="rounded-t-2xl border-t shadow-xl max-h-[70vh] overflow-y-auto" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <div class="sticky top-0 px-4 py-3 border-b flex items-center justify-between" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
@@ -57,16 +80,58 @@
       </button>
     </div>
     <div class="px-2 py-2">
-      <% if (onServerPage && isAdminUser) { %>
-      <button type="button" id="mobile-admin-toggle" role="menuitem" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;" data-admin-label="<%= req.translations.navAdminPanel || 'Admin Panel' %>" data-back-label="Back">
-        <span id="mobile-admin-toggle-arrow" class="transition-transform duration-200"><%- icon('chevron-left', { class: 'w-5 h-5' }) %></span>
-        <span id="mobile-admin-toggle-label" class="text-sm"><%= req.translations.navAdminPanel || 'Admin Panel' %></span>
+      <% if (onServerPage && typeof server !== 'undefined' && server && global.uiComponentStore) {
+        let mSheetHasServerView = false;
+        const mSrvItems = global.uiComponentStore.getServerMenuItems();
+        const mSrvEntries = mSrvItems.filter(item => {
+          if (item.isAdminItem && !isAdminUser) return false;
+          if (item.ownerOnly && (typeof req !== 'undefined' && req && req.subUser)) return false;
+          if (item.feature && !(typeof features !== 'undefined' && features && features.includes(item.feature))) return false;
+          return true;
+        }).map(item => ({
+          item,
+          url: (item.url || '#').replace(':uuid', server.UUID).replace(':id', server.id),
+        }));
+        const mGroupOrder = ['run', 'data', 'manage', 'settings'];
+        const mGroupLabel = (g) => {
+          if (g === 'run') return mT.navGroupRun || 'Run';
+          if (g === 'data') return mT.navGroupData || 'Data';
+          if (g === 'manage') return mT.navGroupManage || 'Manage';
+          return mT.navGroupSettings || 'Settings';
+        };
+        const mGrouped = mGroupOrder
+          .map(g => ({ g, entries: mSrvEntries.filter(e => (e.item.group || 'manage') === g) }))
+          .filter(grp => grp.entries.length > 0);
+        if (mGrouped.length > 0) {
+          let mAnimIdx = 0;
+          mSheetHasServerView = true;
+      %>
+      <div id="mobile-more-server-view" class="mobile-sheet-view showing">
+        <button type="button" id="mobile-sheet-back-btn" role="menuitem" class="sheet-view-toggle mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+          <%- icon('arrow-left', { class: 'w-5 h-5' }) %>
+          <span class="text-sm"><%= mT.navBack || 'Back' %></span>
+        </button>
+        <% mGrouped.forEach(grp => { %>
+        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);"><%= mGroupLabel(grp.g) %></p>
+          <% grp.entries.forEach(entry => { %>
+          <a href="<%= entry.url %>" role="menuitem" class="server-anim-in mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= mAnimIdx++ %>">
+            <%- entry.item.icon %>
+            <span class="text-sm"><%= entry.item.label %></span>
+          </a>
+          <% }); %>
+        <% }); %>
+      </div>
+      <% } } %>
+
+      <div id="mobile-more-main" class="mobile-sheet-view<%= mSheetHasServerView ? ' hidden' : '' %>">
+      <% if (mSheetHasServerView) { %>
+      <button type="button" id="mobile-sheet-goback-btn" role="menuitem" class="sheet-view-toggle mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <%- icon('arrow-left', { class: 'w-5 h-5' }) %>
+        <span class="text-sm"><%= mT.navGoBack || 'Go Back' %></span>
       </button>
       <% } %>
-
-      <div id="mobile-more-main"<% if (onServerPage && isAdminUser) { %> class="hidden"<% } %>>
-      <% (bottomNavItems || []).slice(4).forEach(function(item) { %>
-      <a href="<%= item.url %>" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;" data-match-prefix="<%= item.matchPrefix || '' %>">
+      <% (bottomNavItems || []).slice(4).forEach(function(item, i) { %>
+      <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= i + 1 %>" data-match-prefix="<%= item.matchPrefix || '' %>">
         <%- item.icon %>
         <span class="text-sm"><%= item.label %></span>
       </a>
@@ -74,74 +139,72 @@
 
       <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
         <% if (user != null) { %>
-        <a href="/account" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/account" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:20">
           <img class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
           <span class="text-sm">Account</span>
         </a>
-        <a href="/logout" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/logout" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:21">
           <%- icon('log-out', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Logout</span>
         </a>
         <% } else { %>
-        <a href="/login" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/login" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:20">
           <%- icon('log-in', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Login</span>
         </a>
         <% } %>
-      </div>
-      </div>
-      <div id="mobile-more-admin-pane"<% if (onServerPage && isAdminUser) { %> class="hidden"<% } %>>
-        <% if (isAdminUser) { %>
-        <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
-        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide" style="color:var(--theme-text-muted);">Admin</p>
+      <% if (isAdminUser) { %>
+      <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
+      <% let admSheetIdx = 20; %>
+      <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide" style="color:var(--theme-text-muted);">Admin</p>
         
         <!-- Core -->
-        <a href="/admin/overview" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/overview" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
           <%- icon('layout-grid', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Overview</span>
         </a>
-        <a href="/admin/servers" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/servers" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
           <%- icon('server', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Servers</span>
         </a>
-        <a href="/admin/users" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/users" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
           <%- icon('users', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Users</span>
         </a>
 
         <!-- Infrastructure -->
         <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Infrastructure</p>
-        <a href="/admin/nodes" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/nodes" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
           <%- icon('network', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Nodes</span>
         </a>
-        <a href="/admin/locations" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/locations" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
           <%- icon('map-pin', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Locations</span>
         </a>
-        <a href="/admin/activity" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/activity" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
           <%- icon('activity', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Activity Log</span>
         </a>
-        <a href="/admin/images" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/images" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
           <%- icon('box', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Images</span>
         </a>
 
         <!-- Extensions -->
         <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Extensions</p>
-        <a href="/admin/addons" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/addons" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
           <%- icon('puzzle', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Addons</span>
         </a>
-        <a href="/admin/apikeys" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/apikeys" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
           <%- icon('key', { class: 'w-5 h-5' }) %>
           <span class="text-sm">API Keys</span>
         </a>
 
         <!-- Configuration -->
         <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Configuration</p>
-        <a href="/admin/settings" role="menuitem" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+        <a href="/admin/settings" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
           <%- icon('settings', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Settings</span>
         </a>
@@ -161,8 +224,30 @@
   var backdrop = document.getElementById('mobile-more-backdrop');
   var themeToggle = document.getElementById('mobile-theme-toggle');
   var lastFocus = null;
+  var serverView = document.getElementById('mobile-more-server-view');
+  var mainPane = document.getElementById('mobile-more-main');
+
+  function showSheetView(name) {
+    var incoming = null;
+    if (serverView) {
+      var toServer = name === 'server';
+      serverView.classList.toggle('hidden', !toServer);
+      serverView.classList.remove('showing');
+      if (toServer) incoming = serverView;
+    }
+    if (mainPane) {
+      mainPane.classList.toggle('hidden', name === 'server');
+      mainPane.classList.remove('showing');
+      if (name !== 'server') incoming = mainPane;
+    }
+    if (incoming) {
+      void incoming.offsetWidth;
+      incoming.classList.add('showing');
+    }
+  }
 
   function openSheet() {
+    if (serverView) showSheetView('server');
     sheet.classList.remove('translate-y-full');
     sheet.classList.remove('closing');
     backdrop.classList.remove('hidden');
@@ -201,24 +286,11 @@
   if (close) close.addEventListener('click', closeSheet);
   if (backdrop) backdrop.addEventListener('click', closeSheet);
 
-  // On server pages: back button at top of the sheet reveals the admin buttons
-  var adminToggle = document.getElementById('mobile-admin-toggle');
-  var adminPane = document.getElementById('mobile-more-admin-pane');
-  var mainPane = document.getElementById('mobile-more-main');
-  var adminLabel = document.getElementById('mobile-admin-toggle-label');
-
-  if (adminToggle && adminPane && mainPane) {
-    adminToggle.addEventListener('click', function () {
-      var showingAdmin = !adminPane.classList.contains('hidden');
-      adminPane.classList.toggle('hidden', showingAdmin);
-      mainPane.classList.toggle('hidden', !showingAdmin);
-      if (adminLabel) {
-        adminLabel.textContent = showingAdmin
-          ? (adminToggle.getAttribute('data-admin-label') || 'Admin Panel')
-          : (adminToggle.getAttribute('data-back-label') || 'Back');
-      }
-    });
-  }
+  // Server pages: Back shows the normal nav, Go Back shows the server buttons
+  var sheetBackBtn = document.getElementById('mobile-sheet-back-btn');
+  if (sheetBackBtn) sheetBackBtn.addEventListener('click', function () { showSheetView('main'); });
+  var sheetGoBackBtn = document.getElementById('mobile-sheet-goback-btn');
+  if (sheetGoBackBtn) sheetGoBackBtn.addEventListener('click', function () { showSheetView('server'); });
 
   // Theme toggle for mobile
   if (themeToggle) {
