@@ -6,7 +6,7 @@
 
     <% if (typeof serverStatus !== 'undefined') { %>
       <div class="ml-3" data-server-status-container>
-        <%- include('../components/ui/status-badge', { status: serverStatus.online ? 'online' : 'offline' }) %>
+        <%- include('../components/ui/status-badge', { status: serverStatus.online ? 'online' : serverStatus.starting ? 'starting' : 'offline' }) %>
       </div>
     <% } %>
   </div>

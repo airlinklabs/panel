@@ -49,6 +49,24 @@ describe('icon vocabulary', () => {
     expect(missing).toEqual([]);
   });
 
+  it('no inline <svg> in views except exempt brand marks', () => {
+    const BRAND_VIEWBOXES = new Set(['0 0 127.14 96.36', '0 0 24 24']);
+    const files = walk(join(__dirname, '..', 'views'));
+    const offenders: string[] = [];
+    for (const file of files) {
+      const content = readFileSync(file, 'utf8');
+      for (const m of content.matchAll(/<svg[^>]*>/g)) {
+        const tag = m[0];
+        if (tag.includes('icon(')) continue;
+        if (!tag.includes('viewBox')) continue;
+        const vb = (tag.match(/viewBox="([^"]+)"/) || [])[1];
+        if (vb && BRAND_VIEWBOXES.has(vb)) continue;
+        offenders.push(`${file}: ${tag.slice(0, 80)}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it('every client-side alIcon() name exists in the generated icon set', () => {
     const src = readFileSync(join(__dirname, '..', 'public', 'js', 'shared', 'al-icon.js'), 'utf8');
     const mapMatch = src.match(/var ICONS = (\{.*?\});\n/);

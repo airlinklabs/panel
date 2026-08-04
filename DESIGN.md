@@ -35,11 +35,17 @@
 
 ### Accent / Brand
 
-| Role | Token | Value | Usage |
+Accent is theme-defined (`--theme-accent`), not a fixed brand color:
+
+| Theme | `--theme-accent` | `--theme-accent-hover` | `--theme-accent-text` |
 |---|---|---|---|
-| Accent | `--theme-accent` | `#6366f1` (indigo) | Primary actions, active selection |
-| Accent hover | `--theme-accent-hover` | `#818cf8` | Hover state |
-| Accent text | `--theme-accent-text` | `#ffffff` | Text on accent bg |
+| Default light | `#0a0a0a` (near-black) | `#262626` | `#ffffff` |
+| Default dark | `#ffffff` (white) | `#e8e8e8` | `#0a0a0a` |
+| Solarized light | `#268bd2` | `#1a7abf` | dark |
+| Solarized dark | `#268bd2` | `#3a9fde` | dark |
+| Material UI | `oklch(71% 0.19 260)` (blue) | `oklch(78% 0.17 260)` | dark |
+
+Primary actions and active selection use `--theme-accent`; text on accent uses `--theme-accent-text`.
 
 ### Semantic status
 
@@ -53,7 +59,7 @@
 
 ### Theme variable system
 
-Full `--theme-*` CSS custom property set (56+ variables) overrides Tailwind defaults. Built-in themes: Solarized Dark, Solarized Light. User themes in `/public/themes/user/`.
+Full `--theme-*` CSS custom property set (56+ variables) overrides Tailwind defaults. Built-in themes: Default Dark, Default Light, Solarized Dark, Solarized Light, Material UI. User themes in `/public/themes/user/`.
 
 ---
 

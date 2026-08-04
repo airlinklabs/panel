@@ -13,6 +13,7 @@ interface ErrorMessage {
 
 interface ServerSnapshot {
   status: string;
+  dockerStatus: string | null;
   ramUsage: string;
   cpuUsage: string;
   ramUsed: string;
@@ -88,6 +89,7 @@ function fetchServerSnapshot(
     const fetchedAt = Date.now();
     const snapshot: CachedServerSnapshot = {
       status: 'unknown',
+      dockerStatus: null,
       ramUsage: '0',
       cpuUsage: '0',
       ramUsed: '0MB',
@@ -107,6 +109,8 @@ function fetchServerSnapshot(
 
       const isRunning = (statusResponse.data as any)?.running === true;
       snapshot.status = isRunning ? 'running' : 'stopped';
+      const dockerStatus = (statusResponse.data as any)?.status as string | undefined;
+      snapshot.dockerStatus = typeof dockerStatus === 'string' && dockerStatus.length > 0 ? dockerStatus : null;
       snapshot.nodeOffline = false;
 
       if (isRunning) {
@@ -321,6 +325,7 @@ const dashboardModule: Module = {
               return {
                 ...server,
                 status: 'unknown',
+                dockerStatus: null,
                 ramUsage: '0',
                 cpuUsage: '0',
                 ramUsed: '0MB',
@@ -333,6 +338,7 @@ const dashboardModule: Module = {
             return {
               ...server,
               status: snapshot.status,
+              dockerStatus: snapshot.dockerStatus,
               ramUsage: snapshot.ramUsage,
               cpuUsage: snapshot.cpuUsage,
               ramUsed: snapshot.ramUsed,

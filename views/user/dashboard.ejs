@@ -133,6 +133,12 @@
             const inFolder = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID));
             if (inFolder) return;
           %>
+          <%
+            const statusForBadge = server.Suspended ? 'suspended'
+              : server.status === 'running' ? 'online'
+              : server.dockerStatus === 'restarting' ? 'starting'
+              : 'offline';
+          %>
           <div class="al-server-card group relative block al-card cursor-grab hover:border-[var(--theme-border-accent)] hover:shadow-md transition-[box-shadow,transform,border-color] duration-150 active:cursor-grabbing"
             data-server-uuid="<%= server.UUID %>"
             data-server-name="<%= server.name %>"
@@ -153,7 +159,7 @@
                   <% } %>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                  <%- include('../components/ui/status-badge', { status: server.status === 'running' ? 'online' : 'offline' }) %>
+                  <%- include('../components/ui/status-badge', { status: statusForBadge }) %>
                 </div>
               </div>
               <div class="flex gap-3 mb-3">
@@ -215,7 +221,7 @@
                 </td>
                 <td class="al-table-td">
                 <div class="flex items-center gap-2 shrink-0">
-                  <%- include('../components/ui/status-badge', { status: server.status === 'running' ? 'online' : 'offline' }) %>
+                  <%- include('../components/ui/status-badge', { status: server.Suspended ? 'suspended' : server.status === 'running' ? 'online' : server.dockerStatus === 'restarting' ? 'starting' : 'offline' }) %>
                 </div>
                 </td>
                 <td class="al-table-td"><%= server.owner ? server.owner.username : 'Unknown' %></td>

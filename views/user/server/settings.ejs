@@ -97,13 +97,13 @@
           <h2 class="text-lg font-semibold mb-1" style="color:var(--theme-text-strong)">Allocations</h2>
           <p class="text-sm mb-4" style="color:var(--theme-text-muted)">Manage the ports assigned to this server from the node's pool.</p>
 
-          <div id="allocationsSection" class="space-y-3">
+          <div id="allocationsList" class="space-y-3">
             <p class="text-xs text-neutral-500">Loading allocations...</p>
           </div>
 
           <div class="mt-4 flex gap-2">
-            <select id="allocAddPort" class="al-input flex-1"><option value="">Select an available port...</option></select>
-            <button type="button" id="allocAddBtn" class="al-btn-primary shrink-0">Add port</button>
+            <select id="availPortSelect" class="al-input flex-1"><option value="">Select an available port...</option></select>
+            <button type="button" id="addAllocationBtn" class="al-btn-primary shrink-0">Add port</button>
           </div>
         </div>
 

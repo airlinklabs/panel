@@ -104,8 +104,8 @@
   var cbInput = document.getElementById('remember');
   var cbBox   = document.getElementById('cbBox');
   var cbCheck = document.getElementById('cbCheck');
-  var accent  = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#171717';
-  var accentText = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent-text').trim() || '#ffffff';
+  var accent  = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim();
+  var accentText = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent-text').trim();
   function renderCb() {
     if (cbInput.checked) {
       cbBox.style.background   = accent;

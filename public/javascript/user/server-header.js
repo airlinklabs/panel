@@ -63,6 +63,17 @@
         if (statusData.uptime != null) updateUptime(statusData.uptime);
       }
       lastOnline = true;
+    } else if (statusData && statusData.starting) {
+      lastOnline = false;
+      if (uptimeInterval) { clearInterval(uptimeInterval); uptimeInterval = null; }
+      statusContainer.innerHTML =
+        '<div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">' +
+          '<span class="relative flex h-2 w-2 mr-2">' +
+            '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>' +
+            '<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>' +
+          '</span>' +
+          '<span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Starting</span>' +
+        '</div>';
     } else {
       lastOnline = false;
       if (uptimeInterval) { clearInterval(uptimeInterval); uptimeInterval = null; }

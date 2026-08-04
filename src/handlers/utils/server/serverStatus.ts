@@ -10,6 +10,7 @@ interface ServerInfo {
 
 interface DaemonStatusResponse {
   running?: boolean;
+  status?: string;
   startedAt?: string;
 }
 
@@ -50,6 +51,8 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
         status.startedAt = data.startedAt;
         status.uptime = Math.floor((Date.now() - new Date(data.startedAt).getTime()) / 1000);
       }
+    } else if (data && data.status === 'restarting') {
+      status.starting = true;
     }
 
     return status;

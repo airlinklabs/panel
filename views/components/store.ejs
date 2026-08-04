@@ -151,8 +151,9 @@
   .m-prog-fill {
     height: 100%; background: var(--theme-text-strong, #171717);
     border-radius: 99px;
-    transition: width 0.35s ease;
-    width: 0%;
+    transform-origin: left center;
+    transition: transform 0.35s ease;
+    transform: scaleX(0);
   }
   .m-log {
     margin-top: 10px;
@@ -746,7 +747,7 @@
 
     progEl.style.display = '';
     logEl.innerHTML = '';
-    progBar.style.width = '0%';
+    progBar.style.transform = 'scaleX(0)';
     progLbl.textContent = 'Starting...';
     progPct.textContent = '0%';
     this.disabled = true;
@@ -784,12 +785,12 @@
             if (evt.type === 'step') {
               stepN++;
               const pct = Math.min(Math.round((stepN / est) * 90), 90);
-              progBar.style.width = pct + '%';
+              progBar.style.transform = 'scaleX(' + (pct/100) + ')';
               progPct.textContent = pct + '%';
               progLbl.textContent = evt.stepTitle || 'Running...';
               if (evt.cmd) log(`${evt.stepTitle}: ${evt.cmd}`);
             } else if (evt.type === 'done') {
-              progBar.style.width = '100%';
+              progBar.style.transform = 'scaleX(1)';
               progPct.textContent = '100%';
               progLbl.textContent = 'Installed';
               log(evt.message, 'ok');
