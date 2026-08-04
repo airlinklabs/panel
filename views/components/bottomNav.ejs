@@ -47,8 +47,16 @@
 <!-- More sheet (slides up from bottom) -->
 <div id="mobile-more-sheet" class="mobile-more-sheet fixed inset-x-0 bottom-0 z-50 lg:hidden translate-y-full will-change-transform" role="dialog" aria-label="Additional navigation" aria-modal="true" inert>
   <style>
-    #mobile-more-sheet { transition: transform var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)); }
-    #mobile-more-sheet.closing { transition: transform var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)); }
+    #mobile-more-sheet {
+      translate: none;
+      transform: translateY(100%);
+      transition: transform var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+    }
+    #mobile-more-sheet:not(.translate-y-full) { transform: translateY(0); }
+    #mobile-more-sheet.closing {
+      transform: translateY(100%);
+      transition: transform var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1));
+    }
     @keyframes sheet-view-fade { from { opacity: 0; } to { opacity: 1; } }
     #mobile-more-server-view.showing, #mobile-more-main.showing { animation: sheet-view-fade 140ms ease-out both; }
     #mobile-more-main .sheet-anim-item { opacity: 0; }
@@ -253,7 +261,7 @@
   }
 
   function openSheet() {
-    if (serverView) showSheetView('server');
+    if (serverView) { showSheetView('server'); } else { showSheetView('main'); }
     sheet.classList.remove('translate-y-full');
     sheet.classList.remove('closing');
     backdrop.classList.remove('hidden');

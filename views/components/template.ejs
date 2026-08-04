@@ -1,5 +1,5 @@
 <!-- Sidebar -->
-<div id="pc-sidebar" class="sidebar lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0" style="display:none;">
+<div id="pc-sidebar" class="sidebar hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0" style="display:none;">
   <div id="pc-sidebar2" class="flex flex-col h-full">
 
     <!-- Static top: logo -->
@@ -435,6 +435,7 @@
     markActiveNav(window.location.pathname);
     showActiveNavInView();
     wireSidebarViewToggle();
+    showSidebarView(window.location.pathname.startsWith('/server/') ? 'server' : 'main');
   });
   document.addEventListener('al:navigated', function () {
     markSpecialLinks(window.location.pathname);
