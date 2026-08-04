@@ -18,10 +18,11 @@
     return secs + 's';
   }
 
-  const startedAtElement = document.getElementById('server-started-at');
+  const startedAtElement = document.querySelector('[data-server-started-time]');
   let startTime = null;
-  if (startedAtElement && startedAtElement.textContent) {
-    startTime = new Date(startedAtElement.textContent).getTime();
+  if (startedAtElement && startedAtElement.dataset.startedAt) {
+    const t = new Date(startedAtElement.dataset.startedAt).getTime();
+    if (!isNaN(t)) startTime = t;
   }
 
   let uptimeInterval = null;

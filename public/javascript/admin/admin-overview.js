@@ -6,8 +6,6 @@
   document.querySelectorAll('.current-version').forEach(el => el.textContent = currentVersion);
   const versionInline = document.getElementById('current-version-inline');
   if (versionInline) versionInline.textContent = currentVersion;
-  const versionById = document.getElementById('current-version');
-  if (versionById) versionById.textContent = currentVersion;
 
   document.getElementById('checkUpdateBtn').addEventListener('click', async () => {
     const statusDiv = document.getElementById('updateStatus');

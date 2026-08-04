@@ -19,7 +19,7 @@
     <% if (typeof serverStatus !== 'undefined' && serverStatus.online && typeof serverStatus.startedAt !== 'undefined' && serverStatus.startedAt) { %>
       <div class="ml-3 text-xs flex items-center" style="color:var(--theme-text-muted);" data-server-started-container>
         <%- icon('clock', { class: 'h-3 w-3 mr-1' }) %>
-        <span data-server-started-time>Started: <%= new Date(serverStatus.startedAt).toLocaleString() %></span>
+        <span data-server-started-time data-started-at="<%= serverStatus.startedAt %>">Started: <%= new Date(serverStatus.startedAt).toLocaleString() %></span>
       </div>
     <% } else { %>
       <div class="ml-3 text-xs hidden items-center" style="color:var(--theme-text-muted);" data-server-started-container>
