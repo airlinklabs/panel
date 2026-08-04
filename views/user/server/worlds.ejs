@@ -35,16 +35,20 @@
       <% } %>
 
               <!-- No worlds message -->
-                            <div class="collapsible-row no-anim<% if (worlds.length === 0) { %> open<% } %>" id="noWorldsMessageRow"><div><div id="noWorldsMessage" data-collapsible="true" class="p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-          <%- icon('info', { class: 'size-6 mt-2 ml-1', style:'color:var(--theme-text-muted)' }) %>
-      <div>
-        <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= req.translations.noWorldsFound || 'No worlds found' %></p>
-        <p class="text-sm" style="color:var(--theme-text-muted)"><%= req.translations.noWorldsFoundDesc || 'No Minecraft worlds were detected on this server. Worlds will appear here once they are created.' %></p>
-      </div>
-    </div>
+              <div class="collapsible-row no-anim<% if (worlds.length === 0) { %> open<% } %>" id="noWorldsMessageRow">
+                <div>
+                  <div id="noWorldsMessage" data-collapsible="true" class="p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
+                    <%- icon('info', { class: 'size-6 mt-2 ml-1', style:'color:var(--theme-text-muted)' }) %>
+                    <div>
+                      <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= req.translations.noWorldsFound || 'No worlds found' %></p>
+                      <p class="text-sm" style="color:var(--theme-text-muted)"><%= req.translations.noWorldsFoundDesc || 'No Minecraft worlds were detected on this server. Worlds will appear here once they are created.' %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-      <!-- Server Template -->
-      <%- include('../../components/serverTemplate', { features: ['players', 'worlds'] }) %>
+              <!-- Server Template -->
+              <%- include('../../components/serverTemplate', { features: ['players', 'worlds'] }) %>
 
       <div id="server-page-body">
 

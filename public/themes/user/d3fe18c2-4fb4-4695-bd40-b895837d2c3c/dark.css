@@ -60,6 +60,18 @@
   /* Input field border */
   --theme-border-input:     #333333;
 
+  /* Accent border — focus rings, active indicators */
+  --theme-border-accent:    rgba(99, 102, 241, 0.40);
+
+  /* Strong border — high-emphasis dividers */
+  --theme-border-strong:    rgba(255, 255, 255, 0.25);
+
+  /* Button border */
+  --theme-btn-border:       #333333;
+
+  /* Danger border — error outlines */
+  --theme-danger-border:    rgba(239, 68, 68, 0.30);
+
 
   /* ------------------------------------------------------------------ */
   /* TEXT                                                                 */
@@ -83,6 +95,15 @@
   /* Placeholder text inside inputs */
   --theme-text-placeholder: #555555;
 
+  /* Code / monospace text */
+  --theme-text-code:        #818cf8;
+
+  /* Link text */
+  --theme-text-link:        #818cf8;
+
+  /* Faint / very subdued text */
+  --theme-text-faint:       #555555;
+
 
   /* ------------------------------------------------------------------ */
   /* ACCENT / BRAND                                                       */
@@ -96,6 +117,15 @@
 
   /* Text that sits on top of the accent background */
   --theme-accent-text:      #ffffff;
+
+  /* Subtle accent background — badges, chips, highlights */
+  --theme-accent-subtle:    rgba(99, 102, 241, 0.12);
+
+  /* Accent foreground — icon colour on accent bg */
+  --theme-accent-foreground:#ffffff;
+
+  /* Primary — alias for accent */
+  --theme-primary:          #6366f1;
 
 
   /* ------------------------------------------------------------------ */
@@ -113,6 +143,15 @@
 
   /* Info / neutral status */
   --theme-info:             #3b82f6;
+
+  /* Status backgrounds and text variants */
+  --theme-success-bg:       rgba(34, 197, 94, 0.12);
+  --theme-success-text:     #22c55e;
+  --theme-warning-bg:       rgba(245, 158, 11, 0.12);
+  --theme-warning-text:     #f59e0b;
+  --theme-danger-bg:        rgba(239, 68, 68, 0.12);
+  --theme-info-bg:          rgba(59, 130, 246, 0.12);
+  --theme-info-text:        #3b82f6;
 
 
   /* ------------------------------------------------------------------ */
@@ -135,12 +174,16 @@
   /* Nav icon colour specifically (if you want icons a different shade) */
   --theme-nav-icon:         #555555;
 
+  /* Nav icon when active */
+  --theme-nav-icon-active:  #6366f1;
+
 
   /* ------------------------------------------------------------------ */
   /* THEME TOGGLE SWITCH                                                  */
   /* ------------------------------------------------------------------ */
 
   /* The track the dot slides along */
+  --theme-toggle-bg:        #333333;
   --theme-toggle-track:     #333333;
 
   /* The sliding dot itself */
@@ -179,6 +222,87 @@
   /* ------------------------------------------------------------------ */
 
   --theme-logo-bg:          transparent;
+
+
+  /* ------------------------------------------------------------------ */
+  /* BUTTONS                                                              */
+  /* ------------------------------------------------------------------ */
+
+  /* Primary button */
+  --theme-btn-primary-bg:      #6366f1;
+  --theme-btn-primary-text:    #ffffff;
+  --theme-btn-primary-hover:   #818cf8;
+
+  /* Secondary button */
+  --theme-btn-secondary-bg:    #1a1a1a;
+  --theme-btn-secondary-border:#333333;
+  --theme-btn-secondary-text:  #a3a3a3;
+  --theme-btn-secondary-hover: #252525;
+
+  /* Danger button */
+  --theme-btn-danger-bg:       #ef4444;
+  --theme-btn-danger-text:     #ffffff;
+  --theme-btn-danger-hover:    #dc2626;
+
+  /* Success button */
+  --theme-btn-success-bg:      #22c55e;
+  --theme-btn-success-text:    #052e16;
+  --theme-btn-success-hover:   #4ade80;
+
+
+  /* ------------------------------------------------------------------ */
+  /* SKELETON / LOADING                                                   */
+  /* ------------------------------------------------------------------ */
+
+  --theme-skeleton-base:       rgba(255, 255, 255, 0.06);
+  --theme-skeleton-shine:      rgba(255, 255, 255, 0.10);
+
+
+  /* ------------------------------------------------------------------ */
+  /* CODE / TERMINAL                                                      */
+  /* ------------------------------------------------------------------ */
+
+  --theme-code-bg:             #0a0a0a;
+  --theme-code-text:           #818cf8;
+  --theme-code-border:         #1a1a1a;
+
+
+  /* ------------------------------------------------------------------ */
+  /* SHADOWS                                                              */
+  /* ------------------------------------------------------------------ */
+
+  --theme-shadow-sm:           0 1px 2px rgba(0,0,0,0.3);
+  --theme-shadow:              0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --theme-shadow-md:           0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3);
+  --theme-shadow-lg:           0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.3);
+  --theme-shadow-xl:           0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.4);
+
+
+  /* ------------------------------------------------------------------ */
+  /* DISABLED STATE                                                       */
+  /* ------------------------------------------------------------------ */
+
+  --theme-disabled:            rgba(255, 255, 255, 0.12);
+  --theme-disabled-text:       #555555;
+  --theme-disabled-bg:         rgba(255, 255, 255, 0.04);
+  --theme-disabled-border:     rgba(255, 255, 255, 0.06);
+
+
+  /* ------------------------------------------------------------------ */
+  /* FOCUS RING                                                           */
+  /* ------------------------------------------------------------------ */
+
+  --theme-focus-ring:          rgba(99, 102, 241, 0.45);
+
+
+  /* ------------------------------------------------------------------ */
+  /* BORDER RADIUS                                                        */
+  /* ------------------------------------------------------------------ */
+
+  --theme-radius-sm:           4px;
+  --theme-radius-md:           6px;
+  --theme-radius-lg:           8px;
+  --theme-radius-xl:           12px;
 }
 
 

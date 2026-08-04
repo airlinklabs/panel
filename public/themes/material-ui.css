@@ -22,24 +22,25 @@
   --theme-border-strong:    oklch(50% 0.12 260);
   --theme-btn-border:       oklch(28% 0.01 260);
   --theme-danger-border:    oklch(40% 0.15 25);
+  --theme-toggle-bg:        oklch(25% 0.01 260);
 
   /* --- Text --- */
   --theme-text:             oklch(68% 0.01 260);
   --theme-text-strong:      oklch(92% 0 0);
-  --theme-text-muted:       oklch(55% 0.01 260);
-  --theme-text-nav:         oklch(60% 0.01 260);
+  --theme-text-muted:       oklch(62% 0.01 260);
+  --theme-text-nav:         oklch(64% 0.01 260);
   --theme-text-nav-active:  oklch(90% 0 0);
   --theme-text-placeholder: oklch(60% 0.01 260);
   --theme-text-code:        oklch(75% 0.14 175);
-  --theme-text-link:        oklch(71% 0.19 260);
+  --theme-text-link:        oklch(78% 0.19 260);
 
   /* --- Accent / brand (M3 Primary) --- */
-  --theme-accent:           oklch(71% 0.19 260);
+  --theme-accent:           oklch(78% 0.19 260);
   --theme-accent-hover:     oklch(78% 0.17 260);
   --theme-accent-text:      oklch(15% 0 0);
   --theme-accent-subtle:    oklch(30% 0.08 260);
   --theme-accent-foreground:oklch(15% 0 0);
-  --theme-primary:          oklch(71% 0.19 260);
+  --theme-primary:          oklch(78% 0.19 260);
 
   /* --- Status colours (M3 tones) --- */
   --theme-success:          oklch(72% 0.19 155);
@@ -61,7 +62,7 @@
   --theme-nav-text:         oklch(58% 0.01 260);
   --theme-nav-text-active:  oklch(90% 0 0);
   --theme-nav-icon:         oklch(52% 0.01 260);
-  --theme-nav-icon-active:  oklch(71% 0.19 260);
+  --theme-nav-icon-active:  oklch(78% 0.19 260);
 
   /* --- Table --- */
   --theme-table-header-bg:  oklch(15% 0.01 260);
@@ -75,6 +76,9 @@
   --theme-badge-blue-text:  oklch(75% 0.15 260);
 
   /* --- Buttons --- */
+  --theme-btn-primary-bg:       oklch(78% 0.19 260);
+  --theme-btn-primary-text:     oklch(15% 0 0);
+  --theme-btn-primary-hover:    oklch(82% 0.17 260);
   --theme-btn-secondary-bg:     oklch(20% 0.01 260);
   --theme-btn-secondary-border: oklch(28% 0.01 260);
   --theme-btn-secondary-text:   oklch(70% 0.01 260);
@@ -107,6 +111,32 @@
   --theme-code-bg:          oklch(11% 0.01 260);
   --theme-code-text:        oklch(75% 0.14 175);
   --theme-code-border:      oklch(22% 0.01 260);
+
+  /* --- Skeleton / loading --- */
+  --theme-skeleton-base:    oklch(18% 0.01 260);
+  --theme-skeleton-shine:   oklch(22% 0.01 260);
+
+  /* --- Shadows (M3 elevation) --- */
+  --theme-shadow-sm:        0 1px 2px oklch(0% 0 0 / 0.3);
+  --theme-shadow:           0 1px 3px oklch(0% 0 0 / 0.4), 0 1px 2px oklch(0% 0 0 / 0.3);
+  --theme-shadow-md:        0 4px 6px -1px oklch(0% 0 0 / 0.4), 0 2px 4px -2px oklch(0% 0 0 / 0.3);
+  --theme-shadow-lg:        0 10px 15px -3px oklch(0% 0 0 / 0.4), 0 4px 6px -4px oklch(0% 0 0 / 0.3);
+  --theme-shadow-xl:        0 20px 25px -5px oklch(0% 0 0 / 0.5), 0 8px 10px -6px oklch(0% 0 0 / 0.4);
+
+  /* --- Disabled --- */
+  --theme-disabled:          oklch(30% 0.01 260 / 0.4);
+  --theme-disabled-text:     oklch(40% 0.01 260);
+  --theme-disabled-bg:       oklch(18% 0.01 260 / 0.5);
+  --theme-disabled-border:   oklch(25% 0.01 260 / 0.3);
+
+  /* --- Focus ring --- */
+  --theme-focus-ring:        oklch(71% 0.19 260 / 0.45);
+
+  /* --- Border radius --- */
+  --theme-radius-sm:         4px;
+  --theme-radius-md:         8px;
+  --theme-radius-lg:         12px;
+  --theme-radius-xl:         16px;
 }
 
 /* ------------------------------------------------------------------ */

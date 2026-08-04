@@ -1,7 +1,8 @@
+var _rootStyle = getComputedStyle(document.documentElement);
 const REFRESH_INTERVAL_MS = 300000;
 const DATA_COLLECTION_DELAY_MS = 1000;
-const CHART_TICK_COLOR = '#FFFFFF';
-const CHART_GRID_COLOR = 'rgba(255, 255, 255, 0.1)';
+var CHART_TICK_COLOR = _rootStyle.getPropertyValue('--theme-text').trim() || '#FFFFFF';
+var CHART_GRID_COLOR = 'rgba(255, 255, 255, 0.1)';
 
 const ctx = document.getElementById('playerChart').getContext('2d');
 const playerChart = new Chart(ctx, {

@@ -17,7 +17,7 @@
       <%- include('../../components/ui/page-header', {
         title: req.translations.adminServersTitle,
         description: req.translations.adminServersText,
-        actions: '<button onclick="location.href=\'/admin/servers/create\'" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewServer + '</button>'
+        actions: '<a href="/admin/servers/create" class="al-btn-primary inline-flex items-center gap-1.5">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewServer + '</a>'
       }) %>
 
       <div class="al-page-body">

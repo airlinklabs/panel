@@ -143,9 +143,7 @@
                   <td class="al-table-td">
                     <div class="flex gap-3">
                       <button  onclick="configure('<%= node.id %>')" type="button" class="al-btn-secondary text-xs"><%- icon('settings', { class: 'size-3', strokeWidth: 1.5 }) %>Configure</button>
-                      <a href="./node/<%= node.id %>">
-                        <button type="button" class="al-btn-secondary text-xs"><%- icon('pencil', { class: 'size-3', strokeWidth: 1.5 }) %>Edit</button>
-                      </a>
+                      <a href="./node/<%= node.id %>" class="al-btn-secondary text-xs inline-flex items-center gap-1"><%- icon('pencil', { class: 'size-3', strokeWidth: 1.5 }) %>Edit</a>
                       <button  onclick="deleteNode('<%= node.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete node">
                         <%- icon('trash-2', { size: 16 }) %>
                       </button>

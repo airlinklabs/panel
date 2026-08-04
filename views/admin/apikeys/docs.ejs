@@ -2,12 +2,10 @@
 
   <main class="h-screen m-auto">
     <div class="flex h-screen">
-      <!-- Sidebar -->
       <div class="w-60 h-full hidden lg:block">
         <%- include('../../components/template') %>
       </div>
-      <!-- Content -->
-      <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+      <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
         <%- include('../../components/ui/breadcrumb', { items: [
           { label: 'Admin' },
           { label: 'API Keys', href: '/admin/apikeys' },

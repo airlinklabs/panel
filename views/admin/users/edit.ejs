@@ -27,7 +27,7 @@
           <div class="al-card">
             <h2 class="al-card-header"><%= req.translations.userInformation || 'User Information' %></h2>
             <div class="flex items-center gap-4 mb-5 pb-5 border-b border-neutral-200 dark:border-white/5">
-              <img class="h-12 w-12 rounded-xl object-cover shrink-0 border border-neutral-200 dark:border-neutral-700/30" src="<%= dataUser.avatar ? dataUser.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(dataUser.username) %>" alt="">
+              <img class="h-12 w-12 rounded-xl object-cover shrink-0 border border-neutral-200 dark:border-neutral-700/30" src="<%= dataUser.avatar ? dataUser.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(dataUser.username) %>" alt="<%= dataUser.username %>">
               <div>
                 <p class="text-sm font-semibold text-neutral-800 dark:text-white"><%= dataUser.username %></p>
                 <p class="text-xs text-neutral-500 dark:text-neutral-400"><%= dataUser.email %></p>

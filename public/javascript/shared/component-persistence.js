@@ -24,8 +24,6 @@ class ComponentPersistence {
 
   identifyStaticComponents() {
     STATIC_SELECTORS.forEach(selector => {
-
-    staticSelectors.forEach(selector => {
       const elements = document.querySelectorAll(selector);
       elements.forEach(element => {
         if (element && !this.staticComponents.has(element.id || selector)) {

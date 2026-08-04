@@ -73,7 +73,7 @@
               <div class="p-5">
                 <div class="mb-4">
                   <label for="startCommand" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.startupCommand || 'Startup Command' %></label>
-                  <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 <%= !isStartupEditAllowed ? 'bg-neutral-100 dark:bg-neutral-800/50 cursor-not-allowed' : 'bg-white dark:bg-neutral-600/20' %> border border-neutral-300 dark:border-white/5" <%= !isStartupEditAllowed ? 'readonly' : '' %>><%= server.StartCommand %></textarea>
+                  <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 <%= !isStartupEditAllowed ? 'bg-neutral-100 dark:bg-neutral-800/50 cursor-not-allowed' : 'bg-white dark:bg-neutral-600/20' %> border border-neutral-300 dark:border-white/5" <%= !isStartupEditAllowed ? 'readonly' : '' %> aria-label="<%= req.translations.startupCommand || 'Startup Command' %>"><%= server.StartCommand %></textarea>
                   <% if (!isStartupEditAllowed) { %>
                     <p class="mt-2 text-xs" style="color:var(--theme-danger);"><%= req.translations.startupCommandDisabled || 'Startup command editing is disabled for this server. Contact an administrator to enable this feature.' %></p>
                   <% } else { %>
@@ -167,12 +167,12 @@
                 <% serverVariables.forEach((variable, index) => { %>
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-neutral-100 dark:bg-neutral-700/20 rounded-lg border border-neutral-300 dark:border-white/5">
                     <div>
-                      <label class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= variable.name %></label>
+                      <label class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" for="var_<%= variable.env %>"><%= variable.name %></label>
                       <p class="text-xs text-neutral-500">Environment: <%= variable.env %></p>
                     </div>
                     <div class="md:col-span-2">
                       <% if (variable.type === 'boolean') { %>
-                        <label class="relative inline-flex items-center cursor-pointer">
+                        <label class="relative inline-flex items-center cursor-pointer" for="toggle_<%= variable.env %>">
                           <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %>>
                           <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
                           <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'Enabled' : 'Disabled' %></span>
@@ -183,9 +183,9 @@
                           });
                         </script>
                       <% } else if (variable.type === 'number') { %>
-                        <input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5">
+                        <input type="number" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5" aria-label="<%= variable.name %>">
                       <% } else { %>
-                        <input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5">
+                        <input type="text" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5" aria-label="<%= variable.name %>">
                       <% } %>
                       <p class="mt-1 text-xs text-neutral-500">Type: <%= variable.type %></p>
                     </div>
@@ -208,6 +208,10 @@
 
       </div>
 </main>
+
+<%- include('../../components/toast') %>
+
+<%- include('../../components/footer') %>
 
 <script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {

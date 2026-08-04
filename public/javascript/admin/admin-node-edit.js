@@ -1,4 +1,6 @@
 (function() {
+  var _rootStyle = getComputedStyle(document.documentElement);
+  var _portEase = _rootStyle.getPropertyValue('--ease-standard').trim() || 'ease';
   const PORT_MIN = 1024;
   const PORT_MAX = 65535;
   const PORT_STAGGER_MS = 30;
@@ -49,7 +51,7 @@
   function animatePortIn(el) {
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
-        el.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+        el.style.transition = 'opacity 0.18s ' + _portEase + ', transform 0.18s ' + _portEase;
         el.style.opacity = '1';
         el.style.transform = 'translateY(0)';
         setTimeout(function() { el.style.transition = ''; }, 200);
@@ -58,7 +60,7 @@
   }
 
   function animatePortOut(el, cb) {
-    el.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+    el.style.transition = 'opacity 0.15s ' + _portEase + ', transform 0.15s ' + _portEase;
     el.style.opacity = '0';
     el.style.transform = 'translateY(-4px)';
     setTimeout(cb, PORT_OUT_DURATION_MS);

@@ -54,4 +54,7 @@
       transparent 100%
     );
   }
+  @media (prefers-reduced-motion: reduce) {
+    .al-skeleton::after { animation: none; }
+  }
 </style>

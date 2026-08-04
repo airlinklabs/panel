@@ -83,6 +83,7 @@
   .auth-submit.loading .spinner { display: block; }
   .auth-submit.loading .btn-label { display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
 
   .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); will-change: opacity, transform; }
   .auth-panel.visible { opacity: 1; transform: translateX(0); }

@@ -4,20 +4,22 @@
   const FADE_OUT_MS = 160;
   const STAGGER_MS  = 65;
   const CHILD_DUR   = 480;
-  const EASE_OUT    = 'cubic-bezier(0.4,0,1,1)';
-  const EASE_IN     = 'cubic-bezier(0.16,1,0.3,1)';
+  var _rootStyle = getComputedStyle(document.documentElement);
+  var EASE_OUT    = _rootStyle.getPropertyValue('--ease-in').trim() || 'cubic-bezier(0.4,0,1,1)';
+  var EASE_IN     = _rootStyle.getPropertyValue('--ease-out').trim() || 'cubic-bezier(0.16,1,0.3,1)';
   const SPRINT_MS   = 340;
   const HOLD_MS     = 160;
   const OV_FADE_MS  = 240;
   const LOAD_GUARD_MS = 2000;
   const EXACT_MATCH_SCORE = 9999;
 
-  const COLOR_DARK_BG    = '#171717';
-  const COLOR_LIGHT_BG   = '#f0f0f0';
-  const COLOR_DARK_TEXT  = '#171717';
-  const COLOR_LIGHT_TEXT = '#f0f0f0';
-  const COLOR_DARK_LOGO_BG  = '#f0f0f0';
-  const COLOR_LIGHT_LOGO_BG = '#000000';
+  var _isDark = document.documentElement.classList.contains('dark');
+  var COLOR_DARK_BG    = _rootStyle.getPropertyValue('--theme-bg').trim() || '#171717';
+  var COLOR_LIGHT_BG   = _rootStyle.getPropertyValue('--theme-bg').trim() || '#f0f0f0';
+  var COLOR_DARK_TEXT  = _rootStyle.getPropertyValue('--theme-text').trim() || '#171717';
+  var COLOR_LIGHT_TEXT = _rootStyle.getPropertyValue('--theme-text').trim() || '#f0f0f0';
+  var COLOR_DARK_LOGO_BG  = _rootStyle.getPropertyValue('--theme-bg').trim() || '#f0f0f0';
+  var COLOR_LIGHT_LOGO_BG = '#000000';
 
   const PROGRESS_CEILING  = 82;
   const PROGRESS_DECAY    = 0.065;
@@ -26,7 +28,7 @@
   const CLEARANCE_OVERHEAD_MS = 40;
 
   const ACTIVE_BORDER_RADIUS = '0.75rem';
-  const PILL_TRANSITION = 'transform 0.22s cubic-bezier(0.4,0,0.2,1), height 0.18s ease, opacity 0.15s ease';
+  var PILL_TRANSITION = 'transform 0.22s ' + _rootStyle.getPropertyValue('--ease-standard').trim() + ', height 0.18s ease, opacity 0.15s ease';
 
   const MOBILE_ACTIVE_CLASSES = ['text-neutral-900', 'dark:text-white', 'active-mobile'];
   const MOBILE_INACTIVE_CLASSES = ['text-neutral-500', 'dark:text-neutral-400'];
@@ -200,7 +202,10 @@
   }
 
   function setDesktopActiveLink(link) {
-    const isDark = document.documentElement.classList.contains('dark');
+    var rs = getComputedStyle(document.documentElement);
+    var isDark = document.documentElement.classList.contains('dark');
+    var textC = isDark ? rs.getPropertyValue('--theme-text').trim() : rs.getPropertyValue('--theme-text').trim();
+    var bgC = isDark ? rs.getPropertyValue('--theme-bg').trim() : rs.getPropertyValue('--theme-bg').trim();
     document.querySelectorAll('.nav-link').forEach(function (l) {
       l.classList.remove('active', 'font-medium');
       l.style.color = '';
@@ -208,8 +213,8 @@
     });
     if (!link) return;
     link.classList.add('active', 'font-medium');
-    link.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
-    link.style.background = isDark ? COLOR_LIGHT_BG : COLOR_DARK_BG;
+    link.style.color = textC || (isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT);
+    link.style.background = bgC || (isDark ? COLOR_LIGHT_BG : COLOR_DARK_BG);
     link.style.borderRadius = ACTIVE_BORDER_RADIUS;
   }
 
@@ -290,7 +295,7 @@
     hiding = true;
     if (!barEl) barEl = el('pl-bar');
     if (barEl) {
-      barEl.style.transition = 'transform ' + SPRINT_MS + 'ms cubic-bezier(0.16,1,0.3,1)';
+      barEl.style.transition = 'transform ' + SPRINT_MS + 'ms ' + _rootStyle.getPropertyValue('--ease-out').trim();
       barEl.style.transform = 'scaleX(1)';
     }
     setTimeout(function () {

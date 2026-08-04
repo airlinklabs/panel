@@ -5,13 +5,9 @@
   display: none;
 }
 
-/* Hide scrollbar for Firefox */
+/* Hide scrollbar for Firefox and IE/Edge */
 * {
   scrollbar-width: none;
-}
-
-/* Hide scrollbar for IE and Edge */
-* {
   -ms-overflow-style: none;
 }
 
@@ -38,9 +34,9 @@ body, html {
 #daemonOfflineWarning,
 [data-server-status-container],
 [data-server-started-container] {
-  transition: max-height 0.28s cubic-bezier(0.4,0,0.2,1),
-              opacity    0.22s ease,
-              margin     0.28s cubic-bezier(0.4,0,0.2,1);
+  transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity    0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              margin     0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* When these elements are hidden (display:none via JS), wrap them

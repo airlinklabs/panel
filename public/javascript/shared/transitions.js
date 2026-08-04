@@ -18,12 +18,13 @@
   const CONTENT_FADE_OUT_MS = 100;
   const CONTENT_FADE_IN_MS = 155;
   const CONTENT_SETTLE_MS = 105;
-  const PILL_TRANSITION = 'transform 0.38s cubic-bezier(0.16,1,0.3,1), height 0.2s ease, opacity 0.15s ease';
+  var _rootStyle = getComputedStyle(document.documentElement);
+  var PILL_TRANSITION = 'transform 0.38s ' + _rootStyle.getPropertyValue('--ease-out').trim() + ', height 0.2s ease, opacity 0.15s ease';
   const ACTIVE_BORDER_RADIUS = '0.75rem';
-  const COLOR_DARK_TEXT  = '#171717';
-  const COLOR_LIGHT_TEXT = '#f0f0f0';
-  const COLOR_DARK_BG    = '#f0f0f0';
-  const COLOR_LIGHT_BG   = '#171717';
+  var COLOR_DARK_TEXT  = _rootStyle.getPropertyValue('--theme-text').trim() || '#171717';
+  var COLOR_LIGHT_TEXT = _rootStyle.getPropertyValue('--theme-text').trim() || '#f0f0f0';
+  var COLOR_DARK_BG    = _rootStyle.getPropertyValue('--theme-bg').trim() || '#f0f0f0';
+  var COLOR_LIGHT_BG   = _rootStyle.getPropertyValue('--theme-bg').trim() || '#171717';
 
   let navigating = false;
 
@@ -52,9 +53,9 @@
   function barStart() {
     if (bar) return;
     bar = document.createElement('div');
+    var barColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-text').trim() || (document.documentElement.classList.contains('dark') ? '#fff' : '#171717');
     bar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:2px;z-index:99999;'
-      + 'pointer-events:none;background:'
-      + (document.documentElement.classList.contains('dark') ? '#fff' : '#171717')
+      + 'pointer-events:none;background:' + barColor
       + ';width:0%;';
     document.body.appendChild(bar);
     const t0 = Date.now();
@@ -175,7 +176,10 @@
   function updateNav(newPath) {
     const bg = document.getElementById('active-background');
     let best = null, bestLen = 0;
+    var rs = getComputedStyle(document.documentElement);
     const isDark = document.documentElement.classList.contains('dark');
+    var textColor = rs.getPropertyValue('--theme-text').trim() || (isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT);
+    var bgColor = rs.getPropertyValue('--theme-bg').trim() || (isDark ? COLOR_DARK_BG : COLOR_LIGHT_BG);
 
     function norm(p) {
       try { return new URL(p, window.location.origin).pathname.replace(/\/+$/, '') || '/'; }
@@ -214,8 +218,8 @@
 
     if (best) {
       best.classList.add('active', 'font-medium');
-      best.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
-      best.style.background = isDark ? COLOR_DARK_BG : COLOR_LIGHT_BG;
+      best.style.color = textColor;
+      best.style.background = bgColor;
       best.style.borderRadius = ACTIVE_BORDER_RADIUS;
       if (bg) {
         const r   = best.getBoundingClientRect();
@@ -246,11 +250,11 @@
           bg.style.width  = '100%';
           bg.style.borderRadius = '0';
         }
-        specialMatch.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
-        specialMatch.style.background = isDark ? COLOR_DARK_BG : COLOR_LIGHT_BG;
+        specialMatch.style.color = textColor;
+        specialMatch.style.background = bgColor;
         specialMatch.style.fontWeight = '700';
         const userText = specialMatch.querySelector('#sidebar-username');
-        if (userText) userText.parentElement.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
+        if (userText) userText.parentElement.style.color = textColor;
       } else if (bg) {
         bg.style.left         = '';
         bg.style.width        = '';

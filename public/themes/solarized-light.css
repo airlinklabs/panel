@@ -75,9 +75,9 @@
   /* --- Nav chrome (sidebar + mobile bars) --- */
   --theme-nav-bg:           #eee8d5;
   --theme-nav-border:       #d5ccb3;
-  --theme-nav-text:         #93a1a1;
+  --theme-nav-text:         #7a8e96;
   --theme-nav-text-active:  #073642;
-  --theme-nav-icon:         #aab5b7;
+  --theme-nav-icon:         #7a8e96;
   --theme-nav-icon-active:  #268bd2;
 
   /* --- Table --- */
@@ -92,6 +92,9 @@
   --theme-badge-blue-text:    #1a6fa0;
 
   /* --- Buttons --- */
+  --theme-btn-primary-bg:       #268bd2;
+  --theme-btn-primary-text:     #fdf6e3;
+  --theme-btn-primary-hover:    #1a7abf;
   --theme-btn-secondary-bg:     #ede5cc;
   --theme-btn-secondary-border: #d5ccb3;
   --theme-btn-secondary-text:   #586e75;
@@ -104,6 +107,7 @@
   --theme-btn-success-hover:    #6b8800;
 
   /* --- Toggle / switch --- */
+  --theme-toggle-bg:      #c8bfa6;
   --theme-toggle-track:     #c8bfa6;
   --theme-toggle-dot:       #fdf6e3;
 
@@ -124,6 +128,32 @@
   --theme-code-bg:          #f0e8d0;
   --theme-code-text:        #2aa198;
   --theme-code-border:      #d5ccb3;
+
+  /* --- Skeleton / loading --- */
+  --theme-skeleton-base:    #ede5cc;
+  --theme-skeleton-shine:   #e4dbc2;
+
+  /* --- Shadows --- */
+  --theme-shadow-sm:        0 1px 2px rgba(0,43,54,0.06);
+  --theme-shadow:           0 1px 3px rgba(0,43,54,0.08), 0 1px 2px rgba(0,43,54,0.04);
+  --theme-shadow-md:        0 4px 6px -1px rgba(0,43,54,0.08), 0 2px 4px -2px rgba(0,43,54,0.04);
+  --theme-shadow-lg:        0 10px 15px -3px rgba(0,43,54,0.08), 0 4px 6px -4px rgba(0,43,54,0.04);
+  --theme-shadow-xl:        0 20px 25px -5px rgba(0,43,54,0.08), 0 8px 10px -6px rgba(0,43,54,0.04);
+
+  /* --- Disabled --- */
+  --theme-disabled:          #d5ccb3;
+  --theme-disabled-text:     #93a1a1;
+  --theme-disabled-bg:       #eee8d5;
+  --theme-disabled-border:   #d5ccb3;
+
+  /* --- Focus ring --- */
+  --theme-focus-ring:        rgba(38,139,210,0.35);
+
+  /* --- Border radius --- */
+  --theme-radius-sm:         4px;
+  --theme-radius-md:         6px;
+  --theme-radius-lg:         8px;
+  --theme-radius-xl:         12px;
 }
 
 /* ------------------------------------------------------------------ */
@@ -391,37 +421,37 @@ button.bg-white:hover,
 /* Text hover states, active fills, placeholders, file inputs            */
 /* ------------------------------------------------------------------ */
 
-html.dark [class*="dark:hover:text-neutral-1"],
-html.dark [class*="dark:hover:text-neutral-2"],
-html.dark [class*="dark:hover:text-neutral-3"],
-html.dark [class*="dark:hover:text-white"] {
+[class*="dark:hover:text-neutral-1"],
+[class*="dark:hover:text-neutral-2"],
+[class*="dark:hover:text-neutral-3"],
+[class*="dark:hover:text-white"] {
   color: var(--theme-text-strong) !important;
 }
 
-html.dark [class*="dark:active:bg-white/5"] {
+[class*="dark:active:bg-white/5"] {
   background-color: var(--theme-bg-hover) !important;
 }
 
-html.dark [class*="dark:bg-white/10"],
-html.dark [class*="dark:peer-checked:bg-white/10"] {
+[class*="dark:bg-white/10"],
+[class*="dark:peer-checked:bg-white/10"] {
   background-color: var(--theme-bg-secondary) !important;
 }
 
-html.dark [class*="dark:bg-neutral-6"] {
+[class*="dark:bg-neutral-6"] {
   background-color: var(--theme-bg-secondary) !important;
 }
 
-html.dark input::placeholder,
-html.dark textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: var(--theme-text-placeholder) !important;
 }
 
-html.dark input[type="file"]::file-selector-button {
+input[type="file"]::file-selector-button {
   background-color: var(--theme-btn-secondary-bg) !important;
   color: var(--theme-btn-secondary-text) !important;
   border-color: var(--theme-btn-secondary-border) !important;
 }
 
-html.dark [class*="dark:hover:border-"] {
+[class*="dark:hover:border-"] {
   border-color: var(--theme-border-accent) !important;
 }

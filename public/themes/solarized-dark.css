@@ -44,7 +44,7 @@
   --theme-text:             #839496;
   --theme-text-strong:      #93a1a1;
   --theme-text-muted:       #586e75;
-  --theme-text-nav:         #657b83;
+  --theme-text-nav:         #839496;
   --theme-text-nav-active:  #93a1a1;
   --theme-text-placeholder: #3d5f69;
   --theme-text-code:        #2aa198;
@@ -77,7 +77,7 @@
   --theme-nav-border:       #0f3a47;
   --theme-nav-text:         #586e75;
   --theme-nav-text-active:  #839496;
-  --theme-nav-icon:         #4a6670;
+  --theme-nav-icon:         #657b83;
   --theme-nav-icon-active:  #268bd2;
 
   /* --- Table --- */
@@ -92,6 +92,9 @@
   --theme-badge-blue-text:  #5aafde;
 
   /* --- Buttons --- */
+  --theme-btn-primary-bg:       #268bd2;
+  --theme-btn-primary-text:     #fdf6e3;
+  --theme-btn-primary-hover:    #3a9fde;
   --theme-btn-secondary-bg:     #0a3545;
   --theme-btn-secondary-border: #164450;
   --theme-btn-secondary-text:   #839496;
@@ -104,6 +107,7 @@
   --theme-btn-success-hover:    #9db10c;
 
   /* --- Toggle / switch --- */
+  --theme-toggle-bg:      #0f3a47;
   --theme-toggle-track:     #0f3a47;
   --theme-toggle-dot:       #586e75;
 
@@ -124,6 +128,32 @@
   --theme-code-bg:          #021e28;
   --theme-code-text:        #2aa198;
   --theme-code-border:      #0f3a47;
+
+  /* --- Skeleton / loading --- */
+  --theme-skeleton-base:    rgba(131,148,150,0.08);
+  --theme-skeleton-shine:   rgba(131,148,150,0.14);
+
+  /* --- Shadows --- */
+  --theme-shadow-sm:        0 1px 2px rgba(0,0,0,0.3);
+  --theme-shadow:           0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --theme-shadow-md:        0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3);
+  --theme-shadow-lg:        0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.3);
+  --theme-shadow-xl:        0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.4);
+
+  /* --- Disabled --- */
+  --theme-disabled:          rgba(131,148,150,0.25);
+  --theme-disabled-text:     #586e75;
+  --theme-disabled-bg:       rgba(0,43,54,0.4);
+  --theme-disabled-border:   rgba(22,68,80,0.5);
+
+  /* --- Focus ring --- */
+  --theme-focus-ring:        rgba(38,139,210,0.45);
+
+  /* --- Border radius --- */
+  --theme-radius-sm:         4px;
+  --theme-radius-md:         6px;
+  --theme-radius-lg:         8px;
+  --theme-radius-xl:         12px;
 }
 
 /* ------------------------------------------------------------------ */

@@ -1,7 +1,8 @@
 (function() {
+  var _rootStyle = getComputedStyle(document.documentElement);
   const CPU_MAX = 100;
-  const CHART_TICK_COLOR = '#FFFFFF';
-  const CHART_GRID_COLOR = 'rgba(255, 255, 255, 0.1)';
+  var CHART_TICK_COLOR = _rootStyle.getPropertyValue('--theme-text').trim() || '#FFFFFF';
+  var CHART_GRID_COLOR = 'rgba(255, 255, 255, 0.1)';
 
   const stats = JSON.parse(document.getElementById('page-data').dataset.stats || '[]');
 

@@ -1,7 +1,8 @@
 (function () {
 
-  const MOVE_MS  = 340;
-  const EASE_MOVE = 'cubic-bezier(0.4, 0, 0.2, 1)';
+  var _rootStyle = getComputedStyle(document.documentElement);
+  var MOVE_MS  = 340;
+  var EASE_MOVE = _rootStyle.getPropertyValue('--ease-standard').trim() || 'cubic-bezier(0.4, 0, 0.2, 1)';
   const DEFAULT_DURATION = 260;
   const DEFAULT_STAGGER = 40;
   const POSITION_THRESHOLD = 1;
@@ -112,7 +113,7 @@
         { opacity: 0, transform: 'translateY(8px)' },
         { opacity: 1, transform: 'translateY(0)' }
       ],
-      { duration: duration, delay: delay, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'backwards' }
+      { duration: duration, delay: delay, easing: EASE_MOVE, fill: 'backwards' }
     );
   };
 

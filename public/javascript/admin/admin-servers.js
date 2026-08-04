@@ -2,11 +2,12 @@
   const BYTES_PER_KB = 1024;
   const BYTES_PER_MB = 1048576;
   const BYTES_PER_GB = 1073741824;
+  var _rootStyle = getComputedStyle(document.documentElement);
   const STAGGER_DELAY_MS = 28;
   const STAGGER_INITIAL_DELAY_MS = 60;
   const ROW_ANIMATION_DURATION_MS = 240;
   const TOOLBAR_HIDE_DELAY_MS = 80;
-  const TOOLBAR_TRANSITION_MS = '0.36s cubic-bezier(0.4, 0, 0.2, 1)';
+  var TOOLBAR_TRANSITION_MS = '0.36s ' + (_rootStyle.getPropertyValue('--ease-standard').trim() || 'cubic-bezier(0.4, 0, 0.2, 1)');
   const FLIP_THRESHOLD = 1;
 
   let vtEnabled = false;
@@ -634,13 +635,15 @@
   }
 
   (function () {
+    var _dur = _rootStyle.getPropertyValue('--dur-default').trim() || '0.22s';
+    var _ease = _rootStyle.getPropertyValue('--ease-standard').trim() || 'ease';
     const rows = document.querySelectorAll('#serverTable tbody tr');
     rows.forEach(function (row, i) {
       row.style.opacity = '0';
       row.style.transform = 'translateY(4px)';
       row.style.transition = 'none';
       setTimeout(function () {
-        row.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+        row.style.transition = 'opacity ' + _dur + ' ' + _ease + ', transform ' + _dur + ' ' + _ease;
         row.style.opacity = '1';
         row.style.transform = 'translateY(0)';
         setTimeout(function () {

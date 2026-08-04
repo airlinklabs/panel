@@ -18,7 +18,7 @@ html.dark {
   --theme-text:                #e0e0e0;
   --theme-text-strong:         #fafafa;
   --theme-text-muted:          #8a8a8a;
-  --theme-text-nav:            #8a8a8a;
+  --theme-text-nav:            #7e7e7e;
   --theme-text-nav-active:     #fafafa;
   --theme-text-placeholder:    #9ca3af;
   --theme-text-code:           #a8a8a8;
@@ -49,7 +49,7 @@ html.dark {
   --theme-info:                #60a5fa;
   --theme-info-bg:             rgba(96,165,250,0.1);
   --theme-info-text:           #60a5fa;
-  --theme-text-faint:          #8a8a8a;
+  --theme-text-faint:          #7e7e7e;
 
   --theme-table-header-bg:     rgba(255,255,255,0.04);
   --theme-table-row-hover:     rgba(255,255,255,0.05);
@@ -84,4 +84,19 @@ html.dark {
   --theme-shadow-md:           0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3);
   --theme-shadow-lg:           0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.3);
   --theme-shadow-xl:           0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.4);
+
+  /* Disabled */
+  --theme-disabled:            rgba(255,255,255,0.15);
+  --theme-disabled-text:       #555555;
+  --theme-disabled-bg:         rgba(255,255,255,0.05);
+  --theme-disabled-border:     rgba(255,255,255,0.08);
+
+  /* Focus ring */
+  --theme-focus-ring:          rgba(255,255,255,0.35);
+
+  /* Border radius */
+  --theme-radius-sm:           4px;
+  --theme-radius-md:           6px;
+  --theme-radius-lg:           8px;
+  --theme-radius-xl:           12px;
 }

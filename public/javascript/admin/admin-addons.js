@@ -1,4 +1,7 @@
 (function() {
+  const BADGE_ENABLED = 'status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-600/20 dark:ring-emerald-400/20';
+  const BADGE_DISABLED = 'status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-300 ring-neutral-300 dark:ring-white/10';
+
   function toggleAddon(slug, enable) {
     showLoadingPopup('Updating addon…', 'Applying changes…');
     fetch('/admin/addons/toggle/' + slug, {
@@ -16,9 +19,7 @@
     if (!row) return;
     const badge = row.querySelector('.status-badge');
     if (badge) {
-      badge.className = enabled
-        ? 'status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-600/20 dark:ring-emerald-400/20'
-        : 'status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-300 ring-neutral-300 dark:ring-white/10';
+      badge.className = enabled ? BADGE_ENABLED : BADGE_DISABLED;
       badge.textContent = enabled ? 'Enabled' : 'Disabled';
     }
     const btn = row.querySelector('.toggle-btn');

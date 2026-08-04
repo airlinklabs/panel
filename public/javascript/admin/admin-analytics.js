@@ -1,10 +1,11 @@
 (function () {
+  var _rootStyle = getComputedStyle(document.documentElement);
   const ACTIVITY_PERIOD_DAYS = 30;
   const BAR_HIGH_THRESHOLD = 90;
   const BAR_MEDIUM_THRESHOLD = 70;
-  const BAR_COLOR_HIGH = '#ef4444';
-  const BAR_COLOR_MEDIUM = '#f97316';
-  const BAR_COLOR_LOW = '#3b82f6';
+  var BAR_COLOR_HIGH = _rootStyle.getPropertyValue('--theme-danger').trim() || '#ef4444';
+  var BAR_COLOR_MEDIUM = _rootStyle.getPropertyValue('--theme-warning').trim() || '#f97316';
+  var BAR_COLOR_LOW = _rootStyle.getPropertyValue('--theme-info').trim() || '#3b82f6';
   const CHART_BORDER_RADIUS = 4;
   const MAX_TICKS = 10;
 
@@ -174,7 +175,7 @@
         datasets: [{
           data:            values,
           backgroundColor: 'rgba(59,130,246,0.5)',
-          borderColor:     '#3b82f6',
+          borderColor:     _rootStyle.getPropertyValue('--theme-info').trim() || '#3b82f6',
           borderWidth:     1,
           borderRadius:    CHART_BORDER_RADIUS,
         }],

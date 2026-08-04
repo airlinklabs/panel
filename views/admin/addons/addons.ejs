@@ -99,7 +99,7 @@
       <div class="flex flex-col items-center justify-center py-24 text-center">
         <p class="text-sm text-neutral-500"><% if (addonTableExists) { %>No addons installed<% } else { %>Migration required<% } %></p>
         <% if (addonTableExists) { %>
-        <a href="/admin/addons/store"><button type="button" class="mt-4 al-btn-secondary"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Browse Store</button></a>
+        <a href="/admin/addons/store" class="mt-4 al-btn-secondary inline-flex items-center gap-1.5"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Browse Store</a>
         <% } %>
       </div>
       <% } %>

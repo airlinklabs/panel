@@ -7,8 +7,9 @@
 
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const EASING = 'cubic-bezier(0.16, 1, 0.3, 1)';
-  const DEFAULT_DELAY_MULTIPLIER = 50;
+  var _rootStyle = getComputedStyle(document.documentElement);
+  var EASING = _rootStyle.getPropertyValue('--ease-out').trim() || 'cubic-bezier(0.16, 1, 0.3, 1)';
+  var DEFAULT_DELAY_MULTIPLIER = 50;
   const GROUP_STAGGER_MS = 40;
   const FALLBACK_RESOLVE_MS = 600;
   const EXIT_FALLBACK_MS = 400;

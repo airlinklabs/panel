@@ -90,7 +90,7 @@
 
   /* Ghost / icon button */
   .al-btn-ghost {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg p-2 transition-colors;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
     border: 1px solid var(--theme-btn-border, var(--theme-border));
     color: var(--theme-text-muted);
   }
@@ -105,6 +105,7 @@
   }
   .al-input::placeholder { color: var(--theme-text-placeholder); }
   .al-input:focus { border-color: var(--theme-border-accent); box-shadow: 0 0 0 3px var(--theme-accent-subtle); }
+  .al-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* Labels */
   .al-label {
@@ -131,7 +132,7 @@
   .al-badge-offline { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-danger-bg); color: var(--theme-danger); }
   .al-badge-warning { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-warning-bg); color: var(--theme-warning); }
   .al-badge-info    { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-info-bg); color: var(--theme-info); }
-  .al-badge-neutral { @apply inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full; background: var(--theme-badge-neutral-bg, rgba(0,0,0,0.05)); color: var(--theme-badge-neutral-text, #525252); }
+  .al-badge-neutral { @apply inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full; background: var(--theme-badge-neutral-bg, var(--theme-bg-hover)); color: var(--theme-badge-neutral-text, var(--theme-text-muted)); }
 
   /* Status dot (8px, no ping animation — kills the toy look) */
   .al-dot-online  { @apply inline-block w-2 h-2 rounded-full shrink-0; background: var(--theme-success); }
@@ -281,7 +282,7 @@
   border-radius: 10px 10px 0 0;
   opacity: 0.75;
   cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  transition: color 0.15s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .tab-btn:hover:not([aria-selected="true"]) {
   color: var(--theme-text);
@@ -294,7 +295,8 @@
   opacity: 1;
   font-weight: 600;
 }
-.tab-panel { transition: opacity 0.2s ease; }
+.tab-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.tab-panel { transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
 
 /* ── Resource format switcher (MB/GB/Cores/%) ───────────────── */
 .al-format-switcher {
@@ -315,7 +317,7 @@
   white-space: nowrap;
   cursor: pointer;
   min-height: 0;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .al-format-switcher:hover {
   background: var(--theme-bg-hover);
@@ -338,7 +340,7 @@
 .cs-native { display: none; }
 .cs-trigger {
   display: flex; align-items: center; justify-content: space-between;
-  width: 100%; padding: 10px 14px; border-radius: 10px; cursor: pointer;
+  width: 100%; padding: 10px 14px; border-radius: var(--theme-radius-input, 0.75rem); cursor: pointer;
   font-size: 14px; border: 1px solid var(--theme-border, #e5e5e5);
   background: var(--theme-bg-secondary, #f5f5f5); color: var(--theme-text-strong, #171717);
   transition: background 0.15s, border-color 0.15s; min-height: 44px;
@@ -348,6 +350,7 @@
 .dark .cs-trigger:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.09)); }
 .cs-trigger.open { border-color: var(--theme-border, #a3a3a3); }
 .dark .cs-trigger.open { border-color: var(--theme-border, rgba(255,255,255,0.2)); }
+.cs-trigger:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 .cs-trigger svg { width: 14px; height: 14px; opacity: 0.4; transition: transform 0.18s; flex-shrink: 0; }
 .cs-trigger.open svg { transform: rotate(180deg); }
 .cs-placeholder { opacity: 0.45; }
@@ -378,7 +381,7 @@
   width: 2.25rem; height: 2.25rem; flex-shrink: 0; border-radius: 0.5rem;
   border: 1px solid var(--theme-border); color: var(--theme-text-muted);
   background: var(--theme-bg-card);
-  transition: background var(--dur-quick, 150ms) var(--ease-standard, ease), color var(--dur-quick, 150ms) var(--ease-standard, ease);
+  transition: background var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)), color var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
 }
 .sched-step:hover { background: var(--theme-bg-hover); color: var(--theme-text-strong); }
 .sched-step:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -399,21 +402,23 @@
   font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
   border: 1px solid var(--theme-border); color: var(--theme-text);
   background: var(--theme-bg-card); cursor: pointer; user-select: none;
-  transition: background var(--dur-quick, 150ms) var(--ease-standard, ease), color var(--dur-quick, 150ms) var(--ease-standard, ease), border-color var(--dur-quick, 150ms) var(--ease-standard, ease);
+  transition: background var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)), color var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
 }
-.sched-every-chip svg { opacity: 0; transform: scale(0.6); transition: opacity 120ms ease, transform 120ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)); }
+.sched-every-chip svg { opacity: 0; transform: scale(0.6); transition: opacity 120ms cubic-bezier(0.16, 1, 0.3, 1), transform 120ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)); }
 .sched-every-chip.on { background: var(--theme-text-strong); color: var(--theme-bg-card); border-color: var(--theme-text-strong); }
 .sched-every-chip.on svg { opacity: 1; transform: scale(1); }
+.sched-every-chip:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .sched-day-chip {
   padding: 6px 10px; font-size: 11px; font-weight: 500; border-radius: 8px;
   border: 1px solid var(--theme-border); color: var(--theme-text);
   background: var(--theme-bg-card);
-  transition: background var(--dur-quick, 150ms) var(--ease-standard, ease), color var(--dur-quick, 150ms) var(--ease-standard, ease), border-color var(--dur-quick, 150ms) var(--ease-standard, ease);
+  transition: background var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)), color var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
 }
 .sched-day-chip:hover { background: var(--theme-bg-hover); color: var(--theme-text-strong); }
 .sched-day-chip.on,
 .sched-day-chip.on:hover { background: var(--theme-text-strong); color: var(--theme-bg-card); border-color: var(--theme-text-strong); }
+.sched-day-chip:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── Ports allocator (shared) ──────────────────────────────────── */
 .pa-row {

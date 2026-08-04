@@ -66,6 +66,20 @@
         messageSpan.textContent = message;
         body.appendChild(messageSpan);
 
+        if (!progressMode) {
+          const dismissBtn = document.createElement('button');
+          dismissBtn.type = 'button';
+          dismissBtn.className = 'shrink-0 p-1 rounded-lg transition-opacity hover:opacity-70 ml-1';
+          dismissBtn.style.color = 'var(--theme-text-muted)';
+          dismissBtn.setAttribute('aria-label', 'Dismiss notification');
+          dismissBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+          dismissBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            removeToast();
+          });
+          toast.appendChild(dismissBtn);
+        }
+
         const progressRow = document.createElement('div');
         progressRow.className = 'hidden items-center gap-2 mt-2';
         const barTrack = document.createElement('div');

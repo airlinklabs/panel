@@ -61,6 +61,7 @@
     animation: s-pulse 1.6s ease-in-out infinite;
   }
   @keyframes s-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  @media (prefers-reduced-motion: reduce) { .s-skeleton { animation: none; } }
   .dark .s-skeleton { background: var(--theme-bg-card, rgba(255,255,255,0.03)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.05)); }
 
   /* ── Modal (hosted inside the shared window.modal shell) ── */
@@ -188,9 +189,12 @@
     padding: 7px 14px;
     font-size: 13px; font-weight: 500;
     cursor: pointer; flex: 1; justify-content: center;
-    transition: background 0.12s;
+    transition: background 0.12s, opacity 0.12s;
+    outline: none;
   }
   .m-btn-install:hover:not(:disabled) { background: var(--theme-btn-primary-hover, var(--theme-border, #e5e5e5)); }
+  .m-btn-install:active:not(:disabled) { opacity: 0.85; transform: scale(0.98); }
+  .m-btn-install:focus-visible { box-shadow: 0 0 0 2px var(--theme-bg-card), 0 0 0 4px var(--theme-accent); }
   .m-btn-install:disabled { opacity: 0.45; cursor: not-allowed; }
 
   .m-btn-remove {
@@ -201,9 +205,12 @@
     border-radius: 9px; padding: 7px 14px;
     font-size: 13px; font-weight: 500;
     cursor: pointer; flex: 1; justify-content: center;
-    transition: background 0.12s;
+    transition: background 0.12s, opacity 0.12s;
+    outline: none;
   }
   .m-btn-remove:hover:not(:disabled) { background: var(--theme-danger-bg, rgba(239,68,68,0.18)); }
+  .m-btn-remove:active:not(:disabled) { opacity: 0.85; transform: scale(0.98); }
+  .m-btn-remove:focus-visible { box-shadow: 0 0 0 2px var(--theme-bg-card), 0 0 0 4px var(--theme-danger); }
   .m-btn-remove:disabled { opacity: 0.45; cursor: not-allowed; }
 
   .m-btn-gh {
@@ -214,9 +221,12 @@
     border-radius: 9px; padding: 7px 14px;
     font-size: 13px; font-weight: 500;
     cursor: pointer; text-decoration: none;
-    transition: background 0.12s, color 0.12s;
+    transition: background 0.12s, color 0.12s, opacity 0.12s;
+    outline: none;
   }
   .m-btn-gh:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.08)); color: var(--theme-text-strong, #d4d4d4); }
+  .m-btn-gh:active { opacity: 0.85; transform: scale(0.98); }
+  .m-btn-gh:focus-visible { box-shadow: 0 0 0 2px var(--theme-bg-card), 0 0 0 4px var(--theme-accent); }
 
   .feat-row { display: flex; gap: 8px; align-items: flex-start; padding: 3px 0; font-size: 13px; color: var(--theme-text-muted, #737373); }
   .feat-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--theme-text-muted, #404040); flex-shrink: 0; margin-top: 7px; }
@@ -263,10 +273,10 @@
       <div class="px-8 mt-4">
         <!-- Tab bar -->
         <div class="flex border-b border-neutral-800 mb-6">
-          <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">
+          <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-300 border-b-2 border-transparent -mb-px transition" aria-label="Installed addons">
             Installed <span class="ml-1 text-xs text-neutral-700"><%= addons ? addons.length : 0 %></span>
           </a>
-          <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px"><%= req.translations.storeTab || 'Store' %></a>
+          <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px" aria-label="Addon store"><%= req.translations.storeTab || 'Store' %></a>
         </div>
 
         <!-- Search + filters row -->
@@ -274,7 +284,7 @@
           <div class="relative">
             <%- icon('search', { class: 'w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 pointer-events-none', strokeWidth: 1.5 }) %>
             <input id="store-search-input" type="text" placeholder="<%= req.translations.searchAddons || 'Search addons...' %>" aria-label="Search addons"
-              class="bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl pl-8 pr-4 py-1.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-600 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition w-56" />
+              class="bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl pl-8 pr-4 py-1.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-600 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition w-full sm:w-56" />
           </div>
           <div id="tagFilters" class="flex gap-1.5 flex-wrap"></div>
         </div>
@@ -289,7 +299,7 @@
         <div id="storeError" class="hidden py-16 text-center">
           <%- icon('triangle-alert', { class: 'w-9 h-9 text-neutral-800 mx-auto mb-3', strokeWidth: 1 }) %>
           <p id="storeErrorMsg" class="text-sm text-neutral-600"><%= req.translations.failedToLoadStore || 'Failed to load addon store.' %></p>
-          <button type="button" onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline inline-flex items-center gap-1.5"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.retryLoad || 'Retry' %></button>
+          <button type="button" onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 rounded"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.retryLoad || 'Retry' %></button>
         </div>
 
         <!-- Grid -->
@@ -298,7 +308,7 @@
         <!-- Empty -->
         <div id="storeEmpty" class="hidden py-16 text-center">
           <p class="text-sm text-neutral-600"><%= req.translations.noAddonsMatch || 'No addons match your search.' %></p>
-          <button type="button" id="clearSearch" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline inline-flex items-center gap-1.5"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.clearSearch || 'Clear search' %></button>
+          <button type="button" id="clearSearch" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 rounded"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.clearSearch || 'Clear search' %></button>
         </div>
       </div>
     </div>
@@ -317,7 +327,7 @@
           </div>
           <p id="mMeta" class="text-xs text-neutral-600 mt-0.5"></p>
         </div>
-        <button type="button" id="mClose" class="flex-shrink-0 w-6 h-6 rounded-md bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 flex items-center justify-center text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition" aria-label="Close">
+        <button type="button" id="mClose" class="flex-shrink-0 w-6 h-6 rounded-md bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 flex items-center justify-center text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 active:scale-95" aria-label="Close">
           <%- icon('x', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
         </button>
       </div>
@@ -494,7 +504,7 @@
       const count = discussionCounts[a.id.toLowerCase()] || 0;
       const tags = (a.tags || []).slice(0, 3).map(t => `<span class="s-tag">${esc(t)}</span>`).join('');
 
-      return `<div class="s-card" data-id="${esc(a.id)}">
+      return `<button type="button" class="s-card text-left w-full" data-id="${esc(a.id)}" aria-label="${esc(a.name || 'Addon')}">
         <div style="display:flex;align-items:flex-start;gap:10px;">
           <div class="s-icon" id="si-${esc(a.id)}">
             <%- icon('settings', { class: 'w-4 h-4', strokeWidth: 1.5 }) %>
@@ -513,7 +523,7 @@
           <div style="display:flex;gap:4px;flex-wrap:wrap;">${tags}</div>
           ${count > 0 ? `<span class="s-count"><%- icon('message-square', { class: 's-count-icon', strokeWidth: 1.5 }) %>${count}</span>` : ''}
         </div>
-      </div>`;
+      </button>`;
     }).join('');
 
     // lazy-load icons
@@ -531,6 +541,13 @@
       card.addEventListener('click', () => {
         const a = allAddons.find(x => x.id === card.dataset.id);
         if (a) openModal(a);
+      });
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const a = allAddons.find(x => x.id === card.dataset.id);
+          if (a) openModal(a);
+        }
       });
     });
   }

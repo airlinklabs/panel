@@ -1,6 +1,8 @@
 (function() {
+  var _rootStyle = getComputedStyle(document.documentElement);
   const STAGGER_DELAY_MS = 30;
   const ROW_ANIMATION_DURATION_MS = 200;
+  var _staggerEase = _rootStyle.getPropertyValue('--ease-standard').trim() || 'ease';
 
   const pageData = document.getElementById('page-data').dataset;
 
@@ -43,7 +45,7 @@
       row.style.transform = 'translateY(5px)';
       row.style.transition = 'none';
       setTimeout(function() {
-        row.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+        row.style.transition = 'opacity 0.18s ' + _staggerEase + ', transform 0.18s ' + _staggerEase;
         row.style.opacity = '1';
         row.style.transform = 'translateY(0)';
         setTimeout(function() {

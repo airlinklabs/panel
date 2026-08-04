@@ -1,6 +1,11 @@
+var _rootStyle = getComputedStyle(document.documentElement);
 const CAT_CLS   = { game: 'cat-game', application: 'cat-application', generic: 'cat-generic' };
 const CAT_LABEL = { game: 'Game', application: 'App', generic: 'Generic' };
-const CAT_COLOR = { game: '#7c3aed', application: '#0284c7', generic: '#16a34a' };
+var CAT_COLOR = {
+  game: _rootStyle.getPropertyValue('--theme-accent-purple').trim() || '#7c3aed',
+  application: _rootStyle.getPropertyValue('--theme-accent-blue').trim() || '#0284c7',
+  generic: _rootStyle.getPropertyValue('--theme-success').trim() || '#16a34a'
+};
 
 let allImages = [], pendingEgg = null, mdParse = null;
 let searchQuery = '', sortBy = 'app', sortDir = 'asc';

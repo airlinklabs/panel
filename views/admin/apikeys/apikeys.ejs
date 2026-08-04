@@ -62,7 +62,7 @@
                 <div class="flex items-center gap-1.5 shrink-0">
                   <button type="button" onclick="showEditModal(<%- JSON.stringify(apiKey.id) %>, <%- JSON.stringify(apiKey.name) %>, <%- JSON.stringify(apiKey.description || '') %>, <%= apiKey.permissions %>)"
                     class="w-8 h-8 flex items-center justify-center rounded-lg transition hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:text-neutral-900 dark:hover:text-white" style="color:var(--theme-text-muted)"
-                    type="button" aria-label="Edit API key">
+                    aria-label="Edit API key">
                     <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
                   </button>
                   <form id="toggleKeyForm_<%= apiKey.id %>" action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
