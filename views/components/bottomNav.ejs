@@ -81,7 +81,6 @@
     </div>
     <div class="px-2 py-2">
       <% if (onServerPage && typeof server !== 'undefined' && server && global.uiComponentStore) {
-        let mSheetHasServerView = false;
         const mSrvItems = global.uiComponentStore.getServerMenuItems();
         const mSrvEntries = mSrvItems.filter(item => {
           if (item.isAdminItem && !isAdminUser) return false;
@@ -208,6 +207,13 @@
           <%- icon('settings', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Settings</span>
         </a>
+        <% if (adminMenuItems && adminMenuItems.length > 0) {
+          adminMenuItems.forEach(item => { %>
+        <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
+          <%- item.icon %>
+          <span class="text-sm"><%= item.label %></span>
+        </a>
+        <% }); } %>
       </div>
       <% } %>
       </div>
