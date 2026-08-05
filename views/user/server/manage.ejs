@@ -498,20 +498,36 @@ if (loadHistoryBtn) {
         const btn = loadHistoryBtn;
         btn.disabled = true;
         try {
-            const r = await fetch('/server/' + window.location.pathname.split('/')[2] + '/logs/history', { credentials: 'same-origin' });
-            const d = await r.json();
-            if (!r.ok) throw new Error(d.error || 'Failed to load logs');
-            const lines = d.logs || [];
-            term.writeln('');
-            term.writeln('\x1b[90m— ' + lines.length + ' lines from disk —\x1b[0m');
-            lines.forEach(l => term.writeln(l));
-            term.writeln('\x1b[90m— end of saved log —\x1b[0m');
-        } catch (err) {
-            term.writeln('\x1b[31mFailed to load log history: ' + (err.message || err) + '\x1b[0m');
+            await loadRecentLogs(true);
         } finally {
             btn.disabled = false;
         }
     });
+}
+
+// Reusable log loader — fetches saved daemon output from disk.
+// showMarkers = true: wraps output with "N lines from disk" / "end of saved log" markers (manual button)
+// showMarkers = false: writes lines directly (auto-load after start/install/stop)
+async function loadRecentLogs(showMarkers) {
+    const serverId = window.location.pathname.split('/')[2];
+    try {
+        const r = await fetch('/server/' + serverId + '/logs/history', { credentials: 'same-origin' });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Failed to load logs');
+        const lines = d.logs || [];
+        if (lines.length === 0) return;
+        if (showMarkers) {
+            term.writeln('');
+            term.writeln('\x1b[90m— ' + lines.length + ' lines from disk —\x1b[0m');
+        }
+        lines.forEach(l => term.writeln(l));
+        if (showMarkers) {
+            term.writeln('\x1b[90m— end of saved log —\x1b[0m');
+        }
+        term.scrollToBottom();
+    } catch (err) {
+        term.writeln('\x1b[31mFailed to load log history: ' + (err.message || err) + '\x1b[0m');
+    }
 }
 
 // Intercept wheel events on the terminal so scrolling the console scrolls
@@ -602,6 +618,11 @@ function connectWebSocket() {
     openConsoleSocket();
 }
 
+function forceReconnectConsole() {
+    reconnectAttempts = 0;
+    connectWebSocket();
+}
+
 function setDaemonOfflineBanner(offline) {
     const row = document.getElementById('daemonOfflineWarningRow');
     if (!row) return;
@@ -650,7 +671,7 @@ async function openConsoleSocket() {
 
         socket.onclose = () => {
             socket = null;
-            if (!isReconnecting) {
+            if (!isReconnecting && !serverStopped) {
                 scheduleReconnect();
             }
         };
@@ -947,6 +968,11 @@ connectWebSocket();
     startButton.addEventListener('click', async () => {
         const serverUUID = '<%= server.UUID %>';
 
+        logsAutoLoaded = false;
+        installLogsLoaded = false;
+        serverStopped = false;
+        historyLoaded = false;
+
         setStatusText('Starting', 'var(--theme-warning)');
         setStatusLog('Sending start request...');
         lockInput('Starting container...');
@@ -1029,6 +1055,10 @@ connectWebSocket();
           onConfirm: async () => {
           const serverUUID = '<%= server.UUID %>';
           deliberateStop = true;
+          logsAutoLoaded = false;
+          installLogsLoaded = false;
+          serverStopped = false;
+          historyLoaded = false;
           setStatusText('Restarting', 'var(--theme-warning)');
           setStatusLog('Sending restart request...');
           updateStatusChart('warning', 0.1, 0.2);
@@ -1478,6 +1508,9 @@ connectWebSocket();
     // True when the user (or a lifecycle event) deliberately stopped the server.
     // A stop with this flag set is never labeled a crash.
     let deliberateStop = false;
+let serverStopped = false;
+let logsAutoLoaded = false;
+let installLogsLoaded = false;
 
     // ── Crash vs. stop surfacing (S-2) ─────────────────────────────────────
     // Never fabricate: an exit code labels the crash precisely, 137 gets the
@@ -1591,7 +1624,9 @@ connectWebSocket();
 
     // Function to set all stats to offline state
     function hideConsolePlaceholder() {}
-    function showConsolePlaceholder() {}
+    function showConsolePlaceholder() {
+        writeConsole('info', 'Console connected — waiting for output...');
+    }
 
     function setAllStatsOffline() {
         showConsolePlaceholder();
@@ -1671,13 +1706,43 @@ connectWebSocket();
         lcSock.onmessage = (msg) => {
             let parsed;
             try { parsed = JSON.parse(msg.data); } catch { return; }
-if (parsed.event !== 'lifecycle') return;
+            if (parsed.event !== 'lifecycle') return;
             const { type, message } = parsed.data;
             setStatusLog(message, type);
             writeConsole('daemon', 'info', message);
             if (lockingStates.has(type)) { lockInput('Waiting...'); }
-            if (type === 'started') { unlockInput(); setStatusLog(null); if (typeof term !== 'undefined') term.scrollToBottom(); }
-            if (type === 'stopped' || type === 'killed') { deliberateStop = true; setStatusLog(null); }
+            if (type === 'started') {
+                unlockInput();
+                setStatusLog(null);
+                if (typeof term !== 'undefined') term.scrollToBottom();
+                if (!logsAutoLoaded) {
+                    logsAutoLoaded = true;
+                    loadRecentLogs(false);
+                }
+                if (typeof socket === 'undefined' || !socket || socket.readyState !== 1) {
+                    forceReconnectConsole();
+                }
+            }
+            if (type === 'stopped' || type === 'killed') {
+                deliberateStop = true;
+                serverStopped = true;
+                setStatusLog(null);
+                const sid = window.location.pathname.split('/')[2];
+                fetch('/server/' + sid + '/logs', { credentials: 'same-origin' })
+                    .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+                    .then(data => {
+                        const lines = data.lines || [];
+                        lines.forEach(l => term.write(maskPrompts(String(l)) + '\r\n'));
+                        term.scrollToBottom();
+                    })
+                    .catch(() => {});
+            }
+            if (type === 'installing') {
+                if (!installLogsLoaded) {
+                    installLogsLoaded = true;
+                    loadRecentLogs(false);
+                }
+            }
             if (type === 'error') { unlockInput(); setStatusLog(null); }
         };
         }).catch(() => {});
