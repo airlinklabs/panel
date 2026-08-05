@@ -1508,9 +1508,9 @@ connectWebSocket();
     // True when the user (or a lifecycle event) deliberately stopped the server.
     // A stop with this flag set is never labeled a crash.
     let deliberateStop = false;
-let serverStopped = false;
-let logsAutoLoaded = false;
-let installLogsLoaded = false;
+    let serverStopped = false;
+    let logsAutoLoaded = false;
+    let installLogsLoaded = false;
 
     // ── Crash vs. stop surfacing (S-2) ─────────────────────────────────────
     // Never fabricate: an exit code labels the crash precisely, 137 gets the
@@ -1538,8 +1538,10 @@ let installLogsLoaded = false;
             msgEl.style.color = 'var(--theme-danger)';
             msgEl.classList.remove('opacity-0', 'translate-y-1', 'pointer-events-none');
         }
-        writeConsole('daemon', 'error', reason);
-        showToast(reason, 'error');
+        if (reason) {
+            writeConsole('daemon', 'error', reason);
+            showToast(reason, 'error');
+        }
     }
 
     // Color map: lifecycle event type → text color token
@@ -1625,7 +1627,7 @@ let installLogsLoaded = false;
     // Function to set all stats to offline state
     function hideConsolePlaceholder() {}
     function showConsolePlaceholder() {
-        writeConsole('info', 'Console connected — waiting for output...');
+        writeConsole('daemon', 'info', 'Console connected — waiting for output...');
     }
 
     function setAllStatsOffline() {

@@ -814,12 +814,15 @@ const adminModule: Module = {
               await tx.serverFolderMember.deleteMany({
                 where: { serverUUID: server.UUID },
               });
+              await tx.activityLog.deleteMany({
+                where: { serverId: server.UUID },
+              });
               await tx.server.delete({ where: { id: serverId } });
             });
             await releaseServerAllocations(server.UUID).catch(() => {});
 
             logger.info(`Server ${serverId} successfully deleted`);
-            await logActivity(req, 'server:delete', { serverId: String(server.UUID), metadata: { name: server.name, nodeId: server.nodeId } });
+            await logActivity(req, 'server:delete', { metadata: { name: server.name, nodeId: server.nodeId, serverUUID: server.UUID } });
             res.redirect('/admin/servers');
             return;
           } catch (error: unknown) {
