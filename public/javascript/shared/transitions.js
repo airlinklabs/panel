@@ -178,8 +178,10 @@
     let best = null, bestLen = 0;
     var rs = getComputedStyle(document.documentElement);
     const isDark = document.documentElement.classList.contains('dark');
-    var textColor = rs.getPropertyValue('--theme-text').trim() || (isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT);
-    var bgColor = rs.getPropertyValue('--theme-bg').trim() || (isDark ? COLOR_DARK_BG : COLOR_LIGHT_BG);
+    // Inverted pill — background is the theme's text color, foreground is the
+    // theme's background color (same as the account link highlight).
+    var pillBg = rs.getPropertyValue('--theme-text').trim() || (isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT);
+    var pillFg = rs.getPropertyValue('--theme-bg').trim() || (isDark ? COLOR_DARK_BG : COLOR_LIGHT_BG);
 
     function norm(p) {
       try { return new URL(p, window.location.origin).pathname.replace(/\/+$/, '') || '/'; }
@@ -218,8 +220,8 @@
 
     if (best) {
       best.classList.add('active', 'font-medium');
-      best.style.color = textColor;
-      best.style.background = bgColor;
+      best.style.color = pillFg;
+      best.style.background = pillBg;
       best.style.borderRadius = ACTIVE_BORDER_RADIUS;
       if (bg) {
         const r   = best.getBoundingClientRect();
@@ -250,11 +252,11 @@
           bg.style.width  = '100%';
           bg.style.borderRadius = '0';
         }
-        specialMatch.style.color = textColor;
-        specialMatch.style.background = bgColor;
+        specialMatch.style.color = pillFg;
+        specialMatch.style.background = pillBg;
         specialMatch.style.fontWeight = '700';
         const userText = specialMatch.querySelector('#sidebar-username');
-        if (userText) userText.parentElement.style.color = textColor;
+        if (userText) userText.parentElement.style.color = pillFg;
       } else if (bg) {
         bg.style.left         = '';
         bg.style.width        = '';

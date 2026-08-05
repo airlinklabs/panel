@@ -14,10 +14,10 @@
   const EXACT_MATCH_SCORE = 9999;
 
   var _isDark = document.documentElement.classList.contains('dark');
-  var COLOR_DARK_BG    = _rootStyle.getPropertyValue('--theme-bg').trim() || '#171717';
-  var COLOR_LIGHT_BG   = _rootStyle.getPropertyValue('--theme-bg').trim() || '#f0f0f0';
-  var COLOR_DARK_TEXT  = _rootStyle.getPropertyValue('--theme-text').trim() || '#171717';
-  var COLOR_LIGHT_TEXT = _rootStyle.getPropertyValue('--theme-text').trim() || '#f0f0f0';
+  var COLOR_DARK_BG    = _rootStyle.getPropertyValue('--theme-bg').trim() || '#161616';
+  var COLOR_LIGHT_BG   = _rootStyle.getPropertyValue('--theme-bg').trim() || '#f5f5f5';
+  var COLOR_DARK_TEXT  = _rootStyle.getPropertyValue('--theme-text').trim() || '#e0e0e0';
+  var COLOR_LIGHT_TEXT = _rootStyle.getPropertyValue('--theme-text').trim() || '#404040';
   var COLOR_DARK_LOGO_BG  = _rootStyle.getPropertyValue('--theme-bg').trim() || '#f0f0f0';
   var COLOR_LIGHT_LOGO_BG = '#000000';
 
@@ -204,8 +204,10 @@
   function setDesktopActiveLink(link) {
     var rs = getComputedStyle(document.documentElement);
     var isDark = document.documentElement.classList.contains('dark');
-    var textC = isDark ? rs.getPropertyValue('--theme-text').trim() : rs.getPropertyValue('--theme-text').trim();
-    var bgC = isDark ? rs.getPropertyValue('--theme-bg').trim() : rs.getPropertyValue('--theme-bg').trim();
+    // Inverted pill — background is the theme's text color, foreground is the
+    // theme's background color (same as the account link highlight).
+    var pillBg = rs.getPropertyValue('--theme-text').trim() || (isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT);
+    var pillFg = rs.getPropertyValue('--theme-bg').trim() || (isDark ? COLOR_LIGHT_BG : COLOR_DARK_BG);
     document.querySelectorAll('.nav-link').forEach(function (l) {
       l.classList.remove('active', 'font-medium');
       l.style.color = '';
@@ -213,8 +215,8 @@
     });
     if (!link) return;
     link.classList.add('active', 'font-medium');
-    link.style.color = textC || (isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT);
-    link.style.background = bgC || (isDark ? COLOR_LIGHT_BG : COLOR_DARK_BG);
+    link.style.color = pillFg;
+    link.style.background = pillBg;
     link.style.borderRadius = ACTIVE_BORDER_RADIUS;
   }
 
@@ -389,11 +391,14 @@
     if (accountLink) {
       const onAccount = path === '/account' || path.startsWith('/account/');
       const userText = accountLink.querySelector('#sidebar-username');
+      var pillRs = getComputedStyle(document.documentElement);
+      var pillBg = pillRs.getPropertyValue('--theme-text').trim() || (isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT);
+      var pillFg = pillRs.getPropertyValue('--theme-bg').trim() || (isDark ? COLOR_LIGHT_BG : COLOR_DARK_BG);
       if (onAccount) {
-        accountLink.style.background = isDark ? COLOR_DARK_BG : COLOR_LIGHT_BG;
-        accountLink.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
+        accountLink.style.background = pillBg;
+        accountLink.style.color = pillFg;
         accountLink.style.fontWeight = '700';
-        if (userText) userText.parentElement.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
+        if (userText) userText.parentElement.style.color = pillFg;
       } else {
         accountLink.style.background = '';
         accountLink.style.color = '';

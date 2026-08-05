@@ -21,7 +21,14 @@
 
       <div class="al-page-body">
 
-        <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="flex items-center border-b" style="border-color:var(--theme-border);">
+          <button id="tab-btn-nodes" type="button" data-tab="nodes" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition">Nodes</button>
+          <button id="tab-btn-locations" type="button" data-tab="locations" class="px-3 py-2 text-sm font-medium rounded-lg transition">Locations</button>
+        </div>
+
+        <div id="tab-panel-nodes">
+
+        <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 mt-6">
           <div class="al-card">
             <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= req.translations.totalNodes %></h2>
             <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);"><%= nodes.length %></p>
@@ -163,9 +170,11 @@
           </table>
           <% } %>
         </div>
+        </div>
 
-        <!-- Locations Section -->
-        <div id="locations" class="mt-10">
+        <!-- Locations Tab -->
+        <div id="tab-panel-locations" class="hidden">
+        <div id="locations" class="mt-6">
           <div class="flex items-center justify-between mb-5">
             <div>
               <h2 class="text-lg font-semibold tracking-tight" style="color:var(--theme-text-strong);">Locations</h2>
@@ -215,6 +224,7 @@
               <% } %>
             </div>
           </div>
+        </div>
         </div>
 
       </div>
@@ -273,6 +283,47 @@
       }
     });
   });
+})();
+</script>
+<script nonce="<%- nonce %>">
+(function () {
+  const btnNodes = document.getElementById('tab-btn-nodes');
+  const btnLocs = document.getElementById('tab-btn-locations');
+  const panelNodes = document.getElementById('tab-panel-nodes');
+  const panelLocs = document.getElementById('tab-panel-locations');
+  if (!btnNodes || !btnLocs || !panelNodes || !panelLocs) return;
+
+  const ACTIVE = 'px-3 py-2 mr-4 text-sm font-medium text-white dark:text-black bg-neutral-900 dark:bg-white rounded-lg transition';
+  const INACTIVE = 'px-3 py-2 mr-4 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 rounded-lg transition';
+
+  function activateTab(name, scroll) {
+    const isLoc = name === 'locations';
+    btnNodes.className = isLoc ? INACTIVE : ACTIVE;
+    btnLocs.className = isLoc ? ACTIVE : INACTIVE;
+    panelNodes.classList.toggle('hidden', isLoc);
+    panelLocs.classList.toggle('hidden', !isLoc);
+    if (scroll && isLoc) {
+      const locEl = document.getElementById('locations');
+      if (locEl) locEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  btnNodes.addEventListener('click', function () {
+    activateTab('nodes');
+    history.replaceState(null, '', '#nodes');
+  });
+  btnLocs.addEventListener('click', function () {
+    activateTab('locations');
+    history.replaceState(null, '', '#locations');
+  });
+
+  function handleHash() {
+    if (window.location.hash === '#locations') activateTab('locations', true);
+    else activateTab('nodes');
+  }
+
+  handleHash();
+  window.addEventListener('hashchange', handleHash);
 })();
 </script>
 

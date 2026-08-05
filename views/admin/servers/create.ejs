@@ -155,7 +155,7 @@
                   <%= req.translations.Image %>:</label>
                 <select id="serverImage" name="imageId" class="hidden">
                   <% images.forEach(image => { %>
-                    <option value="<%= image.id %>" data-docker-images='<%- JSON.stringify(image.dockerImages) %>' data-variables='<%- JSON.stringify(image.variables) %>' data-port-requirements='<%- JSON.stringify(image.portRequirements || []) %>'>
+                    <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages || "[]" %>' data-variables='<%= image.variables || "[]" %>' data-port-requirements='<%= image.portRequirements || "[]" %>'>
                       <%= image.name %>
                     </option>
                   <% }); %>
@@ -241,6 +241,16 @@
     let availablePorts = [];
     let assignedPorts = [];
 
+    function parseJson(raw, fallback) {
+      if (!raw) return fallback;
+      let value;
+      try { value = JSON.parse(raw); } catch { return fallback; }
+      for (let depth = 0; depth < 2 && typeof value === 'string'; depth++) {
+        try { value = JSON.parse(value); } catch { break; }
+      }
+      return value;
+    }
+
     async function fetchNodesData() {
       try {
         const response = await fetch('/admin/nodes/list');
@@ -287,13 +297,13 @@
 
     function getPortRequirements() {
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-      try { return JSON.parse(selectedOption.getAttribute('data-port-requirements') || '[]'); } catch { return []; }
+      return parseJson(selectedOption?.getAttribute('data-port-requirements'), []);
     }
 
     function ensureMinimumPortRows() {
       const requirements = getPortRequirements();
       const DEFAULT_PORT = 25565;
-      const min = requirements.length;
+      const min = Math.max(1, requirements.length);
       while (assignedPorts.length < min) {
         const req = requirements[assignedPorts.length] || {};
         assignedPorts.push({
@@ -329,24 +339,21 @@
 
     function updateDockerImages() {
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-      const dockerImagesData = selectedOption.getAttribute('data-docker-images');
+      const dockerImages = parseJson(selectedOption?.getAttribute('data-docker-images'), []);
       dockerImageSelect.innerHTML = '<option value="" disabled selected>Select a Docker image</option>';
-      if (dockerImagesData) {
-        const dockerImages = JSON.parse(dockerImagesData);
-        dockerImages.forEach(imageObj => {
+      dockerImages.forEach(imageObj => {
           Object.entries(imageObj).forEach(([key, value]) => {
             const option = document.createElement('option');
             option.value = key;
             option.textContent = key;
             dockerImageSelect.appendChild(option);
           });
-        });
-      }
+      });
     }
 
     function updateVariables() {
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-      const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
+      const variables = parseJson(selectedOption?.getAttribute('data-variables'), []);
       variablesContainer.innerHTML = '';
       if (variables.length === 0) {
         document.getElementById('variablesSectionRow').classList.remove('open');
@@ -396,7 +403,7 @@
       const formData = new FormData(form);
       const variablesArray = [];
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-      const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
+      const variables = parseJson(selectedOption?.getAttribute('data-variables'), []);
       variables.forEach(variable => {
         const envKey = variable.env_variable || variable.env || '';
         const fieldType = variable.field_type || variable.type || 'text';

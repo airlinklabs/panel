@@ -15,37 +15,64 @@
         <button type="button" id="newMountBtn" class="al-btn-primary shrink-0"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>New mount</button>
       </div>
 
-      <div class="al-page-body space-y-5">
-        <div class="al-card p-2">
-          <% if (!mounts.length) { %>
-            <p class="text-sm p-4" style="color:var(--theme-text-muted)">No mounts defined yet.</p>
+      <div class="al-page-body">
+        <div class="al-card">
+          <h2 class="al-card-header">All Mounts</h2>
+          <% if (mounts.length === 0) { %>
+            <%- include('../../components/ui/empty-state', {
+              iconName: 'folder',
+              title: 'No mounts yet',
+              description: 'Create a mount to expose a host directory to server containers.',
+              action: '<button id="newMountBtnEmpty" type="button" class="al-btn-primary"><span class="inline-flex items-center gap-1.5">' + icon('plus', { class: 'w-4 h-4' }) + ' New mount</span></button>'
+            }) %>
           <% } else { %>
-          <table class="al-table min-w-full">
-            <thead class="al-table-head">
-              <tr>
-                <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
-                <th class="al-table-th px-3 py-3.5">Source</th>
-                <th class="al-table-th px-3 py-3.5">Target</th>
-                <th class="al-table-th px-3 py-3.5">Access</th>
-                <th class="al-table-th px-3 py-3.5">Servers</th>
-                <th class="al-table-th px-3 py-3.5 text-right pr-6"></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y" style="border-color:var(--theme-border)">
-              <% mounts.forEach(m => { %>
-              <tr>
-                <td class="px-3 py-3 pl-6 text-sm" style="color:var(--theme-text-strong)"><%= m.name %></td>
-                <td class="px-3 py-3 text-sm" style="color:var(--theme-text-muted)"><code class="text-xs bg-neutral-200 dark:bg-neutral-700 px-1 rounded"><%= m.source %></code></td>
-                <td class="px-3 py-3 text-sm" style="color:var(--theme-text-muted)"><code class="text-xs bg-neutral-200 dark:bg-neutral-700 px-1 rounded"><%= m.target %></code></td>
-                <td class="px-3 py-3 text-sm" style="color:var(--theme-text-muted)"><%= m.readOnly ? 'Read-only' : 'Read-write' %></td>
-                <td class="px-3 py-3 text-sm" style="color:var(--theme-text-muted)"><%= m._count.servers %></td>
-                <td class="px-3 py-3 pr-6 text-right">
-                  <button type="button" class="al-btn-ghost text-xs" onclick="deleteMount(<%= m.id %>)" style="color:var(--theme-danger)">Delete</button>
-                </td>
-              </tr>
-              <% }) %>
-            </tbody>
-          </table>
+          <div class="-mx-4 overflow-x-auto">
+            <table class="al-table">
+              <colgroup>
+                <col style="width:24%">
+                <col style="width:24%">
+                <col style="width:24%">
+                <col style="width:130px">
+                <col style="width:120px">
+              </colgroup>
+              <thead class="al-table-head">
+                <tr>
+                  <th scope="col" class="al-table-th sm:pl-6">Name</th>
+                  <th scope="col" class="al-table-th sm:pl-6">Source</th>
+                  <th scope="col" class="al-table-th sm:pl-6">Target</th>
+                  <th scope="col" class="al-table-th sm:pl-6">Read-only</th>
+                  <th scope="col" class="al-table-th sm:pl-6">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% let mountIdx = 0; mounts.forEach(m => { %>
+                <tr class="al-table-tr" style="--i:<%= mountIdx++ %>">
+                  <td class="al-table-td sm:pl-6">
+                    <div class="font-medium" style="color:var(--theme-text-strong);"><%= m.name %></div>
+                  </td>
+                  <td class="al-table-td">
+                    <code class="inline-block max-w-full truncate rounded-md bg-neutral-100 px-2 py-1 font-mono text-xs dark:bg-neutral-800" style="color:var(--theme-text);" title="<%= m.source %>"><%= m.source %></code>
+                  </td>
+                  <td class="al-table-td">
+                    <code class="inline-block max-w-full truncate rounded-md bg-neutral-100 px-2 py-1 font-mono text-xs dark:bg-neutral-800" style="color:var(--theme-text);" title="<%= m.target %>"><%= m.target %></code>
+                  </td>
+                  <td class="al-table-td">
+                    <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <%= m.readOnly ? 'bg-amber-600/10 text-amber-700 dark:text-yellow-400 ring-amber-600/20' : 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20' %>">
+                      <%= m.readOnly ? 'Read-only' : 'Read-write' %>
+                    </span>
+                  </td>
+                  <td class="al-table-td">
+                    <div class="flex gap-3">
+                      <button onclick="deleteMount(<%= m.id %>)" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete mount">
+                        <%- icon('trash-2', { size: 16 }) %>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
           <% } %>
         </div>
       </div>
@@ -53,39 +80,43 @@
   </div>
 </main>
 
-<div id="mountModal" class="al-sheet-overlay fixed inset-0 z-50 hidden">
-  <div class="flex items-end sm:items-center justify-center min-h-screen p-0 sm:p-4">
-    <div class="fixed inset-0" onclick="closeMountModal()"></div>
-    <div id="mountModalPanel" class="al-sheet-panel relative border rounded-2xl shadow-lg max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
-      <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
-        <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">New mount</h3>
-        <button type="button" onclick="closeMountModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
-          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
-        </button>
+<!-- New mount modal -->
+<div id="mountModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
+  <div class="absolute inset-0 bg-transparent" aria-hidden="true" onclick="closeMountModal()"></div>
+  <div id="mountModalPanel" class="al-sheet-panel relative w-full max-w-md mx-4 rounded-2xl shadow-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="mountModalTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border)">
+    <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
+      <h3 id="mountModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New mount</h3>
+      <button type="button" onclick="closeMountModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
+    </div>
+    <div class="px-6 py-4 space-y-4 overflow-y-auto">
+      <div>
+        <label for="mountName" class="al-label">Name</label>
+        <input id="mountName" class="al-input w-full" placeholder="Shared plugins">
       </div>
-      <div class="px-6 py-4 overflow-y-auto flex-1">
-        <div class="space-y-4">
-          <div>
-            <label class="al-label">Name</label>
-            <input id="mountName" class="al-input" placeholder="Shared plugins">
-          </div>
-          <div>
-            <label class="al-label">Source (host path)</label>
-            <input id="mountSource" class="al-input" placeholder="/data/shared/plugins">
-          </div>
-          <div>
-            <label class="al-label">Target (container path)</label>
-            <input id="mountTarget" class="al-input" placeholder="/home/container/plugins">
-          </div>
-          <label class="flex items-center gap-2 text-sm cursor-pointer" style="color:var(--theme-text-strong)">
-            <input id="mountReadOnly" type="checkbox" class="al-input h-4 w-4"> Read-only
-          </label>
-        </div>
+      <div>
+        <label for="mountSource" class="al-label">Source (host path)</label>
+        <input id="mountSource" class="al-input w-full font-mono text-xs" placeholder="/data/shared/plugins">
       </div>
-      <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
-        <button type="button" onclick="closeMountModal()" class="al-btn-secondary">Cancel</button>
-        <button type="button" id="saveMountBtn" class="al-btn-primary">Create mount</button>
+      <div>
+        <label for="mountTarget" class="al-label">Target (container path)</label>
+        <input id="mountTarget" class="al-input w-full font-mono text-xs" placeholder="/home/container/plugins">
       </div>
+      <label class="flex items-center gap-2.5 text-sm cursor-pointer select-none" style="color:var(--theme-text-strong)">
+        <input id="mountReadOnly" type="checkbox" class="h-4 w-4 rounded border-neutral-300 dark:border-neutral-600" style="accent-color:var(--theme-accent);">
+        Read-only
+      </label>
+    </div>
+    <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
+      <button type="button" onclick="closeMountModal()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+        <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+        Cancel
+      </button>
+      <button type="button" id="saveMountBtn" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        Create mount
+      </button>
     </div>
   </div>
 </div>
@@ -93,25 +124,20 @@
 <%- include('../../components/toast') %>
 
 <script nonce="<%- nonce %>">
-document.getElementById('newMountBtn').addEventListener('click', () => {
+function openMountModal() {
   const modal = document.getElementById('mountModal');
   const panel = document.getElementById('mountModalPanel');
   if (window.Animate) Animate.openModal(modal, panel);
   else { modal.classList.remove('hidden'); modal.classList.add('flex'); }
-});
+}
 function closeMountModal() {
   const modal = document.getElementById('mountModal');
   const panel = document.getElementById('mountModalPanel');
-  if (window.Animate) {
-    Animate.closeModal(modal, panel, () => {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    });
-  } else {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
+  if (window.Animate) Animate.closeModal(modal, panel);
+  else { modal.classList.add('hidden'); modal.classList.remove('flex'); }
 }
+document.getElementById('newMountBtn').addEventListener('click', openMountModal);
+document.getElementById('newMountBtnEmpty')?.addEventListener('click', openMountModal);
 document.getElementById('saveMountBtn').addEventListener('click', async () => {
   const name = document.getElementById('mountName').value.trim();
   const source = document.getElementById('mountSource').value.trim();
@@ -130,13 +156,21 @@ document.getElementById('saveMountBtn').addEventListener('click', async () => {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
   });
   const d = await r.json();
-  if (r.ok) { showToast('Mount created.', 'success'); setTimeout(() => location.reload(), 800); }
+  if (r.ok) { closeMountModal(); showToast('Mount created.', 'success'); setTimeout(() => location.reload(), 800); }
   else showToast(d.error || 'Failed to create mount.', 'error');
 });
-window.deleteMount = async (id) => {
-  const r = await fetch('/admin/mounts/' + id, { method: 'DELETE' });
-  const d = await r.json();
-  if (r.ok) { showToast('Mount deleted.', 'success'); setTimeout(() => location.reload(), 800); }
-  else showToast(d.error || 'Failed to delete mount.', 'error');
+window.deleteMount = (id) => {
+  window.modal.confirm({
+    title: 'Delete mount',
+    body: 'Delete this mount? Servers using it will no longer be able to attach it.',
+    danger: true,
+    confirmLabel: 'Delete',
+    onConfirm: async () => {
+      const r = await fetch('/admin/mounts/' + id, { method: 'DELETE' });
+      const d = await r.json();
+      if (r.ok) { showToast('Mount deleted.', 'success'); setTimeout(() => location.reload(), 800); }
+      else showToast(d.error || 'Failed to delete mount.', 'error');
+    },
+  });
 };
 </script>
