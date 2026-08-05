@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { Prisma, Users, settings as PanelSettings } from '../../../generated/prisma/client';
 import prisma from '../../../db';
 import { getParamAsString } from '../../../utils/typeHelpers';
-import { daemonRequest, daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { getPrimaryExternalPort, portsToDaemonString } from '../../../handlers/utils/server/ports';
 
 declare global {
@@ -137,10 +137,6 @@ export function sendMissingServerContext(
   }
 
   return false;
-}
-
-export function getServerDaemonAddress(server: Pick<ServerPageServer, 'node'>, path: string): string {
-  return `${daemonSchemeSync()}://${server.node.address}:${server.node.port}${path}`;
 }
 
 export function getServerDaemonAuth(server: Pick<ServerPageServer, 'node'>): { username: string; password: string } {

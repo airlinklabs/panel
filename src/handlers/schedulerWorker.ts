@@ -1,6 +1,11 @@
 import CronParser from 'cron-parser';
 import prisma from '../db';
 import { daemonRequest } from './utils/core/daemonRequest';
+import {
+  startServerContainer,
+  type ServerRuntimeConfig,
+  type ServerPageServer,
+} from '../modules/user/server/shared';
 import logger from './logger';
 
 export interface ScheduleWithRelations {
@@ -13,12 +18,7 @@ export interface ScheduleWithRelations {
   lastRunAt: Date | null;
   nextRunAt: Date | null;
   createdAt: Date;
-  server: {
-    UUID: string;
-    name: string;
-    Suspended: boolean;
-    node: { address: string; port: number; key: string };
-  };
+  server: ServerRuntimeConfig & Pick<ServerPageServer, 'image' | 'UUID'> & { Suspended: boolean };
   tasks: { id: number; action: string; payload: string; timeOffset: number }[];
 }
 
@@ -57,14 +57,20 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<void
           logger.error(`Schedule ${schedule.id} task ${task.id}: invalid power action "${action}"`);
           continue;
         }
-        await daemonRequest({
-          method: 'POST',
-          path: `/container/${action}`,
-          nodeAddress: schedule.server.node.address,
-          nodePort: schedule.server.node.port,
-          nodeKey: schedule.server.node.key,
-          body: { id: schedule.server.UUID },
-        });
+        if (action === 'start') {
+          await startServerContainer(schedule.server, schedule.server.UUID);
+        } else {
+          const method = action === 'kill' ? 'DELETE' : 'POST';
+          const path = action === 'kill' ? '/container/kill' : `/container/${action}`;
+          await daemonRequest({
+            method,
+            path,
+            nodeAddress: schedule.server.node.address,
+            nodePort: schedule.server.node.port,
+            nodeKey: schedule.server.node.key,
+            body: { id: schedule.server.UUID },
+          });
+        }
       } else if (task.action === 'backup') {
         await daemonRequest({
           method: 'POST',
@@ -94,7 +100,7 @@ export function startScheduler(): void {
         where: { enabled: true, nextRunAt: { lte: now } },
         include: {
           tasks: { orderBy: { order: 'asc' } },
-          server: { include: { node: true } },
+          server: { include: { node: true, image: true } },
         },
       });
 

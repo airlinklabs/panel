@@ -430,7 +430,7 @@ export function registerScheduleRoutes(router: Router): void {
           where: { id: scheduleId, serverId: server.UUID },
           include: {
             tasks: { orderBy: { order: 'asc' } },
-            server: { include: { node: true } },
+            server: { include: { node: true, image: true } },
           },
         });
         if (!schedule) {

@@ -68,8 +68,12 @@ function buildBasicAuth(username: string, password: string): string {
   return BASIC_AUTH_PREFIX + Buffer.from(`${username}:${password}`).toString('base64');
 }
 
-function isStreamLike(body: unknown): body is Readable {
-  return typeof body === 'object' && body !== null && 'pipe' in body;
+function isStreamLike(body: unknown): body is Readable | ReadableStream {
+  return (
+    typeof body === 'object' &&
+    body !== null &&
+    ('pipe' in body || typeof (body as ReadableStream).getReader === 'function')
+  );
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {

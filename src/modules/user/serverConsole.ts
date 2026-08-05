@@ -12,10 +12,10 @@ import { isAuthenticatedForServerWS, subUserHasPermission } from '../../handlers
 import { verifyWsToken } from '../../handlers/utils/security/wsToken';
 import logger from '../../handlers/logger';
 import { getParamAsString } from '../../utils/typeHelpers';
-import { daemonRequest, daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonRequest, daemonScheme } from '../../handlers/utils/core/daemonRequest';
 
-function wsScheme(): 'ws' | 'wss' {
-  return daemonSchemeSync() === 'https' ? 'wss' : 'ws';
+async function wsScheme(): Promise<'ws' | 'wss'> {
+  return (await daemonScheme()) === 'https' ? 'wss' : 'ws';
 }
 
 type ProxiedMessage = string | Buffer;
@@ -101,7 +101,7 @@ async function proxyConsole(
     nodeAddress: string,
     nodePort: number,
     serverId: string,
-  ) => string,
+  ) => Promise<string> | string,
   mode: ConsoleProxyMode,
 ) {
   try {
@@ -139,7 +139,7 @@ async function proxyConsole(
     }
 
     const { node } = server;
-    const socket = new WebSocket(daemonPath(node.address, node.port, serverId));
+    const socket = new WebSocket(await daemonPath(node.address, node.port, serverId));
     const pendingClientMessages: ProxiedMessage[] = [];
     let clientClosed = false;
 
@@ -255,7 +255,7 @@ const wsServerConsoleModule: Module = {
           ws,
           req,
           userId,
-          (addr, port, id) => `${wsScheme()}://${addr}:${port}/container/${id}`,
+          async (addr, port, id) => `${await wsScheme()}://${addr}:${port}/container/${id}`,
           'interactive',
         );
       },
@@ -275,8 +275,8 @@ const wsServerConsoleModule: Module = {
           ws,
           req,
           userId,
-          (addr, port, id) =>
-            `${wsScheme()}://${addr}:${port}/containerstatus/${id}`,
+          async (addr, port, id) =>
+            `${await wsScheme()}://${addr}:${port}/containerstatus/${id}`,
           'readonly',
         );
       },
@@ -296,8 +296,8 @@ const wsServerConsoleModule: Module = {
           ws,
           req,
           userId,
-          (addr, port, id) =>
-            `${wsScheme()}://${addr}:${port}/containerevents/${id}`,
+          async (addr, port, id) =>
+            `${await wsScheme()}://${addr}:${port}/containerevents/${id}`,
           'readonly',
         );
       },

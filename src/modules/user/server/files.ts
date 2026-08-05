@@ -284,9 +284,9 @@ export function registerFilesRoutes(router: Router): void {
         }
         const { server } = context;
 
-        if (typeof relativePath !== 'string') {
-          relativePath = JSON.stringify(relativePath);
-        }
+        // daemon's /fs/zip accepts either a single path string or an array of
+        // paths — pass arrays through as-is instead of stringifying them
+        const zipPaths = Array.isArray(relativePath) ? relativePath : String(relativePath);
 
         const response = await daemonRequest<{ message?: string }>({
           method: 'POST',
@@ -296,7 +296,7 @@ export function registerFilesRoutes(router: Router): void {
           nodeKey: server.node.key,
           body: {
             id: serverId,
-            path: relativePath,
+            path: zipPaths,
             zipname: zipName,
           },
         });

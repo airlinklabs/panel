@@ -217,6 +217,7 @@ async function runTransfer(
       path: '/container/backup/upload',
       params: { id: server.UUID, backupUuid },
       body: downloadRes.data,
+      contentDigest: backupChecksum,
       timeout: 600_000,
     });
 

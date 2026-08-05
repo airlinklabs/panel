@@ -5,6 +5,7 @@ import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { startServerContainer } from '../../user/server/shared';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import { nextRunFromCron } from '../../../utils/cron';
 
@@ -135,18 +136,31 @@ const clientApiModule: Module = {
 
         if (server.Suspended) return jsonError(res, 'Server is suspended', 403);
 
-        const method = action === 'kill' ? 'DELETE' : 'POST';
-        const path = action === 'kill' ? '/container/kill' : `/container/${action}`;
+        if (action === 'start') {
+          // start requires the full runtime config (image, env, ports, limits);
+          // resolve it here instead of sending a bare { id } that the daemon rejects
+          const fullServer = await prisma.server.findUnique({
+            where: { UUID: server.UUID },
+            include: { node: true, image: true },
+          });
+          if (!fullServer) {
+            return jsonError(res, 'Server not found', 404);
+          }
+          await startServerContainer(fullServer, server.UUID);
+        } else {
+          const method = action === 'kill' ? 'DELETE' : 'POST';
+          const path = action === 'kill' ? '/container/kill' : `/container/${action}`;
 
-        await daemonRequest({
-          nodeAddress: server.node.address,
-          nodePort: server.node.port,
-          nodeKey: server.node.key,
-          method,
-          path,
-          body: { id: server.UUID },
-          timeout: 30000,
-        });
+          await daemonRequest({
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            method,
+            path,
+            body: { id: server.UUID },
+            timeout: 30000,
+          });
+        }
 
         await logActivity(req, `server:${action}` as Parameters<typeof logActivity>[1], {
           serverId: server.UUID,
@@ -181,7 +195,7 @@ const clientApiModule: Module = {
           nodeKey: server.node.key,
           method: 'GET',
           path: '/fs/list',
-          params: { id: server.UUID, directory: dir },
+          params: { id: server.UUID, path: dir },
           timeout: 15000,
         });
 
@@ -210,7 +224,7 @@ const clientApiModule: Module = {
           nodeKey: server.node.key,
           method: 'GET',
           path: '/fs/file/content',
-          params: { id: server.UUID, file },
+          params: { id: server.UUID, path: file },
           timeout: 15000,
         });
 
@@ -239,7 +253,7 @@ const clientApiModule: Module = {
           nodeKey: server.node.key,
           method: 'POST',
           path: '/fs/file/content',
-          body: { id: server.UUID, file, content },
+          body: { id: server.UUID, path: file, content },
           timeout: 15000,
         });
 
@@ -273,7 +287,7 @@ const clientApiModule: Module = {
           nodeKey: server.node.key,
           method: 'DELETE',
           path: '/fs/rm',
-          body: { id: server.UUID, file },
+          body: { id: server.UUID, path: file },
           timeout: 15000,
         });
 
@@ -307,7 +321,7 @@ const clientApiModule: Module = {
           nodeKey: server.node.key,
           method: 'POST',
           path: '/fs/rename',
-          body: { id: server.UUID, file, newname },
+          body: { id: server.UUID, path: file, newName: newname },
           timeout: 15000,
         });
 
@@ -434,7 +448,7 @@ const clientApiModule: Module = {
           nodeKey: server.node.key,
           method: 'DELETE',
           path: '/container/backup',
-          body: { id: server.UUID, backupUUID },
+          body: { backupPath: backup.filePath },
           timeout: 30000,
         });
 
