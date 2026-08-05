@@ -1,16 +1,42 @@
 <%- include('../../components/header', { title: 'Subusers' }) %>
+<style>
+  .al-perm-row { transition: background 150ms ease, border-color 150ms ease; }
+  .al-perm-row:has(input:checked) {
+    border-color: var(--theme-accent);
+    background: var(--theme-accent-subtle);
+  }
+  .al-perm-row input[type="checkbox"] { accent-color: var(--theme-accent); }
+  .al-subuser-row {
+    animation: al-subuser-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 18ms);
+  }
+  @keyframes al-subuser-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .al-subuser-row { animation: none; }
+  }
+</style>
 
 <%
   const permMeta = {
+    'websocket.connect': { icon: 'radio-tower', desc: 'Connect to the live console stream' },
     console: { icon: 'terminal', desc: 'View console and send commands' },
     'console.send': { icon: 'message-square', desc: 'Send commands to the console' },
+    'control.start': { icon: 'play', desc: 'Start the server' },
+    'control.stop': { icon: 'square', desc: 'Stop the server' },
+    'control.restart': { icon: 'rotate-ccw', desc: 'Restart the server' },
+    'control.console': { icon: 'send', desc: 'Access the console page' },
     files: { icon: 'folder', desc: 'View, upload and edit files' },
-    'files.read': { icon: 'file', desc: 'View and read files' },
+    'files.read': { icon: 'file-text', desc: 'View and read files' },
     'files.write': { icon: 'upload', desc: 'Edit and upload files' },
     'files.delete': { icon: 'trash-2', desc: 'Rename, move and delete files' },
-    'files.sftp': { icon: 'key', desc: 'Generate SFTP credentials' },
+    'files.sftp': { icon: 'key-round', desc: 'Generate SFTP credentials' },
     'files.pull': { icon: 'download', desc: 'Import files by URL' },
     'files.archive': { icon: 'archive', desc: 'Archive and unpack files' },
+    'files.create': { icon: 'file-plus', desc: 'Create files and folders' },
+    'files.update': { icon: 'pencil', desc: 'Save file changes' },
     startup: { icon: 'play', desc: 'View and edit startup variables' },
     'startup.read': { icon: 'eye', desc: 'View startup variables' },
     'startup.update': { icon: 'pencil', desc: 'Edit startup variables' },
@@ -20,16 +46,36 @@
     'backups.create': { icon: 'plus', desc: 'Create backups' },
     'backups.delete': { icon: 'trash-2', desc: 'Delete backups' },
     'backups.download': { icon: 'download', desc: 'Download backups' },
+    'backups.restore': { icon: 'history', desc: 'Restore backups' },
+    'backups.lock': { icon: 'lock', desc: 'Lock backups' },
+    'database.create': { icon: 'plus', desc: 'Create databases' },
+    'database.read': { icon: 'database', desc: 'View databases' },
+    'database.update': { icon: 'pencil', desc: 'Edit databases' },
+    'database.delete': { icon: 'trash-2', desc: 'Delete databases' },
+    'database.view_password': { icon: 'key', desc: 'View database passwords' },
+    'schedule.create': { icon: 'plus', desc: 'Create schedules' },
+    'schedule.read': { icon: 'calendar', desc: 'View schedules' },
+    'schedule.update': { icon: 'pencil', desc: 'Edit schedules' },
+    'schedule.delete': { icon: 'trash-2', desc: 'Delete schedules' },
+    'allocation.read': { icon: 'map-pin', desc: 'View allocations' },
+    'allocation.create': { icon: 'plus', desc: 'Create allocations' },
+    'allocation.update': { icon: 'pencil', desc: 'Edit allocations' },
+    'allocation.delete': { icon: 'trash-2', desc: 'Delete allocations' },
     settings: { icon: 'settings', desc: 'View server settings (read-only)' },
     'settings.update': { icon: 'pencil', desc: 'Edit server settings' },
+    'settings.rename': { icon: 'tag', desc: 'Rename the server' },
+    'settings.reinstall': { icon: 'refresh-cw', desc: 'Reinstall the server' },
+    'activity.read': { icon: 'activity', desc: 'View the server activity log' },
   };
-  const permGroups = [
-    { title: 'Console control', perms: ['console', 'console.send'] },
-    { title: 'Files', perms: ['files', 'files.read', 'files.write', 'files.delete', 'files.sftp', 'files.pull', 'files.archive'] },
-    { title: 'Startup', perms: ['startup', 'startup.read', 'startup.update', 'startup.docker-image'] },
-    { title: 'Backups', perms: ['backups', 'backups.read', 'backups.create', 'backups.delete', 'backups.download'] },
-    { title: 'Settings', perms: ['settings', 'settings.update'] },
-  ];
+
+  function escAttr(val) {
+    return String(val)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
 %>
 
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
@@ -84,18 +130,18 @@
                   <tr>
                     <th scope="col" class="al-table-th px-6 py-3 uppercase">User</th>
                     <th scope="col" class="al-table-th px-6 py-3 uppercase">Permissions</th>
-                    <th scope="col" class="al-table-th px-6 py-3 uppercase">Added</th>
                     <th scope="col" class="al-table-th px-6 py-3 uppercase text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="subusers-table-body" class="divide-y" style="border-color:var(--theme-border)">
                   <% let subIdx = 0; subUsers.forEach(subUser => { %>
-                    <tr class="al-table-tr transition-colors" style="--i:<%= subIdx++ %>" data-subuser-id="<%= subUser.id %>">
+                    <% const subName = subUser.user.username || subUser.user.email || 'Unknown'; %>
+                    <tr class="al-table-tr al-subuser-row transition-colors" style="--i:<%= Math.min(subIdx++, 10) %>" data-subuser-id="<%= subUser.id %>">
                       <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center gap-3">
-                          <span class="flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%= (subUser.user.username || subUser.user.email || '?').slice(0, 1).toUpperCase() %></span>
+                          <span class="flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%= subName.slice(0, 1).toUpperCase() %></span>
                           <div class="min-w-0">
-                            <div class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= subUser.user.username || 'Unknown' %></div>
+                            <div class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= subName %></div>
                             <div class="text-xs truncate max-w-[200px]" style="color:var(--theme-text-muted)"><%= subUser.user.email %></div>
                           </div>
                         </div>
@@ -109,31 +155,29 @@
                             <% } %>
                           <% }) %>
                           <% if (hiddenPerms > 0) { %>
-                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">+<%= hiddenPerms %> more</span>
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)" title="<%= subUser.permissions.map(p => permissionLabels[p] || p).join(', ') %>">+<%= hiddenPerms %> more</span>
                           <% } %>
                           <% if (subUser.permissions.length === 0) { %>
                             <span class="text-xs italic" style="color:var(--theme-text-placeholder)">No permissions</span>
                           <% } %>
                         </div>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm" style="color:var(--theme-text-muted)">
-                          <%= new Date(subUser.createdAt).toLocaleDateString() %>
-                        </div>
-                      </td>
                       <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex justify-end space-x-2">
                           <button type="button"
-                            onclick="openEditSubUserModal(<%= subUser.id %>, '<%= subUser.user.username || subUser.user.email %>', <%= JSON.stringify(subUser.permissions).replace(/'/g, "&#39;") %>)"
-                            class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            class="edit-subuser-btn inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            data-id="<%= subUser.id %>"
+                            data-name="<%- escAttr(subName) %>"
+                            data-perms="<%- escAttr(JSON.stringify(subUser.permissions)) %>"
                             style="color:var(--theme-accent);background:var(--theme-accent-subtle)"
                           >
                             <%- icon('settings', { class: 'w-3 h-3 mr-1' }) %>
                             Edit
                           </button>
                           <button type="button"
-                            onclick="removeSubUser(<%= subUser.id %>, '<%= (subUser.user.username || subUser.user.email).replace(/'/g, "&#39;") %>')"
-                            class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            class="remove-subuser-btn inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            data-id="<%= subUser.id %>"
+                            data-name="<%- escAttr(subName) %>"
                             style="color:var(--theme-danger);background:var(--theme-danger-bg)"
                           >
                             <%- icon('trash-2', { class: 'w-3 h-3 mr-1' }) %>
@@ -147,9 +191,17 @@
               </table>
             <% } else { %>
               <div class="p-8 text-center">
-                <%- icon('users', { class: 'mx-auto h-12 w-12', style: 'color:var(--theme-text-muted)' }) %>
-                <h3 class="mt-2 text-sm font-medium" style="color:var(--theme-text-strong)">No subusers</h3>
+                <div class="flex justify-center mb-5">
+                  <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-bg-secondary);">
+                    <%- icon('users', { class: 'size-6', strokeWidth: 1.5, style: 'color:var(--theme-text-muted)' }) %>
+                  </div>
+                </div>
+                <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">No subusers</h3>
                 <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Invite other users to help manage this server.</p>
+                <button type="button" onclick="openAddSubUserModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
+                  <%- icon('user-plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+                  Add subuser
+                </button>
               </div>
             <% } %>
           </div>
@@ -161,9 +213,10 @@
   </div>
 </main>
 
+<%- include('../../components/toast') %>
 <!-- Add Subuser Modal -->
-<div id="addSubUserModal" class="al-sheet-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="addSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+<div id="addSubUserModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+  <div id="addSubUserModalPanel" class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="addSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex justify-between items-center px-6 py-4 border-b">
       <h3 id="addSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Add subuser</h3>
       <button type="button" onclick="closeModal('addSubUserModal')" aria-label="Close" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
@@ -182,13 +235,13 @@
           </div>
         </div>
         <div class="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
-          <% permGroups.forEach(group => { %>
+          <% permissionGroups.forEach(group => { %>
           <div>
             <p class="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style="color:var(--theme-text-muted)"><%= group.title %></p>
             <div class="space-y-1.5">
               <% group.perms.forEach(perm => { %>
-              <label class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer transition hover:opacity-90" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
-                <input type="checkbox" class="add-perm" value="<%= perm %>" <%= perm.indexOf('.') === -1 ? 'checked' : '' %>>
+              <label class="al-perm-row flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+                <input type="checkbox" class="add-perm form-checkbox h-4 w-4 rounded transition" value="<%= perm %>" <%= perm.indexOf('.') === -1 ? 'checked' : '' %>>
                 <%- icon(permMeta[perm].icon, { size: 14, class: 'shrink-0' }) %>
                 <span class="shrink-0 font-medium" style="color:var(--theme-text-strong)"><%= permissionLabels[perm] %></span>
                 <span class="ml-auto truncate" style="color:var(--theme-text-muted)"><%= permMeta[perm].desc %></span>
@@ -199,23 +252,23 @@
           <% }); %>
         </div>
       </div>
-      <div class="flex gap-2 px-6 py-4 border-t justify-end">
-        <button type="button" onclick="closeModal('addSubUserModal')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
-          <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-          Cancel
-        </button>
-        <button type="button" id="confirmAddSubUser" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
-          <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-          Add subuser
-        </button>
-      </div>
+    </div>
+    <div class="flex gap-2 px-6 py-4 border-t justify-end">
+      <button type="button" onclick="closeModal('addSubUserModal')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+        <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+        Cancel
+      </button>
+      <button type="button" id="confirmAddSubUser" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        Add subuser
+      </button>
     </div>
   </div>
 </div>
 
 <!-- Edit Subuser Modal -->
-<div id="editSubUserModal" class="al-sheet-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="editSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+<div id="editSubUserModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+  <div id="editSubUserModalPanel" class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="editSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex justify-between items-center px-6 py-4 border-b">
       <div>
         <h3 id="editSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Edit permissions</h3>
@@ -233,13 +286,13 @@
           </div>
         </div>
         <div class="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
-          <% permGroups.forEach(group => { %>
+          <% permissionGroups.forEach(group => { %>
           <div>
             <p class="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style="color:var(--theme-text-muted)"><%= group.title %></p>
             <div class="space-y-1.5">
               <% group.perms.forEach(perm => { %>
-              <label class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer transition hover:opacity-90" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
-                <input type="checkbox" class="edit-perm" value="<%= perm %>">
+              <label class="al-perm-row flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+                <input type="checkbox" class="edit-perm form-checkbox h-4 w-4 rounded transition" value="<%= perm %>">
                 <%- icon(permMeta[perm].icon, { size: 14, class: 'shrink-0' }) %>
                 <span class="shrink-0 font-medium" style="color:var(--theme-text-strong)"><%= permissionLabels[perm] %></span>
                 <span class="ml-auto truncate" style="color:var(--theme-text-muted)"><%= permMeta[perm].desc %></span>
@@ -250,22 +303,19 @@
           <% }); %>
         </div>
       </div>
-      <div class="flex gap-2 px-6 py-4 border-t justify-end">
-        <button type="button" onclick="closeModal('editSubUserModal')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
-          <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-          Cancel
-        </button>
-        <button type="button" id="confirmEditSubUser" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
-          <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
-          Save changes
-        </button>
-      </div>
+    </div>
+    <div class="flex gap-2 px-6 py-4 border-t justify-end">
+      <button type="button" onclick="closeModal('editSubUserModal')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+        <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+        Cancel
+      </button>
+      <button type="button" id="confirmEditSubUser" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
+        Save changes
+      </button>
     </div>
   </div>
 </div>
-
-<%- include('../../components/toast') %>
-
 <script nonce="<%- nonce %>">
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 const serverId = '<%= server.UUID %>';
@@ -290,14 +340,24 @@ document.querySelectorAll('.perm-select-all, .perm-select-none').forEach(btn => 
     const modal = document.getElementById(btn.dataset.modal);
     if (!modal) return;
     const selectAll = btn.classList.contains('perm-select-all');
-    modal.querySelectorAll('.add-perm, .edit-perm').forEach(cb => cb.checked = selectAll);
+    modal.querySelectorAll('.add-perm, .edit-perm').forEach(cb => {
+      cb.checked = selectAll;
+      if (window.animateCheckbox) window.animateCheckbox(cb);
+    });
+  });
+});
+
+document.querySelectorAll('.add-perm, .edit-perm').forEach(cb => {
+  cb.addEventListener('change', () => {
+    if (window.animateCheckbox) window.animateCheckbox(cb);
   });
 });
 
 window.openAddSubUserModal = () => {
   document.getElementById('addSubUserEmail').value = '';
-  document.querySelectorAll('.add-perm').forEach(cb => cb.checked = true);
+  document.querySelectorAll('.add-perm').forEach(cb => cb.checked = cb.value.indexOf('.') === -1);
   openModal('addSubUserModal');
+  setTimeout(() => document.getElementById('addSubUserEmail').focus(), 50);
 };
 
 window.openEditSubUserModal = (id, name, permissions) => {
@@ -306,6 +366,18 @@ window.openEditSubUserModal = (id, name, permissions) => {
   document.querySelectorAll('.edit-perm').forEach(cb => cb.checked = permissions.includes(cb.value));
   openModal('editSubUserModal');
 };
+
+document.querySelectorAll('.edit-subuser-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    let perms = [];
+    try { perms = JSON.parse(btn.dataset.perms || '[]'); } catch (e) { perms = []; }
+    openEditSubUserModal(Number(btn.dataset.id), btn.dataset.name || 'Unknown', perms);
+  });
+});
+
+document.querySelectorAll('.remove-subuser-btn').forEach(btn => {
+  btn.addEventListener('click', () => removeSubUser(Number(btn.dataset.id), btn.dataset.name || 'this user'));
+});
 
 async function api(url, method, body) {
   try {
@@ -331,6 +403,13 @@ document.getElementById('confirmAddSubUser')?.addEventListener('click', async ()
   if (result) {
     showToast('Subuser added.', 'success');
     setTimeout(() => location.reload(), 900);
+  }
+});
+
+document.getElementById('addSubUserEmail')?.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    document.getElementById('confirmAddSubUser')?.click();
   }
 });
 

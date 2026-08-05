@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer, SUBUSER_PERMISSIONS } from '../../../handlers/utils/auth/serverAuthUtil';
+import { isAuthenticatedForServer, PERMISSION_GROUPS, SUBUSER_PERMISSIONS } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
@@ -9,8 +9,13 @@ import { sendSubUserInvite } from '../../../handlers/utils/core/mailer';
 import { serverPageInclude } from './shared';
 
 const PERMISSION_LABELS: Record<string, string> = {
+  'websocket.connect': 'Live console',
   console: 'Full console',
   'console.send': 'Send commands',
+  'control.start': 'Start server',
+  'control.stop': 'Stop server',
+  'control.restart': 'Restart server',
+  'control.console': 'Console access',
   files: 'All files',
   'files.read': 'Read files',
   'files.write': 'Edit & upload',
@@ -18,6 +23,8 @@ const PERMISSION_LABELS: Record<string, string> = {
   'files.sftp': 'SFTP access',
   'files.pull': 'Pull/import',
   'files.archive': 'Archive & unpack',
+  'files.create': 'Create files',
+  'files.update': 'Update files',
   startup: 'Full startup',
   'startup.read': 'View startup',
   'startup.update': 'Edit startup',
@@ -27,12 +34,32 @@ const PERMISSION_LABELS: Record<string, string> = {
   'backups.create': 'Create backups',
   'backups.delete': 'Delete backups',
   'backups.download': 'Download backups',
+  'backups.restore': 'Restore backups',
+  'backups.lock': 'Lock backups',
+  'database.create': 'Create databases',
+  'database.read': 'View databases',
+  'database.update': 'Edit databases',
+  'database.delete': 'Delete databases',
+  'database.view_password': 'View passwords',
+  'schedule.create': 'Create schedules',
+  'schedule.read': 'View schedules',
+  'schedule.update': 'Edit schedules',
+  'schedule.delete': 'Delete schedules',
+  'allocation.read': 'View allocations',
+  'allocation.create': 'Create allocations',
+  'allocation.update': 'Edit allocations',
+  'allocation.delete': 'Delete allocations',
   settings: 'View settings',
   'settings.update': 'Edit settings',
+  'settings.rename': 'Rename server',
+  'settings.reinstall': 'Reinstall server',
+  'activity.read': 'View activity',
 };
 
 function isValidPermissionSet(permissions: unknown): permissions is string[] {
-  if (!Array.isArray(permissions)) return false;
+  if (!Array.isArray(permissions)) {
+    return false;
+  }
   return permissions.every((p) => SUBUSER_PERMISSIONS.includes(p as never));
 }
 
@@ -94,6 +121,7 @@ export function registerSubUserRoutes(router: Router): void {
           subUsers: subUsersWithPerms,
           permissionLabels: PERMISSION_LABELS,
           permissionOptions: SUBUSER_PERMISSIONS,
+          permissionGroups: PERMISSION_GROUPS,
           settings,
           features: JSON.parse(server.image.info || '{}').features || [],
           installed: await checkForServerInstallation(getParamAsString(serverId)),

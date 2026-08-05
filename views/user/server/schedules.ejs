@@ -38,77 +38,104 @@
 
       <!-- Schedules -->
       <div class="px-6 mt-8">
+        <div class="al-card rounded-xl overflow-hidden p-0">
+          <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-b" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
+            <div>
+              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Schedules</h2>
+              <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Run commands, power actions, or backups on a timer.</p>
+            </div>
+          </div>
         <% if (schedules.length > 0) { %>
-          <div class="al-card rounded-xl overflow-hidden p-0">
+          <div class="overflow-x-auto">
+            <table class="al-table min-w-full">
+              <thead class="al-table-head">
+                <tr>
+                  <th scope="col" class="al-table-th px-6 py-3 uppercase w-2/5">Name</th>
+                  <th scope="col" class="al-table-th px-6 py-3 uppercase">Schedule</th>
+                  <th scope="col" class="al-table-th px-6 py-3 uppercase">Tasks</th>
+                  <th scope="col" class="al-table-th px-6 py-3 uppercase w-24">Enabled</th>
+                  <th scope="col" class="al-table-th px-6 py-3 uppercase text-right w-52">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
             <% schedules.forEach((schedule, i) => { %>
-            <div class="px-4 sm:px-5 py-4<%= i > 0 ? ' border-t' : '' %>" data-schedule-id="<%= schedule.id %>" style="border-color:var(--theme-border)">
-              <div class="flex flex-wrap items-start justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= schedule.name %></h3>
-                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium font-mono" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%= schedule.cron %></span>
-                    <% if (schedule.timeOffset) { %>
-                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium font-mono" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)" title="Schedule clock offset"><%= schedule.timeOffset > 0 ? '+' : '' %><%= schedule.timeOffset %>m</span>
-                    <% } %>
-                    <% if (!schedule.enabled) { %>
-                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Disabled</span>
-                    <% } %>
-                  </div>
-                  <div class="flex items-center gap-x-4 gap-y-1 mt-1.5 flex-wrap text-[11px]" style="color:var(--theme-text-muted)">
-                    <span class="flex items-center gap-1">
-                      <%- icon('clock', { class: 'w-3 h-3' }) %>
-                      <% if (schedule.nextRunAt) { %>Next: <%= new Date(schedule.nextRunAt).toLocaleString() %><% } else { %>Next: —<% } %>
-                    </span>
-                    <span class="flex items-center gap-1">
-                      <%- icon('history', { class: 'w-3 h-3' }) %>
-                      <% if (schedule.lastRunAt) { %>Last: <%= new Date(schedule.lastRunAt).toLocaleString() %><% } else { %>Last: never<% } %>
-                    </span>
-                    <span class="flex items-center gap-1">
-                      <%- icon('list', { class: 'w-3 h-3' }) %>
-                      <%= schedule.tasks.length %> task<%= schedule.tasks.length === 1 ? '' : 's' %>
-                    </span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-1.5 shrink-0">
-                  <label class="relative inline-flex items-center cursor-pointer" title="<%= schedule.enabled ? 'Disable schedule' : 'Enable schedule' %>">
-                    <input type="checkbox" class="sr-only peer sched-toggle" aria-label="<%= schedule.enabled ? 'Disable schedule' : 'Enable schedule' %>" <%= schedule.enabled ? 'checked' : '' %>>
-                    <div class="al-toggle-track">
-                      <div class="al-toggle-dot"></div>
+                <tr class="al-table-tr transition-colors" data-schedule-id="<%= schedule.id %>">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= schedule.name %></h3>
+                      <% if (!schedule.enabled) { %>
+                      <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Disabled</span>
+                      <% } %>
                     </div>
-                  </label>
-                  <button type="button" data-sched-name="<%= schedule.name.replace(/'/g, "&#39;") %>" onclick="runSchedule(<%= schedule.id %>, this.dataset.schedName)"
-                    class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                    style="color:var(--theme-success);background:var(--theme-success-bg)">
-                    <%- icon('play', { class: 'w-3 h-3' }) %>
-                    Run now
-                  </button>
-                  <button type="button" onclick="toggleTasks(<%= schedule.id %>)"
-                    class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                    style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
-                    <%- icon('settings', { class: 'w-3 h-3' }) %>
-                    Tasks
-                  </button>
-                  <button type="button" data-sched-name="<%= schedule.name.replace(/'/g, "&#39;") %>" onclick="deleteSchedule(<%= schedule.id %>, this.dataset.schedName)"
-                    class="al-btn-ghost p-1.5 -mr-1.5" style="color:var(--theme-danger)" aria-label="Delete schedule">
-                    <%- icon('trash-2', { size: 15 }) %>
-                  </button>
-                </div>
-              </div>
+                    <div class="flex items-center gap-x-4 gap-y-1 mt-1.5 flex-wrap text-[11px]" style="color:var(--theme-text-muted)">
+                      <span class="flex items-center gap-1">
+                        <%- icon('clock', { class: 'w-3 h-3' }) %>
+                        <% if (schedule.nextRunAt) { %>Next: <%= new Date(schedule.nextRunAt).toLocaleString() %><% } else { %>Next: —<% } %>
+                      </span>
+                      <span class="flex items-center gap-1">
+                        <%- icon('history', { class: 'w-3 h-3' }) %>
+                        <% if (schedule.lastRunAt) { %>Last: <%= new Date(schedule.lastRunAt).toLocaleString() %><% } else { %>Last: never<% } %>
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap align-top">
+                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium font-mono" style="background:var(--theme-accent-subtle);color:var(--theme-accent)" title="Cron expression"><%= schedule.cron %></span>
+                    <% if (schedule.timeOffset) { %>
+                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium font-mono ml-1" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)" title="Schedule clock offset"><%= schedule.timeOffset > 0 ? '+' : '' %><%= schedule.timeOffset %>m</span>
+                    <% } %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm tabular-nums" style="color:var(--theme-text)" data-task-count="<%= schedule.id %>"><%= schedule.tasks.length %></span>
+                      <button type="button" onclick="toggleTasks(<%= schedule.id %>)" data-manage-tasks="<%= schedule.id %>" aria-expanded="false"
+                        class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                        style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
+                        <%- icon('settings', { class: 'w-3 h-3' }) %>
+                        <span data-manage-label="<%= schedule.id %>">Manage</span>
+                      </button>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <label class="relative inline-flex items-center cursor-pointer" title="<%= schedule.enabled ? 'Disable schedule' : 'Enable schedule' %>">
+                      <input type="checkbox" class="sr-only peer sched-toggle" aria-label="<%= schedule.enabled ? 'Disable schedule' : 'Enable schedule' %>" <%= schedule.enabled ? 'checked' : '' %>>
+                      <div class="al-toggle-track">
+                        <div class="al-toggle-dot"></div>
+                      </div>
+                    </label>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div class="flex justify-end items-center gap-2">
+                      <button type="button" data-sched-name="<%= schedule.name %>" onclick="runSchedule(<%= schedule.id %>, this.dataset.schedName)"
+                        <%= schedule.tasks.length === 0 ? 'disabled title="Add a task first"' : '' %>
+                        class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none"
+                        style="color:var(--theme-success);background:var(--theme-success-bg)">
+                        <%- icon('play', { class: 'w-3 h-3' }) %>
+                        Run now
+                      </button>
+                      <button type="button" data-sched-name="<%= schedule.name %>" onclick="deleteSchedule(<%= schedule.id %>, this.dataset.schedName)"
+                        class="al-btn-ghost p-1.5 -mr-1.5" style="color:var(--theme-danger)" aria-label="Delete schedule">
+                        <%- icon('trash-2', { size: 15 }) %>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="al-table-tr" data-tasks-row="<%= schedule.id %>">
+                  <td colspan="5" class="px-0 py-0">
+                    <div class="tasks-wrap hidden px-6 pb-5" style="background:var(--theme-bg-secondary)">
 
-              <!-- Task list (collapsed by default) -->
-              <div class="tasks-wrap hidden mt-4 pt-4 border-t" style="border-color:var(--theme-border)">
-                <% if (schedule.tasks.length > 0) { %>
+                  <p class="text-[11px] font-semibold uppercase tracking-widest mb-2 pt-5" style="color:var(--theme-text-muted)">Tasks</p>
+                  <% if (schedule.tasks.length > 0) { %>
                   <div class="space-y-1">
                     <% schedule.tasks.forEach(task => { %>
-                      <div class="task-row flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm" data-task-row="<%= task.id %>" style="background:var(--theme-bg-secondary)">
+                      <div class="task-row flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm" data-task-row="<%= task.id %>" style="background:var(--theme-bg-card)">
                         <div class="min-w-0 flex items-center gap-2.5">
                           <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)"><%= task.action %></span>
-<span class="truncate font-mono text-xs" style="color:var(--theme-text)">
-                             <% if (task.action === 'command') { %><%= task.payload.command %><% } else if (task.action === 'power') { %><%= task.payload.action %><% } else { %><%= task.payload.name %><% } %>
-                           </span>
-                           <% if (task.timeOffset > 0) { %>
-                             <span class="shrink-0 text-[10px] font-medium" style="color:var(--theme-text-muted)">+<%= task.timeOffset %>s</span>
-                           <% } %>
+                          <span class="truncate font-mono text-xs" style="color:var(--theme-text)">
+                            <% if (task.action === 'command') { %><%= task.payload.command %><% } else if (task.action === 'power') { %><%= task.payload.action %><% } else { %><%= task.payload.name %><% } %>
+                          </span>
+                          <% if (task.timeOffset > 0) { %>
+                            <span class="shrink-0 text-[10px] font-medium" style="color:var(--theme-text-muted)">+<%= task.timeOffset %>s</span>
+                          <% } %>
                         </div>
                         <button type="button" onclick="deleteTask(<%= schedule.id %>, <%= task.id %>)" class="al-btn-ghost p-1.5 -mr-1.5 shrink-0" style="color:var(--theme-danger)" aria-label="Remove task">
                           <%- icon('x', { class: 'w-3.5 h-3.5' }) %>
@@ -116,13 +143,12 @@
                       </div>
                     <% }); %>
                   </div>
-                <% } else { %>
+                  <% } else { %>
                   <p class="text-sm italic sched-empty" data-schedule="<%= schedule.id %>" style="color:var(--theme-text-placeholder)">No tasks yet. Add one below.</p>
-                <% } %>
+                  <% } %>
 
-                <div data-pending-tasks="<%= schedule.id %>" class="space-y-1 mt-1"></div>
+                  <div data-pending-tasks="<%= schedule.id %>" class="space-y-1 mt-1"></div>
 
-                  <!-- Add task form -->
                   <div class="flex flex-wrap items-end gap-2.5 pt-3">
                     <div>
                       <label class="al-label">Action</label>
@@ -166,23 +192,25 @@
                       Save tasks
                     </button>
                   </div>
-                </div>
-              </div>
+                  </div>
+                </td>
+              </tr>
             <% }); %>
+              </tbody>
+            </table>
           </div>
         <% } else { %>
-          <div class="al-card rounded-lg shadow">
-            <div class="p-10 text-center">
-              <%- icon('calendar', { class: 'mx-auto h-12 w-12', style: 'color:var(--theme-text-muted)' }) %>
-              <h3 class="mt-3 text-sm font-medium" style="color:var(--theme-text-strong)">No schedules</h3>
-              <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Create a schedule to run commands, power actions, or backups on a timer.</p>
-              <button type="button" onclick="openAddScheduleModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
-                <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-                New Schedule
-              </button>
-            </div>
+          <div class="p-10 text-center">
+            <%- icon('calendar', { class: 'mx-auto h-12 w-12', style: 'color:var(--theme-text-muted)' }) %>
+            <h3 class="mt-3 text-sm font-medium" style="color:var(--theme-text-strong)">No schedules</h3>
+            <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Create a schedule to run commands, power actions, or backups on a timer.</p>
+            <button type="button" onclick="openAddScheduleModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
+              <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+              New Schedule
+            </button>
           </div>
         <% } %>
+        </div>
       </div>
 
       </div><!-- /server-page-body -->
@@ -280,16 +308,16 @@
         </div>
         <p class="text-[11px]" aria-live="polite" style="color:var(--theme-text-muted)">Runs <span id="schedVisualDesc" class="font-medium" style="color:var(--theme-accent)">every hour</span> — cron: <span id="schedVisualCron" class="font-mono font-medium" style="color:var(--theme-accent)">0 0 * * * *</span></p>
       </div>
-      <div class="flex gap-2 px-6 py-4 border-t justify-end">
-        <button type="button" onclick="closeAddScheduleModal()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
-          <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-          Cancel
-        </button>
-        <button type="button" id="confirmAddSchedule" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
-          <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-          <span>Create schedule</span>
-        </button>
-      </div>
+    </div>
+    <div class="flex gap-2 px-6 py-4 border-t justify-end">
+      <button type="button" onclick="closeAddScheduleModal()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+        <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+        Cancel
+      </button>
+      <button type="button" id="confirmAddSchedule" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <span>Create schedule</span>
+      </button>
     </div>
   </div>
 </div>
@@ -742,8 +770,15 @@ document.querySelectorAll('.task-action').forEach((sel) => {
 });
 
 window.toggleTasks = (scheduleId) => {
-  const wrap = document.querySelector('[data-schedule-id="' + scheduleId + '"] .tasks-wrap');
-  wrap.classList.toggle('hidden');
+  const wrap = document.querySelector('[data-tasks-row="' + scheduleId + '"] .tasks-wrap');
+  if (!wrap) return;
+  const closed = wrap.classList.toggle('hidden');
+  const btn = document.querySelector('[data-manage-tasks="' + scheduleId + '"]');
+  if (btn) {
+    btn.setAttribute('aria-expanded', String(!closed));
+    const label = btn.querySelector('[data-manage-label="' + scheduleId + '"]');
+    if (label) label.textContent = closed ? 'Manage' : 'Close';
+  }
 };
 
 window.runSchedule = async (scheduleId, name) => {
@@ -786,7 +821,7 @@ function renderPendingTasks(scheduleId) {
     const label = task.action === 'command' ? task.payload.command : (task.action === 'power' ? task.payload.action : task.payload.name);
     const row = document.createElement('div');
     row.className = 'flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm';
-    row.style.cssText = 'background:var(--theme-bg-secondary);border:1px dashed var(--theme-accent)';
+    row.style.cssText = 'background:var(--theme-bg-card);border:1px dashed var(--theme-accent)';
     row.innerHTML = '<div class="min-w-0 flex items-center gap-2.5">'
       + '<span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">' + task.action + '</span>'
       + '<span class="truncate font-mono text-xs" style="color:var(--theme-text)">' + label.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>'
@@ -806,7 +841,7 @@ function removePendingTask(scheduleId, index) {
 }
 
 window.addTask = (scheduleId) => {
-  const card = document.querySelector('[data-schedule-id="' + scheduleId + '"]');
+  const card = document.querySelector('[data-tasks-row="' + scheduleId + '"]');
   const action = card.querySelector('.task-action').value;
   let payload = {};
   if (action === 'command') {
@@ -855,9 +890,11 @@ window.deleteTask = async (scheduleId, taskId) => {
   if (!result) return;
   const row = document.querySelector('[data-task-row="' + taskId + '"]');
   if (row) row.remove();
-  const card = document.querySelector('[data-schedule-id="' + scheduleId + '"]');
-  const empty = card && card.querySelector('.sched-empty');
-  if (empty) empty.classList.toggle('hidden', (pendingTasks[scheduleId] || []).length > 0 || card.querySelectorAll('.task-row').length > 0);
+  const tasksRow = document.querySelector('[data-tasks-row="' + scheduleId + '"]');
+  const empty = tasksRow && tasksRow.querySelector('.sched-empty');
+  if (empty) empty.classList.toggle('hidden', (pendingTasks[scheduleId] || []).length > 0 || (tasksRow && tasksRow.querySelectorAll('.task-row').length > 0));
+  const count = document.querySelector('[data-task-count="' + scheduleId + '"]');
+  if (count) count.textContent = String(Math.max(0, (parseInt(count.textContent, 10) || 1) - 1));
   showToast('Task removed.', 'success');
 };
 </script>

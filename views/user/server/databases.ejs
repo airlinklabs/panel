@@ -17,38 +17,11 @@
           <div class="flex-1 min-w-0">
             <%- include('../../components/serverHeader') %>
             <!-- Server meta: image · node · id -->
-            <div class="flex items-center gap-3 mt-1.5 flex-wrap">
-              <div class="flex items-center gap-1.5">
-                <%- icon('box', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px] truncate max-w-[140px]" style="color:var(--theme-text-muted)"><%= server.image.name %></span>
-              </div>
-              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
-              <div class="flex items-center gap-1.5">
-                <%- icon('database', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px] truncate" style="color:var(--theme-text-muted)"><%= userDbCount %>/<%= typeof userDbLimit !== 'undefined' && userDbLimit > 0 ? userDbLimit : '∞' %> databases</span>
-              </div>
-              <% if (typeof userDbLimit !== 'undefined' && userDbLimit > 0) { %>
-              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
-              <div class="flex items-center gap-1.5">
-                <%- icon('shield-check', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px]" style="color:var(--theme-text-muted)">account limit</span>
-              </div>
-              <% } %>
-              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
-              <div class="flex items-center gap-1.5">
-                <%- icon('server', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px] truncate max-w-[100px]" style="color:var(--theme-text-muted)"><%= server.node.name %></span>
-              </div>
-              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
-              <div class="flex items-center gap-1.5">
-                <%- icon('hash', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px] font-mono" style="color:var(--theme-text-muted)"><%= server.UUID.split('-')[0] %></span>
-              </div>
-            </div>
+            <%- include('../../components/serverMeta') %>
           </div>
           <% if (hosts.length > 0) { %>
           <div class="flex gap-2 shrink-0">
-            <button onclick="openAddDatabaseModal()" type="button"
+            <button id="newDatabaseBtn" onclick="openAddDatabaseModal()" type="button"
                 class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
                 <%- icon('plus', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
                 <%= req.translations.newDatabase || 'New Database' %>
@@ -65,10 +38,10 @@
 
       <div id="server-page-body">
 
-      <!-- Databases -->
-      <div class="px-6 space-y-4 mt-8">
+      <!-- Databases Management -->
+      <div class="px-6 mt-8">
         <% if (hosts.length === 0) { %>
-          <div class="al-alert-danger mb-5">
+          <div class="al-alert-danger">
             <%- icon('database', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
             <div class="flex-1">
               <p class="font-medium"><%= req.translations.noDbHostsConfigured || 'No database hosts configured' %></p>
@@ -76,125 +49,140 @@
             </div>
           </div>
         <% } else if (databases.length === 0) { %>
-          <div class="al-card rounded-lg shadow">
-            <div class="p-10 text-center">
-              <%- icon('database', { class: 'mx-auto h-12 w-12', style: 'color:var(--theme-text-muted)' }) %>
-              <h3 class="mt-3 text-sm font-medium" style="color:var(--theme-text-strong)"><%= req.translations.noDatabasesYet || 'No databases yet' %></h3>
-              <p class="mt-1 text-sm" style="color:var(--theme-text-muted)"><%= req.translations.noDatabasesYetDesc || 'Create a database to use with your server.' %></p>
-              <button type="button" onclick="openAddDatabaseModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
-                <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-                <%= req.translations.createDatabase || 'Create Database' %>
-              </button>
+          <div class="al-card rounded-xl p-10 text-center">
+            <div class="flex justify-center">
+              <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-bg-secondary);">
+                <%- icon('database', { class: 'size-6', strokeWidth: 1.5, style: 'color:var(--theme-text-muted)' }) %>
+              </div>
             </div>
+            <h2 class="mt-4 text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.noDatabasesYet || 'No databases yet' %></h2>
+            <p class="mt-1 text-sm max-w-sm mx-auto" style="color:var(--theme-text-muted)"><%= req.translations.noDatabasesYetDesc || 'Create a database to use with your server.' %></p>
+            <button type="button" onclick="openAddDatabaseModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
+              <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+              <%= req.translations.createDatabase || 'Create Database' %>
+            </button>
           </div>
         <% } else { %>
-          <div class="al-card rounded-xl overflow-hidden p-0">
-            <% databases.forEach((db, i) => { %>
-            <div class="px-4 sm:px-5 py-4<%= i > 0 ? ' border-t' : '' %>" data-db-id="<%= db.id %>" style="border-color:var(--theme-border)">
-              <div class="flex flex-wrap items-start justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <h3 class="text-sm font-semibold font-mono" style="color:var(--theme-text-strong)"><%= db.databaseName %></h3>
-                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium font-mono" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">@ <%= db.host.host %>:<%= db.host.port %></span>
-                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">MySQL</span>
-                  </div>
-                  <div class="flex items-center gap-x-4 gap-y-1 mt-1.5 flex-wrap text-[11px]" style="color:var(--theme-text-muted)">
-                    <span class="flex items-center gap-1">
-                      <%- icon('calendar', { class: 'w-3 h-3' }) %>
-                      <%= req.translations.createdLabel || 'Created:' %> <%= new Date(db.createdAt).toLocaleString() %>
-                    </span>
-                    <span class="flex items-center gap-1">
-                      <%- icon('server', { class: 'w-3 h-3' }) %>
-                      <%= req.translations.hostLabel || 'Host:' %> <%= db.host.name %>
-                    </span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-1.5 shrink-0">
-                  <button type="button" onclick="rotatePassword(<%= db.id %>)"
-                    class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                    style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
-                    <%- icon('refresh-cw', { class: 'w-3 h-3' }) %>
-                    <%= req.translations.rotatePassword || 'Rotate password' %>
-                  </button>
-                  <button onclick="deleteDatabase(<%= db.id %>)" type="button" class="al-btn-ghost p-1.5 -mr-1.5" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete database' %>">
-                    <%- icon('trash-2', { size: 15 }) %>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Credentials -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-4">
-                <div>
-                  <p class="text-[11px] font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.usernameLabel || 'Username' %></p>
-                  <div class="flex items-center gap-1.5 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary)">
-                    <span id="db-user-<%= db.id %>" class="flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)"><%= db.databaseUser %></span>
-                    <button type="button" onclick="copyText('<%= db.databaseUser %>')" class="al-btn-ghost p-1 -mr-1.5 shrink-0" aria-label="<%= req.translations.copyUsername || 'Copy username' %>">
-                      <%- icon('copy', { size: 14 }) %>
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <p class="text-[11px] font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.passwordLabel || 'Password' %></p>
-                  <div class="flex items-center gap-1.5 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary)">
-                    <span id="db-pass-<%= db.id %>" class="hidden flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong);display:none"><%= db.databasePassword %></span>
-                    <span id="db-pass-mask-<%= db.id %>" class="flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)">••••••••••••••••</span>
-                    <button type="button" onclick="togglePassword(<%= db.id %>)" class="al-btn-ghost p-1 -mr-1.5 shrink-0" aria-label="<%= req.translations.showPassword || 'Show password' %>">
-                      <%- icon('eye', { size: 14 }) %>
-                    </button>
-                    <button type="button" onclick="copyText(document.getElementById('db-pass-<%= db.id %>').textContent)" class="al-btn-ghost p-1 -mr-1.5 shrink-0" aria-label="<%= req.translations.copyPassword || 'Copy password' %>">
-                      <%- icon('copy', { size: 14 }) %>
-                    </button>
-                  </div>
-                </div>
-                <div class="md:col-span-2">
-                  <p class="text-[11px] font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.connectionString || 'Connection string' %></p>
-                  <div class="flex items-center gap-1.5 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary)">
-                    <span id="db-dsn-<%= db.id %>" class="flex-1 min-w-0 truncate font-mono text-[11px]" style="color:var(--theme-text-strong)">
-                      mysql://<%= db.databaseUser %>:<%= db.databasePassword %>@<%= db.host.host %>:<%= db.host.port %>/<%= db.databaseName %>
-                    </span>
-                    <button type="button" onclick="copyText(document.getElementById('db-dsn-<%= db.id %>').textContent)" class="al-btn-ghost p-1 -mr-1.5 shrink-0" aria-label="<%= req.translations.copyConnectionString || 'Copy connection string' %>">
-                      <%- icon('copy', { size: 14 }) %>
-                    </button>
-                  </div>
-                </div>
+          <div class="al-card rounded-lg shadow overflow-hidden p-0">
+            <div class="al-card-header">
+              <div>
+                <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Databases</h2>
+                <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= userDbCount %>/<%= typeof userDbLimit !== 'undefined' && userDbLimit > 0 ? userDbLimit : '∞' %> databases</p>
               </div>
             </div>
-            <% }); %>
+            <div class="overflow-x-auto">
+              <table class="al-table min-w-[900px]">
+                <thead class="al-table-head">
+                  <tr>
+                    <th scope="col" class="al-table-th px-6 py-3 uppercase w-48">Name</th>
+                    <th scope="col" class="al-table-th px-6 py-3 uppercase w-44">Host</th>
+                    <th scope="col" class="al-table-th px-6 py-3 uppercase">Connection string</th>
+                    <th scope="col" class="al-table-th px-6 py-3 uppercase w-40">Username</th>
+                    <th scope="col" class="al-table-th px-6 py-3 uppercase w-44">Password</th>
+                    <th scope="col" class="al-table-th px-6 py-3 uppercase text-right w-36">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y" style="border-color:var(--theme-border)">
+                  <% databases.forEach((db, i) => { %>
+                    <tr class="al-table-tr transition-colors" data-db-id="<%= db.id %>" data-db-name="<%= db.databaseName %>">
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-2">
+                          <span class="font-mono text-sm font-medium truncate max-w-[10rem]" style="color:var(--theme-text-strong)" title="<%= db.databaseName %>"><%= db.databaseName %></span>
+                          <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">MySQL</span>
+                        </div>
+                        <div class="text-[11px] mt-1 flex items-center gap-1.5" style="color:var(--theme-text-muted)">
+                          <%- icon('calendar', { class: 'size-3 shrink-0' }) %>
+                          <%= req.translations.createdLabel || 'Created:' %> <%= new Date(db.createdAt).toLocaleDateString() %> <%= new Date(db.createdAt).toLocaleTimeString() %>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= db.host.name %></div>
+                        <div class="text-[11px] font-mono mt-0.5" style="color:var(--theme-text-muted)"><%= db.host.host %>:<%= db.host.port %></div>
+                      </td>
+                      <td class="px-6 py-4">
+                        <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style="background:var(--theme-bg-secondary)">
+                          <span data-role="dsn" class="flex-1 min-w-0 truncate font-mono text-[11px]" style="color:var(--theme-text-strong)">mysql://<%= db.databaseUser %>:<%= db.databasePassword %>@<%= db.host.host %>:<%= db.host.port %>/<%= db.databaseName %></span>
+                          <button type="button" data-action="copy-dsn" class="al-btn-ghost p-1 shrink-0" style="border:none" aria-label="<%= req.translations.copyConnectionString || 'Copy connection string' %>">
+                            <%- icon('copy', { size: 13 }) %>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style="background:var(--theme-bg-secondary)">
+                          <span data-role="user" class="flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)"><%= db.databaseUser %></span>
+                          <button type="button" data-action="copy-user" class="al-btn-ghost p-1 shrink-0" style="border:none" aria-label="<%= req.translations.copyUsername || 'Copy username' %>">
+                            <%- icon('copy', { size: 13 }) %>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style="background:var(--theme-bg-secondary)">
+                          <span data-role="pass" class="hidden flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)"><%= db.databasePassword %></span>
+                          <span data-role="pass-mask" class="flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)">••••••••••••••••</span>
+                          <button type="button" data-action="toggle-pass" class="al-btn-ghost p-1 shrink-0" style="border:none" aria-label="<%= req.translations.showPassword || 'Show password' %>">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-eye="on" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                          </button>
+                          <button type="button" data-action="copy-pass" class="al-btn-ghost p-1 shrink-0" style="border:none" aria-label="<%= req.translations.copyPassword || 'Copy password' %>">
+                            <%- icon('copy', { size: 13 }) %>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center justify-end gap-1.5">
+                          <button type="button" data-action="rotate"
+                            class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
+                            <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 2 }) %>
+                            <%= req.translations.rotatePassword || 'Rotate' %>
+                          </button>
+                          <button type="button" data-action="delete" class="al-btn-ghost p-1.5" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete database' %>">
+                            <%- icon('trash-2', { size: 14 }) %>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
           </div>
         <% } %>
       </div>
+
+      </div><!-- /server-page-body -->
+
       </div>
-    </div>
   </div>
 </main>
 
-<!-- Add Database Modal -->
-<div id="addDatabaseModal" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
-  <div class="absolute inset-0 bg-transparent" aria-hidden="true" onclick="closeAddDatabaseModal()"></div>
-  <div id="addDatabasePanel" class="al-sheet-panel relative w-full max-w-md mx-4 rounded-2xl shadow-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="addDatabaseTitle" tabindex="-1" style="background:var(--theme-bg-card); border:1px solid var(--theme-border)">
-    <div class="flex justify-between items-center px-6 py-4 border-b">
-      <h3 id="addDatabaseTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h3>
+<%- include('../../components/toast') %>
+
+<!-- Create Database Modal -->
+<div id="addDatabaseModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none">
+  <div id="addDatabasePanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+    <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border)">
+      <div>
+        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= req.translations.dbProvisionHint || 'A database, user and password will be provisioned on this host.' %></p>
+      </div>
       <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="px-6 py-4 space-y-4 overflow-y-auto">
-      <div>
-        <label for="dbHostSelect" class="al-label"><%= req.translations.databaseHostLabel || 'Database host' %></label>
-        <select id="dbHostSelect" class="al-input w-full">
-          <% hosts.forEach(host => { %>
-            <option value="<%= host.id %>"><%= host.name %> (<%= host.host %>:<%= host.port %>)</option>
-          <% }); %>
-        </select>
-        <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)"><%= req.translations.dbProvisionHint || 'A database, user and password will be provisioned on this host.' %></p>
-      </div>
+    <div class="px-6 py-4 overflow-y-auto flex-grow">
+      <label for="dbHostSelect" class="al-label"><%= req.translations.databaseHostLabel || 'Database host' %></label>
+      <select id="dbHostSelect" class="al-input w-full">
+        <% hosts.forEach(host => { %>
+          <option value="<%= host.id %>"><%= host.name %> (<%= host.host %>:<%= host.port %>)</option>
+        <% }); %>
+      </select>
     </div>
-    <div class="flex gap-2 px-6 py-4 border-t justify-end">
-      <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+    <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border)">
+      <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-secondary inline-flex items-center gap-1.5">
         <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
         <%= req.translations.cancel || 'Cancel' %>
       </button>
-      <button type="button" id="confirmAddDatabase" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+      <button type="button" id="confirmAddDatabase" class="al-btn-primary inline-flex items-center gap-1.5">
         <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
         <%= req.translations.createDatabaseBtn || 'Create database' %>
       </button>
@@ -202,58 +190,34 @@
   </div>
 </div>
 
-<%- include('../../components/toast') %>
-
 <script nonce="<%- nonce %>">
-const t = <%= JSON.stringify(req.translations) %>;
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+const t = <%- JSON.stringify(req.translations).replace(/</g, '\\x3c') %>;
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 const serverId = '<%= server.UUID %>';
 
-const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m) => console.warn('[databases]', m) };
+const EYE_ON = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>';
 
-function getFocusableElements(panel) {
-  return Array.from((panel || document).querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'))
-    .filter((el) => !el.disabled && el.offsetParent !== null);
+const modalEl = document.getElementById('addDatabaseModal');
+const modalPanel = document.getElementById('addDatabasePanel');
+
+function showAddModal() {
+  modalEl.classList.remove('opacity-0', 'pointer-events-none');
+  Animate.openModal(modalEl, modalPanel);
+  document.getElementById('dbHostSelect').focus();
 }
 
-let lastAddModalFocus = null;
+function hideAddModal() {
+  const done = function () {
+    modalEl.classList.add('opacity-0', 'pointer-events-none');
+  };
+  Animate.closeModal(modalEl, modalPanel, done);
+}
 
-window.openAddDatabaseModal = () => {
-  lastAddModalFocus = document.activeElement;
-  document.getElementById('dbHostSelect').value = document.querySelector('#dbHostSelect option')?.value || '';
-  Animate.openModal(document.getElementById('addDatabaseModal'), document.getElementById('addDatabasePanel'));
-  const focusable = getFocusableElements(document.getElementById('addDatabasePanel'));
-  (focusable[0] || document.getElementById('addDatabasePanel')).focus();
-};
+window.openAddDatabaseModal = showAddModal;
+window.closeAddDatabaseModal = hideAddModal;
 
-window.closeAddDatabaseModal = () => {
-  Animate.closeModal(document.getElementById('addDatabaseModal'), document.getElementById('addDatabasePanel'));
-  if (lastAddModalFocus) lastAddModalFocus.focus();
-};
-
-document.addEventListener('keydown', (e) => {
-  const modal = document.getElementById('addDatabaseModal');
-  if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-    e.preventDefault();
-    closeAddDatabaseModal();
-    return;
-  }
-  if (e.key === 'Tab' && !modal.classList.contains('hidden')) {
-    const focusable = getFocusableElements(document.getElementById('addDatabasePanel'));
-    if (focusable.length === 0) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  }
-});
-
-document.getElementById('confirmAddDatabase')?.addEventListener('click', async () => {
+document.getElementById('confirmAddDatabase').addEventListener('click', async () => {
   const hostId = document.getElementById('dbHostSelect').value;
   if (!hostId) {
     showToast(t.selectDbHost || 'Select a database host.', 'error');
@@ -267,11 +231,11 @@ document.getElementById('confirmAddDatabase')?.addEventListener('click', async (
       headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
       body: JSON.stringify({ hostId }),
     });
-    const result = await response.json();
+    const result = await response.json().catch(() => ({}));
     if (response.ok && result.success) {
       showToast(t.databaseCreated || 'Database created.', 'success');
-      closeAddDatabaseModal();
-      window.location.reload();
+      hideAddModal();
+      setTimeout(() => window.location.reload(), 600);
     } else {
       showToast(result.error || t.failedCreateDatabase || 'Failed to create database.', 'error');
     }
@@ -283,18 +247,24 @@ document.getElementById('confirmAddDatabase')?.addEventListener('click', async (
 });
 
 window.copyText = (text) => {
+  if (!text) return;
   navigator.clipboard.writeText(text).then(
     () => showToast(t.copiedToClipboard || 'Copied to clipboard.', 'success'),
     () => showToast(t.couldNotCopy || 'Could not copy.', 'error'),
   );
 };
 
-window.togglePassword = (id) => {
-  const pass = document.getElementById('db-pass-' + id);
-  const mask = document.getElementById('db-pass-mask-' + id);
-  const hidden = pass.style.display === 'none';
-  pass.style.display = hidden ? 'flex' : 'none';
-  mask.style.display = hidden ? 'none' : 'flex';
+window.togglePassword = (btn) => {
+  const row = btn.closest('tr[data-db-id]');
+  const pass = row.querySelector('[data-role="pass"]');
+  const mask = row.querySelector('[data-role="pass-mask"]');
+  const showing = pass.classList.contains('hidden');
+  pass.classList.toggle('hidden', !showing);
+  mask.classList.toggle('hidden', showing);
+  btn.innerHTML = showing ? EYE_OFF : EYE_ON;
+  btn.setAttribute('aria-label', showing
+    ? (t.hidePassword || 'Hide password')
+    : (t.showPassword || 'Show password'));
 };
 
 window.rotatePassword = async (id) => {
@@ -309,12 +279,23 @@ window.rotatePassword = async (id) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
         });
-        const result = await response.json();
+        const result = await response.json().catch(() => ({}));
         if (response.ok && result.success) {
-          const passEl = document.getElementById('db-pass-' + id);
-          passEl.textContent = result.password;
-          const dsnEl = document.getElementById('db-dsn-' + id);
-          dsnEl.textContent = dsnEl.textContent.replace(/:[^@]+@/, ':' + result.password + '@');
+          const row = document.querySelector(`tr[data-db-id="${id}"]`);
+          if (row) {
+            const pass = row.querySelector('[data-role="pass"]');
+            const mask = row.querySelector('[data-role="pass-mask"]');
+            const toggle = row.querySelector('[data-action="toggle-pass"]');
+            pass.textContent = result.password;
+            const dsn = row.querySelector('[data-role="dsn"]');
+            dsn.textContent = dsn.textContent.replace(/:[^@]+@/, ':' + result.password + '@');
+            pass.classList.add('hidden');
+            mask.classList.remove('hidden');
+            if (toggle) {
+              toggle.innerHTML = EYE_ON;
+              toggle.setAttribute('aria-label', t.showPassword || 'Show password');
+            }
+          }
           showToast(t.passwordRotated || 'Password rotated.', 'success');
         } else {
           showToast(result.error || t.failedRotatePassword || 'Failed to rotate password.', 'error');
@@ -326,10 +307,10 @@ window.rotatePassword = async (id) => {
   });
 };
 
-window.deleteDatabase = async (id) => {
+window.deleteDatabase = async (id, name) => {
   window.modal.confirm({
     title: t.deleteDatabaseTitle || 'Delete database',
-    body: t.deleteDatabaseConfirm || 'This will permanently delete the database and its user from the host. This cannot be undone.',
+    body: `${t.deleteDatabaseConfirm || 'This will permanently delete the database and its user from the host. This cannot be undone.'}` + (name ? ` (${name})` : ''),
     danger: true,
     confirmLabel: t.delete || 'Delete',
     onConfirm: async () => {
@@ -338,10 +319,10 @@ window.deleteDatabase = async (id) => {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
         });
-        const result = await response.json();
+        const result = await response.json().catch(() => ({}));
         if (response.ok && result.success) {
           showToast(t.databaseDeleted || 'Database deleted.', 'success');
-          window.location.reload();
+          setTimeout(() => window.location.reload(), 600);
         } else {
           showToast(result.error || t.failedDeleteDatabase || 'Failed to delete database.', 'error');
         }
@@ -351,6 +332,29 @@ window.deleteDatabase = async (id) => {
     },
   });
 };
+
+document.querySelectorAll('tr[data-db-id]').forEach((row) => {
+  const id = row.dataset.dbId;
+  const name = row.dataset.dbName;
+  row.querySelector('[data-action="copy-dsn"]')?.addEventListener('click', () => {
+    window.copyText(row.querySelector('[data-role="dsn"]').textContent);
+  });
+  row.querySelector('[data-action="copy-user"]')?.addEventListener('click', () => {
+    window.copyText(row.querySelector('[data-role="user"]').textContent);
+  });
+  row.querySelector('[data-action="copy-pass"]')?.addEventListener('click', () => {
+    window.copyText(row.querySelector('[data-role="pass"]').textContent);
+  });
+  row.querySelector('[data-action="toggle-pass"]')?.addEventListener('click', (e) => {
+    window.togglePassword(e.currentTarget);
+  });
+  row.querySelector('[data-action="rotate"]')?.addEventListener('click', () => {
+    window.rotatePassword(id);
+  });
+  row.querySelector('[data-action="delete"]')?.addEventListener('click', () => {
+    window.deleteDatabase(id, name);
+  });
+});
 </script>
 
 <%- include('../../components/footer') %>

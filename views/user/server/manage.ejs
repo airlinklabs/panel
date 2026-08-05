@@ -1,11 +1,11 @@
 <%- include('../../components/header', { title: 'Console' }) %>
 <%- include('../../components/serverFeatures') %>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" integrity="sha384-8Xk9wy/gzEDUKrXtrmCFa2bBuK3BpjpDuL/p0SeKQX19Khl/M+lHOgD/CyYf7efP" crossorigin="anonymous" />
-<script nonce="<%- nonce %>" defer src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js" integrity="sha384-M169f14mRZOXm3hD/v2Ti0ThIT/RnAQagXA9nlE15yHAtrW19gdePJh/HaTzUOe/" crossorigin="anonymous"></script>
-<script nonce="<%- nonce %>" defer src="/vendor/xterm-addon-fit.js"></script>
-<script nonce="<%- nonce %>" defer src="/vendor/xterm-addon-web-links.js"></script>
-<script nonce="<%- nonce %>" defer src="/vendor/chartjs/chart.umd.js"></script>
+<link rel="stylesheet" href="/vendor/xterm/xterm.css">
+<script nonce="<%- nonce %>" src="/vendor/xterm/lib/xterm.js"></script>
+<script nonce="<%- nonce %>" src="/vendor/xterm-addon-fit/addon-fit.js"></script>
+<script nonce="<%- nonce %>" src="/vendor/xterm-addon-web-links/addon-web-links.js"></script>
+<script nonce="<%- nonce %>" src="/vendor/chartjs/chart.umd.js"></script>
 
 <style>
     canvas {
