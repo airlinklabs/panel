@@ -168,7 +168,7 @@ const coreModule: Module = {
         });
       } catch (error) {
         logger.error('Error rendering API documentation:', error);
-        res.status(500).render('error', {
+        res.status(500).render('errors/error', {
           error: 'Failed to load API documentation',
           req
         });

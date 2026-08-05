@@ -72,7 +72,7 @@ const coreModule: Module = {
           });
         } catch (error: unknown) {
           logger.error('Error rendering API documentation:', error);
-          res.status(500).render('error', {
+          res.status(500).render('errors/error', {
             error: 'Failed to load API documentation',
             req
           });
@@ -132,7 +132,7 @@ const coreModule: Module = {
           });
         } catch (error: unknown) {
           logger.error('Error fetching API keys:', error);
-          res.status(500).render('error', {
+          res.status(500).render('errors/error', {
             error: 'Failed to fetch API keys',
             req,
           });

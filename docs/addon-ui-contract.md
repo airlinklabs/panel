@@ -38,7 +38,7 @@ If your addon ships its own modal or toast, the store review rejects it.
 
 Do not hardcode display strings in a single language. Addon metadata carries per-locale labels and descriptions; the panel applies them.
 
-- Localize every user-visible string. The panel's `data-lang="en"` example at `views/components/store.ejs:730` exists only for an external embed (giscus); it is not a pattern for addon UI.
+- Localize every user-visible string.
 - Use the addon config/translation mechanism to resolve the active locale's strings; fall back to a default locale when a key is missing.
 - Never gate UI copy behind the panel's internal translation tables — those are not part of the addon API.
 

@@ -2,7 +2,9 @@ packages:
   - "."
 
 overrides:
-  dompurify: "^3.4.12"
+  cookie: ^0.7.2
+  find-my-way: ^9.7.0
+  valibot: ^1.4.2
 
 allowBuilds:
   '@parcel/watcher': true
@@ -10,6 +12,7 @@ allowBuilds:
   better-sqlite3: true
   esbuild: true
   prisma: true
+
 minimumReleaseAgeExclude:
   - '@prisma/adapter-better-sqlite3@7.9.1'
   - '@prisma/client-runtime-utils@7.9.1'
