@@ -10,6 +10,7 @@ import {
   normalizeEggForDb,
   validateEggData,
 } from '../../handlers/utils/egg/eggParser';
+import { logActivity } from '../../handlers/utils/activity/activityLogger';
 
 function normalizeImageData(raw: Record<string, unknown>) {
   if (isPterodactylEgg(raw)) {
@@ -149,9 +150,11 @@ const adminModule: Module = {
           const existing = await prisma.images.findFirst({ where: { name: data.name } });
           if (existing) {
             await prisma.images.update({ where: { id: existing.id }, data });
+            await logActivity(req, 'image:update', { metadata: { imageId: existing.id, name: data.name } });
             res.status(200).json({ success: true, message: 'Image updated successfully', id: existing.id });
           } else {
             const created = await prisma.images.create({ data });
+            await logActivity(req, 'image:create', { metadata: { imageId: created.id, name: data.name } });
             res.status(200).json({ success: true, message: 'Image created successfully', id: created.id });
           }
         } catch (error: unknown) {
@@ -186,10 +189,12 @@ const adminModule: Module = {
           if (existing) {
             await prisma.images.update({ where: { id: existing.id }, data });
             logger.info(`Updated image: ${data.name}`);
+            await logActivity(req, 'image:update', { metadata: { imageId: existing.id, name: data.name } });
             res.status(200).json({ success: true, message: 'Image updated successfully', id: existing.id });
           } else {
             const created = await prisma.images.create({ data });
             logger.info(`Created image: ${data.name}`);
+            await logActivity(req, 'image:create', { metadata: { imageId: created.id, name: data.name } });
             res.status(200).json({ success: true, message: 'Image created successfully', id: created.id });
           }
         } catch (error: unknown) {
@@ -230,6 +235,7 @@ const adminModule: Module = {
 
           const image = await prisma.images.create({ data });
           logger.info(`Created image: ${name}`);
+          await logActivity(req, 'image:create', { metadata: { imageId: image.id, name } });
           res.redirect(`/admin/images/edit/${image.id}?success=true`);
         } catch (error: unknown) {
           logger.error('Error creating image:', error);
@@ -338,6 +344,7 @@ const adminModule: Module = {
           });
 
           logger.info(`Updated image ${req.params.id}: ${data.name}`);
+          await logActivity(req, 'image:update', { metadata: { imageId: Number(req.params.id), name: data.name } });
 
           if (req.headers['content-type']?.includes('application/json')) {
             res.json({ success: true });
@@ -433,6 +440,7 @@ const adminModule: Module = {
 
           await prisma.images.delete({ where: { id } });
           logger.info(`Deleted image: ${image.name} (ID: ${id})`);
+          await logActivity(req, 'image:delete', { metadata: { imageId: id, name: image.name } });
           res.status(200).send('Image deleted successfully.');
         } catch (error: unknown) {
           logger.error('Error deleting image:', error);
@@ -506,6 +514,7 @@ const adminModule: Module = {
 
           const image = await prisma.images.create({ data: normalized });
           logger.info(`Installed image from store: ${image.name} (ID: ${image.id})`);
+          await logActivity(req, 'image:create', { metadata: { imageId: image.id, name: image.name } });
           res.status(200).json({ message: `"${image.name}" installed successfully.`, id: image.id });
         } catch (error: unknown) {
           logger.error('Error installing image from store:', error);

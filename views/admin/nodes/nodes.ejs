@@ -15,7 +15,8 @@
       <%- include('../../components/ui/page-header', {
         title: req.translations.adminNodesTitle,
         description: req.translations.adminNodesText,
-        actions: '<button id="createButton" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
+        actions: '<a href="#locations" class="al-btn-secondary text-sm">' + icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) + 'Locations</a>' +
+                 '<button id="createButton" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
       }) %>
 
       <div class="al-page-body">
@@ -78,6 +79,13 @@
             }) %>
           <% } else { %>
           <table class="al-table">
+            <colgroup>
+              <col>
+              <col>
+              <col>
+              <col>
+              <col style="width:220px">
+            </colgroup>
             <thead class="al-table-head">
               <tr>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.name %></th>
@@ -155,6 +163,60 @@
           </table>
           <% } %>
         </div>
+
+        <!-- Locations Section -->
+        <div id="locations" class="mt-10">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h2 class="text-lg font-semibold tracking-tight" style="color:var(--theme-text-strong);">Locations</h2>
+              <p class="text-sm mt-0.5" style="color:var(--theme-text-muted);">Group nodes by region.</p>
+            </div>
+          </div>
+
+          <div class="al-card mb-5">
+            <h3 class="al-card-header">Create Location</h3>
+            <div class="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="al-label" for="locName">Name</label>
+                <input id="locName" type="text" placeholder="US East" class="al-input">
+              </div>
+              <div>
+                <label class="al-label" for="locCode">Short code</label>
+                <input id="locCode" type="text" placeholder="us-east" class="al-input">
+              </div>
+              <div class="flex items-end">
+                <button id="createLocationBtn" type="button" class="al-btn-primary w-full">
+                  <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+                  Create
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="al-card">
+            <h3 class="al-card-header">All Locations</h3>
+            <div class="p-5">
+              <% if (locations.length === 0) { %>
+                <p class="text-sm" style="color:var(--theme-text-muted);">No locations yet. Create one above.</p>
+              <% } else { %>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <% locations.forEach(loc => { %>
+                    <div class="rounded-xl border p-4 flex items-center justify-between" style="border-color:color-mix(in srgb, var(--theme-border, #e5e5e5) 60%, transparent);">
+                      <div>
+                        <p class="font-medium text-sm" style="color:var(--theme-text-strong);"><%= loc.name %></p>
+                        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= loc.shortCode %> · <%= loc._count.nodes %> node(s)</p>
+                      </div>
+                      <button type="button" class="delete-location-btn text-red-500 hover:text-red-700 transition" data-id="<%= loc.id %>" data-name="<%= loc.name %>" aria-label="Delete location <%= loc.name %>">
+                        <%- icon('trash', { class: 'size-4', strokeWidth: 1.5 }) %>
+                      </button>
+                    </div>
+                  <% }); %>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -167,5 +229,51 @@
   document.getElementById('page-data').dataset.nodes = '<%- JSON.stringify(nodes.map(n => ({ id: n.id, status: n.status }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
 </script>
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-nodes.js?v=5"></script>
+<script nonce="<%- nonce %>">
+(function () {
+  const toast = window.showToast || function (m) { console.warn('[locations]', m); };
+
+  document.getElementById('createLocationBtn').addEventListener('click', async () => {
+    const name = document.getElementById('locName').value.trim();
+    const shortCode = document.getElementById('locCode').value.trim().toLowerCase();
+    if (!name || !shortCode) { toast('Name and short code are required.', 'error'); return; }
+
+    const r = await fetch('/admin/locations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, shortCode }),
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast('Location created.', 'success');
+      setTimeout(() => window.location.reload(), 800);
+    } else {
+      toast(d.message || 'Failed to create location.', 'error');
+    }
+  });
+
+  document.querySelectorAll('.delete-location-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      await new Promise(resolve => {
+        window.modal.confirm({
+          title: 'Delete location',
+          body: 'Delete "' + btn.dataset.name + '"? Servers in it will lose their grouping.',
+          danger: true,
+          confirmLabel: 'Delete',
+          onConfirm: resolve,
+        });
+      });
+      const r = await fetch('/admin/location/' + btn.dataset.id, { method: 'DELETE' });
+      const d = await r.json();
+      if (r.ok) {
+        toast('Location deleted.', 'success');
+        setTimeout(() => window.location.reload(), 800);
+      } else {
+        toast(d.message || 'Failed to delete location.', 'error');
+      }
+    });
+  });
+})();
+</script>
 
 <%- include('../../components/footer') %>

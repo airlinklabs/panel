@@ -620,7 +620,7 @@
       const res = await fetch(form.action, {
         method: 'POST',
         headers: { 'Accept': 'application/json' },
-        body: new FormData(form)
+        body: new URLSearchParams(new FormData(form))
       });
       if (res.ok) {
         showToast(successMessage, 'success');

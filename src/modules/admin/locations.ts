@@ -22,22 +22,7 @@ const locationsModule: Module = {
       '/admin/locations',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        try {
-          const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
-          if (!user) return res.redirect('/login');
-
-          const locations = await prisma.location.findMany({
-            include: { _count: { select: { nodes: true } } },
-            orderBy: { name: 'asc' },
-          });
-
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-
-          res.render('admin/locations/locations', { user, req, settings, locations });
-        } catch (error: unknown) {
-          logger.error('Error fetching locations:', error);
-          res.status(500).json({ message: 'Error fetching locations.' });
-        }
+        res.redirect('/admin/nodes#locations');
       },
     );
 

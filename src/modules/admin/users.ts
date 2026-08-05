@@ -6,6 +6,7 @@ import { onlineUsers } from '../user/wsUsers';
 import logger from '../../handlers/logger';
 import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../utils/typeHelpers';
+import { logActivity } from '../../handlers/utils/activity/activityLogger';
 
 const USERNAME_REGEX = /^[a-zA-Z0-9]{3,20}$/;
 const PASSWORD_MIN_LENGTH = 8;
@@ -150,6 +151,8 @@ const adminModule: Module = {
             },
           });
 
+          await logActivity(req, 'user:create', { metadata: { username, email } });
+
           res.status(200).json({ message: 'User created successfully.' });
           return;
         } catch (error: unknown) {
@@ -230,29 +233,41 @@ const adminModule: Module = {
     router.delete(
       '/admin/users/delete/:id/',
       isAuthenticated(true),
-      async (req: Request, res: Response) => {
+      async (req: Request, res: Response): Promise<void> => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
           }
 
+          const targetId = getParamAsNumber(req.params.id);
           const dataUser = await prisma.users.findUnique({
-            where: { id: getParamAsNumber(req.params.id) },
+            where: { id: targetId },
           });
           if (!dataUser) {
-            return res.redirect('/admin/users');
+            res.status(404).json({ error: 'User not found' });
+            return;
           }
 
+          if (userId === targetId) {
+            res.status(400).json({ error: 'Cannot delete your own account' });
+            return;
+          }
+
+          await prisma.session.deleteMany({
+            where: { data: { contains: `"id":${targetId}` } },
+          });
+
           await prisma.users.delete({
-            where: { id: getParamAsNumber(req.params.id) },
+            where: { id: targetId },
           });
 
           res.status(200).json({ message: 'User deleted successfully.' });
         } catch (error: unknown) {
           logger.error('Error deleting user:', error);
-          return res.redirect('/login');
+          res.status(500).json({ error: 'Internal server error' });
         }
       },
     );
@@ -349,6 +364,8 @@ const adminModule: Module = {
             where: { id: targetUserId },
             data: updateData,
           });
+
+          await logActivity(req, 'user:update', { metadata: { targetUserId, username: targetUser.username } });
 
           res.status(200).json({ message: 'User updated successfully' });
         } catch (error: unknown) {

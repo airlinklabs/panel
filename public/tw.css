@@ -164,7 +164,7 @@
   .al-page-body   { @apply px-6 sm:px-8 pb-8; }
 
   /* Table */
-  .al-table       { @apply w-full text-sm; }
+  .al-table       { @apply w-full text-sm; table-layout: fixed; }
   .al-table-head  { @apply text-left; background: var(--theme-table-header-bg); }
   .al-table-th    { @apply px-4 py-2.5 text-xs font-medium uppercase tracking-wide; color: var(--theme-text-muted); }
   .al-table-tr    { @apply border-b transition-colors; border-color: var(--theme-border); }
@@ -458,8 +458,7 @@
 /* Sidebar sliding pill + mobile bottom nav — same active highlight.
    !important resolves the specificity from earlier theme overrides. */
 html #active-background {
-  background: var(--theme-accent) !important;
-  border: 1px solid var(--theme-accent) !important;
+  /* background/border set by JS for inverted pill highlight */
 }
 html .mobile-nav-link.active-mobile {
   background: var(--theme-accent) !important;
@@ -477,14 +476,13 @@ html .mobile-nav-link.active-mobile {
   background-repeat: no-repeat;
 }
 
-/* Icons inside the active sidebar link follow the theme accent text color */
+/* Icons inside the active sidebar link — color set by JS for inverted pill highlight */
 html .nav-link.active svg {
-  color: var(--theme-accent-text) !important;
+  /* color inherited from parent */
 }
 
-/* Active sidebar link text — theme-driven, wins over --theme-nav-text-active */
+/* Active sidebar link text — color set by JS for inverted pill highlight */
 html .nav-link.active {
-  color: var(--theme-accent-text) !important;
   font-weight: 700 !important;
 }
 

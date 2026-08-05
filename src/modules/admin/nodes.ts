@@ -8,6 +8,7 @@ import { getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import { syncNodeAllocations } from '../../handlers/utils/server/allocations';
 import { generateApiKey } from '../../utils/apiKey';
+import { logActivity } from '../../handlers/utils/activity/activityLogger';
 
 const UNLIMITED_RESOURCE = 'all';
 const MIN_PORT_NUMBER = 1024;
@@ -116,6 +117,11 @@ const adminModule: Module = {
 
           const nodes = await listNodes(res);
 
+          const locations = await prisma.location.findMany({
+            include: { _count: { select: { nodes: true } } },
+            orderBy: { name: 'asc' },
+          });
+
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
@@ -125,6 +131,7 @@ const adminModule: Module = {
             req,
             settings,
             nodes,
+            locations,
           });
         } catch (error: unknown) {
           logger.error('Error fetching user:', error);
@@ -314,6 +321,8 @@ const adminModule: Module = {
 
           await syncNodeAllocations(node.id, parsedPorts).catch(() => {});
 
+          await logActivity(req, 'node:create', { metadata: { nodeId: node.id, name } });
+
           res.status(200).json({ message: 'Node created successfully.', node });
           return;
         } catch (error: unknown) {
@@ -378,6 +387,8 @@ const adminModule: Module = {
             }
 
             await prisma.node.delete({ where: { id: nodeId } });
+
+            await logActivity(req, 'node:delete', { metadata: { nodeId } });
 
             res.status(200).json({
               message: deleteInstances
@@ -615,6 +626,8 @@ const adminModule: Module = {
           });
 
           await syncNodeAllocations(nodeId, parsedPorts).catch(() => {});
+
+          await logActivity(req, 'node:update', { metadata: { nodeId, name } });
 
           res.status(200).json({ message: 'Node updated successfully.', node });
           return;

@@ -48,22 +48,102 @@ document.getElementById('imageFilterInput')?.addEventListener('input', function(
   if (el) el.classList.toggle('hidden', n > 0 || !q);
 });
 
-document.getElementById('uploadBtn').addEventListener('click', function() {
-  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.click();
-  inp.onchange = function() {
-    const f = this.files[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = function(e) {
-      try { JSON.parse(e.target.result); } catch { showToast('Invalid JSON.', 'error'); return; }
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/admin/images/upload', true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.onload = () => xhr.status === 200 ? (showToast('Image uploaded.', 'success'), setTimeout(() => location.reload(), IMAGE_IMPORT_RELOAD_DELAY_MS)) : showToast('Upload failed.', 'error');
-      xhr.onerror = () => showToast('Upload failed.', 'error');
-      xhr.send(e.target.result);
-    };
-    r.readAsText(f);
+window.selectedImageFile = null;
+
+function openUploadImageModal() {
+  const modal = document.getElementById('uploadImageModal');
+  if (!modal) return;
+  modal.classList.remove('opacity-0', 'pointer-events-none');
+  Animate.openModal(modal, document.getElementById('uploadImageModalPanel'));
+  removeSelectedImageFile();
+  const fileInput = document.getElementById('imageFileInput');
+  if (fileInput) fileInput.value = '';
+}
+
+function closeUploadImageModal() {
+  const modal = document.getElementById('uploadImageModal');
+  if (!modal) return;
+  Animate.closeModal(modal, document.getElementById('uploadImageModalPanel'), function() {
+    modal.classList.add('opacity-0', 'pointer-events-none');
+  });
+}
+
+function removeSelectedImageFile() {
+  window.selectedImageFile = null;
+  const preview = document.getElementById('imageFilePreview');
+  const dropZone = document.getElementById('imageDropZone');
+  const btn = document.getElementById('imageUploadButton');
+  if (preview) preview.classList.add('hidden');
+  if (dropZone) dropZone.classList.remove('hidden');
+  if (btn) btn.disabled = true;
+}
+
+function formatImageFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function handleImageFileSelection(file) {
+  if (!file) return;
+  window.selectedImageFile = file;
+  document.getElementById('imageSelectedFileName').textContent = file.name;
+  document.getElementById('imageSelectedFileSize').textContent = formatImageFileSize(file.size);
+  document.getElementById('imageFilePreview').classList.remove('hidden');
+  document.getElementById('imageDropZone').classList.add('hidden');
+  document.getElementById('imageUploadButton').disabled = false;
+}
+
+function confirmImageUpload() {
+  if (!window.selectedImageFile) { showToast('Select a JSON file to upload.', 'error'); return; }
+  const file = window.selectedImageFile;
+  closeUploadImageModal();
+  const r = new FileReader();
+  r.onload = function(e) {
+    try { JSON.parse(e.target.result); } catch { showToast('Invalid JSON.', 'error'); return; }
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/admin/images/upload', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = () => xhr.status === 200 ? (showToast('Image uploaded.', 'success'), setTimeout(() => location.reload(), IMAGE_IMPORT_RELOAD_DELAY_MS)) : showToast('Upload failed.', 'error');
+    xhr.onerror = () => showToast('Upload failed.', 'error');
+    xhr.send(e.target.result);
   };
+  r.readAsText(file);
+}
+
+document.getElementById('uploadBtn').addEventListener('click', openUploadImageModal);
+
+document.addEventListener('DOMContentLoaded', function() {
+  const dropZone = document.getElementById('imageDropZone');
+  const fileInput = document.getElementById('imageFileInput');
+  const uploadButton = document.getElementById('imageUploadButton');
+  if (dropZone) {
+    dropZone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      dropZone.style.background = 'var(--theme-bg-hover)';
+      dropZone.style.borderColor = 'var(--theme-accent)';
+    });
+    dropZone.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      dropZone.style.background = '';
+      dropZone.style.borderColor = 'var(--theme-border)';
+    });
+    dropZone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      dropZone.style.background = '';
+      dropZone.style.borderColor = 'var(--theme-border)';
+      if (e.dataTransfer.files.length > 0) handleImageFileSelection(e.dataTransfer.files[0]);
+    });
+  }
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+      if (e.target.files.length > 0) handleImageFileSelection(e.target.files[0]);
+    });
+  }
+  if (uploadButton) {
+    uploadButton.addEventListener('click', confirmImageUpload);
+  }
 });
 
 const importUrlBtn = document.getElementById('importUrlBtn');

@@ -8,6 +8,7 @@ import { getParamAsNumber } from '../../utils/typeHelpers';
 import crypto from 'crypto';
 import { apiEndpoints } from '../api/v1/apiDocs';
 import { generateApiKey } from '../../utils/apiKey';
+import { logActivity } from '../../handlers/utils/activity/activityLogger';
 
 const MAX_API_KEYS_PER_USER = 25;
 
@@ -178,6 +179,8 @@ const coreModule: Module = {
             },
           });
 
+          await logActivity(req, 'apikey:create', { metadata: { name, userId } });
+
           if (useHash) {
             res.redirect(`/admin/apikeys?created=${encodeURIComponent(rawKey)}`);
           } else {
@@ -200,6 +203,8 @@ const coreModule: Module = {
           await prisma.apiKey.delete({
             where: { id },
           });
+
+          await logActivity(req, 'apikey:delete', { metadata: { keyId: id } });
 
           res.redirect('/admin/apikeys');
         } catch (error: unknown) {

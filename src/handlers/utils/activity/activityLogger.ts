@@ -41,7 +41,14 @@ export type ActivityEvent =
   | 'node:update'
   | 'node:delete'
   | 'api:key'
-  | 'user:update';
+  | 'apikey:create'
+  | 'apikey:delete'
+  | 'user:create'
+  | 'user:delete'
+  | 'user:update'
+  | 'image:create'
+  | 'image:update'
+  | 'image:delete';
 
 export function getClientIp(req: Request): string | undefined {
   const fwd = req.headers['x-forwarded-for'];

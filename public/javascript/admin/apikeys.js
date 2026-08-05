@@ -26,7 +26,7 @@ function confirmDeleteApiKey(keyId) {
     fetch(form.action, {
       method: 'POST',
       headers: { 'Accept': 'application/json' },
-      body: new FormData(form)
+      body: new URLSearchParams(new FormData(form))
     }).then(function(res) {
       if (res.ok) {
         showToast('API key deleted', 'success');

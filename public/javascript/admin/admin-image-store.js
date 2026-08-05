@@ -223,6 +223,7 @@ function openEgg(img) {
   hide('eggErr');
   var btn = document.getElementById('eggInstallBtn');
   btn.innerHTML = 'Install'; btn.disabled = false;
+  btn.style.background = ''; btn.style.borderColor = ''; btn.style.pointerEvents = '';
   window.modal.show({
     title: img.name,
     bodyNode: document.getElementById('eggContent'),
@@ -251,8 +252,12 @@ async function confirmInstall() {
       show('eggErr'); btn.disabled = false; btn.innerHTML = 'Install'; return;
     }
     var installedName = pendingEgg.name;
-    closeEgg();
+    btn.innerHTML = '<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Installed';
+    btn.style.background = 'var(--theme-success, #16a34a)';
+    btn.style.borderColor = 'var(--theme-success, #16a34a)';
+    btn.style.pointerEvents = 'none';
     if (typeof showToast === 'function') showToast('"' + installedName + '" installed successfully.', 'success');
+    setTimeout(function() { closeEgg(); }, 1500);
   } catch(err) {
     console.error('Image install error:', err);
     document.getElementById('eggErrTxt').textContent = 'Installation failed. Try again.';
