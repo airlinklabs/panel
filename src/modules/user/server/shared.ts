@@ -267,26 +267,41 @@ export async function startServerContainer(
     }
   }
 
-  await daemonRequest({
-    method: 'POST',
-    path: '/container/start',
-    nodeAddress: server.node.address,
-    nodePort: server.node.port,
-    nodeKey: server.node.key,
-    body: {
-      id: serverId,
-      image: dockerImage,
-      ports: portsToDaemonString(server.Ports),
-      Memory: server.Memory,
-      Swap: server.Swap ?? 0,
-      Cpu: server.Cpu,
-      Storage: server.Storage,
-      env: buildServerRuntimeEnv(server, options.variables ?? server.Variables),
-      StartCommand: options.startCommand ?? server.StartCommand,
-      mounts,
-      configFiles,
-    },
-  });
+  let startResponse;
+  try {
+    startResponse = await daemonRequest({
+      method: 'POST',
+      path: '/container/start',
+      nodeAddress: server.node.address,
+      nodePort: server.node.port,
+      nodeKey: server.node.key,
+      body: {
+        id: serverId,
+        image: dockerImage,
+        ports: portsToDaemonString(server.Ports),
+        Memory: server.Memory,
+        Swap: server.Swap ?? 0,
+        Cpu: server.Cpu,
+        Storage: server.Storage,
+        env: buildServerRuntimeEnv(server, options.variables ?? server.Variables),
+        StartCommand: options.startCommand ?? server.StartCommand,
+        mounts,
+        configFiles,
+      },
+    });
+  } catch (error) {
+    throw new Error('daemon is unreachable — is it running?', { cause: error });
+  }
+
+  if (startResponse.status >= 400) {
+    const body =
+      typeof startResponse.data === 'object' && startResponse.data !== null
+        ? (startResponse.data as { error?: string; detail?: string })
+        : {};
+    throw new Error(
+      `daemon: ${body.error ?? 'request failed'}${body.detail ? ' — ' + body.detail : ''}`,
+    );
+  }
 }
 
 async function resolveServerMounts(
