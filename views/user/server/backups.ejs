@@ -181,6 +181,7 @@
 
 <script nonce="<%- nonce %>">
 const serverUUID = '<%= server.UUID %>';
+const getCsrf = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
 
 function showLoading(title, message) {
   showLoadingPopup(title, message);
@@ -248,6 +249,7 @@ try {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'csrf-token': getCsrf(),
     },
     body: JSON.stringify({ name }),
   });
@@ -290,6 +292,7 @@ function restoreBackup(backupId, backupName) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'csrf-token': getCsrf(),
           },
         });
 
@@ -378,6 +381,7 @@ async function toggleBackupLock(backupId, backupName, currentlyLocked) {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
+        'csrf-token': getCsrf(),
       },
       body: JSON.stringify({ locked: !currentlyLocked }),
     });
@@ -406,6 +410,7 @@ function deleteBackup(backupId, backupName) {  showConfirmation(
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'csrf-token': getCsrf(),
           },
         });
 

@@ -19,6 +19,28 @@ function s3KeyFor(serverId: string, uuid: string): string {
   return `backups/${serverId}/${uuid}.tar.gz`;
 }
 
+export async function persistBackupRecord(params: {
+  uuid: string;
+  name: string;
+  serverId: string;
+  filePath: string;
+  size: bigint;
+  checksum: string | null;
+  airlinkCloudId: string | null;
+}): Promise<Awaited<ReturnType<typeof prisma.backup.create>>> {
+  return prisma.backup.create({
+    data: {
+      UUID: params.uuid,
+      name: params.name,
+      serverId: params.serverId,
+      filePath: params.filePath,
+      size: params.size,
+      checksum: params.checksum,
+      airlinkCloudId: params.airlinkCloudId,
+    },
+  });
+}
+
 export function registerBackupRoutes(router: Router): void {
   router.get(
     '/server/:id/backups',
@@ -138,8 +160,10 @@ export function registerBackupRoutes(router: Router): void {
         });
 
         if (response.data.success) {
-          let airlinkCloudId = null;
-          let filePath = response.data.backup!.filePath;
+          const daemonFilePath = response.data.backup!.filePath;
+          let airlinkCloudId: string | null = null;
+          let filePath = daemonFilePath;
+          let remoteRedirect: 'none' | 'ok' | 'failed' = 'none';
 
           if (isCloudBackupEnabled) {
             try {
@@ -151,7 +175,7 @@ export function registerBackupRoutes(router: Router): void {
                 nodeAddress: server.node.address,
                 nodePort: server.node.port,
                 nodeKey: server.node.key,
-                params: { backupPath: filePath },
+                params: { backupPath: daemonFilePath },
                 responseType: 'stream',
               });
 
@@ -161,22 +185,26 @@ export function registerBackupRoutes(router: Router): void {
                 uniqueCloudFileName
               );
 
-              if (uploadResult && (uploadResult as Record<string, unknown>).id) {
-                airlinkCloudId = (uploadResult as Record<string, unknown>).id as string;
-
-                await daemonRequest({
-                  method: 'DELETE',
-                  path: '/container/backup',
-                  nodeAddress: server.node.address,
-                  nodePort: server.node.port,
-                  nodeKey: server.node.key,
-                  body: { backupPath: filePath },
-                }).catch(e => logger.warn(`Failed to delete temporary local backup: ${e}`));
-
-                filePath = 'airlink-cloud';
+              const remoteId = (uploadResult as Record<string, unknown>)?.id as string | undefined;
+              if (!remoteId) {
+                throw new Error('Airlink Cloud upload returned no file id');
               }
+
+              airlinkCloudId = remoteId;
+              filePath = 'airlink-cloud';
+              remoteRedirect = 'ok';
+
+              daemonRequest({
+                method: 'DELETE',
+                path: '/container/backup',
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                nodeKey: server.node.key,
+                body: { backupPath: daemonFilePath },
+              }).catch(e => logger.warn(`Failed to delete temporary local backup: ${e}`));
             } catch (cloudError) {
               logger.error('Failed to redirect backup to Airlink Cloud:', cloudError);
+              remoteRedirect = 'failed';
             }
           } else if (settings?.s3Enabled) {
             try {
@@ -186,7 +214,7 @@ export function registerBackupRoutes(router: Router): void {
                 nodeAddress: server.node.address,
                 nodePort: server.node.port,
                 nodeKey: server.node.key,
-                params: { backupPath: filePath },
+                params: { backupPath: daemonFilePath },
                 responseType: 'stream',
               });
 
@@ -195,37 +223,48 @@ export function registerBackupRoutes(router: Router): void {
               const stream = downloadResponse.data as import('stream').Readable;
               await uploadStreamToS3(stream, s3Key);
 
-              await daemonRequest({
+              filePath = `${S3_KEY_PREFIX}${s3Key}`;
+              remoteRedirect = 'ok';
+
+              daemonRequest({
                 method: 'DELETE',
                 path: '/container/backup',
                 nodeAddress: server.node.address,
                 nodePort: server.node.port,
                 nodeKey: server.node.key,
-                body: { backupPath: response.data.backup!.filePath },
+                body: { backupPath: daemonFilePath },
               }).catch(e => logger.warn(`Failed to delete temporary local backup: ${e}`));
-
-              filePath = `${S3_KEY_PREFIX}${s3Key}`;
             } catch (s3Error) {
               logger.error('Failed to redirect backup to S3:', s3Error);
+              remoteRedirect = 'failed';
             }
           }
 
-          const backup = await prisma.backup.create({
-            data: {
-              UUID: response.data.backup!.uuid,
-              name: name.trim(),
-              serverId: getParamAsString(serverId),
-              filePath: filePath,
-              size: BigInt(response.data.backup!.size),
-              checksum: typeof response.data.backup!.checksum === 'string' ? response.data.backup!.checksum : null,
-              airlinkCloudId: airlinkCloudId,
-            },
+          const backup = await persistBackupRecord({
+            uuid: response.data.backup!.uuid,
+            name: name.trim(),
+            serverId: getParamAsString(serverId),
+            filePath,
+            size: BigInt(response.data.backup!.size),
+            checksum: typeof response.data.backup!.checksum === 'string' ? response.data.backup!.checksum : null,
+            airlinkCloudId,
           });
 
           await logActivity(req, 'backup:create', { serverId: getParamAsString(serverId), metadata: { name: name.trim(), uuid: backup.UUID } });
+
+          let message: string;
+          if (remoteRedirect === 'ok') {
+            message = isCloudBackupEnabled ? 'Backup created and uploaded to Airlink Cloud' : 'Backup created successfully';
+          } else if (remoteRedirect === 'failed') {
+            message = 'Backup created on the node, but the remote upload failed.';
+          } else {
+            message = 'Backup created successfully';
+          }
+
           res.json({
             success: true,
-            message: isCloudBackupEnabled && airlinkCloudId ? 'Backup created and uploaded to Airlink Cloud' : 'Backup created successfully',
+            message,
+            remoteRedirect,
             backup: {
               ...backup,
               size: backup.size ? backup.size.toString() : '0',

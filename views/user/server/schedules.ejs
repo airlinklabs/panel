@@ -325,7 +325,7 @@
 <%- include('../../components/toast') %>
 
 <script nonce="<%- nonce %>">
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+const getCsrf = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
 const serverId = '<%= server.UUID %>';
 
 const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m) => console.warn('[schedules]', m) };
@@ -679,7 +679,7 @@ async function api(url, method, body) {
   try {
     const res = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
       body: body ? JSON.stringify(body) : undefined,
     });
     const data = await res.json().catch(() => ({}));
@@ -822,13 +822,39 @@ function renderPendingTasks(scheduleId) {
     const row = document.createElement('div');
     row.className = 'flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm';
     row.style.cssText = 'background:var(--theme-bg-card);border:1px dashed var(--theme-accent)';
-    row.innerHTML = '<div class="min-w-0 flex items-center gap-2.5">'
-      + '<span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">' + task.action + '</span>'
-      + '<span class="truncate font-mono text-xs" style="color:var(--theme-text)">' + label.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>'
-      + (task.timeOffset > 0 ? '<span class="shrink-0 text-[10px] font-medium" style="color:var(--theme-text-muted)">+' + task.timeOffset + 's</span>' : '')
-      + '</div>'
-      + '<button type="button" class="al-btn-ghost p-1.5 -mr-1.5 shrink-0" style="color:var(--theme-danger)" aria-label="Remove task"><%- icon('x', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %></button>';
-    row.querySelector('button').addEventListener('click', () => removePendingTask(scheduleId, i));
+
+    const left = document.createElement('div');
+    left.className = 'min-w-0 flex items-center gap-2.5';
+
+    const badge = document.createElement('span');
+    badge.className = 'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide shrink-0';
+    badge.style.cssText = 'background:var(--theme-accent-subtle);color:var(--theme-accent)';
+    badge.textContent = task.action;
+
+    const labelEl = document.createElement('span');
+    labelEl.className = 'truncate font-mono text-xs';
+    labelEl.style.color = 'var(--theme-text)';
+    labelEl.textContent = label;
+    left.appendChild(badge);
+    left.appendChild(labelEl);
+
+    if (task.timeOffset > 0) {
+      const off = document.createElement('span');
+      off.className = 'shrink-0 text-[10px] font-medium';
+      off.style.color = 'var(--theme-text-muted)';
+      off.textContent = '+' + task.timeOffset + 's';
+      left.appendChild(off);
+    }
+    row.appendChild(left);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'al-btn-ghost p-1.5 -mr-1.5 shrink-0';
+    btn.style.color = 'var(--theme-danger)';
+    btn.setAttribute('aria-label', 'Remove task');
+    btn.innerHTML = '<%- icon('x', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>';
+    btn.addEventListener('click', () => removePendingTask(scheduleId, i));
+    row.appendChild(btn);
     wrap.appendChild(row);
   });
   saveBtn.classList.toggle('hidden', tasks.length === 0);

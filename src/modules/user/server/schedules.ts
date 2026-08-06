@@ -444,9 +444,13 @@ export function registerScheduleRoutes(router: Router): void {
         }
 
         await runSchedule(schedule);
+        const now = new Date();
         await prisma.schedule.update({
           where: { id: schedule.id },
-          data: { lastRunAt: new Date() },
+          data: {
+            lastRunAt: now,
+            nextRunAt: nextRunFromCron(schedule.cron, schedule.timeOffset || 0),
+          },
         });
 
         res.json({ success: true, message: 'Schedule run triggered.' });

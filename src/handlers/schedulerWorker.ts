@@ -6,6 +6,7 @@ import {
   type ServerRuntimeConfig,
   type ServerPageServer,
 } from '../modules/user/server/shared';
+import { persistBackupRecord } from '../modules/user/server/backups';
 import logger from './logger';
 
 export interface ScheduleWithRelations {
@@ -72,7 +73,11 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<void
           });
         }
       } else if (task.action === 'backup') {
-        await daemonRequest({
+        const name = String(payload.name ?? `scheduled-${Date.now()}`);
+        const resp = await daemonRequest<{
+          success: boolean;
+          backup?: { uuid: string; name: string; filePath: string; size: number; checksum?: string };
+        }>({
           method: 'POST',
           path: '/container/backup',
           nodeAddress: schedule.server.node.address,
@@ -80,9 +85,24 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<void
           nodeKey: schedule.server.node.key,
           body: {
             id: schedule.server.UUID,
-            name: String(payload.name ?? `auto-${Date.now()}`),
+            name,
           },
         });
+        if (resp.data?.success && resp.data.backup?.uuid) {
+          try {
+            await persistBackupRecord({
+              uuid: resp.data.backup.uuid,
+              name,
+              serverId: schedule.server.UUID,
+              filePath: resp.data.backup.filePath,
+              size: BigInt(resp.data.backup.size ?? 0),
+              checksum: typeof resp.data.backup.checksum === 'string' ? resp.data.backup.checksum : null,
+              airlinkCloudId: null,
+            });
+          } catch (err) {
+            logger.error(`Schedule ${schedule.id} task ${task.id}: failed to record backup`, err);
+          }
+        }
       } else {
         logger.error(`Schedule ${schedule.id} task ${task.id}: unknown action "${task.action}"`);
       }
