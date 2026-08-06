@@ -294,7 +294,7 @@ require.config({
 
     // Create editor with enhanced options
     editor = monaco.editor.create(document.getElementById('editor-container'), {
-      value: <%- JSON.stringify(fileSkipped ? '' : (file.content || '')) %>,
+      value: <%- JSON.stringify(fileContentSkipped ? '' : (file.content || '')) %>,
       language: '<%= language %>',
       theme: document.documentElement.classList.contains('dark') ? 'custom-dark' : 'custom-light',
       automaticLayout: true,

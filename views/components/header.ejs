@@ -9,9 +9,9 @@
     <meta name="csrf-token" content="<%= csrfToken %>">
     <% } %>
     <title><%= settings.title %> - <%= title %></title>
-    <link rel="stylesheet" href="/styles.css?v=7">
-    <link rel="stylesheet" href="/layout-animations.css?v=7">
-    <link rel="stylesheet" href="/styles/motion.css?v=7">
+    <link rel="stylesheet" href="/styles.css?v=8">
+    <link rel="stylesheet" href="/layout-animations.css?v=8">
+    <link rel="stylesheet" href="/styles/motion.css?v=8">
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <!-- Default themes — always loaded, always the base layer -->
@@ -27,15 +27,15 @@
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"></noscript>
-    <script nonce="<%- nonce %>" defer src="/js/csrf.js?v=7"></script>
-    <script nonce="<%- nonce %>" defer src="/js/shared/al-icon.js?v=7"></script>
+    <script nonce="<%- nonce %>" defer src="/js/csrf.js?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="/js/shared/al-icon.js?v=8"></script>
     <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
-    <script nonce="<%- nonce %>" defer src="/javascript/shared/format-switcher.js?v=7"></script>
-    <script nonce="<%- nonce %>" defer src="/javascript/shared/animations.js?v=7"></script>
-    <script nonce="<%- nonce %>" defer src="/javascript/shared/custom-select.js?v=7"></script>
-    <script nonce="<%- nonce %>" defer src="/javascript/shared/page-loader.js?v=7"></script>
-    <script nonce="<%- nonce %>" defer src="/javascript/shared/checkbox-anim.js?v=7"></script>
-    <script nonce="<%- nonce %>" defer src="/javascript/shared/layout-animations.js?v=7"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/format-switcher.js?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/animations.js?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/custom-select.js?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/page-loader.js?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/checkbox-anim.js?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/layout-animations.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/al-table.js?v=6"></script>
     <style>
       * { scrollbar-width: thin; scrollbar-color: var(--theme-border) transparent; }

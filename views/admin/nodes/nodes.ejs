@@ -269,7 +269,7 @@
 <script nonce="<%- nonce %>">
   document.getElementById('page-data').dataset.nodes = '<%- JSON.stringify(nodes.map(n => ({ id: n.id, status: n.status }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
 </script>
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-nodes.js?v=7"></script>
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-nodes.js?v=8"></script>
 <script nonce="<%- nonce %>">
 (function () {
   const toast = window.showToast || function (m) { console.warn('[locations]', m); };

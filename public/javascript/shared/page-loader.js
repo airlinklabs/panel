@@ -43,8 +43,12 @@
   })();
 
   if (_fromNav) {
-    document.documentElement.style.opacity = '0';
-    document.documentElement.style.pointerEvents = 'none';
+    // Hide only the content column so the sidebar stays painted during the
+    // swap — hiding <html> hides the sidebar too (it blinks out/in) and the
+    // invisible page lets the browser's white canvas show through in dark
+    // mode. The content wrapper is faded back in by revealAfterNav().
+    const _pc = el('page-content') || el('server-page-body');
+    if (_pc) _pc.style.opacity = '0';
   }
 
   // ── Utilities ─────────────────────────────────────────────────────────────
@@ -165,8 +169,8 @@
   let hiding = false;
 
   function revealAfterNav() {
-    document.documentElement.style.opacity      = '';
-    document.documentElement.style.pointerEvents = '';
+    const _pc = el('page-content') || el('server-page-body');
+    if (_pc) _pc.style.opacity = '';
     const ov = el('pl-overlay');
     if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
     barEl = null;
