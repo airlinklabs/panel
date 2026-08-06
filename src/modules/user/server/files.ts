@@ -332,6 +332,11 @@ export function registerFilesRoutes(router: Router): void {
         }
       }
 
+      if (typeof zipName !== 'string' || !zipName.trim()) {
+        res.status(400).json({ error: 'Zip file name is required' });
+        return;
+      }
+
       try {
         if (!serverId) {
           res.status(400).json({ error: 'Server ID is required.' });
@@ -378,12 +383,143 @@ export function registerFilesRoutes(router: Router): void {
             response: inner.body,
             status: inner.status,
           });
+          res.status(502).json({
+            error: 'Failed to unzip files',
+            details: inner.body,
+          });
         }
       } catch (error) {
         logger.error('Error unzipping files:', error);
         res
           .status(500)
           .json({ error: 'Failed to unzip files: ' + (error instanceof Error ? error.message : 'An unexpected error occurred.') });
+      }
+    },
+  );
+
+  /**
+   * Duplicate a file or directory within the container volume.
+   * Used by the frontend's "Duplicate" action on the files page.
+   */
+  router.post(
+    '/server/:id/files/copy',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
+    async (req: Request, res: Response) => {
+      const location = req.body?.location;
+
+      if (typeof location !== 'string' || !location.trim()) {
+        res.status(400).json({ error: 'Location is required.' });
+        return;
+      }
+
+      const cleanLocation = location.replace(/^\/+/, '');
+      if (cleanLocation === '' || !isPathSafe(cleanLocation)) {
+        res.status(400).json({ error: 'Invalid location.' });
+        return;
+      }
+
+      try {
+        const context = await loadAuthenticatedServerContext(req);
+        if (sendMissingServerContext(res, context)) {
+          return;
+        }
+        const { server } = context;
+
+        const response = await daemonRequest<{ message?: string; path?: string }>({
+          method: 'POST',
+          path: '/fs/copy',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          body: {
+            id: server.UUID,
+            source: cleanLocation,
+          },
+        });
+
+        if (response.status === 200) {
+          res.status(200).json({
+            success: true,
+            message: response.data?.message,
+            path: response.data?.path,
+          });
+          return;
+        }
+
+        const body = response.data as { error?: string } | undefined;
+        res.status(response.status).json({
+          error: body?.error || 'Failed to duplicate file',
+        });
+      } catch (error: unknown) {
+        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+        const body = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
+        const status = (err.status as number) || 500;
+        res.status(status).json({
+          error: (body?.error as string) || 'Failed to duplicate file',
+        });
+      }
+    },
+  );
+
+  /**
+   * Move a file/directory to a new path.
+   * Thin adapter for the frontend Move modal (posts { oldPath, newPath }).
+   */
+  router.post(
+    '/server/:id/files/rename',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
+    async (req: Request, res: Response) => {
+      const oldPath = req.body?.oldPath;
+      const newPath = req.body?.newPath;
+
+      if (
+        typeof oldPath !== 'string' ||
+        typeof newPath !== 'string' ||
+        !isPathSafe(oldPath) ||
+        !isPathSafe(newPath)
+      ) {
+        res.status(400).json({ error: 'Invalid path.' });
+        return;
+      }
+
+      try {
+        const context = await loadAuthenticatedServerContext(req);
+        if (sendMissingServerContext(res, context)) {
+          return;
+        }
+        const { server } = context;
+
+        const response = await daemonRequest<{ message?: string }>({
+          method: 'POST',
+          path: '/fs/rename',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          body: {
+            id: server.UUID,
+            path: oldPath,
+            newName: newPath,
+          },
+        });
+
+        if (response.status === 200) {
+          res.json({ success: true });
+          return;
+        }
+
+        res.status(response.status).json({
+          error: response.data?.message || 'Failed to rename file',
+        });
+      } catch (error) {
+        logger.error('Error renaming file:', error);
+        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+        const body = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
+        const status = (err.status as number) || 500;
+        res.status(status).json({
+          error: (body?.error as string) || 'Failed to rename file',
+        });
       }
     },
   );
@@ -545,9 +681,25 @@ export function registerFilesRoutes(router: Router): void {
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
-      const relativePath = req.body.path || '/';
+      const relativePath = typeof req.body.path === 'string' ? req.body.path : '/';
       const fileName =
         req.body.fileName || (req.file ? req.file.originalname : '');
+
+      if (
+        typeof fileName !== 'string' ||
+        !fileName.trim() ||
+        fileName.includes('/') ||
+        fileName.includes('\\') ||
+        fileName.includes('..')
+      ) {
+        res.status(400).json({ error: 'Invalid file name.' });
+        return;
+      }
+
+      if (typeof relativePath === 'string' && !isPathSafe(relativePath) && relativePath !== '/') {
+        res.status(400).json({ error: 'Invalid path.' });
+        return;
+      }
 
       logger.info(
         `Upload request received for file ${fileName} to path ${relativePath} for server ${serverId}`,
@@ -572,54 +724,72 @@ export function registerFilesRoutes(router: Router): void {
           return;
         }
 
-        if (!fileName) {
-          logger.warn('File name is required');
-          res.status(400).json({ error: 'File name is required' });
-          return;
-        }
-
         if (!req.file) {
           logger.warn('File content is required');
           res.status(400).json({ error: 'File content is required' });
           return;
         }
 
-        try {
+        logger.info(
+          `Sending upload request to node at ${server.node.address}:${server.node.port}`,
+        );
+        logger.info(`File size: ${req.file.size} bytes`);
+
+        if (req.file.size < 10 * 1024 * 1024) {
+          const fileContent = req.file.buffer.toString('base64');
+          const fileContentWithMeta = `data:${req.file.mimetype};base64,${fileContent}`;
+
+          const uploadResponse = await daemonRequest<{ fileName?: string; path?: string }>({
+            method: 'POST',
+            path: '/fs/upload',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            body: {
+              id: server.UUID,
+              path: relativePath,
+              fileName: fileName,
+              fileContent: fileContentWithMeta,
+            },
+            timeout: 60000,
+          });
           logger.info(
-            `Sending upload request to node at ${server.node.address}:${server.node.port}`,
+            `File ${fileName} successfully uploaded to ${relativePath}`,
           );
-          logger.info(`File size: ${req.file.size} bytes`);
+          res.status(200).json({
+            success: true,
+            fileName: uploadResponse.data?.fileName,
+            path: uploadResponse.data?.path,
+          });
+        } else {
+          await daemonRequest({
+            method: 'POST',
+            path: '/fs/create-empty-file',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            body: {
+              id: server.UUID,
+              path: relativePath,
+              fileName: fileName,
+            },
+            timeout: 10000,
+          });
+          logger.info(`Created empty file ${fileName} in ${relativePath}`);
 
-          if (req.file.size < 10 * 1024 * 1024) {
-            const fileContent = req.file.buffer.toString('base64');
-            const fileContentWithMeta = `data:${req.file.mimetype};base64,${fileContent}`;
+          const CHUNK_SIZE = 5 * 1024 * 1024;
+          const totalChunks = Math.ceil(req.file.size / CHUNK_SIZE);
 
-            const uploadResponse = await daemonRequest<{ fileName?: string; path?: string }>({
-              method: 'POST',
-              path: '/fs/upload',
-              nodeAddress: server.node.address,
-              nodePort: server.node.port,
-              nodeKey: server.node.key,
-              body: {
-                id: server.UUID,
-                path: relativePath,
-                fileName: fileName,
-                fileContent: fileContentWithMeta,
-              },
-              timeout: 60000,
-            });
-            logger.info(
-              `File ${fileName} successfully uploaded to ${relativePath}`,
-            );
-            res.status(200).json({
-              success: true,
-              fileName: uploadResponse.data?.fileName,
-              path: uploadResponse.data?.path,
-            });
-          } else {
+          for (let i = 0; i < totalChunks; i++) {
+            const start = i * CHUNK_SIZE;
+            const end = Math.min(start + CHUNK_SIZE, req.file.size);
+            const chunk = req.file.buffer.slice(start, end);
+            const chunkContent = chunk.toString('base64');
+            const chunkContentWithMeta = `data:${req.file.mimetype};base64,${chunkContent}`;
+
             await daemonRequest({
               method: 'POST',
-              path: '/fs/create-empty-file',
+              path: '/fs/append-file',
               nodeAddress: server.node.address,
               nodePort: server.node.port,
               nodeKey: server.node.key,
@@ -627,85 +797,56 @@ export function registerFilesRoutes(router: Router): void {
                 id: server.UUID,
                 path: relativePath,
                 fileName: fileName,
+                fileContent: chunkContentWithMeta,
+                chunkIndex: i,
+                totalChunks: totalChunks,
               },
-              timeout: 10000,
+              timeout: 30000,
             });
-            logger.info(`Created empty file ${fileName} in ${relativePath}`);
-
-            const CHUNK_SIZE = 5 * 1024 * 1024;
-            const totalChunks = Math.ceil(req.file.size / CHUNK_SIZE);
-
-            for (let i = 0; i < totalChunks; i++) {
-              const start = i * CHUNK_SIZE;
-              const end = Math.min(start + CHUNK_SIZE, req.file.size);
-              const chunk = req.file.buffer.slice(start, end);
-              const chunkContent = chunk.toString('base64');
-              const chunkContentWithMeta = `data:${req.file.mimetype};base64,${chunkContent}`;
-
-              await daemonRequest({
-                method: 'POST',
-                path: '/fs/append-file',
-                nodeAddress: server.node.address,
-                nodePort: server.node.port,
-                nodeKey: server.node.key,
-                body: {
-                  id: server.UUID,
-                  path: relativePath,
-                  fileName: fileName,
-                  fileContent: chunkContentWithMeta,
-                  chunkIndex: i,
-                  totalChunks: totalChunks,
-                },
-                timeout: 30000,
-              });
-              logger.info(
-                `Uploaded chunk ${i + 1}/${totalChunks} for file ${fileName}`,
-              );
-            }
-
             logger.info(
-              `File ${fileName} successfully uploaded to ${relativePath} in ${totalChunks} chunks`,
+              `Uploaded chunk ${i + 1}/${totalChunks} for file ${fileName}`,
             );
-            res.status(200).json({
-              success: true,
-              fileName: fileName,
-              path: relativePath,
-            });
           }
-        } catch (error: unknown) {
-          const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
-          const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
-          if (err.status && errBody) {
-            logger.error(
-              `Error uploading file - Status: ${err.status}, Data:`,
-              errBody,
-            );
-            res.status(err.status as number).json({
-              error: (errBody.error as string) || 'Failed to upload file',
-              details: errBody,
-            });
-          } else if (err.message) {
-            logger.error(
-              'Error uploading file - No response received:',
-              err.message,
-            );
-            res.status(500).json({
-              error:
-                'Connection error during file upload. Please try again with a smaller file.',
-            });
-          } else {
-            logger.error(
-              'Error uploading file - Request setup error:',
-              error,
-            );
-            res
-              .status(500)
-              .json({ error: 'Error setting up upload request' });
-          }
+
+          logger.info(
+            `File ${fileName} successfully uploaded to ${relativePath} in ${totalChunks} chunks`,
+          );
+          res.status(200).json({
+            success: true,
+            fileName: fileName,
+            path: relativePath,
+          });
         }
-        } catch (error) {
-        logger.error('Error uploading file:', error);
-        res.status(500).json({ error: 'Failed to upload file' });
+      } catch (error: unknown) {
+        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+        const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
+        if (err.status && errBody) {
+          logger.error(
+            `Error uploading file - Status: ${err.status}, Data:`,
+            errBody,
+          );
+          res.status(err.status as number).json({
+            error: (errBody.error as string) || 'Failed to upload file',
+            details: errBody,
+          });
+        } else if (err.message) {
+          logger.error(
+            'Error uploading file - No response received:',
+            err.message,
+          );
+          res.status(500).json({
+            error:
+              'Connection error during file upload. Please try again with a smaller file.',
+          });
+        } else {
+          logger.error(
+            'Error uploading file - Request setup error:',
+            error,
+          );
+          res
+            .status(500)
+            .json({ error: 'Error setting up upload request' });
+        }
       }
     },
   );

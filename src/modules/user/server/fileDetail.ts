@@ -134,6 +134,11 @@ export function registerFileDetailRoutes(router: Router): void {
       }
       const { content } = req.body;
 
+      if (typeof content !== 'string') {
+        res.status(400).json({ error: 'Content is required' });
+        return;
+      }
+
       try {
         const context = await loadAuthenticatedServerContext(req);
         if (sendMissingServerContext(res, context)) {

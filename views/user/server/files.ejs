@@ -239,7 +239,7 @@ function escJS(val) {
                         return `${size.toFixed(2)} ${sizes[unitIndex]}`;
                       })();
                     %>
-                    <a href="<%= fileHref %>" class="flex items-center gap-2.5 text-sm font-medium hover:text-neutral-600 dark:hover:text-white transition-colors" style="color:var(--theme-text-strong)" <% if (isImage) { %>onclick="event.preventDefault(); showImageViewer('<%= file.name %>', '<%= filePath %>', '<%= fileSize %>', '<%= server.UUID %>');"<% } %>>
+                    <a href="<%= fileHref %>" class="flex items-center gap-2.5 text-sm font-medium hover:text-neutral-600 dark:hover:text-white transition-colors" style="color:var(--theme-text-strong)" data-filename="<%= file.name %>" data-path="<%= filePath %>" data-size="<%= fileSize %>" data-uuid="<%= server.UUID %>" <% if (isImage) { %>data-click="viewer"<% } %>>
                       <span class="al-file-icon shrink-0" style="color:var(--theme-text-muted)">
                         <%- getFileIcon(file.type === 'directory' ? 'Folder' : file.category || 'No Category') %>
                       </span>
@@ -522,15 +522,28 @@ function escJS(val) {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    if (typeof window.showImageViewer !== 'function' && typeof window.imageViewerSystem === 'function') {
+  if (typeof window.showImageViewer !== 'function' && typeof window.imageViewerSystem === 'function') {
       const { showImageViewer, closeImageViewer, downloadViewedImage } = window.imageViewerSystem();
       window.showImageViewer = showImageViewer;
       window.closeImageViewer = closeImageViewer;
       window.downloadViewedImage = downloadViewedImage;
     }
 
-
+    // Image rows read their details from data-* attributes instead of inline
+    // JS string literals, so a filename containing a quote can never break out
+    // of an onclick attribute (stored-XSS safe).
+    document.querySelectorAll('a[data-click="viewer"]').forEach((el) => {
+      el.addEventListener('click', (event) => {
+        event.preventDefault();
+        const img = el;
+        if (typeof window.showImageViewer === 'function') {
+          window.showImageViewer(img.dataset.filename, img.dataset.path, img.dataset.size, img.dataset.uuid);
+        }
+      });
+    });
   });
+
+  const getCsrf = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
 
   function deletefile(fileName, filePath) {
     window.modal.confirm({
@@ -540,7 +553,10 @@ function escJS(val) {
       confirmLabel: 'Delete',
       onConfirm: () => {
       const loader = showLoadingPopup('Deleting File', 'Removing file from server...');
-      fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(filePath), { method: 'DELETE' })
+      fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(filePath), {
+        method: 'DELETE',
+        headers: { 'csrf-token': getCsrf() }
+      })
       .then(response => {
         loader.close();
         if (response.ok) {
@@ -686,7 +702,8 @@ function archiveFiles(files) {
     fetch('/server/<%= server.UUID %>/zip', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'csrf-token': getCsrf()
         },
         body: JSON.stringify({
           relativePath: files,
@@ -737,7 +754,10 @@ confirmMassDeleteBtn.addEventListener('click', async function() {
   loader.updateProgress(10, 'Processing deletion requests...');
 
   const deletePromises = selectedFiles.map(fileName =>
-    fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(fileName), { method: 'DELETE' })
+    fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(fileName), {
+      method: 'DELETE',
+      headers: { 'csrf-token': getCsrf() }
+    })
   );
 
   try {
@@ -840,7 +860,8 @@ function openCreateFileModal() {
         const response = await fetch(`/server/<%= server.UUID %>/unzip`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'csrf-token': getCsrf()
             },
             body: JSON.stringify({
                 relativePath: parentPath || '/',
@@ -1018,6 +1039,7 @@ function openCreateFileModal() {
         const xhr = new XMLHttpRequest();
 
         xhr.open('POST', `/server/<%= server.UUID %>/upload`, true);
+        xhr.setRequestHeader('csrf-token', getCsrf());
 
         xhr.upload.onprogress = function(e) {
           if (e.lengthComputable) {
@@ -1212,7 +1234,7 @@ function openCreateFileModal() {
         const parent = parts.join('/');
         const res = await fetch('/server/<%= server.UUID %>/files/mkdir', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
           body: JSON.stringify({ path: parent || '/', name }),
         });
         loader.close();
@@ -1240,7 +1262,7 @@ function openCreateFileModal() {
         const encoded = encodeURIComponent(finalPath);
         const res = await fetch('/server/<%= server.UUID %>/files/' + encoded, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
           body: JSON.stringify({ content: '' }),
         });
         if (res.ok) {
@@ -1261,7 +1283,7 @@ function openCreateFileModal() {
     try {
       const res1 = await fetch('/server/<%= server.UUID %>/files/' + encodeURIComponent(tempPath), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
         body: JSON.stringify({ content: '' }),
       });
       if (!res1.ok) { loader.close(); showToast('<%= req.translations.fileCreateFailed || "Failed to create file" %>', 'error'); return; }
@@ -1270,7 +1292,7 @@ function openCreateFileModal() {
 
       const res2 = await fetch('/server/<%= server.UUID %>/rename', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
         body: JSON.stringify({ path: tempPath, newName: finalPath }),
       });
       if (res2.ok) {
@@ -1289,7 +1311,7 @@ function openCreateFileModal() {
     try {
       const res = await fetch('/server/<%= server.UUID %>/files/' + encoded, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
         body: JSON.stringify({ content: '' }),
       });
       if (res.ok) {
@@ -1315,7 +1337,7 @@ function openCreateFileModal() {
     try {
       const res = await fetch('/server/<%= server.UUID %>/rename', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
         body: JSON.stringify({ path: filePath, newName: newPath }),
       });
       loader.close();
@@ -1431,7 +1453,7 @@ function openCreateFileModal() {
     try {
       const res = await fetch(`/server/<%- server.UUID %>/files/rename`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
         body:    JSON.stringify({ oldPath: src, newPath: dest }),
       });
       if (!res.ok) throw new Error('Move failed');
@@ -1451,7 +1473,7 @@ function openCreateFileModal() {
     try {
       const res = await fetch(`/server/<%- server.UUID %>/files/copy`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
         body:    JSON.stringify({ location: path }),
       });
       if (!res.ok) throw new Error('Copy failed');
@@ -1557,7 +1579,7 @@ function openCreateFileModal() {
     try {
       const res = await fetch('/server/<%= server.UUID %>/files/pull', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
         body: JSON.stringify({ url, path: '<%= currentPath %>' }),
       });
       const data = await res.json();

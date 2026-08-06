@@ -100,7 +100,7 @@ const sftpModule: Module = {
             }
           }
 
-          const response = await daemonRequest({
+          const response = await daemonRequest<Record<string, unknown>>({
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -110,19 +110,37 @@ const sftpModule: Module = {
             timeout: 15000,
           });
 
-          const { username, password, port, expiresAt } = response.data as {
-            username: string;
-            password: string;
-            port: number;
-            expiresAt: string | null;
-          };
+          if (response.status < 200 || response.status >= 300) {
+            const errBody = response.data as Record<string, unknown> | undefined;
+            const message =
+              typeof errBody?.error === 'string' && errBody.error
+                ? errBody.error
+                : 'The daemon failed to generate SFTP credentials.';
+            res.status(502).json({ error: message });
+            return;
+          }
+
+          // Validate at the boundary: only persist well-formed credentials.
+          const data = response.data;
+          const username = typeof data?.username === 'string' ? data.username : '';
+          const password = typeof data?.password === 'string' ? data.password : '';
+          const port = typeof data?.port === 'number' ? data.port : NaN;
+          const expiresAt = typeof data?.expiresAt === 'string' ? data.expiresAt : null;
+          const expiresDate = expiresAt ? new Date(expiresAt) : null;
+
+          if (!username || !password || !Number.isInteger(port) || (expiresDate && isNaN(expiresDate.getTime()))) {
+            logger.error(`Daemon returned malformed SFTP credentials for server ${serverId}`);
+            res.status(502).json({ error: 'The daemon returned invalid SFTP credentials.' });
+            return;
+          }
+
           const host = server.node.address;
           const hashedPassword = await bcrypt.hash(password, 12);
 
           await prisma.sftpCredential.upsert({
             where: { serverId },
-            update: { username, password: hashedPassword, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
-            create: { serverId, username, password: hashedPassword, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
+            update: { username, password: hashedPassword, host, port, expiresAt: expiresDate },
+            create: { serverId, username, password: hashedPassword, host, port, expiresAt: expiresDate },
           });
 
           res.json({ username, password, host, port, expiresAt });

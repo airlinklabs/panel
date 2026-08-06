@@ -41,7 +41,7 @@
       <div class="flex items-start gap-3 p-3 rounded-lg mb-4" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);">
         <%- icon('triangle-alert', { class: 'size-4 shrink-0 mt-0.5', style: 'color:var(--theme-danger);' }) %>
         <div>
-          <p class="text-xs font-medium" style="color:var(--theme-danger);">Couldn't load credentials — maybe generate a fresh set?</p>
+          <p id="sftpErrorTitle" class="text-xs font-medium" style="color:var(--theme-danger);">Couldn't load credentials — maybe generate a fresh set?</p>
           <p id="sftpErrorMsg" class="text-xs mt-0.5" style="color:var(--theme-danger);opacity:0.7;"></p>
         </div>
       </div>
@@ -93,6 +93,13 @@
             <%- icon('copy', { class: 'size-3', strokeWidth: 2 }) %>
           </button>
         </div>
+        <div class="h-px" style="background:var(--theme-border);"></div>
+
+        
+        <div class="flex items-center gap-3 py-2" id="sftpExpiryRow">
+          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);">Expires</span>
+          <span id="sftpValExpiry" class="text-xs flex-1 font-mono" style="color:var(--theme-text);"></span>
+        </div>
 
       </div>
 
@@ -118,7 +125,9 @@
 <script nonce="<%- nonce %>">
 (function () {
   const SERVER_ID = '<%= server.UUID %>';
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   let sftpPlainPassword = null;
+  let sftpExpired = false;
   let lastFocusedElement = null;
 
   function trapFocus(modal, e) {
@@ -198,15 +207,69 @@
     document.getElementById('sftpValPort').textContent = data.port;
     document.getElementById('sftpValUser').textContent = data.username;
     document.getElementById('sftpValPass').textContent = data.password || sftpPlainPassword || 'Regenerate to view';
+    renderExpiry(data.expiresAt);
     showSftpState('credentials');
+  }
+
+  function renderExpiry(expiresAt) {
+    const row = document.getElementById('sftpExpiryRow');
+    const val = document.getElementById('sftpValExpiry');
+    if (!row || !val) return;
+    if (!expiresAt) {
+      row.classList.add('hidden');
+      setCredentialsLocked(false);
+      return;
+    }
+    row.classList.remove('hidden');
+    const ts = new Date(expiresAt).getTime();
+    if (isNaN(ts)) {
+      val.textContent = 'unknown';
+      val.style.color = 'var(--theme-text)';
+      setCredentialsLocked(false);
+      return;
+    }
+    if (ts <= Date.now()) {
+      sftpExpired = true;
+      val.textContent = 'expired';
+      val.style.color = 'var(--theme-danger)';
+    } else {
+      sftpExpired = false;
+      val.style.color = 'var(--theme-text)';
+      const ms = ts - Date.now();
+      const days = Math.floor(ms / 86400000);
+      const hours = Math.floor((ms % 86400000) / 3600000);
+      const mins = Math.floor((ms % 3600000) / 60000);
+      val.textContent = days > 0 ? days + 'd ' + hours + 'h ' + mins + 'm' : hours + 'h ' + mins + 'm';
+    }
+    setCredentialsLocked(sftpExpired);
+  }
+
+  function setCredentialsLocked(locked) {
+    const modal = document.getElementById('sftpModal');
+    modal.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.disabled = locked;
+      btn.classList.toggle('opacity-40', locked);
+    });
+    const passEl = document.getElementById('sftpValPass');
+    if (passEl) {
+      passEl.classList.toggle('blur-sm', locked);
+      passEl.classList.remove('blur-none');
+    }
   }
 
   function loadSftpCredentials() {
     showSftpState('loading');
+    // GET intentionally has no password — never resurface a stale one from a
+    // previous generate on a fresh load; force a regenerate prompt instead.
+    sftpPlainPassword = null;
+    sftpExpired = false;
     fetch('/server/' + SERVER_ID + '/sftp/credentials')
       .then(function (resp) {
         if (resp.status === 404) {
-          return generateSftpCredentials();
+          document.getElementById('sftpErrorTitle').textContent = 'No SFTP credentials yet.';
+          document.getElementById('sftpErrorMsg').textContent = '';
+          showSftpState('error');
+          return;
         }
         if (!resp.ok) {
           return resp.json().catch(function () { return {}; }).then(function (d) {
@@ -216,6 +279,7 @@
         return resp.json().then(fillCredentials);
       })
       .catch(function (err) {
+        document.getElementById('sftpErrorTitle').textContent = "Couldn't load credentials — maybe generate a fresh set?";
         document.getElementById('sftpErrorMsg').textContent = err.message || 'Unknown error.';
         showSftpState('error');
       });
@@ -224,11 +288,13 @@
   window.generateSftpCredentials = function () {
     const btn = document.getElementById('sftpRegenBtn');
     if (btn) btn.disabled = true;
+    sftpPlainPassword = null;
+    sftpExpired = false;
     showSftpState('loading');
 
     return fetch('/server/' + SERVER_ID + '/sftp/credentials', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
     })
       .then(function (resp) {
         if (!resp.ok) {
@@ -245,6 +311,7 @@
       })
       .catch(function (err) {
         if (btn) btn.disabled = false;
+        document.getElementById('sftpErrorTitle').textContent = "Couldn't generate credentials — please try again.";
         document.getElementById('sftpErrorMsg').textContent = err.message || 'Unknown error.';
         showSftpState('error');
       });
@@ -253,26 +320,57 @@
   window.revokeSftpCredentials = function () {
     fetch('/server/' + SERVER_ID + '/sftp/credentials', {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
     })
-      .then(function () {
+      .then(function (resp) {
+        if (!resp.ok) {
+          return resp.json().catch(function () { return {}; }).then(function (d) {
+            throw new Error(d.error || 'Request failed (' + resp.status + ')');
+          });
+        }
+        sftpPlainPassword = null;
+        sftpExpired = false;
         closeSftpModal();
         showToast('SFTP access revoked.', 'success');
       })
       .catch(function (err) {
         console.error('Failed to revoke SFTP credentials:', err);
-        showToast('Failed to revoke credentials. Try again.', 'error');
+        showToast(err && err.message ? err.message : 'Failed to revoke credentials. Try again.', 'error');
       });
   };
 
   window.sftpCopy = function (elementId) {
     const el = document.getElementById(elementId);
     if (!el) return;
-    navigator.clipboard.writeText(el.textContent || '').then(function () {
-      showToast('Copied!', 'success');
-    }).catch(function () {
-      showToast('Copy failed — try selecting and copying manually.', 'error');
-    });
+    const text = (el.textContent || '').trim();
+    if (!text) return;
+
+    const fallbackCopy = function () {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      let ok = false;
+      try {
+        ok = document.execCommand('copy');
+      } catch (e) {
+        ok = false;
+      } finally {
+        document.body.removeChild(ta);
+      }
+      showToast(ok ? 'Copied!' : 'Copy failed — try selecting and copying manually.', ok ? 'success' : 'error');
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        showToast('Copied!', 'success');
+      }).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
   };
 
   // Touch device support: tap to toggle password reveal

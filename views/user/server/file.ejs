@@ -159,27 +159,58 @@
 
 <script nonce="<%- nonce %>" src="/monaco/vs/loader.js"></script>
 <%
-    const fileExtension = file.extension;
+    const fileExtension = (file.extension || '').toString().toLowerCase();
+    // Monaco language id mapping. Unknown/missing extensions fall back to plaintext.
     const language = fileExtension === 'js' ? 'javascript'
+                       : fileExtension === 'mjs' ? 'javascript'
+                       : fileExtension === 'cjs' ? 'javascript'
+                       : fileExtension === 'jsx' ? 'javascript'
                        : fileExtension === 'json' ? 'json'
                        : fileExtension === 'html' ? 'html'
+                       : fileExtension === 'htm' ? 'html'
                        : fileExtension === 'css' ? 'css'
                        : fileExtension === 'ts' ? 'typescript'
+                       : fileExtension === 'tsx' ? 'typescript'
                        : fileExtension === 'md' ? 'markdown'
+                       : fileExtension === 'markdown' ? 'markdown'
                        : fileExtension === 'txt' ? 'plaintext'
                        : fileExtension === 'py' ? 'python'
                        : fileExtension === 'sh' ? 'shell'
+                       : fileExtension === 'bash' ? 'shell'
+                       : fileExtension === 'zsh' ? 'shell'
                        : fileExtension === 'go' ? 'go'
                        : fileExtension === 'php' ? 'php'
                        : fileExtension === 'sql' ? 'sql'
                        : fileExtension === 'c' ? 'c'
+                       : fileExtension === 'h' ? 'c'
                        : fileExtension === 'cpp' ? 'cpp'
+                       : fileExtension === 'cc' ? 'cpp'
+                       : fileExtension === 'hpp' ? 'cpp'
                        : fileExtension === 'java' ? 'java'
                        : fileExtension === 'rb' ? 'ruby'
                        : fileExtension === 'pl' ? 'perl'
                        : fileExtension === 'yml' ? 'yaml'
+                       : fileExtension === 'yaml' ? 'yaml'
                        : fileExtension === 'xml' ? 'xml'
+                       : fileExtension === 'ini' ? 'ini'
+                       : fileExtension === 'toml' ? 'ini'
+                       : fileExtension === 'cfg' ? 'ini'
+                       : fileExtension === 'env' ? 'ini'
+                       : fileExtension === 'conf' ? 'ini'
+                       : fileExtension === 'properties' ? 'ini'
+                       : fileExtension === 'dockerfile' ? 'dockerfile'
+                       : fileExtension === 'cs' ? 'csharp'
+                       : fileExtension === 'kt' ? 'kotlin'
+                       : fileExtension === 'rs' ? 'rust'
+                       : fileExtension === 'swift' ? 'swift'
+                       : fileExtension === 'vue' ? 'html'
+                       : fileExtension === 'svelte' ? 'html'
                        : 'plaintext';
+    // Content guards: refuse to corrupt/embed problematic files.
+    const _fileContent = file.content || '';
+    const fileContentTooLarge = _fileContent.length > 1048576;
+    const fileContentInvalidUtf8 = /[\uFFFD]/.test(_fileContent);
+    const fileContentSkipped = fileContentTooLarge || fileContentInvalidUtf8;
 %>
 <script nonce="<%- nonce %>">
 require.config({
@@ -192,12 +223,36 @@ require.config({
   let minimapEnabled = false;
   let themeMode = 'auto'; // 'auto', 'light', or 'dark'
   let isDirty = false;
+  let isSaving = false;
   let allowNavigation = false;
   const serverUuid = <%- JSON.stringify(server.UUID) %>;
   const editorFilePath = <%- JSON.stringify(file.path || '') %>;
   const saveUrl = `/server/${serverUuid}/files/${encodeURIComponent(editorFilePath)}`;
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  const fileTooLarge = <%- JSON.stringify(fileContentTooLarge) %>;
+  const fileInvalidUtf8 = <%- JSON.stringify(fileContentInvalidUtf8) %>;
+  const fileSkipped = <%- JSON.stringify(fileContentSkipped) %>;
 
   require(['vs/editor/editor.main'], function (_) {
+    // Never open problematic content into Monaco (would freeze or corrupt it).
+    // Mark the file as clean-to-navigate and surface a clear message instead.
+    if (fileSkipped) {
+      allowNavigation = true;
+      isDirty = false;
+      var e = document.getElementById('editor-container');
+      if (e) {
+        e.innerHTML =
+          '<div class="p-6 text-sm" style="color:var(--theme-text);">' +
+          (fileTooLarge
+            ? 'This file is too large (&gt; 1 MiB) for the in-browser editor. Download or edit it locally instead.'
+            : 'This file contains non-UTF-8 binary content and cannot be edited safely in the browser.') +
+          '</div>';
+      }
+      var info = document.getElementById('file-info');
+      if (info) info.textContent = fileTooLarge ? 'file too large' : 'binary / non-UTF-8';
+      return;
+    }
+
     // Define custom themes
     monaco.editor.defineTheme('custom-dark', {
       base: 'vs-dark',
@@ -239,7 +294,7 @@ require.config({
 
     // Create editor with enhanced options
     editor = monaco.editor.create(document.getElementById('editor-container'), {
-      value: <%- JSON.stringify(file.content || '') %>,
+      value: <%- JSON.stringify(fileSkipped ? '' : (file.content || '')) %>,
       language: '<%= language %>',
       theme: document.documentElement.classList.contains('dark') ? 'custom-dark' : 'custom-light',
       automaticLayout: true,
@@ -372,8 +427,10 @@ require.config({
   });
 
 
-  async function saveFile() {
+async function saveFile() {
     if (!editor) return;
+    if (isSaving) return; // prevent double POST while a save is in flight
+    isSaving = true;
     const saveBtn = document.getElementById('saveBtn');
     saveBtn.disabled = true;
     saveBtn.innerHTML = `<%- icon('loader-circle', { class: 'animate-spin h-4 w-4 mr-1.5', strokeWidth: 2 }) %>
@@ -386,18 +443,28 @@ require.config({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'csrf-token': csrfToken,
         },
         body: JSON.stringify({ content }),
       });
 
-      if (!response.ok) throw new Error('Failed to save file');
+      if (!response.ok) {
+        let message = 'Failed to save file';
+        try {
+          const data = await response.json();
+          if (data && data.error) message = data.error;
+        } catch {
+          // keep the default message if the body isn't JSON
+        }
+        throw new Error(message);
+      }
 
       isDirty = false;
       showToast('File saved.', 'success');
     } catch (error) {
       console.error('Error saving file:', error);
       // Content is never cleared on failure — offer Retry instead
-      showToast('Failed to save file', 'error');
+      showToast(error && error.message ? error.message : 'Failed to save file', 'error');
       if (window.modal) {
         window.modal.confirm({
           title: 'Save failed',
@@ -408,6 +475,7 @@ require.config({
         });
       }
     } finally {
+      isSaving = false;
       saveBtn.disabled = false;
       saveBtn.innerHTML = `<%- icon('save', { class: 'h-4 w-4 mr-1.5', strokeWidth: 2 }) %>
         Save
