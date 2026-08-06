@@ -180,7 +180,17 @@
                 const loader = showLoadingPopup('Deleting Server', 'Removing server and all data...');
                 loader.updateProgress(20, 'Contacting node...');
                 <% if (user && user.isAdmin) { %>
-                window.location.href = '/admin/server/delete/<%= server.id %>';
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                fetch('/admin/server/delete/<%= server.id %>', {
+                  method: 'POST',
+                  headers: { 'csrf-token': csrfToken },
+                })
+                  .then(r => {
+                    loader.close();
+                    if (r.ok) window.location.href = '/';
+                    else return r.json().then(d => showToast((d && d.error) || "Couldn't delete the server.", 'error'));
+                  })
+                  .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
                 <% } else { %>
                 fetch('/user/server/<%= server.UUID %>', { method: 'DELETE' })
                   .then(r => r.json())

@@ -991,7 +991,7 @@ connectWebSocket();
             if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); clearButtonLoading(startButton); }
         };
 
-        fetch(`/server/${serverUUID}/power/start`, { method: 'POST' })
+        fetch(`/server/${serverUUID}/power/start`, { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
             .then(r => r.json().then(d => ({ ok: r.ok, d })))
             .then(({ ok, d }) => {
                 if (!ok) {
@@ -1078,7 +1078,7 @@ connectWebSocket();
               if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); clearButtonLoading(restartButton); }
           };
 
-          fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
+          fetch(`/server/${serverUUID}/power/restart`, { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
               .then(r => r.json().then(d => ({ ok: r.ok, d })))
               .then(({ ok, d }) => {
                   if (!ok) {
@@ -1161,7 +1161,7 @@ connectWebSocket();
               if (type === 'error') { setStatusLog(null); showToast(message, 'error'); clearButtonLoading(stopButton); }
           };
 
-          fetch(`/server/${serverUUID}/power/stop`, { method: 'POST' })
+          fetch(`/server/${serverUUID}/power/stop`, { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
               .then(r => r.json())
               .then(() => {
                   let attempts = 0;

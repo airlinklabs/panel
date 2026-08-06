@@ -123,27 +123,42 @@ async function fetchPlayerData() {
         const statusClass = server.online ? 'text-emerald-700 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30' : 'text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/30 border border-neutral-300 dark:border-neutral-700/30';
         const statusText = server.online ? 'Online' : 'Offline';
 
-        row.innerHTML = `
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <div class="ml-4">
-                <div class="text-sm font-medium text-neutral-800 dark:text-white">${server.serverName}</div>
-                <div class="text-sm text-neutral-400">${server.serverId}</div>
-              </div>
-            </div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
-              ${statusText}
-            </span>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-700 dark:text-white">
-            ${server.playerCount} / ${server.maxPlayers}
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-400">
-            ${server.version || 'Unknown'}
-          </td>
-        `;
+        const nameCell = document.createElement('td');
+        nameCell.className = 'px-6 py-4 whitespace-nowrap';
+        const nameWrap = document.createElement('div');
+        nameWrap.className = 'flex items-center';
+        const metaWrap = document.createElement('div');
+        metaWrap.className = 'ml-4';
+        const serverNameEl = document.createElement('div');
+        serverNameEl.className = 'text-sm font-medium text-neutral-800 dark:text-white';
+        serverNameEl.textContent = server.serverName;
+        const serverIdEl = document.createElement('div');
+        serverIdEl.className = 'text-sm text-neutral-400';
+        serverIdEl.textContent = server.serverId;
+        metaWrap.appendChild(serverNameEl);
+        metaWrap.appendChild(serverIdEl);
+        nameWrap.appendChild(metaWrap);
+        nameCell.appendChild(nameWrap);
+
+        const statusCell = document.createElement('td');
+        statusCell.className = 'px-6 py-4 whitespace-nowrap';
+        const badge = document.createElement('span');
+        badge.className = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full ' + statusClass;
+        badge.textContent = statusText;
+        statusCell.appendChild(badge);
+
+        const countCell = document.createElement('td');
+        countCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-neutral-700 dark:text-white';
+        countCell.textContent = server.playerCount + ' / ' + server.maxPlayers;
+
+        const versionCell = document.createElement('td');
+        versionCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-neutral-400';
+        versionCell.textContent = server.version || 'Unknown';
+
+        row.appendChild(nameCell);
+        row.appendChild(statusCell);
+        row.appendChild(countCell);
+        row.appendChild(versionCell);
 
         tableBody.appendChild(row);
       });

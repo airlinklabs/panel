@@ -286,7 +286,8 @@
       fetch(startupForm.action, {
         method: 'POST',
         headers: {
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || ''
         },
         body: formData
       })
@@ -330,7 +331,8 @@
       fetch(dockerImageForm.action, {
         method: 'POST',
         headers: {
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || ''
         },
         body: formData
       })
@@ -381,7 +383,8 @@
         method: 'POST',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || ''
         },
         body: urlEncodedData
       })

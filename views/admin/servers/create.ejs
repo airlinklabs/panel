@@ -421,7 +421,7 @@
       const loader = showLoadingPopup('Creating Server', 'Initializing server creation...');
       loader.updateProgress(20, 'Sending server configuration...');
       fetch('/admin/servers/create', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }, body: JSON.stringify(data),
       })
         .then(response => {
           if (!response.ok) throw new Error('Server creation failed');

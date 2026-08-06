@@ -106,7 +106,7 @@
     try {
       const res = await fetch('/2fa', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
         body: JSON.stringify({ token: token }),
       });
       const data = await res.json();

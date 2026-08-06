@@ -110,7 +110,7 @@
   retryBtn.addEventListener('click', function() {
     retryBtn.disabled = true;
     retryBtn.textContent = 'Retrying…';
-    fetch('/server/' + encodeURIComponent(serverUUID) + '/reinstall', { method: 'POST', credentials: 'same-origin' })
+    fetch('/server/' + encodeURIComponent(serverUUID) + '/reinstall', { method: 'POST', credentials: 'same-origin', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
       .then(function(r) {
         if (!r.ok) { return r.json().then(function(d) { throw new Error(d.error || 'Reinstall failed'); }); }
         window.location.reload();

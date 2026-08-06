@@ -383,7 +383,7 @@ async function api(url, method, body) {
   try {
     const res = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
       body: body ? JSON.stringify(body) : undefined,
     });
     const data = await res.json().catch(() => ({}));

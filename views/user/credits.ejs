@@ -299,9 +299,9 @@
       return;
     }
     grid.innerHTML = others.map(function (c) {
-      const safeLogin = c.login.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-      const safeUrl = c.html_url.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-      const safeAvatar = c.avatar_url.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      const safeLogin = c.login.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      const safeUrl = c.html_url.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      const safeAvatar = c.avatar_url.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       return '<a href="' + safeUrl + '" target="_blank" rel="noopener"' +
         ' class="al-card flex items-center gap-3 px-3 py-3 hover:border-[var(--theme-border-accent)] transition-colors min-w-0">' +
         '<img loading="lazy" src="' + safeAvatar + '&s=48" alt="' + safeLogin + '" class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-white/10 object-cover shrink-0" onerror="this.src=\'https://github.com/ghost.png\'">' +

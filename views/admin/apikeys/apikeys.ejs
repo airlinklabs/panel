@@ -619,7 +619,7 @@
     try {
       const res = await fetch(form.action, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
+        headers: { 'Accept': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
         body: new URLSearchParams(new FormData(form))
       });
       if (res.ok) {

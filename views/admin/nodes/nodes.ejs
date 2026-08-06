@@ -250,7 +250,7 @@
 
     const r = await fetch('/admin/locations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
       body: JSON.stringify({ name, shortCode }),
     });
     const d = await r.json();
@@ -273,7 +273,7 @@
           onConfirm: resolve,
         });
       });
-      const r = await fetch('/admin/location/' + btn.dataset.id, { method: 'DELETE' });
+      const r = await fetch('/admin/location/' + btn.dataset.id, { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
       const d = await r.json();
       if (r.ok) {
         toast('Location deleted.', 'success');

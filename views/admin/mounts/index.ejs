@@ -153,7 +153,7 @@ document.getElementById('saveMountBtn').addEventListener('click', async () => {
     readOnly: document.getElementById('mountReadOnly').checked,
   };
   const r = await fetch('/admin/mounts', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }, body: JSON.stringify(body),
   });
   const d = await r.json();
   if (r.ok) { closeMountModal(); showToast('Mount created.', 'success'); setTimeout(() => location.reload(), 800); }
@@ -166,7 +166,7 @@ window.deleteMount = (id) => {
     danger: true,
     confirmLabel: 'Delete',
     onConfirm: async () => {
-      const r = await fetch('/admin/mounts/' + id, { method: 'DELETE' });
+      const r = await fetch('/admin/mounts/' + id, { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
       const d = await r.json();
       if (r.ok) { showToast('Mount deleted.', 'success'); setTimeout(() => location.reload(), 800); }
       else showToast(d.error || 'Failed to delete mount.', 'error');

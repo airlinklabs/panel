@@ -570,7 +570,7 @@ function generateRandomName() {
       try {
         const response = await fetch('/admin/servers/<%= server.id %>/' + action, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
           body: JSON.stringify({}),
         });
 
@@ -612,6 +612,7 @@ function generateRandomName() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '',
           },
           body: JSON.stringify(data),
         });
@@ -851,7 +852,7 @@ function generateRandomName() {
       try {
         const response = await fetch('/admin/servers/<%= server.id %>/transfer', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
           body: JSON.stringify({ targetNodeId: parseInt(nodeId), ports: transferPorts }),
         });
 
