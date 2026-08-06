@@ -4,6 +4,7 @@ import logger from '../../handlers/logger';
 import os from 'os';
 import prisma from '../../db';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
+import { isAuthenticated, requireApiAuth } from '../../handlers/utils/auth/authUtil';
 
 const coreModule: Module = {
   info: {
@@ -18,7 +19,7 @@ const coreModule: Module = {
   router: () => {
     const router = Router();
 
-    router.get('/api/system/status', async (_req: Request, res: Response) => {
+    router.get('/api/system/status', isAuthenticated(true), async (_req: Request, res: Response) => {
       try {
         const systemInfo = {
           hostname: os.hostname(),
@@ -67,16 +68,24 @@ const coreModule: Module = {
       res.status(200).json({ status: 'ok' });
     });
 
-    router.post('/api/system/test-node-connection', async (req: Request, res: Response) => {
+    router.post('/api/system/test-node-connection', isAuthenticated(true), async (req: Request, res: Response) => {
       try {
         const { address, port, key } = req.body;
 
-        if (!address || !port || !key) {
-          res.status(400).json({ error: 'Missing required parameters' });
+        if (typeof address !== 'string' || address.trim() === '') {
+          res.status(400).json({ error: 'address must be a non-empty string' });
+          return;
+        }
+        if (!Number.isInteger(port) || port < 1 || port > 65535) {
+          res.status(400).json({ error: 'port must be an integer between 1 and 65535' });
+          return;
+        }
+        if (typeof key !== 'string' || key.trim() === '') {
+          res.status(400).json({ error: 'key must be a non-empty string' });
           return;
         }
 
-        const testNode = { address, port, key };
+        const testNode = { address: address.trim(), port, key };
 
         const nodeWithStatus = await checkNodeStatus(testNode);
 
@@ -105,8 +114,8 @@ const coreModule: Module = {
       }
     });
 
-    router.get('/api/search', async (req: Request, res: Response) => {
-      const userId = req.session?.user?.id;
+    router.get('/api/search', requireApiAuth, async (req: Request, res: Response) => {
+      const userId = req.session.user?.id;
       if (!userId) return res.status(401).json({ results: [] });
 
       const qRaw = String(req.query.q || '').trim().toLowerCase();

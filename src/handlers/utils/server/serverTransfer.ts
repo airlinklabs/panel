@@ -16,6 +16,7 @@ import {
   serializeServerPorts,
   validatePortAssignments,
   getUsedExternalPorts,
+  getPrimaryExternalPort,
 } from './ports';
 
 export type TransferStatus =
@@ -261,10 +262,9 @@ async function runTransfer(
 
         // Add SERVER_PORT from ports
         try {
-          const parsedPorts = JSON.parse(server.Ports) as Array<{ primary?: boolean; Port?: string; externalPort?: number }>;
-          const primary = parsedPorts.find((p) => p.primary);
-          if (primary?.Port) {
-            env['SERVER_PORT'] = String(primary.externalPort || String(primary.Port).split(':')[0]);
+          const primaryExternalPort = getPrimaryExternalPort(server.Ports);
+          if (primaryExternalPort) {
+            env['SERVER_PORT'] = String(primaryExternalPort);
           }
         } catch { /* keep fallback */ }
         env['SERVER_MEMORY'] = String(server.Memory);

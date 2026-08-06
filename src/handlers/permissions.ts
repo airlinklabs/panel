@@ -12,6 +12,8 @@ type CorePermission =
   | 'airlink.admin.addons.reload'
   | 'airlink.admin.addons.store'
   | 'airlink.admin.addons.install'
+  | 'airlink.admin.addons.settings'
+  | 'airlink.admin.addons.commands'
   | 'airlink.admin.analytics.view'
   | 'airlink.admin.apikeys.view'
   | 'airlink.admin.apikeys.create'
@@ -44,7 +46,13 @@ type CorePermission =
   | 'airlink.api.nodes.update'
   | 'airlink.api.nodes.delete'
   | 'airlink.api.settings.read'
-  | 'airlink.api.settings.update';
+  | 'airlink.api.settings.update'
+  | 'airlink.api.images.read'
+  | 'airlink.api.images.create'
+  | 'airlink.api.images.update'
+  | 'airlink.api.images.delete'
+  | 'airlink.api.locations.read'
+  | 'airlink.api.locations.create';
 
 export type Permission = CorePermission | `addon.${string}`;
 
@@ -122,6 +130,14 @@ registerPermission('airlink.api.nodes.update');
 registerPermission('airlink.api.nodes.delete');
 registerPermission('airlink.api.settings.read');
 registerPermission('airlink.api.settings.update');
+registerPermission('airlink.admin.addons.settings');
+registerPermission('airlink.admin.addons.commands');
+registerPermission('airlink.api.images.read');
+registerPermission('airlink.api.images.create');
+registerPermission('airlink.api.images.update');
+registerPermission('airlink.api.images.delete');
+registerPermission('airlink.api.locations.read');
+registerPermission('airlink.api.locations.create');
 registerPermission('airlink.admin.menu.main');
 
 export default permissions;

@@ -2,6 +2,7 @@ import prisma from '../db';
 import logger from './logger';
 import { daemonRequest } from './utils/core/daemonRequest';
 import { queueer } from './queueer';
+import { getPrimaryExternalPort } from './utils/server/ports';
 
 const INSTALL_TIMEOUT_MS = 600_000;
 
@@ -26,10 +27,9 @@ export async function processQueuedServerInstalls(): Promise<void> {
       }));
       let serverPort: string | number = '';
       try {
-        const parsedPorts = JSON.parse(server.Ports);
-        const primary = parsedPorts.find((p: Record<string, unknown>) => p.primary);
-        if (primary?.Port) {
-          serverPort = parseInt(String(primary.Port).split(':')[0] ?? '');
+        const primaryExternalPort = getPrimaryExternalPort(server.Ports);
+        if (primaryExternalPort) {
+          serverPort = primaryExternalPort;
         }
       } catch { /* keep fallback */ }
       serverEnv.push({ env: 'SERVER_PORT', value: serverPort });

@@ -10,12 +10,18 @@ import {
   type ServerPageServer,
   getServerStatusInput,
   getImageFeatures,
+  getPrimaryPort,
 } from './shared';
 
 type PlayerServer = Pick<ServerPageServer, 'UUID' | 'Ports' | 'node' | 'image'>;
 
 export function registerPlayersRoutes(router: Router): void {
-  async function fetchPlayerData(server: PlayerServer, primaryPort: string) {
+  // The daemon /minecraft/players handler pings host:port on the node address.
+  // Server start maps ports as external:internal (portsToDaemonString), so the
+  // Minecraft server inside the container is reachable on the node's own
+  // address at the EXTERNAL (primary) port — not the internal port. Match the
+  // server-start contract by using the external primary port.
+  async function fetchPlayerData(server: PlayerServer, primaryPort: number) {
     let players: Array<{ name: string; uuid: string }> = [];
     let serverInfo = {
       maxPlayers: 0,
@@ -45,7 +51,7 @@ export function registerPlayersRoutes(router: Router): void {
         params: {
           id: server.UUID,
           host: server.node.address,
-          port: parseInt(primaryPort, 10),
+          port: primaryPort,
         },
         timeout: 8000,
       });
@@ -113,12 +119,7 @@ export function registerPlayersRoutes(router: Router): void {
           return;
         }
 
-        const primaryPort = server.Ports
-          ? JSON.parse(server.Ports)
-            .filter((Port: { primary?: boolean }) => Port.primary)
-            .map((Port: { Port: string }) => Port.Port.split(':')[1])
-            .pop()
-          : '';
+        const primaryPort = getPrimaryPort(server.Ports);
 
         if (!primaryPort) {
           res.json({ serverInfo: null, players: [], serverIsOnline: false, error: 'No primary port found' });
@@ -166,12 +167,7 @@ export function registerPlayersRoutes(router: Router): void {
           return;
         }
 
-        const primaryPort = server.Ports
-          ? JSON.parse(server.Ports)
-            .filter((Port: { primary?: boolean }) => Port.primary)
-            .map((Port: { Port: string }) => Port.Port.split(':')[1])
-            .pop()
-          : '';
+        const primaryPort = getPrimaryPort(server.Ports);
 
         const features = getImageFeatures(server.image);
 

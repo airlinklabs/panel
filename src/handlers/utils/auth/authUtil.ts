@@ -57,3 +57,20 @@ export const isAuthenticated =
       }
       next();
     };
+
+// JSON-friendly auth guard for API routes that must return a 401 JSON body
+// (rather than an HTML redirect) when the caller is unauthenticated.
+export const requireApiAuth =
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.session.user?.id;
+    if (!userId) {
+      return res.status(401).json({ results: [] });
+    }
+
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(401).json({ results: [] });
+    }
+
+    return next();
+  };

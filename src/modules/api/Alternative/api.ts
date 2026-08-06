@@ -7,6 +7,7 @@ import type { Prisma } from '../../../generated/prisma/client';
 import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../../utils/typeHelpers';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { getUsedExternalPorts } from '../../../handlers/utils/server/ports';
 
 const PTERO_MEMORY_MB = 1024;
 const PTERO_DISK_MB = 1024;
@@ -568,10 +569,8 @@ const coreModule: Module = {
           { length: 100 },
           (_, i) => 25565 + i,
         );
-        const usedPorts = servers.flatMap((server) =>
-          JSON.parse(server.Ports).map((portInfo: { Port: string }) =>
-            parseInt(portInfo.Port.split(':')[0] ?? ''),
-          ),
+        const usedPorts = getUsedExternalPorts(
+          servers as { Ports: string }[],
         );
 
         const freePorts = allPossiblePorts.filter(

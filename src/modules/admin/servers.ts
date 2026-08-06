@@ -13,6 +13,7 @@ import {
   parseServerPorts,
   serializeServerPorts,
   validatePortAssignments,
+  getPrimaryExternalPort,
 } from '../../handlers/utils/server/ports';
 import { assertNodeCapacity } from '../../handlers/utils/server/resourceCheck';
 import {
@@ -582,13 +583,10 @@ const adminModule: Module = {
                 }));
 
                 let serverPort = String(parseServerPorts(Port)[0]?.externalPort ?? '');
-                try {
-                  const parsedPorts: Array<{ Port: string; primary?: boolean }> = JSON.parse(server.Ports);
-                  const primary = parsedPorts.find((p) => p.primary);
-                  if (primary?.Port) {
-                    serverPort = String(primary.Port).split(':')[0] ?? '';
-                  }
-                } catch { /* keep fallback */ }
+                const primaryExternalPort = getPrimaryExternalPort(server.Ports);
+                if (primaryExternalPort) {
+                  serverPort = String(primaryExternalPort);
+                }
                 ServerEnv.push({
                   env: 'SERVER_PORT',
                   value: serverPort,

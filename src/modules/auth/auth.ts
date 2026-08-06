@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import logger from '../../handlers/logger';
 import prisma from '../../db';
 
 
@@ -43,23 +42,6 @@ const authModule: Module = {
       }
 
       res.render('auth/register', { req, settings });
-    });
-
-    router.post('/logout', (req: Request, res: Response) => {
-      if (req.session) {
-        req.session.destroy((err) => {
-          if (err) {
-            logger.error('Session destruction error', err);
-            res.status(500).json({ error: 'logout_error' });
-            return;
-          }
-          res.clearCookie('connect.sid');
-          res.redirect('/');
-        });
-      } else {
-        res.redirect('/');
-      }
-      return;
     });
 
     return router;

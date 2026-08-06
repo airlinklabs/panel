@@ -9,6 +9,7 @@ import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import { issueWsToken } from '../../../handlers/utils/security/wsToken';
+import { getPrimaryExternalPort } from '../../../handlers/utils/server/ports';
 import {
   type ErrorMessage,
   loadServerPageContext,
@@ -551,15 +552,14 @@ export function registerConsoleRoutes(router: Router): void {
                   serverToReinstall.Variables,
                 ) as import('./shared').ServerVariable[];
 
-                const ports = JSON.parse(serverToReinstall.Ports);
-                const primaryPort = ports.find((p: { primary?: boolean; Port?: string }) => p.primary);
+                const primaryPort = getPrimaryExternalPort(serverToReinstall.Ports);
                 if (primaryPort) {
                   ServerEnv.push({
                     env: 'SERVER_PORT',
                     name: 'Primary Port',
-                    value: primaryPort.Port.split(':')[0],
+                    value: primaryPort,
                     type: 'text',
-                    default: primaryPort.Port.split(':')[0],
+                    default: primaryPort,
                   });
                 }
               } catch (error) {

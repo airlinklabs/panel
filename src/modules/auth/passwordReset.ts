@@ -21,6 +21,22 @@ const forgotRateLimit = rateLimit({
   },
 });
 
+// Per-IP limit on POST /reset-password. A reset token is 64 hex chars, so
+// brute-force is infeasible, but the endpoint shouldn't be openly hammerable
+// (token-enumeration / DoS defense). Returns 429 JSON rather than redirecting
+// so API callers get a machine-readable response.
+const resetRateLimit = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => getClientIp(req),
+  validate: false,
+  handler: (req: Request, res: Response) => {
+    res.status(429).json({ error: 'Too many attempts. Try again later.' });
+  },
+});
+
 const passwordResetModule: Module = {
   info: {
     name: 'Password Reset Module',
@@ -102,7 +118,7 @@ const passwordResetModule: Module = {
     });
 
     // ── POST /reset-password ────────────────────────────────────────────────
-    router.post('/reset-password', async (req: Request, res: Response) => {
+    router.post('/reset-password', resetRateLimit, async (req: Request, res: Response) => {
       const { token, password, confirmPassword } = req.body as {
         token?: string;
         password?: string;

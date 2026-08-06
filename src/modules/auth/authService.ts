@@ -193,11 +193,20 @@ const authServiceModule: Module = {
     });
 
     // ── GET /logout ──────────────────────────────────────────────────────────
+    // Canonical logout route. The browser initiates logout via a plain GET link
+    // (<a href="/logout"> in template.ejs / bottomNav.ejs), so only GET is kept;
+    // the duplicate POST handler previously lived in auth.ts and is removed.
     router.get('/logout', (req: Request, res: Response) => {
-      res.clearCookie('connect.sid');
       if (req.session) {
-        req.session.destroy(() => res.redirect('/login'));
+        req.session.destroy((err) => {
+          if (err) {
+            logger.error('Session destruction error', err);
+          }
+          res.clearCookie('connect.sid');
+          res.redirect('/login');
+        });
       } else {
+        res.clearCookie('connect.sid');
         res.redirect('/login');
       }
     });

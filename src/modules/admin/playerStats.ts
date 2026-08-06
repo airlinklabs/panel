@@ -6,6 +6,7 @@ import logger from '../../handlers/logger';
 import { registerPermission } from '../../handlers/permissions';
 import { collectPlayerStats } from '../../handlers/playerStatsCollector';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { getPrimaryExternalPort } from '../../handlers/utils/server/ports';
 
 registerPermission('airlink.admin.playerstats.view');
 
@@ -78,8 +79,7 @@ const adminModule: Module = {
           const playerData = await Promise.all(
             servers.map(async (server) => {
               try {
-                const ports = JSON.parse(server.Ports || '[]');
-                const primaryPort = ports.find((p: { primary?: boolean; Port?: string }) => p.primary)?.Port;
+                const primaryPort = getPrimaryExternalPort(server.Ports);
 
                 if (!primaryPort) {
                   return {
