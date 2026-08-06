@@ -7,10 +7,21 @@ import logger from '../../handlers/logger';
 import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
+import { registerPermission, type Permission } from '../../handlers/permissions';
 
 const USERNAME_REGEX = /^[a-zA-Z0-9]{3,20}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_MIN_LENGTH = 8;
 const BCRYPT_SALT_ROUNDS = 12;
+
+registerPermission('airlink.admin.users.view' as Permission);
+registerPermission('airlink.admin.users.create' as Permission);
+registerPermission('airlink.admin.users.edit' as Permission);
+registerPermission('airlink.admin.users.delete' as Permission);
+
+async function countAdmins(): Promise<number> {
+  return prisma.users.count({ where: { isAdmin: true } });
+}
 
 
 async function listUsers(res: Response) {
@@ -44,7 +55,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/users',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.users.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -74,7 +85,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/users/create',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.users.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -96,7 +107,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/users/create-user',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.users.create'),
       async (req: Request, res: Response) => {
         const { email, username, password, isAdmin, serverLimit, maxMemory, maxCpu, maxStorage, maxDatabases } = req.body;
 
@@ -104,6 +115,11 @@ const adminModule: Module = {
           res.status(400).json({
             message: 'Missing required fields: email, username, or password.',
           });
+          return;
+        }
+
+        if (typeof email !== 'string' || !EMAIL_REGEX.test(email)) {
+          res.status(400).json({ message: 'Please provide a valid email address.' });
           return;
         }
 
@@ -165,9 +181,9 @@ const adminModule: Module = {
       },
     );
 
-    router.get(
-      '/admin/users/view/:id/',
-      isAuthenticated(true),
+router.get(
+      '/admin/users/create',
+      isAuthenticated(true, 'airlink.admin.users.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -197,9 +213,9 @@ const adminModule: Module = {
       },
     );
 
-    router.get(
-      '/admin/users/edit/:id/',
-      isAuthenticated(true),
+router.get(
+      '/admin/users/view/:id/',
+      isAuthenticated(true, 'airlink.admin.users.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -232,7 +248,7 @@ const adminModule: Module = {
 
     router.delete(
       '/admin/users/delete/:id/',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.users.delete'),
       async (req: Request, res: Response): Promise<void> => {
         try {
           const userId = req.session?.user?.id;
@@ -256,9 +272,24 @@ const adminModule: Module = {
             return;
           }
 
+          if (dataUser.isAdmin && (await countAdmins()) <= 1) {
+            res.status(400).json({ error: 'Cannot delete the last admin account' });
+            return;
+          }
+
+          const serverCount = await prisma.server.count({ where: { ownerId: targetId } });
+          if (serverCount > 0) {
+            res.status(409).json({
+              error: 'Cannot delete user: they own servers. Delete or reassign those servers first.',
+            });
+            return;
+          }
+
           await prisma.session.deleteMany({
             where: { data: { contains: `"id":${targetId}` } },
           });
+
+          await prisma.loginHistory.deleteMany({ where: { userId: targetId } });
 
           await prisma.users.delete({
             where: { id: targetId },
@@ -274,7 +305,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/users/update/:id/',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.users.edit'),
       async (req: Request, res: Response): Promise<void> => {
         try {
           const userId = req.session?.user?.id;
@@ -295,6 +326,31 @@ const adminModule: Module = {
           }
 
           const { email, username, description, isAdmin, password, serverLimit, maxMemory, maxCpu, maxStorage, maxDatabases } = req.body;
+
+          // Validate updated values before writing anything
+          if (email && (typeof email !== 'string' || !EMAIL_REGEX.test(email))) {
+            res.status(400).json({ error: 'Please provide a valid email address.' });
+            return;
+          }
+
+          if (username && (typeof username !== 'string' || !USERNAME_REGEX.test(username))) {
+            res.status(400).json({
+              error: 'Username must be 3–20 characters and contain only letters and numbers.',
+            });
+            return;
+          }
+
+          if (
+            password &&
+            typeof password === 'string' &&
+            password.trim() !== '' &&
+            (password.length < PASSWORD_MIN_LENGTH || !/[A-Za-z]/.test(password) || !/\d/.test(password))
+          ) {
+            res.status(400).json({
+              error: 'Password must be at least 8 characters and contain at least one letter and one number.',
+            });
+            return;
+          }
 
           // Check if email or username is already taken by another user
           if (email && email !== targetUser.email) {
@@ -321,6 +377,21 @@ const adminModule: Module = {
 
             if (existingUserWithUsername) {
               res.status(400).json({ error: 'Username already in use' });
+              return;
+            }
+          }
+
+          // Handle isAdmin field (convert to boolean)
+          const newIsAdmin = isAdmin === true || isAdmin === 'true';
+          if (isAdmin !== undefined && isAdmin !== null && targetUser.isAdmin && !newIsAdmin) {
+            const isSelf = targetUserId === userId;
+            const adminCount = await countAdmins();
+            if (isSelf) {
+              res.status(400).json({ error: 'You cannot remove your own admin role' });
+              return;
+            }
+            if (adminCount <= 1) {
+              res.status(400).json({ error: 'Cannot demote the last admin account' });
               return;
             }
           }

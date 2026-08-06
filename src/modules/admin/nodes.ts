@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
+import { registerPermission, Permission } from '../../handlers/permissions';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
 import { getParamAsNumber } from '../../utils/typeHelpers';
@@ -17,6 +18,14 @@ const MIN_NODE_PORT = 1025;
 const NAME_MIN_LENGTH = 3;
 const NAME_MAX_LENGTH = 50;
 const NODE_KEY_LENGTH = 32;
+
+const NODE_ADDRESS_REGEX =
+  /^(localhost|(?:\d{1,3}\.){3}\d{1,3}|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/;
+
+registerPermission('airlink.admin.nodes.view' as Permission);
+registerPermission('airlink.admin.nodes.create' as Permission);
+registerPermission('airlink.admin.nodes.update' as Permission);
+registerPermission('airlink.admin.nodes.delete' as Permission);
 
 type NodeWithInstances = {
   id: number;
@@ -106,7 +115,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/nodes',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -142,7 +151,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/nodes/create',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -167,7 +176,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/nodes/list',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.view'),
       async (_req: Request, res: Response) => {
         // Include servers data for port allocation UI
         const listNode = await listNodes(res, true);
@@ -177,7 +186,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/nodes/create',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.create'),
       async (req: Request, res: Response) => {
         const { name, ram, cpu, disk, address, port } = req.body;
         const locationId = req.body.locationId ? parseInt(req.body.locationId) : null;
@@ -209,6 +218,10 @@ const adminModule: Module = {
         }
 
         if (locationId !== null) {
+          if (isNaN(locationId)) {
+            res.status(400).json({ message: 'Selected location is invalid.' });
+            return;
+          }
           const location = await prisma.location.findUnique({ where: { id: locationId } });
           if (!location) {
             res.status(400).json({ message: 'Selected location not found.' });
@@ -226,27 +239,25 @@ const adminModule: Module = {
           return;
         }
 
-        if (ram !== 'all' && (!ram || isNaN(parseFloat(ram)) || parseFloat(ram) <= 0)) {
+        if (ram !== 'all' && (!ram || isNaN(parseFloat(ram)) || parseFloat(ram) <= 0 || !Number.isInteger(parseFloat(ram)))) {
           res.status(400).json({ message: 'RAM must be a positive number.' });
           return;
         }
 
-        if (cpu !== 'all' && (!cpu || isNaN(parseFloat(cpu)) || parseFloat(cpu) <= 0)) {
+        if (cpu !== 'all' && (!cpu || isNaN(parseFloat(cpu)) || parseFloat(cpu) <= 0 || !Number.isInteger(parseFloat(cpu)))) {
           res.status(400).json({ message: 'CPU must be a positive number.' });
           return;
         }
 
-        if (disk !== 'all' && (!disk || isNaN(parseFloat(disk)) || parseFloat(disk) <= 0)) {
+        if (disk !== 'all' && (!disk || isNaN(parseFloat(disk)) || parseFloat(disk) <= 0 || !Number.isInteger(parseFloat(disk)))) {
           res.status(400).json({ message: 'Disk must be a positive number.' });
           return;
         }
 
-        const addressRegex =
-          /^(localhost|(?:\d{1,3}\.){3}\d{1,3}|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/;
         if (
           !address ||
           typeof address !== 'string' ||
-          !addressRegex.test(address)
+          !NODE_ADDRESS_REGEX.test(address)
         ) {
           res.status(400).json({
             message: 'Address must be a valid IPv4, domain, or localhost.',
@@ -335,7 +346,7 @@ const adminModule: Module = {
 
     router.delete(
       '/admin/node/:id',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.delete'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -345,9 +356,22 @@ const adminModule: Module = {
           }
 
           const nodeId = getParamAsNumber(req.params.id);
+          if (isNaN(nodeId)) {
+            res.status(400).json({ message: 'Invalid node ID.' });
+            return;
+          }
           const deleteInstances = req.query.deleteInstance === 'true';
 
           try {
+            const nodeExists = await prisma.node.findUnique({
+              where: { id: nodeId },
+              select: { id: true },
+            });
+            if (!nodeExists) {
+              res.status(404).json({ message: 'Node not found.' });
+              return;
+            }
+
             const serverCount = await prisma.server.count({
               where: { nodeId: nodeId },
             });
@@ -408,7 +432,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/node/:id/configure',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -444,7 +468,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/node/:id/verify',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.view'),
       async (req: Request, res: Response) => {
         try {
           const nodeId = getParamAsNumber(req.params.id);
@@ -488,7 +512,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/node/:id',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -528,7 +552,7 @@ const adminModule: Module = {
 
     router.put(
       '/admin/node/:id/edit',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.update'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -565,6 +589,10 @@ const adminModule: Module = {
           }
 
           if (locationId !== null) {
+            if (isNaN(locationId)) {
+              res.status(400).json({ message: 'Selected location is invalid.' });
+              return;
+            }
             const location = await prisma.location.findUnique({ where: { id: locationId } });
             if (!location) {
               res.status(400).json({ message: 'Selected location not found.' });
@@ -574,9 +602,9 @@ const adminModule: Module = {
 
           if (
             !name ||
-            (ram !== 0 && (isNaN(ram) || ram <= 0)) ||
-            (cpu !== 0 && (isNaN(cpu) || cpu <= 0)) ||
-            (disk !== 0 && (isNaN(disk) || disk <= 0)) ||
+            (ram !== 0 && (isNaN(ram) || ram <= 0 || !Number.isInteger(ram))) ||
+            (cpu !== 0 && (isNaN(cpu) || cpu <= 0 || !Number.isInteger(cpu))) ||
+            (disk !== 0 && (isNaN(disk) || disk <= 0 || !Number.isInteger(disk))) ||
             !address ||
             !port
           ) {
@@ -584,6 +612,33 @@ const adminModule: Module = {
               message:
                 'All fields are required and numeric values must be valid positive numbers (or "all" for unlimited).',
             });
+            return;
+          }
+
+          if (name.length < NAME_MIN_LENGTH || name.length > NAME_MAX_LENGTH) {
+            res.status(400).json({
+              message: `Name must be between ${NAME_MIN_LENGTH} and ${NAME_MAX_LENGTH} characters long.`,
+            });
+            return;
+          }
+
+          if (typeof address !== 'string' || !NODE_ADDRESS_REGEX.test(address)) {
+            res.status(400).json({
+              message: 'Address must be a valid IPv4, domain, or localhost.',
+            });
+            return;
+          }
+
+          if (isNaN(port) || port <= MIN_PORT_NUMBER || port > MAX_PORT_NUMBER) {
+            res.status(400).json({
+              message: `Port must be a number between ${MIN_NODE_PORT} and ${MAX_PORT_NUMBER}.`,
+            });
+            return;
+          }
+
+          const existingNode = await prisma.node.findUnique({ where: { id: nodeId } });
+          if (!existingNode) {
+            res.status(404).json({ message: 'Node not found.' });
             return;
           }
 
@@ -641,7 +696,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/node/:id/maintenance',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.update'),
       async (req: Request, res: Response) => {
         try {
           const nodeId = getParamAsNumber(req.params.id);
@@ -650,7 +705,8 @@ const adminModule: Module = {
             res.status(404).json({ message: 'Node not found.' });
             return;
           }
-          const maintenanceMode = req.body.maintenanceMode === true;
+          const maintenanceMode =
+            req.body.maintenanceMode === true || req.body.maintenanceMode === 'true';
           const updated = await prisma.node.update({
             where: { id: nodeId },
             data: { maintenanceMode },
@@ -667,7 +723,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/node/:id/stats',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.nodes.view'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const user = await prisma.users.findUnique({ where: { id: userId } });

@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
+import { registerPermission, Permission } from '../../handlers/permissions';
 import logger from '../../handlers/logger';
 import { queueer } from '../../handlers/queueer';
 import { getParamAsNumber, getParamAsString } from '../../utils/typeHelpers';
@@ -34,6 +35,11 @@ const DEFAULT_DATABASE_LIMIT = 5;
 const DEFAULT_BACKUP_LIMIT = 5;
 const SUSPENDED_TRUE = 'true';
 
+registerPermission('airlink.admin.servers.view' as Permission);
+registerPermission('airlink.admin.servers.create' as Permission);
+registerPermission('airlink.admin.servers.update' as Permission);
+registerPermission('airlink.admin.servers.delete' as Permission);
+
 const adminModule: Module = {
   info: {
     name: 'Admin Module',
@@ -49,7 +55,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/servers',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.servers.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -78,7 +84,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/servers/edit/:id',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.servers.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -141,7 +147,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/servers/edit/:id',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.servers.update'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -192,6 +198,21 @@ const adminModule: Module = {
             return;
           }
 
+          const memInt = parseInt(String(Memory), 10);
+          const cpuInt = parseInt(String(Cpu), 10);
+          const storageInt = parseInt(String(Storage), 10);
+          const swapInt = Swap !== undefined && Swap !== '' ? Math.max(0, parseInt(String(Swap), 10) || 0) : 0;
+          if (isNaN(memInt) || memInt <= 0 || isNaN(cpuInt) || cpuInt <= 0 || isNaN(storageInt) || storageInt <= 0) {
+            res.status(400).json({ error: 'Memory, CPU, and Storage must be positive integers.' });
+            return;
+          }
+
+          const owner = await prisma.users.findUnique({ where: { id: parseInt(String(ownerId), 10) } });
+          if (!owner) {
+            res.status(400).json({ error: 'Owner not found' });
+            return;
+          }
+
           // Check if suspension status is changing
           const currentSuspendedState = server.Suspended;
           const newSuspendedState = Suspended === SUSPENDED_TRUE;
@@ -225,9 +246,9 @@ const adminModule: Module = {
             }
             await assertNodeCapacity(
               capacityNode,
-              parseInt(Memory),
-              parseInt(Cpu),
-              parseInt(Storage),
+              memInt,
+              cpuInt,
+              storageInt,
               server.UUID,
             );
           } catch (error: unknown) {
@@ -243,10 +264,10 @@ const adminModule: Module = {
               ownerId: parseInt(ownerId),
               nodeId: parseInt(nodeId),
               imageId: parseInt(imageId),
-              Memory: parseInt(Memory),
-              Swap: Swap !== undefined && Swap !== '' ? parseInt(Swap) || 0 : 0,
-              Cpu: parseInt(Cpu),
-              Storage: parseInt(Storage),
+              Memory: memInt,
+              Swap: swapInt,
+              Cpu: cpuInt,
+              Storage: storageInt,
               StartCommand,
               databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : DEFAULT_DATABASE_LIMIT,
               backupLimit: backupLimit !== undefined && backupLimit !== '' ? Math.max(0, parseInt(backupLimit) || 0) : DEFAULT_BACKUP_LIMIT,
@@ -326,7 +347,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/servers/create',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.servers.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -359,7 +380,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/servers/create',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.servers.create'),
       async (req: Request, res: Response) => {
         const {
           name,
@@ -392,6 +413,21 @@ const adminModule: Module = {
           !userId
         ) {
           res.status(400).json({ error: 'Missing required fields' });
+          return;
+        }
+
+        const memInt = parseInt(String(Memory), 10);
+        const cpuInt = parseInt(String(Cpu), 10);
+        const storageInt = parseInt(String(Storage), 10);
+        const swapInt = Swap !== undefined && Swap !== '' ? Math.max(0, parseInt(String(Swap), 10) || 0) : 0;
+        if (isNaN(memInt) || memInt <= 0 || isNaN(cpuInt) || cpuInt <= 0 || isNaN(storageInt) || storageInt <= 0) {
+          res.status(400).json({ error: 'Memory, CPU, and Storage must be positive integers.' });
+          return;
+        }
+
+        const owner = await prisma.users.findUnique({ where: { id: userId } });
+        if (!owner) {
+          res.status(400).json({ error: 'Owner not found' });
           return;
         }
 
@@ -529,11 +565,11 @@ const adminModule: Module = {
                   nodeId: parseInt(nodeId),
                   imageId: parseInt(imageId),
                   Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
-                  Memory: (parseInt(Memory) || 1024),
-                  Swap: Swap !== undefined && Swap !== '' ? parseInt(Swap) || 0 : 0,
-                  Cpu: parseInt(Cpu) || 100,
+                  Memory: memInt,
+                  Swap: swapInt,
+                  Cpu: cpuInt,
                   databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : 5,
-                  Storage: parseInt(Storage) || 20480,
+                  Storage: storageInt,
                   Variables: JSON.stringify(mergedVariables),
                   StartCommand,
                   dockerImage: JSON.stringify(imageDocker),
@@ -727,7 +763,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/server/delete/:id',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.servers.delete'),
       async (req: Request, res: Response) => {
         const { id } = req.params;
 
@@ -838,7 +874,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/servers/:id/suspend',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.servers.update'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -907,7 +943,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/servers/:id/unsuspend',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.servers.update'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -951,7 +987,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/servers/:id/transfer',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.servers.update'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -1008,7 +1044,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/servers/:id/transfer/status',
-      isAuthenticated(true),
+      isAuthenticated(true, 'airlink.admin.servers.view'),
       async (req: Request, res: Response) => {
         try {
           const serverId = getParamAsNumber(req.params.id);

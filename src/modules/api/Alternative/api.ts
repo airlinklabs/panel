@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../../utils/typeHelpers';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { getUsedExternalPorts } from '../../../handlers/utils/server/ports';
+import { apiValidator } from '../../../handlers/utils/api/apiValidator';
 
 const PTERO_MEMORY_MB = 1024;
 const PTERO_DISK_MB = 1024;
@@ -17,6 +18,45 @@ const DEFAULT_STORAGE_MB = 20480;
 const BCRYPT_SALT_ROUNDS = 10;
 const DEFAULT_PAGE_SIZE = 50;
 
+// Legacy application API wrapper. The canonical `apiValidator` is hash-aware,
+// enforces `active`, applies a constant-time delay on invalid keys and never
+// logs the raw key. To preserve the legacy client contract it normalizes only
+// the invalid/inactive-key responses (403 / inactive 401) down to the legacy
+// 401 body while leaving malformed-header 401s and 5xx untouched.
+const legacyInvalidKeyBody = { error: 'Unauthorized: Invalid API Key' };
+
+export const legacyApiValidator = (req: Request, res: Response, next: NextFunction) => {
+  const originalStatus = res.status.bind(res);
+  const originalJson = res.json.bind(res);
+
+  let pendingStatus = 0;
+
+  res.status = ((code: number) => {
+    pendingStatus = code;
+    return originalStatus(code);
+  }) as typeof res.status;
+
+  res.json = ((body: unknown) => {
+    const json = body as { error?: string } | undefined;
+    const inactiveKey = pendingStatus === 401 && json?.error === 'Unauthorized: API Key is inactive';
+    const invalidKey = pendingStatus === 403;
+
+    if (inactiveKey || invalidKey) {
+      originalStatus(401);
+      return originalJson(legacyInvalidKeyBody);
+    }
+
+    return originalJson(body);
+  }) as typeof res.json;
+
+  const innerNext: NextFunction = (err?: unknown) => {
+    res.status = originalStatus as typeof res.status;
+    res.json = originalJson as typeof res.json;
+    next(err as Error | undefined);
+  };
+
+  return apiValidator()(req, res, innerNext);
+};
 
 const coreModule: Module = {
   info: {
@@ -29,43 +69,11 @@ const coreModule: Module = {
   },
 
   router: () => {
-    let validKeys: string[] = [];
-
-    async function loadApiKeys() {
-      try {
-        const keys = await prisma.apiKey.findMany();
-        validKeys = keys.map((key) => key.key);
-      } catch (error) {
-        logger.error('Error loading API keys:', error);
-      }
-    }
-
-    async function validator(req: Request, res: Response, next: NextFunction) {
-      await loadApiKeys();
-
-      const authHeader = req.headers['authorization'];
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({
-          error: 'Unauthorized: Missing or malformed Authorization header',
-        });
-        return;
-      }
-
-      const apiKey = authHeader.split(' ')[1] ?? '';
-
-      if (validKeys.includes(apiKey)) {
-        next();
-      } else {
-        logger.error('Invalid API key:', apiKey);
-        res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
-      }
-    }
-
     const router = Router();
 
     router.get(
       '/api/application/users',
-      validator,
+      legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
           const filter =
@@ -142,7 +150,7 @@ const coreModule: Module = {
 
     router.get(
       '/api/application/users/:user',
-      validator,
+      legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
           const userId = req.params.user;
@@ -254,7 +262,7 @@ const coreModule: Module = {
 
     router.post(
       '/api/application/users',
-      validator,
+      legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
           const { username, email, first_name, last_name, password } = req.body;
@@ -311,7 +319,7 @@ const coreModule: Module = {
 
     router.patch(
       '/api/application/users/:id',
-      validator,
+      legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
           const userId = getParamAsNumber(req.params.id);
@@ -361,7 +369,7 @@ const coreModule: Module = {
 
     router.delete(
       '/api/application/users/:id',
-      validator,
+      legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
           const userId = getParamAsNumber(req.params.id);
@@ -398,7 +406,7 @@ const coreModule: Module = {
 
     router.get(
       '/api/application/nodes',
-      validator,
+      legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
           const nodes = await prisma.node.findMany({
@@ -452,7 +460,7 @@ const coreModule: Module = {
 
     router.get(
       '/api/application/nodes/:id',
-      validator,
+      legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
           const nodeId = getParamAsNumber(req.params.id);
@@ -509,7 +517,7 @@ const coreModule: Module = {
 
     router.delete(
       '/api/application/nodes/:id',
-      validator,
+      legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
           const nodeId = getParamAsNumber(req.params.id);
@@ -549,7 +557,7 @@ const coreModule: Module = {
 
     router.post(
       '/api/application/servers',
-      validator,
+      legacyApiValidator,
       async (req: Request, res: Response) => {
         const name = req.body.name;
         const description = req.body.description || 'Server Generated by API';
@@ -795,7 +803,7 @@ const coreModule: Module = {
 
     router.delete(
       '/api/application/servers/:id',
-      validator,
+      legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
           const serverId = String(req.params.id);

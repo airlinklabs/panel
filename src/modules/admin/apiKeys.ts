@@ -200,6 +200,15 @@ const coreModule: Module = {
         try {
           const id = getParamAsNumber(req.params.id);
 
+          const existing = await prisma.apiKey.findUnique({
+            where: { id },
+          });
+
+          if (!existing) {
+            res.status(404).json({ error: 'API key not found' });
+            return;
+          }
+
           await prisma.apiKey.delete({
             where: { id },
           });
