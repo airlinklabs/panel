@@ -72,9 +72,10 @@
 
     function syncLabel() {
       const sel = select.options[select.selectedIndex];
-      if (sel && !sel.disabled && sel.value) {
-        label.textContent = sel.text;
-        label.classList.remove('cs-placeholder');
+      if (sel && !sel.disabled) {
+        label.textContent = sel.text || (sel.value ? sel.value : 'Select…');
+        label.classList[sel.value ? 'remove' : 'add']('cs-placeholder');
+        if (!sel.value && !sel.text) label.classList.add('cs-placeholder');
       } else {
         const ph = Array.from(select.options).find(function (o) { return o.disabled && o.selected; });
         label.textContent = ph ? ph.text : 'Select…';
@@ -261,8 +262,40 @@
     syncLabel();
   }
 
+  function ensureContainer(select) {
+    if (!select.id) select.id = 'al-select-' + Math.random().toString(36).slice(2, 8);
+    let container = document.querySelector('.custom-select[data-for="' + select.id + '"]');
+    if (container) return container;
+    container = document.createElement('div');
+    container.className = 'custom-select';
+    container.dataset.for = select.id;
+    Array.from(select.classList).forEach(function (c) {
+      if (/^(w|h|max-w|min-w|max-h|min-h)-/.test(c)) {
+        container.classList.add(c === 'w-full' || c === 'h-full' ? c : c);
+      }
+    });
+    if (select.classList.contains('flex-1')) container.classList.add('flex-1');
+    if (select.classList.contains('md:col-span-2')) container.classList.add('md:col-span-2');
+    select.parentNode.insertBefore(container, select);
+    return container;
+  }
+
+  /* Auto-upgrade native selects that are styled as .al-input (or opted in
+     with data-al-dropdown) but have no manual .custom-select pairing.
+     The native select stays in the DOM (hidden by .cs-native) so existing
+     form reads and change listeners keep working. */
+  function attachAuto(root) {
+    (root || document).querySelectorAll('select.al-input, select[data-al-dropdown]').forEach(function (select) {
+      if (select.classList.contains('cs-native')) return;
+      if (document.querySelector('.custom-select[data-for="' + (select.id || '') + '"]')) return;
+      const container = ensureContainer(select);
+      if (container && !container.dataset.built) buildCustomSelect(container);
+    });
+  }
+
   function attachAll(root) {
     (root || document).querySelectorAll('.custom-select').forEach(buildCustomSelect);
+    attachAuto(root);
   }
 
   if (document.readyState === 'loading') {
@@ -272,5 +305,18 @@
   }
   document.addEventListener('al:navigated', function () { setTimeout(function () { attachAll(); }, SPA_REATTACH_MS); });
 
+  if (window.MutationObserver) {
+    let autoScheduled = false;
+    new MutationObserver(function () {
+      if (autoScheduled) return;
+      autoScheduled = true;
+      requestAnimationFrame(function () {
+        autoScheduled = false;
+        attachAuto(document.body);
+      });
+    }).observe(document.body || document.documentElement, { childList: true, subtree: true });
+  }
+
   window.buildCustomSelect = buildCustomSelect;
+  window.attachAutoCustomSelect = attachAuto;
 })();

@@ -63,7 +63,7 @@
   #listEl thead { position: sticky; top: 0; z-index: 2; }
   #listEl thead th { background: var(--theme-table-header-bg,var(--theme-bg,#fafafa)); }
   html.dark #listEl thead th { background: var(--theme-table-header-bg,#1a1a1a); }
-  #listBody td:last-child { max-width: 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #listBody td:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   @media (max-width: 640px) {
     .modal-two-col { flex-direction: column; }
@@ -145,14 +145,20 @@
         </div>
 
         <!-- List table -->
-        <div id="listEl" style="display:none;box-shadow:0 0 0 1px var(--theme-border)" class="overflow-hidden rounded-xl mt-3">
-          <table class="al-table min-w-full">
+        <div id="listEl" style="display:none;box-shadow:0 0 0 1px var(--theme-border)" class="overflow-x-auto overflow-y-hidden rounded-xl mt-3">
+          <table class="al-table" style="table-layout:auto">
+            <colgroup>
+              <col style="min-width:200px">
+              <col style="min-width:90px">
+              <col style="min-width:90px">
+              <col style="min-width:180px">
+            </colgroup>
             <thead class="al-table-head">
               <tr>
-                <th onclick="sortKey('app')" class="al-table-th py-3.5 pl-6 pr-3 sortable-th">App <span id="sortApp" class="text-[10px] ml-1 align-middle">&#9650;</span></th>
-                <th onclick="sortKey('type')" class="al-table-th px-3 py-3.5 sortable-th col-hide">Type <span id="sortType" class="text-[10px] ml-1 align-middle"></span></th>
-                <th onclick="sortKey('author')" class="al-table-th px-3 py-3.5 sortable-th col-hide">Images <span id="sortAuthor" class="text-[10px] ml-1 align-middle"></span></th>
-                <th onclick="sortKey('desc')" class="al-table-th px-3 py-3.5 sortable-th col-hide">Description <span id="sortDesc" class="text-[10px] ml-1 align-middle"></span></th>
+                <th onclick="sortKey('app')" class="al-table-th py-3.5 pl-6 pr-3 sortable-th" style="min-width:200px">App <span id="sortApp" class="text-[10px] ml-1 align-middle">&#9650;</span></th>
+                <th onclick="sortKey('type')" class="al-table-th px-3 py-3.5 sortable-th col-hide" style="min-width:90px">Type <span id="sortType" class="text-[10px] ml-1 align-middle"></span></th>
+                <th onclick="sortKey('author')" class="al-table-th px-3 py-3.5 sortable-th col-hide" style="min-width:90px">Images <span id="sortAuthor" class="text-[10px] ml-1 align-middle"></span></th>
+                <th onclick="sortKey('desc')" class="al-table-th px-3 py-3.5 sortable-th col-hide" style="min-width:160px">Description <span id="sortDesc" class="text-[10px] ml-1 align-middle"></span></th>
               </tr>
             </thead>
             <tbody id="listBody" class="divide-y" style="border-color:var(--theme-border)"></tbody>
@@ -165,39 +171,47 @@
   </div>
 </main>
 
-<!-- Group drill-down content — hosted inside the shared window.modal shell -->
-<div id="groupContent" class="modal-sheet" style="display:none;height:540px;">
-  <div class="flex items-center gap-2 mb-3">
-    <p id="grpCount" class="text-xs shrink-0" style="color:var(--theme-text-muted)"></p>
-  </div>
-  <div class="modal-two-col">
-    <div class="modal-left">
-      <p class="text-[10px] font-semibold uppercase tracking-wider" style="color:var(--theme-text-muted)">Images</p>
-      <div id="grpSubList" class="space-y-1.5"></div>
+<!-- Group drill-down content — staged via a <template> so the 2-step
+     popup never has to move DOM nodes back and forth. openGroup() clones
+     this into #globalModalContent (the shared window.modal body) and
+     populates it there, so getElementById always resolves against fresh,
+     unattached-free nodes. -->
+<template id="groupTpl">
+  <div class="modal-sheet" style="height:540px;">
+    <div class="flex items-center gap-2 mb-3">
+      <p id="grpCount" class="text-xs shrink-0" style="color:var(--theme-text-muted)"></p>
     </div>
-    <div class="modal-right">
-      <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color:var(--theme-text-muted)">README</p>
-      <div id="grpReadme" class="md-body"></div>
+    <div class="modal-two-col">
+      <div class="modal-left">
+        <p class="text-[10px] font-semibold uppercase tracking-wider" style="color:var(--theme-text-muted)">Images</p>
+        <div id="grpSubList" class="space-y-1.5"></div>
+      </div>
+      <div class="modal-right">
+        <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color:var(--theme-text-muted)">README</p>
+        <div id="grpReadme" class="md-body"></div>
+      </div>
     </div>
   </div>
-</div>
+</template>
 
-<!-- Image detail / install content — hosted inside the shared window.modal shell -->
-<div id="eggContent" class="modal-sheet" style="display:none;height:480px;">
-  <div class="space-y-1 mb-3">
-    <span id="eggCat" class="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 ring-1 ring-inset"></span>
-    <p id="eggDesc" class="text-xs leading-relaxed" style="color:var(--theme-text-muted)"></p>
-    <p id="eggAuthor" class="text-[11px]" style="color:var(--theme-text-muted)"></p>
-  </div>
-  <div class="modal-single-body">
-    <div class="flex-1 overflow-y-auto min-h-0">
-      <p class="text-[10px] font-semibold uppercase tracking-wider mb-2" style="color:var(--theme-text-muted)">README</p>
-      <div id="eggReadme" class="md-body"></div>
+<!-- Image detail / install step — same treatment: cloned into the modal -->
+<template id="eggTpl">
+  <div class="modal-sheet" style="height:480px;">
+    <div class="space-y-1 mb-3">
+      <span id="eggCat" class="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 ring-1 ring-inset"></span>
+      <p id="eggDesc" class="text-xs leading-relaxed" style="color:var(--theme-text-muted)"></p>
+      <p id="eggAuthor" class="text-[11px]" style="color:var(--theme-text-muted)"></p>
     </div>
-    <div id="eggErr" style="display:none" class="err-box"><p id="eggErrTxt" class="err-txt"></p></div>
-    <button id="eggInstallBtn" onclick="confirmInstall()" type="button" class="al-btn-primary w-full py-2.5 text-sm font-medium" style="flex-shrink:0"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Install</button>
+    <div class="modal-single-body">
+      <div class="flex-1 overflow-y-auto min-h-0">
+        <p class="text-[10px] font-semibold uppercase tracking-wider mb-2" style="color:var(--theme-text-muted)">README</p>
+        <div id="eggReadme" class="md-body"></div>
+      </div>
+      <div id="eggErr" style="display:none" class="err-box"><p id="eggErrTxt" class="err-txt"></p></div>
+      <button id="eggInstallBtn" onclick="confirmInstall()" type="button" class="al-btn-primary w-full py-2.5 text-sm font-medium" style="flex-shrink:0"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Install</button>
+    </div>
   </div>
-</div>
+</template>
 
 <style>
   @keyframes al-shimmer {
@@ -210,6 +224,6 @@
   @media (max-width: 640px) { .col-hide { display: none; } }
 </style>
 
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-image-store.js?v=5"></script>
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-image-store.js?v=7"></script>
 
 <%- include('../../components/footer') %>

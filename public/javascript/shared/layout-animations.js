@@ -26,8 +26,9 @@
     if (!el || el.nodeType !== 1) return true;
     const tag = el.tagName;
     if (SKIP_TAGS.has(tag)) return true;
-    const cls = el.className || '';
-    if (SKIP_CLASS_FRAGMENTS.some(frag => cls.indexOf(frag) !== -1)) return true;
+    const cls = el.className;
+    const clsStr = typeof cls === 'string' ? cls : (el.classList ? el.classList.toString() : '');
+    if (SKIP_CLASS_FRAGMENTS.some(frag => clsStr.indexOf(frag) !== -1)) return true;
     const id = el.id;
     if (SKIP_IDS.has(id)) return true;
     if (window.getComputedStyle(el).position === 'fixed') return true;

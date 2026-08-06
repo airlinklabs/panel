@@ -2,7 +2,10 @@
      Confirmations: window.modal.confirm({ title, body, danger, confirmLabel, onConfirm })
      Alerts:        window.modal.alert({ title, body })
      Rich sheets:   window.modal.show({ title, bodyNode, panelClass, onClose })
-                    bodyNode is moved into the shared panel; close with window.modal.close(). -->
+                    bodyNode is moved into the shared panel; close with
+                    window.modal.close(). The node is always restored to its
+                    page position on close so getElementById works for the
+                    next step of a multi-step flow. -->
 <div id="globalModal" class="al-sheet-overlay al-modal-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0" id="globalModalBackdrop"></div>
   <div id="globalModalPanel" role="dialog" aria-modal="true" aria-labelledby="globalModalTitle" aria-describedby="globalModalBody" tabindex="-1" class="al-sheet-panel al-modal-panel relative border rounded-2xl shadow-lg w-full max-w-sm mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
@@ -25,28 +28,43 @@
 (function () {
   if (window.modal) return;
 
-  const overlay  = document.getElementById('globalModal');
-  const panel    = document.getElementById('globalModalPanel');
-  const header   = document.getElementById('globalModalHeader');
-  const title    = document.getElementById('globalModalTitle');
-  const body     = document.getElementById('globalModalBody');
-  const content  = document.getElementById('globalModalContent');
-  const simple   = document.getElementById('globalModalSimple');
-  const footer   = document.getElementById('globalModalFooter');
-  const cancel   = document.getElementById('globalModalCancel');
-  const confirmBtn  = document.getElementById('globalModalConfirm');
-  const backdrop = document.getElementById('globalModalBackdrop');
-  const closeBtn = document.getElementById('globalModalCloseBtn');
+  var overlay  = document.getElementById('globalModal');
+  var panel    = document.getElementById('globalModalPanel');
+  var header   = document.getElementById('globalModalHeader');
+  var title    = document.getElementById('globalModalTitle');
+  var body     = document.getElementById('globalModalBody');
+  var content  = document.getElementById('globalModalContent');
+  var simple   = document.getElementById('globalModalSimple');
+  var footer   = document.getElementById('globalModalFooter');
+  var cancel   = document.getElementById('globalModalCancel');
+  var confirmBtn  = document.getElementById('globalModalConfirm');
+  var backdrop = document.getElementById('globalModalBackdrop');
+  var closeBtn = document.getElementById('globalModalCloseBtn');
 
-  let currentResolve = null;
-  let lastFocused = null;
-  let onCloseHook = null;
-  let richNode = null;
-  let richPanelClass = null;
+  var currentResolve = null;
+  var lastFocused = null;
+  var onCloseHook = null;
+
+  /* Body-node tracking. show() moves a node into the modal; close()
+     always restores it to its original page position so getElementById
+     works for the next step of a multi-step flow. No clones, no
+     destruction — the original DOM node moves back and forth. */
+  var lastBodyNode = null;
+  var bodyOrigins = typeof WeakMap === 'function' ? new WeakMap() : null;
+
+  function restoreBody() {
+    if (!lastBodyNode) return;
+    var o = bodyOrigins && bodyOrigins.get(lastBodyNode);
+    if (o && o.parent && o.parent.parentNode) {
+      lastBodyNode.style.display = 'none';
+      o.parent.insertBefore(lastBodyNode, o.ref || null);
+    }
+    lastBodyNode = null;
+  }
 
   function focusableElements() {
     return Array.from(panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
-      .filter(el => !el.disabled && el.offsetParent !== null);
+      .filter(function (el) { return !el.disabled && el.offsetParent !== null; });
   }
 
   function lockScroll() {
@@ -66,7 +84,7 @@
   }
 
   function hidePanel(done) {
-    const finish = function () {
+    var finish = function () {
       overlay.setAttribute('aria-hidden', 'true');
       document.documentElement.removeAttribute('data-modal-open');
       unlockScroll();
@@ -81,18 +99,18 @@
     else { overlay.classList.remove('open'); panel.classList.remove('open'); finish(); }
   }
 
-  function open({ title: t, body: b, danger = false, confirmLabel = 'Confirm', onConfirm }) {
+  function open(opts) {
+    restoreBody();
     lastFocused = document.activeElement;
-    title.textContent = t || '';
-    body.textContent  = b || '';
-    confirmBtn.textContent = confirmLabel;
-    confirmBtn.className = danger
+    title.textContent = opts.title || '';
+    body.textContent  = opts.body || '';
+    confirmBtn.textContent = opts.confirmLabel || 'Confirm';
+    confirmBtn.className = opts.danger
       ? 'px-4 py-2 text-xs font-medium rounded-xl text-white transition al-btn-danger'
       : 'px-4 py-2 text-xs font-medium rounded-xl text-white transition al-btn-primary';
 
-    currentResolve = onConfirm || null;
-    onCloseHook = null;
-    richNode = null;
+    currentResolve = opts.onConfirm || null;
+    onCloseHook = opts.onClose || null;
 
     header.style.display = '';
     content.style.display = 'none';
@@ -104,28 +122,40 @@
     panel.style.borderColor = 'var(--theme-border)';
 
     showPanel();
-    // Focus the neutral action first — never land on the destructive
-    // confirm (one accidental Enter should not destroy).
     setTimeout(function () { cancel.focus(); }, 0);
   }
 
-  function show({ title: t, bodyNode, panelClass = '', onClose }) {
-    lastFocused = document.activeElement;
-    onCloseHook = onClose || null;
+  function show(opts) {
+    var bodyNode = opts.bodyNode;
 
-    title.textContent = t || '';
+    /* Step 1: if a different body node is already in the modal, put it
+       back on the page first so getElementById finds it next time. */
+    if (lastBodyNode && lastBodyNode !== bodyNode && lastBodyNode.parentNode === content) {
+      restoreBody();
+    }
+
+    lastFocused = document.activeElement;
+    onCloseHook = opts.onClose || null;
+    title.textContent = opts.title || '';
     panel.setAttribute('aria-describedby', '');
 
+    /* Step 2: record the node's original position (first time only),
+       then move it into the modal content. */
     if (bodyNode) {
+      if (bodyOrigins && !bodyOrigins.has(bodyNode)) {
+        bodyOrigins.set(bodyNode, { parent: bodyNode.parentNode, ref: bodyNode.nextSibling });
+      }
       content.innerHTML = '';
-      bodyNode.style.display = '';
       content.appendChild(bodyNode);
+      bodyNode.style.display = '';
+      lastBodyNode = bodyNode;
     }
+
     header.style.display = '';
     content.style.display = '';
     simple.style.display = 'none';
     footer.style.display = 'none';
-    panel.className = 'al-sheet-panel al-modal-panel relative border rounded-2xl shadow-lg w-full mx-4 max-h-[85vh] flex flex-col' + (panelClass ? ' ' + panelClass : '');
+    panel.className = 'al-sheet-panel al-modal-panel relative border rounded-2xl shadow-lg w-full mx-4 max-h-[85vh] flex flex-col' + (opts.panelClass ? ' ' + opts.panelClass : '');
     panel.style.background = 'var(--theme-bg-card)';
     panel.style.borderColor = 'var(--theme-border)';
 
@@ -134,8 +164,9 @@
   }
 
   function close() {
-    const hook = onCloseHook;
+    var hook = onCloseHook;
     onCloseHook = null;
+    restoreBody();
     hidePanel(function () {
       if (hook) hook();
     });
@@ -145,8 +176,8 @@
   closeBtn.addEventListener('click', close);
   backdrop.addEventListener('click', close);
 
-  confirmBtn.addEventListener('click', () => {
-    const fn = currentResolve;
+  confirmBtn.addEventListener('click', function () {
+    var fn = currentResolve;
     close();
     if (fn) fn();
   });
@@ -158,14 +189,14 @@
       return;
     }
     if (event.key !== 'Tab') return;
-    const focusable = focusableElements();
+    var focusable = focusableElements();
     if (!focusable.length) {
       event.preventDefault();
       panel.focus();
       return;
     }
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
     if (event.shiftKey && document.activeElement === first) {
       event.preventDefault();
       last.focus();
@@ -175,11 +206,11 @@
     }
   });
 
-  function alert(message) {
+  function alertFn(message) {
     if (message && typeof message === 'object') open(message);
     else open({ title: 'Error', body: String(message || '') });
   }
 
-  window.modal = { confirm: open, alert: alert, show: show, close: close };
+  window.modal = { confirm: open, alert: alertFn, show: show, close: close };
 })();
 </script>

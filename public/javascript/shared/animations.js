@@ -47,7 +47,15 @@
      computed before-state, animations do not). */
   function openModal(overlay, panel) {
     if (!overlay) return;
-    if (overlay.classList.contains('open')) return;
+    if (overlay.classList.contains('open')) {
+      // Re-showing an already-open overlay (e.g. swapping the body of a
+      // 2-step dialog): make sure a stale exit animation can never take it
+      // down. Remove any leftover closing state so the pending closeModal
+      // timer sees .open and backs off.
+      overlay.classList.remove('closing');
+      if (panel) panel.classList.remove('closing');
+      return;
+    }
 
     openOverlays.slice().forEach(function (ov) {
       if (ov !== overlay) closeModal(ov, panelOf(ov));
@@ -63,10 +71,10 @@
     });
 
     overlay._lastFocused = document.activeElement;
-    openOverlays.push(overlay);
+    if (openOverlays.indexOf(overlay) === -1) openOverlays.push(overlay);
     overlay.classList.remove('hidden');
     overlay.classList.add('flex');
-    overlay.classList.remove('opacity-0', 'pointer-events-none');
+    overlay.classList.remove('opacity-0', 'pointer-events-none', 'closing');
     overlay.classList.add('al-modal-overlay');
     overlay.setAttribute('aria-hidden', 'false');
     if (panel) {

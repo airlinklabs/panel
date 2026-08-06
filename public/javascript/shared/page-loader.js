@@ -75,13 +75,19 @@
     return el('server-page-body') || el('page-content') || null;
   }
 
+  function hasClass(child, frag) {
+    const list = child.classList;
+    if (list && typeof list.contains === 'function') return list.contains(frag);
+    const name = child.className;
+    return typeof name === 'string' && name.indexOf(frag) !== -1;
+  }
+
   function getAnimatableChildren(container) {
     return Array.from(container.children).filter(function (child) {
-      const cls = child.className || '';
-      if (cls.indexOf('mobile-top-bar') !== -1) return false;
-      if (cls.indexOf('mobile-bottom-nav') !== -1) return false;
-      if (cls.indexOf('mobile-more-sheet') !== -1) return false;
-      if (cls.indexOf('mobile-server-chrome') !== -1) return false;
+      if (hasClass(child, 'mobile-top-bar')) return false;
+      if (hasClass(child, 'mobile-bottom-nav')) return false;
+      if (hasClass(child, 'mobile-more-sheet')) return false;
+      if (hasClass(child, 'mobile-server-chrome')) return false;
       const pos = window.getComputedStyle(child).position;
       if (pos === 'fixed') return false;
       return true;

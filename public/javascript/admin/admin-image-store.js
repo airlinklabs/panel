@@ -155,8 +155,19 @@ function makeGroupRow(g) {
   return tr;
 }
 
+function stageBody(templateId, title, panelClass) {
+  var content = document.getElementById('globalModalContent');
+  if (content) {
+    content.innerHTML = '';
+    var tpl = document.getElementById(templateId);
+    if (tpl) content.appendChild(tpl.content.cloneNode(true));
+  }
+  window.modal.show({ title: title || '', panelClass: panelClass });
+}
+
 function openGroup(group, imgs) {
   var s = imgs.slice().sort(function(a,b){return a.name.localeCompare(b.name)});
+  stageBody('groupTpl', cap(group), 'max-w-3xl');
   document.getElementById('grpCount').textContent = s.length + ' image' + (s.length !== 1 ? 's' : '');
   var list = document.getElementById('grpSubList');
   list.innerHTML = '';
@@ -179,11 +190,6 @@ function openGroup(group, imgs) {
     list.appendChild(row);
   });
   renderMd(imgs[0]?.groupReadme||'', document.getElementById('grpReadme'));
-  window.modal.show({
-    title: cap(group),
-    bodyNode: document.getElementById('groupContent'),
-    panelClass: 'max-w-3xl',
-  });
 }
 
 function closeGroup() {
@@ -214,6 +220,7 @@ async function renderMd(md, el) {
 
 function openEgg(img) {
   pendingEgg = img;
+  stageBody('eggTpl', img.name, 'max-w-lg');
   var catEl = document.getElementById('eggCat');
   catEl.className = 'text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 ring-1 ring-inset ' + (CAT_CLS[img.category]||'');
   catEl.innerHTML = catDot(img.category, 6) + (CAT_LABEL[img.category]||img.category);
@@ -224,11 +231,6 @@ function openEgg(img) {
   var btn = document.getElementById('eggInstallBtn');
   btn.innerHTML = 'Install'; btn.disabled = false;
   btn.style.background = ''; btn.style.borderColor = ''; btn.style.pointerEvents = '';
-  window.modal.show({
-    title: img.name,
-    bodyNode: document.getElementById('eggContent'),
-    panelClass: 'max-w-lg',
-  });
 }
 
 function closeEgg() {

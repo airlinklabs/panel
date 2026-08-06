@@ -85,20 +85,18 @@
               action: '<button id="createButtonEmpty" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
             }) %>
           <% } else { %>
-          <table class="al-table">
+          <table class="al-table" style="table-layout:auto">
             <colgroup>
-              <col>
-              <col>
-              <col>
-              <col>
-              <col style="width:220px">
+              <col style="min-width:170px">
+              <col style="min-width:180px">
+              <col style="min-width:80px">
+              <col style="min-width:220px">
             </colgroup>
             <thead class="al-table-head">
               <tr>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.name %></th>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.connection %></th>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.instances %></th>
-                <th scope="col" class="al-table-th sm:pl-6">Usage</th>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.actions %></th>
               </tr>
             </thead>
@@ -133,30 +131,7 @@
                     </div></td>
                   <td class="al-table-td"><%= node.instances ? node.instances.length : 0 %></td>
                   <td class="al-table-td">
-                    <% const totalAlloc = node.allocationCount ?? 0; const usedAlloc = node.allocationsInUse ?? 0; %>
-                    <div class="text-xs" style="color:var(--theme-text-muted)">
-                      <span class="inline-flex items-center gap-1">
-                        <%- icon('git-branch', { class: 'size-3', strokeWidth: 1.5 }) %><%= usedAlloc %>/<%= totalAlloc %> used
-                      </span>
-                    </div>
-                  </td>
-                  <td class="al-table-td">
-                    <% const memPct = node.usage ? node.usage.memory : 0; %>
-                    <div class="flex items-center gap-2">
-                      <div class="w-24 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden">
-                        <div class="h-full rounded-full <%= memPct > (node.usage ? node.usage.overallocatedMemory : 0) || memPct >= 90 ? 'bg-red-500' : 'bg-emerald-500' %>"
-                          style="width: <%= Math.min(100, memPct) %>%"></div>
-                      </div>
-                      <span class="text-xs" style="color:var(--theme-text-muted)"><%= memPct %>%</span>
-                    </div>
-                    <% if (node.location) { %>
-                      <div class="mt-1 text-xs inline-flex items-center gap-1" style="color:var(--theme-text-muted)">
-                        <%- icon('map-pin', { class: 'size-3', strokeWidth: 1.5 }) %><%= node.location.name %>
-                      </div>
-                    <% } %>
-                  </td>
-                  <td class="al-table-td">
-                    <div class="flex gap-3">
+                    <div class="flex gap-3 whitespace-nowrap">
                       <button  onclick="configure('<%= node.id %>')" type="button" class="al-btn-secondary text-xs"><%- icon('settings', { class: 'size-3', strokeWidth: 1.5 }) %>Configure</button>
                       <a href="./node/<%= node.id %>" class="al-btn-secondary text-xs inline-flex items-center gap-1"><%- icon('pencil', { class: 'size-3', strokeWidth: 1.5 }) %>Edit</a>
                       <button  onclick="deleteNode('<%= node.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete node">
@@ -174,53 +149,109 @@
 
         <!-- Locations Tab -->
         <div id="tab-panel-locations" class="hidden">
-        <div id="locations" class="mt-6">
-          <div class="flex items-center justify-between mb-5">
+        <div id="locations" class="mt-6 space-y-5">
+          <div class="flex items-center justify-between">
             <div>
               <h2 class="text-lg font-semibold tracking-tight" style="color:var(--theme-text-strong);">Locations</h2>
               <p class="text-sm mt-0.5" style="color:var(--theme-text-muted);">Group nodes by region.</p>
             </div>
           </div>
 
-          <div class="al-card mb-5">
-            <h3 class="al-card-header">Create Location</h3>
-            <div class="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label class="al-label" for="locName">Name</label>
-                <input id="locName" type="text" placeholder="US East" class="al-input">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="al-card p-5 flex items-center gap-4">
+              <div class="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-accent) 12%, transparent); color:var(--theme-accent);">
+                <%- icon('map-pin', { class: 'size-5' }) %>
               </div>
               <div>
-                <label class="al-label" for="locCode">Short code</label>
-                <input id="locCode" type="text" placeholder="us-east" class="al-input">
+                <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);"><%= locations.length %></p>
+                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Locations</p>
               </div>
-              <div class="flex items-end">
-                <button id="createLocationBtn" type="button" class="al-btn-primary w-full">
-                  <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-                  Create
-                </button>
+            </div>
+            <div class="al-card p-5 flex items-center gap-4">
+              <div class="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-info) 12%, transparent); color:var(--theme-info);">
+                <%- icon('server', { class: 'size-5' }) %>
+              </div>
+              <div>
+                <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);"><%= nodes.filter(n => n.locationId).length %></p>
+                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Nodes assigned</p>
+              </div>
+            </div>
+            <div class="al-card p-5 flex items-center gap-4">
+              <div class="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-warning) 12%, transparent); color:var(--theme-warning);">
+                <%- icon('network', { class: 'size-5' }) %>
+              </div>
+              <div>
+                <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);"><%= nodes.filter(n => !n.locationId).length %></p>
+                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Nodes without a location</p>
               </div>
             </div>
           </div>
 
           <div class="al-card">
-            <h3 class="al-card-header">All Locations</h3>
+            <h3 class="al-card-header flex items-center gap-2"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Create Location</h3>
+            <div class="p-5">
+              <form id="createLocationForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end" onsubmit="event.preventDefault();document.getElementById('createLocationBtn').click();">
+                <div>
+                  <label class="al-label" for="locName">Name</label>
+                  <input id="locName" type="text" placeholder="US East" class="al-input">
+                </div>
+                <div>
+                  <label class="al-label" for="locCode">Short code</label>
+                  <input id="locCode" type="text" placeholder="us-east" class="al-input" autocapitalize="off" spellcheck="false">
+                </div>
+                <div class="lg:col-span-2 flex items-end">
+                  <button id="createLocationBtn" type="button" class="al-btn-primary w-full sm:w-auto">
+                    <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+                    Create Location
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="al-card">
+            <h3 class="al-card-header flex items-center gap-2"><%- icon('map', { class: 'size-4', strokeWidth: 1.5 }) %>All Locations</h3>
             <div class="p-5">
               <% if (locations.length === 0) { %>
-                <p class="text-sm" style="color:var(--theme-text-muted);">No locations yet. Create one above.</p>
-              <% } else { %>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <% locations.forEach(loc => { %>
-                    <div class="rounded-xl border p-4 flex items-center justify-between" style="border-color:color-mix(in srgb, var(--theme-border, #e5e5e5) 60%, transparent);">
-                      <div>
-                        <p class="font-medium text-sm" style="color:var(--theme-text-strong);"><%= loc.name %></p>
-                        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= loc.shortCode %> · <%= loc._count.nodes %> node(s)</p>
-                      </div>
-                      <button type="button" class="delete-location-btn text-red-500 hover:text-red-700 transition" data-id="<%= loc.id %>" data-name="<%= loc.name %>" aria-label="Delete location <%= loc.name %>">
-                        <%- icon('trash', { class: 'size-4', strokeWidth: 1.5 }) %>
-                      </button>
-                    </div>
-                  <% }); %>
+                <div class="text-center py-10">
+                  <div class="mx-auto mb-3 w-12 h-12 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-border) 35%, transparent); color:var(--theme-text-muted);">
+                    <%- icon('map-pin', { class: 'size-6', strokeWidth: 1.5 }) %>
+                  </div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong);">No locations yet</p>
+                  <p class="text-xs mt-1" style="color:var(--theme-text-muted);">Create your first location above to start grouping nodes by region.</p>
                 </div>
+              <% } else { %>
+                <% const byRegion = new Map(); locations.forEach(loc => {
+                     const region = loc.shortCode.split('-')[0] || 'Other';
+                     if (!byRegion.has(region)) byRegion.set(region, []);
+                     byRegion.get(region).push(loc);
+                   });
+                   for (const [region, locs] of byRegion) { %>
+                  <div class="mb-6 last:mb-0">
+                    <div class="flex items-center gap-2 mb-3">
+                      <span class="text-[11px] font-semibold uppercase tracking-widest" style="color:var(--theme-text-muted);"><%= region %></span>
+                      <span class="h-px flex-1" style="background:var(--theme-border);"></span>
+                      <span class="text-xs" style="color:var(--theme-text-muted);"><%= locs.length %></span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <% locs.forEach(loc => { %>
+                        <div class="rounded-xl border p-4 flex items-center justify-between gap-3 transition-shadow hover:shadow-sm" style="border-color:var(--theme-border); background:var(--theme-bg-card);">
+                          <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                              <span class="shrink-0 w-2 h-2 rounded-full" style="background:<%= loc._count.nodes > 0 ? 'var(--theme-success)' : 'var(--theme-border)' %>;"></span>
+                              <p class="font-medium text-sm truncate" style="color:var(--theme-text-strong);"><%= loc.name %></p>
+                            </div>
+                            <p class="text-xs mt-1.5 font-mono" style="color:var(--theme-text-muted);"><%= loc.shortCode %></p>
+                            <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= loc._count.nodes %> node(s)</p>
+                          </div>
+                          <button type="button" class="delete-location-btn shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-red-50 dark:hover:bg-red-950/30" data-id="<%= loc.id %>" data-name="<%= loc.name %>" aria-label="Delete location <%= loc.name %>">
+                            <%- icon('trash', { class: 'size-4', strokeWidth: 1.5, style: 'color:var(--theme-danger);' }) %>
+                          </button>
+                        </div>
+                      <% }); %>
+                    </div>
+                  </div>
+                <% } %>
               <% } %>
             </div>
           </div>
@@ -238,7 +269,7 @@
 <script nonce="<%- nonce %>">
   document.getElementById('page-data').dataset.nodes = '<%- JSON.stringify(nodes.map(n => ({ id: n.id, status: n.status }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
 </script>
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-nodes.js?v=5"></script>
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-nodes.js?v=7"></script>
 <script nonce="<%- nonce %>">
 (function () {
   const toast = window.showToast || function (m) { console.warn('[locations]', m); };

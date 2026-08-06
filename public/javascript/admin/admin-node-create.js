@@ -195,33 +195,50 @@
     form.classList.add('hidden');
     panel.classList.remove('hidden');
 
-    const protocol = (window.location.protocol === 'https:' || String(node.enforceDaemonHttps) === 'true') ? 'https' : 'http';
-    const cfg = {
-      daemon: {
-        address: node.address,
-        port: node.port,
-        key: node.key,
-      },
-    };
-    document.getElementById('daemonConfigBlock').textContent = JSON.stringify(cfg, null, 2);
-    document.getElementById('daemonCliCommand').textContent =
-      'configure -- --panel "' + window.location.origin + '" --address "' + node.address + '" --port "' + node.port + '" --key "' + node.key + '"';
+    const panelUrl = window.location.origin;
+    const cli = 'bun configure --panel ' + panelUrl + ' --key ' + node.key;
+    const host = node.address;
+    document.getElementById('daemonCliCommand').textContent = cli;
 
-    document.getElementById('copyDaemonConfig').addEventListener('click', async () => {
-      const text = document.getElementById('daemonConfigBlock').textContent;
-      try {
-        await navigator.clipboard.writeText(text);
-      } catch {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        ta.remove();
+    const envLines = 'key=' + node.key + '\nremote=' + host + '\nport=' + (node.port || '3002');
+    document.getElementById('envPreview').textContent = envLines;
+
+    const copyCli = document.getElementById('copyDaemonCli');
+    const copyHint = document.getElementById('copyDaemonCliHint');
+    copyHint.textContent = 'Paste into a terminal on the machine where the daemon runs.';
+
+    function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
       }
-      const label = document.getElementById('copyDaemonConfigLabel');
-      label.textContent = 'Copied!';
-      setTimeout(() => { label.textContent = 'Copy config'; }, COPY_RESET_DELAY_MS);
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      return Promise.resolve();
+    }
+
+    document.getElementById('copyDaemonCli').addEventListener('click', async () => {
+      const label = copyCli.innerHTML;
+      try {
+        await copyText(cli);
+        copyCli.innerHTML = '<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        copyHint.textContent = 'Copied — run it on the daemon machine.';
+      } catch {
+        copyHint.textContent = 'Could not copy. Select the command above and copy it manually.';
+      }
+      setTimeout(() => { copyCli.innerHTML = label; copyHint.textContent = 'Paste into a terminal on the machine where the daemon runs.'; }, COPY_RESET_DELAY_MS);
+    });
+
+    document.getElementById('envPreviewToggle').addEventListener('click', function () {
+      const preview = document.getElementById('envPreview');
+      const chev = this.querySelector('svg');
+      preview.classList.toggle('hidden');
+      chev.style.transform = preview.classList.contains('hidden') ? '' : 'rotate(180deg)';
     });
 
     document.getElementById('verifyDaemonBtn').addEventListener('click', async () => {

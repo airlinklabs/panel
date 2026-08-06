@@ -147,6 +147,11 @@
           <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= req.translations.loginHistory || 'Login history' %></p>
           <div class="overflow-x-auto rounded-xl border" style="border-color:var(--theme-border)">
             <table class="al-table min-w-full text-sm">
+              <colgroup>
+                <col style="min-width:200px">
+                <col style="min-width:140px">
+                <col style="min-width:280px">
+              </colgroup>
               <thead class="al-table-head">
                 <tr>
                   <th class="al-table-th px-4 py-3"><%= req.translations.dateTime || 'Date & Time' %></th>

@@ -67,6 +67,13 @@
             }) %>
           <% } else { %>
           <table class="al-table">
+            <colgroup>
+              <col style="min-width:160px">
+              <col style="min-width:240px">
+              <col style="min-width:90px">
+              <col style="min-width:140px">
+              <col style="min-width:160px">
+            </colgroup>
             <thead class="al-table-head">
               <tr>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.name %></th>
@@ -98,7 +105,7 @@
                   <td class="al-table-td"><%= host._count.databases %></td>
                   <td class="al-table-td"><%= new Date(host.createdAt).toLocaleDateString() %></td>
                   <td class="al-table-td">
-                    <div class="flex gap-3">
+                    <div class="flex gap-3 whitespace-nowrap">
                       <button  onclick="testHost('<%= host.id %>')" type="button" class="al-btn-secondary text-xs"><%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.test || 'Test' %></button>
                       <button  onclick="deleteHost('<%= host.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= req.translations.deleteDatabaseAria || 'Delete host' %>">
                         <%- icon('trash-2', { size: 16 }) %>

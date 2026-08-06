@@ -163,8 +163,10 @@
   .al-page-desc   { @apply text-sm mt-0.5; color: var(--theme-text-muted); }
   .al-page-body   { @apply px-6 sm:px-8 pb-8; }
 
-  /* Table */
-  .al-table       { @apply w-full text-sm; table-layout: fixed; }
+  /* Table — auto layout so columns size to their content; per-table
+     min-widths (colgroup/td) provide floors so narrow cells never
+     collapse and wide cells never bleed into their neighbours. */
+  .al-table       { @apply w-full text-sm; table-layout: auto; }
   .al-table-head  { @apply text-left; background: var(--theme-table-header-bg); }
   .al-table-th    { @apply px-4 py-2.5 text-xs font-medium uppercase tracking-wide; color: var(--theme-text-muted); }
   .al-table-tr    { @apply border-b transition-colors; border-color: var(--theme-border); }
@@ -562,8 +564,53 @@ input[type="button"]:disabled {
 }
 
 /* Tables — scroll horizontally on narrow screens instead of bursting
-   the layout; normal table layout restored on desktop. */
+   the layout; normal table layout restored on desktop. Tables that the
+   al-table.js upgrader flags (.al-table-card) instead collapse into
+   stacked cards on small screens using the injected data-label. */
 .al-table { display: block; overflow-x: auto; }
 @media (min-width: 640px) {
   .al-table { display: table; overflow: visible; }
+}
+
+@media (max-width: 639px) {
+  .al-table-card.al-table {
+    display: block;
+    overflow: visible;
+    width: 100%;
+  }
+  .al-table-card thead { display: none; }
+  .al-table-card tbody { display: block; }
+  .al-table-card tbody tr {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.75rem;
+    padding: 0.25rem 0;
+    border: 1px solid var(--theme-border);
+    border-radius: 0.875rem;
+    background: var(--theme-bg-card);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  }
+  .al-table-card tbody tr:last-child { margin-bottom: 0; }
+  .al-table-card tbody tr:hover { background: var(--theme-bg-card); }
+  .al-table-card tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px dashed var(--theme-border);
+  }
+  .al-table-card tbody tr > td:last-child { border-bottom: none; }
+  .al-table-card tbody td::before {
+    content: attr(data-label);
+    order: -1;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--theme-text-muted);
+  }
+  .al-table-card tbody td:first-child { padding-top: 0.75rem; }
+  .al-table-card tbody tr > td:last-child { padding-bottom: 0.75rem; }
 }
