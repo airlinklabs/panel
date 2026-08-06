@@ -149,7 +149,6 @@
       </div>
 </main>
 
-<%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
 <!-- Create Backup Modal -->
@@ -164,7 +163,7 @@
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="px-6 py-4 overflow-y-auto flex-grow">
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
       <label for="backupName" class="al-label"><%= req.translations.enterBackupName || 'Enter backup name' %></label>
       <input type="text"
         id="backupName"
@@ -187,7 +186,6 @@
 
 <script nonce="<%- nonce %>">
 const serverUUID = '<%= server.UUID %>';
-const getCsrf = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
 
 function showLoading(title, message) {
   showLoadingPopup(title, message);
@@ -255,7 +253,6 @@ try {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'csrf-token': getCsrf(),
     },
     body: JSON.stringify({ name }),
   });
@@ -298,7 +295,6 @@ function restoreBackup(backupId, backupName) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'csrf-token': getCsrf(),
           },
         });
 
@@ -339,7 +335,7 @@ function addBackupRow(backup) {
   const sizeTd = document.createElement('td');
   sizeTd.className = 'px-6 py-4 whitespace-nowrap';
   const sizeText = backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown';
-  const safeSizeText = sizeText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const safeSizeText = escHtml(sizeText);
   sizeTd.innerHTML = `<div class="text-sm" style="color:var(--theme-text-muted)">${safeSizeText}</div>`;
   tr.appendChild(sizeTd);
 
@@ -387,7 +383,6 @@ async function toggleBackupLock(backupId, backupName, currentlyLocked) {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'csrf-token': getCsrf(),
       },
       body: JSON.stringify({ locked: !currentlyLocked }),
     });
@@ -416,7 +411,6 @@ function deleteBackup(backupId, backupName) {  showConfirmation(
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            'csrf-token': getCsrf(),
           },
         });
 

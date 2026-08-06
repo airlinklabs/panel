@@ -294,9 +294,9 @@ export async function startServerContainer(
       typeof startResponse.data === 'object' && startResponse.data !== null
         ? (startResponse.data as { error?: string; detail?: string })
         : {};
-    throw new Error(
-      `daemon: ${body.error ?? 'request failed'}${body.detail ? ' — ' + body.detail : ''}`,
-    );
+    const rawDetail = `${body.error ?? 'request failed'}${body.detail ? ' — ' + body.detail : ''}`;
+    // Safe client message; raw daemon detail stays in the log via `cause`.
+    throw new Error('The daemon could not start the server.', { cause: `daemon: ${rawDetail}` });
   }
 }
 

@@ -4,6 +4,7 @@ import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
 import { getParamAsString, getParamAsNumber } from '../../../utils/typeHelpers';
+import { safeClientMessage } from '../../../utils/errors';
 import bcrypt from 'bcryptjs';
 import validator from 'validator';
 import crypto from 'crypto';
@@ -1151,9 +1152,8 @@ const coreModule: Module = {
           await apiAudit(req, 'backup:create', serverId, { name: name.trim(), uuid: backup.UUID });
           res.status(201).json({ data: { ...backup, size: backup.size ? backup.size.toString() : '0' } });
         } catch (error: unknown) {
-          const err = error as { body?: { error?: string }; message?: string };
           logger.error('Error creating backup:', error);
-          res.status(500).json({ error: `Failed to create backup: ${err.body?.error || err.message || 'Failed to create backup'}` });
+          res.status(500).json({ error: safeClientMessage(error, 'Failed to create backup') });
           return;
         }
       }
@@ -1275,9 +1275,8 @@ const coreModule: Module = {
           await apiAudit(req, 'backup:restore', serverId, { name: backup.name, uuid: backup.UUID });
           res.json({ data: { success: true } });
         } catch (error: unknown) {
-          const err = error as { body?: { error?: string }; message?: string };
           logger.error('Error restoring backup:', error);
-          res.status(500).json({ error: `Failed to restore backup: ${err.body?.error || err.message || 'Failed to restore backup'}` });
+          res.status(500).json({ error: safeClientMessage(error, 'Failed to restore backup') });
           return;
         }
       }
@@ -1449,7 +1448,7 @@ const coreModule: Module = {
             res.status(201).json({ data: db });
           } catch (error) {
             logger.error('Failed to provision database:', error);
-            res.status(502).json({ error: error instanceof Error ? error.message : 'Failed to connect to the database host.' });
+            res.status(502).json({ error: safeClientMessage(error, 'Failed to connect to the database host.') });
             return;
           }
         } catch (error) {
@@ -1491,7 +1490,7 @@ const coreModule: Module = {
             res.json({ data: { success: true } });
           } catch (error) {
             logger.error('Failed to deprovision database:', error);
-            res.status(502).json({ error: error instanceof Error ? error.message : 'Failed to remove the database from the host.' });
+            res.status(502).json({ error: safeClientMessage(error, 'Failed to remove the database from the host.') });
             return;
           }
         } catch (error) {
@@ -1811,9 +1810,8 @@ const coreModule: Module = {
           await apiAudit(req, 'server:update-startup', serverId);
           res.json({ data: { success: true } });
         } catch (error: unknown) {
-          const err = error as { body?: { error?: string }; message?: string };
           logger.error('Error updating startup:', error);
-          res.status(500).json({ error: `Failed to update startup: ${err.body?.error || err.message || 'Failed to update startup'}` });
+          res.status(500).json({ error: safeClientMessage(error, 'Failed to update startup') });
           return;
         }
       }

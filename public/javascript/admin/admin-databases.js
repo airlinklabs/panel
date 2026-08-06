@@ -10,22 +10,15 @@ async function autoGenerateHost() {
   const label = btn ? btn.querySelector('span') : null;
   if (btn) btn.disabled = true;
   if (label) label.textContent = 'Working…';
-  try {
-    const response = await fetch('/admin/databases/auto-host', { method: 'POST' });
-    const result = await response.json();
-    if (result.success) {
-      showToast(result.created ? 'Host generated and connection verified.' : 'Host already exists. Connection verified.', 'success');
-      setTimeout(() => window.location.reload(), AUTO_HOST_RELOAD_DELAY_MS);
-    } else {
-      showToast(result.error || 'Failed to auto-generate host', 'error');
-      if (btn) btn.disabled = false;
-      if (label) label.textContent = 'Auto-generate';
-    }
-  } catch {
-    showToast('Request failed. Try again?', 'error');
-    if (btn) btn.disabled = false;
-    if (label) label.textContent = 'Auto-generate';
+  const result = await window.api('/admin/databases/auto-host', 'POST');
+  if (result && result.success) {
+    showToast(result.created ? 'Host generated and connection verified.' : 'Host already exists. Connection verified.', 'success');
+    setTimeout(() => window.location.reload(), AUTO_HOST_RELOAD_DELAY_MS);
+  } else if (result) {
+    showToast(result.error || 'Failed to auto-generate host', 'error');
   }
+  if (btn) btn.disabled = false;
+  if (label) label.textContent = 'Auto-generate';
 }
 
 async function autoGenerateBucket() {
@@ -34,15 +27,12 @@ async function autoGenerateBucket() {
   if (btn) btn.disabled = true;
   if (label) label.textContent = 'Working…';
   try {
-    const response = await fetch('/admin/databases/auto-bucket', { method: 'POST' });
-    const result = await response.json();
-    if (result.success) {
+    const result = await window.api('/admin/databases/auto-bucket', 'POST');
+    if (result && result.success) {
       showToast(result.created ? 'Bucket created.' : 'Bucket already exists.', 'success');
-    } else {
+    } else if (result) {
       showToast(result.error || 'Failed to auto-generate bucket', 'error');
     }
-  } catch {
-    showToast('Request failed. Try again?', 'error');
   } finally {
     if (btn) btn.disabled = false;
     if (label) label.textContent = 'Auto-generate';
@@ -50,35 +40,22 @@ async function autoGenerateBucket() {
 }
 
 async function testHost(hostId) {
-  try {
-    const response = await fetch(`/admin/databases/${hostId}/test`, { method: 'POST' });
-    const result = await response.json();
-    if (result.success) {
-      showToast(`Connection successful (${result.latency}ms)`, 'success');
-    } else {
-      showToast(result.error || 'Connection failed', 'error');
-    }
-  } catch {
-    showToast('Request failed. Try again?', 'error');
+  const result = await window.api(`/admin/databases/${hostId}/test`, 'POST');
+  if (result && result.success) {
+    showToast(`Connection successful (${result.latency}ms)`, 'success');
+  } else if (result) {
+    showToast(result.error || 'Connection failed', 'error');
   }
 }
 
 async function deleteHost(hostId) {
   showConfirmModal('Delete host', 'This will permanently remove the database host. This cannot be undone.', async () => {
-    try {
-      const response = await fetch(`/admin/databases/${hostId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await response.json();
-      if (response.ok) {
-        showToast('Host deleted.', 'success');
-        window.location.reload();
-      } else {
-        showToast(result.error || 'Failed to delete host', 'error');
-      }
-    } catch {
-      showToast('Request failed. Try again?', 'error');
+    const result = await window.api(`/admin/databases/${hostId}`, 'DELETE');
+    if (result && result.success) {
+      showToast('Host deleted.', 'success');
+      window.location.reload();
+    } else if (result) {
+      showToast(result.error || 'Failed to delete host', 'error');
     }
   });
 }

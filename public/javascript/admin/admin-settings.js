@@ -41,14 +41,14 @@ const BAN_RELOAD_DELAY_MS = 800;
       body:  'Reset all appearance settings to their defaults?',
       danger: true,
       confirmLabel: 'Reset',
-      onConfirm: function() {
-        fetch('/admin/settings/reset', { method: 'POST' })
-          .then(function(r) { return r.json(); })
-          .then(function(d) {
-            if (d.success) { showToast('Settings reset to defaults.', 'success'); setTimeout(function() { location.reload(); }, RELOAD_DELAY_MS); }
-            else showToast(d.error || 'Failed', 'error');
-          })
-          .catch(function() { showToast('Something went wrong.', 'error'); });
+      onConfirm: async function() {
+        const d = await window.api('/admin/settings/reset', 'POST');
+        if (d && d.success) {
+          showToast('Settings reset to defaults.', 'success');
+          setTimeout(function() { location.reload(); }, RELOAD_DELAY_MS);
+        } else if (d) {
+          showToast(d.error || 'Failed', 'error');
+        }
       },
     });
   };
@@ -170,31 +170,29 @@ const BAN_RELOAD_DELAY_MS = 800;
   });
 
   /* ── IP banning (not tab-specific) ───────── */
-  document.getElementById('banIpBtn').addEventListener('click', function () {
+  document.getElementById('banIpBtn').addEventListener('click', async function () {
     const ip = document.getElementById('banIpInput').value.trim();
     if (!ip) return showToast('Enter an IP address', 'error');
-    fetch('/admin/settings/ban-ip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ip }) })
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        if (!d.success) throw new Error(d.error || 'Failed');
-        document.getElementById('banIpInput').value = '';
-        showToast('IP banned. Bye bye.', 'success');
-        setTimeout(function() { location.reload(); }, BAN_RELOAD_DELAY_MS);
-      })
-      .catch(function(err) { showToast(err.message || 'Failed', 'error'); });
+    const d = await window.api('/admin/settings/ban-ip', 'POST', { ip });
+    if (d && d.success) {
+      document.getElementById('banIpInput').value = '';
+      showToast('IP banned. Bye bye.', 'success');
+      setTimeout(function() { location.reload(); }, BAN_RELOAD_DELAY_MS);
+    } else if (d) {
+      showToast(d.error || 'Failed', 'error');
+    }
   });
 
-  document.getElementById('bannedIpList').addEventListener('click', function (e) {
+  document.getElementById('bannedIpList').addEventListener('click', async function (e) {
     var btn = e.target.closest('.unban-btn');
     if (!btn) return;
-    fetch('/admin/settings/unban-ip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ip: btn.dataset.ip }) })
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        if (!d.success) throw new Error(d.error || 'Failed');
-        showToast('IP unbanned. Welcome back.', 'success');
-        setTimeout(function() { location.reload(); }, BAN_RELOAD_DELAY_MS);
-      })
-      .catch(function(err) { showToast(err.message || 'Failed', 'error'); });
+    const d = await window.api('/admin/settings/unban-ip', 'POST', { ip: btn.dataset.ip });
+    if (d && d.success) {
+      showToast('IP unbanned. Welcome back.', 'success');
+      setTimeout(function() { location.reload(); }, BAN_RELOAD_DELAY_MS);
+    } else if (d) {
+      showToast(d.error || 'Failed', 'error');
+    }
   });
 
   /* ── Radio button style toggle ──────────── */

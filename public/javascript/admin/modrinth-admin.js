@@ -255,5 +255,5 @@
       });
   }
 
-  function escapeHtml(t) { if (typeof t !== 'string') return String(t || ''); var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+  function escapeHtml(t) { return window.escHtml(t); }
 })();

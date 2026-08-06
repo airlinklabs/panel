@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { getParamAsString } from '../../../utils/typeHelpers';
+import { safeClientMessage } from '../../../utils/errors';
 import prisma from '../../../db';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
@@ -170,7 +171,7 @@ router.post(
         } catch (error) {
           logger.error('Failed to provision database:', error);
           return res.status(502).json({
-            error: error instanceof Error ? error.message : 'Failed to connect to the database host.',
+            error: safeClientMessage(error, 'Failed to connect to the database host.'),
           });
         }
       } catch (error) {
@@ -220,7 +221,7 @@ router.post(
         } catch (error) {
           logger.error('Failed to deprovision database:', error);
           return res.status(502).json({
-            error: error instanceof Error ? error.message : 'Failed to remove the database from the host.',
+            error: safeClientMessage(error, 'Failed to remove the database from the host.'),
           });
         }
       } catch (error) {
@@ -272,7 +273,7 @@ router.post(
         } catch (error) {
           logger.error('Failed to rotate database password:', error);
           return res.status(502).json({
-            error: error instanceof Error ? error.message : 'Failed to rotate the password on the host.',
+            error: safeClientMessage(error, 'Failed to rotate the password on the host.'),
           });
         }
       } catch (error) {

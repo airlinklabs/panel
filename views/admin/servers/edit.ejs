@@ -355,7 +355,6 @@
 </main>
 
 <%- include('../../components/portsAllocator') %>
-<%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
 <!-- Transfer Modal -->
@@ -761,7 +760,7 @@ function generateRandomName() {
             <label class="flex items-center gap-1 text-xs shrink-0">
               <input type="checkbox" class="transfer-port-primary" data-idx="${idx}" ${port.primary ? 'checked' : ''}> Primary
             </label>
-            <button type="button" onclick="removeTransferPort(${idx})" class="al-btn-ghost p-1 shrink-0" style="color:var(--theme-danger);" aria-label="Remove port">
+            <button type="button" onclick="removeTransferPort(${idx})" class="al-btn-ghost p-2 shrink-0" style="color:var(--theme-danger);" aria-label="Remove port">
               <%- icon('x', { size: 14 }) %>
             </button>
           </div>

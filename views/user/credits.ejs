@@ -42,12 +42,12 @@
         <p class="text-sm" style="color:var(--theme-text-muted);">The people who build and maintain Airlink.</p>
       </div>
 
-      <div class="px-8 space-y-8 max-w-5xl">
+      <div class="px-4 sm:px-8 space-y-8 max-w-5xl">
 
         <!-- Project leads — horizontal row on desktop -->
         <section>
           <h2 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:var(--theme-text-muted);">Project leads</h2>
-          <div class="grid grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <% const leads = [
               { login: 'bthavanish', role: 'Current maintainer' },
               { login: 'privt00',   role: 'Project lead' },
@@ -82,7 +82,7 @@
             <h2 class="text-xs font-semibold uppercase tracking-widest" style="color:var(--theme-text-muted);">Contributors</h2>
             <span id="contrib-cache-label" class="text-xs" style="color:var(--theme-text-muted);"></span>
           </div>
-          <div id="contributors-grid" class="grid grid-cols-3 lg:grid-cols-4 gap-3">
+          <div id="contributors-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             <div class="col-span-full flex items-center gap-2 py-2">
               <div class="h-4 w-4 border-2 border-neutral-300 dark:border-neutral-600 border-t-neutral-600 dark:border-t-neutral-300 rounded-full animate-spin"></div>
               <span class="text-sm" style="color:var(--theme-text-muted);">Loading contributors…</span>
@@ -93,7 +93,7 @@
         <!-- Links — full horizontal row -->
         <section>
           <h2 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:var(--theme-text-muted);">Links</h2>
-          <div class="grid grid-cols-4 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
             <a href="https://github.com/airlinklabs/panel" target="_blank" rel="noopener"
               class="al-card flex items-center gap-3 px-4 py-3.5 hover:border-[var(--theme-border-accent)] transition-colors">
@@ -150,7 +150,6 @@
   </div>
 </main>
 
-<%- include('../components/toast') %>
 
 <%- include('../components/footer') %>
 
@@ -299,9 +298,9 @@
       return;
     }
     grid.innerHTML = others.map(function (c) {
-      const safeLogin = c.login.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-      const safeUrl = c.html_url.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-      const safeAvatar = c.avatar_url.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      const safeLogin = escHtml(c.login);
+      const safeUrl = escHtml(c.html_url);
+      const safeAvatar = escHtml(c.avatar_url);
       return '<a href="' + safeUrl + '" target="_blank" rel="noopener"' +
         ' class="al-card flex items-center gap-3 px-3 py-3 hover:border-[var(--theme-border-accent)] transition-colors min-w-0">' +
         '<img loading="lazy" src="' + safeAvatar + '&s=48" alt="' + safeLogin + '" class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-white/10 object-cover shrink-0" onerror="this.src=\'https://github.com/ghost.png\'">' +

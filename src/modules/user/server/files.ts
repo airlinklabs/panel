@@ -6,6 +6,7 @@ import { isWorld } from '../../../handlers/features';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
+import { safeClientMessage, daemonMessage, errorBody } from '../../../utils/errors';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { isPathSafe, normalizePath } from '../../../utils/pathSecurity';
@@ -310,7 +311,7 @@ export function registerFilesRoutes(router: Router): void {
         logger.error('Error zipping files:', error);
         res
           .status(500)
-          .json({ error: 'Failed to zip files: ' + (error instanceof Error ? error.message : 'An unexpected error occurred.') });
+          .json({ error: safeClientMessage(error, 'Failed to zip files.') });
       }
     },
   );
@@ -372,8 +373,7 @@ export function registerFilesRoutes(router: Router): void {
             res.json({ success: true });
           } else {
             res.status(response.status).json({
-              error: response.data?.message || 'Failed to unzip file',
-              details: response.data,
+              error: daemonMessage(response.data, 'Failed to unzip file'),
             });
           }
         } catch (innerError: unknown) {
@@ -384,15 +384,14 @@ export function registerFilesRoutes(router: Router): void {
             status: inner.status,
           });
           res.status(502).json({
-            error: 'Failed to unzip files',
-            details: inner.body,
+            error: daemonMessage(inner.body, 'Failed to unzip files'),
           });
         }
       } catch (error) {
         logger.error('Error unzipping files:', error);
         res
           .status(500)
-          .json({ error: 'Failed to unzip files: ' + (error instanceof Error ? error.message : 'An unexpected error occurred.') });
+          .json({ error: safeClientMessage(error, 'Failed to unzip files.') });
       }
     },
   );
@@ -449,15 +448,12 @@ export function registerFilesRoutes(router: Router): void {
 
         const body = response.data as { error?: string } | undefined;
         res.status(response.status).json({
-          error: body?.error || 'Failed to duplicate file',
+          error: daemonMessage(body, 'Failed to duplicate file'),
         });
       } catch (error: unknown) {
-        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
-        const body = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
-        const status = (err.status as number) || 500;
-        res.status(status).json({
-          error: (body?.error as string) || 'Failed to duplicate file',
-        });
+        logger.error('Error duplicating file:', error);
+        const status = (error && typeof error === 'object' ? (error as Record<string, unknown>).status : 500) as number;
+        res.status(status || 500).json({ error: daemonMessage(errorBody(error), 'Failed to duplicate file') });
       }
     },
   );
@@ -510,16 +506,12 @@ export function registerFilesRoutes(router: Router): void {
         }
 
         res.status(response.status).json({
-          error: response.data?.message || 'Failed to rename file',
+          error: daemonMessage(response.data, 'Failed to rename file'),
         });
       } catch (error) {
         logger.error('Error renaming file:', error);
-        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
-        const body = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
-        const status = (err.status as number) || 500;
-        res.status(status).json({
-          error: (body?.error as string) || 'Failed to rename file',
-        });
+        const status = (error && typeof error === 'object' ? (error as Record<string, unknown>).status : 500) as number;
+        res.status(status || 500).json({ error: daemonMessage(errorBody(error), 'Failed to rename file') });
       }
     },
   );
@@ -584,15 +576,12 @@ export function registerFilesRoutes(router: Router): void {
         } catch (deleteError: unknown) {
           const del = deleteError && typeof deleteError === 'object' ? deleteError as Record<string, unknown> : {};
           const statusCode = (del.status as number) || 500;
-          const body = del.body && typeof del.body === 'object' ? del.body as Record<string, unknown> : undefined;
-          const errorMessage =
-            (body?.error as string) || (del.message as string) || 'Failed to delete file';
 
           logger.error(
-            `Error deleting ${filePath}: ${errorMessage}`,
+            `Error deleting ${filePath}`,
             deleteError,
           );
-          res.status(statusCode).json({ error: errorMessage });
+          res.status(statusCode).json({ error: daemonMessage(errorBody(deleteError), 'Failed to delete file') });
           return;
         }
       } catch (error) {
@@ -826,8 +815,7 @@ export function registerFilesRoutes(router: Router): void {
             errBody,
           );
           res.status(err.status as number).json({
-            error: (errBody.error as string) || 'Failed to upload file',
-            details: errBody,
+            error: daemonMessage(errBody, 'Failed to upload file'),
           });
         } else if (err.message) {
           logger.error(
@@ -907,7 +895,7 @@ export function registerFilesRoutes(router: Router): void {
 
         if (pullResponse.status !== 200 || !pullResponse.data?.success) {
           res.status(pullResponse.status === 200 ? 400 : pullResponse.status).json({
-            error: pullResponse.data?.error || 'Failed to pull file from URL',
+            error: daemonMessage(pullResponse.data, 'Failed to pull file from URL'),
           });
           return;
         }
@@ -924,10 +912,8 @@ export function registerFilesRoutes(router: Router): void {
         });
       } catch (error: unknown) {
         logger.error('Error pulling file from URL:', error);
-        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
-        const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
         res.status(500).json({
-          error: (errBody?.error as string) || (err.message as string) || 'Failed to pull file from URL',
+          error: safeClientMessage(error, 'Failed to pull file from URL'),
         });
       }
     },

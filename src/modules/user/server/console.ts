@@ -5,6 +5,7 @@ import { checkEulaStatus } from '../../../handlers/features';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
+import { safeClientMessage } from '../../../utils/errors';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
@@ -198,7 +199,9 @@ export function registerConsoleRoutes(router: Router): void {
         res.status(200).json({
           ...serverStatus,
           state: installResult?.state,
-          error: installResult?.error,
+          error: installResult?.error
+            ? safeClientMessage(installResult.error, 'The server could not be installed.')
+            : undefined,
         });
         return;
       } catch (error) {
@@ -421,15 +424,11 @@ export function registerConsoleRoutes(router: Router): void {
         res.status(200).json({ message: 'Container started successfully.' });
         return;
       } catch (error) {
-        const message =
-          error instanceof Error && error.message
-            ? error.message
-            : 'Failed to process power action.';
         logger.error('Failed to process power action', error, {
           serverId: String(serverId),
           action: String(powerAction),
         });
-        res.status(500).json({ error: message });
+        res.status(500).json({ error: safeClientMessage(error, 'Failed to process power action.') });
       }
     },
   );

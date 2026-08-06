@@ -1,5 +1,4 @@
 <%- include('../../components/header', { title: 'Images' }) %>
-<%- include('../../components/toast') %>
 
 <style>
   ::-webkit-scrollbar { display: none; }
@@ -16,7 +15,6 @@
   html.dark .field-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.25)); }
   .field-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
   html.dark .field-input::placeholder { color: var(--theme-text-muted, #525252); }
-  @media (max-width: 640px) { .col-hide { display: none; } }
 </style>
 
 <main class="min-h-screen m-auto">
@@ -125,7 +123,7 @@
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="px-6 py-4 overflow-y-auto flex-grow">
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
       <div class="mb-4">
         <label for="imageFileInput" class="w-full px-3 py-6 border-2 border-dashed rounded-xl focus:outline-none focus:ring-2 transition text-center cursor-pointer block" id="imageDropZone" style="border-color:var(--theme-border); color:var(--theme-text-strong);">
           <%- icon('upload', { class: 'w-10 h-10 mx-auto mb-2', fill: 'currentColor', strokeWidth: 1 }) %>

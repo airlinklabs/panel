@@ -9,11 +9,11 @@
 <div data-pagination class="flex items-center justify-between gap-3 px-4 py-3" data-total="<%= total %>" data-page-size="<%= pageSize %>">
   <p class="text-xs shrink-0" data-pagination-count style="color:var(--theme-text-muted)"></p>
   <div class="flex items-center gap-1" role="navigation" aria-label="Pagination">
-    <button type="button" data-page="prev" class="p-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10" style="color:var(--theme-text-muted)" aria-label="Previous page">
+    <button type="button" data-page="prev" class="p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10" style="color:var(--theme-text-muted)" aria-label="Previous page">
       <%- icon('chevron-left', { class: 'w-4 h-4' }) %>
     </button>
     <span class="flex items-center gap-1" data-pagination-window></span>
-    <button type="button" data-page="next" class="p-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10" style="color:var(--theme-text-muted)" aria-label="Next page">
+    <button type="button" data-page="next" class="p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10" style="color:var(--theme-text-muted)" aria-label="Next page">
       <%- icon('chevron-right', { class: 'w-4 h-4' }) %>
     </button>
   </div>
@@ -80,7 +80,7 @@
         b.type = 'button';
         b.textContent = label;
         b.dataset.page = target;
-        b.className = 'min-w-[28px] h-9 px-1.5 rounded-lg text-xs font-medium transition-colors' +
+        b.className = 'min-w-[40px] h-10 px-1.5 rounded-lg text-xs font-medium transition-colors' +
           (active ? '' : ' hover:bg-black/5 dark:hover:bg-white/10');
         b.style.color = active ? 'var(--theme-accent-text)' : 'var(--theme-text-muted)';
         if (active) b.style.background = 'var(--theme-accent)';

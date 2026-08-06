@@ -140,7 +140,7 @@
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon — it might just need a nudge.' %></p>
             </div>
-            <button type="button" onclick="window.location.reload()" class="al-btn-danger shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition inline-flex items-center gap-1.5">
+            <button type="button" onclick="retryDaemonConnection()" class="al-btn-danger shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition inline-flex items-center gap-1.5">
               <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
               Retry Connection
             </button>
@@ -287,7 +287,7 @@
           <p class="text-xs font-medium" style="color:var(--theme-danger);">Connection Error</p>
           <p class="text-[11px] truncate" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'The daemon appears to be offline.' %></p>
         </div>
-        <button type="button" onclick="window.location.reload()" class="al-btn-danger shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-lg transition inline-flex items-center gap-1.5">
+        <button type="button" onclick="retryDaemonConnection()" class="al-btn-danger shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-lg transition inline-flex items-center gap-1.5">
           <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
           Retry
         </button>
@@ -389,7 +389,6 @@
   </div>
 </main>
 
-<%- include('../../components/toast') %>
 
 <%- include('../../components/footer') %>
 
@@ -508,10 +507,16 @@ if (loadHistoryBtn) {
 // Reusable log loader — fetches saved daemon output from disk.
 // showMarkers = true: wraps output with "N lines from disk" / "end of saved log" markers (manual button)
 // showMarkers = false: writes lines directly (auto-load after start/install/stop)
+// A newer call supersedes any older in-flight one, so a slow load can never
+// write stale lines after fresher console output.
 async function loadRecentLogs(showMarkers) {
     const serverId = window.location.pathname.split('/')[2];
+    const ctrl = new AbortController();
+    if (recentLogsController) recentLogsController.abort();
+    recentLogsController = ctrl;
+    logFetchControllers.add(ctrl);
     try {
-        const r = await fetch('/server/' + serverId + '/logs/history', { credentials: 'same-origin' });
+        const r = await fetch('/server/' + serverId + '/logs/history', { credentials: 'same-origin', signal: ctrl.signal });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || 'Failed to load logs');
         const lines = d.logs || [];
@@ -526,7 +531,11 @@ async function loadRecentLogs(showMarkers) {
         }
         term.scrollToBottom();
     } catch (err) {
+        if (err && err.name === 'AbortError') return;
         term.writeln('\x1b[31mFailed to load log history: ' + (err.message || err) + '\x1b[0m');
+    } finally {
+        logFetchControllers.delete(ctrl);
+        if (recentLogsController === ctrl) recentLogsController = null;
     }
 }
 
@@ -588,6 +597,14 @@ async function loadRecentLogs(showMarkers) {
 
     let socket;
 
+// Passive lifecycle events socket — closed with the page, reconnects on drop.
+let lifecycleSock = null;
+let lifecycleSockIntentionalClose = false;
+let lifecycleReconnectTimer = null;
+// In-flight log fetches get aborted on teardown so nothing writes after unload.
+let recentLogsController = null;
+const logFetchControllers = new Set();
+
 let isReconnecting = false;
 let reconnectAttempts = 0;
 let maxReconnectAttempts = 10;
@@ -625,14 +642,29 @@ function forceReconnectConsole() {
 
 function setDaemonOfflineBanner(offline) {
     const row = document.getElementById('daemonOfflineWarningRow');
-    if (!row) return;
+    const mobileRow = document.getElementById('mobileDaemonOfflineWarning');
+    if (row) row.classList.toggle('hidden', !offline);
+    if (mobileRow) mobileRow.classList.toggle('hidden', !offline);
     if (offline) {
-        row.classList.remove('hidden');
         lockInput('Console paused — daemon offline');
         writeConsole('system', 'error', 'Console paused — daemon offline');
     } else {
-        row.classList.add('hidden');
         unlockInput();
+    }
+}
+
+// In-place daemon reconnection for the "Retry Connection" banners — reopens
+// any socket that isn't connected instead of reloading the whole page.
+function retryDaemonConnection() {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        forceReconnectConsole();
+    }
+    if (!statsWs || (statsWs.readyState !== WebSocket.OPEN && statsWs.readyState !== WebSocket.CONNECTING)) {
+        isStatsReconnecting = false;
+        initStatsWebSocket();
+    }
+    if (!lifecycleSock) {
+        connectLifecycleSocket();
     }
 }
 
@@ -650,13 +682,16 @@ async function openConsoleSocket() {
 
             if (!historyLoaded) {
                 historyLoaded = true;
-                fetch(`/server/<%= server.UUID %>/logs`)
+                const ctrl = new AbortController();
+                logFetchControllers.add(ctrl);
+                fetch(`/server/<%= server.UUID %>/logs`, { credentials: 'same-origin', signal: ctrl.signal })
                     .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
                     .then((data) => {
                         const lines = data.lines || [];
                         lines.forEach((line) => term.write(maskPrompts(String(line)) + '\r\n'));
                     })
-                    .catch(() => {});
+                    .catch(() => {})
+                    .finally(() => logFetchControllers.delete(ctrl));
             }
         };
 
@@ -690,8 +725,13 @@ function scheduleReconnect() {
 
     if (reconnectAttempts <= maxReconnectAttempts) {
         reconnectTimer = setTimeout(() => {
+            connectWebSocket();
+        }, backoffTime);
+    } else {
 
-connectWebSocket();
+        writeConsole('system', 'error', 'Maximum reconnect attempts reached. Please refresh the page.');
+    }
+}
 
 // Background throttle — close the console socket while the tab is hidden,
 // pause reconnect timers, and reconnect immediately when the tab returns.
@@ -705,8 +745,44 @@ document.addEventListener('visibilitychange', () => {
             try { socket.close(1000, 'page hidden'); } catch (e) { console.warn('WebSocket close failed:', e); }
             socket = null;
         }
+        lifecycleSockIntentionalClose = true;
+        if (lifecycleReconnectTimer) { clearTimeout(lifecycleReconnectTimer); lifecycleReconnectTimer = null; }
+        if (lifecycleSock) {
+            try { lifecycleSock.close(1000, 'page hidden'); } catch (e) {}
+            lifecycleSock = null;
+        }
     } else {
         isReconnecting = false;
+        connectWebSocket();
+        if (!lifecycleSock) {
+            lifecycleSockIntentionalClose = false;
+            connectLifecycleSocket();
+        }
+    }
+});
+
+// Teardown on navigation — close every socket, cancel timers and abort any
+// in-flight log fetches so nothing keeps running after unload.
+function teardownPage() {
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+    if (statsReconnectTimer) { clearTimeout(statsReconnectTimer); statsReconnectTimer = null; }
+    if (lifecycleReconnectTimer) { clearTimeout(lifecycleReconnectTimer); lifecycleReconnectTimer = null; }
+    if (statusMsgFadeTimer) { clearTimeout(statusMsgFadeTimer); statusMsgFadeTimer = null; }
+    if (chartUpdatePending) { cancelAnimationFrame(chartUpdatePending); chartUpdatePending = null; }
+    logFetchControllers.forEach((c) => c.abort());
+    logFetchControllers.clear();
+    [socket, statsWs, lifecycleSock].forEach((ws) => {
+        if (ws) {
+            try { ws.close(1000, 'page navigating'); } catch (e) {}
+        }
+    });
+    socket = null;
+    statsWs = null;
+    lifecycleSock = null;
+}
+window.addEventListener('beforeunload', teardownPage);
+window.addEventListener('pagehide', teardownPage);
+
 // Two-tab console guard — exactly one tab owns console input; every other
 // tab renders view-only (notices shown, inputs disabled, sends refused).
 // Uses the Web Locks API so ownership transfers automatically when the
@@ -731,16 +807,6 @@ function updateConsoleOwnerUI() {
         return new Promise(function () {});
     });
 })();
-
-connectWebSocket();
-    }
-});
-        }, backoffTime);
-    } else {
-
-        writeConsole('system', 'error', 'Maximum reconnect attempts reached. Please refresh the page.');
-    }
-}
 
 connectWebSocket();
 
@@ -953,11 +1019,13 @@ connectWebSocket();
         btn.dataset.loading = 'true';
         btn.dataset.origLabel = btn.textContent;
         btn.textContent = label;
+        btn.disabled = true;
     }
 
     function clearButtonLoading(btn) {
         if (!btn || btn.dataset.loading !== 'true') return;
         btn.dataset.loading = 'false';
+        btn.disabled = false;
         if (btn.dataset.origLabel) {
             btn.textContent = btn.dataset.origLabel;
             delete btn.dataset.origLabel;
@@ -1457,11 +1525,16 @@ connectWebSocket();
     }
 
     function updateDiskUsage(stats) {
-        const DISK_LIMIT_MB = 10 * 1024;
+        const DISK_LIMIT_MB = <%- typeof server !== 'undefined' && server.Storage ? server.Storage : 0 %>;
         const diskUsageRaw = parseFloat(stats.data.storage.usage) || 0;
-        const diskLimitRaw = DISK_LIMIT_MB;
-        const diskPct = Math.round(diskUsageRaw / diskLimitRaw * 100);
-        document.getElementById('diskUsage').textContent = `${diskPct}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${formatBytes(diskLimitRaw * 1024 * 1024)})`;
+        const diskEl = document.getElementById('diskUsage');
+        if (!diskEl) return;
+        if (DISK_LIMIT_MB <= 0) {
+            diskEl.textContent = `${formatBytes(diskUsageRaw * 1024 * 1024)} used (unlimited disk)`;
+            return;
+        }
+        const diskPct = Math.round(diskUsageRaw / DISK_LIMIT_MB * 100);
+        diskEl.textContent = `${diskPct}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${formatBytes(DISK_LIMIT_MB * 1024 * 1024)})`;
     }
 
     function updateStatus(stats) {
@@ -1499,7 +1572,23 @@ connectWebSocket();
         chart.data.datasets[0].borderColor = colors.border;
         chart.data.datasets[0].backgroundColor = colors.fill;
 
-        chart.update();
+        scheduleChartUpdate(chart);
+    }
+
+    // Coalesce chart re-renders onto a single requestAnimationFrame. The stats
+    // stream can deliver many messages per second; calling chart.update() on
+    // each one (with animation enabled) stalls the page.
+    let chartUpdatePending = null;
+    const chartsPendingUpdate = new Set();
+    function scheduleChartUpdate(chart) {
+        chartsPendingUpdate.add(chart);
+        if (chartUpdatePending) return;
+        chartUpdatePending = requestAnimationFrame(() => {
+            chartUpdatePending = null;
+            const charts = Array.from(chartsPendingUpdate);
+            chartsPendingUpdate.clear();
+            charts.forEach((c) => c.update());
+        });
     }
 
     // When true, the lifecycle stream owns the status card — stats polling must not overwrite it.
@@ -1524,8 +1613,12 @@ connectWebSocket();
     function surfaceStoppedState(data) {
         if (deliberateStop) { deliberateStop = false; return; }
         const reason = crashReasonLabel(data && data.exitCode);
-        setStatusText(reason, 'var(--theme-danger)');
-        updateStatusChart('danger', 0.1, 0.2);
+        if (reason) {
+            setStatusText(reason, 'var(--theme-danger)');
+            updateStatusChart('danger', 0.1, 0.2);
+            writeConsole('daemon', 'error', reason);
+            showToast(reason, 'error');
+        }
         const msgEl = document.getElementById('status-msg');
         if (msgEl) {
             const link = document.createElement('a');
@@ -1537,10 +1630,6 @@ connectWebSocket();
             msgEl.className = 'text-xs font-medium mt-0.5 leading-snug transition-all duration-300';
             msgEl.style.color = 'var(--theme-danger)';
             msgEl.classList.remove('opacity-0', 'translate-y-1', 'pointer-events-none');
-        }
-        if (reason) {
-            writeConsole('daemon', 'error', reason);
-            showToast(reason, 'error');
         }
     }
 
@@ -1630,14 +1719,6 @@ connectWebSocket();
 
     function setAllStatsOffline() {
         showConsolePlaceholder();
-        // Update status display
-        const statusElement = document.getElementById('status');
-        statusElement.textContent = 'Offline';
-        statusElement.className = 'mt-1 text-lg font-medium tracking-tight';
-        statusElement.style.color = 'var(--theme-danger)';
-
-        // Update status chart
-        updateStatusChart('danger', 0.1, 0.2);
 
         // Update RAM usage
         document.getElementById('ramUsage').textContent = `${Math.round(0)}% (0 MB / ${formatRam(<%- server.Memory %> * 1024 * 1024)})`;
@@ -1648,14 +1729,28 @@ connectWebSocket();
         document.getElementById('cpuUsage').textContent = `${Math.round(0)}% of ${cpuCores} core${cpuCores === '1.0' ? '' : 's'}`;
 
         // Update disk usage
-        document.getElementById('diskUsage').textContent = `${Math.round(0)}% (0 Bytes / 10 GB)`;
-
-        // Hide players decoration if it exists
-
-        // No need to show daemon down message as it's been removed
+        const diskLimitMB = <%- typeof server !== 'undefined' && server.Storage ? server.Storage : 0 %>;
+        document.getElementById('diskUsage').textContent = diskLimitMB > 0
+            ? `0% (0 Bytes / ${formatBytes(diskLimitMB * 1024 * 1024)})`
+            : '0 bytes used (unlimited disk)';
 
         // Reset charts
         resetCharts();
+
+        // The lifecycle stream owns the status card while an action is in
+        // flight (starting/stopping/installing). Don't clobber it with a
+        // generic offline state — the stats stream or the next lifecycle
+        // event refreshes the card instead.
+        if (lifecycleActive) return;
+
+        // Update status display
+        const statusElement = document.getElementById('status');
+        statusElement.textContent = 'Offline';
+        statusElement.className = 'mt-1 text-lg font-medium tracking-tight';
+        statusElement.style.color = 'var(--theme-danger)';
+
+        // Update status chart
+        updateStatusChart('danger', 0.1, 0.2);
     }
 
     // Function to reset all charts
@@ -1682,14 +1777,20 @@ connectWebSocket();
 
     initStatsWebSocket();
 
-    // Passive lifecycle stream — receives daemon events for any operation in progress
-    // Writes them to the console terminal and manages input lock state
-    (function () {
+    // Passive lifecycle stream — receives daemon events for any operation in
+    // progress. Writes them to the console terminal and manages input lock
+    // state. Reconnects on drop; closed on visibility change and unload like
+    // the other sockets.
+    function connectLifecycleSocket() {
         const proto = location.protocol === 'https:' ? 'wss' : 'ws';
         const base = `${proto}://${location.host}/events/<%= server.UUID %>`;
 
         getWsConnectToken('<%= server.UUID %>').then((token) => {
-            const lcSock = new WebSocket(base + '?token=' + encodeURIComponent(token));
+            if (lifecycleSock && (lifecycleSock.readyState === WebSocket.CONNECTING || lifecycleSock.readyState === WebSocket.OPEN)) {
+                return;
+            }
+            const sock = new WebSocket(base + '?token=' + encodeURIComponent(token));
+            lifecycleSock = sock;
 
             const stateMap = {
             pulling:  { label: 'Pulling image',      color: 'var(--theme-info)' },
@@ -1703,7 +1804,7 @@ connectWebSocket();
 
         const lockingStates = new Set(['pulling', 'creating', 'starting']);
 
-        lcSock.onmessage = (msg) => {
+        sock.onmessage = (msg) => {
             let parsed;
             try { parsed = JSON.parse(msg.data); } catch { return; }
             if (parsed.event !== 'lifecycle') return;
@@ -1727,15 +1828,7 @@ connectWebSocket();
                 deliberateStop = true;
                 serverStopped = true;
                 setStatusLog(null);
-                const sid = window.location.pathname.split('/')[2];
-                fetch('/server/' + sid + '/logs', { credentials: 'same-origin' })
-                    .then(r => { if (!r.ok) throw new Error(); return r.json(); })
-                    .then(data => {
-                        const lines = data.lines || [];
-                        lines.forEach(l => term.write(maskPrompts(String(l)) + '\r\n'));
-                        term.scrollToBottom();
-                    })
-                    .catch(() => {});
+                loadRecentLogs(false);
             }
             if (type === 'installing') {
                 if (!installLogsLoaded) {
@@ -1745,8 +1838,20 @@ connectWebSocket();
             }
             if (type === 'error') { unlockInput(); setStatusLog(null); }
         };
+
+        sock.onclose = () => {
+            if (lifecycleSock === sock) lifecycleSock = null;
+            if (lifecycleSockIntentionalClose || pageHidden) return;
+            if (!lifecycleReconnectTimer) {
+                lifecycleReconnectTimer = setTimeout(() => {
+                    lifecycleReconnectTimer = null;
+                    connectLifecycleSocket();
+                }, 3000);
+            }
+        };
         }).catch(() => {});
-    })();
+    }
+    connectLifecycleSocket();
 
     // ═══════════════════════════════════════════════════════════════
     // MOBILE LAYOUT — separate terminal, charts, buttons
@@ -1839,6 +1944,38 @@ connectWebSocket();
             const prefixText = (prefix && type !== 'normal') ? '[' + prefix + '] ' : '';
             mobileTerm.write(color + prefixText + '\x1b[37m' + message + '\x1b[0m\r\n');
         }
+
+        // Mirror live RAM/CPU/disk updates to the mobile stats grid. These
+        // were captured but never assigned before, so the mobile cards stayed
+        // at their static "0%" / "--" placeholders.
+        const origUpdateRamMobile = updateRamUsage;
+        updateRamUsage = function (stats) {
+            origUpdateRamMobile(stats);
+            const el = document.getElementById('mobile-ramUsage');
+            if (el) el.textContent = (document.getElementById('ramUsage') || {}).textContent || '0%';
+            const pct = Number(stats?.data?.memory?.percentage) || 0;
+            if (pct > 0) updateChart(mobileRamChart, Math.round(pct));
+        };
+
+        const origUpdateCpuMobile = updateCpuUsage;
+        updateCpuUsage = function (stats) {
+            origUpdateCpuMobile(stats);
+            const el = document.getElementById('mobile-cpuUsage');
+            if (el) el.textContent = (document.getElementById('cpuUsage') || {}).textContent || '0%';
+            const pct = Number(stats?.data?.cpu?.percentage) || 0;
+            if (pct > 0) updateChart(mobileCpuChart, Math.round(pct));
+        };
+
+        const origUpdateDiskMobile = updateDiskUsage;
+        updateDiskUsage = function (stats) {
+            origUpdateDiskMobile(stats);
+            const el = document.getElementById('mobile-diskUsage');
+            if (el) el.textContent = (document.getElementById('diskUsage') || {}).textContent || '--';
+            const limitMB = <%- typeof server !== 'undefined' && server.Storage ? server.Storage : 0 %>;
+            const usageMB = parseFloat(stats?.data?.storage?.usage) || 0;
+            const pct = limitMB > 0 ? Math.round(usageMB / limitMB * 100) : 0;
+            updateChart(mobileDiskChart, Math.min(100, pct));
+        };
 
         // Mobile input handling
         const mobileInput = document.getElementById('mobile-input');

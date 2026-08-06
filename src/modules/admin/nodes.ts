@@ -504,7 +504,7 @@ const adminModule: Module = {
                 ? 'That address does not resolve. Check the hostname or IP you entered.'
                 : cause.includes('timed out')
                   ? 'The daemon did not answer in time. Check the address, port, and firewall.'
-                  : `Could not reach the daemon: ${cause || 'unknown error'}`;
+                  : 'Could not reach the daemon. Check the address, port, and firewall.';
           res.status(200).json({ connected: false, error: friendly });
         }
       },

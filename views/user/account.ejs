@@ -181,7 +181,6 @@
   </div>
 </main>
 
-<%- include('../components/toast') %>
 
 <script nonce="<%- nonce %>">
 document.addEventListener('DOMContentLoaded', () => {
@@ -199,7 +198,17 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(data),
       });
       const text = await res.text();
-      return { ok: res.ok, text };
+      // Surface only the server's error field, never the raw response body.
+      let message = text;
+      if (!res.ok) {
+        try {
+          const parsed = JSON.parse(text);
+          message = parsed.error || parsed.message || 'Request failed';
+        } catch {
+          message = 'Request failed';
+        }
+      }
+      return { ok: res.ok, text: message };
     } finally { submitting = false; }
   }
 
@@ -346,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="text-sm font-semibold" style="color:var(--theme-text-strong);">Position your photo</p>
             <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Drag and resize the selection box.</p>
           </div>
-          <button type="button" id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-75 transition" style="color:var(--theme-text-muted);">
+          <button type="button" id="crop-cancel" class="w-9 h-9 flex items-center justify-center rounded-lg hover:opacity-75 transition" style="color:var(--theme-text-muted);">
             <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
           </button>
         </div>

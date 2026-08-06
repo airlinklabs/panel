@@ -98,7 +98,6 @@
   </div>
 </main>
 
-<%- include('../components/toast') %>
 
 <script nonce="<%- nonce %>">
 document.addEventListener('DOMContentLoaded', () => {
@@ -146,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Two-factor authentication enabled.', 'success');
         recoveryCodes = data.recoveryCodes || [];
         recoveryList.innerHTML = recoveryCodes.map(code => {
-          const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          const escaped = escHtml(code);
           return '<code class="select-all rounded-lg px-3 py-2 text-xs font-mono text-center" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)">' + escaped + '</code>';
         }).join('');
         form.closest('.al-card').classList.add('hidden');

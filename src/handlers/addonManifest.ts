@@ -67,11 +67,12 @@ export type ParseManifestResult =
   | { success: false; error: string; filePath: string };
 
 export function parseAddonManifest(filePath: string, addonSlug?: string): ParseManifestResult {
+  const displayName = addonSlug ?? path.basename(path.dirname(filePath));
   try {
     if (!fs.existsSync(filePath)) {
       return {
         success: false,
-        error: `package.json not found at ${filePath}`,
+        error: `package.json not found for addon "${displayName}"`,
         filePath,
       };
     }
@@ -83,7 +84,7 @@ export function parseAddonManifest(filePath: string, addonSlug?: string): ParseM
     } catch {
       return {
         success: false,
-        error: `Invalid JSON in ${filePath}`,
+        error: `Invalid JSON in package.json for addon "${displayName}"`,
         filePath,
       };
     }
@@ -93,13 +94,13 @@ export function parseAddonManifest(filePath: string, addonSlug?: string): ParseM
       const issues = result.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; ');
       return {
         success: false,
-        error: `Manifest validation failed: ${issues}`,
+        error: `Manifest validation failed for addon "${displayName}": ${issues}`,
         filePath,
       };
     }
 
     const manifest = result.data;
-    const slug = addonSlug ?? path.basename(path.dirname(filePath));
+    const slug = displayName;
 
     if (manifest.identifier && manifest.identifier !== slug) {
       return {

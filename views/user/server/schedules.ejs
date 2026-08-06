@@ -113,7 +113,7 @@
                         Run now
                       </button>
                       <button type="button" data-sched-name="<%= schedule.name %>" onclick="deleteSchedule(<%= schedule.id %>, this.dataset.schedName)"
-                        class="al-btn-ghost p-1.5 -mr-1.5" style="color:var(--theme-danger)" aria-label="Delete schedule">
+                        class="al-btn-ghost p-2 -mr-1.5" style="color:var(--theme-danger)" aria-label="Delete schedule">
                         <%- icon('trash-2', { size: 15 }) %>
                       </button>
                     </div>
@@ -137,7 +137,7 @@
                             <span class="shrink-0 text-[10px] font-medium" style="color:var(--theme-text-muted)">+<%= task.timeOffset %>s</span>
                           <% } %>
                         </div>
-                        <button type="button" onclick="deleteTask(<%= schedule.id %>, <%= task.id %>)" class="al-btn-ghost p-1.5 -mr-1.5 shrink-0" style="color:var(--theme-danger)" aria-label="Remove task">
+                        <button type="button" onclick="deleteTask(<%= schedule.id %>, <%= task.id %>)" class="al-btn-ghost p-2 -mr-1.5 shrink-0" style="color:var(--theme-danger)" aria-label="Remove task">
                           <%- icon('x', { class: 'w-3.5 h-3.5' }) %>
                         </button>
                       </div>
@@ -228,7 +228,7 @@
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="px-6 py-4 space-y-4 overflow-y-auto">
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
       <div>
         <label for="schedName" class="al-label">Name</label>
         <input id="schedName" type="text" class="al-input w-full" placeholder="Daily restart" autocomplete="off">
@@ -322,10 +322,8 @@
   </div>
 </div>
 
-<%- include('../../components/toast') %>
 
 <script nonce="<%- nonce %>">
-const getCsrf = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
 const serverId = '<%= server.UUID %>';
 
 const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m) => console.warn('[schedules]', m) };
@@ -675,22 +673,6 @@ function setSchedMode(mode) {
 }
 document.querySelectorAll('.sched-mode-btn').forEach((b) => b.addEventListener('click', () => setSchedMode(b.dataset.schedMode)));
 
-async function api(url, method, body) {
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Request failed');
-    return data;
-  } catch (err) {
-    showToast(err.message || 'Something went wrong.', 'error');
-    return null;
-  }
-}
-
 const FIELD_BOUNDS = [[0, 59], [0, 59], [0, 23], [1, 31], [1, 12], [0, 7]];
 
 function tokenValid(tok, bounds) {
@@ -849,7 +831,7 @@ function renderPendingTasks(scheduleId) {
 
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'al-btn-ghost p-1.5 -mr-1.5 shrink-0';
+    btn.className = 'al-btn-ghost p-2 -mr-1.5 shrink-0';
     btn.style.color = 'var(--theme-danger)';
     btn.setAttribute('aria-label', 'Remove task');
     btn.innerHTML = '<%- icon('x', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>';

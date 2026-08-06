@@ -249,7 +249,7 @@
     }
 
     function escHtml(str) {
-      return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return window.escHtml(str);
     }
 
     /* ── header button handlers ── */

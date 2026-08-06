@@ -1,5 +1,4 @@
 <%- include('../components/header', { title:'ERROR' }) %>
-  <%- include('../components/toast') %>
     <main class="min-h-screen">
       <div class="flex min-h-screen">
         <% if (user != null) { %>
@@ -25,7 +24,7 @@
               <%= errorMessage %>
             </p>
             <p
-              class="mt-4 max-w-xl truncate rounded-lg px-3 py-2 font-mono text-xs" style="color:var(--theme-text-muted); background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
+              class="mt-4 max-w-xl break-all rounded-lg px-3 py-2 font-mono text-xs" style="color:var(--theme-text-muted); background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
               <%= path %>
             </p>
 

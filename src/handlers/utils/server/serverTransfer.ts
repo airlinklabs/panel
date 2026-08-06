@@ -9,6 +9,7 @@ import {
   withNodePortLock,
 } from './allocations';
 import { assertNodeCapacity } from './resourceCheck';
+import { safeClientMessage } from '../../../utils/errors';
 import {
   normalizeServerPorts,
   parseImagePortRequirements,
@@ -130,7 +131,7 @@ export async function startTransfer(
   // Run the transfer in background — the UI polls /transfer/status
   runTransfer(server, targetNode, targetPorts, state, req).catch((err) => {
     logger.error(`Transfer failed for server ${server.UUID}:`, err);
-    updateStatus(serverId, 'failed', err instanceof Error ? err.message : 'Unknown error');
+    updateStatus(serverId, 'failed', safeClientMessage(err, 'The transfer failed.'));
   });
 
   return state;
@@ -183,7 +184,9 @@ async function runTransfer(
     });
 
     if (!backupRes.data?.backup?.filePath) {
-      throw new Error(`Failed to create backup on source: ${backupRes.data?.error || 'Unknown error'}`);
+      throw new Error(
+        safeClientMessage(backupRes.data?.error, 'The backup could not be created on the source node.'),
+      );
     }
     backupFilePath = backupRes.data.backup.filePath;
     const backupChecksum = backupRes.data.backup.checksum;
@@ -223,7 +226,9 @@ async function runTransfer(
     });
 
     if (!uploadRes.data?.success) {
-      throw new Error(`Failed to upload backup to destination: ${uploadRes.data?.error || 'Unknown error'}`);
+      throw new Error(
+        safeClientMessage(uploadRes.data?.error, 'The backup could not be uploaded to the destination node.'),
+      );
     }
 
     // ── Step 5: Restore backup on destination daemon ───────────────────────
@@ -243,7 +248,9 @@ async function runTransfer(
     });
 
     if (!restoreRes.data?.success) {
-      throw new Error(`Failed to restore backup on destination: ${restoreRes.data?.error || 'Unknown error'}`);
+      throw new Error(
+        safeClientMessage(restoreRes.data?.error, 'The backup could not be restored on the destination node.'),
+      );
     }
 
     // ── Step 6: Install server on destination (pull image + scripts) ───────
@@ -404,7 +411,7 @@ async function runTransfer(
     updateStatus(state.serverId, 'completed');
     logger.info(`Server ${server.UUID} transferred from node ${srcDaemon.id} to node ${targetNode.id}`);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
+    const msg = safeClientMessage(err, 'The transfer failed.');
     updateStatus(state.serverId, 'failed', msg);
     logger.error(`Transfer failed for ${server.UUID}:`, err);
 

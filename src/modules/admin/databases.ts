@@ -5,6 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { registerPermission } from '../../handlers/permissions';
 import { getParamAsNumber } from '../../utils/typeHelpers';
+import { safeClientMessage } from '../../utils/errors';
 import { testDatabaseHost } from '../../handlers/utils/core/mysqlProvisioner';
 import { ensureS3Bucket } from '../../handlers/utils/core/s3Client';
 
@@ -109,7 +110,7 @@ const databasesModule: Module = {
             created = true;
           }
           const result = await testDatabaseHost(host);
-          return res.json({ success: result.success, created, hostId: host.id, latency: result.latency, error: result.error });
+          return res.json({ success: result.success, created, hostId: host.id, latency: result.latency, error: result.error ? safeClientMessage(result.error, 'The database host could not be reached.') : undefined });
         } catch (error: unknown) {
           logger.error('Error auto-generating database host:', error);
           return res.status(500).json({ success: false, error: 'Failed to auto-generate database host.' });
@@ -126,11 +127,13 @@ const databasesModule: Module = {
           return res.json({ success: true, created });
         } catch (error: unknown) {
           logger.error('Error auto-generating S3 bucket:', error);
-          const message = error instanceof Error ? error.message : 'Failed to auto-generate S3 bucket.';
+          const message = error instanceof Error ? error.message : '';
           const unconfigured = message.includes('S3 not configured');
           return res.status(unconfigured ? 400 : 500).json({
             success: false,
-            error: unconfigured ? 'S3 is not configured. Add your S3-compatible endpoint and credentials in Admin Settings first.' : message,
+            error: unconfigured
+              ? 'S3 is not configured. Add your S3-compatible endpoint and credentials in Admin Settings first.'
+              : safeClientMessage(error, 'Failed to auto-generate S3 bucket.'),
           });
         }
       },
@@ -147,7 +150,10 @@ const databasesModule: Module = {
             return res.status(404).json({ success: false, error: 'Database host not found.' });
           }
           const result = await testDatabaseHost(host);
-          return res.json(result);
+          return res.json({
+            ...result,
+            error: result.error ? safeClientMessage(result.error, 'The database host could not be reached.') : undefined,
+          });
         } catch (error: unknown) {
           logger.error('Error testing database host:', error);
           return res.status(500).json({ success: false, error: 'Failed to test database host.' });

@@ -11,7 +11,9 @@
       confirmLabel: 'Accept EULA',
       onConfirm: () => {
         fetch('/server/<%= req.params.id %>/feature/eula', { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
-          .then(() => location.reload())
+          .then(() => {
+            // EULA accepted — the start flow is unblocked in place; no reload.
+          })
           .catch(error => {
             console.error('There was an error!', error);
             if (typeof showToast === 'function') {

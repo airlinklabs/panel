@@ -23,7 +23,7 @@ function catBadge(cat) {
   return '<span class="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset '+(CAT_CLS[cat]||'')+'">'+catDot(cat,6)+(CAT_LABEL[cat]||cat)+'</span>';
 }
 
-function escHtml(s) { return esc(s||'').replace(/"/g,'&quot;'); }
+function escHtml(s) { return window.escHtml(s); }
 
 function groupData() {
   var map = {};

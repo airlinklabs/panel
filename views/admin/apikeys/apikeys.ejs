@@ -67,7 +67,7 @@
                   </button>
                   <form id="toggleKeyForm_<%= apiKey.id %>" action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
                     <%- include('../../components/csrf') %>
-                    <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg transition" style="color:var(--theme-text-muted)" aria-label="<%= apiKey.active ? 'Disable API key' : 'Enable API key' %>">
+                    <button type="submit" class="w-9 h-9 flex items-center justify-center rounded-lg transition" style="color:var(--theme-text-muted)" aria-label="<%= apiKey.active ? 'Disable API key' : 'Enable API key' %>">
                       <% if (apiKey.active) { %>
                         <%- icon('x-circle', { size: 16, class: 'shrink-0' }) %>
                       <% } else { %>
@@ -77,7 +77,7 @@
                   </form>
                   <form id="deleteKeyForm_<%= apiKey.id %>" action="/admin/apikeys/delete/<%= apiKey.id %>" method="POST" class="inline">
                     <%- include('../../components/csrf') %>
-                    <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="w-8 h-8 flex items-center justify-center rounded-lg transition" style="color:var(--theme-danger)" aria-label="Delete API key">
+                    <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="w-9 h-9 flex items-center justify-center rounded-lg transition" style="color:var(--theme-danger)" aria-label="Delete API key">
                       <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                     </button>
                   </form>
@@ -252,7 +252,7 @@
     <!-- Body -->
     <form id="editApiKeyForm" action="/admin/apikeys/edit/0" method="POST" class="flex flex-col min-h-0 flex-1">
       <%- include('../../components/csrf') %>
-      <div class="px-6 py-4 overflow-y-auto flex-1 space-y-4">
+      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
 
         <!-- Name + description -->
         <div class="grid grid-cols-2 gap-4">

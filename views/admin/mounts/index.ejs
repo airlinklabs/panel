@@ -90,7 +90,7 @@
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="px-6 py-4 space-y-4 overflow-y-auto">
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
       <div>
         <label for="mountName" class="al-label">Name</label>
         <input id="mountName" class="al-input w-full" placeholder="Shared plugins">
@@ -121,7 +121,6 @@
   </div>
 </div>
 
-<%- include('../../components/toast') %>
 
 <script nonce="<%- nonce %>">
 function openMountModal() {

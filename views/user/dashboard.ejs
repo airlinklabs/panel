@@ -112,10 +112,6 @@
                 <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= folder.name %></p>
                 <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= folder.members.length %> server<%= folder.members.length !== 1 ? 's' : '' %></p>
               </div>
-              <button type="button" class="folder-menu-btn al-btn-ghost shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:group-focus-visible:opacity-100 transition-opacity"
-                data-folder-id="<%= folder.id %>" aria-label="Folder options">
-                <%- icon('more-horizontal', { class: 'w-4 h-4' }) %>
-              </button>
             </div>
             <% }); %>
           </div>
@@ -186,7 +182,7 @@
                 <% } %>
               </div>
             </a>
-            <button type="button" class="server-actions-btn absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:group-focus-visible:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 z-10" style="color:var(--theme-text-muted);" aria-label="Server actions" data-uuid="<%= server.UUID %>">
+            <button type="button" class="server-actions-btn absolute top-2 right-2 w-9 h-9 flex items-center justify-center rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:group-focus-visible:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 z-10" style="color:var(--theme-text-muted);" aria-label="Server actions" data-uuid="<%= server.UUID %>">
               <%- icon('more-horizontal', { class: 'w-4 h-4' }) %>
             </button>
             <!-- Context menu -->
@@ -281,7 +277,7 @@
         </button>
       </div>
     </div>
-    <div class="flex-1 overflow-y-auto px-6 py-4">
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
       <div id="folderPopupContent" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
     </div>
   </div>
@@ -327,7 +323,6 @@
   </div>
 </div>
 
-<%- include('../components/toast') %>
 
 <div id="dashboard-data" class="hidden"></div>
 <script nonce="<%- nonce %>">

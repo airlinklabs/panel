@@ -313,7 +313,7 @@ function escJS(val) {
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
-      <div class="px-6 py-4 overflow-y-auto flex-grow">
+      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
         <input type="hidden" id="moveSourcePath">
         <input type="text" id="moveDestPath"
           class="al-input font-mono"
@@ -343,7 +343,7 @@ function escJS(val) {
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
-      <div class="px-6 py-4 overflow-y-auto flex-grow">
+      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
         <p id="massDeleteMessage" class="text-xs leading-relaxed" style="color:var(--theme-text-muted)"></p>
       </div>
       <div class="flex gap-2 px-6 py-4 border-t justify-end">
@@ -370,7 +370,7 @@ function escJS(val) {
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
-      <div class="px-6 py-4 overflow-y-auto flex-grow">
+      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
         <input type="text" id="FileName" data-mode="file"
           class="al-input font-mono"
           placeholder="filename.txt or folder/filename.txt"
@@ -402,7 +402,7 @@ function escJS(val) {
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
-      <div class="px-6 py-4 overflow-y-auto flex-grow">
+      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
         <div class="mb-4">
           <div class="mb-4">
             <label for="fileInput" class="w-full px-3 py-6 border-2 border-dashed rounded-xl focus:outline-none focus:ring-2 transition text-center cursor-pointer block" style="border-color:var(--theme-border); color:var(--theme-text-strong);" id="dropZone">
@@ -450,7 +450,7 @@ function escJS(val) {
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
-      <div class="px-6 py-4 overflow-y-auto flex-grow">
+      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
         <div class="mb-4">
           <label for="pullUrlInput" class="mb-1.5 block text-xs font-medium" style="color:var(--theme-text-muted)">File URL</label>
           <input type="url" id="pullUrlInput" class="al-input w-full font-mono" placeholder="https://example.com/file.zip" autocomplete="off" spellcheck="false">
@@ -476,7 +476,6 @@ function escJS(val) {
       </div>
 </main>
 
-<%- include('../../components/toast')%>
 <%- include('../../components/loadingPopup')%>
 <%- include('../../components/imageViewer')%>
 
@@ -492,7 +491,7 @@ function escJS(val) {
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="px-6 py-4 overflow-y-auto flex-grow">
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
       <input type="text" id="newFileName"
         class="al-input font-mono"
         placeholder="new-name.txt or subfolder/new-name.txt">
@@ -543,8 +542,6 @@ function escJS(val) {
     });
   });
 
-  const getCsrf = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
-
   function deletefile(fileName, filePath) {
     window.modal.confirm({
       title: 'Delete File',
@@ -554,8 +551,7 @@ function escJS(val) {
       onConfirm: () => {
       const loader = showLoadingPopup('Deleting File', 'Removing file from server...');
       fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(filePath), {
-        method: 'DELETE',
-        headers: { 'csrf-token': getCsrf() }
+        method: 'DELETE'
       })
       .then(response => {
         loader.close();
@@ -702,8 +698,7 @@ function archiveFiles(files) {
     fetch('/server/<%= server.UUID %>/zip', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'csrf-token': getCsrf()
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           relativePath: files,
@@ -755,8 +750,7 @@ confirmMassDeleteBtn.addEventListener('click', async function() {
 
   const deletePromises = selectedFiles.map(fileName =>
     fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(fileName), {
-      method: 'DELETE',
-      headers: { 'csrf-token': getCsrf() }
+      method: 'DELETE'
     })
   );
 
@@ -860,8 +854,7 @@ function openCreateFileModal() {
         const response = await fetch(`/server/<%= server.UUID %>/unzip`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'csrf-token': getCsrf()
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 relativePath: parentPath || '/',
@@ -1039,7 +1032,6 @@ function openCreateFileModal() {
         const xhr = new XMLHttpRequest();
 
         xhr.open('POST', `/server/<%= server.UUID %>/upload`, true);
-        xhr.setRequestHeader('csrf-token', getCsrf());
 
         xhr.upload.onprogress = function(e) {
           if (e.lengthComputable) {
@@ -1234,7 +1226,7 @@ function openCreateFileModal() {
         const parent = parts.join('/');
         const res = await fetch('/server/<%= server.UUID %>/files/mkdir', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ path: parent || '/', name }),
         });
         loader.close();
@@ -1262,7 +1254,7 @@ function openCreateFileModal() {
         const encoded = encodeURIComponent(finalPath);
         const res = await fetch('/server/<%= server.UUID %>/files/' + encoded, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: '' }),
         });
         if (res.ok) {
@@ -1283,7 +1275,7 @@ function openCreateFileModal() {
     try {
       const res1 = await fetch('/server/<%= server.UUID %>/files/' + encodeURIComponent(tempPath), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: '' }),
       });
       if (!res1.ok) { loader.close(); showToast('<%= req.translations.fileCreateFailed || "Failed to create file" %>', 'error'); return; }
@@ -1292,7 +1284,7 @@ function openCreateFileModal() {
 
       const res2 = await fetch('/server/<%= server.UUID %>/rename', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: tempPath, newName: finalPath }),
       });
       if (res2.ok) {
@@ -1311,7 +1303,7 @@ function openCreateFileModal() {
     try {
       const res = await fetch('/server/<%= server.UUID %>/files/' + encoded, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: '' }),
       });
       if (res.ok) {
@@ -1337,7 +1329,7 @@ function openCreateFileModal() {
     try {
       const res = await fetch('/server/<%= server.UUID %>/rename', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: filePath, newName: newPath }),
       });
       loader.close();
@@ -1453,7 +1445,7 @@ function openCreateFileModal() {
     try {
       const res = await fetch(`/server/<%- server.UUID %>/files/rename`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
+        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ oldPath: src, newPath: dest }),
       });
       if (!res.ok) throw new Error('Move failed');
@@ -1473,7 +1465,7 @@ function openCreateFileModal() {
     try {
       const res = await fetch(`/server/<%- server.UUID %>/files/copy`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
+        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ location: path }),
       });
       if (!res.ok) throw new Error('Copy failed');
@@ -1579,7 +1571,7 @@ function openCreateFileModal() {
     try {
       const res = await fetch('/server/<%= server.UUID %>/files/pull', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': getCsrf() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, path: '<%= currentPath %>' }),
       });
       const data = await res.json();

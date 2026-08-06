@@ -5,12 +5,12 @@
     <h1 class="font-medium text-sm truncate" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></h1>
   </a>
   <div class="flex items-center gap-2">
-    <button type="button" id="mobile-theme-toggle" class="p-2 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 active:scale-95" style="color:var(--theme-text-muted);" aria-label="Toggle theme">
+    <button type="button" id="mobile-theme-toggle" class="p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 active:scale-95" style="color:var(--theme-text-muted);" aria-label="Toggle theme">
       <%- icon('sun', { class: 'w-4 h-4 dark:hidden' }) %>
       <%- icon('moon', { class: 'w-4 h-4 hidden dark:block' }) %>
     </button>
     <% if (user != null) { %>
-    <a href="/account" class="p-1 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center" style="color:var(--theme-text-muted);">
+    <a href="/account" class="p-1 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-text-muted);">
       <img loading="lazy" decoding="async" class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
     </a>
     <% } %>

@@ -3,6 +3,7 @@ import { isAuthenticatedForServer, requireSubUserPermission } from '../../../han
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getParamAsString } from '../../../utils/typeHelpers';
+import { safeClientMessage } from '../../../utils/errors';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { AirlinkCloudClient } from '../../../handlers/utils/core/airlinkCloud';
@@ -280,11 +281,7 @@ export function registerBackupRoutes(router: Router): void {
         }
       } catch (error: unknown) {
         logger.error('Error creating backup:', error);
-        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
-        const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
-        res.status(500).json({
-          error: `Failed to create backup: ${(errBody?.error as string) || (err.message as string) || 'Failed to create backup'}`,
-        });
+        res.status(500).json({ error: safeClientMessage(error, 'Failed to create backup') });
       }
     },
   );
@@ -440,11 +437,7 @@ export function registerBackupRoutes(router: Router): void {
         }
       } catch (error: unknown) {
         logger.error('Error restoring backup:', error);
-        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
-        const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
-        res.status(500).json({
-          error: `Failed to restore backup: ${(errBody?.error as string) || (err.message as string) || 'Failed to restore backup'}`,
-        });
+        res.status(500).json({ error: safeClientMessage(error, 'Failed to restore backup') });
       }
     },
   );
@@ -545,11 +538,7 @@ export function registerBackupRoutes(router: Router): void {
         downloadResponse.data.pipe(res);
       } catch (error: unknown) {
         logger.error('Error downloading backup:', error);
-        const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
-        const errBody = err.body && typeof err.body === 'object' ? err.body as Record<string, unknown> : undefined;
-        res.status(500).json({
-          error: `Failed to download backup: ${(errBody?.error as string) || (err.message as string) || 'Failed to download backup'}`,
-        });
+        res.status(500).json({ error: safeClientMessage(error, 'Failed to download backup') });
       }
     },
   );

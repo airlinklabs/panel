@@ -319,7 +319,7 @@
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  min-height: 0;
+  min-height: 40px;
   transition: background 0.15s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .al-format-switcher:hover {
@@ -614,4 +614,23 @@ input[type="button"]:disabled {
   }
   .al-table-card tbody td:first-child { padding-top: 0.75rem; }
   .al-table-card tbody tr > td:last-child { padding-bottom: 0.75rem; }
+  /* B-041: shared owner for "hide this table column on phones".
+     Was previously copy-pasted per-view (images, store, addons). */
+  .col-hide { display: none; }
+  /* B-042: collapsible expansion rows (e.g. schedules task list) must
+     not be re-styled as cards; the single colspan cell spans the row. */
+  .al-table-card tbody tr[data-tasks-row] {
+    display: block;
+    border: none;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .al-table-card tbody tr[data-tasks-row] > td {
+    display: block;
+    padding: 0;
+    border: none;
+  }
+  .al-table-card tbody tr[data-tasks-row] > td::before { content: none; }
 }

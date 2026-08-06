@@ -173,14 +173,14 @@
       body: 'Delete "' + name + '"? All data will be permanently removed.',
       danger: true,
       confirmLabel: 'Delete',
-      onConfirm: function () {
-        fetch('/admin/server/delete/' + id, { method: 'POST' })
-          .then(function(r) {
-            if (!r.ok) throw new Error('Request failed');
-            showToast('Server deleted.', 'success');
-            window.location.reload();
-          })
-          .catch(function() { showToast('Failed to delete server.', 'error'); });
+      onConfirm: async function () {
+        const d = await window.api('/admin/server/delete/' + id, 'POST');
+        if (d && d.success) {
+          showToast('Server deleted.', 'success');
+          window.location.reload();
+        } else if (d) {
+          showToast(d.error || 'Failed to delete server.', 'error');
+        }
       }
     });
   }
@@ -630,8 +630,7 @@
   }
 
   function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return window.escHtml(str);
   }
 
   (function () {

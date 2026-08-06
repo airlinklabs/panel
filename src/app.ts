@@ -27,6 +27,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import icon from './utils/icon';
 import { getClientIp } from './utils/ip';
+import { isProductionPosture } from './utils/errors';
 // hpp removed: Express 5's req.query parsing (qs with arrayLimit: 0) already
 // prevents HTTP Parameter Pollution. No replacement needed.
 import fs from 'fs';
@@ -501,7 +502,9 @@ app.use((_req, res, next) => {
           (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
               if (typeof callback === 'function') return callback(err, '');
-              return res.status(500).send('View render error: ' + err.message);
+              return res.status(500).send(
+                isProductionPosture() ? 'View render error' : 'View render error: ' + err.message,
+              );
             }
             if (typeof callback === 'function') return callback(null!, html);
             res.send(html);
@@ -518,7 +521,9 @@ app.use((_req, res, next) => {
           (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
               if (typeof callback === 'function') return callback(err, '');
-              return res.status(500).send('View render error: ' + err.message);
+              return res.status(500).send(
+                isProductionPosture() ? 'View render error' : 'View render error: ' + err.message,
+              );
             }
             if (typeof callback === 'function') return callback(null!, html);
             res.send(html);

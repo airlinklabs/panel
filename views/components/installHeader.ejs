@@ -37,6 +37,12 @@
 
   const startTime = Date.now();
   let finished  = false;
+  let poller    = null;
+
+  // Snapshot the original spinner markup so a retry pass can restore it.
+  const originalSpinnerHtml = spinnerEl ? spinnerEl.innerHTML : '';
+  const originalIconWrapClass = iconWrap ? iconWrap.className : '';
+  const originalIconWrapBg = iconWrap ? iconWrap.style.background : '';
 
   const proto   = location.protocol === 'https:' ? 'wss' : 'ws';
   const evtWsUrl = proto + '://' + location.host + '/events/' + serverUUID;
@@ -75,12 +81,36 @@
     }
   }
 
+  function resetIcon() {
+    if (spinnerEl) {
+      spinnerEl.innerHTML = originalSpinnerHtml;
+      spinnerEl.setAttribute('stroke', 'currentColor');
+      spinnerEl.setAttribute('stroke-width', '2');
+      spinnerEl.classList.add('animate-spin', 'text-neutral-500');
+      spinnerEl.classList.remove('text-emerald-500', 'text-red-500');
+    }
+    if (iconWrap) {
+      iconWrap.className = originalIconWrapClass;
+      iconWrap.style.background = originalIconWrapBg;
+    }
+  }
+
   function markDone() {
     if (finished) return;
     finished = true;
     stateText.textContent = 'Installation complete';
     setIcon('done');
-    setTimeout(function() { window.location.reload(); }, 1600);
+    if (poller) clearInterval(poller);
+    if (window.retryDaemonConnection) {
+      // On the server manage page we reconnect the sockets in place instead
+      // of reloading; other pages don't have that plumbing, so reload there.
+      setTimeout(function() {
+        if (window.retryDaemonConnection) window.retryDaemonConnection();
+        if (banner) banner.classList.add('hidden');
+      }, 1200);
+    } else {
+      setTimeout(function() { window.location.reload(); }, 1600);
+    }
   }
 
   function markFailed(reason) {
@@ -113,7 +143,22 @@
     fetch('/server/' + encodeURIComponent(serverUUID) + '/reinstall', { method: 'POST', credentials: 'same-origin', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
       .then(function(r) {
         if (!r.ok) { return r.json().then(function(d) { throw new Error(d.error || 'Reinstall failed'); }); }
-        window.location.reload();
+        if (window.retryDaemonConnection) {
+          // Re-arm the banner for the new install pass without a reload.
+          finished = false;
+          stateText.textContent = 'Waiting for daemon…';
+          stateText.classList.add('truncate');
+          stateText.classList.remove('whitespace-normal', 'break-words');
+          retryBtn.classList.add('hidden');
+          retryBtn.disabled = false;
+          retryBtn.textContent = 'Retry install';
+          if (banner) banner.classList.remove('hidden');
+          resetIcon();
+          if (poller) clearInterval(poller);
+          startPolling();
+        } else {
+          window.location.reload();
+        }
       })
       .catch(function(err) {
         retryBtn.disabled = false;
@@ -134,9 +179,13 @@
     .catch(function(err) { console.warn('WS token fetch failed:', err); });
   }
 
-  const poller = setInterval(function() { poll(); heartbeat(); }, 3000);
-  poll();
-  heartbeat();
+  function startPolling() {
+    if (poller) clearInterval(poller);
+    poller = setInterval(function() { poll(); heartbeat(); }, 3000);
+    poll();
+    heartbeat();
+  }
+  startPolling();
   }
 })();
 </script>

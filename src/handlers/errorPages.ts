@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../db';
 import logger from './logger';
+import { isProductionPosture } from '../utils/errors';
 
 type ErrorPageInfo = {
   title: string;
@@ -165,6 +166,8 @@ export function errorPageHandler(
 
   const statusCode = normalizeStatus(err.status || err.statusCode);
   logger.error('Unhandled error:', err);
-  const detail = process.env.NODE_ENV === 'production' ? undefined : err.message;
+  // Only an explicit development/debug env exposes internal detail. An unset
+  // NODE_ENV is treated as production-safe so a missing .env cannot leak.
+  const detail = isProductionPosture() ? undefined : err.message;
   return renderErrorPage(req, res, statusCode, detail);
 }

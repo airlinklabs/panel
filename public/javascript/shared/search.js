@@ -42,9 +42,7 @@ const typeIcon = {
 };
 
 function escHtml(t) {
-  const d = document.createElement('div');
-  d.textContent = t || '';
-  return d.innerHTML;
+  return window.escHtml(t);
 }
 
 function highlightMatch(text, term) {

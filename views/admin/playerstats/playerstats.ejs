@@ -12,18 +12,13 @@
         { label: 'Admin' },
         { label: 'Player Statistics' }
       ] }) %>
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <%- include('../../components/pageTitle', {
+      <div class="px-8 pt-4">
+        <%- include('../../components/ui/page-header', {
           title: 'Player Statistics',
-          description: 'View player statistics across all Minecraft servers'
+          description: 'View player statistics across all Minecraft servers',
+          actions: '<button type="button" id="refreshBtn" class="al-btn-secondary">' + icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) + ' Refresh Data</button>'
         }) %>
-         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button type="button" id="refreshBtn" class="al-btn-secondary">
-            <%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>
-            Refresh Data
-          </button>
-        </div>
-       </div>
+      </div>
 
        <!-- Error Message -->
       <% if (errorMessage && errorMessage.message) { %>

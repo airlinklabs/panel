@@ -6,6 +6,7 @@ import { registerPermission, Permission } from '../../handlers/permissions';
 import logger from '../../handlers/logger';
 import { queueer } from '../../handlers/queueer';
 import { getParamAsNumber, getParamAsString } from '../../utils/typeHelpers';
+import { safeClientMessage } from '../../utils/errors';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import {
   getUsedExternalPorts,
@@ -820,20 +821,18 @@ const adminModule: Module = {
                   if (isNotFound) {
                     logger.warn(`Container ${server.UUID} not found on daemon, proceeding with database cleanup`);
                   } else {
-                    throw new Error(`Daemon returned status ${response.status}: ${JSON.stringify(response.data)}`);
+                    logger.error(`Daemon returned unexpected status ${response.status}:`, response.data);
+                    throw new Error(`Daemon returned an unexpected response (status ${response.status})`);
                   }
                 } else {
                   logger.info(`Successfully deleted container ${server.UUID} on daemon`);
                 }
               } catch (error: unknown) {
                 logger.error('Error deleting container on daemon:', error);
-                const errorMessage = error instanceof Error ? error.message : String(error);
-
-                if (errorMessage.startsWith('Daemon returned status')) {
-                  throw new Error(`Daemon unreachable: ${errorMessage}. Use ?force=true to remove from panel only.`, { cause: error });
-                }
-
-                throw new Error(`Daemon unreachable${errorMessage ? `: ${errorMessage}` : ''}. Use ?force=true to remove from panel only.`, { cause: error });
+                throw new Error(
+                  `${safeClientMessage(error, 'The daemon is unreachable')} Use ?force=true to remove from panel only.`,
+                  { cause: error },
+                );
               }
             }
 
@@ -1035,9 +1034,8 @@ const adminModule: Module = {
 
           res.json({ success: true, transferId: serverId });
         } catch (error: unknown) {
-          const message = error instanceof Error ? error.message : 'Failed to start transfer';
           logger.error('Error starting transfer:', error);
-          res.status(400).json({ error: message });
+          res.status(400).json({ error: safeClientMessage(error, 'Failed to start transfer') });
         }
       },
     );

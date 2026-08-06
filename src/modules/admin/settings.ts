@@ -11,6 +11,7 @@ import { randomUUID } from 'crypto';
 import AdmZip from 'adm-zip';
 import nodemailer from 'nodemailer';
 import { testS3Connection } from '../../handlers/utils/core/s3Client';
+import { safeClientMessage } from '../../utils/errors';
 
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
 const BCRYPT_SALT_ROUNDS = 12;
@@ -510,7 +511,7 @@ const adminModule: Module = {
           if (result.success) {
             return res.json({ success: true, message: `S3 connection verified (${result.latency}ms).` });
           }
-          return res.status(500).json({ success: false, error: result.error || 'S3 connection failed.' });
+          return res.status(500).json({ success: false, error: result.error ? safeClientMessage(result.error, 'S3 connection failed.') : 'S3 connection failed.' });
         } catch (error: unknown) {
           logger.error('S3 test failed:', error);
           res.status(500).json({ success: false, error: 'S3 connection failed.' });
