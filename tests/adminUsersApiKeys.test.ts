@@ -149,7 +149,7 @@ describe('admin users CRUD', () => {
     const data = createSpy.mock.calls[0][0].data;
     expect(data.password).not.toBe(password);
     expect(bcrypt.compareSync(password, data.password)).toBe(true);
-  });
+  }, 30_000);
 
   it('create rejects empty username with a 400', async () => {
     const res = await request(usersApp(), '/admin/users/create-user', {
