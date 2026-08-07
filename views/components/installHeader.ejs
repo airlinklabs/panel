@@ -28,12 +28,16 @@
 
 <script nonce="<%- nonce %>">
 (function () {
+  // Scope to this include's own container — installHeader is rendered in
+  // both the desktop and mobile layouts on manage.ejs (mirrors), and each
+  // instance must drive its own banner, not the first one in the document.
+  const root = document.currentScript ? document.currentScript.parentNode : document;
   const serverUUID = '<%= server.UUID %>';
-  const stateText  = document.getElementById('installStateText');
-  const spinnerEl  = document.getElementById('installSpinner');
-  const iconWrap   = document.getElementById('installIconWrap');
-  const banner     = document.getElementById('installBanner');
-  const retryBtn   = document.getElementById('installRetryBtn');
+  const stateText  = root.querySelector('#installStateText');
+  const spinnerEl  = root.querySelector('#installSpinner');
+  const iconWrap   = root.querySelector('#installIconWrap');
+  const banner     = root.querySelector('#installBanner');
+  const retryBtn   = root.querySelector('#installRetryBtn');
 
   const startTime = Date.now();
   let finished  = false;

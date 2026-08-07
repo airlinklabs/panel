@@ -93,20 +93,6 @@
           </div>
         </div>
 
-        <div class="al-card p-5">
-          <h2 class="text-lg font-semibold mb-1" style="color:var(--theme-text-strong)">Allocations</h2>
-          <p class="text-sm mb-4" style="color:var(--theme-text-muted)">Manage the ports assigned to this server from the node's pool.</p>
-
-          <div id="allocationsList" class="space-y-3">
-            <p class="text-xs" style="color:var(--theme-text-muted)">Loading allocations...</p>
-          </div>
-
-          <div class="mt-4 flex gap-2">
-            <select id="availPortSelect" class="al-input flex-1"><option value="">Select an available port...</option></select>
-            <button type="button" id="addAllocationBtn" class="al-btn-primary shrink-0">Add port</button>
-          </div>
-        </div>
-
         <div class="al-card p-5" style="background:var(--theme-danger-bg);border-color:color-mix(in oklch, var(--theme-danger) 20%, transparent)">
           <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
 
@@ -123,14 +109,25 @@
           </div>
           <% } %>
 
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between gap-4 mb-5">
             <div>
               <h3 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.reinstallServer || 'Reinstall Server' %></h3>
-              <p class="text-sm" style="color:var(--theme-text-muted)"><%= req.translations.reinstallServerDesc || 'Reinstall your server from scratch (all data will be lost)' %></p>
+              <p class="text-sm" style="color:var(--theme-text-muted)">Re-run the install scripts. Your files, worlds and settings are kept.</p>
             </div>
             <button id="reinstallButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
               <%- icon('rotate-ccw', { class: 'size-4', strokeWidth: 1.5 }) %>
               <%= req.translations.reinstall || 'Reinstall' %>
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <h3 class="text-sm font-medium" style="color:var(--theme-text-muted)">Reinstall &amp; Delete All Data</h3>
+              <p class="text-sm" style="color:var(--theme-text-muted)">Wipes the server volume (worlds, configs, files) then reinstalls from scratch. This cannot be undone.</p>
+            </div>
+            <button id="reinstallWipeButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
+              <%- icon('triangle-alert', { class: 'size-4', strokeWidth: 1.5 }) %>
+              Reinstall &amp; Delete All Data
             </button>
           </div>
         </div>
@@ -206,81 +203,48 @@
     reinstallButton.addEventListener('click', () => {
       window.modal.confirm({
         title: '<%= req.translations.confirmReinstallation || "Confirm Reinstallation" %>',
-        body: '<%= req.translations.confirmReinstallDanger || "This will DELETE ALL DATA and reinstall from scratch. This action cannot be undone." %>',
-        danger: true, confirmLabel: '<%= req.translations.reinstall || "Reinstall" %>',
+        body: 'Re-run the install scripts. Your files, worlds and settings are kept. Continue?',
+        confirmLabel: '<%= req.translations.reinstall || "Reinstall" %>',
         onConfirm: () => {
-          window.modal.confirm({
-            title: 'Final Warning', body: 'All server data will be permanently deleted. There is no recovery. Continue?',
-            danger: true, confirmLabel: 'Proceed',
-            onConfirm: () => {
-              const loader = showLoadingPopup('Reinstalling Server', 'Initiating server reinstallation...');
-              loader.updateProgress(10, 'Preparing for reinstallation...');
-              fetch(`/server/<%= server.UUID %>/reinstall`, { method: 'POST' })
-                .then(r => r.json())
-                .then(data => {
-                  loader.updateProgress(100, 'Reinstallation initiated!');
-                  setTimeout(() => { loader.close(); if (data.success) showToast('Server reinstalling. This may take a while.', 'success'); else showToast('Failed to reinstall server: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
-                })
-                .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
-            }
-          });
+          const loader = showLoadingPopup('Reinstalling Server', 'Initiating server reinstallation...');
+          loader.updateProgress(10, 'Preparing for reinstallation...');
+          fetch(`/server/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: true }) })
+            .then(r => r.json())
+            .then(data => {
+              loader.updateProgress(100, 'Reinstallation initiated!');
+              setTimeout(() => { loader.close(); if (data.success) showToast('Server reinstalling. This may take a while.', 'success'); else showToast('Failed to reinstall server: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
+            })
+            .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
         }
       });
     });
 
-    // ── Allocations management ─────────────────────────────────────────────
-    const allocList = document.getElementById('allocationsList');
-    const availSelect = document.getElementById('availPortSelect');
-    const addBtn = document.getElementById('addAllocationBtn');
-    const serverUuid = '<%= server.UUID %>';
-
-    function renderAllocations(data) {
-      if (!allocList) return;
-
-      const chips = data.allocated;
-      if (!chips.length) {
-        allocList.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">No ports assigned yet.</p>';
-      } else {
-        allocList.innerHTML = chips.map(p =>
-          '<div class="flex items-center justify-between rounded-lg px-3 py-2 text-sm" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">' +
-            '<span>' + (p.primary ? '<strong>' + p.external + '</strong> <em>(primary)</em>' : p.external + ':' + p.internal) + '</span>' +
-            (p.primary ? '' : '<button type="button" class="al-btn-ghost text-xs" onclick="releaseAllocation(' + p.external + ')">Remove</button>') +
-          '</div>'
-        ).join('');
-      }
-
-      if (availSelect) {
-        availSelect.innerHTML = '<option value="">Select an available port...</option>' +
-          data.available.map(p => '<option value="' + p + '">' + p + '</option>').join('');
-      }
-    }
-
-    async function loadAllocations() {
-      try {
-        const r = await fetch('/server/' + serverUuid + '/settings/allocations');
-        const data = await r.json();
-        if (data.allocated) renderAllocations(data);
-      } catch (err) { console.error('Failed to load allocations:', err); if (allocList) allocList.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted)">Could not load allocations.</p>'; }
-    }
-
-    window.releaseAllocation = async function(port) {
-      const r = await fetch('/server/' + serverUuid + '/settings/allocations/' + port, { method: 'DELETE' });
-      const d = await r.json();
-      if (r.ok) { showToast('Port ' + port + ' released.', 'success'); loadAllocations(); }
-      else showToast(d.error || 'Failed to release port.', 'error');
-    };
-
-    if (addBtn) addBtn.addEventListener('click', async () => {
-      const port = availSelect.value;
-      if (!port) { showToast('Select a port first.', 'error'); return; }
-      const r = await fetch('/server/' + serverUuid + '/settings/allocations', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ port: Number(port) }),
+    const reinstallWipeButton = document.getElementById('reinstallWipeButton');
+    if (reinstallWipeButton) {
+      reinstallWipeButton.addEventListener('click', () => {
+        window.modal.confirm({
+          title: 'Reinstall & Delete All Data',
+          body: 'This wipes the server volume (worlds, configs, files) and reinstalls from scratch.',
+          danger: true, confirmLabel: 'Continue',
+          onConfirm: () => {
+            window.modal.confirm({
+              title: 'Final Warning', body: 'All server data will be permanently deleted. There is no recovery. Continue?',
+              danger: true, confirmLabel: 'Yes, Delete All Data',
+              onConfirm: () => {
+                const loader = showLoadingPopup('Reinstalling Server', 'Deleting all data and reinstalling...');
+                loader.updateProgress(10, 'Preparing for reinstallation...');
+                fetch(`/server/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: false }) })
+                  .then(r => r.json())
+                  .then(data => {
+                    loader.updateProgress(100, 'Reinstallation initiated!');
+                    setTimeout(() => { loader.close(); if (data.success) showToast('Server reinstalling. All data was deleted.', 'success'); else showToast('Failed to reinstall server: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
+                  })
+                  .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
+              }
+            });
+          }
+        });
       });
-      const d = await r.json();
-      if (r.ok) { showToast('Port ' + port + ' added.', 'success'); loadAllocations(); }
-      else showToast(d.error || 'Failed to add port.', 'error');
-    });
-
-    if (document.getElementById('allocationsList')) loadAllocations();
+    }
   });
 </script>

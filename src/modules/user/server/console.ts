@@ -671,6 +671,10 @@ export function registerConsoleRoutes(router: Router): void {
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
+      // preserveData defaults to true: plain "reinstall" keeps the server's
+      // data (worlds, configs, files). Only an explicit wipe request (a
+      // confirmed "delete all data" flow) removes the volume.
+      const preserveData = req.body?.preserveData !== false;
 
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
@@ -788,6 +792,7 @@ export function registerConsoleRoutes(router: Router): void {
                     id: serverToReinstall.UUID,
                     image: reinstallDockerImage,
                     env: env,
+                    preserveData,
                     scripts: scripts.install.map(
                       (script: {
                         url: string;

@@ -562,10 +562,28 @@ function generateRandomName() {
       allowStartupEditLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
     });
 
-    suspendServerToggle.addEventListener('change', async function() {
+    suspendServerToggle.addEventListener('change', function() {
       const checked = this.checked;
       const action = checked ? 'suspend' : 'unsuspend';
 
+      // Suspending stops the server and blocks the owner — confirm first.
+      // Unsuspending is a safe reversal, so it goes through immediately.
+      if (!checked) return doSuspend(action, this);
+
+      // Optimistically revert the toggle; only flip it back on confirm.
+      this.checked = false;
+      window.modal.confirm({
+        title: 'Suspend server?',
+        body: 'The server will be stopped and the owner will not be able to start it. You can unsuspend at any time.',
+        danger: true, confirmLabel: 'Suspend',
+        onConfirm: function () {
+          suspendServerToggle.checked = true;
+          doSuspend('suspend', suspendServerToggle);
+        },
+      });
+    });
+
+    async function doSuspend(action, toggle) {
       try {
         const response = await fetch('/admin/servers/<%= server.id %>/' + action, {
           method: 'POST',
@@ -577,23 +595,23 @@ function generateRandomName() {
           throw new Error((await response.json()).error || 'Request failed');
         }
 
-        suspendServerLabel.textContent = checked ? 'Suspended' : 'Active';
+        suspendServerLabel.textContent = action === 'suspend' ? 'Suspended' : 'Active';
         const statusText = document.getElementById('serverStatusText');
         if (statusText) {
-          statusText.textContent = checked ? 'Suspended' : 'Active';
-          statusText.className = checked ? 'text-red-500' : 'text-green-500';
+          statusText.textContent = action === 'suspend' ? 'Suspended' : 'Active';
+          statusText.className = action === 'suspend' ? 'text-red-500' : 'text-green-500';
         }
         const statusCircle = document.getElementById('serverStatusCircle');
         if (statusCircle) {
-          statusCircle.className = 'inline-flex items-center justify-center h-8 w-8 rounded-full ' + (checked ? 'bg-red-100 text-red-500 dark:bg-red-500/15 dark:text-red-400' : 'bg-green-100 text-green-500 dark:bg-green-500/15 dark:text-green-400');
-          statusCircle.innerHTML = window.alIcon ? (checked ? window.alIcon('x-circle', 'size-5 shrink-0') : window.alIcon('check-circle', 'size-5 shrink-0')) : '';
+          statusCircle.className = 'inline-flex items-center justify-center h-8 w-8 rounded-full ' + (action === 'suspend' ? 'bg-red-100 text-red-500 dark:bg-red-500/15 dark:text-red-400' : 'bg-green-100 text-green-500 dark:bg-green-500/15 dark:text-green-400');
+          statusCircle.innerHTML = window.alIcon ? (action === 'suspend' ? window.alIcon('x-circle', 'size-5 shrink-0') : window.alIcon('check-circle', 'size-5 shrink-0')) : '';
         }
       } catch (err) {
-        this.checked = !checked;
-        suspendServerLabel.textContent = checked ? 'Active' : 'Suspended';
+        toggle.checked = action === 'unsuspend';
+        suspendServerLabel.textContent = action === 'suspend' ? 'Active' : 'Suspended';
         showToast('Failed to ' + action + ' server: ' + (err.message || 'unknown error'), 'error');
       }
-    });
+    }
 
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
