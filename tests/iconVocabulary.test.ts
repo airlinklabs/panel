@@ -49,6 +49,13 @@ describe('icon vocabulary', () => {
     expect(missing).toEqual([]);
   });
 
+  it('server-side icon() renders stroke-width 1.5 by default', async () => {
+    const mod = await import('../src/utils/icon');
+    const out = mod.default('x');
+    expect(out).toContain('stroke-width="1.5"');
+    expect(out).not.toContain('stroke-width="1.75"');
+  });
+
   it('no inline <svg> in views except exempt brand marks', () => {
     const BRAND_VIEWBOXES = new Set(['0 0 127.14 96.36', '0 0 24 24']);
     const files = walk(join(__dirname, '..', 'views'));

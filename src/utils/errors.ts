@@ -47,6 +47,7 @@ const DAEMON_MARKERS = [
 
 const DATABASE_MARKERS = [
   'ecnrefused',
+  'econnrefused',
   'er_access_denied',
   'er_con_count_error',
   'er_bad_db_error',

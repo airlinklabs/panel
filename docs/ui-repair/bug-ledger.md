@@ -87,7 +87,7 @@ Fields: ID | surface | severity | reproduction | expected | actual | cause | own
 | B-072 | second listbox | P1 | `portsAllocator.ejs:213-390` hand-rolled listbox duplicates `custom-select.js` (two positioning engines). | 2 · deferred |
 | B-073 | no fetch wrapper | P1 | ~140 raw `fetch(`; repeated `r.json -> d.success ? toast : toast -> catch` pattern 16+ times. | 2 · partial (shared `window.api` created; 5 admin JS + subusers/schedules migrated; ~120 fetch remain) |
 | B-074 | server page shell duplication | P1 | ~11 copies of the 60-100 line server shell (header->template->breadcrumb->serverHeader/serverMeta->installHeader->serverTemplate). ~800+ lines. | 2 · deferred (own effort) |
-| B-075 | dead/inert helpers | P2 | `pageTitle.ejs` dead duplicate of ui/page-header; @formkit/auto-animate declared but unused; motion.js `data-animate` inert (no view uses it); `airlinkAnimate` API dead; 2 dead page-JS files. | 8 · partial (pageTitle.ejs deleted in P2; modrinth-admin.js/admin-airlink-cloud-settings.js confirmed unreferenced, still to delete) |
+| B-075 | dead/inert helpers | P2 | `pageTitle.ejs` dead duplicate of ui/page-header; @formkit/auto-animate declared but unused; motion.js `data-animate` inert (no view uses it); `airlinkAnimate` API dead; 2 dead page-JS files. | 8 · corrected (`modrinth-admin.js` + `admin-airlink-cloud-settings.js` are NOT dead — loaded by `storage/addons/modrinth/views/admin.ejs:195` and `storage/addons/airlink-cloud/views/settings.ejs:62`; prior scan excluded `storage/addons/`. pageTitle.ejs deleted in P2. @formkit/auto-animate still declared-unused — deferred) |
 | B-076 | confirm danger default | P2 | `modal.ejs:79` `danger = true` default -> non-destructive confirms are red. | 2 · fixed (default now primary; danger explicit) |
 | B-077 | checkbox spring | P2 | `checkbox-anim.js:4` spring overshoot not gated under `prefers-reduced-motion`. | 6 · fixed (already gated since e6a80260 — `prefersReduced` early-return verified) |
 | B-078 | missing footer | P2 | mounts/index, servers/create, servers/edit lack footer include -> motion.js not loaded. | 2 · open (verified still missing) |
@@ -111,4 +111,4 @@ Fields: ID | surface | severity | reproduction | expected | actual | cause | own
 ## Coverage notes
 
 - No browser tests exist for these surfaces today. `smoke/` exists (prior e2e Phase 11 harness). Vitest is configured.
-- Phase 8 will add tests: live manage behavior, error sanitization contract, responsive behavior, shared components.
+- Phase 8 added tests: error sanitization contract (`tests/errors.test.ts`, 19 tests) + icon default stroke regression (`tests/iconVocabulary.test.ts`). Suite now 244/244.
