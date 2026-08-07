@@ -45,7 +45,7 @@
             <%- icon('database', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
             <div class="flex-1">
               <p class="font-medium"><%= req.translations.noDbHostsConfigured || 'No database hosts configured' %></p>
-              <p class="text-xs opacity-70 mt-0.5"><%= req.translations.noDbHostsConfiguredDesc || 'An administrator must add a database host before you can create databases.' %></p>
+              <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= req.translations.noDbHostsConfiguredDesc || 'An administrator must add a database host before you can create databases.' %></p>
             </div>
           </div>
         <% } else if (databases.length === 0) { %>

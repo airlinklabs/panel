@@ -21,16 +21,13 @@
   --theme-text:                #404040;
   --theme-text-strong:         #0a0a0a;
   --theme-text-muted:          #575757;
-  --theme-text-nav:            #4a4a4a;
-  --theme-text-nav-active:     #0a0a0a;
   --theme-text-placeholder:    #6b7280;
-  --theme-text-code:           #171717;
   --theme-text-link:           #0a0a0a;
 
   /* Accent (B&W — no color accent in default light) */
   --theme-accent:              #0a0a0a;
-  --theme-accent-hover:        #262626;
   --theme-accent-text:         #ffffff;
+  --theme-text-on-accent:   #ffffff;
   --theme-accent-subtle:       #f0f0f0;
   --theme-accent-foreground:   #ffffff;
   --theme-primary:             #0a0a0a;
@@ -46,15 +43,14 @@
   /* Status (keep semantic color — status can never be color-free) */
   --theme-success:             #15803d;
   --theme-success-bg:          #f0fdf4;
-  --theme-success-text:        #15803d;
   --theme-warning:             #b45309;
   --theme-warning-bg:          #fffbeb;
-  --theme-warning-text:        #b45309;
   --theme-danger:              #dc2626;
   --theme-danger-bg:           #fef2f2;
   --theme-info:                #2563eb;
   --theme-info-bg:             #eff6ff;
-  --theme-info-text:           #2563eb;
+  --theme-badge-neutral-text:  #525252;
+  --theme-badge-neutral-bg:  rgba(0,0,0,0.06);
   --theme-text-faint:          #575757;
 
   /* Table */
@@ -97,17 +93,9 @@
   --theme-shadow-xl:           0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
 
   /* Disabled */
-  --theme-disabled:            #d4d4d4;
-  --theme-disabled-text:       #a3a3a3;
-  --theme-disabled-bg:         #f5f5f5;
-  --theme-disabled-border:     #e5e5e5;
 
   /* Focus ring */
-  --theme-focus-ring:          rgba(10,10,10,0.25);
 
   /* Border radius */
-  --theme-radius-sm:           4px;
-  --theme-radius-md:           6px;
-  --theme-radius-lg:           8px;
-  --theme-radius-xl:           12px;
+  --theme-radius-input:      0.75rem;
 }

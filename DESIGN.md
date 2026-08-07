@@ -37,13 +37,13 @@
 
 Accent is theme-defined (`--theme-accent`), not a fixed brand color:
 
-| Theme | `--theme-accent` | `--theme-accent-hover` | `--theme-accent-text` |
-|---|---|---|---|
-| Default light | `#0a0a0a` (near-black) | `#262626` | `#ffffff` |
-| Default dark | `#ffffff` (white) | `#e8e8e8` | `#0a0a0a` |
-| Solarized light | `#268bd2` | `#1a7abf` | dark |
-| Solarized dark | `#268bd2` | `#3a9fde` | dark |
-| Material UI | `oklch(71% 0.19 260)` (blue) | `oklch(78% 0.17 260)` | dark |
+| Theme | `--theme-accent` | `--theme-accent-text` |
+|---|---|---|
+| Default light | `#0a0a0a` (near-black) | `#ffffff` |
+| Default dark | `#ffffff` (white) | `#0a0a0a` |
+| Solarized light | `#268bd2` | dark |
+| Solarized dark | `#268bd2` | dark |
+| Material UI | `oklch(71% 0.19 260)` (blue) | dark |
 
 Primary actions and active selection use `--theme-accent`; text on accent uses `--theme-accent-text`.
 

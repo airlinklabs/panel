@@ -460,19 +460,17 @@
 
 /* Sidebar sliding pill + mobile bottom nav — same active highlight.
    !important resolves the specificity from earlier theme overrides. */
-/* Active sidebar pill — inverted, same as the account/logout links:
-   dark mode = light background + dark text; light mode = dark background
-   + light text. `background` takes the theme's text color, `color` takes
-   the theme's background color. The #pc-sidebar scope keeps specificity
-   above the alternate-theme overrides (solarized, material, user themes)
-   which also style .nav-link.active with !important. */
+/* Active sidebar pill — driven by the theme accent so Solarized, Material
+   and user themes each control their own active identity. The #pc-sidebar
+   scope keeps specificity above the alternate-theme overrides (solarized,
+   material, user themes) which also style .nav-link.active with !important. */
 html #pc-sidebar #active-background {
-  background-color: var(--theme-text, #171717) !important;
-  border-color: var(--theme-text, #171717) !important;
+  background-color: var(--theme-accent, #171717) !important;
+  border-color: var(--theme-accent, #171717) !important;
 }
 html #pc-sidebar .nav-link.active {
-  background: var(--theme-text, #171717) !important;
-  color: var(--theme-bg, #f0f0f0) !important;
+  background: var(--theme-accent, #171717) !important;
+  color: var(--theme-accent-text, #f0f0f0) !important;
   font-weight: 700 !important;
   border-radius: 0.75rem !important;
 }

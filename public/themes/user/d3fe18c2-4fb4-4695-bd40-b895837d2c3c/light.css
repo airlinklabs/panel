@@ -11,7 +11,6 @@
   /* ------------------------------------------------------------------ */
   --theme-bg:               #ffffff;
   --theme-bg-secondary:     #f5f5f5;
-  --theme-bg-tertiary:      #ececec;
   --theme-bg-card:          #f9f9f9;
   --theme-bg-hover:         #eeeeee;
   --theme-bg-input:         #f0f0f0;
@@ -42,12 +41,9 @@
   --theme-text:             #525252;
   --theme-text-strong:      #171717;
   --theme-text-muted:       #767676;
-  --theme-text-nav:         #737373;
-  --theme-text-nav-active:  #171717;
   --theme-text-placeholder: #bbbbbb;
 
   /* Code / monospace text */
-  --theme-text-code:        #4f46e5;
 
   /* Link text */
   --theme-text-link:        #4f46e5;
@@ -59,8 +55,8 @@
   /* ACCENT / BRAND                                                       */
   /* ------------------------------------------------------------------ */
   --theme-accent:           #6366f1;
-  --theme-accent-hover:     #4f46e5;
   --theme-accent-text:      #ffffff;
+  --theme-text-on-accent:   #ffffff;
 
   /* Subtle accent background — badges, chips, highlights */
   --theme-accent-subtle:    rgba(99, 102, 241, 0.08);
@@ -81,21 +77,20 @@
 
   /* Status backgrounds and text variants */
   --theme-success-bg:       rgba(22, 163, 74, 0.08);
-  --theme-success-text:     #16a34a;
   --theme-warning-bg:       rgba(217, 119, 6, 0.08);
-  --theme-warning-text:     #d97706;
   --theme-danger-bg:        rgba(220, 38, 38, 0.06);
   --theme-info-bg:          rgba(37, 99, 235, 0.08);
-  --theme-info-text:        #2563eb;
+  --theme-badge-neutral-text:  #525252;
+  --theme-badge-neutral-bg:  rgba(0,0,0,0.06);
 
   /* ------------------------------------------------------------------ */
   /* NAV CHROME                                                           */
   /* ------------------------------------------------------------------ */
   --theme-nav-bg:           #f5f5f5;
   --theme-nav-border:       #e0e0e0;
-  --theme-nav-text:         #737373;
+  --theme-nav-text:         #525252;
   --theme-nav-text-active:  #171717;
-  --theme-nav-icon:         #a3a3a3;
+  --theme-nav-icon:         #868686;
 
   /* Nav icon when active */
   --theme-nav-icon-active:  #6366f1;
@@ -105,26 +100,23 @@
   /* ------------------------------------------------------------------ */
   --theme-toggle-track:     #d4d4d4;
   --theme-toggle-bg:        #d4d4d4;
-  --theme-toggle-dot:       #ffffff;
 
   /* ------------------------------------------------------------------ */
   /* SEARCH                                                               */
   /* ------------------------------------------------------------------ */
-  --theme-search-bg:        #f0f0f0;
-  --theme-search-border:    #e0e0e0;
-  --theme-search-text:      #525252;
   --theme-search-results:   #ffffff;
 
   /* ------------------------------------------------------------------ */
   /* SCROLLBAR                                                            */
   /* ------------------------------------------------------------------ */
-  --theme-scrollbar-track:  #ffffff;
-  --theme-scrollbar-thumb:  #e0e0e0;
 
   /* ------------------------------------------------------------------ */
   /* LOGO BACKGROUND                                                      */
   /* ------------------------------------------------------------------ */
   --theme-logo-bg:          rgba(0, 0, 0, 0.08);
+  --theme-table-header-bg:          rgba(0,0,0,0.03);
+  --theme-table-row-hover:          rgba(0,0,0,0.04);
+  --theme-table-divide:          rgba(0,0,0,0.05);
 
 
   /* ------------------------------------------------------------------ */
@@ -179,33 +171,25 @@
   --theme-shadow-md:           0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.04);
   --theme-shadow-lg:           0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
   --theme-shadow-xl:           0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+  --theme-radius-input:      0.75rem;
 
 
   /* ------------------------------------------------------------------ */
   /* DISABLED STATE                                                       */
   /* ------------------------------------------------------------------ */
 
-  --theme-disabled:            #d4d4d4;
-  --theme-disabled-text:       #a3a3a3;
-  --theme-disabled-bg:         #f5f5f5;
-  --theme-disabled-border:     #e5e5e5;
 
 
   /* ------------------------------------------------------------------ */
   /* FOCUS RING                                                           */
   /* ------------------------------------------------------------------ */
 
-  --theme-focus-ring:          rgba(99, 102, 241, 0.35);
 
 
   /* ------------------------------------------------------------------ */
   /* BORDER RADIUS                                                        */
   /* ------------------------------------------------------------------ */
 
-  --theme-radius-sm:           4px;
-  --theme-radius-md:           6px;
-  --theme-radius-lg:           8px;
-  --theme-radius-xl:           12px;
 }
 
 

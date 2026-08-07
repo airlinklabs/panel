@@ -71,11 +71,11 @@ Fields: ID | surface | severity | reproduction | expected | actual | cause | own
 
 | ID | Surface | Sev | Actual / cause | Phase |
 |---|---|---|---|---|
-| B-060 | quiet text contrast | P1 | `opacity-60` -> 2.47:1, `opacity-70` -> 3.6:1 in dark (breadcrumb.ejs:4, template.ejs:474, dashboard.ejs:67/79, nodes.ejs:61, alert.ejs:10, databases.ejs:75). | 6 |
-| B-061 | nav text contrast | P2 | `--theme-nav-text #7a7a7a` on `#111111` ~4.4:1, under AA (all theme files). | 6 |
-| B-062 | active-state inversion | P0 | Hardcoded `#171717`/`#f0f0f0` `!important` pills override the 64-var theme system (tw.css:183-196,404-481; hide-scrollbars.css:80-88). Solarized/Material/user themes cannot restyle active state. | 6 |
+| B-060 | quiet text contrast | P1 | `opacity-60` -> 2.47:1, `opacity-70` -> 3.6:1 in dark (breadcrumb.ejs:4, template.ejs:474, dashboard.ejs:67/79, nodes.ejs:61, alert.ejs:10, databases.ejs:75). | 6 · fixed (databases.ejs empty-state -> `color:var(--theme-text-muted)`; breadcrumb/alert components deleted in P2; template/dashboard sites already token-based) |
+| B-061 | nav text contrast | P2 | `--theme-nav-text #7a7a7a` on `#111111` ~4.4:1, under AA (all theme files). | 6 · fixed (nav text bumped per-theme to ≥4.5:1: default-dark `#8a8a8a`, solarized-dark `#839496`, solarized-light `#4b5a63`, user `#8a8a8a`/`#525252`; nav icons ≥3:1: default-dark `#767676`, solarized-light `#4b5a63`, user `#767676`/`#868686`) |
+| B-062 | active-state inversion | P0 | Hardcoded `#171717`/`#f0f0f0` `!important` pills override the 64-var theme system (tw.css:183-196,404-481; hide-scrollbars.css:80-88). Solarized/Material/user themes cannot restyle active state. | 6 · fixed (sidebar pill + mobile nav + settings + subnav all `--theme-accent`/`--theme-accent-text`; hide-scrollbars.css already deleted) |
 | B-063 | native inputs bypass themes | P0 | Tailwind forms plugin hardcodes white input bg + blue ring (styles.css:5111-5135); fields without `.al-input` break dark mode (backups.ejs:157, files.ejs:192/318/367/471, store.ejs:276, images/store.ejs:103, addons.ejs:48, images.ejs:67, apikeys/docs.ejs:156). | 2 · fixed (tw.css native-input overrides) |
-| B-064 | theme var drift | P2 | 9 consumed-but-undefined vars + 8 defined-but-unused vars across theme files. | 6 |
+| B-064 | theme var drift | P2 | 9 consumed-but-undefined vars + 8 defined-but-unused vars across theme files. | 6 · fixed (defined `--theme-radius-input` + `--theme-text-on-accent` in all 7 theme files; added `--theme-badge-neutral-*` to 4, `--theme-table-*` to user theme; deleted 25 defined-but-unused vars; audit now shows 0 consumed-but-undefined and 0 defined-but-unused) |
 | B-065 | component color hard-coding | P2 | installHeader.ejs, pageTitle.ejs, auth-styles.ejs use hard-coded neutrals instead of `--theme-*`. | 2 · partial (pageTitle.ejs deleted; installHeader/auth-styles remain) |
 
 ## Consistency / duplication
@@ -89,7 +89,7 @@ Fields: ID | surface | severity | reproduction | expected | actual | cause | own
 | B-074 | server page shell duplication | P1 | ~11 copies of the 60-100 line server shell (header->template->breadcrumb->serverHeader/serverMeta->installHeader->serverTemplate). ~800+ lines. | 2 · deferred (own effort) |
 | B-075 | dead/inert helpers | P2 | `pageTitle.ejs` dead duplicate of ui/page-header; @formkit/auto-animate declared but unused; motion.js `data-animate` inert (no view uses it); `airlinkAnimate` API dead; 2 dead page-JS files. | 8 · partial (pageTitle.ejs deleted in P2; modrinth-admin.js/admin-airlink-cloud-settings.js confirmed unreferenced, still to delete) |
 | B-076 | confirm danger default | P2 | `modal.ejs:79` `danger = true` default -> non-destructive confirms are red. | 2 · fixed (default now primary; danger explicit) |
-| B-077 | checkbox spring | P2 | `checkbox-anim.js:4` spring overshoot not gated under `prefers-reduced-motion`. | 6 |
+| B-077 | checkbox spring | P2 | `checkbox-anim.js:4` spring overshoot not gated under `prefers-reduced-motion`. | 6 · fixed (already gated since e6a80260 — `prefersReduced` early-return verified) |
 | B-078 | missing footer | P2 | mounts/index, servers/create, servers/edit lack footer include -> motion.js not loaded. | 2 · open (verified still missing) |
 | B-079 | status dot matcher | P3 | `status-badge.ejs:14` `s.startsWith('s') && s !== 'suspended'` brittle. | 7 · fixed (explicit `starting/stopping` list) |
 | B-080 | stop has no confirm | P3 | `manage.ejs:116-121` stop button no confirm while deleteFolder does. | 7 |

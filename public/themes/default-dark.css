@@ -18,15 +18,12 @@ html.dark {
   --theme-text:                #e0e0e0;
   --theme-text-strong:         #fafafa;
   --theme-text-muted:          #8a8a8a;
-  --theme-text-nav:            #7e7e7e;
-  --theme-text-nav-active:     #fafafa;
   --theme-text-placeholder:    #9ca3af;
-  --theme-text-code:           #a8a8a8;
   --theme-text-link:           #e8e8e8;
 
   --theme-accent:              #ffffff;
-  --theme-accent-hover:        #e8e8e8;
   --theme-accent-text:         #0a0a0a;
+  --theme-text-on-accent:   #0a0a0a;
   --theme-accent-subtle:       rgba(255,255,255,0.1);
   --theme-accent-foreground:   #0a0a0a;
   --theme-primary:             #ffffff;
@@ -35,20 +32,19 @@ html.dark {
   --theme-nav-border:          rgba(255,255,255,0.07);
   --theme-nav-text:            #8a8a8a;
   --theme-nav-text-active:     #fafafa;
-  --theme-nav-icon:            #5a5a5a;
+  --theme-nav-icon:            #767676;
   --theme-nav-icon-active:     #fafafa;
 
   --theme-success:             #4ade80;
   --theme-success-bg:          rgba(74,222,128,0.1);
-  --theme-success-text:        #4ade80;
   --theme-warning:             #fbbf24;
   --theme-warning-bg:          rgba(251,191,36,0.1);
-  --theme-warning-text:        #fbbf24;
   --theme-danger:              #f87171;
   --theme-danger-bg:           rgba(248,113,113,0.1);
   --theme-info:                #60a5fa;
   --theme-info-bg:             rgba(96,165,250,0.1);
-  --theme-info-text:           #60a5fa;
+  --theme-badge-neutral-text:  #8a8a8a;
+  --theme-badge-neutral-bg:  rgba(255,255,255,0.1);
   --theme-text-faint:          #7e7e7e;
 
   --theme-table-header-bg:     rgba(255,255,255,0.04);
@@ -86,17 +82,9 @@ html.dark {
   --theme-shadow-xl:           0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.4);
 
   /* Disabled */
-  --theme-disabled:            rgba(255,255,255,0.15);
-  --theme-disabled-text:       #555555;
-  --theme-disabled-bg:         rgba(255,255,255,0.05);
-  --theme-disabled-border:     rgba(255,255,255,0.08);
 
   /* Focus ring */
-  --theme-focus-ring:          rgba(255,255,255,0.35);
 
   /* Border radius */
-  --theme-radius-sm:           4px;
-  --theme-radius-md:           6px;
-  --theme-radius-lg:           8px;
-  --theme-radius-xl:           12px;
+  --theme-radius-input:      0.75rem;
 }
