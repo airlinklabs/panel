@@ -251,13 +251,13 @@ const sftpModule: Module = {
             const ip = String((event as { ip?: string }).ip ?? '');
             const path = String((event as { path?: string; from?: string }).path ?? '');
 
+            // Only real file mutations belong in the audit log. Session
+            // lifecycle (connect/disconnect) and view-only reads are noise.
             const mapToAuditEvent: Record<string, string> = {
-              connect: 'file:sftp-connect',
-              disconnect: 'file:sftp-disconnect',
               write: 'file:sftp-write',
-              read: 'file:sftp-read',
               rename: 'file:sftp-rename',
               remove: 'file:sftp-delete',
+              mkdir: 'file:create',
             };
             const auditEvent = mapToAuditEvent[kind];
             if (!auditEvent) continue;

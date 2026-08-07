@@ -14,6 +14,7 @@ export type ActivityEvent =
   | 'server:restart'
   | 'server:transfer'
   | 'server:reinstall'
+  | 'server:update-startup'
   | 'file:create'
   | 'file:delete'
   | 'file:rename'
@@ -34,12 +35,17 @@ export type ActivityEvent =
   | 'subuser:create'
   | 'subuser:update'
   | 'subuser:delete'
+  | 'schedule:create'
   | 'schedule:run'
+  | 'schedule:delete'
   | 'database:create'
   | 'database:delete'
   | 'node:create'
   | 'node:update'
   | 'node:delete'
+  | 'node:delete-allocation'
+  | 'allocation:create'
+  | 'location:create'
   | 'api:key'
   | 'apikey:create'
   | 'apikey:delete'
@@ -49,6 +55,40 @@ export type ActivityEvent =
   | 'image:create'
   | 'image:update'
   | 'image:delete';
+
+// Per-user (or per-IP when unauthenticated) sliding-window rate limit so a
+// single actor cannot flood the audit table. Dropping excess logs is a
+// deliberate trade-off: audit stays useful and the write never blocks the
+// action it records.
+const ACTIVITY_WINDOW_MS = 60_000;
+const ACTIVITY_MAX_PER_WINDOW = 120;
+const buckets = new Map<string, number[]>();
+
+export function resetActivityRateLimitForTests(): void {
+  buckets.clear();
+}
+
+export function isActivityRateLimited(key: string): boolean {
+  const now = Date.now();
+  const cutoff = now - ACTIVITY_WINDOW_MS;
+  const times = buckets.get(key)?.filter((t) => t > cutoff) ?? [];
+  if (times.length >= ACTIVITY_MAX_PER_WINDOW) {
+    buckets.set(key, times);
+    return true;
+  }
+  times.push(now);
+  buckets.set(key, times);
+  return false;
+}
+
+export function activityRateLimitKey(req: Request): string {
+  const id = req.session?.user?.id;
+  if (id) {
+    return `user:${id}`;
+  }
+  const ip = getClientIp(req);
+  return ip ? `ip:${ip}` : 'anon';
+}
 
 export function getClientIp(req: Request): string | undefined {
   const fwd = req.headers['x-forwarded-for'];
@@ -62,6 +102,9 @@ export async function logActivity(
   opts: { serverId?: string | null; metadata?: Record<string, unknown> } = {},
 ): Promise<void> {
   try {
+    if (isActivityRateLimited(activityRateLimitKey(req))) {
+      return;
+    }
     await prisma.activityLog.create({
       data: {
         actorId: req.session?.user?.id ?? null,

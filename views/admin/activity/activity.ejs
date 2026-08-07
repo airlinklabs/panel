@@ -4,7 +4,7 @@
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
   <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
-    <div class="px-8 lg:px-12 pt-6 pb-12 max-w-5xl">
+    <div class="px-8 lg:px-12 pt-6 pb-12 max-w-6xl">
       <div class="flex items-center justify-between mb-7">
         <div>
           <h1 class="text-xl font-semibold tracking-tight text-neutral-900 dark:text-white">Activity Log</h1>
@@ -13,7 +13,23 @@
       </div>
 
       <form method="GET" action="/admin/activity" class="al-card mb-6">
-        <div class="p-5 grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label class="al-label" for="category">Category</label>
+            <select id="category" name="category" class="al-input">
+              <option value="">All categories</option>
+              <option value="server" <%= filters.category === 'server' ? 'selected' : '' %>>Servers</option>
+              <option value="file" <%= filters.category === 'file' ? 'selected' : '' %>>Files</option>
+              <option value="backup" <%= filters.category === 'backup' ? 'selected' : '' %>>Backups</option>
+              <option value="database" <%= filters.category === 'database' ? 'selected' : '' %>>Databases</option>
+              <option value="user" <%= filters.category === 'user' ? 'selected' : '' %>>Users</option>
+              <option value="node" <%= filters.category === 'node' ? 'selected' : '' %>>Nodes</option>
+              <option value="image" <%= filters.category === 'image' ? 'selected' : '' %>>Images</option>
+              <option value="apikey" <%= filters.category === 'apikey' ? 'selected' : '' %>>API Keys</option>
+              <option value="schedule" <%= filters.category === 'schedule' ? 'selected' : '' %>>Schedules</option>
+              <option value="subuser" <%= filters.category === 'subuser' ? 'selected' : '' %>>Subusers</option>
+            </select>
+          </div>
           <div>
             <label class="al-label" for="event">Event</label>
             <select id="event" name="event" class="al-input">
@@ -24,12 +40,25 @@
             </select>
           </div>
           <div>
-            <label class="al-label" for="server">Server UUID</label>
-            <input id="server" name="server" type="text" value="<%= filters.server %>" class="al-input" placeholder="e.g. 3f8a...">
+            <label class="al-label" for="server">Server</label>
+            <select id="server" name="server" class="al-input">
+              <option value="">All servers</option>
+              <% servers.forEach(s => { %>
+                <option value="<%= s.UUID %>" <%= filters.server === s.UUID ? 'selected' : '' %>><%= s.name %></option>
+              <% }); %>
+            </select>
           </div>
           <div>
             <label class="al-label" for="actor">Actor</label>
             <input id="actor" name="actor" type="text" value="<%= filters.actor %>" class="al-input" placeholder="username / email">
+          </div>
+          <div>
+            <label class="al-label" for="from">From</label>
+            <input id="from" name="from" type="date" value="<%= filters.from %>" class="al-input">
+          </div>
+          <div>
+            <label class="al-label" for="to">To</label>
+            <input id="to" name="to" type="date" value="<%= filters.to %>" class="al-input">
           </div>
           <div class="flex items-end gap-2">
             <button type="submit" class="al-btn-primary flex-1">Filter</button>
@@ -44,31 +73,68 @@
           <% if (logs.length === 0) { %>
             <p class="text-sm text-neutral-500">No activity matching the current filters.</p>
           <% } else { %>
-            <div class="space-y-2">
-              <% logs.forEach(log => { %>
-                <div class="rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2" style="border-color:color-mix(in srgb, var(--theme-border, #e5e5e5) 60%, transparent);">
-                  <div class="min-w-0">
-                    <p class="text-sm font-medium truncate">
-                      <span class="font-mono text-xs px-1.5 py-0.5 rounded" style="background:color-mix(in srgb, var(--theme-primary, #6366f1) 12%, transparent); color:var(--theme-primary, #6366f1)"><%= log.event %></span>
-                      <span class="ml-2"><%= log.actor ? log.actor.username : 'System' %></span>
-                    </p>
-                    <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
-                      <%= new Date(log.createdAt).toLocaleString() %> · <%= log.ip || 'unknown IP' %>
-                      <% if (log.serverId) { %><span class="font-mono">· <%= log.serverId.slice(0, 8) %>…</span><% } %>
-                    </p>
-                    <% if (log.metadata && Object.keys(log.metadata).length > 0) { %>
-                      <p class="text-xs mt-1 font-mono break-all" style="color:var(--theme-text-muted)"><%= JSON.stringify(log.metadata) %></p>
-                    <% } %>
+            <% const groups = []; %>
+            <% logs.forEach(log => {
+              const day = new Date(log.createdAt).toDateString();
+              const existing = groups.find(g => g.day === day);
+              if (existing) existing.items.push(log); else groups.push({ day, items: [log] });
+            }); %>
+            <div class="space-y-6">
+              <% groups.forEach(group => { %>
+                <div>
+                  <div class="text-xs font-medium uppercase tracking-wider mb-2" style="color:var(--theme-text-muted)"><%= new Date(group.items[0].createdAt).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) %></div>
+                  <div class="space-y-2">
+                    <% group.items.forEach(log => {
+                      const meta = log.meta || { label: log.event, category: 'other' };
+                      const catColors = {
+                        server: '#6366f1', file: '#0ea5e9', backup: '#f59e0b', database: '#10b981',
+                        user: '#a855f7', node: '#06b6d4', image: '#ec4899', apikey: '#8b5cf6',
+                        schedule: '#f97316', subuser: '#14b8a6', location: '#84cc16', allocation: '#22c55e',
+                        other: '#6b7280',
+                      };
+                      const catColor = catColors[meta.category] || catColors.other;
+                    %>
+                      <div class="rounded-xl border p-4" style="border-color:color-mix(in srgb, var(--theme-border, #e5e5e5) 60%, transparent);">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div class="min-w-0">
+                            <p class="text-sm font-medium truncate flex items-center gap-2">
+                              <span class="w-2 h-2 rounded-full shrink-0" style="background:<%= catColor %>"></span>
+                              <span class="truncate"><%= meta.label %></span>
+                              <span class="font-mono text-xs px-1.5 py-0.5 rounded hidden sm:inline" style="background:color-mix(in srgb, <%- catColor %> 12%, transparent); color:<%- catColor %>"><%= log.event %></span>
+                            </p>
+                            <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
+                              <span class="font-medium" style="color:var(--theme-text-strong)"><%= log.actor ? log.actor.username : 'System' %></span>
+                              <% if (log.server) { %> · <a href="/admin/servers/<%= log.server.UUID %>" class="underline decoration-dotted underline-offset-2"><%= log.server.name %></a><% } %>
+                              <% if (log.serverId && !log.server) { %><span class="font-mono">· <%= log.serverId.slice(0, 8) %>…</span><% } %>
+                              · <%- new Date(log.createdAt).toLocaleString() %>
+                              <% if (log.ip) { %> · <span class="font-mono"><%= log.ip %></span><% } %>
+                            </p>
+                          </div>
+                          <% if (log.metadata && Object.keys(log.metadata).length > 0) { %>
+                            <button type="button" class="al-btn-secondary text-xs shrink-0" data-activity-toggle="<%= log.id %>" aria-expanded="false">Details</button>
+                          <% } %>
+                        </div>
+                        <% if (log.metadata && Object.keys(log.metadata).length > 0) { %>
+                          <div id="activity-meta-<%= log.id %>" class="hidden mt-3">
+                            <pre class="text-xs font-mono break-all rounded-lg p-3 overflow-x-auto whitespace-pre-wrap" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border); color:var(--theme-text-muted)"><%- JSON.stringify(log.metadata, null, 2) %></pre>
+                          </div>
+                        <% } %>
+                      </div>
+                    <% }); %>
                   </div>
                 </div>
               <% }); %>
             </div>
 
             <% if (totalPages > 1) { %>
+              <% const qs = [];
+                 const addQs = (k, v) => { if (v) qs.push(k + '=' + encodeURIComponent(v)); };
+                 addQs('event', filters.event); addQs('server', filters.server); addQs('actor', filters.actor);
+                 addQs('category', filters.category); addQs('from', filters.from); addQs('to', filters.to); %>
               <div class="flex items-center justify-between mt-5">
-                <a href="/admin/activity?page=<%= Math.max(page - 1, 1) %><%= filters.event ? '&event=' + encodeURIComponent(filters.event) : '' %><%= filters.server ? '&server=' + encodeURIComponent(filters.server) : '' %><%= filters.actor ? '&actor=' + encodeURIComponent(filters.actor) : '' %>" class="al-btn-secondary <%= page <= 1 ? 'pointer-events-none opacity-40' : '' %>">Previous</a>
+                <a href="/admin/activity?page=<%= Math.max(page - 1, 1) %><%= qs.map(q => '&' + q).join('') %>" class="al-btn-secondary <%= page <= 1 ? 'pointer-events-none opacity-40' : '' %>">Previous</a>
                 <span class="text-sm" style="color:var(--theme-text-muted)">Page <%= page %> / <%= totalPages %></span>
-                <a href="/admin/activity?page=<%= Math.min(page + 1, totalPages) %><%= filters.event ? '&event=' + encodeURIComponent(filters.event) : '' %><%= filters.server ? '&server=' + encodeURIComponent(filters.server) : '' %><%= filters.actor ? '&actor=' + encodeURIComponent(filters.actor) : '' %>" class="al-btn-secondary <%= page >= totalPages ? 'pointer-events-none opacity-40' : '' %>">Next</a>
+                <a href="/admin/activity?page=<%= Math.min(page + 1, totalPages) %><%= qs.map(q => '&' + q).join('') %>" class="al-btn-secondary <%= page >= totalPages ? 'pointer-events-none opacity-40' : '' %>">Next</a>
               </div>
             <% } %>
           <% } %>
@@ -78,5 +144,19 @@
   </div>
   </div>
 </main>
+
+<script nonce="<%- nonce %>">
+(function () {
+  document.querySelectorAll('[data-activity-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const meta = document.getElementById('activity-meta-' + btn.dataset.activityToggle);
+      if (!meta) return;
+      const open = meta.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', String(!open));
+      btn.textContent = open ? 'Details' : 'Hide';
+    });
+  });
+})();
+</script>
 
 <%- include('../../components/footer') %>
