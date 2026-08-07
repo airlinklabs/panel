@@ -144,6 +144,7 @@ export function registerScheduleRoutes(router: Router): void {
             serverId: server.UUID,
             name: name.trim(),
             cron: cron.trim(),
+            enabled: true,
             timeOffset: offset,
             nextRunAt: nextRunFromCron(cron.trim()),
           },
@@ -443,7 +444,11 @@ export function registerScheduleRoutes(router: Router): void {
           return;
         }
 
-        await runSchedule(schedule);
+        const result = await runSchedule(schedule);
+        if (!result.ok) {
+          res.status(500).json({ error: 'One or more schedule tasks failed.', errors: result.errors });
+          return;
+        }
         const now = new Date();
         await prisma.schedule.update({
           where: { id: schedule.id },

@@ -1,0 +1,228 @@
+<%- include('../../components/header', { title: 'Server Logs' }) %>
+
+<main class="h-screen m-auto text-neutral-800 dark:text-white">
+  <div class="flex h-full">
+    <div class="hidden lg:block w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Dashboard', href: '/' },
+        { label: server.name, href: '/server/' + server.UUID },
+        { label: server.UUID },
+        { label: 'Logs' }
+      ] }) %>
+      <!-- Page Header: title + meta left, buttons right -->
+      <div class="px-4 sm:px-8 pt-4 pb-2 sm:pb-6">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <%- include('../../components/serverHeader') %>
+            <!-- Server meta: image · node · id -->
+            <%- include('../../components/serverMeta') %>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <a href="/server/<%= server.UUID %>" class="al-btn-ghost inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-center text-sm font-medium transition duration-300">
+              <%- icon('terminal', { class: 'size-4', strokeWidth: 1.5 }) %>
+              Back to console
+            </a>
+            <button id="logsRefreshBtn" type="button"
+                class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
+                <%- icon('refresh-cw', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
+                Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <%- include('../../components/installHeader') %>
+
+      <!-- Server Template -->
+      <%- include('../../components/serverTemplate') %>
+
+      <div id="server-page-body">
+
+      <!-- Server Logs -->
+      <div class="px-6 mt-8 space-y-6">
+        <!-- Recent output viewer -->
+        <div class="al-card rounded-lg shadow overflow-hidden">
+          <div class="al-card-header">
+            <div>
+              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Recent output</h2>
+              <p class="text-xs" style="color:var(--theme-text-muted)">Last N lines from disk</p>
+            </div>
+          </div>
+          <div id="logsViewer" class="h-96 overflow-y-auto p-3 font-mono text-[12px] leading-relaxed whitespace-pre-wrap break-words"
+               style="background:var(--theme-bg-card);border:1px solid var(--theme-border);color:var(--theme-text-strong)"></div>
+        </div>
+
+        <!-- Saved logs -->
+        <div class="al-card rounded-lg shadow overflow-hidden">
+          <div class="al-card-header">
+            <div>
+              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Saved logs</h2>
+              <p class="text-xs" style="color:var(--theme-text-muted)">Archived snapshots of the console log, taken when the server stopped</p>
+            </div>
+          </div>
+          <ul id="logsArchiveList" class="divide-y" style="border-color:var(--theme-border)"></ul>
+        </div>
+      </div>
+
+      </div><!-- /server-page-body -->
+
+      </div>
+</main>
+
+<%- include('../../components/loadingPopup') %>
+
+<script nonce="<%- nonce %>">
+const serverId = window.location.pathname.split('/')[2];
+
+const logsViewer = document.getElementById('logsViewer');
+const logsArchiveList = document.getElementById('logsArchiveList');
+const logsRefreshBtn = document.getElementById('logsRefreshBtn');
+
+function notify(type, message) {
+  if (typeof window.showToast === 'function') window.showToast(message, type);
+}
+
+function setViewerError(message) {
+  if (!logsViewer) return;
+  logsViewer.textContent = 'Failed to load logs: ' + message;
+}
+
+async function loadRecent() {
+  if (!logsViewer) return;
+  logsViewer.textContent = 'Loading recent output…';
+  try {
+    const r = await fetch('/server/' + encodeURIComponent(serverId) + '/logs/history', { credentials: 'same-origin' });
+    const d = await r.json().catch(() => null);
+    if (!r.ok) throw new Error((d && d.error) || 'request failed');
+    const lines = (d && Array.isArray(d.logs)) ? d.logs : [];
+    logsViewer.textContent = lines.length > 0 ? lines.join('\n') : 'No recent output saved to disk yet.';
+  } catch (err) {
+    setViewerError((err && err.message) || 'request failed');
+    notify('error', 'Failed to load recent output.');
+  }
+}
+
+function formatBytes(bytes) {
+  if (bytes === undefined || bytes === null || isNaN(bytes)) return 'Unknown';
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.min(sizes.length - 1, Math.floor(Math.log(bytes) / Math.log(k)));
+  return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
+}
+
+function renderArchives(logs) {
+  if (!logsArchiveList) return;
+  logsArchiveList.textContent = '';
+
+  if (!logs || logs.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'p-8 text-center';
+    li.style.color = 'var(--theme-text-muted)';
+    li.textContent = 'No saved logs yet.';
+    logsArchiveList.appendChild(li);
+    return;
+  }
+
+  logs.forEach((log) => {
+    const name = String((log && log.fileName) || '');
+    const li = document.createElement('li');
+    li.className = 'flex flex-wrap items-center gap-x-3 gap-y-2 px-6 py-3';
+
+    const nameWrap = document.createElement('div');
+    nameWrap.className = 'flex items-center gap-2 min-w-0 flex-1';
+    nameWrap.innerHTML = alIcon('file-text', 'size-3.5 shrink-0');
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'truncate text-sm font-medium';
+    nameSpan.style.color = 'var(--theme-text-strong)';
+    nameSpan.title = name;
+    nameSpan.textContent = name;
+    nameWrap.appendChild(nameSpan);
+    li.appendChild(nameWrap);
+
+    const sizeSpan = document.createElement('span');
+    sizeSpan.className = 'text-xs whitespace-nowrap';
+    sizeSpan.style.color = 'var(--theme-text-muted)';
+    sizeSpan.textContent = formatBytes(log.size);
+    li.appendChild(sizeSpan);
+
+    const createdSpan = document.createElement('span');
+    createdSpan.className = 'text-xs whitespace-nowrap';
+    createdSpan.style.color = 'var(--theme-text-muted)';
+    let createdText = 'Unknown';
+    if (log && log.createdAt) {
+      const date = new Date(log.createdAt);
+      if (!isNaN(date.getTime())) createdText = date.toLocaleString();
+    }
+    createdSpan.textContent = createdText;
+    li.appendChild(createdSpan);
+
+    const actions = document.createElement('div');
+    actions.className = 'flex items-center gap-2 shrink-0';
+
+    const viewBtn = document.createElement('button');
+    viewBtn.type = 'button';
+    viewBtn.className = 'inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+    viewBtn.style.cssText = 'color:var(--theme-accent);background:var(--theme-accent-subtle)';
+    viewBtn.textContent = 'View';
+    viewBtn.addEventListener('click', function () { loadArchiveFile(name); });
+    actions.appendChild(viewBtn);
+
+    const downloadLink = document.createElement('a');
+    downloadLink.href = '/server/' + encodeURIComponent(serverId) + '/logs/archives/download?file=' + encodeURIComponent(name);
+    downloadLink.download = name;
+    downloadLink.className = 'inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+    downloadLink.style.cssText = 'color:var(--theme-success);background:var(--theme-success-bg)';
+    downloadLink.textContent = 'Download';
+    actions.appendChild(downloadLink);
+
+    li.appendChild(actions);
+    logsArchiveList.appendChild(li);
+  });
+}
+
+async function loadArchives() {
+  try {
+    const r = await fetch('/server/' + encodeURIComponent(serverId) + '/logs/archives', { credentials: 'same-origin' });
+    const d = await r.json().catch(() => null);
+    if (!r.ok) throw new Error((d && d.error) || 'request failed');
+    renderArchives((d && d.logs) || []);
+  } catch (err) {
+    renderArchives([]);
+    setViewerError((err && err.message) || 'request failed');
+    notify('error', 'Failed to load saved logs.');
+  }
+}
+
+async function loadArchiveFile(file) {
+  if (!logsViewer) return;
+  logsViewer.textContent = 'Loading ' + file + '…';
+  try {
+    const r = await fetch('/server/' + encodeURIComponent(serverId) + '/logs/archives/read?file=' + encodeURIComponent(file), { credentials: 'same-origin' });
+    const d = await r.json().catch(() => null);
+    if (!r.ok) throw new Error((d && d.error) || 'request failed');
+    const lines = (d && Array.isArray(d.lines)) ? d.lines : [];
+    logsViewer.textContent = lines.length > 0 ? lines.join('\n') : '(archive is empty)';
+  } catch (err) {
+    setViewerError((err && err.message) || 'request failed');
+    notify('error', 'Failed to read archive.');
+  }
+}
+
+function refreshLogs() {
+  return Promise.all([loadRecent(), loadArchives()]);
+}
+
+if (logsRefreshBtn) {
+  logsRefreshBtn.addEventListener('click', function () {
+    refreshLogs().catch(function () {});
+  });
+}
+
+refreshLogs().catch(function () {});
+</script>
+
+<%- include('../../components/footer') %>

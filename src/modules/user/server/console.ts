@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import type { Readable } from 'stream';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkEulaStatus } from '../../../handlers/features';
@@ -23,7 +24,6 @@ import {
 
 const LOG_HISTORY_TIMEOUT_MS = 8_000;
 const STATUS_TIMEOUT_MS = 4_000;
-const CONSOLE_LOG_TIMEOUT_MS = 5_000;
 const STOP_STATE_TTL_MS = 120_000;
 const RESTART_DELAY_MS = 2_000;
 
@@ -217,6 +217,47 @@ export function registerConsoleRoutes(router: Router): void {
     isAuthenticatedForServer('id'),
     requireSubUserPermission('console'),
     async (req: Request, res: Response): Promise<void> => {
+      const errorMessage: ErrorMessage = {};
+      const serverId = req.params?.id;
+
+      try {
+        const context = await loadServerPageContext(req);
+        const settings = context.settings;
+
+        if (context.status === 'missing-user' || context.status === 'missing-server') {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        const { user, server } = context;
+        const features = getImageFeatures(server.image);
+        const serverStatus = await getServerStatus(getServerStatusInput(server));
+
+        res.render('user/server/logs', {
+          errorMessage,
+          features: features || [],
+          installed: await checkForServerInstallation(getParamAsString(serverId)),
+          user,
+          req,
+          server,
+          serverStatus,
+          settings,
+        });
+        return;
+      } catch (error) {
+        logger.error('Error loading server logs page:', error);
+        errorMessage.message = 'Error loading server logs page.';
+        res.status(500).json({ error: 'Failed to load server logs page' });
+        return;
+      }
+    },
+  );
+
+  router.get(
+    '/server/:id/logs/archives',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
+    async (req: Request, res: Response): Promise<void> => {
       const serverId = req.params?.id;
 
       try {
@@ -230,20 +271,133 @@ export function registerConsoleRoutes(router: Router): void {
           return;
         }
 
-        const response = await daemonRequest<{ lines?: string[] }>({
+        const { node } = server;
+
+        const response = await daemonRequest<{ logs?: { fileName: string; size: number; createdAt: string }[] }>({
           method: 'GET',
-          path: `/container/logs/${server.UUID}`,
-          nodeAddress: server.node.address,
-          nodePort: server.node.port,
-          nodeKey: server.node.key,
-          timeout: CONSOLE_LOG_TIMEOUT_MS,
+          path: `/container/logs/archives?id=${server.UUID}`,
+          nodeAddress: node.address,
+          nodePort: node.port,
+          nodeKey: node.key,
+          timeout: LOG_HISTORY_TIMEOUT_MS,
         });
 
-        res.json({ lines: response.data?.lines ?? [] });
+        res.status(200).json({ logs: response.data?.logs ?? [] });
         return;
       } catch (error) {
-        logger.error('Error fetching console log history:', error);
-        res.status(500).json({ error: 'Failed to fetch console log history' });
+        logger.error('Error fetching server log archives:', error);
+        res.status(500).json({ error: 'Failed to fetch server log archives' });
+        return;
+      }
+    },
+  );
+
+  router.get(
+    '/server/:id/logs/archives/read',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
+    async (req: Request, res: Response): Promise<void> => {
+      const serverId = req.params?.id;
+      const file = req.query?.file;
+
+      try {
+        if (typeof file !== 'string' || !file || !/^[A-Za-z0-9._-]+$/.test(file)) {
+          res.status(400).json({ error: 'Invalid file name' });
+          return;
+        }
+
+        const server = await prisma.server.findUnique({
+          where: { UUID: String(serverId) },
+          include: { node: true },
+        });
+
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        const { node } = server;
+
+        const response = await daemonRequest<{ lines?: string[] }>({
+          method: 'GET',
+          path: `/container/logs/archives/read?id=${server.UUID}&file=${encodeURIComponent(file)}`,
+          nodeAddress: node.address,
+          nodePort: node.port,
+          nodeKey: node.key,
+          timeout: LOG_HISTORY_TIMEOUT_MS,
+        });
+
+        res.status(200).json({ lines: response.data?.lines ?? [] });
+        return;
+      } catch (error) {
+        logger.error('Error reading server log archive:', error);
+        res.status(500).json({ error: 'Failed to read server log archive' });
+        return;
+      }
+    },
+  );
+
+  router.get(
+    '/server/:id/logs/archives/download',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
+    async (req: Request, res: Response): Promise<void> => {
+      const serverId = req.params?.id;
+      const file = req.query?.file;
+
+      try {
+        if (typeof file !== 'string' || !file || !/^[A-Za-z0-9._-]+$/.test(file)) {
+          res.status(400).json({ error: 'Invalid file name' });
+          return;
+        }
+
+        const server = await prisma.server.findUnique({
+          where: { UUID: String(serverId) },
+          include: { node: true },
+        });
+
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        const { node } = server;
+
+        const response = await daemonRequest<Readable>({
+          method: 'GET',
+          path: `/container/logs/archives/download?id=${server.UUID}&file=${encodeURIComponent(file)}`,
+          nodeAddress: node.address,
+          nodePort: node.port,
+          nodeKey: node.key,
+          responseType: 'stream',
+          timeout: LOG_HISTORY_TIMEOUT_MS,
+        });
+
+        if (response.status >= 400) {
+          if (response.data && typeof response.data.destroy === 'function') {
+            response.data.destroy();
+          }
+          res.status(response.status).json({ error: 'Failed to download server log archive' });
+          return;
+        }
+
+        res.setHeader('Content-Type', 'application/gzip');
+        res.setHeader('Content-Disposition', `attachment; filename="${file}"`);
+
+        response.data.on('error', (streamError) => {
+          logger.error('Error streaming server log archive:', streamError);
+          if (!res.headersSent) {
+            res.status(500).json({ error: 'Failed to download server log archive' });
+            return;
+          }
+          res.end();
+        });
+
+        response.data.pipe(res);
+        return;
+      } catch (error) {
+        logger.error('Error downloading server log archive:', error);
+        res.status(500).json({ error: 'Failed to download server log archive' });
         return;
       }
     },

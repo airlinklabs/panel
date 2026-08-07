@@ -175,6 +175,28 @@
     opacity var(--dur-exit) var(--ease-in);
 }
 
+/* Step transition — a 2-step dialog (e.g. the image store group → egg
+   popup) swaps its body while the panel stays open. Play a short
+   re-enter so the new step doesn't just pop in; animations.js re-triggers
+   it by toggling the class off/on. Fill-mode both keeps the panel at
+   rest after the animation. */
+.al-modal-panel.al-modal-reenter {
+  animation:
+    modal-reenter var(--dur-default) var(--ease-out);
+  animation-fill-mode: both;
+}
+
+@keyframes modal-reenter {
+  from {
+    opacity: 0;
+    transform: scale(0.985) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 /* ── Dropdown / popover reveal ────────────────────────────────── */
 
 .al-dropdown {
@@ -344,6 +366,9 @@
   .tab-btn,
   .m-tab {
     transition: none !important;
+  }
+  .al-modal-panel.al-modal-reenter {
+    animation: none !important;
   }
   .al-skeleton {
     animation: none;

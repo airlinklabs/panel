@@ -185,7 +185,7 @@
         <div class="w-full lg:w-1/3 mt-4 lg:mt-0 space-y-4 flex flex-col">
 
             <!-- IP Address Card -->
-            <div class="relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:0">
+            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:0">
                 <div class="relative z-10 flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %>:</h2>
@@ -199,7 +199,7 @@
             </div>
 
             <!-- Status Card -->
-            <div class="relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:1">
+            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:1">
                 <canvas id="statusChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
                   <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.Status %>:</h2>
@@ -209,7 +209,7 @@
               </div>
 
             <!-- RAM Usage Card -->
-            <div class="relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:2">
+            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:2">
                 <canvas id="ramChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
                     <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.ramUsage %>:</h2>
@@ -218,7 +218,7 @@
             </div>
 
             <!-- CPU Usage Card -->
-            <div class="relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:3">
+            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:3">
                 <canvas id="cpuChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
                     <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.cpuUsage %>:</h2>
@@ -455,6 +455,22 @@ function applyTermTheme() {
 
 applyTermTheme();
 
+// True while the server container is running. While online the live console
+// is streaming, so the "Load recent logs" button is disabled.
+let serverOnline = false;
+function updateLoadLogsButton() {
+    const b = document.getElementById('loadHistoryBtn');
+    if (!b) return;
+    const disabled = serverOnline;
+    b.disabled = disabled;
+    b.style.opacity = disabled ? '0.45' : '';
+    b.style.pointerEvents = disabled ? 'none' : '';
+}
+if (typeof serverStatus !== 'undefined' && serverStatus && serverStatus.online) {
+    serverOnline = true;
+}
+updateLoadLogsButton();
+
 // Called by header.ejs on theme toggle — console follows the current mode.
 function setTerminalTheme() {
   applyTermTheme();
@@ -494,6 +510,7 @@ window.addEventListener('resize', () => fitAddon.fit());
 const loadHistoryBtn = document.getElementById('loadHistoryBtn');
 if (loadHistoryBtn) {
     loadHistoryBtn.addEventListener('click', async () => {
+        if (serverOnline) return;
         const btn = loadHistoryBtn;
         btn.disabled = true;
         try {
@@ -684,10 +701,10 @@ async function openConsoleSocket() {
                 historyLoaded = true;
                 const ctrl = new AbortController();
                 logFetchControllers.add(ctrl);
-                fetch(`/server/<%= server.UUID %>/logs`, { credentials: 'same-origin', signal: ctrl.signal })
+                fetch(`/server/<%= server.UUID %>/logs/history`, { credentials: 'same-origin', signal: ctrl.signal })
                     .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
                     .then((data) => {
-                        const lines = data.lines || [];
+                        const lines = data.logs || [];
                         lines.forEach((line) => term.write(maskPrompts(String(line)) + '\r\n'));
                     })
                     .catch(() => {})
@@ -1055,8 +1072,8 @@ connectWebSocket();
             const { type, message } = parsed.data;
             setStatusLog(message, type);
             writeConsole('daemon', 'info', message);
-            if (type === 'started') { unlockInput(); clearButtonLoading(startButton); }
-            if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); clearButtonLoading(startButton); }
+            if (type === 'started') { serverOnline = true; updateLoadLogsButton(); unlockInput(); clearButtonLoading(startButton); }
+            if (type === 'error') { serverOnline = false; updateLoadLogsButton(); setStatusLog(null); showToast(message, 'error'); unlockInput(); clearButtonLoading(startButton); }
         };
 
         fetch(`/server/${serverUUID}/power/start`, { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
@@ -1142,8 +1159,8 @@ connectWebSocket();
               const { type, message } = parsed.data;
               setStatusLog(message, type);
               writeConsole('daemon', 'info', message);
-              if (type === 'started') { unlockInput(); clearButtonLoading(restartButton); if (typeof term !== 'undefined') term.scrollToBottom(); }
-              if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); clearButtonLoading(restartButton); }
+              if (type === 'started') { serverOnline = true; updateLoadLogsButton(); unlockInput(); clearButtonLoading(restartButton); if (typeof term !== 'undefined') term.scrollToBottom(); }
+              if (type === 'error') { serverOnline = false; updateLoadLogsButton(); setStatusLog(null); showToast(message, 'error'); unlockInput(); clearButtonLoading(restartButton); }
           };
 
           fetch(`/server/${serverUUID}/power/restart`, { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
@@ -1226,7 +1243,7 @@ connectWebSocket();
               const { type, message } = parsed.data;
               writeConsole('daemon', 'info', message);
               setStatusLog(message, type);
-              if (type === 'error') { setStatusLog(null); showToast(message, 'error'); clearButtonLoading(stopButton); }
+              if (type === 'error') { serverOnline = false; updateLoadLogsButton(); setStatusLog(null); showToast(message, 'error'); clearButtonLoading(stopButton); }
           };
 
           fetch(`/server/${serverUUID}/power/stop`, { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
@@ -1557,6 +1574,8 @@ connectWebSocket();
             statusElement.style.color = 'var(--theme-danger)';
             updateStatusChart('danger', 0.1, 0.2);
         }
+        serverOnline = (stats.data && stats.data.running === true);
+        updateLoadLogsButton();
     }
 
     function updateChart(chart, value) {
@@ -1719,6 +1738,8 @@ connectWebSocket();
 
     function setAllStatsOffline() {
         showConsolePlaceholder();
+        serverOnline = false;
+        updateLoadLogsButton();
 
         // Update RAM usage
         document.getElementById('ramUsage').textContent = `${Math.round(0)}% (0 MB / ${formatRam(<%- server.Memory %> * 1024 * 1024)})`;
@@ -1813,6 +1834,8 @@ connectWebSocket();
             writeConsole('daemon', 'info', message);
             if (lockingStates.has(type)) { lockInput('Waiting...'); }
             if (type === 'started') {
+                serverOnline = true;
+                updateLoadLogsButton();
                 unlockInput();
                 setStatusLog(null);
                 if (typeof term !== 'undefined') term.scrollToBottom();
@@ -1825,6 +1848,8 @@ connectWebSocket();
                 }
             }
             if (type === 'stopped' || type === 'killed') {
+                serverOnline = false;
+                updateLoadLogsButton();
                 deliberateStop = true;
                 serverStopped = true;
                 setStatusLog(null);
@@ -1836,7 +1861,7 @@ connectWebSocket();
                     loadRecentLogs(false);
                 }
             }
-            if (type === 'error') { unlockInput(); setStatusLog(null); }
+            if (type === 'error') { serverOnline = false; updateLoadLogsButton(); unlockInput(); setStatusLog(null); }
         };
 
         sock.onclose = () => {

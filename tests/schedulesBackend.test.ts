@@ -153,6 +153,25 @@ describe('schedules manual run', () => {
     expect(mockDaemonRequest).not.toHaveBeenCalled();
     expect(mockPrisma.schedule.update).not.toHaveBeenCalled();
   });
+
+  it('POST .../run returns 500 and does NOT advance lastRunAt when the daemon fails', async () => {
+    const task = { id: 1, action: 'command', payload: JSON.stringify({ command: 'echo hi' }), timeOffset: 0 };
+    const sched = scheduleFixture({ tasks: [task] });
+    mockPrisma.schedule.findFirst.mockResolvedValue(sched as any);
+    mockDaemonRequest.mockResolvedValue({ status: 500, data: { error: 'boom' } } as any);
+
+    await withServer(buildApp(), async (base) => {
+      const res = await fetch(`${base}/server/srv-abc/schedules/7/run`, { method: 'POST' });
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toContain('failed');
+      expect(Array.isArray(body.errors)).toBe(true);
+      expect(body.errors[0]).toContain('boom');
+    });
+
+    expect(mockDaemonRequest).toHaveBeenCalledTimes(1);
+    expect(mockPrisma.schedule.update).not.toHaveBeenCalled();
+  });
 });
 
 describe('schedules validation', () => {
@@ -178,6 +197,24 @@ describe('schedules validation', () => {
     });
 
     expect(mockPrisma.schedule.create).not.toHaveBeenCalled();
+  });
+
+  it('POST /server/:id/schedules persists enabled: true by default', async () => {
+    mockPrisma.schedule.create.mockImplementation(async ({ data }: any) => ({ id: 1, ...data }));
+
+    await withServer(buildApp(), async (base) => {
+      const res = await fetch(`${base}/server/srv-abc/schedules`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'nightly', cron: '0 0 * * *' }),
+      });
+      expect(res.status).toBe(200);
+      expect((await res.json()).success).toBe(true);
+    });
+
+    expect(mockPrisma.schedule.create).toHaveBeenCalledTimes(1);
+    const data = mockPrisma.schedule.create.mock.calls[0][0].data as any;
+    expect(data.enabled).toBe(true);
   });
 
   it('POST .../tasks with an action outside {command,power,backup} returns 400', async () => {

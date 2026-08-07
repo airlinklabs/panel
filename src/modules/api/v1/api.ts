@@ -1890,6 +1890,7 @@ const coreModule: Module = {
               serverId: server.UUID,
               name: name.trim(),
               cron: cron.trim(),
+              enabled: true,
               timeOffset: offset,
               nextRunAt: nextRunFromCron(cron.trim()),
             },

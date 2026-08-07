@@ -38,10 +38,10 @@
       <div class="px-4 sm:px-8 mt-8">
         <div class="al-card p-6 shadow-lg">
           <div class="al-card overflow-hidden mb-6">
-            <div class="p-5 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
+            <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
               <div>
-                <h2 class="text-lg font-semibold text-neutral-800 dark:text-white"><%= req.translations.startupCommand || 'Startup Command' %></h2>
-                <p class="text-sm text-neutral-600 dark:text-neutral-400"><%= req.translations.startupCommandDesc || 'Customize the command used to start your server.' %></p>
+                <h2 class="text-lg font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.startupCommand || 'Startup Command' %></h2>
+                <p class="text-sm" style="color:var(--theme-text-muted)"><%= req.translations.startupCommandDesc || 'Customize the command used to start your server.' %></p>
               </div>
               <%
                 let isStartupEditAllowed = false;
@@ -54,14 +54,14 @@
               %>
                 <div class="flex items-center">
                   <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-danger-bg);color:var(--theme-danger);--tw-ring-color:color-mix(in srgb, var(--theme-danger) 25%, transparent);">
-                    <%- icon('circle-x', { class: 'mr-1.5 h-3 w-3 text-red-500', strokeWidth: 2 }) %>
+                    <%- icon('circle-x', { class: 'mr-1.5 h-3 w-3', style: 'color:var(--theme-danger)', strokeWidth: 2 }) %>
                     Editing Disabled
                   </span>
                 </div>
               <% } else { %>
                 <div class="flex items-center">
                   <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent);">
-                    <%- icon('circle-check', { class: 'mr-1.5 h-3 w-3 text-green-500', strokeWidth: 2 }) %>
+                    <%- icon('circle-check', { class: 'mr-1.5 h-3 w-3', style: 'color:var(--theme-success)', strokeWidth: 2 }) %>
                     Editing Enabled
                   </span>
                 </div>
@@ -72,17 +72,17 @@
               <%- include('../../components/csrf') %>
               <div class="p-5">
                 <div class="mb-4">
-                  <label for="startCommand" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.startupCommand || 'Startup Command' %></label>
+                  <label for="startCommand" class="block text-sm font-medium mb-2" style="color:var(--theme-text-muted)"><%= req.translations.startupCommand || 'Startup Command' %></label>
                   <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 <%= !isStartupEditAllowed ? 'bg-neutral-100 dark:bg-neutral-800/50 cursor-not-allowed' : 'bg-white dark:bg-neutral-600/20' %> border border-neutral-300 dark:border-white/5" <%= !isStartupEditAllowed ? 'readonly' : '' %> aria-label="<%= req.translations.startupCommand || 'Startup Command' %>"><%= server.StartCommand %></textarea>
                   <% if (!isStartupEditAllowed) { %>
                     <p class="mt-2 text-xs" style="color:var(--theme-danger);"><%= req.translations.startupCommandDisabled || 'Startup command editing is disabled for this server. Contact an administrator to enable this feature.' %></p>
                   <% } else { %>
-                    <p class="mt-2 text-xs text-neutral-500"><%= req.translations.startupCommandHint || 'Use $ALVKT(VARIABLE_NAME) to reference environment variables.' %></p>
+                    <p class="mt-2 text-xs" style="color:var(--theme-text-muted)"><%= req.translations.startupCommandHint || 'Use $ALVKT(VARIABLE_NAME) to reference environment variables.' %></p>
                   <% } %>
                 </div>
               </div>
 
-              <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
+              <div class="px-5 py-4 border-t" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
                 <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
               </div>
             </form>
@@ -92,12 +92,12 @@
           <div class="al-card overflow-hidden">
             <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
               <div>
-                <h3 class="text-lg font-semibold text-neutral-800 dark:text-white"><%= req.translations.dockerImageLabel || 'Docker Image' %></h3>
-                <p class="text-sm text-neutral-600 dark:text-neutral-400"><%= req.translations.dockerImageDesc || 'Change the Docker image used by your server.' %></p>
+                <h3 class="text-lg font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.dockerImageLabel || 'Docker Image' %></h3>
+                <p class="text-sm" style="color:var(--theme-text-muted)"><%= req.translations.dockerImageDesc || 'Change the Docker image used by your server.' %></p>
               </div>
               <div class="flex items-center">
-                <span class="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900/20 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-600/20 dark:ring-blue-500/30">
-                  <%- icon('info', { class: 'mr-1.5 h-3 w-3 text-blue-500', strokeWidth: 2 }) %>
+                <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-info-bg);color:var(--theme-info);--tw-ring-color:color-mix(in srgb, var(--theme-info) 25%, transparent);">
+                  <%- icon('info', { class: 'mr-1.5 h-3 w-3', style: 'color:var(--theme-info)', strokeWidth: 2 }) %>
                   Requires Restart
                 </span>
               </div>
@@ -107,7 +107,7 @@
               <%- include('../../components/csrf') %>
               <div class="p-5">
                 <div class="mb-4">
-                  <label for="dockerImage" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.dockerImageLabel || 'Docker Image' %></label>
+                  <label for="dockerImage" class="block text-sm font-medium mb-2" style="color:var(--theme-text-muted)"><%= req.translations.dockerImageLabel || 'Docker Image' %></label>
                   <%
                     let currentDockerImage = '';
                     try {
@@ -144,11 +144,11 @@
                     </select>
                     <div class="custom-select" data-for="dockerImage"></div>
                   </div>
-                  <p class="mt-2 text-xs text-neutral-500"><%= req.translations.dockerImageHint || "Changing the Docker image will restart your server if it's currently running." %></p>
+                  <p class="mt-2 text-xs" style="color:var(--theme-text-muted)"><%= req.translations.dockerImageHint || "Changing the Docker image will restart your server if it's currently running." %></p>
                 </div>
               </div>
 
-              <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
+              <div class="px-5 py-4 border-t" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
                 <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm"><%= req.translations.updateDockerImage || 'Update Docker Image' %></button>
               </div>
             </form>
@@ -157,25 +157,25 @@
 
         <!-- Server Variables -->
         <div class="al-card p-6 shadow-lg mt-8">
-          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= req.translations.serverVariables || 'Server Variables' %></h2>
-          <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
+          <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.serverVariables || 'Server Variables' %></h2>
+          <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
 
           <form id="variablesForm" action="/server/<%= server.UUID %>/startup/variables" method="POST" enctype="application/x-www-form-urlencoded">
             <%- include('../../components/csrf') %>
             <div id="variablesContainer" class="space-y-4">
               <% if (serverVariables && serverVariables.length > 0) { %>
                 <% serverVariables.forEach((variable, index) => { %>
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-neutral-100 dark:bg-neutral-700/20 rounded-lg border border-neutral-300 dark:border-white/5">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg border" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
                     <div>
-                      <label class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2" for="var_<%= variable.env %>"><%= variable.name %></label>
-                      <p class="text-xs text-neutral-500">Environment: <%= variable.env %></p>
+                      <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-muted)" for="var_<%= variable.env %>"><%= variable.name %></label>
+                      <p class="text-xs" style="color:var(--theme-text-muted)">Environment: <%= variable.env %></p>
                     </div>
                     <div class="md:col-span-2">
                       <% if (variable.type === 'boolean') { %>
                         <label class="relative inline-flex items-center cursor-pointer" for="toggle_<%= variable.env %>">
                           <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %>>
                           <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                          <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'Enabled' : 'Disabled' %></span>
+                          <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-muted)" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'Enabled' : 'Disabled' %></span>
                         </label>
                         <script nonce="<%- nonce %>">
                           document.getElementById('toggle_<%= variable.env %>').addEventListener('change', function() {
@@ -187,12 +187,12 @@
                       <% } else { %>
                         <input type="text" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5" aria-label="<%= variable.name %>">
                       <% } %>
-                      <p class="mt-1 text-xs text-neutral-500">Type: <%= variable.type %></p>
+                      <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Type: <%= variable.type %></p>
                     </div>
                   </div>
                 <% }); %>
               <% } else { %>
-                <p class="text-neutral-600 dark:text-neutral-400"><%= req.translations.noVariables || 'No variables available for this server.' %></p>
+                <p style="color:var(--theme-text-muted)"><%= req.translations.noVariables || 'No variables available for this server.' %></p>
               <% } %>
             </div>
 

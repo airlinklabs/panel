@@ -49,11 +49,23 @@
     if (!overlay) return;
     if (overlay.classList.contains('open')) {
       // Re-showing an already-open overlay (e.g. swapping the body of a
-      // 2-step dialog): make sure a stale exit animation can never take it
-      // down. Remove any leftover closing state so the pending closeModal
-      // timer sees .open and backs off.
+      // 2-step dialog): the caller (window.modal.show) resets the panel's
+      // className on every open, which drops the `open` class — so re-apply
+      // it here or the new panel body stays invisible (opacity 0) and the
+      // step appears to open and instantly close. Also make sure a stale
+      // exit animation can never take it down: remove any leftover closing
+      // state so the pending closeModal timer sees .open and backs off.
       overlay.classList.remove('closing');
-      if (panel) panel.classList.remove('closing');
+      if (panel) {
+        panel.classList.remove('closing');
+        panel.classList.add('open');
+        // Step transition: when one popup step is swapped for another,
+        // play a short re-enter so the new step doesn't just pop in.
+        // Restart from a clean state so re-swapping mid-animation works.
+        panel.classList.remove('al-modal-reenter');
+        void panel.offsetWidth;
+        panel.classList.add('al-modal-reenter');
+      }
       return;
     }
 

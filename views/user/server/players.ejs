@@ -55,7 +55,7 @@
                 <% if (typeof serverInfo !== 'undefined') { %>
                   <span class="font-medium" id="onlineCount"><%= serverInfo.onlinePlayers || 0 %></span> / <span id="maxCount"><%= serverInfo.maxPlayers || 0 %></span> players online
                   <% if (serverInfo.version) { %>
-                    • <span class="text-neutral-500" id="versionLabel">Version: <%= serverInfo.version %></span>
+                    • <span style="color:var(--theme-text-muted)" id="versionLabel">Version: <%= serverInfo.version %></span>
                   <% } %>
                 <% } else { %>
                   Manage your server's player list
@@ -65,7 +65,7 @@
           </div>
 
           <!-- Auto-refresh notice -->
-          <div class="text-xs text-neutral-500 mb-4 flex items-center">
+          <div class="text-xs mb-4 flex items-center" style="color:var(--theme-text-muted)">
             <%- icon('refresh-cw', { class: 'h-3 w-3 mr-1', strokeWidth: 2 }) %>
             <span>
               Refreshing in <span id="refresh-countdown">30</span> seconds
@@ -107,12 +107,12 @@
             <% if (!serverIsOnline && errorMessage && errorMessage.message) { %>
               <!-- Server Offline Message -->
               <div class="flex justify-center mb-6">
-                <div class="w-16 h-16 rounded-full bg-neutral-200 dark:bg-neutral-700/50 flex items-center justify-center">
+                <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-bg-secondary);">
                   <%- icon('wifi-off', { class: 'size-6', strokeWidth: 1.5 }) %>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.serverOffline || 'Server Offline' %></h2>
-              <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
+              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.serverOffline || 'Server Offline' %></h2>
+              <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
                 The server appears to be offline. Start your server to see online players.
               </p>
               <div class="mt-6">
@@ -124,15 +124,15 @@
             <% } else if (serverIsOnline) { %>
               <!-- Server Online but No Players Message -->
               <div class="flex justify-center mb-6">
-                <div class="w-16 h-16 rounded-full bg-green-700/20 dark:bg-green-500/15 flex items-center justify-center">
-                  <%- icon('ellipsis', { class: 'h-8 w-8 text-green-400', strokeWidth: 2 }) %>
+                <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-success-bg);">
+                  <%- icon('ellipsis', { class: 'h-8 w-8', style: 'color:var(--theme-success)', strokeWidth: 2 }) %>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.serverOnline || 'Server is online' %></h2>
-              <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
+              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.serverOnline || 'Server is online' %></h2>
+              <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
                 Your server is running but no players are currently connected. Players will appear here when they join.
               </p>
-              <div class="mt-4 text-sm text-neutral-600 dark:text-neutral-400">
+              <div class="mt-4 text-sm" style="color:var(--theme-text-muted)">
                 <div class="flex items-center justify-center gap-4">
                   <div>
                     <span class="font-semibold">Version:</span> <%= serverInfo.version %>
@@ -145,12 +145,12 @@
             <% } else { %>
               <!-- Unknown Status Message -->
               <div class="flex justify-center mb-6">
-                <div class="w-16 h-16 rounded-full bg-yellow-700/20 dark:bg-yellow-500/15 flex items-center justify-center">
-                  <%- icon('circle-help', { class: 'h-8 w-8 text-yellow-400', strokeWidth: 2 }) %>
+                <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-warning-bg);">
+                  <%- icon('circle-help', { class: 'h-8 w-8', style: 'color:var(--theme-warning)', strokeWidth: 2 }) %>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.statusUnknown || 'Status Unknown' %></h2>
-              <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
+              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.statusUnknown || 'Status Unknown' %></h2>
+              <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
                 We couldn't determine if your server is online. It may be starting up or in an unusual state.
               </p>
             <% } %>
