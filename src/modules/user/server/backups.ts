@@ -5,7 +5,7 @@ import { checkForServerInstallation } from '../../../handlers/checkForServerInst
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { safeClientMessage } from '../../../utils/errors';
 import prisma from '../../../db';
-import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest, daemonBaseUrl } from '../../../handlers/utils/core/daemonRequest';
 import { AirlinkCloudClient } from '../../../handlers/utils/core/airlinkCloud';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import {
@@ -516,26 +516,31 @@ export function registerBackupRoutes(router: Router): void {
           return;
         }
 
-        const downloadResponse = await daemonRequest<import('stream').Readable>({
-          method: 'GET',
-          path: '/container/backup/download',
+        // Local backup on the daemon node: mint a one-time token and 302 the
+        // browser straight at the daemon — no file bytes flow through the panel.
+        const downloadResponse = await daemonRequest<{ token?: string; url?: string }>({
+          method: 'POST',
+          path: '/container/backup/download-token',
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
-          params: {
+          body: {
             backupPath: backup.filePath,
           },
-          responseType: 'stream',
+          timeout: 15000,
         });
 
-        const fileName = `${backup.name}_${backup.createdAt.toISOString().split('T')[0]}.tar.gz`;
-        res.setHeader(
-          'Content-Disposition',
-          `attachment; filename="${fileName}"`,
-        );
-        res.setHeader('Content-Type', 'application/gzip');
+        if (downloadResponse.status !== 200 || !downloadResponse.data?.token || !downloadResponse.data?.url) {
+          res.status(downloadResponse.status || 500).json({ error: 'Failed to start download' });
+          return;
+        }
 
-        downloadResponse.data.pipe(res);
+        const base = await daemonBaseUrl(server.node.address, server.node.port);
+        await logActivity(req, 'backup:download', {
+          serverId: String(server.UUID),
+          metadata: { backupId: String(backup.UUID) },
+        });
+        res.redirect(302, `${base}${downloadResponse.data.url}`);
       } catch (error: unknown) {
         logger.error('Error downloading backup:', error);
         res.status(500).json({ error: safeClientMessage(error, 'Failed to download backup') });

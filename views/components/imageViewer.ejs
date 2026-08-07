@@ -97,30 +97,16 @@
 
             const downloadViewedImage = () => {
                 if (currentImagePath && currentFileName && currentServerUUID) {
+                    // Panel route mints a one-time daemon token and 302s to the
+                    // daemon, which streams the file directly to the browser.
                     const url = `/server/${currentServerUUID}/files/download/${encodeURIComponent(currentImagePath)}`;
-                    fetch(url, { method: 'GET' })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`Error downloading file: ${response.statusText}`);
-                            }
-                            return response.blob();
-                        })
-                        .then(blob => {
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = currentFileName;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            window.URL.revokeObjectURL(url);
-                        })
-                        .catch(error => {
-                            console.error('Download failed:', error);
-                            if (typeof showToast === 'function') {
-                                showToast('Failed to download file', 'error');
-                            }
-                        });
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.rel = 'noopener';
+                    a.download = currentFileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
                 }
             };
 

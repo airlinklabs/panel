@@ -8,7 +8,7 @@ import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { safeClientMessage, daemonMessage, errorBody } from '../../../utils/errors';
 import prisma from '../../../db';
-import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest, daemonBaseUrl } from '../../../handlers/utils/core/daemonRequest';
 import { isPathSafe, normalizePath } from '../../../utils/pathSecurity';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import {
@@ -223,23 +223,29 @@ export function registerFilesRoutes(router: Router): void {
         }
         const { server } = context;
 
-        const response = await daemonRequest<import('stream').Readable>({
-          method: 'GET',
-          path: '/fs/download',
+        // Mint a short-lived single-use daemon token and redirect the browser
+        // straight at the daemon — the panel never proxies the file bytes.
+        const response = await daemonRequest<{ token?: string; url?: string }>({
+          method: 'POST',
+          path: '/fs/download-token',
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
-          params: { id: server.UUID, path: filePath },
-          responseType: 'stream',
+          body: { id: server.UUID, path: filePath },
+          timeout: 15000,
         });
 
-        res.setHeader(
-          'Content-Disposition',
-          `attachment; filename="${filePath}"`,
-        );
-        res.setHeader('Content-Type', 'application/octet-stream');
+        if (response.status !== 200 || !response.data?.token || !response.data?.url) {
+          res.status(response.status || 500).json({ error: 'Failed to start download' });
+          return;
+        }
 
-        response.data.pipe(res);
+        const base = await daemonBaseUrl(server.node.address, server.node.port);
+        await logActivity(req, 'file:download', {
+          serverId: String(server.UUID),
+          metadata: { path: filePath },
+        });
+        res.redirect(302, `${base}${response.data.url}`);
       } catch (error) {
         logger.error('Error downloading file:', error);
         res.status(500).json({ error: 'Failed to download file' });
@@ -791,6 +797,10 @@ export function registerFilesRoutes(router: Router): void {
           logger.info(
             `File ${fileName} successfully uploaded to ${relativePath}`,
           );
+          await logActivity(req, 'file:upload', {
+            serverId: String(server.UUID),
+            metadata: { path: relativePath, fileName, size: req.file.size },
+          });
           res.status(200).json({
             success: true,
             fileName: uploadResponse.data?.fileName,
@@ -846,6 +856,10 @@ export function registerFilesRoutes(router: Router): void {
           logger.info(
             `File ${fileName} successfully uploaded to ${relativePath} in ${totalChunks} chunks`,
           );
+          await logActivity(req, 'file:upload', {
+            serverId: String(server.UUID),
+            metadata: { path: relativePath, fileName, size: req.file.size },
+          });
           res.status(200).json({
             success: true,
             fileName,

@@ -587,27 +587,17 @@ function escJS(val) {
   }
 
   function downloadfile(fileName, filePath) {
-    fetch('/server/<%= server.UUID %>/files/download/' + encodeURIComponent(filePath), { method: 'GET' })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error downloading file: ${response.statusText}`);
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        })
-        .catch(error => {
-            console.error('Download failed:', error);
-            showToast('Failed to download file', 'error');
-        });
+    // The panel route mints a one-time daemon token and 302s to the daemon,
+    // which serves the file directly — opening it in a new tab keeps this
+    // page's state intact.
+    const url = '/server/<%= server.UUID %>/files/download/' + encodeURIComponent(filePath);
+    const a = document.createElement('a');
+    a.href = url;
+    a.rel = 'noopener';
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 
  // File Select thingy

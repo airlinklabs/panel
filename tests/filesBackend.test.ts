@@ -23,6 +23,7 @@ vi.mock('../src/handlers/logger', () => ({
 
 vi.mock('../src/handlers/utils/core/daemonRequest', () => ({
   daemonRequest: vi.fn(),
+  daemonBaseUrl: vi.fn(async () => 'http://127.0.0.1:8080'),
 }));
 
 import prisma from '../src/db';
@@ -154,6 +155,34 @@ describe('filesBackend copy / rename / rm guards', () => {
       const res = await fetch(`${base}/server/srv-abc/files/rm/a..b`, { method: 'DELETE' });
       expect(res.status).toBe(400);
       expect((await res.json()).error).toBeTruthy();
+      expect(mockDaemonRequest).not.toHaveBeenCalled();
+    });
+  });
+
+  it('GET /server/:id/files/download/{*path} mints a daemon token and 302s to the daemon instead of proxying bytes', async () => {
+    mockDaemonRequest.mockResolvedValue({
+      status: 200,
+      data: { token: 'a'.repeat(64), url: '/dl/a'.repeat(64) },
+    } as any);
+
+    await withServer(buildApp(), async (base) => {
+      const res = await fetch(`${base}/server/srv-abc/files/download/world/foo.txt`, { redirect: 'manual' });
+      expect(res.status).toBe(302);
+      const location = res.headers.get('location') || '';
+      expect(location).toContain('127.0.0.1:8080/dl/');
+
+      expect(mockDaemonRequest).toHaveBeenCalledTimes(1);
+      const options = mockDaemonRequest.mock.calls[0][0];
+      expect(options.method).toBe('POST');
+      expect(options.path).toBe('/fs/download-token');
+      expect(options.body).toEqual({ id: 'srv-abc', path: 'world/foo.txt' });
+    });
+  });
+
+  it('GET /server/:id/files/download/{*path} rejects an unsafe path with 400 without hitting the daemon', async () => {
+    await withServer(buildApp(), async (base) => {
+      const res = await fetch(`${base}/server/srv-abc/files/download/..%2F..%2Fetc%2Fpasswd`, { redirect: 'manual' });
+      expect(res.status).toBe(400);
       expect(mockDaemonRequest).not.toHaveBeenCalled();
     });
   });

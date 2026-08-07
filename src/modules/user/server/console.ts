@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import type { Readable } from 'stream';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkEulaStatus } from '../../../handlers/features';
@@ -9,7 +8,7 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import { safeClientMessage } from '../../../utils/errors';
 import { NodeCapacityExceededError } from '../../../handlers/utils/server/resourceCheck';
 import prisma from '../../../db';
-import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest, daemonBaseUrl } from '../../../handlers/utils/core/daemonRequest';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import { issueWsToken } from '../../../handlers/utils/security/wsToken';
 import { getPrimaryExternalPort } from '../../../handlers/utils/server/ports';
@@ -364,37 +363,23 @@ export function registerConsoleRoutes(router: Router): void {
 
         const { node } = server;
 
-        const response = await daemonRequest<Readable>({
-          method: 'GET',
-          path: `/container/logs/archives/download?id=${server.UUID}&file=${encodeURIComponent(file)}`,
+        const response = await daemonRequest<{ token?: string; url?: string }>({
+          method: 'POST',
+          path: '/container/logs/archives/download-token',
           nodeAddress: node.address,
           nodePort: node.port,
           nodeKey: node.key,
-          responseType: 'stream',
-          timeout: LOG_HISTORY_TIMEOUT_MS,
+          body: { id: server.UUID, file },
+          timeout: 15000,
         });
 
-        if (response.status >= 400) {
-          if (response.data && typeof response.data.destroy === 'function') {
-            response.data.destroy();
-          }
-          res.status(response.status).json({ error: 'Failed to download server log archive' });
+        if (response.status !== 200 || !response.data?.token || !response.data?.url) {
+          res.status(response.status || 500).json({ error: 'Failed to start download' });
           return;
         }
 
-        res.setHeader('Content-Type', 'application/gzip');
-        res.setHeader('Content-Disposition', `attachment; filename="${file}"`);
-
-        response.data.on('error', (streamError) => {
-          logger.error('Error streaming server log archive:', streamError);
-          if (!res.headersSent) {
-            res.status(500).json({ error: 'Failed to download server log archive' });
-            return;
-          }
-          res.end();
-        });
-
-        response.data.pipe(res);
+        const base = await daemonBaseUrl(node.address, node.port);
+        res.redirect(302, `${base}${response.data.url}`);
         return;
       } catch (error) {
         logger.error('Error downloading server log archive:', error);
