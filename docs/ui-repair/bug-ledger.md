@@ -92,7 +92,7 @@ Fields: ID | surface | severity | reproduction | expected | actual | cause | own
 | B-077 | checkbox spring | P2 | `checkbox-anim.js:4` spring overshoot not gated under `prefers-reduced-motion`. | 6 · fixed (already gated since e6a80260 — `prefersReduced` early-return verified) |
 | B-078 | missing footer | P2 | mounts/index, servers/create, servers/edit lack footer include -> motion.js not loaded. | 2 · open (verified still missing) |
 | B-079 | status dot matcher | P3 | `status-badge.ejs:14` `s.startsWith('s') && s !== 'suspended'` brittle. | 7 · fixed (explicit `starting/stopping` list) |
-| B-080 | stop has no confirm | P3 | `manage.ejs:116-121` stop button no confirm while deleteFolder does. | 7 |
+| B-080 | stop has no confirm | P3 | `manage.ejs:116-121` stop button no confirm while deleteFolder does. | 7 · fixed (confirm present at manage.ejs:1207 — `window.modal.confirm` with `danger: true`; ledger was stale) |
 | B-081 | hardcoded icons | P2 | 3 non-brand hardcoded stroke SVGs (toast.ejs:75 X, databases.ejs:123/198-199 eye). | 2 · fixed (toast X -> `alIcon('x')`, databases eye/eye-off -> `icon()`) |
 | B-082 | date/uptime formatter duplication | P2 | 3 uptime formatters + 2 formatBytes + ~25 `toLocale*` call sites; locale divergence known (docs/12-localize). | 2 · deferred |
 | B-083 | duplicate theme toggle | P2 | header.ejs:80-111 + auth-header.ejs:38-66 duplicate theme-init. | 2 · deferred |

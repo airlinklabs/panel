@@ -22,7 +22,7 @@ interface IconOptions {
   width?: number;
   /** Override height only */
   height?: number;
-  /** Override stroke-width — default 1.75 */
+  /** Override stroke-width — default 1.5 */
   strokeWidth?: number;
   /** aria-label for standalone decorative icons */
   label?: string;
@@ -67,7 +67,7 @@ export function icon(name: string, opts: IconOptions = {}): string {
 
   const w = opts.width  ?? opts.size ?? 16;
   const h = opts.height ?? opts.size ?? 16;
-  const sw = opts.strokeWidth ?? 1.75;
+  const sw = opts.strokeWidth ?? 1.5;
 
   const svgAttrs: Record<string, string | number> = {
     xmlns:              'http://www.w3.org/2000/svg',
