@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import type { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import multer from 'multer';
@@ -154,6 +154,52 @@ export function registerFilesRoutes(router: Router): void {
           settings,
           installed: await checkForServerInstallation(getParamAsString(serverId)),
         });
+      }
+    },
+  );
+
+  router.get(
+    '/server/:id/files/list',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
+    async (req: Request, res: Response) => {
+      try {
+        const context = await loadAuthenticatedServerContext(req);
+        if (sendMissingServerContext(res, context)) {return;}
+        const { server } = context;
+
+        let path = req.query?.path || '/';
+        path = typeof path === 'string' ? path : String(path);
+        path = path.replace(/\/+/g, '/');
+
+        const filesResponse = await daemonRequest<FsFileEntry[]>({
+          method: 'GET',
+          path: '/fs/list',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          params: { id: server.UUID, path },
+        });
+
+        let files: FsFileEntry[] = filesResponse.data as FsFileEntry[];
+        files = typeof files === 'string' ? JSON.parse(files as unknown as string) : files;
+        files = (files || []).filter((file) => file.name !== 'airlink');
+        files = files.sort((a, b) => {
+          if (a.type === 'directory' && b.type === 'file') {return -1;}
+          if (a.type === 'file' && b.type === 'directory') {return 1;}
+          return 0;
+        });
+
+        const html = await new Promise<string>((resolve, reject) => {
+          res.render('user/server/files-rows', { files, currentPath: path, server, req }, (err, out) => {
+            if (err) {reject(err);}
+            else {resolve(out ?? '');}
+          });
+        });
+        res.json({ success: true, files, html });
+      } catch (error: unknown) {
+        logger.error('Error listing files for in-place refresh:', error);
+        res.status(500).json({ error: 'Failed to list files.' });
       }
     },
   );
@@ -637,8 +683,8 @@ export function registerFilesRoutes(router: Router): void {
             body: {
               id: server.UUID,
               path: relativePath,
-              newName: newName,
-              newPath: newPath,
+              newName,
+              newPath,
             },
           });
           await logActivity(req, 'file:rename', { serverId: String(server.UUID), metadata: { path: relativePath, newName } });
@@ -737,7 +783,7 @@ export function registerFilesRoutes(router: Router): void {
             body: {
               id: server.UUID,
               path: relativePath,
-              fileName: fileName,
+              fileName,
               fileContent: fileContentWithMeta,
             },
             timeout: 60000,
@@ -760,7 +806,7 @@ export function registerFilesRoutes(router: Router): void {
             body: {
               id: server.UUID,
               path: relativePath,
-              fileName: fileName,
+              fileName,
             },
             timeout: 10000,
           });
@@ -785,10 +831,10 @@ export function registerFilesRoutes(router: Router): void {
               body: {
                 id: server.UUID,
                 path: relativePath,
-                fileName: fileName,
+                fileName,
                 fileContent: chunkContentWithMeta,
                 chunkIndex: i,
-                totalChunks: totalChunks,
+                totalChunks,
               },
               timeout: 30000,
             });
@@ -802,7 +848,7 @@ export function registerFilesRoutes(router: Router): void {
           );
           res.status(200).json({
             success: true,
-            fileName: fileName,
+            fileName,
             path: relativePath,
           });
         }

@@ -211,54 +211,8 @@ function escJS(val) {
                 <th class="al-table-th px-4 py-2.5 text-left w-32 hidden md:table-cell" scope="col">Modified</th>
               </tr>
             </thead>
-            <tbody>
-              <% files.forEach((file, index) => { %>
-                <tr class="al-file-row al-table-tr cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
-                  <td class="px-4 py-3 w-10">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(new RegExp("^/+", "g"), '') + '/' + file.name : file.name %>" aria-label="Select <%= file.name %>">
-                  </td>
-                  <td class="px-4 py-3">
-                    <%
-                      const isImage = file.type !== 'directory' && isImageFile(file.name);
-                      const filePath = currentPath && currentPath !== '/'
-                        ? currentPath.replace(new RegExp("^/+", "g"), '') + '/' + file.name
-                        : file.name;
-                      const fileHref = file.type === 'directory'
-                        ? `/server/${server.UUID}/files?path=${encodeURIComponent(filePath)}`
-                        : isImage
-                          ? '#'
-                          : `/server/${server.UUID}/files/edit/${encodeURIComponent(filePath)}`;
-                      const fileSize = (() => {
-                        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                        let size = file.size;
-                        let unitIndex = 0;
-                        while (size >= 1024 && unitIndex < sizes.length - 1) {
-                          size /= 1024;
-                          unitIndex++;
-                        }
-                        return `${size.toFixed(2)} ${sizes[unitIndex]}`;
-                      })();
-                    %>
-                    <a href="<%= fileHref %>" class="flex items-center gap-2.5 text-sm font-medium hover:text-neutral-600 dark:hover:text-white transition-colors" style="color:var(--theme-text-strong)" data-filename="<%= file.name %>" data-path="<%= filePath %>" data-size="<%= fileSize %>" data-uuid="<%= server.UUID %>" <% if (isImage) { %>data-click="viewer"<% } %>>
-                      <span class="al-file-icon shrink-0" style="color:var(--theme-text-muted)">
-                        <%- getFileIcon(file.type === 'directory' ? 'Folder' : file.category || 'No Category') %>
-                      </span>
-                      <span class="truncate"><%= file.name %></span>
-                    </a>
-                  </td>
-                  <td class="px-4 py-3 text-xs whitespace-nowrap" style="color:var(--theme-text-muted)">
-                    <%= fileSize %>
-                  </td>
-                  <td class="px-4 py-3 text-xs whitespace-nowrap hidden md:table-cell" style="color:var(--theme-text-muted)">
-                    <% if (file.modifiedAt) { %>
-                      <time datetime="<%= new Date(file.modifiedAt).toISOString() %>" class="relative-time"><%= new Date(file.modifiedAt).toLocaleDateString() %></time>
-                    <% } else { %>
-                      <span style="color:var(--theme-text-muted)">—</span>
-                    <% } %>
-                  </td>
-
-                </tr>
-              <% }) %>
+            <tbody id="fileTableBody">
+              <%- include('./files-rows', { files, currentPath, server }) %>
             </tbody>
           </table>
           <%- include('../../components/ui/al-pagination', { total: files.length, pageSize: 50 }) %>
@@ -542,6 +496,67 @@ function escJS(val) {
     });
   });
 
+  const fileListPath = '<%= currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
+
+  // In-place refresh of the file table — replaces location.reload() after
+  // create/delete/rename/move/upload/archive operations. Re-fetches the
+  // server-rendered rows so markup and icons stay identical to the initial
+  // page, then re-binds row events.
+  function bindFileRowEvents(root) {
+    root = root || document;
+    root.querySelectorAll('a[data-click="viewer"]').forEach((el) => {
+      el.addEventListener('click', (event) => {
+        event.preventDefault();
+        const img = el;
+        if (typeof window.showImageViewer === 'function') {
+          window.showImageViewer(img.dataset.filename, img.dataset.path, img.dataset.size, img.dataset.uuid);
+        }
+      });
+    });
+    root.querySelectorAll('.file-checkbox:not(#selectAll)').forEach(checkbox => {
+      checkbox.addEventListener('change', event => {
+        if (window.animateCheckbox) window.animateCheckbox(checkbox);
+        const fileName = event.target.dataset.filename;
+        if (event.target.checked) {
+          if (!selectedFiles.includes(fileName)) selectedFiles.push(fileName);
+        } else {
+          selectedFiles = selectedFiles.filter(name => name !== fileName);
+        }
+        const allBoxes = document.querySelectorAll('.file-checkbox:not(#selectAll)');
+        const checkedCount = document.querySelectorAll('.file-checkbox:not(#selectAll):checked').length;
+        selectAllCheckbox.checked = checkedCount === allBoxes.length;
+        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < allBoxes.length;
+        updateSelectedFiles();
+      });
+    });
+    const searchInput = document.getElementById('fileSearchInput');
+    if (searchInput && searchInput.value) {
+      const q = searchInput.value.toLowerCase().trim();
+      root.querySelectorAll('tbody tr.al-file-row, tr.al-file-row').forEach(row => {
+        const name = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() ?? '';
+        row.style.display = name.includes(q) ? '' : 'none';
+      });
+    }
+  }
+
+  async function refreshFileList() {
+    const tbody = document.getElementById('fileTableBody');
+    if (!tbody) { location.reload(); return; }
+    try {
+      const res = await fetch('/server/<%= server.UUID %>/files/list?path=' + encodeURIComponent(fileListPath || '/'));
+      const data = await res.json();
+      if (!data.success || typeof data.html !== 'string') { throw new Error('Bad response'); }
+      tbody.innerHTML = data.html;
+      bindFileRowEvents(tbody);
+      if (window.alTableScan) alTableScan(tbody);
+      selectedFiles = [];
+      updateSelectedFiles();
+      if (window.staggerFileRows) window.staggerFileRows();
+    } catch (err) {
+      location.reload();
+    }
+  }
+
   function deletefile(fileName, filePath) {
     window.modal.confirm({
       title: 'Delete File',
@@ -557,7 +572,7 @@ function escJS(val) {
         loader.close();
         if (response.ok) {
            showToast(`File ${fileName} deleted.`, 'success');
-          setTimeout(() => location.reload(), 1000);
+          refreshFileList();
         } else {
           showToast('Failed to delete file', 'error');
         }
@@ -714,7 +729,7 @@ function archiveFiles(files) {
                 showToast('Files archived.', 'success');
                 selectedFiles = [];
                 updateSelectedFiles();
-                setTimeout(() => location.reload(), 1000);
+                refreshFileList();
             } else {
                 showToast('Failed to archive files', 'error');
             }
@@ -760,7 +775,7 @@ confirmMassDeleteBtn.addEventListener('click', async function() {
     setTimeout(() => {
       loader.close();
       showToast(`${selectedFiles.length} files deleted.`, 'success');
-      setTimeout(() => window.location.reload(), 1000);
+      refreshFileList();
     }, 500);
   } catch (error) {
     loader.close();
@@ -867,7 +882,7 @@ function openCreateFileModal() {
             setTimeout(() => {
                 loader.close();
                 showToast('File extracted.', 'success');
-                setTimeout(() => location.reload(), 1000);
+                refreshFileList();
             }, 500);
         } else {
             loader.close();
@@ -1046,7 +1061,7 @@ function openCreateFileModal() {
             setTimeout(() => {
               loader.close();
                showToast(`File ${fileName} uploaded.`, 'success');
-              setTimeout(() => location.reload(), 1000);
+              refreshFileList();
             }, 500);
           } else {
             loader.close();
@@ -1232,7 +1247,7 @@ function openCreateFileModal() {
         loader.close();
         if (res.ok) {
           showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success');
-          setTimeout(() => location.reload(), 800);
+          refreshFileList();
         } else {
           showToast('<%= req.translations.folderCreateFailedFallback || "Failed to create folder, retrying with fallback" %>', 'error');
           tryCreateFolderViaFile(finalPath, raw);
@@ -1259,7 +1274,7 @@ function openCreateFileModal() {
         });
         if (res.ok) {
           loader.updateProgress(100, 'Done!');
-          setTimeout(() => { loader.close(); showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success'); setTimeout(() => location.reload(), 800); }, 400);
+          setTimeout(() => { loader.close(); showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success'); refreshFileList(); }, 400);
         } else {
           loader.close(); showToast('<%= req.translations.fileCreateFailed || "Failed to create file" %>', 'error');
         }
@@ -1289,7 +1304,7 @@ function openCreateFileModal() {
       });
       if (res2.ok) {
         loader.updateProgress(100, 'Done!');
-        setTimeout(() => { loader.close(); showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success'); setTimeout(() => location.reload(), 800); }, 400);
+        setTimeout(() => { loader.close(); showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success'); refreshFileList(); }, 400);
       } else {
         loader.close(); showToast('<%= req.translations.moveToTargetFailed || "Failed to move to target path" %>', 'error');
       }
@@ -1308,7 +1323,7 @@ function openCreateFileModal() {
       });
       if (res.ok) {
         showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success');
-        setTimeout(() => location.reload(), 800);
+        refreshFileList();
       } else {
         showToast('<%= req.translations.folderCreateFailed || "Failed to create folder" %>', 'error');
       }
@@ -1335,7 +1350,7 @@ function openCreateFileModal() {
       loader.close();
       if (res.ok) {
         showToast('Renamed.', 'success');
-        setTimeout(() => location.reload(), 800);
+        refreshFileList();
       } else {
         showToast('Failed to rename', 'error');
       }
@@ -1451,7 +1466,7 @@ function openCreateFileModal() {
       if (!res.ok) throw new Error('Move failed');
       closeMoveModal();
       showToast('File moved.', 'success');
-      setTimeout(() => location.reload(), 700);
+      refreshFileList();
     } catch {
       showToast('Move failed — check the destination path.', 'error');
     }
@@ -1470,7 +1485,7 @@ function openCreateFileModal() {
       });
       if (!res.ok) throw new Error('Copy failed');
       showToast(`Duplicated as ${name.split('/').pop()}.`, 'success');
-      setTimeout(() => location.reload(), 700);
+      refreshFileList();
     } catch {
       showToast('Duplicate failed.', 'error');
     }
@@ -1491,7 +1506,7 @@ function openCreateFileModal() {
     openRenameModal(name, fullPath);
   });
 
-  (function staggerFileRows() {
+  window.staggerFileRows = function staggerFileRows() {
     const rows = document.querySelectorAll('tbody tr');
     rows.forEach(function(row, i) {
       row.style.opacity = '0';
@@ -1508,7 +1523,8 @@ function openCreateFileModal() {
         }, 200);
       }, i * 25);
     });
-  })();
+  };
+  window.staggerFileRows();
 
   // ── Pull file from URL ──────────────────────────────────────────────────
   function openPullFileModal() {
@@ -1578,7 +1594,7 @@ function openCreateFileModal() {
       loader.close();
       if (res.ok && data.success) {
         showToast(data.message || 'File pulled.', 'success');
-        setTimeout(() => location.reload(), 1000);
+        refreshFileList();
       } else {
         showToast(data.error || 'Failed to pull file.', 'error');
       }

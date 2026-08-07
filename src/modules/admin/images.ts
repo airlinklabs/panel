@@ -1,6 +1,7 @@
-import { Router, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
 import prisma from '../../db';
-import { Module } from '../../handlers/moduleInit';
+import type { Module } from '../../handlers/moduleInit';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { getCatalogue, forceRefresh } from '../../handlers/eggCatalogueService';
@@ -67,7 +68,7 @@ const adminModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {return res.redirect('/login');}
 
           const images = await prisma.images.findMany();
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
@@ -251,10 +252,10 @@ const adminModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {return res.redirect('/login');}
 
           const image = await prisma.images.findUnique({ where: { id: Number(req.params.id) } });
-          if (!image) return res.redirect('/admin/images?error=Image+not+found');
+          if (!image) {return res.redirect('/admin/images?error=Image+not+found');}
 
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
@@ -263,7 +264,7 @@ const adminModule: Module = {
             const parsed = JSON.parse(image.dockerImages || '[]');
             if (Array.isArray(parsed)) {
               for (const obj of parsed) {
-                if (typeof obj === 'object') Object.assign(dockerImages, obj);
+                if (typeof obj === 'object') {Object.assign(dockerImages, obj);}
               }
             } else if (typeof parsed === 'object') {
               dockerImages = parsed;
@@ -374,7 +375,7 @@ const adminModule: Module = {
             const parsed = JSON.parse(image.dockerImages || '[]');
             if (Array.isArray(parsed)) {
               for (const obj of parsed) {
-                if (typeof obj === 'object') Object.assign(dockerImagesRaw, obj);
+                if (typeof obj === 'object') {Object.assign(dockerImagesRaw, obj);}
               }
             }
           } catch { /* keep empty */ }
@@ -449,6 +450,24 @@ const adminModule: Module = {
       },
     );
 
+    // JSON list for in-place table updates (Phase 1: no-reload image list)
+    router.get(
+      '/admin/images/list',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const images = await prisma.images.findMany({
+            select: { id: true, name: true, author: true, createdAt: true },
+            orderBy: { createdAt: 'desc' },
+          });
+          res.json({ success: true, images });
+        } catch (error: unknown) {
+          logger.error('Error listing images:', error);
+          res.status(500).json({ success: false, error: 'Failed to list images.' });
+        }
+      },
+    );
+
     // Store page shell — just renders the HTML, all data comes from /catalogue
     router.get(
       '/admin/images/store',
@@ -457,7 +476,7 @@ const adminModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {return res.redirect('/login');}
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           res.render('admin/images/store', { user, req, settings });
         } catch (error: unknown) {

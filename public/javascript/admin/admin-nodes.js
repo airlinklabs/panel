@@ -8,6 +8,15 @@ function showConfirmModal(title, message, onConfirm) {
   window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Yeah, delete it', onConfirm });
 }
 
+function removeNodeRow(nodeId) {
+  const row = document.querySelector('#nodeTable [data-node-id="' + nodeId + '"]');
+  if (!row) return;
+  al.removeRow(row).then(function () {
+    const tbody = document.querySelector('#nodeTable tbody');
+    if (tbody && !tbody.querySelector('[data-node-id]')) al.showEmpty(tbody, 'No nodes yet.', 4);
+  });
+}
+
 async function deleteNode(nodeId) {
   showConfirmModal('Delete node', 'This will permanently remove the node. This cannot be undone.', async () => {
     try {
@@ -18,7 +27,7 @@ async function deleteNode(nodeId) {
       const result = await response.json();
       if (response.ok) {
         showToast('Node deleted.', 'success');
-        window.location.reload();
+        removeNodeRow(nodeId);
       } else if (result.error === 'There are instances on the node') {
         showConfirmModal('Node has servers', 'There are servers on this node. Delete all servers and remove the node?', async () => {
           const r2 = await fetch(`/admin/node/${nodeId}?deleteInstance=true`, {
@@ -27,7 +36,7 @@ async function deleteNode(nodeId) {
           });
           if (r2.ok) {
             showToast('Node and servers deleted.', 'success');
-            window.location.reload();
+            removeNodeRow(nodeId);
           } else {
             showToast('Failed to delete node', 'error');
           }
@@ -128,24 +137,69 @@ function copyCommand(copyBtn, command) {
     }
   }
 
+  function offlineBannerHtml() {
+    return alIcon('triangle-alert', 'w-4 h-4 shrink-0 mt-0.5') +
+      '<div class="flex-1">' +
+      '<p class="font-medium">Connection Error</p>' +
+      '<p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p>' +
+      '</div>' +
+      '<button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">' +
+      alIcon('refresh-cw', 'size-3', { strokeWidth: 1.5 }) + 'Retry Connection</button>';
+  }
+
+  function injectOfflineBanner() {
+    if (document.querySelector('.al-alert-danger')) return;
+    const banner = document.createElement('div');
+    banner.className = 'al-alert-danger mb-5';
+    banner.innerHTML = offlineBannerHtml();
+    const table = document.getElementById('nodeTable');
+    if (table && table.parentNode) table.parentNode.insertBefore(banner, table);
+  }
+
+  function applyNodeStatuses(nodes) {
+    nodes.forEach(function (n) {
+      updateNodeStatus(n.id, n.status);
+    });
+    const anyOffline = nodes.some(function (n) { return n.status === 'Offline'; });
+    const alertEl = document.querySelector('.al-alert-danger');
+    if (anyOffline) {
+      if (!alertEl) injectOfflineBanner();
+    } else if (alertEl) {
+      alertEl.remove();
+    }
+  }
+
   function pollNodeStatus() {
     fetch('/admin/nodes/list')
       .then(function(r) { return r.json(); })
       .then(function(nodes) {
         if (!nodes || !nodes.length) return;
-        nodes.forEach(function(n) {
-          updateNodeStatus(n.id, n.status);
-        });
-        var anyOffline = nodes.some(function(n) { return n.status === 'Offline'; });
-        var alertEl = document.querySelector('.al-alert-danger');
-        if (anyOffline) {
-          if (!alertEl) window.location.reload();
-        } else {
-          if (alertEl) alertEl.remove();
-        }
+        applyNodeStatuses(nodes);
       })
       .catch(function() {});
   }
+
+  window.refreshNodeStatuses = function () {
+    const banner = document.querySelector('.al-alert-danger');
+    if (banner && window.al) al.patchEl(banner, '<div class="flex items-center gap-3">' + alIcon('loader-circle', 'w-4 h-4 animate-spin') + '<p class="font-medium">Reconnecting…</p></div>');
+    fetch('/admin/nodes/list')
+      .then(function(r) { return r.json(); })
+      .then(function(nodes) {
+        if (!nodes || !nodes.length) return;
+        nodes.forEach(function (n) {
+          updateNodeStatus(n.id, n.status);
+        });
+        const anyOffline = nodes.some(function (n) { return n.status === 'Offline'; });
+        const alertEl = document.querySelector('.al-alert-danger');
+        if (anyOffline) {
+          if (alertEl && window.al) al.patchEl(alertEl, offlineBannerHtml());
+          else if (!alertEl) injectOfflineBanner();
+        } else if (alertEl) {
+          alertEl.remove();
+        }
+      })
+      .catch(function() {});
+  };
 
   setInterval(pollNodeStatus, 15000);
 })();

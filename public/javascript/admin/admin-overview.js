@@ -64,6 +64,7 @@
           showToast(data.message || 'Update complete. Restarting.', 'success');
           statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';
           fadeIn(statusDiv);
+          // The update restarts the panel process — reload loads the new build.
           setTimeout(() => window.location.reload(), UPDATE_RELOAD_DELAY_MS);
         } catch (error) {
           statusDiv.innerHTML = '<span class="text-red-500">Update failed.</span>';

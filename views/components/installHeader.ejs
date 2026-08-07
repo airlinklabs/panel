@@ -109,6 +109,13 @@
         if (banner) banner.classList.add('hidden');
       }, 1200);
     } else {
+      // Non-manage pages render install-gated content server-side; a single
+      // state-transition reload after install completes is required to show
+      // the page content. Toast first so the result is visible on arrival.
+      if (window.showToast) showToast('Installation complete.', 'success');
+      setTimeout(function() {
+        if (banner) banner.classList.add('hidden');
+      }, 400);
       setTimeout(function() { window.location.reload(); }, 1600);
     }
   }
@@ -157,6 +164,9 @@
           if (poller) clearInterval(poller);
           startPolling();
         } else {
+          // State transition (reinstall re-arms the install banner). Reload
+          // re-renders the install-gated page with the fresh state.
+          if (window.showToast) showToast('Reinstalling server…', 'info');
           window.location.reload();
         }
       })

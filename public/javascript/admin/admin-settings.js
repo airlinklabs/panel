@@ -1,7 +1,5 @@
 const DEFAULT_SMTP_PORT = 587;
 const DEFAULT_UPLOAD_LIMIT = 100;
-const RELOAD_DELAY_MS = 1200;
-const BAN_RELOAD_DELAY_MS = 800;
 
 (function () {
   function post(url, body, btn) {
@@ -16,8 +14,9 @@ const BAN_RELOAD_DELAY_MS = 800;
       .then(function(d) {
         if (!d.success) throw new Error(d.error || 'Failed');
         showToast('Settings saved. Looking good.', 'success');
+        return true;
       })
-      .catch(function(err) { showToast(err.message || 'Failed', 'error'); })
+      .catch(function(err) { showToast(err.message || 'Failed', 'error'); return false; })
       .finally(function() { if (btn) { btn.disabled = false; btn.textContent = orig; } });
   }
 
@@ -27,12 +26,144 @@ const BAN_RELOAD_DELAY_MS = 800;
   window.tabLabels = window.tabLabels || {};
   window.tabResetHandlers = window.tabResetHandlers || {};
 
+  /* ── In-place DOM helpers ─────────────────── */
+
+  function applyThemeCss(mode, value) {
+    var link = document.getElementById(mode + '-theme-css');
+    if (value && value !== 'default') {
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.id = mode + '-theme-css';
+        link.setAttribute('data-theme-mode', mode);
+        document.head.appendChild(link);
+      }
+      link.href = value;
+    } else if (link) {
+      link.parentNode.removeChild(link);
+    }
+  }
+
+  function applyThemeFromForm() {
+    if (!formAppearance) return;
+    var light = formAppearance.querySelector('input[name="lightTheme"]:checked');
+    var dark  = formAppearance.querySelector('input[name="darkTheme"]:checked');
+    applyThemeCss('light', light ? light.value : 'default');
+    applyThemeCss('dark',  dark  ? dark.value  : 'default');
+    if (window.applyThemeSheets) window.applyThemeSheets();
+  }
+
+  function selectThemeRadio(name, value) {
+    if (!formAppearance) return;
+    var changed = false;
+    formAppearance.querySelectorAll('input[name="' + name + '"]').forEach(function(radio) {
+      var on = radio.value === value;
+      if (radio.checked !== on) { radio.checked = on; changed = true; }
+    });
+    if (changed) {
+      var checked = formAppearance.querySelector('input[name="' + name + '"]:checked');
+      if (checked) checked.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
+
+  function resetAppearanceForm() {
+    if (!formAppearance) return;
+    var title = formAppearance.querySelector('input[name="title"]');
+    if (title) title.value = 'Airlink';
+    selectThemeRadio('lightTheme', 'default');
+    selectThemeRadio('darkTheme', 'default');
+    var loginUrl = document.getElementById('login-wallpaper-url');
+    var registerUrl = document.getElementById('register-wallpaper-url');
+    if (loginUrl) loginUrl.value = '';
+    if (registerUrl) registerUrl.value = '';
+    document.querySelectorAll('#panel-appearance img').forEach(function(img) { img.remove(); });
+    applyThemeCss('light', 'default');
+    applyThemeCss('dark', 'default');
+  }
+
+  var formSnapshot = [];
+  function snapshotForms() {
+    formSnapshot = [];
+    document.querySelectorAll('#panel-servers input, #panel-security input, #panel-security select, #panel-security textarea').forEach(function(el) {
+      formSnapshot.push({ el: el, value: el.value, checked: el.checked, text: null });
+    });
+    document.querySelectorAll('#panel-servers [data-format-switcher], #panel-security [data-format-switcher]').forEach(function(btn) {
+      formSnapshot.push({ el: btn, value: btn.textContent, checked: null, text: true });
+    });
+  }
+  function syncFormatSwitchers() {
+    document.querySelectorAll('#panel-servers [data-format-switcher], #panel-security [data-format-switcher]').forEach(function(btn) {
+      var display = document.getElementById(btn.dataset.display);
+      var hidden  = document.getElementById(btn.dataset.hidden);
+      if (!display || !hidden) return;
+      var v = parseInt(hidden.value, 10);
+      if (isNaN(v) || v <= 0) return;
+      if (v >= 1024) {
+        display.value = Math.round(v / 1024);
+        btn.textContent = 'GB';
+      } else {
+        display.value = v;
+        btn.textContent = 'MB';
+      }
+    });
+  }
+  function restoreForm() {
+    formSnapshot.forEach(function(s) {
+      if (s.text) { s.el.textContent = s.value; return; }
+      s.el.value = s.value;
+      s.el.checked = s.checked;
+    });
+    syncFormatSwitchers();
+  }
+
+  function banRowHtml(ip) {
+    return '<div class="flex items-center justify-between rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-4 py-2.5">' +
+      '<span class="text-sm font-mono text-neutral-700 dark:text-neutral-300">' + window.escHtml(ip) + '</span>' +
+      '<button type="button" class="unban-btn text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition inline-flex items-center gap-1.5" data-ip="' + window.escAttr(ip) + '">' +
+      (window.alIcon ? window.alIcon('shield-check', 'size-3', { strokeWidth: 1.5 }) : '') + 'Unban</button></div>';
+  }
+
+  function showEmptyBanList(list) {
+    if (!list) return;
+    var hasEmpty = Array.prototype.some.call(list.children, function(child) { return child.tagName === 'P'; });
+    if (hasEmpty) return;
+    var p = document.createElement('p');
+    p.className = 'text-sm text-neutral-400';
+    p.textContent = 'No banned IPs.';
+    list.appendChild(p);
+  }
+
+  function hideEmptyBanList(list) {
+    if (!list) return;
+    Array.prototype.forEach.call(list.children, function(child) {
+      if (child.tagName === 'P') child.parentNode.removeChild(child);
+    });
+  }
+
+  function addBanRow(ip) {
+    var list = document.getElementById('bannedIpList');
+    if (!list) return;
+    hideEmptyBanList(list);
+    al.addRow(list, banRowHtml(ip));
+  }
+
+  function removeBanRow(btn) {
+    var row = btn.closest('.flex.items-center.justify-between');
+    if (!row) return;
+    var list = document.getElementById('bannedIpList');
+    al.removeRow(row).then(function() {
+      if (list && !list.querySelector('.unban-btn')) showEmptyBanList(list);
+    });
+  }
+
+  snapshotForms();
+
   /* ── Appearance ──────────────────────────── */
   window.tabHandlers['appearance'] = function() {
     if (!formAppearance) return;
     const btn = document.getElementById('tab-save-btn');
     const fd = new FormData(formAppearance);
-    post('/admin/settings', fd, btn).then(function() { setTimeout(function() { location.reload(); }, RELOAD_DELAY_MS); });
+    post('/admin/settings', fd, btn).then(function(ok) { if (ok) applyThemeFromForm(); });
   };
   window.tabLabels['appearance'] = 'Save';
   window.tabResetHandlers['appearance'] = function() {
@@ -45,7 +176,7 @@ const BAN_RELOAD_DELAY_MS = 800;
         const d = await window.api('/admin/settings/reset', 'POST');
         if (d && d.success) {
           showToast('Settings reset to defaults.', 'success');
-          setTimeout(function() { location.reload(); }, RELOAD_DELAY_MS);
+          resetAppearanceForm();
         } else if (d) {
           showToast(d.error || 'Failed', 'error');
         }
@@ -71,7 +202,10 @@ const BAN_RELOAD_DELAY_MS = 800;
     }, btn);
   };
   window.tabLabels['servers'] = 'Save';
-  window.tabResetHandlers['servers'] = function() { location.reload(); };
+  window.tabResetHandlers['servers'] = function() {
+    restoreForm();
+    showToast('Changes discarded.', 'success');
+  };
 
   /* ── Security ────────────────────────────── */
   window.tabHandlers['security'] = function() {
@@ -121,7 +255,10 @@ const BAN_RELOAD_DELAY_MS = 800;
     });
   };
   window.tabLabels['security'] = 'Save';
-  window.tabResetHandlers['security'] = function() { location.reload(); };
+  window.tabResetHandlers['security'] = function() {
+    restoreForm();
+    showToast('Changes discarded.', 'success');
+  };
 
   /* ── SMTP test ──────────────────────────── */
   document.getElementById('smtpTestBtn').addEventListener('click', function () {
@@ -177,7 +314,7 @@ const BAN_RELOAD_DELAY_MS = 800;
     if (d && d.success) {
       document.getElementById('banIpInput').value = '';
       showToast('IP banned. Bye bye.', 'success');
-      setTimeout(function() { location.reload(); }, BAN_RELOAD_DELAY_MS);
+      addBanRow(ip);
     } else if (d) {
       showToast(d.error || 'Failed', 'error');
     }
@@ -189,7 +326,7 @@ const BAN_RELOAD_DELAY_MS = 800;
     const d = await window.api('/admin/settings/unban-ip', 'POST', { ip: btn.dataset.ip });
     if (d && d.success) {
       showToast('IP unbanned. Welcome back.', 'success');
-      setTimeout(function() { location.reload(); }, BAN_RELOAD_DELAY_MS);
+      removeBanRow(btn);
     } else if (d) {
       showToast(d.error || 'Failed', 'error');
     }

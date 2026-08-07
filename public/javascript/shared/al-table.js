@@ -1,12 +1,21 @@
-/* al-table — responsive table upgrade.
+/* al-table — responsive table upgrade with feature flags.
    Reads thead labels and injects them as data-label on each td so the
    CSS card collapse (see .al-table-card in tw.css) can render row-as-card
-   on small screens without any markup changes. Tables with 3+ columns are
-   auto-upgraded; add data-table-card="off" to opt a table out, or
-   data-table-card="on" to force card mode on a smaller table. */
+   on small screens without any markup changes.
+
+   Feature flags (data attributes on <table>):
+     data-table-card="on|off"     — force card mode on/off
+     data-table-compact           — compact row padding
+     data-table-sticky            — sticky thead
+     data-table-search="#input"   — bind search input to filter rows
+     data-table-empty="msg"       — show empty state when no rows
+     data-table-empty-colspan="n" — colspan for empty state (default: 6)
+
+   Auto-scans on DOMContentLoaded and via MutationObserver.
+   Exposes window.alTableScan(root) for manual re-scan after DOM changes. */
 (function () {
   function headerLabels(table) {
-    const thead = table.querySelector('thead');
+    var thead = table.querySelector('thead');
     if (!thead) return [];
     return Array.prototype.slice.call(thead.querySelectorAll('th')).map(function (th) {
       return (th.textContent || '').replace(/\s+/g, ' ').trim();
@@ -16,26 +25,118 @@
   function upgrade(table) {
     if (table.dataset.tableCard === 'off') return;
 
-    const labels = headerLabels(table);
+    /* ── compact mode ─────────────────────────────────────── */
+    if (table.hasAttribute('data-table-compact')) {
+      table.classList.add('al-table-compact');
+    }
+
+    /* ── sticky header ────────────────────────────────────── */
+    if (table.hasAttribute('data-table-sticky')) {
+      table.classList.add('al-table-sticky');
+      var thead = table.querySelector('thead');
+      if (thead) {
+        var ths = thead.querySelectorAll('th');
+        for (var i = 0; i < ths.length; i++) {
+          ths[i].style.position = 'sticky';
+          ths[i].style.top = '0';
+          ths[i].style.zIndex = '2';
+          ths[i].style.background = 'var(--theme-table-header-bg)';
+        }
+      }
+    }
+
+    /* ── card mode ────────────────────────────────────────── */
+    var labels = headerLabels(table);
     if (labels.length >= 3 && table.dataset.tableCard !== 'on') table.classList.add('al-table-card');
     if (table.dataset.tableCard === 'on') table.classList.add('al-table-card');
 
     if (!table.classList.contains('al-table-card')) return;
 
-    const rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+    var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
     rows.forEach(function (row) {
-      const cells = Array.prototype.slice.call(row.querySelectorAll('td'));
+      var cells = Array.prototype.slice.call(row.querySelectorAll('td'));
       cells.forEach(function (td, i) {
-        const label = labels[i];
+        var label = labels[i];
         if (!label || /^actions?$/i.test(label)) return;
         td.setAttribute('data-label', label);
       });
     });
   }
 
-  function scan(root) {
-    Array.prototype.slice.call((root || document).querySelectorAll('table.al-table')).forEach(upgrade);
+  /* ── search binding ──────────────────────────────────────── */
+  function bindSearch(table) {
+    var searchSel = table.dataset.tableSearch;
+    if (!searchSel) return;
+    var input = document.querySelector(searchSel);
+    if (!input || input._alTableBound) return;
+    input._alTableBound = true;
+    var debounceTimer;
+    input.addEventListener('input', function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        var query = input.value.toLowerCase();
+        var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+        var visible = 0;
+        rows.forEach(function (row) {
+          if (row.hasAttribute('data-al-empty')) return;
+          var text = row.textContent.toLowerCase();
+          var match = !query || text.indexOf(query) !== -1;
+          row.style.display = match ? '' : 'none';
+          if (match) visible++;
+        });
+        /* show/hide empty state */
+        var emptyAttr = table.dataset.tableEmpty;
+        if (emptyAttr) {
+          var existing = table.querySelector('[data-al-empty]');
+          if (visible === 0 && !existing) {
+            var colspan = parseInt(table.dataset.tableEmptyColspan, 10) || 6;
+            var tbody = table.querySelector('tbody');
+            if (tbody) {
+              var tr = document.createElement('tr');
+              tr.setAttribute('data-al-empty', '');
+              tr.innerHTML = '<td colspan="' + colspan + '" class="px-4 py-8 text-center text-sm" style="color:var(--theme-text-muted);">' + emptyAttr + '</td>';
+              tbody.appendChild(tr);
+            }
+          } else if (visible > 0 && existing && existing.parentNode) {
+            existing.parentNode.removeChild(existing);
+          }
+        }
+      }, 150);
+    });
   }
+
+  /* ── empty state on initial load ─────────────────────────── */
+  function checkEmpty(table) {
+    var emptyAttr = table.dataset.tableEmpty;
+    if (!emptyAttr) return;
+    var tbody = table.querySelector('tbody');
+    if (!tbody) return;
+    var dataRows = Array.prototype.slice.call(tbody.querySelectorAll('tr')).filter(function (r) {
+      return !r.hasAttribute('data-al-empty');
+    });
+    if (dataRows.length === 0) {
+      var colspan = parseInt(table.dataset.tableEmptyColspan, 10) || 6;
+      var existing = tbody.querySelector('[data-al-empty]');
+      if (!existing) {
+        var tr = document.createElement('tr');
+        tr.setAttribute('data-al-empty', '');
+        tr.innerHTML = '<td colspan="' + colspan + '" class="px-4 py-8 text-center text-sm" style="color:var(--theme-text-muted);">' + emptyAttr + '</td>';
+        tbody.appendChild(tr);
+      }
+    }
+  }
+
+  function scan(root) {
+    var tables = Array.prototype.slice.call((root || document).querySelectorAll('table.al-table'));
+    tables.forEach(function (table) {
+      upgrade(table);
+      bindSearch(table);
+      checkEmpty(table);
+    });
+  }
+
+  /* Expose for data-layer.js and manual calls */
+  window.alTableScan = scan;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () { scan(); });
@@ -44,7 +145,7 @@
   }
 
   if (window.MutationObserver) {
-    let scheduled = false;
+    var scheduled = false;
     new MutationObserver(function () {
       if (scheduled) return;
       scheduled = true;

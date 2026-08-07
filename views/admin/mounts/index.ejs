@@ -27,7 +27,7 @@
             }) %>
           <% } else { %>
           <div class="-mx-4 overflow-x-auto">
-            <table class="al-table">
+            <table class="al-table" id="mountTable">
               <colgroup>
                 <col style="min-width:160px">
                 <col style="min-width:200px">
@@ -46,7 +46,7 @@
               </thead>
               <tbody>
                 <% let mountIdx = 0; mounts.forEach(m => { %>
-                <tr class="al-table-tr" style="--i:<%= mountIdx++ %>">
+                <tr class="al-table-tr" style="--i:<%= mountIdx++ %>" data-mount-id="<%= m.id %>">
                   <td class="al-table-td sm:pl-6">
                     <div class="font-medium" style="color:var(--theme-text-strong);"><%= m.name %></div>
                   </td>
@@ -155,9 +155,77 @@ document.getElementById('saveMountBtn').addEventListener('click', async () => {
     method: 'POST', headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }, body: JSON.stringify(body),
   });
   const d = await r.json();
-  if (r.ok) { closeMountModal(); showToast('Mount created.', 'success'); setTimeout(() => location.reload(), 800); }
+  if (r.ok) { closeMountModal(); showToast('Mount created.', 'success'); addMountRow(d.mount); }
   else showToast(d.error || 'Failed to create mount.', 'error');
 });
+
+function mountRowHtml(m) {
+  const readOnlyClass = m.readOnly
+    ? 'bg-amber-600/10 text-amber-700 dark:text-yellow-400 ring-amber-600/20'
+    : 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20';
+  const trashIcon = window.alIcon ? window.alIcon('trash-2', 'w-4 h-4') : '';
+  return '<tr class="al-table-tr" data-mount-id="' + m.id + '">' +
+    '<td class="al-table-td sm:pl-6"><div class="font-medium" style="color:var(--theme-text-strong);">' + window.escHtml(m.name) + '</div></td>' +
+    '<td class="al-table-td"><code class="inline-block max-w-full truncate rounded-md bg-neutral-100 px-2 py-1 font-mono text-xs dark:bg-neutral-800" style="color:var(--theme-text);" title="' + window.escAttr(m.source) + '">' + window.escHtml(m.source) + '</code></td>' +
+    '<td class="al-table-td"><code class="inline-block max-w-full truncate rounded-md bg-neutral-100 px-2 py-1 font-mono text-xs dark:bg-neutral-800" style="color:var(--theme-text);" title="' + window.escAttr(m.target) + '">' + window.escHtml(m.target) + '</code></td>' +
+    '<td class="al-table-td"><span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ' + readOnlyClass + '">' + (m.readOnly ? 'Read-only' : 'Read-write') + '</span></td>' +
+    '<td class="al-table-td"><div class="flex gap-3"><button onclick="deleteMount(' + m.id + ')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete mount">' + trashIcon + '</button></div></td>' +
+    '</tr>';
+}
+
+function addMountRow(mount) {
+  let tbody = document.querySelector('#mountTable tbody');
+  if (tbody) {
+    if (window.al) al.addRow(tbody, mountRowHtml(mount));
+    return;
+  }
+  const card = document.querySelector('.al-card');
+  if (!card) return;
+  const empty = card.querySelector('.py-20');
+  if (empty) empty.remove();
+  card.insertAdjacentHTML('beforeend',
+    '<div class="-mx-4 overflow-x-auto">' +
+    '<table class="al-table" id="mountTable">' +
+    '<colgroup>' +
+    '<col style="min-width:160px"><col style="min-width:200px"><col style="min-width:200px"><col style="min-width:110px"><col style="min-width:110px">' +
+    '</colgroup>' +
+    '<thead class="al-table-head"><tr>' +
+    '<th scope="col" class="al-table-th sm:pl-6">Name</th>' +
+    '<th scope="col" class="al-table-th sm:pl-6">Source</th>' +
+    '<th scope="col" class="al-table-th sm:pl-6">Target</th>' +
+    '<th scope="col" class="al-table-th sm:pl-6">Read-only</th>' +
+    '<th scope="col" class="al-table-th sm:pl-6">Actions</th>' +
+    '</tr></thead><tbody></tbody></table></div>');
+  tbody = document.querySelector('#mountTable tbody');
+  if (tbody && window.al) al.addRow(tbody, mountRowHtml(mount));
+}
+
+function showMountsEmpty() {
+  const card = document.querySelector('.al-card');
+  if (!card || card.querySelector('.py-20')) return;
+  const wrapper = document.querySelector('#mountTable') ? document.querySelector('#mountTable').closest('.-mx-4') : null;
+  if (wrapper) wrapper.remove();
+  const div = document.createElement('div');
+  div.className = 'flex flex-col items-center justify-center py-20 text-center';
+  div.innerHTML =
+    '<div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">' +
+    (window.alIcon ? window.alIcon('folder', 'w-6 h-6', { style: 'color:var(--theme-text-muted)' }) : '') +
+    '</div>' +
+    '<h3 class="text-sm font-medium" style="color:var(--theme-text-strong);">No mounts yet</h3>' +
+    '<p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);">Create a mount to expose a host directory to server containers.</p>' +
+    '<div class="mt-5"><button type="button" class="al-btn-primary" onclick="openMountModal()"><span class="inline-flex items-center gap-1.5">' + (window.alIcon ? window.alIcon('plus', 'w-4 h-4') : '') + ' New mount</span></button></div>';
+  card.appendChild(div);
+}
+
+function removeMountRow(id) {
+  const row = document.querySelector('#mountTable tbody tr[data-mount-id="' + id + '"]');
+  if (!row) return;
+  al.removeRow(row).then(function () {
+    const tbody = document.querySelector('#mountTable tbody');
+    if (tbody && !tbody.querySelector('tr[data-mount-id]')) showMountsEmpty();
+  });
+}
+
 window.deleteMount = (id) => {
   window.modal.confirm({
     title: 'Delete mount',
@@ -167,7 +235,7 @@ window.deleteMount = (id) => {
     onConfirm: async () => {
       const r = await fetch('/admin/mounts/' + id, { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
       const d = await r.json();
-      if (r.ok) { showToast('Mount deleted.', 'success'); setTimeout(() => location.reload(), 800); }
+      if (r.ok) { showToast('Mount deleted.', 'success'); removeMountRow(id); }
       else showToast(d.error || 'Failed to delete mount.', 'error');
     },
   });

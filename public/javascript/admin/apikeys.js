@@ -1,4 +1,3 @@
-const API_KEY_DELETE_RELOAD_DELAY_MS = 700;
 const STAGGER_DELAY_MS = 30;
 const ROW_ANIMATION_DURATION_MS = 200;
 
@@ -30,7 +29,16 @@ function confirmDeleteApiKey(keyId) {
     }).then(function(res) {
       if (res.ok) {
         showToast('API key deleted', 'success');
-        setTimeout(function() { location.reload(); }, API_KEY_DELETE_RELOAD_DELAY_MS);
+        const card = document.querySelector('[data-api-key-id="' + keyId + '"]');
+        if (card && window.al) al.removeRow(card);
+        const list = document.querySelector('.al-page-body');
+        if (list && !list.querySelector('[data-api-key-id]') && !list.querySelector('[data-al-apikeys-empty]')) {
+          const empty = document.createElement('div');
+          empty.className = 'flex flex-col items-center justify-center py-24 text-center al-card';
+          empty.setAttribute('data-al-apikeys-empty', '');
+          empty.innerHTML = '<p class="text-sm" style="color:var(--theme-text-muted)">No API keys yet. The robots can\'t connect without them.</p>';
+          list.appendChild(empty);
+        }
         return;
       }
       return res.json().then(function(data) {

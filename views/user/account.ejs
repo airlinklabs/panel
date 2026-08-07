@@ -116,6 +116,7 @@
               <p class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('shield', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.twoFactorAuth || 'Two-factor authentication' %>
               </p>
+              <div id="twofa-status">
               <% if (user.totpEnabled !== true) { %>
               <p class="text-sm mb-3" style="color:var(--theme-text-muted)">Add an extra layer of security to your account.</p>
               <a href="/account/2fa/setup" class="al-btn-primary text-sm inline-flex">Set up 2FA</a>
@@ -130,6 +131,7 @@
                 <button id="disable2faBtn" type="button" class="al-btn-secondary text-sm"><%- icon('shield-off', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.disable2FA || 'Disable 2FA' %></button>
               </div>
               <% } %>
+              </div>
             </div>
 
           </div>
@@ -314,8 +316,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const res = await fetch('/remove-avatar', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken } });
     if (res.ok) {
       avatarPreview.src = 'https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>';
+      const removeAvatarBtn = document.getElementById('remove-avatar-btn');
+      if (removeAvatarBtn) removeAvatarBtn.style.display = 'none';
       showToast('Profile picture removed.', 'success');
-      setTimeout(() => location.reload(), 1200);
     } else showToast('Something went wrong.', 'error');
   });
 
@@ -334,7 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (res.ok && data.success) {
         showToast('Two-factor authentication disabled.', 'success');
-        setTimeout(() => location.reload(), 1200);
+        const twofaStatus = document.getElementById('twofa-status');
+        if (twofaStatus) al.patchEl(twofaStatus, '<p class="text-sm mb-3" style="color:var(--theme-text-muted)">Add an extra layer of security to your account.</p><a href="/account/2fa/setup" class="al-btn-primary text-sm inline-flex">Set up 2FA</a>');
       } else {
         showToast(data.error || 'Failed to disable 2FA.', 'error');
       }

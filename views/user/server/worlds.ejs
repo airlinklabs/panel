@@ -195,18 +195,13 @@
       if (data.success) {
         showToast('World ' + worldName + ' deleted.', 'success');
 
-        // Fade out the deleted row
         const rows = document.querySelectorAll('tr');
         for (const row of rows) {
           if (row.textContent.includes(worldName)) {
-            row.style.transition = 'opacity 0.5s';
-            row.style.opacity = '0';
+            al.removeRow(row);
             break;
           }
         }
-
-        // Reload after animation
-        setTimeout(() => location.reload(), 800);
       } else {
         showToast(data.error || 'Failed to delete world', 'error');
         if (callback) callback();

@@ -67,7 +67,7 @@
             <div class="al-card-header">
               <div>
                 <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Databases</h2>
-                <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= userDbCount %>/<%= typeof userDbLimit !== 'undefined' && userDbLimit > 0 ? userDbLimit : '∞' %> databases</p>
+                <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" data-db-count><%= userDbCount %>/<%= typeof userDbLimit !== 'undefined' && userDbLimit > 0 ? userDbLimit : '∞' %> databases</p>
               </div>
             </div>
             <div class="overflow-x-auto">
@@ -216,6 +216,130 @@ function hideAddModal() {
 window.openAddDatabaseModal = showAddModal;
 window.closeAddDatabaseModal = hideAddModal;
 
+const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+const ICON_CALENDAR = '<%- icon('calendar', { class: 'size-3 shrink-0' }) %>';
+const ICON_COPY = '<%- icon('copy', { size: 13 }) %>';
+const ICON_REFRESH = '<%- icon('refresh-cw', { class: 'size-3', strokeWidth: 2 }) %>';
+const ICON_TRASH = '<%- icon('trash-2', { size: 14 }) %>';
+
+const buildDbRow = (db) => {
+  const host = db.host || {};
+  const created = new Date(db.createdAt).toLocaleDateString() + ' ' + new Date(db.createdAt).toLocaleTimeString();
+  return `<tr class="al-table-tr transition-colors" data-db-id="${db.id}" data-db-name="${esc(db.databaseName)}">
+      <td class="px-6 py-4 whitespace-nowrap">
+        <div class="flex items-center gap-2">
+          <span class="font-mono text-sm font-medium truncate max-w-[10rem]" style="color:var(--theme-text-strong)" title="${esc(db.databaseName)}">${esc(db.databaseName)}</span>
+          <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">MySQL</span>
+        </div>
+        <div class="text-[11px] mt-1 flex items-center gap-1.5" style="color:var(--theme-text-muted)">
+          ${ICON_CALENDAR}
+          ${t.createdLabel || 'Created:'} ${created}
+        </div>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <div class="text-sm font-medium" style="color:var(--theme-text-strong)">${esc(host.name)}</div>
+        <div class="text-[11px] font-mono mt-0.5" style="color:var(--theme-text-muted)">${esc(host.host)}:${host.port}</div>
+      </td>
+      <td class="px-6 py-4">
+        <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style="background:var(--theme-bg-secondary)">
+          <span data-role="dsn" class="flex-1 min-w-0 truncate font-mono text-[11px]" style="color:var(--theme-text-strong)">mysql://${esc(db.databaseUser)}:${esc(db.databasePassword)}@${esc(host.host)}:${host.port}/${esc(db.databaseName)}</span>
+          <button type="button" data-action="copy-dsn" class="al-btn-ghost p-2 shrink-0" style="border:none" aria-label="${t.copyConnectionString || 'Copy connection string'}">
+            ${ICON_COPY}
+          </button>
+        </div>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style="background:var(--theme-bg-secondary)">
+          <span data-role="user" class="flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)">${esc(db.databaseUser)}</span>
+          <button type="button" data-action="copy-user" class="al-btn-ghost p-2 shrink-0" style="border:none" aria-label="${t.copyUsername || 'Copy username'}">
+            ${ICON_COPY}
+          </button>
+        </div>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style="background:var(--theme-bg-secondary)">
+          <span data-role="pass" class="hidden flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)">${esc(db.databasePassword)}</span>
+          <span data-role="pass-mask" class="flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)">••••••••••••••••</span>
+          <button type="button" data-action="toggle-pass" class="al-btn-ghost p-2 shrink-0" style="border:none" aria-label="${t.showPassword || 'Show password'}">
+            ${EYE_ON}
+          </button>
+          <button type="button" data-action="copy-pass" class="al-btn-ghost p-2 shrink-0" style="border:none" aria-label="${t.copyPassword || 'Copy password'}">
+            ${ICON_COPY}
+          </button>
+        </div>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <div class="flex items-center justify-end gap-1.5">
+          <button type="button" data-action="rotate"
+            class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
+            ${ICON_REFRESH}
+            ${t.rotatePassword || 'Rotate'}
+          </button>
+          <button type="button" data-action="delete" class="al-btn-ghost p-2" style="color:var(--theme-danger);" aria-label="${t.deleteDatabaseAria || 'Delete database'}">
+            ${ICON_TRASH}
+          </button>
+        </div>
+      </td>
+    </tr>`;
+};
+
+const renderDbTable = (rowHtml) => `
+  <div class="al-card rounded-lg shadow overflow-hidden p-0">
+    <div class="al-card-header">
+      <div>
+        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Databases</h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" data-db-count><%= userDbCount + 1 %>/<%= typeof userDbLimit !== 'undefined' && userDbLimit > 0 ? userDbLimit : '∞' %> databases</p>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="al-table min-w-[900px]">
+        <thead class="al-table-head">
+          <tr>
+            <th scope="col" class="al-table-th px-6 py-3 uppercase w-48">Name</th>
+            <th scope="col" class="al-table-th px-6 py-3 uppercase w-44">Host</th>
+            <th scope="col" class="al-table-th px-6 py-3 uppercase">Connection string</th>
+            <th scope="col" class="al-table-th px-6 py-3 uppercase w-40">Username</th>
+            <th scope="col" class="al-table-th px-6 py-3 uppercase w-44">Password</th>
+            <th scope="col" class="al-table-th px-6 py-3 uppercase text-right w-36">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y" style="border-color:var(--theme-border)">${rowHtml}</tbody>
+      </table>
+    </div>
+  </div>`;
+
+const wireDbRow = (row) => {
+  const id = row.dataset.dbId;
+  const name = row.dataset.dbName;
+  row.querySelector('[data-action="copy-dsn"]')?.addEventListener('click', () => {
+    window.copyText(row.querySelector('[data-role="dsn"]').textContent);
+  });
+  row.querySelector('[data-action="copy-user"]')?.addEventListener('click', () => {
+    window.copyText(row.querySelector('[data-role="user"]').textContent);
+  });
+  row.querySelector('[data-action="copy-pass"]')?.addEventListener('click', () => {
+    window.copyText(row.querySelector('[data-role="pass"]').textContent);
+  });
+  row.querySelector('[data-action="toggle-pass"]')?.addEventListener('click', (e) => {
+    window.togglePassword(e.currentTarget);
+  });
+  row.querySelector('[data-action="rotate"]')?.addEventListener('click', () => {
+    window.rotatePassword(id);
+  });
+  row.querySelector('[data-action="delete"]')?.addEventListener('click', () => {
+    window.deleteDatabase(id, name);
+  });
+};
+
+const bumpDbCount = (delta) => {
+  const el = document.querySelector('[data-db-count]');
+  if (!el) return;
+  const m = el.textContent.match(/(\d+)/);
+  if (m) el.textContent = el.textContent.replace(m[0], String(Math.max(0, Number(m[0]) + delta)));
+};
+
 document.getElementById('confirmAddDatabase').addEventListener('click', async () => {
   const hostId = document.getElementById('dbHostSelect').value;
   if (!hostId) {
@@ -231,10 +355,19 @@ document.getElementById('confirmAddDatabase').addEventListener('click', async ()
       body: JSON.stringify({ hostId }),
     });
     const result = await response.json().catch(() => ({}));
-    if (response.ok && result.success) {
+    if (response.ok && result.success && result.database) {
       showToast(t.databaseCreated || 'Database created.', 'success');
       hideAddModal();
-      setTimeout(() => window.location.reload(), 600);
+      const tbody = document.querySelector('#server-page-body tbody');
+      if (tbody) {
+        al.hideEmpty(tbody);
+        const row = al.addRow(tbody, buildDbRow(result.database));
+        if (row) wireDbRow(row);
+        bumpDbCount(1);
+      } else {
+        al.patchEl('#server-page-body .px-6.mt-8', renderDbTable(buildDbRow(result.database)));
+        document.querySelectorAll('#server-page-body tbody tr[data-db-id]').forEach(wireDbRow);
+      }
     } else {
       showToast(result.error || t.failedCreateDatabase || 'Failed to create database.', 'error');
     }
@@ -321,7 +454,16 @@ window.deleteDatabase = async (id, name) => {
         const result = await response.json().catch(() => ({}));
         if (response.ok && result.success) {
           showToast(t.databaseDeleted || 'Database deleted.', 'success');
-          setTimeout(() => window.location.reload(), 600);
+          const row = document.querySelector(`tr[data-db-id="${id}"]`);
+          if (row) {
+            al.removeRow(row).then(() => {
+              const tbody = document.querySelector('#server-page-body tbody');
+              if (tbody && !tbody.querySelector('tr[data-db-id]')) {
+                al.showEmpty(tbody, t.noDatabasesYet || 'No databases yet.', 6);
+              }
+            });
+          }
+          bumpDbCount(-1);
         } else {
           showToast(result.error || t.failedDeleteDatabase || 'Failed to delete database.', 'error');
         }
@@ -332,28 +474,7 @@ window.deleteDatabase = async (id, name) => {
   });
 };
 
-document.querySelectorAll('tr[data-db-id]').forEach((row) => {
-  const id = row.dataset.dbId;
-  const name = row.dataset.dbName;
-  row.querySelector('[data-action="copy-dsn"]')?.addEventListener('click', () => {
-    window.copyText(row.querySelector('[data-role="dsn"]').textContent);
-  });
-  row.querySelector('[data-action="copy-user"]')?.addEventListener('click', () => {
-    window.copyText(row.querySelector('[data-role="user"]').textContent);
-  });
-  row.querySelector('[data-action="copy-pass"]')?.addEventListener('click', () => {
-    window.copyText(row.querySelector('[data-role="pass"]').textContent);
-  });
-  row.querySelector('[data-action="toggle-pass"]')?.addEventListener('click', (e) => {
-    window.togglePassword(e.currentTarget);
-  });
-  row.querySelector('[data-action="rotate"]')?.addEventListener('click', () => {
-    window.rotatePassword(id);
-  });
-  row.querySelector('[data-action="delete"]')?.addEventListener('click', () => {
-    window.deleteDatabase(id, name);
-  });
-});
+document.querySelectorAll('tr[data-db-id]').forEach(wireDbRow);
 </script>
 
 <%- include('../../components/footer') %>

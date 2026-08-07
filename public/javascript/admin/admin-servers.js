@@ -136,6 +136,22 @@
     openRadarScanModal(ids, label);
   }
 
+  function removeServerRows(ids) {
+    const tbody = document.querySelector('#serverTable tbody');
+    const rows = [];
+    ids.forEach(function (id) {
+      const row = document.querySelector('#serverTable .server-row[data-id="' + id + '"]');
+      if (row) rows.push(row);
+    });
+    const chain = rows.reduce(function (p, row) {
+      return p.then(function () { return al.removeRow(row); });
+    }, Promise.resolve());
+    chain.then(function () {
+      updateToolbar();
+      if (tbody && !tbody.querySelector('.server-row')) al.showEmpty(tbody, 'No servers yet.', 7);
+    });
+  }
+
   function bulkDelete() {
     const checked = getChecked();
     if (!checked.length) return;
@@ -160,7 +176,7 @@
         chain.then(function () {
           if (failed) { showToast('Some servers failed to delete.', 'error'); return; }
           showToast('Servers deleted.', 'success');
-          window.location.reload();
+          removeServerRows(ids);
         })
              .catch(function (err) { console.error('Bulk delete error:', err); showToast('Failed to delete servers.', 'error'); });
       }
@@ -175,11 +191,9 @@
       confirmLabel: 'Delete',
       onConfirm: async function () {
         const d = await window.api('/admin/server/delete/' + id, 'POST');
-        if (d && d.success) {
+        if (d !== null) {
           showToast('Server deleted.', 'success');
-          window.location.reload();
-        } else if (d) {
-          showToast(d.error || 'Failed to delete server.', 'error');
+          removeServerRows([String(id)]);
         }
       }
     });

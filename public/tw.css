@@ -562,7 +562,39 @@ input[type="button"]:disabled {
 }
 }
 
-/* Tables — scroll horizontally on narrow screens instead of bursting
+  /* ── Enhanced al-card: first-class header/title/action ────── */
+  .al-card-header {
+    @apply -mx-4 -mt-4 mb-0 px-4 py-3 text-sm font-medium border-b flex items-center justify-between gap-3;
+    background: var(--theme-bg-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-muted);
+  }
+  .al-card-header-title {
+    @apply text-sm font-semibold truncate;
+    color: var(--theme-text-strong);
+  }
+  .al-card-header-desc {
+    @apply text-xs mt-0.5;
+    color: var(--theme-text-muted);
+  }
+  .al-card-header-actions {
+    @apply flex items-center gap-2 shrink-0;
+  }
+
+  /* ── Table compact mode ─────────────────────────────────── */
+  .al-table-compact .al-table-td { @apply px-3 py-1.5; }
+  .al-table-compact .al-table-th { @apply px-3 py-1.5; }
+
+  /* ── Table sticky header ────────────────────────────────── */
+  .al-table-sticky { border-collapse: separate; border-spacing: 0; }
+  .al-table-sticky thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--theme-table-header-bg);
+  }
+
+  /* Tables — scroll horizontally on narrow screens instead of bursting
    the layout; normal table layout restored on desktop. Tables that the
    al-table.js upgrader flags (.al-table-card) instead collapse into
    stacked cards on small screens using the injected data-label. */

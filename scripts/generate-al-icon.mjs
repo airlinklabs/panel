@@ -22,7 +22,7 @@ const ICONS = [
   'users', 'layout-grid', 'map-pin', 'activity', 'box', 'puzzle', 'key',
   'folder', 'calendar', 'play', 'database', 'layers', 'square-terminal',
   'chart-column', 'square-arrow-up-right', 'archive', 'badge-check',
-  'hard-drive', 'sparkle',
+  'hard-drive', 'sparkle', 'zap', 'pencil', 'download',
 ];
 
 function pascal(name) {
@@ -74,7 +74,7 @@ const banner = `/* GENERATED FILE — do not edit by hand.
       return '<span aria-hidden="true" style="display:inline-block;width:16px;height:16px;"></span>';
     }
     opts = opts || {};
-    var sw = opts.strokeWidth != null ? opts.strokeWidth : 1.75;
+    var sw = opts.strokeWidth != null ? opts.strokeWidth : 1.5;
     var attrs = {
       xmlns: 'http://www.w3.org/2000/svg',
       width: opts.width || 16,

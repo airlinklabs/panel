@@ -79,7 +79,7 @@
             <p class="text-xs mt-2" style="color:var(--theme-text-muted);">The daemon on these nodes isn't responding. Servers on them stay offline until it comes back.</p>
             <% } %>
           </div>
-          <button type="button" onclick="window.location.reload()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.retry || 'Retry' %></button>
+          <button type="button" id="retryDaemonCheck" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.retry || 'Retry' %></button>
         </div>
         <% } %>
 
@@ -328,6 +328,31 @@
 <script nonce="<%- nonce %>">
   document.getElementById('dashboard-data').dataset.folders = '<%- JSON.stringify(folders || []).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
   document.getElementById('dashboard-data').dataset.servers = '<%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status, ramUsage: s.ramUsage, cpuUsage: s.cpuUsage }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
+
+  document.getElementById('retryDaemonCheck')?.addEventListener('click', function () {
+    var btn = this;
+    var original = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = 'Checking\u2026';
+    fetch(window.location.pathname, { headers: { 'X-Requested-With': 'fetch' } })
+      .then(function (r) { return r.text(); })
+      .then(function (html) {
+        btn.disabled = false;
+        btn.innerHTML = original;
+        if (html.indexOf('retryDaemonCheck') === -1) {
+          var banner = btn.closest('.al-alert-danger');
+          if (banner) banner.style.display = 'none';
+          showToast('All nodes are online.', 'success');
+        } else {
+          showToast('Nodes are still offline.', 'error');
+        }
+      })
+      .catch(function () {
+        btn.disabled = false;
+        btn.innerHTML = original;
+        showToast('Re-check failed. Try again.', 'error');
+      });
+  });
 </script>
 
 <script nonce="<%- nonce %>" src="/javascript/user/dashboard.js?v=5"></script>

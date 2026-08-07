@@ -2,9 +2,7 @@
   'use strict';
 
   var FOCUS_DELAY = 80;
-  var REMOVE_FOLDER_DELAY = 600;
   var DRAG_END_DELAY = 50;
-  var ADD_TO_FOLDER_DELAY = 700;
   var POLL_INTERVAL = 15000;
 
   var SECONDS_PER_DAY = 86400;
@@ -16,6 +14,185 @@
   var bridge = document.getElementById('dashboard-data');
   var allFolders = JSON.parse(bridge.dataset.folders || '[]');
   var allServers = JSON.parse(bridge.dataset.servers || '[]');
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function folderMemberUUIDs(folder) {
+    return (folder.members || []).map(function (m) { return m.serverUUID; });
+  }
+
+  function serverInFolder(uuid) {
+    return allFolders.some(function (f) { return folderMemberUUIDs(f).indexOf(uuid) !== -1; });
+  }
+
+  function setServerFolder(uuid, folderId) {
+    allFolders.forEach(function (f) {
+      var members = folderMemberUUIDs(f);
+      var idx = members.indexOf(uuid);
+      if (idx !== -1) {
+        if (String(f.id) === String(folderId)) return;
+        f.members.splice(idx, 1);
+      }
+    });
+    if (folderId !== null) {
+      var target = null;
+      allFolders.forEach(function (f) { if (String(f.id) === String(folderId)) target = f; });
+      if (target && folderMemberUUIDs(target).indexOf(uuid) === -1) {
+        target.members.push({ serverUUID: uuid });
+      }
+    }
+  }
+
+  function folderCardHtml(folder, idx) {
+    var members = folderMemberUUIDs(folder);
+    return '<div class="al-card flex items-center gap-3 cursor-pointer relative transition-[background,border-color,box-shadow] select-none hover:border-[var(--theme-border-accent)] group folder-card" role="button" tabindex="0" aria-label="Open folder ' + escapeHtml(folder.name) + '" style="--i:' + idx + '" data-folder-id="' + folder.id + '" data-folder-name="' + escapeHtml(folder.name) + '" data-folder-members=\'' + JSON.stringify(members) + '\'>' +
+      alIcon('folder', 'h-5 w-5 shrink-0', { style: 'color:var(--theme-warning);' }) +
+      '<div class="min-w-0 flex-1">' +
+        '<p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);">' + escapeHtml(folder.name) + '</p>' +
+        '<p class="text-xs mt-0.5" style="color:var(--theme-text-muted);">' + members.length + ' server' + (members.length !== 1 ? 's' : '') + '</p>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderServerViews() {
+    document.querySelectorAll('.al-server-card[data-server-uuid]').forEach(function (card) {
+      var inFolder = serverInFolder(card.dataset.serverUuid);
+      card.classList.toggle('hidden', inFolder);
+      var removeBtn = card.querySelector('.ctx-remove-from-folder');
+      if (removeBtn) removeBtn.style.display = inFolder ? '' : 'none';
+    });
+    document.querySelectorAll('tr[data-server-uuid]').forEach(function (row) {
+      row.classList.toggle('hidden', serverInFolder(row.dataset.serverUuid));
+    });
+  }
+
+  function renderFolderPopupContent(memberUUIDs) {
+    folderPopupContent.innerHTML = '';
+    var serversIn = allServers.filter(function (s) { return memberUUIDs.includes(s.UUID); });
+    if (serversIn.length === 0) {
+      folderPopupContent.innerHTML = '<p class="text-sm text-neutral-400 col-span-2">No servers — drag a card here to add one.</p>';
+      return;
+    }
+    serversIn.forEach(function (s) {
+      var row = document.createElement('div');
+      row.className = 'flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition';
+      var running = s.status === 'running';
+      row.innerHTML =
+        '<a href="/server/' + s.UUID + '" class="flex items-center gap-2 flex-1 min-w-0">' +
+          '<span class="text-sm font-medium text-neutral-800 dark:text-white truncate">' + escapeHtml(s.name) + '</span>' +
+          '<span class="ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md ' + (running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400') + '">' +
+            (running ? 'Running' : 'Stopped') +
+          '</span>' +
+        '</a>' +
+        '<button data-uuid="' + s.UUID + '" class="remove-from-folder-btn shrink-0 w-10 h-10 inline-flex items-center justify-center rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" title="Remove from folder" aria-label="Remove server from folder">' +
+          alIcon('trash-2', 'w-4 h-4') +
+        '</button>';
+      row.querySelector('.remove-from-folder-btn').addEventListener('click', async function (e) {
+        e.preventDefault();
+        var uuid = e.currentTarget.dataset.uuid;
+        try {
+          var r = await fetch('/api/folders/servers/' + uuid, { method: 'DELETE' });
+          var d = await r.json();
+          if (d.success) {
+            showToast('Removed from folder.', 'success');
+            setServerFolder(uuid, null);
+            renderFolders();
+            renderServerViews();
+            if (window.al) {
+              window.al.removeRow(row).then(function () {
+                var f = null;
+                allFolders.forEach(function (x) { if (String(x.id) === String(activeFolderId)) f = x; });
+                renderFolderPopupContent(f ? folderMemberUUIDs(f) : memberUUIDs);
+              });
+            } else {
+              renderFolderPopupContent(memberUUIDs);
+            }
+          }
+          else showToast(d.error || 'Something went wrong.', 'error');
+        } catch (err) {
+          console.error('Failed to remove from folder:', err);
+          showToast('Network error. Try again.', 'error');
+        }
+      });
+      folderPopupContent.appendChild(row);
+    });
+  }
+
+  function renderFolders() {
+    var section = document.querySelector('#folderGrid') ? document.querySelector('#folderGrid').closest('.mb-8') : null;
+    if (allFolders.length === 0) {
+      if (section) section.remove();
+      return;
+    }
+    if (!section) {
+      var serversLabel = null;
+      document.querySelectorAll('.al-section-label').forEach(function (l) { if (l.textContent === 'Servers') serversLabel = l; });
+      section = document.createElement('div');
+      section.className = 'mb-8';
+      section.innerHTML = '<p class="al-section-label">Folders</p><div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3" id="folderGrid"></div><p class="text-xs mt-2" style="color:var(--theme-text-muted);">Drag a server card onto a folder to add it</p>';
+      if (serversLabel && serversLabel.parentNode) serversLabel.parentNode.insertBefore(section, serversLabel);
+      else document.getElementById('page-content').appendChild(section);
+    }
+    var grid = section.querySelector('#folderGrid');
+    var html = '';
+    allFolders.forEach(function (f, i) { html += folderCardHtml(f, i); });
+    grid.innerHTML = html;
+    grid.querySelectorAll('.folder-card').forEach(function (card) { bindFolderCard(card); });
+  }
+
+  function bindFolderCard(card) {
+    card.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.click();
+      }
+    });
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('.folder-delete-btn') || e.target.closest('.folder-menu-btn')) return;
+      var memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]');
+      activeFolderId = card.dataset.folderId;
+      folderPopupTitle.textContent = card.dataset.folderName;
+      renderFolderPopupContent(memberUUIDs);
+      openOverlay(folderPopupOverlay, folderPopupPanel);
+    });
+    card.addEventListener('dragover', function (e) {
+      if (!dragUUID) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      card.classList.add('fc-drag-over');
+    });
+    card.addEventListener('dragleave', function () { card.classList.remove('fc-drag-over'); });
+    card.addEventListener('drop', async function (e) {
+      e.preventDefault();
+      card.classList.remove('fc-drag-over');
+      if (!dragUUID) return;
+      var folderId = card.dataset.folderId;
+      try {
+        var r = await fetch('/api/folders/' + folderId + '/servers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ serverUUID: dragUUID }),
+        });
+        var d = await r.json();
+        if (d.success) {
+          showToast('"' + dragName + '" added to folder.', 'success');
+          setServerFolder(dragUUID, folderId);
+          renderFolders();
+          renderServerViews();
+        }
+        else showToast(d.error || 'Something went wrong.', 'error');
+      } catch (err) {
+        console.error('Failed to add server to folder:', err);
+        showToast('Network error. Try again.', 'error');
+      }
+    });
+  }
+
+  function bindAllFolderCards() {
+    document.querySelectorAll('.folder-card').forEach(function (card) { bindFolderCard(card); });
+  }
 
   function openOverlay(overlay, panel) {
     overlay.setAttribute('data-open', '');
@@ -91,7 +268,12 @@
       var r = await fetch('/api/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name }) });
       var d = await r.json();
       confirmNewFolder.disabled = false;
-      if (d.success) { showToast('Folder created.', 'success'); location.reload(); }
+      if (d.success) {
+        showToast('Folder created.', 'success');
+        allFolders.push(d.folder);
+        closeOverlay(newFolderOverlay, newFolderPanel);
+        renderFolders();
+      }
       else showToast(d.error || 'Something went wrong.', 'error');
     } catch (err) {
       console.error('Failed to create folder:', err);
@@ -108,56 +290,7 @@
 
   var activeFolderId = null;
 
-  document.querySelectorAll('.folder-card').forEach(function (card) {
-    card.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        card.click();
-      }
-    });
-    card.addEventListener('click', function (e) {
-      if (e.target.closest('.folder-delete-btn') || e.target.closest('.folder-menu-btn')) return;
-      var memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]');
-      activeFolderId = card.dataset.folderId;
-      folderPopupTitle.textContent = card.dataset.folderName;
-      folderPopupContent.innerHTML = '';
-      var serversIn = allServers.filter(function (s) { return memberUUIDs.includes(s.UUID); });
-      if (serversIn.length === 0) {
-        folderPopupContent.innerHTML = '<p class="text-sm text-neutral-400 col-span-2">No servers — drag a card here to add one.</p>';
-      } else {
-        serversIn.forEach(function (s) {
-          var row = document.createElement('div');
-          row.className = 'flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition';
-          var running = s.status === 'running';
-          row.innerHTML =
-            '<a href="/server/' + s.UUID + '" class="flex items-center gap-2 flex-1 min-w-0">' +
-              '<span class="text-sm font-medium text-neutral-800 dark:text-white truncate">' + s.name + '</span>' +
-              '<span class="ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md ' + (running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400') + '">' +
-                (running ? 'Running' : 'Stopped') +
-              '</span>' +
-            '</a>' +
-            '<button data-uuid="' + s.UUID + '" class="remove-from-folder-btn shrink-0 w-10 h-10 inline-flex items-center justify-center rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" title="Remove from folder" aria-label="Remove server from folder">' +
-              alIcon('trash-2', 'w-4 h-4') +
-            '</button>';
-          row.querySelector('.remove-from-folder-btn').addEventListener('click', async function (e) {
-            e.preventDefault();
-            var uuid = e.currentTarget.dataset.uuid;
-            try {
-              var r = await fetch('/api/folders/servers/' + uuid, { method: 'DELETE' });
-              var d = await r.json();
-              if (d.success) { showToast('Removed from folder.', 'success'); setTimeout(function () { location.reload(); }, REMOVE_FOLDER_DELAY); }
-              else showToast(d.error || 'Something went wrong.', 'error');
-            } catch (err) {
-              console.error('Failed to remove from folder:', err);
-              showToast('Network error. Try again.', 'error');
-            }
-          });
-          folderPopupContent.appendChild(row);
-        });
-      }
-      openOverlay(folderPopupOverlay, folderPopupPanel);
-    });
-  });
+  bindAllFolderCards();
 
   document.getElementById('closeFolderPopup').addEventListener('click', function () {
     closeOverlay(folderPopupOverlay, folderPopupPanel, function () { deleteFolderBtn.style.display = ''; });
@@ -189,7 +322,12 @@
       var d = await r.json();
       confirmDeleteFolder.disabled = false;
       closeOverlay(deleteFolderOverlay, deleteFolderPanel);
-      if (d.success) { showToast('Folder deleted.', 'success'); location.reload(); } else showToast(d.error || "Couldn't delete the folder.", 'error');
+      if (d.success) {
+        showToast('Folder deleted.', 'success');
+        allFolders = allFolders.filter(function (f) { return String(f.id) !== String(activeFolderId); });
+        renderFolders();
+        renderServerViews();
+      } else showToast(d.error || "Couldn't delete the folder.", 'error');
     } catch (err) {
       console.error('Failed to delete folder:', err);
       confirmDeleteFolder.disabled = false;
@@ -282,35 +420,6 @@
     document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
   });
 
-  document.querySelectorAll('.folder-card').forEach(function (folderCard) {
-    folderCard.addEventListener('dragover', function (e) {
-      if (!dragUUID) return;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      folderCard.classList.add('fc-drag-over');
-    });
-    folderCard.addEventListener('dragleave', function () { folderCard.classList.remove('fc-drag-over'); });
-    folderCard.addEventListener('drop', async function (e) {
-      e.preventDefault();
-      folderCard.classList.remove('fc-drag-over');
-      if (!dragUUID) return;
-      var folderId = folderCard.dataset.folderId;
-      try {
-        var r = await fetch('/api/folders/' + folderId + '/servers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ serverUUID: dragUUID }),
-        });
-        var d = await r.json();
-        if (d.success) { showToast('"' + dragName + '" added to folder.', 'success'); setTimeout(function () { location.reload(); }, ADD_TO_FOLDER_DELAY); }
-        else showToast(d.error || 'Something went wrong.', 'error');
-      } catch (err) {
-        console.error('Failed to add server to folder:', err);
-        showToast('Network error. Try again.', 'error');
-      }
-    });
-  });
-
   document.querySelectorAll('.ctx-add-to-folder').forEach(function (btn) {
     btn.addEventListener('click', async function (e) {
       e.stopPropagation();
@@ -320,7 +429,13 @@
         try {
           var r = await fetch('/api/folders/' + allFolders[0].id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
           var d = await r.json();
-          if (d.success) { showToast('Added to folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
+          if (d.success) {
+            showToast('Added to folder.', 'success');
+            setServerFolder(uuid, allFolders[0].id);
+            renderFolders();
+            renderServerViews();
+            document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
+          } else showToast(d.error || 'Something went wrong.', 'error');
         } catch (err) {
           console.error('Failed to add to folder:', err);
           showToast('Network error. Try again.', 'error');
@@ -337,7 +452,13 @@
       try {
         var r = await fetch('/api/folders/servers/' + btn.dataset.uuid, { method: 'DELETE' });
         var d = await r.json();
-        if (d.success) { showToast('Removed from folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
+        if (d.success) {
+          showToast('Removed from folder.', 'success');
+          setServerFolder(btn.dataset.uuid, null);
+          renderFolders();
+          renderServerViews();
+          document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
+        } else showToast(d.error || 'Something went wrong.', 'error');
       } catch (err) {
         console.error('Failed to remove from folder:', err);
         showToast('Network error. Try again.', 'error');
@@ -353,12 +474,18 @@
     allFolders.forEach(function (f) {
       var btn = document.createElement('button');
       btn.className = 'flex items-center gap-2.5 w-full text-left bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition';
-      btn.innerHTML = alIcon('folder', 'h-4 w-4 text-amber-500 shrink-0') + '<span class="text-sm text-neutral-800 dark:text-white">' + f.name + '</span>';
+      btn.innerHTML = alIcon('folder', 'h-4 w-4 text-amber-500 shrink-0') + '<span class="text-sm text-neutral-800 dark:text-white">' + escapeHtml(f.name) + '</span>';
       btn.addEventListener('click', async function () {
         try {
           var r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: serverUUID }) });
           var d = await r.json();
-          if (d.success) { showToast('Added to folder.', 'success'); location.reload(); } else showToast(d.error || 'Something went wrong.', 'error');
+          if (d.success) {
+            showToast('Added to folder.', 'success');
+            setServerFolder(serverUUID, f.id);
+            renderFolders();
+            renderServerViews();
+            closeOverlay(folderPopupOverlay, folderPopupPanel);
+          } else showToast(d.error || 'Something went wrong.', 'error');
         } catch (err) {
           console.error('Failed to add to folder:', err);
           showToast('Network error. Try again.', 'error');

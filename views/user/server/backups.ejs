@@ -319,6 +319,8 @@ function addBackupRow(backup) {
   const tbody = document.getElementById('backups-table-body');
   if (!tbody) return;
 
+  al.hideEmpty(tbody);
+
   const tr = document.createElement('tr');
   tr.className = 'al-table-tr transition-colors';
   tr.dataset.backupId = backup.UUID;
@@ -391,13 +393,56 @@ async function toggleBackupLock(backupId, backupName, currentlyLocked) {
 
     if (data.success) {
       showToast(currentlyLocked ? 'Backup unlocked.' : 'Backup locked.', 'success');
-      setTimeout(() => window.location.reload(), 600);
+      updateBackupLockUI(backupId, backupName, !currentlyLocked);
     } else {
       showToast(data.error || 'Failed to update backup lock', 'error');
     }
   } catch (error) {
     console.error('Failed to toggle backup lock:', error);
     showToast('Failed to update backup lock. Try again.', 'error');
+  }
+}
+
+function updateBackupLockUI(backupId, backupName, locked) {
+  const row = document.querySelector(`tr[data-backup-id="${backupId}"]`);
+  if (!row) return;
+
+  const lockBtn = row.querySelector('button[onclick*="toggleBackupLock"]');
+  if (lockBtn) {
+    lockBtn.setAttribute('onclick', `toggleBackupLock('${backupId}', '${backupName}', ${locked})`);
+    const label = lockBtn.childNodes[lockBtn.childNodes.length - 1];
+    if (label && label.nodeType === Node.TEXT_NODE) label.textContent = locked ? 'Unlock' : 'Lock';
+    lockBtn.style.cssText = locked
+      ? 'color:var(--theme-warning);background:var(--theme-warning-bg, var(--theme-bg-secondary))'
+      : 'color:var(--theme-text-muted);background:var(--theme-bg-secondary)';
+  }
+
+  const delBtn = row.querySelector('button[onclick*="deleteBackup"]');
+  if (delBtn) {
+    if (locked) {
+      delBtn.disabled = true;
+      delBtn.setAttribute('title', 'Locked backups cannot be deleted until unlocked');
+      delBtn.style.cssText = 'opacity:40;pointer-events:none;color:var(--theme-danger);background:var(--theme-danger-bg)';
+    } else {
+      delBtn.disabled = false;
+      delBtn.removeAttribute('title');
+      delBtn.style.cssText = 'color:var(--theme-danger);background:var(--theme-danger-bg)';
+    }
+  }
+
+  const nameDiv = row.querySelector('td div.text-sm.font-medium');
+  if (!nameDiv) return;
+  let badge = nameDiv.querySelector('span.ml-1\\.5');
+  if (locked && !badge) {
+    badge = document.createElement('span');
+    badge.className = 'ml-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium align-middle';
+    badge.style.cssText = 'background:var(--theme-warning-bg, var(--theme-bg-secondary));color:var(--theme-warning, var(--theme-text-muted))';
+    const icon = lockBtn && lockBtn.querySelector('svg');
+    if (icon) badge.appendChild(icon.cloneNode(true));
+    badge.appendChild(document.createTextNode(' locked'));
+    nameDiv.appendChild(badge);
+  } else if (!locked && badge) {
+    badge.remove();
   }
 }
 
@@ -418,19 +463,14 @@ function deleteBackup(backupId, backupName) {  showConfirmation(
 
         if (data.success) {
            showToast('Backup deleted.', 'success');
-          // Remove the row from the table
           const row = document.querySelector(`tr[data-backup-id="${backupId}"]`);
           if (row) {
-            row.remove();
-          }
-
-          // Check if table is now empty
-          const tbody = document.getElementById('backups-table-body');
-          if (tbody && tbody.children.length === 0) {
-            // Reload to show empty state
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
+            al.removeRow(row).then(() => {
+              const tbody = document.getElementById('backups-table-body');
+              if (tbody && tbody.children.length === 0) {
+                al.showEmpty(tbody, 'No backups yet. Backups protect your server\'s world and files.', 4);
+              }
+            });
           }
         } else {
           showToast(data.error || 'Failed to delete backup', 'error');

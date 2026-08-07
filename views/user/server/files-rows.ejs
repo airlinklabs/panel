@@ -1,0 +1,74 @@
+<%
+function getFileIcon(category) {
+  const iconNames = {
+    'Configuration Files': 'file-code',
+    'Documents': 'file-text',
+    'Folder': 'folder',
+    'Images': 'image',
+    'No Category': 'file',
+  };
+  const name = iconNames[category] || 'file';
+  return `<span class="al-file-icon size-6">${icon(name, { class: 'size-6' })}</span>`;
+}
+
+function isImageFile(filename) {
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff'];
+  const extension = filename.split('.').pop().toLowerCase();
+  return imageExtensions.includes(extension);
+}
+
+function escAttr(val) {
+  return String(val)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+%>
+<% files.forEach((file, index) => { %>
+  <tr class="al-file-row al-table-tr cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
+    <td class="px-4 py-3 w-10">
+      <input type="checkbox" class="form-checkbox h-4 w-4 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(new RegExp("^/+", "g"), '') + '/' + file.name : file.name %>" aria-label="Select <%= file.name %>">
+    </td>
+    <td class="px-4 py-3">
+      <%
+        const isImage = file.type !== 'directory' && isImageFile(file.name);
+        const filePath = currentPath && currentPath !== '/'
+          ? currentPath.replace(new RegExp("^/+", "g"), '') + '/' + file.name
+          : file.name;
+        const fileHref = file.type === 'directory'
+          ? `/server/${server.UUID}/files?path=${encodeURIComponent(filePath)}`
+          : isImage
+            ? '#'
+            : `/server/${server.UUID}/files/edit/${encodeURIComponent(filePath)}`;
+        const fileSize = (() => {
+          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+          let size = file.size;
+          let unitIndex = 0;
+          while (size >= 1024 && unitIndex < sizes.length - 1) {
+            size /= 1024;
+            unitIndex++;
+          }
+          return `${size.toFixed(2)} ${sizes[unitIndex]}`;
+        })();
+      %>
+      <a href="<%= fileHref %>" class="flex items-center gap-2.5 text-sm font-medium hover:text-neutral-600 dark:hover:text-white transition-colors" style="color:var(--theme-text-strong)" data-filename="<%= file.name %>" data-path="<%= filePath %>" data-size="<%= fileSize %>" data-uuid="<%= server.UUID %>" <% if (isImage) { %>data-click="viewer"<% } %>>
+        <span class="al-file-icon shrink-0" style="color:var(--theme-text-muted)">
+          <%- getFileIcon(file.type === 'directory' ? 'Folder' : file.category || 'No Category') %>
+        </span>
+        <span class="truncate"><%= file.name %></span>
+      </a>
+    </td>
+    <td class="px-4 py-3 text-xs whitespace-nowrap" style="color:var(--theme-text-muted)">
+      <%= fileSize %>
+    </td>
+    <td class="px-4 py-3 text-xs whitespace-nowrap hidden md:table-cell" style="color:var(--theme-text-muted)">
+      <% if (file.modifiedAt) { %>
+        <time datetime="<%= new Date(file.modifiedAt).toISOString() %>" class="relative-time"><%= new Date(file.modifiedAt).toLocaleDateString() %></time>
+      <% } else { %>
+        <span style="color:var(--theme-text-muted)">—</span>
+      <% } %>
+    </td>
+  </tr>
+<% }) %>

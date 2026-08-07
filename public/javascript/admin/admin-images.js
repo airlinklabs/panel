@@ -1,6 +1,3 @@
-const IMAGE_DELETE_RELOAD_DELAY_MS = 700;
-const IMAGE_IMPORT_RELOAD_DELAY_MS = 800;
-
 function handleRowClick(e, url) { if (!e.target.closest('button,a')) window.location = url; }
 
 function openCreate() {
@@ -29,11 +26,53 @@ function closeDelete() {
   _deleteId = null;
   window.modal.close();
 }
+
+function esc(str) {
+  return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function imageRowHtml(image) {
+  return '<tr class="al-table-tr transition-colors cursor-pointer img-row" data-search="' + esc((image.name + ' ' + (image.author || '')).toLowerCase()) + '" onclick="handleRowClick(event, \'/admin/images/edit/' + image.id + '\')">' +
+    '<td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3 font-medium" style="color:var(--theme-text-strong)">' + esc(image.name) + '</td>' +
+    '<td class="al-table-td whitespace-nowrap px-3 py-4 col-hide">' + esc(image.author || '—') + '</td>' +
+    '<td class="al-table-td whitespace-nowrap px-3 py-4 col-hide">' + esc(new Date(image.createdAt).toLocaleDateString()) + '</td>' +
+    '<td class="whitespace-nowrap px-3 py-4 text-sm"><div class="flex gap-2">' +
+    '<a href="/admin/images/edit/' + image.id + '" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">' + (window.alIcon ? alIcon('pencil', 'size-4') : '') + 'Edit</a>' +
+    '<a href="/admin/images/export/' + image.id + '" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">' + (window.alIcon ? alIcon('download', 'size-4') : '') + 'Export</a>' +
+    '<button onclick="event.stopPropagation(); openDelete(\'' + image.id + '\', \'' + esc(image.name).replace(/'/g, "\\'") + '\')" type="button" class="al-btn-danger" aria-label="Delete image ' + esc(image.name) + '">' + (window.alIcon ? alIcon('trash-2', 'size-4') : '') + '</button>' +
+    '</div></td></tr>';
+}
+
+async function renderImageTable() {
+  const res = await fetch('/admin/images/list');
+  const data = await res.json();
+  const tbody = document.getElementById('tableBody');
+  if (!tbody || !data.success) return;
+  const searchInput = document.getElementById('imageFilterInput');
+  const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+  tbody.innerHTML = data.images.map(imageRowHtml).join('');
+  let n = 0;
+  tbody.querySelectorAll('.img-row').forEach(function (r) {
+    const match = !q || r.dataset.search.includes(q);
+    r.style.display = match ? '' : 'none';
+    if (match) n++;
+  });
+  const noResults = document.getElementById('noResults');
+  if (noResults) noResults.classList.toggle('hidden', data.images.length === 0 || n > 0 || !q);
+  if (window.alTableScan) alTableScan(tbody);
+}
+
 async function deleteImage() {
   if (!_deleteId) return;
   const res = await fetch('/admin/images/delete/' + _deleteId, { method: 'DELETE' });
-  if (res.ok) { showToast('Image deleted.', 'success'); setTimeout(() => location.reload(), IMAGE_DELETE_RELOAD_DELAY_MS); }
-  else { showToast('Failed.', 'error'); }
+  if (res.ok) {
+    showToast('Image deleted.', 'success');
+    await renderImageTable();
+  } else {
+    showToast('Failed.', 'error');
+  }
 }
 
 document.getElementById('imageFilterInput')?.addEventListener('input', function() {
@@ -105,7 +144,14 @@ function confirmImageUpload() {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/admin/images/upload', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = () => xhr.status === 200 ? (showToast('Image uploaded.', 'success'), setTimeout(() => location.reload(), IMAGE_IMPORT_RELOAD_DELAY_MS)) : showToast('Upload failed.', 'error');
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        showToast('Image uploaded.', 'success');
+        renderImageTable();
+      } else {
+        showToast('Upload failed.', 'error');
+      }
+    };
     xhr.onerror = () => showToast('Upload failed.', 'error');
     xhr.send(e.target.result);
   };
@@ -167,7 +213,7 @@ if (importUrlBtn) {
       const d = await r.json();
       if (r.ok && d.success) {
         showToast(d.message || 'Image imported.', 'success');
-        setTimeout(() => location.reload(), IMAGE_IMPORT_RELOAD_DELAY_MS);
+        renderImageTable();
       } else {
         showToast(d.error || 'Import failed.', 'error');
       }

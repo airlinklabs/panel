@@ -159,7 +159,7 @@
       .then(response => response.json())
       .then(data => {
         loader.close();
-        if (data.success) { showToast('Server settings saved.', 'success'); setTimeout(() => window.location.reload(), 1500); }
+        if (data.success) { showToast('Server settings saved.', 'success'); }
         else { showToast('Failed to update server settings: ' + (data.error || 'Unknown error'), 'error'); }
       })
       .catch(error => { loader.close(); console.error('Error:', error); showToast('Something went wrong.', 'error'); });

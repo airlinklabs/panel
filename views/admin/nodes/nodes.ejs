@@ -68,7 +68,7 @@
               <p class="font-medium">Connection Error</p>
               <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p>
             </div>
-            <button type="button" onclick="window.location.reload()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
+            <button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
               <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
               Retry Connection
             </button>
@@ -163,7 +163,7 @@
                 <%- icon('map-pin', { class: 'size-5' }) %>
               </div>
               <div>
-                <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);"><%= locations.length %></p>
+                <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);" id="totalLocationsCount"><%= locations.length %></p>
                 <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Locations</p>
               </div>
             </div>
@@ -211,7 +211,7 @@
 
           <div class="al-card">
             <h3 class="al-card-header flex items-center gap-2"><%- icon('map', { class: 'size-4', strokeWidth: 1.5 }) %>All Locations</h3>
-            <div class="p-5">
+            <div class="p-5" id="locationsList">
               <% if (locations.length === 0) { %>
                 <div class="text-center py-10">
                   <div class="mx-auto mb-3 w-12 h-12 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-border) 35%, transparent); color:var(--theme-text-muted);">
@@ -227,15 +227,15 @@
                      byRegion.get(region).push(loc);
                    });
                    for (const [region, locs] of byRegion) { %>
-                  <div class="mb-6 last:mb-0">
+                  <div class="mb-6 last:mb-0" data-region="<%= region %>">
                     <div class="flex items-center gap-2 mb-3">
                       <span class="text-[11px] font-semibold uppercase tracking-widest" style="color:var(--theme-text-muted);"><%= region %></span>
                       <span class="h-px flex-1" style="background:var(--theme-border);"></span>
-                      <span class="text-xs" style="color:var(--theme-text-muted);"><%= locs.length %></span>
+                      <span class="text-xs region-count" style="color:var(--theme-text-muted);"><%= locs.length %></span>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       <% locs.forEach(loc => { %>
-                        <div class="rounded-xl border p-4 flex items-center justify-between gap-3 transition-shadow hover:shadow-sm" style="border-color:var(--theme-border); background:var(--theme-bg-card);">
+                        <div class="rounded-xl border p-4 flex items-center justify-between gap-3 transition-shadow hover:shadow-sm" style="border-color:var(--theme-border); background:var(--theme-bg-card);" data-location-id="<%= loc.id %>">
                           <div class="min-w-0">
                             <div class="flex items-center gap-2">
                               <span class="shrink-0 w-2 h-2 rounded-full" style="background:<%= loc._count.nodes > 0 ? 'var(--theme-success)' : 'var(--theme-border)' %>;"></span>
@@ -273,6 +273,89 @@
 (function () {
   const toast = window.showToast || function (m) { console.warn('[locations]', m); };
 
+  function locationRowHtml(loc) {
+    const name = window.escHtml(loc.name);
+    const nodeCount = (loc._count && loc._count.nodes) || 0;
+    return '<div class="rounded-xl border p-4 flex items-center justify-between gap-3 transition-shadow hover:shadow-sm" style="border-color:var(--theme-border); background:var(--theme-bg-card);" data-location-id="' + loc.id + '">' +
+      '<div class="min-w-0">' +
+      '<div class="flex items-center gap-2">' +
+      '<span class="shrink-0 w-2 h-2 rounded-full" style="background:' + (nodeCount > 0 ? 'var(--theme-success)' : 'var(--theme-border)') + ';"></span>' +
+      '<p class="font-medium text-sm truncate" style="color:var(--theme-text-strong);">' + name + '</p>' +
+      '</div>' +
+      '<p class="text-xs mt-1.5 font-mono" style="color:var(--theme-text-muted);">' + window.escHtml(loc.shortCode) + '</p>' +
+      '<p class="text-xs mt-1" style="color:var(--theme-text-muted);">' + nodeCount + ' node(s)</p>' +
+      '</div>' +
+      '<button type="button" class="delete-location-btn shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-red-50 dark:hover:bg-red-950/30" data-id="' + loc.id + '" data-name="' + window.escAttr(loc.name) + '" aria-label="Delete location ' + name + '">' +
+      (window.alIcon ? window.alIcon('trash', 'size-4', { strokeWidth: 1.5, style: 'color:var(--theme-danger);' }) : '') +
+      '</button>' +
+      '</div>';
+  }
+
+  function syncLocationCount() {
+    const el = document.getElementById('totalLocationsCount');
+    if (!el) return;
+    el.textContent = String(document.querySelectorAll('#locationsList [data-location-id]').length);
+  }
+
+  function showEmptyLocations(list) {
+    if (!list || list.querySelector('[data-empty-locations]')) return;
+    const div = document.createElement('div');
+    div.setAttribute('data-empty-locations', '');
+    div.className = 'text-center py-10';
+    div.innerHTML =
+      '<div class="mx-auto mb-3 w-12 h-12 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-border) 35%, transparent); color:var(--theme-text-muted);">' +
+      (window.alIcon ? window.alIcon('map-pin', 'size-6', { strokeWidth: 1.5 }) : '') +
+      '</div>' +
+      '<p class="text-sm font-medium" style="color:var(--theme-text-strong);">No locations yet</p>' +
+      '<p class="text-xs mt-1" style="color:var(--theme-text-muted);">Create your first location above to start grouping nodes by region.</p>';
+    list.appendChild(div);
+  }
+
+  function addLocationRow(loc) {
+    const list = document.getElementById('locationsList');
+    if (!list) return;
+    const empty = list.querySelector('[data-empty-locations]');
+    if (empty) empty.remove();
+    const region = (loc.shortCode || '').split('-')[0] || 'Other';
+    const group = list.querySelector('[data-region="' + region + '"]');
+    if (group) {
+      const grid = group.querySelector('.grid');
+      if (grid && window.al) al.addRow(grid, locationRowHtml(loc));
+      const count = group.querySelector('.region-count');
+      if (count) count.textContent = String(parseInt(count.textContent || '0', 10) + 1);
+    } else {
+      list.insertAdjacentHTML('beforeend',
+        '<div class="mb-6 last:mb-0" data-region="' + region + '">' +
+        '<div class="flex items-center gap-2 mb-3">' +
+        '<span class="text-[11px] font-semibold uppercase tracking-widest" style="color:var(--theme-text-muted);">' + window.escHtml(region) + '</span>' +
+        '<span class="h-px flex-1" style="background:var(--theme-border);"></span>' +
+        '<span class="text-xs region-count" style="color:var(--theme-text-muted);">1</span>' +
+        '</div>' +
+        '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">' + locationRowHtml(loc) + '</div>' +
+        '</div>');
+    }
+    syncLocationCount();
+  }
+
+  function removeLocationRow(id) {
+    const card = document.querySelector('[data-location-id="' + id + '"]');
+    if (!card) return;
+    const group = card.closest('[data-region]');
+    const list = document.getElementById('locationsList');
+    al.removeRow(card).then(function () {
+      if (group) {
+        const remaining = group.querySelectorAll('[data-location-id]').length;
+        if (remaining === 0) al.removeRow(group);
+        else {
+          const count = group.querySelector('.region-count');
+          if (count) count.textContent = String(remaining);
+        }
+      }
+      syncLocationCount();
+      if (list && !list.querySelector('[data-location-id]')) showEmptyLocations(list);
+    });
+  }
+
   document.getElementById('createLocationBtn').addEventListener('click', async () => {
     const name = document.getElementById('locName').value.trim();
     const shortCode = document.getElementById('locCode').value.trim().toLowerCase();
@@ -286,14 +369,16 @@
     const d = await r.json();
     if (r.ok) {
       toast('Location created.', 'success');
-      setTimeout(() => window.location.reload(), 800);
+      addLocationRow(d.location);
     } else {
       toast(d.message || 'Failed to create location.', 'error');
     }
   });
 
-  document.querySelectorAll('.delete-location-btn').forEach((btn) => {
-    btn.addEventListener('click', async () => {
+  document.getElementById('locationsList').addEventListener('click', (e) => {
+    const btn = e.target.closest('.delete-location-btn');
+    if (!btn) return;
+    (async () => {
       await new Promise(resolve => {
         window.modal.confirm({
           title: 'Delete location',
@@ -307,11 +392,11 @@
       const d = await r.json();
       if (r.ok) {
         toast('Location deleted.', 'success');
-        setTimeout(() => window.location.reload(), 800);
+        removeLocationRow(btn.dataset.id);
       } else {
         toast(d.message || 'Failed to delete location.', 'error');
       }
-    });
+    })();
   });
 })();
 </script>

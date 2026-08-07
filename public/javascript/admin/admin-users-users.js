@@ -28,7 +28,14 @@
           .then(response => {
             if (response.ok) {
               showToast('User deleted.', 'success');
-              location.reload();
+              const tbody = document.querySelector('#userTable tbody');
+              const nodes = document.querySelectorAll('[data-user-id="' + userId + '"]');
+              nodes.forEach(function(node) {
+                if (window.al) al.removeRow(node);
+              });
+              if (tbody && !tbody.querySelector('[data-user-id]')) {
+                al.showEmpty(tbody, 'No users yet.', 4);
+              }
             } else {
               showToast('Failed to delete user.', 'error');
             }
