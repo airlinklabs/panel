@@ -9,7 +9,7 @@
 <div id="globalModal" class="al-sheet-overlay al-modal-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0" id="globalModalBackdrop"></div>
   <div id="globalModalPanel" role="dialog" aria-modal="true" aria-labelledby="globalModalTitle" aria-describedby="globalModalBody" tabindex="-1" class="al-sheet-panel al-modal-panel relative border rounded-2xl shadow-lg w-full max-w-sm mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
-    <div id="globalModalHeader" class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
+    <div id="globalModalHeader" class="al-sheet-header" style="border-color:var(--theme-border);">
       <p id="globalModalTitle" class="text-sm font-semibold leading-snug truncate" style="color:var(--theme-text-strong);"></p>
       <button type="button" id="globalModalCloseBtn" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
     </div>
@@ -17,7 +17,7 @@
     <div id="globalModalSimple" class="px-6 py-4">
       <p id="globalModalBody" class="text-xs leading-relaxed" style="color:var(--theme-text-muted);"></p>
     </div>
-    <div id="globalModalFooter" class="flex gap-2 px-6 py-4 border-t justify-end shrink-0" style="border-color:var(--theme-border);">
+    <div id="globalModalFooter" class="al-sheet-footer justify-end" style="border-color:var(--theme-border);">
       <button type="button" id="globalModalCancel" class="al-btn-secondary inline-flex items-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
       <button type="button" id="globalModalConfirm" class="px-4 py-2 text-xs font-medium rounded-xl text-white transition"></button>
     </div>

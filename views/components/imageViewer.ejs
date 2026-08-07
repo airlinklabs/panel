@@ -1,16 +1,16 @@
 <!-- Image Viewer Modal Component -->
 <div id="imageViewerModal" class="al-sheet-overlay al-modal-overlay fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
-    <div id="imageViewerPanel" class="al-sheet-panel al-modal-panel rounded-xl p-4 max-w-4xl w-full max-h-[90vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="imageViewerTitle" tabindex="-1" style="background:var(--theme-bg-card);">
-        <div class="flex justify-between items-center mb-2">
+    <div id="imageViewerPanel" class="al-sheet-panel al-modal-panel rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col border" role="dialog" aria-modal="true" aria-labelledby="imageViewerTitle" tabindex="-1" style="background:var(--theme-bg-card);">
+        <div class="al-sheet-header">
             <h2 id="imageViewerTitle" class="text-xl font-medium truncate" style="color:var(--theme-text-strong);"></h2>
-            <button type="button" onclick="closeImageViewer()" class="hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg p-1 transition" aria-label="Close image viewer" style="color:var(--theme-text-muted);">
+            <button type="button" onclick="closeImageViewer()" class="hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg p-1 transition min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close image viewer" style="color:var(--theme-text-muted);">
                 <%- icon('x', { class: 'h-6 w-6' }) %>
             </button>
         </div>
         <div class="flex-1 min-h-0 overflow-auto flex items-center justify-center p-2">
             <img id="imageViewerContent" class="max-w-full max-h-[calc(90vh-120px)] object-contain" alt="Image preview">
         </div>
-        <div class="flex justify-between items-center mt-4">
+        <div class="al-sheet-footer justify-between">
             <div class="text-sm" style="color:var(--theme-text-muted);">
                 <span id="imageViewerSize"></span>
             </div>

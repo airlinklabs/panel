@@ -90,6 +90,7 @@ document.getElementById('imageFilterInput')?.addEventListener('input', function(
 window.selectedImageFile = null;
 
 function openUploadImageModal() {
+  setUploadMode('file');
   const modal = document.getElementById('uploadImageModal');
   if (!modal) return;
   modal.classList.remove('opacity-0', 'pointer-events-none');
@@ -97,6 +98,24 @@ function openUploadImageModal() {
   removeSelectedImageFile();
   const fileInput = document.getElementById('imageFileInput');
   if (fileInput) fileInput.value = '';
+}
+
+function setUploadMode(mode) {
+  const isUrl = mode === 'url';
+  const fileBtn = document.getElementById('uploadModeFile');
+  const urlBtn = document.getElementById('uploadModeUrl');
+  const fileSection = document.getElementById('uploadFileSection');
+  const urlSection = document.getElementById('importUrlSection');
+  const uploadBtn = document.getElementById('imageUploadButton');
+  const submitBtn = document.getElementById('importUrlSubmit');
+  const active = 'color:var(--theme-text-strong); background:var(--theme-bg-card);';
+  const idle = 'color:var(--theme-text-muted);';
+  if (fileBtn) fileBtn.setAttribute('style', isUrl ? idle : active);
+  if (urlBtn) urlBtn.setAttribute('style', isUrl ? active : idle);
+  if (fileSection) fileSection.classList.toggle('hidden', isUrl);
+  if (urlSection) urlSection.classList.toggle('hidden', !isUrl);
+  if (uploadBtn) uploadBtn.classList.toggle('hidden', isUrl);
+  if (submitBtn) submitBtn.classList.toggle('hidden', !isUrl);
 }
 
 function closeUploadImageModal() {
@@ -192,17 +211,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-const importUrlBtn = document.getElementById('importUrlBtn');
-if (importUrlBtn) {
-  importUrlBtn.addEventListener('click', () => {
-    const panel = document.getElementById('importUrlPanel');
-    panel.classList.toggle('hidden');
-    if (!panel.classList.contains('hidden')) document.getElementById('importUrlInput').focus();
-  });
-  document.getElementById('importUrlSubmit').addEventListener('click', async () => {
+const importUrlSubmit = document.getElementById('importUrlSubmit');
+if (importUrlSubmit) {
+  importUrlSubmit.addEventListener('click', async () => {
     const url = document.getElementById('importUrlInput').value.trim();
     if (!url) { showToast('Enter a URL.', 'error'); return; }
-    const btn = document.getElementById('importUrlSubmit');
+    const btn = importUrlSubmit;
     btn.disabled = true; btn.classList.add('opacity-60');
     try {
       const r = await fetch('/admin/images/import-url', {
@@ -214,6 +228,7 @@ if (importUrlBtn) {
       if (r.ok && d.success) {
         showToast(d.message || 'Image imported.', 'success');
         renderImageTable();
+        closeUploadImageModal();
       } else {
         showToast(d.error || 'Import failed.', 'error');
       }
@@ -224,3 +239,9 @@ if (importUrlBtn) {
     }
   });
 }
+
+document.getElementById('uploadModeFile').addEventListener('click', () => setUploadMode('file'));
+document.getElementById('uploadModeUrl').addEventListener('click', () => {
+  setUploadMode('url');
+  document.getElementById('importUrlInput').focus();
+});

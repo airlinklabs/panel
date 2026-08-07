@@ -18,8 +18,8 @@
     overlay.style.background = OVERLAY_BG;
 
     panel = document.createElement('div');
-    panel.className = 'bg-white dark:bg-[#1c1c1c] rounded-2xl shadow-2xl w-full max-w-sm mx-4 al-modal-panel';
-    panel.style.border = '1px solid var(--theme-border)';
+    panel.className = 'al-sheet-panel al-modal-panel rounded-2xl shadow-2xl w-full max-w-sm mx-4 border';
+    panel.style.background = 'var(--theme-bg-card)';
 
     panel.innerHTML = `
       <div class="p-6">
@@ -42,7 +42,7 @@
         </div>
         <div id="lp-steps" class="space-y-2"></div>
       </div>
-      <div class="px-6 py-4 border-t flex justify-end gap-2" style="border-color:var(--theme-border)">
+      <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
         <button id="lp-cancel" class="px-4 py-2 text-xs font-medium rounded-xl transition" style="color:var(--theme-text-muted); background:var(--theme-bg-secondary)">Cancel</button>
         <button id="lp-close" class="px-4 py-2 text-xs font-medium rounded-xl transition hidden" style="background:var(--theme-btn-primary-bg); color:var(--theme-btn-primary-text)">Done</button>
       </div>

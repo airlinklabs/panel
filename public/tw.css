@@ -163,6 +163,23 @@
   .al-page-desc   { @apply text-sm mt-0.5; color: var(--theme-text-muted); }
   .al-page-body   { @apply px-6 sm:px-8 pb-8; }
 
+  /* B-043: on phones the header title and its action buttons no longer fit
+     on one row. Stack the actions below the title (right-aligned, wrapping)
+     so primary buttons stay reachable. Only headers with a second child
+     (the actions row) are affected — single-line headers are untouched. */
+  @media (max-width: 639px) {
+    .al-page-header:has(> :nth-child(2)) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .al-page-header:has(> :nth-child(2)) > div:last-child {
+      align-self: flex-end;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      row-gap: 0.5rem;
+    }
+  }
+
   /* Table — auto layout so columns size to their content; per-table
      min-widths (colgroup/td) provide floors so narrow cells never
      collapse and wide cells never bleed into their neighbours. */
@@ -552,12 +569,27 @@ input[type="button"]:disabled {
   @apply fixed inset-0 z-50 flex items-center justify-center;
   background: rgba(0, 0, 0, 0.5);
 }
+
+/* Every sheet panel keeps its border themed. Tailwind v4's `border`
+   utility defaults to currentColor, which renders as a stray light/white
+   edge on any popup that forgets to theme it — this single rule removes
+   that class of bug (B-050 stray white border). Inline border-color (the
+   common case) still wins. */
+.al-sheet-panel { border-color: var(--theme-border); }
+
+/* Shared sheet regions. Popups that use these get one compact, touch-
+   friendly header/footer treatment across every surface instead of each
+   page inventing its own paddings. */
+.al-sheet-header { @apply flex items-center justify-between gap-3 px-6 py-4 border-b shrink-0; }
+.al-sheet-footer { @apply flex items-center gap-2 px-6 py-4 border-t shrink-0; }
+
 @media (max-width: 639px) {
   .al-sheet-overlay {
     z-index: 70 !important;
     align-items: flex-end !important;
     padding: 0 !important;
-  }  .al-sheet-panel {
+  }
+  .al-sheet-panel {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
@@ -575,6 +607,16 @@ input[type="button"]:disabled {
     .al-sheet-overlay.open .al-sheet-panel { animation: none; }
     .al-sheet-overlay .al-sheet-panel.closing { animation: none; }
   }
+  /* Compact sheet regions on phones: tight horizontal padding, smaller
+     vertical rhythm, and 44px touch targets for the header/footer
+     controls (B-044, B-045). */
+  .al-sheet-header, .al-sheet-footer { padding-left: 1rem; padding-right: 1rem; }
+  .al-sheet-header { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+  .al-sheet-footer { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+  .al-sheet-header button,
+  .al-sheet-footer button,
+  .al-sheet-header a,
+  .al-sheet-footer a { min-height: 2.75rem; }
 }
 @keyframes al-sheet-in {
   from { transform: translateY(100%); }
