@@ -1,5 +1,13 @@
 <!DOCTYPE html>
 <html class="h-full js-loading" lang="<%= (req && req.lang) || 'en' %>">
+<%
+// Overview and Credits own their backgrounds — never show the panel
+// wallpaper there so their existing UX is preserved unchanged.
+const wallpaperExcluded = req && req.path && (
+  req.path.startsWith('/admin/overview') ||
+  req.path.startsWith('/credits')
+);
+%>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -62,7 +70,11 @@
       }
     </style>
 </head>
-<body style="font-family: 'General Sans'" class="h-full">
+<body style="font-family: 'General Sans';<%= (settings.panelWallpaper && !wallpaperExcluded) ? `--al-wallpaper-image:url('${settings.panelWallpaper}');` : '' %>" class="h-full<%= (settings.panelWallpaper && !wallpaperExcluded) ? ' al-wallpaper' : '' %>">
+<% if (settings.panelWallpaper && !wallpaperExcluded) { %>
+<!-- Panel wallpaper layer — fixed behind all surfaces. Excluded pages (Overview, Credits) never render this. -->
+<div id="al-wallpaper-layer" aria-hidden="true"></div>
+<% } %>
 
 <a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white dark:focus:bg-neutral-950 focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
 

@@ -14,7 +14,7 @@ const DEFAULT_UPLOAD_LIMIT = 100;
       .then(function(d) {
         if (!d.success) throw new Error(d.error || 'Failed');
         showToast('Settings saved. Looking good.', 'success');
-        return true;
+        return d;
       })
       .catch(function(err) { showToast(err.message || 'Failed', 'error'); return false; })
       .finally(function() { if (btn) { btn.disabled = false; btn.textContent = orig; } });
@@ -53,6 +53,28 @@ const DEFAULT_UPLOAD_LIMIT = 100;
     if (window.applyThemeSheets) window.applyThemeSheets();
   }
 
+  /* ── Panel wallpaper live preview ──────────────
+     After a successful save, refresh the wallpaper layer in place so
+     admins see the result without a full page reload. */
+  function applyWallpaperFromResponse(url) {
+    var layer = document.getElementById('al-wallpaper-layer');
+    var body = document.body;
+    if (url) {
+      body.classList.add('al-wallpaper');
+      body.style.setProperty('--al-wallpaper-image', "url('" + url + "')");
+      if (!layer) {
+        layer = document.createElement('div');
+        layer.id = 'al-wallpaper-layer';
+        layer.setAttribute('aria-hidden', 'true');
+        document.body.insertBefore(layer, document.body.firstChild);
+      }
+    } else {
+      body.classList.remove('al-wallpaper');
+      body.style.removeProperty('--al-wallpaper-image');
+      if (layer) layer.parentNode.removeChild(layer);
+    }
+  }
+
   function selectThemeRadio(name, value) {
     if (!formAppearance) return;
     var changed = false;
@@ -74,9 +96,12 @@ const DEFAULT_UPLOAD_LIMIT = 100;
     selectThemeRadio('darkTheme', 'default');
     var loginUrl = document.getElementById('login-wallpaper-url');
     var registerUrl = document.getElementById('register-wallpaper-url');
+    var panelUrl = document.getElementById('panel-wallpaper-url');
     if (loginUrl) loginUrl.value = '';
     if (registerUrl) registerUrl.value = '';
+    if (panelUrl) panelUrl.value = '';
     document.querySelectorAll('#panel-appearance img').forEach(function(img) { img.remove(); });
+    applyWallpaperFromResponse(null);
     applyThemeCss('light', 'default');
     applyThemeCss('dark', 'default');
   }
@@ -163,7 +188,12 @@ const DEFAULT_UPLOAD_LIMIT = 100;
     if (!formAppearance) return;
     const btn = document.getElementById('tab-save-btn');
     const fd = new FormData(formAppearance);
-    post('/admin/settings', fd, btn).then(function(ok) { if (ok) applyThemeFromForm(); });
+    post('/admin/settings', fd, btn).then(function(ok) {
+      if (ok) {
+        applyThemeFromForm();
+        applyWallpaperFromResponse(ok.panelWallpaper);
+      }
+    });
   };
   window.tabLabels['appearance'] = 'Save';
   window.tabResetHandlers['appearance'] = function() {

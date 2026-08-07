@@ -25,6 +25,20 @@ const MIME_TYPE_ALLOWLIST = [
   'image/vnd.microsoft.icon',
 ] as const;
 
+// Resolve a wallpaper value from an upload-or-URL form field.
+//   - non-string input   -> undefined (no change)
+//   - empty string       -> null     (clear the wallpaper)
+//   - http(s) URL        -> the URL
+//   - anything else      -> undefined (ignore — only our own upload handler
+//                           produces local paths, never client input)
+export function resolveWallpaperValue(raw: unknown): string | null | undefined {
+  if (typeof raw !== 'string') { return undefined; }
+  const u = raw.trim();
+  if (u === '') { return null; }
+  if (u.startsWith('http://') || u.startsWith('https://')) { return u; }
+  return undefined;
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dirs: Record<string, string> = {
@@ -33,6 +47,7 @@ const storage = multer.diskStorage({
       themeFile:             'theme-zips',
       loginWallpaperFile:    'wallpapers',
       registerWallpaperFile: 'wallpapers',
+      panelWallpaperFile:    'wallpapers',
     };
     const subdir = dirs[file.fieldname] || 'misc';
     const uploadDir = path.join(process.cwd(), 'public', 'uploads', subdir);
@@ -236,6 +251,7 @@ const adminModule: Module = {
         { name: 'themeFile',            maxCount: 1 },
         { name: 'loginWallpaperFile',   maxCount: 1 },
         { name: 'registerWallpaperFile', maxCount: 1 },
+        { name: 'panelWallpaperFile',    maxCount: 1 },
       ]),
       async (req, res) => {
         try {
@@ -270,21 +286,29 @@ const adminModule: Module = {
           if (files.loginWallpaperFile?.[0]) {
             data.loginWallpaper = `/uploads/wallpapers/${files.loginWallpaperFile[0].filename}`;
           } else if (typeof raw.loginWallpaperUrl === 'string') {
-            const u = raw.loginWallpaperUrl.trim();
-            if (u === '') data.loginWallpaper = null;
-            else if (u.startsWith('http')) data.loginWallpaper = u;
+            const resolved = resolveWallpaperValue(raw.loginWallpaperUrl);
+            if (resolved !== undefined) data.loginWallpaper = resolved;
           }
 
           if (files.registerWallpaperFile?.[0]) {
             data.registerWallpaper = `/uploads/wallpapers/${files.registerWallpaperFile[0].filename}`;
           } else if (typeof raw.registerWallpaperUrl === 'string') {
-            const u = raw.registerWallpaperUrl.trim();
-            if (u === '') data.registerWallpaper = null;
-            else if (u.startsWith('http')) data.registerWallpaper = u;
+            const resolved = resolveWallpaperValue(raw.registerWallpaperUrl);
+            if (resolved !== undefined) data.registerWallpaper = resolved;
+          }
+
+          // Panel wallpaper: uploaded file > URL input > no change. Empty URL
+          // clears the wallpaper. Only http(s) URLs are accepted — local paths
+          // come exclusively from our own upload handler.
+          if (files.panelWallpaperFile?.[0]) {
+            data.panelWallpaper = `/uploads/wallpapers/${files.panelWallpaperFile[0].filename}`;
+          } else if (typeof raw.panelWallpaperUrl === 'string') {
+            const resolved = resolveWallpaperValue(raw.panelWallpaperUrl);
+            if (resolved !== undefined) data.panelWallpaper = resolved;
           }
 
           if (Object.keys(data).length > 0) await saveSettings(data);
-          return res.json({ success: true });
+          return res.json({ success: true, panelWallpaper: data.panelWallpaper ?? null });
         } catch (error: unknown) {
           logger.error('Error saving appearance settings:', error);
           res.status(500).json({ success: false, error: 'Failed to save settings.' });
@@ -583,6 +607,7 @@ const adminModule: Module = {
             allowRegistration: false,
             loginWallpaper:    null,
             registerWallpaper: null,
+            panelWallpaper:    null,
           });
           const defaultFavicon = path.join(process.cwd(), 'public', 'assets', 'favicon.ico');
           const dest           = path.join(process.cwd(), 'public', 'favicon.ico');

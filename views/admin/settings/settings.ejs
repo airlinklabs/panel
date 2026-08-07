@@ -168,6 +168,24 @@
             </div>
           </div>
 
+          <!-- Panel wallpaper -->
+          <div class="al-card">
+            <h2 class="al-card-header">Panel wallpaper</h2>
+            <p class="text-xs text-neutral-500 px-5 pt-2 pb-0">Background image behind the panel content. Upload a file or paste a URL. Leave both blank to use the plain theme background. The Overview and Credits pages keep their own backgrounds.</p>
+            <div class="p-4">
+              <% if (settings.panelWallpaper) { %>
+              <img src="<%= settings.panelWallpaper %>" alt="Panel wallpaper preview" class="h-20 w-full object-cover rounded-xl border border-neutral-200 dark:border-white/5 mb-3">
+              <% } %>
+              <label for="panel-wallpaper-file" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
+              <input type="file" id="panel-wallpaper-file" name="panelWallpaperFile" accept="image/*"
+                class="al-input mb-2 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+              <label for="panel-wallpaper-url" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
+              <input type="text" id="panel-wallpaper-url" name="panelWallpaperUrl" placeholder="https://…"
+                value="<%= (settings.panelWallpaper && settings.panelWallpaper.startsWith('http')) ? settings.panelWallpaper : '' %>"
+                class="al-input">
+            </div>
+          </div>
+
           </form>
         </div>
 

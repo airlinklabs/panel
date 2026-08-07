@@ -268,6 +268,7 @@ model settings {
   defaultOverallocateCpu    Int      @default(0)
   loginWallpaper            String?
   registerWallpaper         String?
+  panelWallpaper            String?
   loginMaxAttempts          Int      @default(5)
   loginLockoutMinutes       Int      @default(15)
   enforceDaemonHttps        Boolean  @default(false)
