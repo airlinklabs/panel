@@ -107,4 +107,42 @@ describe('assertNodeCapacity', () => {
       assertNodeCapacity(unlimitedNode, 999999, 999999, 999999)
     ).resolves.toBeUndefined();
   });
+
+  it('runningOnly filters to running servers in the query', async () => {
+    mockPrisma.server.findMany.mockResolvedValue([]);
+
+    await assertNodeCapacity(baseNode, 1024, 100, 20480, undefined, { runningOnly: true });
+
+    expect(mockPrisma.server.findMany).toHaveBeenCalledWith({
+      where: {
+        nodeId: 1,
+        Running: true,
+      },
+    });
+  });
+
+  it('runningOnly ignores stopped servers (freed resources)', async () => {
+    // A stopped 4 GB server no longer consumes capacity, so a new 4 GB server
+    // fits on the 4 GB node.
+    mockPrisma.server.findMany.mockImplementation(({ where }: any) => {
+      if (where?.Running === true) return Promise.resolve([]);
+      return Promise.resolve([{ Memory: 4096, Cpu: 100, Storage: 51200, Running: false }]);
+    });
+
+    await expect(
+      assertNodeCapacity(baseNode, 4096, 100, 20480, undefined, { runningOnly: true })
+    ).resolves.toBeUndefined();
+  });
+
+  it('runningOnly counts running servers against capacity', async () => {
+    // A running 8 GB server holds the node — adding another 4 GB is blocked.
+    mockPrisma.server.findMany.mockImplementation(({ where }: any) => {
+      if (where?.Running === true) return Promise.resolve([{ Memory: 8193, Cpu: 100, Storage: 51200, Running: true }]);
+      return Promise.resolve([{ Memory: 8193, Cpu: 100, Storage: 51200, Running: true }]);
+    });
+
+    await expect(
+      assertNodeCapacity(baseNode, 4096, 100, 20480, undefined, { runningOnly: true })
+    ).rejects.toThrow('memory capacity exceeded');
+  });
 });

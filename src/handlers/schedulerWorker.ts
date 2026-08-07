@@ -118,6 +118,8 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
           });
           if (resp.status >= 400) {
             errors.push(`task ${task.id}: ${describeDaemonError(resp)}`);
+          } else if (action === 'stop' || action === 'kill') {
+            await prisma.server.update({ where: { UUID: schedule.server.UUID }, data: { Running: false } }).catch(() => {});
           }
         }
       } else if (task.action === 'backup') {

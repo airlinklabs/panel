@@ -4,6 +4,7 @@ import prisma from '../../../db';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { getPrimaryExternalPort, portsToDaemonString } from '../../../handlers/utils/server/ports';
+import { assertNodeCapacity } from '../../../handlers/utils/server/resourceCheck';
 
 declare global {
   var serverStoppingStates: { [key: string]: boolean };
@@ -223,7 +224,9 @@ export async function stopServerContainer(
   server: Pick<ServerPageServer, 'node' | 'image'>,
   serverId: string,
   stopCommand = server.image?.stop || 'stop',
+  options: { releaseResources?: boolean } = {},
 ): Promise<void> {
+  const releaseResources = options.releaseResources !== false;
   await daemonRequest({
     method: 'POST',
     path: '/container/stop',
@@ -235,6 +238,12 @@ export async function stopServerContainer(
       stopCmd: stopCommand,
     },
   });
+  if (releaseResources) {
+    // The container is down — free its reservation so stopped servers stop
+    // consuming node capacity. Restart passes releaseResources:false to keep
+    // the reservation held across the stop/start cycle.
+    await prisma.server.update({ where: { UUID: serverId }, data: { Running: false } }).catch(() => {});
+  }
 }
 
 export async function startServerContainer(
@@ -251,6 +260,18 @@ export async function startServerContainer(
   if (!dockerImage) {
     throw new Error('Docker image not found.');
   }
+
+  // Runtime capacity gate: only running servers consume node capacity, so a
+  // stopped server's resources are immediately available again. The starting
+  // server is excluded so restart can keep its own reservation held.
+  await assertNodeCapacity(
+    server.node,
+    server.Memory,
+    server.Cpu,
+    server.Storage,
+    serverId,
+    { runningOnly: true },
+  );
 
   const mounts = options.mounts ?? await resolveServerMounts(serverId);
 
@@ -298,6 +319,9 @@ export async function startServerContainer(
     // Safe client message; raw daemon detail stays in the log via `cause`.
     throw new Error('The daemon could not start the server.', { cause: `daemon: ${rawDetail}` });
   }
+
+  // The container is up — the server now holds a reservation on its node.
+  await prisma.server.update({ where: { UUID: serverId }, data: { Running: true } }).catch(() => {});
 }
 
 async function resolveServerMounts(
@@ -327,7 +351,9 @@ export async function restartServerContainer(
     mounts?: { source: string; target: string; readOnly?: boolean }[];
   } = {},
 ): Promise<void> {
-  await stopServerContainer(server, serverId, options.stopCommand);
+  // releaseResources:false keeps the reservation held across the stop/start
+  // cycle — a restart must not free the server's own reserved resources.
+  await stopServerContainer(server, serverId, options.stopCommand, { releaseResources: false });
   await new Promise((resolve) => setTimeout(resolve, 2000));
   await startServerContainer(server, serverId, options);
 }

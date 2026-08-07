@@ -93,6 +93,7 @@ export type SettingsMinAggregateOutputType = {
   defaultOverallocateCpu: number | null
   loginWallpaper: string | null
   registerWallpaper: string | null
+  panelWallpaper: string | null
   loginMaxAttempts: number | null
   loginLockoutMinutes: number | null
   enforceDaemonHttps: boolean | null
@@ -147,6 +148,7 @@ export type SettingsMaxAggregateOutputType = {
   defaultOverallocateCpu: number | null
   loginWallpaper: string | null
   registerWallpaper: string | null
+  panelWallpaper: string | null
   loginMaxAttempts: number | null
   loginLockoutMinutes: number | null
   enforceDaemonHttps: boolean | null
@@ -201,6 +203,7 @@ export type SettingsCountAggregateOutputType = {
   defaultOverallocateCpu: number
   loginWallpaper: number
   registerWallpaper: number
+  panelWallpaper: number
   loginMaxAttempts: number
   loginLockoutMinutes: number
   enforceDaemonHttps: number
@@ -293,6 +296,7 @@ export type SettingsMinAggregateInputType = {
   defaultOverallocateCpu?: true
   loginWallpaper?: true
   registerWallpaper?: true
+  panelWallpaper?: true
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
   enforceDaemonHttps?: true
@@ -347,6 +351,7 @@ export type SettingsMaxAggregateInputType = {
   defaultOverallocateCpu?: true
   loginWallpaper?: true
   registerWallpaper?: true
+  panelWallpaper?: true
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
   enforceDaemonHttps?: true
@@ -401,6 +406,7 @@ export type SettingsCountAggregateInputType = {
   defaultOverallocateCpu?: true
   loginWallpaper?: true
   registerWallpaper?: true
+  panelWallpaper?: true
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
   enforceDaemonHttps?: true
@@ -542,6 +548,7 @@ export type SettingsGroupByOutputType = {
   defaultOverallocateCpu: number
   loginWallpaper: string | null
   registerWallpaper: string | null
+  panelWallpaper: string | null
   loginMaxAttempts: number
   loginLockoutMinutes: number
   enforceDaemonHttps: boolean
@@ -619,6 +626,7 @@ export type settingsWhereInput = {
   defaultOverallocateCpu?: Prisma.IntFilter<"settings"> | number
   loginWallpaper?: Prisma.StringNullableFilter<"settings"> | string | null
   registerWallpaper?: Prisma.StringNullableFilter<"settings"> | string | null
+  panelWallpaper?: Prisma.StringNullableFilter<"settings"> | string | null
   loginMaxAttempts?: Prisma.IntFilter<"settings"> | number
   loginLockoutMinutes?: Prisma.IntFilter<"settings"> | number
   enforceDaemonHttps?: Prisma.BoolFilter<"settings"> | boolean
@@ -673,6 +681,7 @@ export type settingsOrderByWithRelationInput = {
   defaultOverallocateCpu?: Prisma.SortOrder
   loginWallpaper?: Prisma.SortOrderInput | Prisma.SortOrder
   registerWallpaper?: Prisma.SortOrderInput | Prisma.SortOrder
+  panelWallpaper?: Prisma.SortOrderInput | Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   enforceDaemonHttps?: Prisma.SortOrder
@@ -730,6 +739,7 @@ export type settingsWhereUniqueInput = Prisma.AtLeast<{
   defaultOverallocateCpu?: Prisma.IntFilter<"settings"> | number
   loginWallpaper?: Prisma.StringNullableFilter<"settings"> | string | null
   registerWallpaper?: Prisma.StringNullableFilter<"settings"> | string | null
+  panelWallpaper?: Prisma.StringNullableFilter<"settings"> | string | null
   loginMaxAttempts?: Prisma.IntFilter<"settings"> | number
   loginLockoutMinutes?: Prisma.IntFilter<"settings"> | number
   enforceDaemonHttps?: Prisma.BoolFilter<"settings"> | boolean
@@ -784,6 +794,7 @@ export type settingsOrderByWithAggregationInput = {
   defaultOverallocateCpu?: Prisma.SortOrder
   loginWallpaper?: Prisma.SortOrderInput | Prisma.SortOrder
   registerWallpaper?: Prisma.SortOrderInput | Prisma.SortOrder
+  panelWallpaper?: Prisma.SortOrderInput | Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   enforceDaemonHttps?: Prisma.SortOrder
@@ -846,6 +857,7 @@ export type settingsScalarWhereWithAggregatesInput = {
   defaultOverallocateCpu?: Prisma.IntWithAggregatesFilter<"settings"> | number
   loginWallpaper?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
   registerWallpaper?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
+  panelWallpaper?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
   loginMaxAttempts?: Prisma.IntWithAggregatesFilter<"settings"> | number
   loginLockoutMinutes?: Prisma.IntWithAggregatesFilter<"settings"> | number
   enforceDaemonHttps?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
@@ -899,6 +911,7 @@ export type settingsCreateInput = {
   defaultOverallocateCpu?: number
   loginWallpaper?: string | null
   registerWallpaper?: string | null
+  panelWallpaper?: string | null
   loginMaxAttempts?: number
   loginLockoutMinutes?: number
   enforceDaemonHttps?: boolean
@@ -953,6 +966,7 @@ export type settingsUncheckedCreateInput = {
   defaultOverallocateCpu?: number
   loginWallpaper?: string | null
   registerWallpaper?: string | null
+  panelWallpaper?: string | null
   loginMaxAttempts?: number
   loginLockoutMinutes?: number
   enforceDaemonHttps?: boolean
@@ -1006,6 +1020,7 @@ export type settingsUpdateInput = {
   defaultOverallocateCpu?: Prisma.IntFieldUpdateOperationsInput | number
   loginWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registerWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  panelWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   loginLockoutMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   enforceDaemonHttps?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1060,6 +1075,7 @@ export type settingsUncheckedUpdateInput = {
   defaultOverallocateCpu?: Prisma.IntFieldUpdateOperationsInput | number
   loginWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registerWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  panelWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   loginLockoutMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   enforceDaemonHttps?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1114,6 +1130,7 @@ export type settingsCreateManyInput = {
   defaultOverallocateCpu?: number
   loginWallpaper?: string | null
   registerWallpaper?: string | null
+  panelWallpaper?: string | null
   loginMaxAttempts?: number
   loginLockoutMinutes?: number
   enforceDaemonHttps?: boolean
@@ -1167,6 +1184,7 @@ export type settingsUpdateManyMutationInput = {
   defaultOverallocateCpu?: Prisma.IntFieldUpdateOperationsInput | number
   loginWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registerWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  panelWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   loginLockoutMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   enforceDaemonHttps?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1221,6 +1239,7 @@ export type settingsUncheckedUpdateManyInput = {
   defaultOverallocateCpu?: Prisma.IntFieldUpdateOperationsInput | number
   loginWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registerWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  panelWallpaper?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMaxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   loginLockoutMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   enforceDaemonHttps?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1275,6 +1294,7 @@ export type settingsCountOrderByAggregateInput = {
   defaultOverallocateCpu?: Prisma.SortOrder
   loginWallpaper?: Prisma.SortOrder
   registerWallpaper?: Prisma.SortOrder
+  panelWallpaper?: Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   enforceDaemonHttps?: Prisma.SortOrder
@@ -1347,6 +1367,7 @@ export type settingsMaxOrderByAggregateInput = {
   defaultOverallocateCpu?: Prisma.SortOrder
   loginWallpaper?: Prisma.SortOrder
   registerWallpaper?: Prisma.SortOrder
+  panelWallpaper?: Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   enforceDaemonHttps?: Prisma.SortOrder
@@ -1401,6 +1422,7 @@ export type settingsMinOrderByAggregateInput = {
   defaultOverallocateCpu?: Prisma.SortOrder
   loginWallpaper?: Prisma.SortOrder
   registerWallpaper?: Prisma.SortOrder
+  panelWallpaper?: Prisma.SortOrder
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   enforceDaemonHttps?: Prisma.SortOrder
@@ -1475,6 +1497,7 @@ export type settingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   defaultOverallocateCpu?: boolean
   loginWallpaper?: boolean
   registerWallpaper?: boolean
+  panelWallpaper?: boolean
   loginMaxAttempts?: boolean
   loginLockoutMinutes?: boolean
   enforceDaemonHttps?: boolean
@@ -1529,6 +1552,7 @@ export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   defaultOverallocateCpu?: boolean
   loginWallpaper?: boolean
   registerWallpaper?: boolean
+  panelWallpaper?: boolean
   loginMaxAttempts?: boolean
   loginLockoutMinutes?: boolean
   enforceDaemonHttps?: boolean
@@ -1583,6 +1607,7 @@ export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   defaultOverallocateCpu?: boolean
   loginWallpaper?: boolean
   registerWallpaper?: boolean
+  panelWallpaper?: boolean
   loginMaxAttempts?: boolean
   loginLockoutMinutes?: boolean
   enforceDaemonHttps?: boolean
@@ -1637,6 +1662,7 @@ export type settingsSelectScalar = {
   defaultOverallocateCpu?: boolean
   loginWallpaper?: boolean
   registerWallpaper?: boolean
+  panelWallpaper?: boolean
   loginMaxAttempts?: boolean
   loginLockoutMinutes?: boolean
   enforceDaemonHttps?: boolean
@@ -1660,7 +1686,7 @@ export type settingsSelectScalar = {
   s3PathStyle?: boolean
 }
 
-export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "require2faForAdmins" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle", ExtArgs["result"]["settings"]>
+export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "panelWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "require2faForAdmins" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle", ExtArgs["result"]["settings"]>
 
 export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "settings"
@@ -1696,6 +1722,7 @@ export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     defaultOverallocateCpu: number
     loginWallpaper: string | null
     registerWallpaper: string | null
+    panelWallpaper: string | null
     loginMaxAttempts: number
     loginLockoutMinutes: number
     enforceDaemonHttps: boolean
@@ -2170,6 +2197,7 @@ export interface settingsFieldRefs {
   readonly defaultOverallocateCpu: Prisma.FieldRef<"settings", 'Int'>
   readonly loginWallpaper: Prisma.FieldRef<"settings", 'String'>
   readonly registerWallpaper: Prisma.FieldRef<"settings", 'String'>
+  readonly panelWallpaper: Prisma.FieldRef<"settings", 'String'>
   readonly loginMaxAttempts: Prisma.FieldRef<"settings", 'Int'>
   readonly loginLockoutMinutes: Prisma.FieldRef<"settings", 'Int'>
   readonly enforceDaemonHttps: Prisma.FieldRef<"settings", 'Boolean'>

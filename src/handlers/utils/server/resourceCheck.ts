@@ -1,5 +1,20 @@
 import prisma from '../../../db';
 
+export class NodeCapacityExceededError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NodeCapacityExceededError';
+  }
+}
+
+export interface NodeCapacityOptions {
+  // Count only running servers against node capacity. Stopped servers have
+  // freed their resources, so they no longer consume capacity. Defaults to
+  // false so provisioning checks (create/edit/transfer) keep counting the
+  // total footprint on the node.
+  runningOnly?: boolean;
+}
+
 // Enforce node capacity with overallocation. Any node limit of 0 = unlimited.
 // Node ram/disk are stored in GB; server Memory/Storage are in MB. CPU is a
 // percentage on both (100 = 1 core).
@@ -9,10 +24,12 @@ export async function assertNodeCapacity(
   newCpu: number,
   newStorage: number,
   excludeServerId?: string,
+  options: NodeCapacityOptions = {},
 ): Promise<void> {
   const servers = await prisma.server.findMany({
     where: {
       nodeId: node.id,
+      ...(options.runningOnly ? { Running: true } : {}),
       ...(excludeServerId ? { NOT: { UUID: excludeServerId } } : {}),
     },
   });
@@ -27,7 +44,7 @@ export async function assertNodeCapacity(
     if (totalRequestedMb > capMb) {
       const requestedGb = (totalRequestedMb / 1024).toFixed(1);
       const availableGb = (capMb / 1024).toFixed(1);
-      throw new Error(
+      throw new NodeCapacityExceededError(
         `Node memory capacity exceeded: ${requestedGb} GB requested, ${availableGb} GB available (${node.ram} GB base + ${node.overallocateMemory}% overallocation).`,
       );
     }
@@ -36,7 +53,7 @@ export async function assertNodeCapacity(
   if (node.cpu > 0) {
     const cap = node.cpu * (1 + node.overallocateCpu / 100);
     if (usedCpu + newCpu > cap) {
-      throw new Error(
+      throw new NodeCapacityExceededError(
         `Node CPU capacity exceeded: ${Math.round(usedCpu + newCpu)}% requested, ${Math.round(cap)}% available (${node.cpu}% base + ${node.overallocateCpu}% overallocation).`,
       );
     }
@@ -48,7 +65,7 @@ export async function assertNodeCapacity(
     if (totalRequestedMb > capMb) {
       const requestedGb = (totalRequestedMb / 1024).toFixed(1);
       const availableGb = (capMb / 1024).toFixed(1);
-      throw new Error(
+      throw new NodeCapacityExceededError(
         `Node disk capacity exceeded: ${requestedGb} GB requested, ${availableGb} GB available (${node.disk} GB base + ${node.overallocateDisk}% overallocation).`,
       );
     }

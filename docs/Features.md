@@ -53,6 +53,8 @@ Servers are game server instances that run on nodes. Each server belongs to a us
 
 To create a server, go to Admin > Servers > Create Server. Pick a node, a user to own the server, an image (the server type), and resource limits: RAM, disk, and CPU.
 
+Node capacity is enforced at runtime, not just at creation. Only running servers consume a node's capacity: when a server is stopped, its RAM, CPU, and disk are immediately available again for other servers to start. A start that would push a node past its limit (accounting for overallocation) is rejected with a clear capacity error. Restarting a server keeps its reservation held, so a restart never frees the server's own slot.
+
 The server list shows every server across all nodes with its owner, node, and status.
 
 Clicking a server opens its detail page where you can edit its configuration, change resource limits, or delete it.

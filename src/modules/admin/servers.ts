@@ -309,6 +309,7 @@ const adminModule: Module = {
                 },
               });
 
+              await prisma.server.update({ where: { UUID: String(server.UUID) }, data: { Running: false } }).catch(() => {});
               logger.info(`Server ${server.UUID} stopped successfully due to suspension`);
             } catch (stopError) {
               logger.error(`Error stopping server ${server.UUID} during suspension:`, stopError);
@@ -913,6 +914,7 @@ const adminModule: Module = {
               nodeKey: server.node?.key ?? '',
               body: { id: server.UUID },
             });
+            await prisma.server.update({ where: { UUID: String(server.UUID) }, data: { Running: false } }).catch(() => {});
           } catch {
             // ignore if already stopped
           }

@@ -78,6 +78,7 @@ model Server {
   Installing       Boolean            @default(true)
   Queued           Boolean            @default(true)
   Suspended        Boolean            @default(false)
+  Running          Boolean            @default(false)
   backupLimit      Int                @default(5)
   backupIgnoreList String            @default("")
   databaseLimit    Int                @default(0)

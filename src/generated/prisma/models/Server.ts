@@ -70,6 +70,7 @@ export type ServerMinAggregateOutputType = {
   Installing: boolean | null
   Queued: boolean | null
   Suspended: boolean | null
+  Running: boolean | null
   backupLimit: number | null
   backupIgnoreList: string | null
   databaseLimit: number | null
@@ -96,6 +97,7 @@ export type ServerMaxAggregateOutputType = {
   Installing: boolean | null
   Queued: boolean | null
   Suspended: boolean | null
+  Running: boolean | null
   backupLimit: number | null
   backupIgnoreList: string | null
   databaseLimit: number | null
@@ -122,6 +124,7 @@ export type ServerCountAggregateOutputType = {
   Installing: number
   Queued: number
   Suspended: number
+  Running: number
   backupLimit: number
   backupIgnoreList: number
   databaseLimit: number
@@ -176,6 +179,7 @@ export type ServerMinAggregateInputType = {
   Installing?: true
   Queued?: true
   Suspended?: true
+  Running?: true
   backupLimit?: true
   backupIgnoreList?: true
   databaseLimit?: true
@@ -202,6 +206,7 @@ export type ServerMaxAggregateInputType = {
   Installing?: true
   Queued?: true
   Suspended?: true
+  Running?: true
   backupLimit?: true
   backupIgnoreList?: true
   databaseLimit?: true
@@ -228,6 +233,7 @@ export type ServerCountAggregateInputType = {
   Installing?: true
   Queued?: true
   Suspended?: true
+  Running?: true
   backupLimit?: true
   backupIgnoreList?: true
   databaseLimit?: true
@@ -341,6 +347,7 @@ export type ServerGroupByOutputType = {
   Installing: boolean
   Queued: boolean
   Suspended: boolean
+  Running: boolean
   backupLimit: number
   backupIgnoreList: string
   databaseLimit: number
@@ -390,6 +397,7 @@ export type ServerWhereInput = {
   Installing?: Prisma.BoolFilter<"Server"> | boolean
   Queued?: Prisma.BoolFilter<"Server"> | boolean
   Suspended?: Prisma.BoolFilter<"Server"> | boolean
+  Running?: Prisma.BoolFilter<"Server"> | boolean
   backupLimit?: Prisma.IntFilter<"Server"> | number
   backupIgnoreList?: Prisma.StringFilter<"Server"> | string
   databaseLimit?: Prisma.IntFilter<"Server"> | number
@@ -428,6 +436,7 @@ export type ServerOrderByWithRelationInput = {
   Installing?: Prisma.SortOrder
   Queued?: Prisma.SortOrder
   Suspended?: Prisma.SortOrder
+  Running?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
   backupIgnoreList?: Prisma.SortOrder
   databaseLimit?: Prisma.SortOrder
@@ -469,6 +478,7 @@ export type ServerWhereUniqueInput = Prisma.AtLeast<{
   Installing?: Prisma.BoolFilter<"Server"> | boolean
   Queued?: Prisma.BoolFilter<"Server"> | boolean
   Suspended?: Prisma.BoolFilter<"Server"> | boolean
+  Running?: Prisma.BoolFilter<"Server"> | boolean
   backupLimit?: Prisma.IntFilter<"Server"> | number
   backupIgnoreList?: Prisma.StringFilter<"Server"> | string
   databaseLimit?: Prisma.IntFilter<"Server"> | number
@@ -507,6 +517,7 @@ export type ServerOrderByWithAggregationInput = {
   Installing?: Prisma.SortOrder
   Queued?: Prisma.SortOrder
   Suspended?: Prisma.SortOrder
+  Running?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
   backupIgnoreList?: Prisma.SortOrder
   databaseLimit?: Prisma.SortOrder
@@ -541,6 +552,7 @@ export type ServerScalarWhereWithAggregatesInput = {
   Installing?: Prisma.BoolWithAggregatesFilter<"Server"> | boolean
   Queued?: Prisma.BoolWithAggregatesFilter<"Server"> | boolean
   Suspended?: Prisma.BoolWithAggregatesFilter<"Server"> | boolean
+  Running?: Prisma.BoolWithAggregatesFilter<"Server"> | boolean
   backupLimit?: Prisma.IntWithAggregatesFilter<"Server"> | number
   backupIgnoreList?: Prisma.StringWithAggregatesFilter<"Server"> | string
   databaseLimit?: Prisma.IntWithAggregatesFilter<"Server"> | number
@@ -566,6 +578,7 @@ export type ServerCreateInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -601,6 +614,7 @@ export type ServerUncheckedCreateInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -635,6 +649,7 @@ export type ServerUpdateInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -670,6 +685,7 @@ export type ServerUncheckedUpdateInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -705,6 +721,7 @@ export type ServerCreateManyInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -730,6 +747,7 @@ export type ServerUpdateManyMutationInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -753,6 +771,7 @@ export type ServerUncheckedUpdateManyInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -789,6 +808,7 @@ export type ServerCountOrderByAggregateInput = {
   Installing?: Prisma.SortOrder
   Queued?: Prisma.SortOrder
   Suspended?: Prisma.SortOrder
+  Running?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
   backupIgnoreList?: Prisma.SortOrder
   databaseLimit?: Prisma.SortOrder
@@ -828,6 +848,7 @@ export type ServerMaxOrderByAggregateInput = {
   Installing?: Prisma.SortOrder
   Queued?: Prisma.SortOrder
   Suspended?: Prisma.SortOrder
+  Running?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
   backupIgnoreList?: Prisma.SortOrder
   databaseLimit?: Prisma.SortOrder
@@ -854,6 +875,7 @@ export type ServerMinOrderByAggregateInput = {
   Installing?: Prisma.SortOrder
   Queued?: Prisma.SortOrder
   Suspended?: Prisma.SortOrder
+  Running?: Prisma.SortOrder
   backupLimit?: Prisma.SortOrder
   backupIgnoreList?: Prisma.SortOrder
   databaseLimit?: Prisma.SortOrder
@@ -1158,6 +1180,7 @@ export type ServerCreateWithoutOwnerInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1192,6 +1215,7 @@ export type ServerUncheckedCreateWithoutOwnerInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1254,6 +1278,7 @@ export type ServerScalarWhereInput = {
   Installing?: Prisma.BoolFilter<"Server"> | boolean
   Queued?: Prisma.BoolFilter<"Server"> | boolean
   Suspended?: Prisma.BoolFilter<"Server"> | boolean
+  Running?: Prisma.BoolFilter<"Server"> | boolean
   backupLimit?: Prisma.IntFilter<"Server"> | number
   backupIgnoreList?: Prisma.StringFilter<"Server"> | string
   databaseLimit?: Prisma.IntFilter<"Server"> | number
@@ -1279,6 +1304,7 @@ export type ServerCreateWithoutServerMountsInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1313,6 +1339,7 @@ export type ServerUncheckedCreateWithoutServerMountsInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1362,6 +1389,7 @@ export type ServerUpdateWithoutServerMountsInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1396,6 +1424,7 @@ export type ServerUncheckedUpdateWithoutServerMountsInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1429,6 +1458,7 @@ export type ServerCreateWithoutDatabasesInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1463,6 +1493,7 @@ export type ServerUncheckedCreateWithoutDatabasesInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1512,6 +1543,7 @@ export type ServerUpdateWithoutDatabasesInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1546,6 +1578,7 @@ export type ServerUncheckedUpdateWithoutDatabasesInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1579,6 +1612,7 @@ export type ServerCreateWithoutSchedulesInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1613,6 +1647,7 @@ export type ServerUncheckedCreateWithoutSchedulesInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1662,6 +1697,7 @@ export type ServerUpdateWithoutSchedulesInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1696,6 +1732,7 @@ export type ServerUncheckedUpdateWithoutSchedulesInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1729,6 +1766,7 @@ export type ServerCreateWithoutImageInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1763,6 +1801,7 @@ export type ServerUncheckedCreateWithoutImageInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1821,6 +1860,7 @@ export type ServerCreateWithoutAllocationsInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1855,6 +1895,7 @@ export type ServerUncheckedCreateWithoutAllocationsInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -1904,6 +1945,7 @@ export type ServerUpdateWithoutAllocationsInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1938,6 +1980,7 @@ export type ServerUncheckedUpdateWithoutAllocationsInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1971,6 +2014,7 @@ export type ServerCreateWithoutNodeInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2005,6 +2049,7 @@ export type ServerUncheckedCreateWithoutNodeInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2063,6 +2108,7 @@ export type ServerCreateWithoutFolderInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2097,6 +2143,7 @@ export type ServerUncheckedCreateWithoutFolderInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2146,6 +2193,7 @@ export type ServerUpdateWithoutFolderInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2180,6 +2228,7 @@ export type ServerUncheckedUpdateWithoutFolderInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2213,6 +2262,7 @@ export type ServerCreateWithoutBackupsInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2247,6 +2297,7 @@ export type ServerUncheckedCreateWithoutBackupsInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2296,6 +2347,7 @@ export type ServerUpdateWithoutBackupsInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2330,6 +2382,7 @@ export type ServerUncheckedUpdateWithoutBackupsInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2363,6 +2416,7 @@ export type ServerCreateWithoutSftpCredentialInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2397,6 +2451,7 @@ export type ServerUncheckedCreateWithoutSftpCredentialInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2446,6 +2501,7 @@ export type ServerUpdateWithoutSftpCredentialInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2480,6 +2536,7 @@ export type ServerUncheckedUpdateWithoutSftpCredentialInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2513,6 +2570,7 @@ export type ServerCreateWithoutSubUsersInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2547,6 +2605,7 @@ export type ServerUncheckedCreateWithoutSubUsersInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2596,6 +2655,7 @@ export type ServerUpdateWithoutSubUsersInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2630,6 +2690,7 @@ export type ServerUncheckedUpdateWithoutSubUsersInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2663,6 +2724,7 @@ export type ServerCreateWithoutActivityLogsInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2697,6 +2759,7 @@ export type ServerUncheckedCreateWithoutActivityLogsInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2746,6 +2809,7 @@ export type ServerUpdateWithoutActivityLogsInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2780,6 +2844,7 @@ export type ServerUncheckedUpdateWithoutActivityLogsInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2814,6 +2879,7 @@ export type ServerCreateManyOwnerInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2838,6 +2904,7 @@ export type ServerUpdateWithoutOwnerInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2872,6 +2939,7 @@ export type ServerUncheckedUpdateWithoutOwnerInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2906,6 +2974,7 @@ export type ServerUncheckedUpdateManyWithoutOwnerInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2931,6 +3000,7 @@ export type ServerCreateManyImageInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -2955,6 +3025,7 @@ export type ServerUpdateWithoutImageInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2989,6 +3060,7 @@ export type ServerUncheckedUpdateWithoutImageInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3023,6 +3095,7 @@ export type ServerUncheckedUpdateManyWithoutImageInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3048,6 +3121,7 @@ export type ServerCreateManyNodeInput = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: number
   backupIgnoreList?: string
   databaseLimit?: number
@@ -3072,6 +3146,7 @@ export type ServerUpdateWithoutNodeInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3106,6 +3181,7 @@ export type ServerUncheckedUpdateWithoutNodeInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3140,6 +3216,7 @@ export type ServerUncheckedUpdateManyWithoutNodeInput = {
   Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Running?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupLimit?: Prisma.IntFieldUpdateOperationsInput | number
   backupIgnoreList?: Prisma.StringFieldUpdateOperationsInput | string
   databaseLimit?: Prisma.IntFieldUpdateOperationsInput | number
@@ -3250,6 +3327,7 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: boolean
   backupIgnoreList?: boolean
   databaseLimit?: boolean
@@ -3289,6 +3367,7 @@ export type ServerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: boolean
   backupIgnoreList?: boolean
   databaseLimit?: boolean
@@ -3318,6 +3397,7 @@ export type ServerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: boolean
   backupIgnoreList?: boolean
   databaseLimit?: boolean
@@ -3347,6 +3427,7 @@ export type ServerSelectScalar = {
   Installing?: boolean
   Queued?: boolean
   Suspended?: boolean
+  Running?: boolean
   backupLimit?: boolean
   backupIgnoreList?: boolean
   databaseLimit?: boolean
@@ -3355,7 +3436,7 @@ export type ServerSelectScalar = {
   imageId?: boolean
 }
 
-export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "description" | "createdAt" | "Ports" | "Memory" | "Swap" | "Cpu" | "Storage" | "Variables" | "StartCommand" | "dockerImage" | "allowStartupEdit" | "Installing" | "Queued" | "Suspended" | "backupLimit" | "backupIgnoreList" | "databaseLimit" | "ownerId" | "nodeId" | "imageId", ExtArgs["result"]["server"]>
+export type ServerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "description" | "createdAt" | "Ports" | "Memory" | "Swap" | "Cpu" | "Storage" | "Variables" | "StartCommand" | "dockerImage" | "allowStartupEdit" | "Installing" | "Queued" | "Suspended" | "Running" | "backupLimit" | "backupIgnoreList" | "databaseLimit" | "ownerId" | "nodeId" | "imageId", ExtArgs["result"]["server"]>
 export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sftpCredential?: boolean | Prisma.Server$sftpCredentialArgs<ExtArgs>
   node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
@@ -3416,6 +3497,7 @@ export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     Installing: boolean
     Queued: boolean
     Suspended: boolean
+    Running: boolean
     backupLimit: number
     backupIgnoreList: string
     databaseLimit: number
@@ -3874,6 +3956,7 @@ export interface ServerFieldRefs {
   readonly Installing: Prisma.FieldRef<"Server", 'Boolean'>
   readonly Queued: Prisma.FieldRef<"Server", 'Boolean'>
   readonly Suspended: Prisma.FieldRef<"Server", 'Boolean'>
+  readonly Running: Prisma.FieldRef<"Server", 'Boolean'>
   readonly backupLimit: Prisma.FieldRef<"Server", 'Int'>
   readonly backupIgnoreList: Prisma.FieldRef<"Server", 'String'>
   readonly databaseLimit: Prisma.FieldRef<"Server", 'Int'>

@@ -165,6 +165,7 @@ async function runTransfer(
     } catch {
       // Container might already be stopped — continue
     }
+    await prisma.server.update({ where: { UUID: server.UUID }, data: { Running: false } }).catch(() => {});
     await sleep(2000); // Wait for container to fully stop
 
     // ── Step 2: Create backup on source daemon ─────────────────────────────
@@ -386,6 +387,7 @@ async function runTransfer(
         },
         timeout: 60_000,
       });
+      await prisma.server.update({ where: { UUID: server.UUID }, data: { Running: true } }).catch(() => {});
     } catch (startErr) {
       logger.warn(`Failed to start server after transfer: ${startErr}`);
       // Don't fail the transfer — server is migrated, just not running

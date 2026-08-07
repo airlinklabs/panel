@@ -7,6 +7,7 @@ import { checkForServerInstallation } from '../../../handlers/checkForServerInst
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { safeClientMessage } from '../../../utils/errors';
+import { NodeCapacityExceededError } from '../../../handlers/utils/server/resourceCheck';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
@@ -505,6 +506,7 @@ export function registerConsoleRoutes(router: Router): void {
               },
             });
             logger.info('Container stopped successfully: ' + serverId);
+            await prisma.server.update({ where: { UUID: String(serverId) }, data: { Running: false } }).catch(() => {});
             await logActivity(req, 'server:stop', { serverId: String(serverId) });
             return;
           } catch (stopError: unknown) {
@@ -515,6 +517,8 @@ export function registerConsoleRoutes(router: Router): void {
               logger.info(
                 'Container already stopped or not found: ' + serverId,
               );
+
+              await prisma.server.update({ where: { UUID: String(serverId) }, data: { Running: false } }).catch(() => {});
 
               const cacheKey = `server_stopping_${serverId}`;
               if (
@@ -542,7 +546,7 @@ export function registerConsoleRoutes(router: Router): void {
 
         if (powerAction === 'restart') {
           try {
-            await stopServerContainer(server, String(serverId), 'stop');
+            await stopServerContainer(server, String(serverId), 'stop', { releaseResources: false });
           } catch {
             // Container may already be stopped
           }
@@ -553,6 +557,10 @@ export function registerConsoleRoutes(router: Router): void {
           } catch (error) {
             if (error instanceof Error && error.message === 'Docker image not found.') {
               res.status(400).json({ error: 'Docker image not found.' });
+              return;
+            }
+            if (error instanceof NodeCapacityExceededError) {
+              res.status(409).json({ error: error.message });
               return;
             }
             throw error;
@@ -569,6 +577,10 @@ export function registerConsoleRoutes(router: Router): void {
         } catch (error) {
           if (error instanceof Error && error.message === 'Docker image not found.') {
             res.status(400).json({ error: 'Docker image not found.' });
+            return;
+          }
+          if (error instanceof NodeCapacityExceededError) {
+            res.status(409).json({ error: error.message });
             return;
           }
           throw error;

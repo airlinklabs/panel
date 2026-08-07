@@ -6,6 +6,7 @@ import { apiValidator } from '../../../handlers/utils/api/apiValidator';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { startServerContainer } from '../../user/server/shared';
+import { NodeCapacityExceededError } from '../../../handlers/utils/server/resourceCheck';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import { nextRunFromCron } from '../../../utils/cron';
 
@@ -160,6 +161,10 @@ const clientApiModule: Module = {
             body: { id: server.UUID },
             timeout: 30000,
           });
+
+          if (action === 'stop' || action === 'kill') {
+            await prisma.server.update({ where: { UUID: server.UUID }, data: { Running: false } }).catch(() => {});
+          }
         }
 
         await logActivity(req, `server:${action}` as Parameters<typeof logActivity>[1], {
@@ -169,6 +174,10 @@ const clientApiModule: Module = {
 
         res.json({ message: `${action} signal sent` });
       } catch (err) {
+        if (err instanceof NodeCapacityExceededError) {
+          logger.warn('Client API: power action blocked by node capacity', { error: err.message });
+          return jsonError(res, err.message, 409);
+        }
         logger.error('Client API: power action error', err);
         jsonError(res, 'Failed to execute power action', 500);
       }
