@@ -73,6 +73,20 @@
     try { sessionStorage.setItem(NAV_FLAG, '1'); } catch { /* sessionStorage unavailable */ }
   }
 
+  // ── Turbo Drive interop ────────────────────────────────────────────────────
+  // When Turbo is present it takes over same-origin link clicks and form
+  // submits (swapping <body> via fetch), so the sessionStorage nav-flag + full
+  // reload flow is only needed for links/forms Turbo deliberately skips.
+  // Highlights and the reveal animation re-run after the swap on turbo:load.
+
+  const USING_TURBO = !!(window.Turbo);
+
+  function willTurboHandle(el) {
+    if (!USING_TURBO) return false;
+    const t = el.getAttribute && el.getAttribute('data-turbo');
+    return t !== 'false';
+  }
+
   // ── Animated element ──────────────────────────────────────────────────────
 
   function getAnimEl() {
@@ -338,6 +352,24 @@
     }
   }
 
+  // turbo:load also fires for the initial page (Turbo boots it), so only treat
+  // subsequent fires as boundary-after-navigation. pageRenderer's body swap
+  // leaves `<html class="js-loading">` behind, so the new content is hidden by
+  // CSS until revealAfterNav animates it in — no flash between swap and reveal.
+
+  var _turboVisits = 0;
+  document.addEventListener('turbo:load', function () {
+    initDesktopHighlight(_turboVisits > 0);
+    initMobileHighlight();
+    if (_turboVisits > 0) {
+      revealAfterNav();
+      _turboVisits = 0;
+    }
+  });
+  document.addEventListener('turbo:before-visit', function () {
+    _turboVisits++;
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
     initDesktopHighlight(_fromNav);
     initMobileHighlight();
@@ -386,7 +418,7 @@
       a.classList.remove(...MOBILE_INACTIVE_CLASSES);
       a.classList.add(...MOBILE_ACTIVE_CLASSES);
     }
-    markNavigation();
+    if (!willTurboHandle(a)) markNavigation();
     fadeContentOut();
   }, true);
 
@@ -448,8 +480,9 @@
     }
   });
 
-  document.addEventListener('submit', function () {
-    markNavigation();
+  document.addEventListener('submit', function (e) {
+    const form = e.target && e.target.closest && e.target.closest('form');
+    if (form && !willTurboHandle(form)) markNavigation();
     fadeContentOut();
   }, true);
 

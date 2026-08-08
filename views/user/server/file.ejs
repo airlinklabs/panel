@@ -213,6 +213,7 @@
 %>
 <script type="application/json" id="editor-file-data"><%- JSON.stringify({ content: file.content || '', tooLarge: fileContentTooLarge, invalidUtf8: fileContentInvalidUtf8 }).replace(/<\//g, '<\\/') %></script>
 <script nonce="<%- nonce %>">
+(function () {
 require.config({
   paths: {
     'vs': '/monaco/vs'
@@ -584,6 +585,7 @@ async function saveFile() {
     if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
     guardNavigation(href);
   });
+})();
 </script>
 
 <%- include('../../components/footer') %>

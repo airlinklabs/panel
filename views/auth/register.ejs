@@ -76,6 +76,7 @@
 </div>
 
 <script nonce="<%- nonce %>">
+(function () {
   requestAnimationFrame(function () {
     requestAnimationFrame(function () {
       document.getElementById('authPanel').classList.add('visible');
@@ -122,6 +123,7 @@
   ['username','email','password'].forEach(function (id) {
     document.getElementById(id).addEventListener('input', function () { this.classList.remove('invalid'); });
   });
+})();
 </script>
 
 <%- include('../components/footer') %>

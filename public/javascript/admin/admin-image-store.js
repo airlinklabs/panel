@@ -1,3 +1,4 @@
+(function () {
 var _rootStyle = getComputedStyle(document.documentElement);
 const CAT_CLS   = { game: 'cat-game', application: 'cat-application', generic: 'cat-generic' };
 const CAT_LABEL = { game: 'Game', application: 'App', generic: 'Generic' };
@@ -276,3 +277,10 @@ document.getElementById('searchInput').addEventListener('input', function() {
 });
 
 loadCatalogue();
+
+window.doSearch = doSearch;
+window.doRefresh = doRefresh;
+window.loadCatalogue = loadCatalogue;
+window.sortKey = sortKey;
+window.confirmInstall = confirmInstall;
+})();

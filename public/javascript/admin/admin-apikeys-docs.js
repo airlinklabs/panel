@@ -1,3 +1,4 @@
+(function () {
 const apiKeySelect = document.getElementById('apiKeySelect');
 const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
 const testButtons = document.querySelectorAll('.test-endpoint-btn');
@@ -153,3 +154,4 @@ testButtons.forEach(button => {
     }
   });
 });
+})();

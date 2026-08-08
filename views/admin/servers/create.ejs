@@ -228,7 +228,7 @@
 <%- include('../../components/loadingPopup') %>
 
 <script nonce="<%- nonce %>">
-  document.addEventListener('DOMContentLoaded', () => {
+  window.ALMount(() => {
     const serverImageSelect = document.getElementById('serverImage');
     const dockerImageSelect = document.getElementById('dockerImage');
     const serverNodeSelect = document.getElementById('serverNode');
@@ -446,6 +446,7 @@
   });
 </script>
 <script nonce="<%- nonce %>">
+(function () {
 const listA = [
     "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted",
     "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked",
@@ -465,6 +466,8 @@ function generateRandomName() {
     do { randomA = listA[Math.floor(Math.random() * listA.length)]; randomB = listB[Math.floor(Math.random() * listB.length)]; } while (randomA === randomB);
     document.getElementById("serverName").value = randomA + " " + randomB;
 }
+window.generateRandomName = generateRandomName;
+})();
 </script>
 <style>
 #createServerForm .al-card { overflow: visible; }

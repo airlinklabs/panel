@@ -36,6 +36,12 @@ const wallpaperExcluded = req && req.path && (
     <script nonce="<%- nonce %>" defer src="/js/csrf.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/js/shared/al-icon.js?v=8"></script>
     <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
+    <script nonce="<%- nonce %>" defer src="/javascript/vendor/query-core.js?v=1"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/vendor/reconnecting-websocket.js?v=1"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/vendor/stimulus.js?v=1"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/vendor/turbo.js?v=1"></script>
+    <!-- turbo-shell must load synchronously: inline body/page scripts call ALMount during parse -->
+    <script nonce="<%- nonce %>" src="/javascript/shared/turbo-shell.js?v=1"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/format-switcher.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/animations.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/custom-select.js?v=8"></script>
@@ -66,6 +72,8 @@ const wallpaperExcluded = req && req.path && (
         opacity: 0;
         transform: translateY(14px);
       }
+      /* Turbo Drive's default top progress bar is hidden: the panel draws its own page-loader overlay */
+      turbo-progress-bar { visibility: hidden; }
     </style>
 </head>
 <body style="font-family: 'General Sans';<%= (settings.panelWallpaper && !wallpaperExcluded) ? `--al-wallpaper-image:url('${settings.panelWallpaper}');` : '' %>" class="h-full<%= (settings.panelWallpaper && !wallpaperExcluded) ? ' al-wallpaper' : '' %>">
@@ -81,9 +89,6 @@ const wallpaperExcluded = req && req.path && (
   <div id="pl-inner" style="display:flex;flex-direction:column;align-items:center;gap:18px;">
     <img src="/assets/logo.svg" alt="" style="width:42px;height:42px;object-fit:contain;border-radius:10px;display:block;" onerror="this.style.display='none'">
     <p style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:14px;font-weight:600;letter-spacing:-0.015em;color:var(--theme-text-strong);" id="pl-title"><%= settings.title %></p>
-    <div style="width:128px;height:1.5px;border-radius:2px;overflow:hidden;background:var(--theme-border-subtle);" id="pl-track">
-      <div id="pl-bar" style="height:100%;transform:scaleX(0);transform-origin:left center;border-radius:2px;transition:transform 260ms cubic-bezier(0.4,0,0.2,1);background:var(--theme-text-strong);"></div>
-    </div>
     <p id="pl-msg" style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:11px;color:var(--theme-text-muted);letter-spacing:0.01em;transition:opacity 180ms ease;">Preparing your experience...</p>
   </div>
 </div>
@@ -122,7 +127,7 @@ function initializeTheme() {
 </script>
 <%- include("./bottomNav") %>
 <%- include("./modal") %>
-<script nonce="<%- nonce %>" src="/javascript/shared/toast-store.js?v=1"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/toast-store.js?v=1" data-turbo-eval="false"></script>
 <%- include("./toast") %>
-<script nonce="<%- nonce %>" src="/javascript/shared/escape.js?v=1"></script>
-<script nonce="<%- nonce %>" src="/javascript/shared/api.js?v=1"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/escape.js?v=1" data-turbo-eval="false"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/api.js?v=1" data-turbo-eval="false"></script>

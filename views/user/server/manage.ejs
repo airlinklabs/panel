@@ -400,6 +400,7 @@
 <%- include('../../components/footer') %>
 
 <script nonce="<%- nonce %>">
+(function () {
 function themeVar(name, fallback) {
   const v = getComputedStyle(document.documentElement).getPropertyValue('--theme-' + name).trim();
   return v || fallback;
@@ -510,8 +511,9 @@ term.loadAddon(webLinksAddon);
 
 term.open(document.getElementById('terminal'));
 fitAddon.fit();
+window.alListener(window, 'resize', 'manage-term-resize', () => fitAddon.fit());
 
-window.addEventListener('resize', () => fitAddon.fit());
+window.alListener(window, 'resize', 'manage-term-resize', () => fitAddon.fit());
 
 // Load the last ~500 console lines from disk (survives restarts) for post-mortems.
 const loadHistoryBtn = document.getElementById('loadHistoryBtn');
@@ -749,7 +751,7 @@ function scheduleReconnect() {
 // Background throttle — close the console socket while the tab is hidden,
 // pause reconnect timers, and reconnect immediately when the tab returns.
 pageHidden = document.visibilityState === 'hidden';
-document.addEventListener('visibilitychange', () => {
+window.alListener(document, 'visibilitychange', 'manage-visibility', () => {
     pageHidden = document.visibilityState === 'hidden';
     if (pageHidden) {
         isReconnecting = false;
@@ -782,8 +784,8 @@ function teardownPage() {
         try { window.alRealtime.unwatchEvents('<%= server.UUID %>'); } catch (e) {}
     }
 }
-window.addEventListener('beforeunload', teardownPage);
-window.addEventListener('pagehide', teardownPage);
+window.alListener(window, 'beforeunload', 'manage-teardown-unload', teardownPage);
+window.alListener(window, 'pagehide', 'manage-teardown-pagehide', teardownPage);
 
 // Two-tab console guard — exactly one tab owns console input; every other
 // tab renders view-only (notices shown, inputs disabled, sends refused).
@@ -1215,7 +1217,7 @@ connectWebSocket();
     });
     <% } %>
 
-    document.addEventListener('DOMContentLoaded', () => {
+    window.ALMount(() => {
         const inputElement = document.getElementById('input');
 
         inputElement.addEventListener('keypress', function (event) {
@@ -1894,7 +1896,7 @@ connectWebSocket();
         } else {
             setTimeout(fitMobileTerminal, 100);
         }
-        window.addEventListener('resize', function () { requestAnimationFrame(fitMobileTerminal); });
+        window.alListener(window, 'resize', 'manage-mobile-term-resize', function () { requestAnimationFrame(fitMobileTerminal); });
 
         // Touch scroll for mobile terminal
         (function () {
@@ -2040,4 +2042,7 @@ connectWebSocket();
         }
     })();
 
+  window.copyServerIP = copyServerIP;
+  window.retryDaemonConnection = retryDaemonConnection;
+})();
 </script>

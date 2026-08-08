@@ -1,3 +1,4 @@
+(function () {
 const STAGGER_DELAY_MS = 30;
 const ROW_ANIMATION_DURATION_MS = 200;
 
@@ -75,4 +76,7 @@ function confirmDeleteApiKey(keyId) {
       setTimeout(function() { row.style.transition = ''; row.style.opacity = ''; row.style.transform = ''; }, ROW_ANIMATION_DURATION_MS);
     }, i * STAGGER_DELAY_MS);
   });
+})();
+
+window.confirmDeleteApiKey = confirmDeleteApiKey;
 })();

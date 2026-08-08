@@ -185,6 +185,7 @@
 </div>
 
 <script nonce="<%- nonce %>">
+(function () {
 const serverUUID = '<%= server.UUID %>';
 
 function showConfirmation(title, message, onConfirm) {
@@ -477,6 +478,15 @@ function deleteBackup(backupId, backupName) {  showConfirmation(
     }
   );
 }
+window.openCreateBackupModal = openCreateBackupModal;
+window.closeCreateBackupModal = closeCreateBackupModal;
+window.confirmCreateBackup = confirmCreateBackup;
+window.downloadBackup = downloadBackup;
+window.restoreBackup = restoreBackup;
+window.toggleBackupLock = toggleBackupLock;
+window.deleteBackup = deleteBackup;
+window.handleBackupNameKeyPress = handleBackupNameKeyPress;
+})();
 </script>
 
 <%- include('../../components/footer') %>

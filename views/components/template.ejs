@@ -427,17 +427,19 @@
     if (goBackBtn) goBackBtn.addEventListener('click', function () { showSidebarView('server'); });
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  window.ALMount(function () {
     // Show sidebar first — rects are all zeros while display:none, so the
     // scroll check below would never fire.
-    document.getElementById('pc-sidebar').style.display = '';
-    markSpecialLinks(window.location.pathname);
-    markActiveNav(window.location.pathname);
-    showActiveNavInView();
-    wireSidebarViewToggle();
-    showSidebarView(window.location.pathname.startsWith('/server/') ? 'server' : 'main');
+    if (document.getElementById('pc-sidebar')) {
+      document.getElementById('pc-sidebar').style.display = '';
+      markSpecialLinks(window.location.pathname);
+      markActiveNav(window.location.pathname);
+      showActiveNavInView();
+      wireSidebarViewToggle();
+      showSidebarView(window.location.pathname.startsWith('/server/') ? 'server' : 'main');
+    }
   });
-  document.addEventListener('al:navigated', function () {
+  window.alOnNavigated('sidebar-template', function () {
     markSpecialLinks(window.location.pathname);
     markActiveNav(window.location.pathname);
     showActiveNavInView();

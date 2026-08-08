@@ -23,6 +23,21 @@ function controllableFetcher(calls: Deferred[]) {
   };
 }
 
+// The query engine (@tanstack/query-core) schedules fetch work on
+// setTimeout(0); flush it the same way realtime.test.ts does.
+// Requires vi.useFakeTimers() to be active.
+async function flush() {
+  await vi.advanceTimersByTimeAsync(0);
+}
+
+// For tests that keep real timers: resolving a promised fetch still needs a
+// couple of microtask turns (the notify cycle is Promise-scheduled).
+async function settle() {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
 describe('state client', () => {
   beforeEach(() => {
     vi.useRealTimers();
@@ -39,6 +54,7 @@ describe('state client', () => {
   });
 
   it('moves loading → success and keeps the snapshot observable', async () => {
+    vi.useFakeTimers();
     const client = ALState.createClient();
     const seen: string[] = [];
     client.observe('server:status:abc', (s) => seen.push(s.status));
@@ -49,8 +65,8 @@ describe('state client', () => {
     // Initial emission happened first (idle), then loading.
     expect(seen).toContain('loading');
 
-    await Promise.resolve();
-    await Promise.resolve();
+    await flush();
+    await flush();
     const rec = client.getQuery('server:status:abc');
     expect(rec.status).toBe('success');
     expect(client.get('server:status:abc')).toEqual({ running: true });
@@ -58,6 +74,7 @@ describe('state client', () => {
   });
 
   it('does not blank existing data during background refetch', async () => {
+    vi.useFakeTimers();
     const client = ALState.createClient();
     const calls: Deferred[] = [];
     const fetcher = controllableFetcher(calls);
@@ -67,13 +84,13 @@ describe('state client', () => {
       refreshOnMount: true,
     });
     calls[0].resolve({ running: true });
-    await Promise.resolve();
-    await Promise.resolve();
+    await flush();
+    await flush();
     expect(client.get('server:status:abc')).toEqual({ running: true });
 
     // Force a background refetch: existing data stays visible while loading.
     client.query('server:status:abc', { fetcher, refreshOnMount: true });
-    await Promise.resolve();
+    await flush();
     expect(client.get('server:status:abc')).toEqual({ running: true });
     expect(client.getQuery('server:status:abc').status).toBe('refreshing');
   });
@@ -90,9 +107,8 @@ describe('state client', () => {
 
     // The slow (older) HTTP response resolves afterwards.
     calls[0].resolve({ running: true });
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
+    await settle();
 
     const after = client.getQuery('server:status:abc');
     expect(after.data).toEqual({ running: false });
@@ -122,13 +138,13 @@ describe('state client', () => {
 
     // Unobserved key: invalidate marks stale but does not refetch.
     client.query('server:status:unwatched', { fetcher });
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
+    await settle();
     expect(calls).toBe(1);
     client.invalidate('server:status:unwatched');
     expect(client.getQuery('server:status:unwatched').status).toBe('stale');
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
+    await settle();
     expect(calls).toBe(1);
 
     // Observed key: invalidate triggers a refetch.
@@ -136,12 +152,12 @@ describe('state client', () => {
       /* UI cares about this key */
     });
     client.query('server:status:watched', { fetcher });
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
+    await settle();
     expect(calls).toBe(2);
     client.invalidate('server:status');
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
+    await settle();
     expect(calls).toBe(3);
     expect(client.getQuery('server:status:watched').status).toBe('success');
   });
@@ -173,8 +189,8 @@ describe('state client', () => {
     });
     // Loading first.
     expect(client.getQuery('server:status:err').status).toBe('loading');
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
+    await settle();
     expect(client.getQuery('server:status:err').status).toBe('error');
     expect(client.getQuery('server:status:err').error.message).toBe('boom');
     expect(client.getQuery('server:status:err').data).toBeUndefined();
@@ -213,8 +229,8 @@ describe('state client', () => {
     client.query('server:status:abc', { fetcher: controllableFetcher(calls) });
     expect(client.isInitialLoading('server:status:abc')).toBe(true);
     calls[0].resolve({ running: true });
-    await Promise.resolve();
-    await Promise.resolve();
+    await settle();
+    await settle();
     expect(client.isInitialLoading('server:status:abc')).toBe(false);
   });
 });

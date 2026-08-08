@@ -1,3 +1,4 @@
+(function () {
 const USERNAME_MIN_LENGTH = 3;
 const USERNAME_MAX_LENGTH = 20;
 const PASSWORD_MIN_LENGTH = 8;
@@ -130,3 +131,4 @@ createBtn.addEventListener('click', async () => {
     showToast('Failed to create user. Try again.', 'error');
   }
 });
+})();

@@ -157,7 +157,7 @@
 ></div>
 
 <script nonce="<%- nonce %>">
-  document.addEventListener('DOMContentLoaded', function() {
+  window.ALMount(function() {
     const emptyBtn = document.getElementById('createButtonEmpty');
     if (emptyBtn) {
       emptyBtn.addEventListener('click', function() {

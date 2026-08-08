@@ -84,6 +84,7 @@
 </div>
 
 <script nonce="<%- nonce %>">
+(function () {
   requestAnimationFrame(function () {
     requestAnimationFrame(function () {
       document.getElementById('authPanel').classList.add('visible');
@@ -129,6 +130,7 @@
     document.getElementById('submitBtn').classList.add('loading');
     document.getElementById('submitBtn').disabled = true;
   });
+})();
 </script>
 
 <%- include('../components/footer') %>

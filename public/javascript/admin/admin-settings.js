@@ -1,3 +1,4 @@
+(function () {
 const DEFAULT_SMTP_PORT = 587;
 const DEFAULT_UPLOAD_LIMIT = 100;
 
@@ -389,4 +390,6 @@ const DEFAULT_UPLOAD_LIMIT = 100;
       });
     });
   });
+})();
+
 })();

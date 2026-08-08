@@ -8,8 +8,15 @@
  *   - online/offline and page-visibility awareness
  *   - fan-out of every decoded event to registered handlers
  *
- * Dependencies are injected (WebSocket ctor, storage, url) so reconnect /
- * backoff / resync behaviour is unit-testable in Node.
+ * The transport itself is driven by `reconnecting-websocket` (vendored at
+ * /javascript/vendor/reconnecting-websocket.js, exposed as the global
+ * ReconnectingWebSocket). That library owns the connection pool, backoff
+ * schedule and socket lifecycle; this file owns the panel protocol on top of
+ * it: hello/sync cursor, ping/pong, watch commands, and the public event API
+ * consumed by pages ("one authoritative socket, many subscribers").
+ *
+ * The WebSocket ctor is injected so reconnect/backoff/resync behaviour is
+ * unit-testable in Node.
  *
  * Exposed surfaces:
  *   window.ALRealtimeClient.client(opts)
@@ -25,14 +32,12 @@
   var VERSION = 1;
   var DEFAULT_PATH = '/ws/realtime';
   var SEQ_KEY = '__al_realtime_seq';
-  var BASE_RETRY_MS = 500;
   var MAX_RETRY_MS = 15_000;
   var MAX_ATTEMPTS = 12;
-  var HEARTBEAT_TIMEOUT_MS = 15_000;
 
   function backoffDelay(attempt) {
     var jitter = 0.6 + Math.random() * 0.4;
-    return Math.min(MAX_RETRY_MS, BASE_RETRY_MS * Math.pow(2, attempt)) * jitter;
+    return Math.min(MAX_RETRY_MS, 1000 * Math.pow(1.3, attempt)) * jitter;
   }
 
   function buildUrl(opts) {
@@ -59,20 +64,32 @@
     try { storage.setItem(SEQ_KEY, String(seq)); } catch (e) { /* storage unavailable */ }
   }
 
+  /* Resolve the reconnecting-websocket class. In the browser it is vendored
+     (window.ReconnectingWebSocket); in Node tests it is required directly. */
+  function resolveRWS(opts) {
+    if (opts.ReconnectingWebSocket) return opts.ReconnectingWebSocket;
+    if (typeof window !== 'undefined' && window.ReconnectingWebSocket) return window.ReconnectingWebSocket;
+    try {
+      // InteropImport: @ts-ignore
+      return require('reconnecting-websocket');
+    } catch (e) { /* not installed in this environment */ }
+    return null;
+  }
+
   function create(opts) {
     opts = opts || {};
     var url = buildUrl(opts);
     var storage = opts.storage || null;
-    var WS = opts.WebSocket || (typeof window !== 'undefined' ? window.WebSocket : (typeof WebSocket !== 'undefined' ? WebSocket : null));
-    var now = opts.now || function () { return Date.now(); };
     var onMessage = opts.onMessage;       // (event) => void
     var onEvent = opts.onEvent || onMessage || function () {};
+    var RWS = resolveRWS(opts);
+    var WS = opts.WebSocket || (typeof window !== 'undefined' ? window.WebSocket : undefined);
 
-    if (!WS) {
+    if (!RWS) {
       return {
         status: function () { return 'unsupported'; },
-        subscribe: function () { return noopFn; },
-        onStatusChange: function () { return noopFn; },
+        subscribe: function () { return function () {}; },
+        onStatusChange: function () { return function () {}; },
         send: function () { return false; },
         watch: function () { return false; },
         unwatch: function () { return false; },
@@ -85,12 +102,8 @@
       };
     }
 
-    var noopFn = function () {};
     var status = 'disconnected';
     var socket = null;
-    var attempt = 0;
-    var reconnectTimer = null;
-    var killTimer = null;
     var stopped = false;
     var paused = false;
     var lastSeq = readSeq(storage);
@@ -99,9 +112,10 @@
 
     function setStatus(next) {
       if (status === next) return;
+      var prev = status;
       status = next;
       for (var i = 0; i < statusListeners.length; i++) {
-        try { statusListeners[i](status); } catch (e) { /* listener isolation */ }
+        try { statusListeners[i](status, prev); } catch (e) { /* listener isolation */ }
       }
     }
 
@@ -111,62 +125,44 @@
       }
     }
 
-    function send(obj) {
-      if (!socket || socket.readyState !== 1) return false;
+    function makeRWS() {
+      // reconnecting-websocket takes (url, protocols, options). Passing the
+      // app's WebSocket lets tests inject the mock; browsers get the real one.
+      var rwsOpts = {
+        connectionTimeout: 4000,
+        minReconnectionDelay: 1000,
+        maxReconnectionDelay: MAX_RETRY_MS,
+        maxRetries: MAX_ATTEMPTS,
+        startClosed: stopped,
+      };
+      if (WS) rwsOpts.WebSocket = WS;
       try {
-        socket.send(JSON.stringify(obj));
-        return true;
+        var r = new RWS(url, [], rwsOpts);
+        return r;
       } catch (e) {
-        return false;
+        return null;
       }
-    }
-
-    function closeSocket() {
-      if (killTimer) { clearTimeout(killTimer); killTimer = null; }
-      if (socket) {
-        try { socket.close(); } catch (e) { /* already closed */ }
-        socket = null;
-      }
-    }
-
-    function scheduleReconnect(immediate) {
-      if (stopped || paused) return;
-      attempt += 1;
-      if (attempt > MAX_ATTEMPTS) {
-        // Give up active reconnecting but keep listeners informed; once the
-        // browser wakes up (visibility/online) it will retry.
-        setStatus('reconnecting');
-        return;
-      }
-      var delay = immediate ? 10 : backoffDelay(attempt - 1);
-      if (reconnectTimer) clearTimeout(reconnectTimer);
-      setStatus('reconnecting');
-      reconnectTimer = setTimeout(function () {
-        reconnectTimer = null;
-        connectSocket();
-      }, delay);
     }
 
     function connectSocket() {
       if (stopped || paused) return;
-      if (socket && socket.readyState === 1) return;
+      if (socket) return; // rws owns reconnects, keep exactly one instance
 
-      var ws;
-      try {
-        ws = new WS(url);
-      } catch (e) {
-        scheduleReconnect(true);
+      var rws = makeRWS();
+      if (!rws) {
+        setStatus('unsupported');
         return;
       }
-      socket = ws;
+      socket = rws;
       setStatus('connecting');
 
-      ws.onopen = function () {
-        attempt = 0;
-        ws.send(JSON.stringify({ type: 'sync', sinceSeq: lastSeq }));
-      };
+      rws.addEventListener('open', function () {
+        try {
+          rws.send(JSON.stringify({ type: 'sync', sinceSeq: lastSeq }));
+        } catch (e) { /* transport not ready */ }
+      });
 
-      ws.onmessage = function (evt) {
+      rws.addEventListener('message', function (evt) {
         var parsed;
         try {
           parsed = JSON.parse(evt.data);
@@ -176,7 +172,7 @@
         if (!parsed || typeof parsed !== 'object') return;
 
         if (parsed.type === 'ping') {
-          try { ws.send(JSON.stringify({ type: 'pong' })); } catch (e) {}
+          try { rws.send(JSON.stringify({ type: 'pong' })); } catch (e) {}
           return;
         }
 
@@ -197,52 +193,47 @@
           writeSeq(storage, lastSeq);
         }
         dispatch(parsed);
-      };
+      });
 
-      ws.onclose = function () {
-        if (socket === ws) socket = null;
-        if (killTimer) { clearTimeout(killTimer); killTimer = null; }
+      rws.addEventListener('close', function () {
+        // rws keeps its single instance and owns the reconnect; the socket
+        // reference must stay live so `disconnect()`/`reconnect()`/`send()`
+        // keep targeting the same transport.
         if (stopped) {
           setStatus('disconnected');
           return;
         }
         if (paused) return;
-        scheduleReconnect();
-      };
+        setStatus('reconnecting'); // rws is already backoff-scheduling
+      });
 
-      ws.onerror = function () {
-        // A dead socket surfaces as onclose; force a close if it did not.
-        try { if (ws && ws.readyState !== 1) ws.close(); } catch (e) {}
-      };
-
-      killTimer = setTimeout(killTimedOut, HEARTBEAT_TIMEOUT_MS);
-    }
-
-    function killTimedOut() {
-      // If no `realtime.ready`/`realtime.synced` arrived in time the socket is
-      // unresponsive — close it to trigger the reconnect path.
-      if (!socket) return;
-      try { socket.close(); } catch (e) {}
+      rws.addEventListener('error', function () {
+        // A dead socket surfaces as 'close'; nothing else to do here.
+      });
     }
 
     function wake() {
       paused = false;
       if (stopped) return;
-      if (!socket || socket.readyState !== 1) {
-        scheduleReconnect(true);
+      if (!socket) {
+        connectSocket();
+        return;
       }
+      try { socket.reconnect(); } catch (e) { /* a closed rws reconnects on its own */ }
     }
 
     function pause() {
       paused = true;
-      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      if (socket) {
+        try { socket.close(4001); } catch (e) { /* already closed */ }
+      }
     }
 
     // Browser wiring.
     if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
       window.addEventListener('online', function () { wake(); });
       window.addEventListener('offline', function () {
-        if (!socket || socket.readyState !== 1) setStatus('reconnecting');
+        if (!socket) setStatus('reconnecting');
       });
     }
     if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
@@ -255,16 +246,26 @@
     var client = {
       subscribe: function (fn) { handlers.push(fn); return function () { handlers = handlers.filter(function (h) { return h !== fn; }); }; },
       onStatusChange: function (fn) { statusListeners.push(fn); return function () { statusListeners = statusListeners.filter(function (h) { return h !== fn; }); }; },
-      send: send,
-      watch: function (serverId) { return send({ type: 'watch', serverId: serverId }); },
-      unwatch: function (serverId) { return send({ type: 'unwatch', serverId: serverId }); },
-      watchEvents: function (serverId) { return send({ type: 'watchEvents', serverId: serverId }); },
-      unwatchEvents: function (serverId) { return send({ type: 'unwatchEvents', serverId: serverId }); },
-      watchAll: function () { return send({ type: 'watchAll' }); },
+      send: function (obj) {
+        if (!socket) return false;
+        try {
+          socket.send(JSON.stringify(obj));
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      watch: function (serverId) { return this.send({ type: 'watch', serverId: serverId }); },
+      unwatch: function (serverId) { return this.send({ type: 'unwatch', serverId: serverId }); },
+      watchEvents: function (serverId) { return this.send({ type: 'watchEvents', serverId: serverId }); },
+      unwatchEvents: function (serverId) { return this.send({ type: 'unwatchEvents', serverId: serverId }); },
+      watchAll: function () { return this.send({ type: 'watchAll' }); },
       disconnect: function () {
         stopped = true;
-        if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
-        closeSocket();
+        if (socket) {
+          try { socket.close(1000); } catch (e) { /* already closed */ }
+          socket = null;
+        }
         setStatus('disconnected');
       },
       reconnect: function () {
@@ -276,7 +277,9 @@
     };
 
     if (opts.autostart !== false) {
-      // Connect on construction; navigation between pages keeps this one socket.
+      // One socket, kept across navigation. Turbo keeps window alive, so this
+      // instance survives page swaps; a full reload creates a fresh one that
+      // resyncs from the persisted cursor.
       connectSocket();
     }
     return client;

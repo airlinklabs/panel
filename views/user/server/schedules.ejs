@@ -324,6 +324,7 @@
 
 
 <script nonce="<%- nonce %>">
+(function () {
 const serverId = '<%= server.UUID %>';
 
 const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m) => console.warn('[schedules]', m) };
@@ -1024,6 +1025,7 @@ window.deleteTask = async (scheduleId, taskId) => {
   if (count) count.textContent = String(Math.max(0, (parseInt(count.textContent, 10) || 1) - 1));
   showToast('Task removed.', 'success');
 };
+})();
 </script>
 
 <%- include('../../components/footer') %>

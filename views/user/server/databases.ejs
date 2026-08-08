@@ -190,6 +190,7 @@
 </div>
 
 <script nonce="<%- nonce %>">
+(function () {
 const t = <%- JSON.stringify(req.translations).replace(/</g, '\\x3c') %>;
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 const serverId = '<%= server.UUID %>';
@@ -475,6 +476,7 @@ window.deleteDatabase = async (id, name) => {
 };
 
 document.querySelectorAll('tr[data-db-id]').forEach(wireDbRow);
+})();
 </script>
 
 <%- include('../../components/footer') %>

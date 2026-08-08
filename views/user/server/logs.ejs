@@ -75,6 +75,7 @@
 <%- include('../../components/loadingPopup') %>
 
 <script nonce="<%- nonce %>">
+(function () {
 const serverId = window.location.pathname.split('/')[2];
 
 const logsViewer = document.getElementById('logsViewer');
@@ -223,6 +224,7 @@ if (logsRefreshBtn) {
 }
 
 refreshLogs().catch(function () {});
+})();
 </script>
 
 <%- include('../../components/footer') %>

@@ -100,7 +100,7 @@
 
 
 <script nonce="<%- nonce %>">
-document.addEventListener('DOMContentLoaded', () => {
+window.ALMount(() => {
   const { showToast } = createToastSystem();
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
   const form = document.getElementById('enable2faForm');

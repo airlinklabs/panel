@@ -1,41 +1,54 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import RealtimeClient from '../public/javascript/shared/realtime.js';
 
-// A deterministic WebSocket with an injectable backoff scheduler.
+// The transport is `reconnecting-websocket`, which requires a WebSocket that
+// supports addEventListener/removeEventListener and the ready-state statics,
+// and which this mock exposes so tests can drive open/message/close timing.
 class MockWebSocket {
   static instances: MockWebSocket[] = [];
-  static nextOpen: boolean = true;
+  static CONNECTING = 0;
+  static OPEN = 1;
+  static CLOSING = 2;
+  static CLOSED = 3;
 
   url: string;
-  readyState = 0; // CONNECTING
+  readyState = MockWebSocket.CONNECTING;
   sent: string[] = [];
-  onopen: (() => void) | null = null;
-  onmessage: ((evt: { data: string }) => void) | null = null;
-  onclose: (() => void) | null = null;
-  closed = false;
+  private listeners: Record<string, Array<(evt?: unknown) => void>> = {};
 
   constructor(url: string) {
     this.url = url;
     MockWebSocket.instances.push(this);
   }
 
+  addEventListener(type: string, fn: (evt?: unknown) => void) {
+    (this.listeners[type] ||= new Set()).add(fn);
+  }
+
+  removeEventListener(type: string, fn: (evt?: unknown) => void) {
+    this.listeners[type]?.delete(fn);
+  }
+
+  private fire(type: string, evt?: unknown) {
+    this.listeners[type]?.forEach((fn) => fn(evt));
+  }
+
   send(m: string) {
     this.sent.push(m);
   }
 
-  close() {
-    this.closed = true;
-    this.readyState = 3;
-    if (this.onclose) this.onclose();
+  close(code?: number) {
+    this.readyState = MockWebSocket.CLOSED;
+    this.fire('close', { code, reason: '', wasClean: true });
   }
 
   open() {
-    this.readyState = 1;
-    if (this.onopen) this.onopen();
+    this.readyState = MockWebSocket.OPEN;
+    this.fire('open');
   }
 
   emit(data: unknown) {
-    if (this.onmessage) this.onmessage({ data: JSON.stringify(data) });
+    this.fire('message', { data: JSON.stringify(data) });
   }
 }
 
@@ -51,7 +64,12 @@ function memoryStorage(seed?: { seq?: string }) {
 
 function freshMocks() {
   MockWebSocket.instances = [];
-  MockWebSocket.nextOpen = true;
+}
+
+// First connection is scheduled via a setTimeout(0) inside rws; flush it under
+// fake timers so the underlying socket exists before tests drive the protocol.
+async function flushSocket() {
+  await vi.advanceTimersByTimeAsync(0);
 }
 
 describe('realtime client', () => {
@@ -64,12 +82,13 @@ describe('realtime client', () => {
     vi.useRealTimers();
   });
 
-  it('connects and asks for a sync without a stored cursor on first run', () => {
+  it('connects and asks for a sync without a stored cursor on first run', async () => {
     const storage = memoryStorage();
     const client = RealtimeClient.create({
       WebSocket: MockWebSocket as unknown as typeof WebSocket,
       storage,
     });
+    await flushSocket();
     expect(MockWebSocket.instances).toHaveLength(1);
     MockWebSocket.instances[0].open();
     const sync = JSON.parse(MockWebSocket.instances[0].sent[0]);
@@ -77,12 +96,13 @@ describe('realtime client', () => {
     client.disconnect();
   });
 
-  it('reconnects with the last seen seq as its cursor', () => {
+  it('reconnects with the last seen seq as its cursor', async () => {
     const storage = memoryStorage();
     const client = RealtimeClient.createClient({
       WebSocket: MockWebSocket as unknown as typeof WebSocket,
       storage,
     });
+    await flushSocket();
     const s1 = MockWebSocket.instances[0];
     s1.open();
     s1.emit({ type: 'realtime.ready', seq: 4 });
@@ -90,8 +110,8 @@ describe('realtime client', () => {
     expect(client.lastSeq()).toBe(9);
 
     s1.close();
-    // Backoff reconnect opens a fresh socket (advance ~1s).
-    vi.advanceTimersByTime(1200);
+    // rws backs off ~1s before opening the next socket.
+    await vi.advanceTimersByTimeAsync(1200);
     expect(MockWebSocket.instances).toHaveLength(2);
     const s2 = MockWebSocket.instances[1];
     s2.open();
@@ -100,8 +120,9 @@ describe('realtime client', () => {
     client.disconnect();
   });
 
-  it('answers server pings with pong', () => {
+  it('answers server pings with pong', async () => {
     const client = RealtimeClient.createClient({ WebSocket: MockWebSocket as unknown as typeof WebSocket });
+    await flushSocket();
     const s1 = MockWebSocket.instances[0];
     s1.open();
     s1.emit({ type: 'ping', timestamp: 1 });
@@ -109,8 +130,9 @@ describe('realtime client', () => {
     client.disconnect();
   });
 
-  it('notifies subscribers of fan-out events but not protocol frames', () => {
+  it('notifies subscribers of fan-out events but not protocol frames', async () => {
     const client = RealtimeClient.createClient({ WebSocket: MockWebSocket as unknown as typeof WebSocket });
+    await flushSocket();
     const received: string[] = [];
     client.subscribe((e) => received.push(e.type));
 
@@ -124,9 +146,10 @@ describe('realtime client', () => {
     client.disconnect();
   });
 
-  it('tracks connection status through connect and sync', () => {
-    const statuses: string[] = [];
+  it('tracks connection status through connect and sync', async () => {
     const client = RealtimeClient.createClient({ WebSocket: MockWebSocket as unknown as typeof WebSocket });
+    await flushSocket();
+    const statuses: string[] = [];
     client.onStatusChange((s) => statuses.push(s));
     const s1 = MockWebSocket.instances[0];
     s1.open();
@@ -135,18 +158,20 @@ describe('realtime client', () => {
     client.disconnect();
   });
 
-  it('stops reconnecting after an explicit disconnect', () => {
+  it('stops reconnecting after an explicit disconnect', async () => {
     const client = RealtimeClient.createClient({ WebSocket: MockWebSocket as unknown as typeof WebSocket });
+    await flushSocket();
     const s1 = MockWebSocket.instances[0];
     s1.open();
     s1.emit({ type: 'realtime.ready', seq: 1 });
     client.disconnect();
-    vi.advanceTimersByTime(5000);
+    await vi.advanceTimersByTimeAsync(5000);
     expect(MockWebSocket.instances).toHaveLength(1);
   });
 
-  it('sends watch/unwatch control frames over the open socket', () => {
+  it('sends watch/unwatch control frames over the open socket', async () => {
     const client = RealtimeClient.createClient({ WebSocket: MockWebSocket as unknown as typeof WebSocket });
+    await flushSocket();
     const s1 = MockWebSocket.instances[0];
     s1.open();
     expect(client.watch('abc')).toBe(true);
@@ -159,9 +184,10 @@ describe('realtime client', () => {
     client.disconnect();
   });
 
-  it('persists the cursor to storage as events stream by', () => {
+  it('persists the cursor to storage as events stream by', async () => {
     const storage = memoryStorage();
     const client = RealtimeClient.createClient({ WebSocket: MockWebSocket as unknown as typeof WebSocket, storage });
+    await flushSocket();
     const s1 = MockWebSocket.instances[0];
     s1.open();
     s1.emit({ type: 'realtime.ready', seq: 7 });

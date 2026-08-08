@@ -1,3 +1,4 @@
+(function () {
 function handleRowClick(e, url) { if (!e.target.closest('button,a')) window.location = url; }
 
 function openCreate() {
@@ -254,3 +255,11 @@ document.getElementById('uploadModeUrl').addEventListener('click', () => {
   setUploadMode('url');
   document.getElementById('importUrlInput').focus();
 });
+
+window.handleRowClick = handleRowClick;
+window.openCreate = openCreate;
+window.closeCreate = closeCreate;
+window.openDelete = openDelete;
+window.closeUploadImageModal = closeUploadImageModal;
+window.removeSelectedImageFile = removeSelectedImageFile;
+})();

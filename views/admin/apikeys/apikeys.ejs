@@ -336,6 +336,7 @@
 
 
 <script nonce="<%- nonce %>">
+(function () {
   let activeModalId = null;
   let modalReturnFocus = null;
 
@@ -738,6 +739,16 @@
       copyToClipboard('<%= created %>');
     };
   }
+
+  // Inline HTML attributes on this page call these handlers directly; expose
+  // them so Turbo re-execution keeps the global bindings working.
+  window.copyToClipboard = copyToClipboard;
+  window.showEditModal = showEditModal;
+  window.hideCreateModal = hideCreateModal;
+  window.hideEditModal = hideEditModal;
+  window.toggleCategory = toggleCategory;
+  window.updateCategoryCount = updateCategoryCount;
+})();
 </script>
 
 <%- include('../../components/footer') %>

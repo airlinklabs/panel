@@ -467,6 +467,7 @@ function escJS(val) {
 </div>
 
 <script nonce="<%- nonce %>">
+(function () {
   function handleFileNameKeyPress(event) {
     if (event.key === 'Enter') {
         event.preventDefault();
@@ -474,7 +475,7 @@ function escJS(val) {
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  window.ALMount(() => {
   if (typeof window.showImageViewer !== 'function' && typeof window.imageViewerSystem === 'function') {
       const { showImageViewer, closeImageViewer, downloadViewedImage } = window.imageViewerSystem();
       window.showImageViewer = showImageViewer;
@@ -774,9 +775,9 @@ confirmMassDeleteBtn.addEventListener('click', async function() {
   }
 });
 
-document.addEventListener('DOMContentLoaded', initializeSelectedFiles);
+window.ALMount(initializeSelectedFiles);
 
-window.addEventListener('beforeunload', () => {
+window.alListener(window, 'beforeunload', 'files-clear-selection', () => {
   sessionStorage.removeItem('selectedFiles');
 });
 
@@ -1152,7 +1153,7 @@ function openCreateFileModal() {
   }
 
   // Initialize file upload functionality when the DOM is loaded
-  document.addEventListener('DOMContentLoaded', function() {
+  window.ALMount(function() {
 
     // Get DOM elements
     const dropZone = document.getElementById('dropZone');
@@ -1403,7 +1404,7 @@ function openCreateFileModal() {
   });
 
   // ── Keyboard shortcuts ───────────────────────────────────────────────────
-  document.addEventListener('keydown', (e) => {
+  window.alListener(document, 'keydown', 'files-shortcuts', (e) => {
     // Ctrl/Cmd+A — select all
     if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !e.target.closest('input, textarea')) {
       e.preventDefault();
@@ -1632,6 +1633,23 @@ function openCreateFileModal() {
       showToast('Failed to pull file — check the URL and try again.', 'error');
     }
   });
+
+  window.openCreateFileModal = openCreateFileModal;
+  window.openUploadFileModal = openUploadFileModal;
+  window.openPullFileModal = openPullFileModal;
+  window.closeMoveModal = closeMoveModal;
+  window.confirmMove = confirmMove;
+  window.closeMassDeleteModal = closeMassDeleteModal;
+  window.closeCreateFileModal = closeCreateFileModal;
+  window.confirmCreateFile = confirmCreateFile;
+  window.handleFileNameKeyPress = handleFileNameKeyPress;
+  window.closeUploadFileModal = closeUploadFileModal;
+  window.handleFileInputChange = handleFileInputChange;
+  window.removeSelectedFile = removeSelectedFile;
+  window.closePullFileModal = closePullFileModal;
+  window.closeRenameModal = closeRenameModal;
+  window.confirmRename = confirmRename;
+})();
 </script>
 
 <%- include('../../components/footer') %>

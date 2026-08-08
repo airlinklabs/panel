@@ -213,7 +213,7 @@
 <%- include('../../components/footer') %>
 
 <script nonce="<%- nonce %>">
-  document.addEventListener('DOMContentLoaded', function() {
+  window.ALMount(function() {
     const urlParams = new URLSearchParams(window.location.search);
     const success = urlParams.get('success');
     const error = urlParams.get('error');

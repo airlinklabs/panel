@@ -1,3 +1,4 @@
+(function () {
 const DEFAULT_DB_PORT = 3306;
 
 function showConfirmModal(title, message, onConfirm) {
@@ -164,4 +165,9 @@ async function deleteHost(hostId) {
       showToast('Error creating host. Try again.', 'error');
     }
   });
+})();
+window.autoGenerateHost = autoGenerateHost;
+window.autoGenerateBucket = autoGenerateBucket;
+window.testHost = testHost;
+window.deleteHost = deleteHost;
 })();

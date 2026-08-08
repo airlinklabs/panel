@@ -66,7 +66,11 @@
     "qrcode": "^1.5.4",
     "validator": "^13.15.35",
     "ws": "^8.21.0",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "@hotwired/turbo": "^8.0.23",
+    "@hotwired/stimulus": "^3.2.2",
+    "@tanstack/query-core": "^5.101.4",
+    "reconnecting-websocket": "^4.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

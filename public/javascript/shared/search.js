@@ -1,3 +1,4 @@
+(function () {
 const searchButton  = document.getElementById('searchButton');
 const searchOverlay = document.getElementById('searchOverlay');
 const searchPanel   = document.getElementById('searchPanel');
@@ -466,3 +467,4 @@ document.addEventListener('keydown', function(e) {
 });
 
 }
+})();

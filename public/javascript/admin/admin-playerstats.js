@@ -1,3 +1,4 @@
+(function () {
 var _rootStyle = getComputedStyle(document.documentElement);
 const REFRESH_INTERVAL_MS = 300000;
 const DATA_COLLECTION_DELAY_MS = 1000;
@@ -223,3 +224,4 @@ document.getElementById('refreshBtn').addEventListener('dblclick', (e) => {
 window.addEventListener('beforeunload', () => {
   clearInterval(refreshInterval);
 });
+})();

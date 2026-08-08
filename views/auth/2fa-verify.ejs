@@ -57,6 +57,7 @@
 </div>
 
 <script nonce="<%- nonce %>">
+(function () {
   requestAnimationFrame(function () {
     requestAnimationFrame(function () {
       document.getElementById('authPanel').classList.add('visible');
@@ -126,6 +127,7 @@
     submitBtn.disabled = false;
     document.getElementById('token').focus();
   });
+})();
 </script>
 
 <%- include('../components/footer') %>

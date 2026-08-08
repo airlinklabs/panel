@@ -454,10 +454,10 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  window.ALMount(function () {
     markActiveMobile(window.location.pathname);
   });
-  document.addEventListener('al:navigated', function () {
+  window.alOnNavigated('bottom-nav', function () {
     markActiveMobile(window.location.pathname);
     markActiveSheetItems();
   });

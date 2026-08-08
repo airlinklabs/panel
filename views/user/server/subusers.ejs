@@ -321,6 +321,7 @@
   </div>
 </div>
 <script nonce="<%- nonce %>">
+(function () {
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 const serverId = '<%= server.UUID %>';
 let editingSubUserId = null;
@@ -488,6 +489,7 @@ window.removeSubUser = async (id, name) => {
     if (row) al.removeRow(row);
   }
 };
+})();
 </script>
 
 <%- include('../../components/footer') %>

@@ -161,8 +161,7 @@
        syncActiveLink();
      }
 
-      window.addEventListener('popstate', syncActiveLink);
-      document.addEventListener('al:navigated', syncActiveLink);
+window.alOnNavigated('server-template', syncActiveLink);
 
       // Mobile group tabs — show the active group's items, keep the current
       // path's group selected on load.

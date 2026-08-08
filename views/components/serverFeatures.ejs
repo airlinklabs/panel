@@ -3,7 +3,7 @@
 
 <% if (typeof features !== 'undefined' && features && features.includes('eula')) { %>
 <script nonce="<%- nonce %>">
-  document.addEventListener('DOMContentLoaded', function() {
+  window.ALMount(function() {
     window.modal.confirm({
       title: "Accept Minecraft's EULA",
       body: "By clicking Accept you agree to the Mojang End User License Agreement (EULA). The server will not start until you accept.",

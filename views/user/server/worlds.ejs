@@ -130,7 +130,7 @@
 <%- include('../../components/footer') %>
 
 <script nonce="<%- nonce %>">
-  document.addEventListener('DOMContentLoaded', function() {
+  window.ALMount(function() {
     const noWorldsMessage = document.getElementById('noWorldsMessage');
     const serverTable = document.getElementById('serverTable');
 
