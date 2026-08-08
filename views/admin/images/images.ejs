@@ -51,12 +51,12 @@
           <div class="text-sm" style="color:var(--theme-text-muted);"><span id="installedImagesCount"><%= images.length %></span> image<%= images.length !== 1 ? 's' : '' %> installed on this panel</div>
         </div>
 
-      <% if (images.length === 0) { %>
-      <div class="flex flex-col items-center justify-center py-24 text-center">
+      <div id="installedEmptyState" class="flex flex-col items-center justify-center py-24 text-center <%= images.length === 0 ? '' : 'hidden' %>">
         <p class="text-sm text-neutral-500">No images installed yet.</p>
         <a href="/admin/images/store" class="mt-4 al-btn-secondary inline-flex items-center gap-1.5"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Browse Store</a>
       </div>
-      <% } else { %>
+
+      <div id="installedTableSection" class="<%= images.length === 0 ? 'hidden' : '' %>">
 
       <div class="mt-5 mb-1">
         <input id="imageFilterInput" type="text" placeholder="Filter images…" aria-label="Search images" class="al-input w-56">
@@ -102,7 +102,7 @@
         </table>
         <div id="noResults" class="hidden py-10 text-center text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800/20"><%= req.translations.noImagesMatch || 'No images match your search.' %></div>
       </div>
-      <% } %>
+      </div>
       </div>
 
       <div id="tab-panel-approvals" class="hidden">

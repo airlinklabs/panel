@@ -49,7 +49,12 @@ async function renderImageTable() {
   const res = await fetch('/admin/images/list');
   const data = await res.json();
   const tbody = document.getElementById('tableBody');
-  if (!tbody || !data.success) return;
+  if (!data.success) return;
+  const emptyState = document.getElementById('installedEmptyState');
+  const tableSection = document.getElementById('installedTableSection');
+  if (emptyState) emptyState.classList.toggle('hidden', data.images.length > 0);
+  if (tableSection) tableSection.classList.toggle('hidden', data.images.length === 0);
+  if (!tbody) return;
   const searchInput = document.getElementById('imageFilterInput');
   const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
   tbody.innerHTML = data.images.map(imageRowHtml).join('');
