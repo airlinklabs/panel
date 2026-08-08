@@ -38,8 +38,8 @@
             <%= req.translations.imageSubmissionsDisabledText || 'An administrator has turned off user image submissions.' %>
           </p>
         </div>
-        <% } else if (images.length === 0) { %>
-        <div class="flex flex-col items-center justify-center py-24 text-center">
+        <% } else { %>
+        <div id="myImagesEmpty" class="flex flex-col items-center justify-center py-24 text-center <%= images.length === 0 ? '' : 'hidden' %>">
           <div class="w-12 h-12 rounded-full bg-neutral-400/10 flex items-center justify-center mb-4">
             <%- icon('image', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
           </div>
@@ -54,8 +54,7 @@
             <%= req.translations.submitImage || 'Submit Image' %>
           </a>
         </div>
-        <% } else { %>
-        <div class="overflow-x-auto shadow-sm rounded-xl border" style="border-color:var(--theme-border)">
+        <div id="myImagesTable" class="overflow-x-auto shadow-sm rounded-xl border <%= images.length === 0 ? 'hidden' : '' %>" style="border-color:var(--theme-border)">
           <table class="al-table min-w-full">
             <thead class="al-table-head">
               <tr>
@@ -67,7 +66,7 @@
             </thead>
             <tbody class="divide-y" style="border-color:var(--theme-border)">
               <% let imgIdx = 0; images.forEach(function(image) { %>
-              <tr class="al-table-tr transition-colors" style="--i:<%= imgIdx++ %>">
+              <tr class="al-table-tr transition-colors" style="--i:<%= imgIdx++ %>" data-image-id="<%= image.id %>">
                 <td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3 font-medium" style="color:var(--theme-text-strong)">
                   <%= image.name %>
                   <% if (image.status === 'rejected' && image.rejectionReason) { %>
@@ -119,6 +118,6 @@
   data-error="<%= req.translations.errorOccurred || 'Something went wrong.' %>"
 ></div>
 
-<script nonce="<%- nonce %>" src="/javascript/user/my-images.js?v=1"></script>
+<script nonce="<%- nonce %>" src="/javascript/user/my-images.js?v=2"></script>
 
 <%- include('../components/footer') %>
