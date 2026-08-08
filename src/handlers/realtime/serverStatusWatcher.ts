@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 import logger from '../logger';
-import { daemonScheme } from '../utils/core/daemonRequest';
+import { daemonBaseUrl } from '../utils/core/daemonRequest';
 import { emitRealtime } from './events';
 
 // ── Per-server daemon status watcher ──────────────────────────────────────────
@@ -26,6 +26,7 @@ interface WatcherState {
   connecting: boolean;
   reconnectTimer: NodeJS.Timeout | null;
   reconnectAttempts: number;
+  authed: boolean;
   status: unknown;
   stats: unknown;
   node: { address: string; port: number; key: string };
@@ -37,35 +38,40 @@ const BASE_RETRY_MS = 500;
 const MAX_RETRY_MS = 15_000;
 const MAX_RETRY_ATTEMPTS = 8;
 
-async function daemonWsUrl(port: number): Promise<`wss://${string}` | `ws://${string}`> {
-  const scheme = await daemonScheme();
-  return scheme === 'https' ? 'wss://' : 'ws://';
-}
-
-function socketPath(state: WatcherState, serverId: string, port: number, scheme: 'wss' | 'ws'): string {
-  const { address } = state.node;
-  const host = address.includes(':') && !address.startsWith('[') ? `[${address}]` : address;
-  return `${scheme}://${host}:${port}/containerstatus/${encodeURIComponent(serverId)}`;
+// Build the daemon WebSocket base URL from the same scheme logic the panel's
+// HTTP calls use (daemonBaseUrl respects enforceDaemonHttps) so the watcher
+// never diverges from normal daemon traffic. The node hostname is always kept.
+async function daemonWsUrl(node: { address: string; port: number | string }): Promise<string> {
+  const scheme = (await daemonBaseUrl(node.address, node.port)).startsWith('https') ? 'wss' : 'ws';
+  const host = node.address.includes(':') && !node.address.startsWith('[') ? `[${node.address}]` : node.address;
+  return `${scheme}://${host}:${node.port}`;
 }
 
 function openSocket(state: WatcherState, serverId: string): void {
   if (state.connecting || (state.socket && state.socket.readyState === WebSocket.OPEN)) return;
 
   state.connecting = true;
-  daemonWsUrl(state.node.port).then((scheme) => {
-    const url = socketPath(state, serverId, state.node.port, scheme as 'wss' | 'ws');
-    const socket = new WebSocket(url, { handshakeTimeout: 8_000 });
+  daemonWsUrl(state.node).then((base) => {
+    if (state.refs <= 0) {
+      state.connecting = false;
+      return;
+    }
+
+    const socket = new WebSocket(`${base}/containerstatus/${encodeURIComponent(serverId)}`, { handshakeTimeout: 8_000 });
     state.socket = socket;
+    const isCurrent = () => state.socket === socket;
 
     const authTimer = setTimeout(() => {
-      if (socket.readyState === WebSocket.OPEN && !(state as WatcherState & { authed?: boolean }).authed) {
+      if (socket.readyState === WebSocket.OPEN && !state.authed) {
         logger.debug(`status watcher auth timeout for ${serverId}`);
         socket.close(1008, 'auth timeout');
       }
     }, 10_000);
 
     socket.on('open', () => {
-      (state as WatcherState & { authed?: boolean }).authed = false;
+      if (!isCurrent()) return;
+      state.authed = false;
+      state.reconnectAttempts = 0;
       socket.send(JSON.stringify({ event: 'auth', args: [state.node.key] }));
       clearTimeout(authTimer);
     });
@@ -101,17 +107,20 @@ function openSocket(state: WatcherState, serverId: string): void {
     });
 
     socket.on('error', () => {
+      if (!isCurrent()) return;
       clearTimeout(authTimer);
       state.socket = null;
       scheduleReconnect(state, serverId);
     });
 
     socket.on('close', () => {
+      if (!isCurrent()) return;
       clearTimeout(authTimer);
       state.socket = null;
       scheduleReconnect(state, serverId);
     });
-  }).catch(() => {
+  }).catch((error) => {
+    logger.debug(`status watcher failed to resolve daemon URL for ${serverId}: ${String(error)}`);
     state.connecting = false;
     scheduleReconnect(state, serverId);
   });
@@ -170,6 +179,7 @@ export function watchServerStatus(
       connecting: false,
       reconnectTimer: null,
       reconnectAttempts: 0,
+      authed: false,
       status: undefined,
       stats: undefined,
       node,

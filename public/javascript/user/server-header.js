@@ -120,6 +120,61 @@
       });
   }
 
+  var pollTimer = null;
+  var realtimeConnected = false;
+
+  function startPolling() {
+    if (pollTimer) return;
+    pollTimer = setInterval(pollServerStatus, POLL_INTERVAL);
+  }
+
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
   pollServerStatus();
-  setInterval(pollServerStatus, POLL_INTERVAL);
+  startPolling();
+
+  // Live status over the shared /ws/realtime socket (bootstrapped in
+  // footer.ejs). While connected, watch the daemon stream instead of polling;
+  // a disconnect falls back to polling until the socket returns.
+  var realtimeWired = false;
+
+  function onRealtimeStatus(snap) {
+    if (!snap || snap.status !== 'success' || !snap.data) return;
+    var s = snap.data;
+    updateServerHeaderStatus({
+      online: s.running === true,
+      starting: s.starting === true || s.status === 'starting' || s.status === 'restarting',
+      uptime: typeof s.uptime === 'number' ? s.uptime : null,
+      startedAt: s.startedAt || null,
+    });
+  }
+
+  function wireRealtime() {
+    if (realtimeWired) return;
+    var rt = window.alRealtime;
+    var st = window.alState;
+    if (!rt || !st) return;
+    realtimeWired = true;
+
+    function resubscribe() {
+      rt.watch(serverUUID);
+      rt.watchEvents(serverUUID);
+    }
+
+    resubscribe();
+    rt.onStatusChange(function (status) {
+      var connected = status === 'connected';
+      if (connected) resubscribe();
+      if (connected === realtimeConnected) return;
+      realtimeConnected = connected;
+      if (connected) stopPolling();
+      else { startPolling(); pollServerStatus(); }
+    });
+    st.observe('server:status:' + serverUUID, onRealtimeStatus);
+  }
+
+  if (window.alRealtime) wireRealtime();
+  else window.addEventListener('al:realtime-ready', wireRealtime);
 })();

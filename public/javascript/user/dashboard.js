@@ -576,10 +576,71 @@
     });
   }
 
+  var pollTimer = null;
+  var realtimeConnected = false;
+
+  function startPolling() {
+    if (pollTimer) return;
+    pollTimer = setInterval(pollAllServers, POLL_INTERVAL);
+  }
+
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
   if (serverUUIDs.length > 0) {
     pollAllServers();
-    setInterval(pollAllServers, POLL_INTERVAL);
+    startPolling();
   }
+
+  /* ── Realtime live status ──────────────────────────
+     The shared /ws/realtime socket (bootstrapped in footer.ejs) streams
+     server.status.changed events via the state cache. While it is connected
+     we stop the poll loop above and render those instead; a disconnect falls
+     back to polling until the socket returns. */
+  var realtimeWired = false;
+
+  function onRealtimeStatus(uuid, snap) {
+    if (!snap || snap.status !== 'success' || !snap.data) return;
+    var s = snap.data;
+    lastPollAt = Date.now();
+    applyServerStatus(uuid, {
+      online: s.running === true,
+      starting: s.starting === true || s.status === 'starting' || s.status === 'restarting',
+      stopping: s.stopping === true || s.status === 'stopping',
+      daemonOffline: s.daemonOffline === true,
+      uptime: typeof s.uptime === 'number' ? s.uptime : null,
+      error: s.error,
+    });
+  }
+
+  function wireRealtime() {
+    if (realtimeWired) return;
+    var rt = window.alRealtime;
+    var st = window.alState;
+    if (!rt || !st) return;
+    realtimeWired = true;
+
+    function resubscribe() {
+      serverUUIDs.forEach(function (uuid) { rt.watch(uuid); });
+    }
+
+    resubscribe();
+    rt.onStatusChange(function (status) {
+      var connected = status === 'connected';
+      if (connected) resubscribe();
+      if (connected === realtimeConnected) return;
+      realtimeConnected = connected;
+      if (connected) stopPolling();
+      else { startPolling(); pollAllServers(); }
+    });
+    serverUUIDs.forEach(function (uuid) {
+      st.observe('server:status:' + uuid, function (snap) { onRealtimeStatus(uuid, snap); });
+    });
+  }
+
+  if (window.alRealtime) wireRealtime();
+  else window.addEventListener('al:realtime-ready', wireRealtime);
 
   /* ── Onboarding modal ─────────────────────── */
   var onboardingModal = document.getElementById('onboardingModal');

@@ -36,14 +36,12 @@ import csrfProtection, {
   addCsrfTokenToLocals,
 } from './handlers/utils/security/csrfProtection';
 import {
-  spaMiddleware,
-  handleSPAPageRequest,
-} from './handlers/spaHandler';
-import {
   errorPageHandler,
   notFoundHandler,
   renderErrorPage,
 } from './handlers/errorPages';
+
+type RenderCallback = (err: Error | null, html?: string) => void;
 
 
 loadEnv();
@@ -413,9 +411,6 @@ app.use(cookieParser());
 // Load translation
 app.use(translationMiddleware);
 
-// SPA middleware for detecting AJAX requests
-app.use(spaMiddleware);
-
 // Apply CSRF protection to all routes except for API routes and WebSocket routes
 app.use((req, res, next) => {
   // Skip CSRF protection for WebSocket routes and API routes
@@ -470,14 +465,18 @@ app.use((_req, res, next) => {
   );
 
   res.locals.isMobileViewport = false;
-
   const originalRenderBase = res.render.bind(res);
-  (res as any).render = function (view: string, options?: Record<string, unknown>, callback?: (err: Error, html: string) => void) {
+
+  const renderOverride = function (
+    view: string,
+    options?: object | RenderCallback,
+    callback?: RenderCallback,
+  ): void {
     const isAbsolutePath = path.isAbsolute(view);
     const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
 
     if (typeof options === 'function') {
-      callback = options;
+      callback = options as RenderCallback;
       options = {};
     }
     const opts = options || {};
@@ -486,11 +485,11 @@ app.use((_req, res, next) => {
       const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
       (ejs as any).renderFile(view, data, {}, (err: Error | null, html: string) => {
         if (err) {
-          if (typeof callback === 'function') return callback(err, '');
+          if (typeof callback === 'function') return callback(err);
           logger.error('View render error:', err);
           return res.status(500).send('View render error');
         }
-        if (typeof callback === 'function') return callback(null!, html);
+        if (typeof callback === 'function') return callback(null, html);
         res.send(html);
       });
       return;
@@ -506,12 +505,12 @@ app.use((_req, res, next) => {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
           (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
-              if (typeof callback === 'function') return callback(err, '');
+              if (typeof callback === 'function') return callback(err);
               return res.status(500).send(
                 isProductionPosture() ? 'View render error' : 'View render error: ' + err.message,
               );
             }
-            if (typeof callback === 'function') return callback(null!, html);
+            if (typeof callback === 'function') return callback(null, html);
             res.send(html);
           });
           return;
@@ -525,12 +524,12 @@ app.use((_req, res, next) => {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
           (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
-              if (typeof callback === 'function') return callback(err, '');
+              if (typeof callback === 'function') return callback(err);
               return res.status(500).send(
                 isProductionPosture() ? 'View render error' : 'View render error: ' + err.message,
               );
             }
-            if (typeof callback === 'function') return callback(null!, html);
+            if (typeof callback === 'function') return callback(null, html);
             res.send(html);
           });
           return;
@@ -541,8 +540,7 @@ app.use((_req, res, next) => {
     return originalRenderBase(view, opts, callback);
   };
 
-  const renderWithViewport = res.render;
-  res.render = handleSPAPageRequest(renderWithViewport);
+  res.render = renderOverride as typeof res.render;
 
   next();
 });

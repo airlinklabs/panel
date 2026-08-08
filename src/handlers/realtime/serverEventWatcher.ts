@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 import logger from '../logger';
-import { daemonScheme } from '../utils/core/daemonRequest';
+import { daemonBaseUrl } from '../utils/core/daemonRequest';
 import { emitRealtime, serverEvent } from './events';
 
 // ── Per-server daemon event watcher ──────────────────────────────────────────
@@ -24,6 +24,7 @@ interface WatcherState {
   connecting: boolean;
   reconnectTimer: NodeJS.Timeout | null;
   reconnectAttempts: number;
+  authed: boolean;
   node: { address: string; port: number; key: string };
 }
 
@@ -33,34 +34,39 @@ const BASE_RETRY_MS = 500;
 const MAX_RETRY_MS = 15_000;
 const MAX_RETRY_ATTEMPTS = 8;
 
-async function daemonWsScheme(): Promise<'wss' | 'ws'> {
-  return (await daemonScheme()) === 'https' ? 'wss' : 'ws';
-}
-
-function socketPath(state: WatcherState, serverId: string, port: number, scheme: 'wss' | 'ws'): string {
-  const { address } = state.node;
-  const host = address.includes(':') && !address.startsWith('[') ? `[${address}]` : address;
-  return `${scheme}://${host}:${port}/containerevents/${encodeURIComponent(serverId)}`;
+// Same URL logic as the status watcher: scheme from daemonBaseUrl (respects
+// enforceDaemonHttps), always keeps the node hostname, brackets IPv6 literals.
+async function daemonWsUrl(node: { address: string; port: number | string }): Promise<string> {
+  const scheme = (await daemonBaseUrl(node.address, node.port)).startsWith('https') ? 'wss' : 'ws';
+  const host = node.address.includes(':') && !node.address.startsWith('[') ? `[${node.address}]` : node.address;
+  return `${scheme}://${host}:${node.port}`;
 }
 
 function openSocket(state: WatcherState, serverId: string): void {
   if (state.connecting || (state.socket && state.socket.readyState === WebSocket.OPEN)) return;
 
   state.connecting = true;
-  daemonWsScheme().then((scheme) => {
-    const url = socketPath(state, serverId, state.node.port, scheme);
-    const socket = new WebSocket(url, { handshakeTimeout: 8_000 });
+  daemonWsUrl(state.node).then((base) => {
+    if (state.refs <= 0) {
+      state.connecting = false;
+      return;
+    }
+
+    const socket = new WebSocket(`${base}/containerevents/${encodeURIComponent(serverId)}`, { handshakeTimeout: 8_000 });
     state.socket = socket;
+    const isCurrent = () => state.socket === socket;
 
     const authTimer = setTimeout(() => {
-      if (socket.readyState === WebSocket.OPEN && !(state as WatcherState & { authed?: boolean }).authed) {
+      if (socket.readyState === WebSocket.OPEN && !state.authed) {
         logger.debug(`event watcher auth timeout for ${serverId}`);
         socket.close(1008, 'auth timeout');
       }
     }, 10_000);
 
     socket.on('open', () => {
-      (state as WatcherState & { authed?: boolean }).authed = false;
+      if (!isCurrent()) return;
+      state.authed = false;
+      state.reconnectAttempts = 0;
       socket.send(JSON.stringify({ event: 'auth', args: [state.node.key] }));
       clearTimeout(authTimer);
     });
@@ -89,17 +95,20 @@ function openSocket(state: WatcherState, serverId: string): void {
     });
 
     socket.on('error', () => {
+      if (!isCurrent()) return;
       clearTimeout(authTimer);
       state.socket = null;
       scheduleReconnect(state, serverId);
     });
 
     socket.on('close', () => {
+      if (!isCurrent()) return;
       clearTimeout(authTimer);
       state.socket = null;
       scheduleReconnect(state, serverId);
     });
-  }).catch(() => {
+  }).catch((error) => {
+    logger.debug(`event watcher failed to resolve daemon URL for ${serverId}: ${String(error)}`);
     state.connecting = false;
     scheduleReconnect(state, serverId);
   });
@@ -158,6 +167,7 @@ export function watchServerEvents(
       connecting: false,
       reconnectTimer: null,
       reconnectAttempts: 0,
+      authed: false,
       node,
     };
     watchers.set(serverId, state);
