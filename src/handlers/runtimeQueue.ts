@@ -2,6 +2,7 @@ import prisma from '../db';
 import logger from './logger';
 import { assertNodeCapacity } from './utils/server/resourceCheck';
 import { startServerContainer } from '../modules/user/server/shared';
+import { emitRealtime, serverEvent } from './realtime/events';
 
 // ── Runtime start queue ───────────────────────────────────────────────────────
 // A capacity-aware admission queue for *runtime container starts*. Installs and
@@ -232,6 +233,7 @@ async function processNode(nodeId: number): Promise<void> {
       const outcome = await attemptStart(head.serverId);
       if (outcome === 'started' || outcome === 'gone') {
         removeEntry(list, head.serverId);
+        broadcastNodeQueue(nodeId);
         continue;
       }
 
@@ -241,6 +243,12 @@ async function processNode(nodeId: number): Promise<void> {
       head.failures += 1;
       if (head.failures >= MAX_GRANT_FAILURES) {
         removeEntry(list, head.serverId);
+        emitRealtime(
+          serverEvent('server.start.failed', head.serverId, {
+            error: { message: 'The server could not be started after several attempts.', code: 'QUEUE_GRANT_FAILED' },
+          }),
+        );
+        broadcastNodeQueue(nodeId);
         logger.warn(`Dropped queued start for ${head.serverId} after ${head.failures} failures.`);
       } else {
         scheduleRetry(nodeId);
@@ -267,6 +275,19 @@ export interface EnqueueResult {
   queued: boolean;
   position: number;
   total: number;
+}
+
+// Realtime: publish the current position/length of every queued server on a
+// node so watches on each affected server update live without polling.
+function broadcastNodeQueue(nodeId: number): void {
+  const list = nodeQueue(nodeId);
+  list.forEach((entry, index) => {
+    emitRealtime(
+      serverEvent('server.start.queue.changed', entry.serverId, {
+        state: { queued: true, position: index + 1, total: list.length },
+      }),
+    );
+  });
 }
 
 export async function enqueueStart(params: {
@@ -321,6 +342,12 @@ export async function enqueueStart(params: {
     const index = insertEntry(list, entry);
     serverNode.set(serverId, server.nodeId);
 
+    emitRealtime(
+      serverEvent('server.start.queued', serverId, {
+        state: { queued: true, position: index + 1, total: list.length },
+      }),
+    );
+
     processNode(server.nodeId).catch((err) => logger.error('Queued start processor failed:', err));
     return { queued: true, position: index + 1, total: list.length };
   });
@@ -334,6 +361,8 @@ export async function cancelQueuedStart(serverId: string): Promise<boolean> {
       return false;
     }
     removeEntry(nodeQueue(nodeId), serverId);
+    emitRealtime(serverEvent('server.start.cancelled', serverId));
+    broadcastNodeQueue(nodeId);
     processNode(nodeId).catch((err) => logger.error('Queued start processor failed:', err));
     return true;
   });
@@ -362,6 +391,7 @@ export async function banUserFromQueue(userId: number, minutes = DEFAULT_BAN_MIN
       }
     }
     for (const nodeId of affected) {
+      broadcastNodeQueue(nodeId);
       processNode(nodeId).catch((err) => logger.error('Queued start processor failed:', err));
     }
     return removed;

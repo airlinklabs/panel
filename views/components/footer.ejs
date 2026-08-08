@@ -1,3 +1,33 @@
 <script nonce="<%- nonce %>" src="/javascript/shared/motion.js?v=5"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/state.js?v=1"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/operations.js?v=1"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/eventrouting.js?v=1"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/realtime.js?v=1"></script>
+<script nonce="<%- nonce %>">
+// ── Shared realtime bootstrap ────────────────────────────────────────────────
+// One WebSocket per browser to /ws/realtime, wired to the shared state cache
+// and operation registry. Pages subscribe to state/operations (or the raw
+// event stream) instead of opening their own sockets or poll loops. The panel
+// decides authorization (hub.ts); the client only renders what it is sent.
+(function () {
+  if (window.alRealtime) return; // already bootstrapped
+  if (!window.ALState || !window.ALRealtimeClient || !window.ALOperations || !window.ALEventRouting) return;
+
+  const state = window.ALState.createClient();
+  const ops = window.ALOperations.create();
+  const routing = window.ALEventRouting.create({ state: state, ops: ops });
+  const realtime = window.ALRealtimeClient.create();
+
+  realtime.subscribe(function (event) {
+    try { routing.handle(event); } catch (e) { /* routing must never break the socket */ }
+  });
+
+  window.alState = state;
+  window.alOps = ops;
+  window.alRouting = routing;
+  window.alRealtime = realtime;
+  window.dispatchEvent(new CustomEvent('al:realtime-ready', { detail: { state: state, realtime: realtime, ops: ops } }));
+})();
+</script>
 </body>
 </html>

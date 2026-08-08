@@ -5,6 +5,7 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { getPrimaryExternalPort, portsToDaemonString } from '../../../handlers/utils/server/ports';
 import { assertNodeCapacity } from '../../../handlers/utils/server/resourceCheck';
+import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
 
 declare global {
   var serverStoppingStates: { [key: string]: boolean };
@@ -227,23 +228,34 @@ export async function stopServerContainer(
   options: { releaseResources?: boolean } = {},
 ): Promise<void> {
   const releaseResources = options.releaseResources !== false;
-  await daemonRequest({
-    method: 'POST',
-    path: '/container/stop',
-    nodeAddress: server.node.address,
-    nodePort: server.node.port,
-    nodeKey: server.node.key,
-    body: {
-      id: serverId,
-      stopCmd: stopCommand,
-    },
-  });
+  emitRealtime(serverEvent('server.power.stop.started', serverId, { state: { stopCommand } }));
+  try {
+    await daemonRequest({
+      method: 'POST',
+      path: '/container/stop',
+      nodeAddress: server.node.address,
+      nodePort: server.node.port,
+      nodeKey: server.node.key,
+      body: {
+        id: serverId,
+        stopCmd: stopCommand,
+      },
+    });
+  } catch (error) {
+    emitRealtime(
+      serverEvent('server.power.stop.failed', serverId, {
+        error: { message: 'The daemon could not stop the server.', code: 'DAEMON_UNREACHABLE' },
+      }),
+    );
+    throw error;
+  }
   if (releaseResources) {
     // The container is down — free its reservation so stopped servers stop
     // consuming node capacity. Restart passes releaseResources:false to keep
     // the reservation held across the stop/start cycle.
     await prisma.server.update({ where: { UUID: serverId }, data: { Running: false } }).catch(() => {});
   }
+  emitRealtime(serverEvent('server.power.stopped', serverId, { state: { running: false } }));
 }
 
 export async function startServerContainer(
@@ -285,6 +297,7 @@ export async function startServerContainer(
   }
 
   let startResponse;
+  emitRealtime(serverEvent('server.power.start.started', serverId));
   try {
     startResponse = await daemonRequest({
       method: 'POST',
@@ -307,6 +320,11 @@ export async function startServerContainer(
       },
     });
   } catch (error) {
+    emitRealtime(
+      serverEvent('server.power.start.failed', serverId, {
+        error: { message: 'The daemon could not start the server.', code: 'DAEMON_UNREACHABLE' },
+      }),
+    );
     throw new Error('daemon is unreachable — is it running?', { cause: error });
   }
 
@@ -316,12 +334,19 @@ export async function startServerContainer(
         ? (startResponse.data as { error?: string; detail?: string })
         : {};
     const rawDetail = `${body.error ?? 'request failed'}${body.detail ? ' — ' + body.detail : ''}`;
+    emitRealtime(
+      serverEvent('server.power.start.failed', serverId, {
+        error: { message: 'The daemon could not start the server.', code: 'DAEMON_START_FAILED' },
+        state: { detail: rawDetail },
+      }),
+    );
     // Safe client message; raw daemon detail stays in the log via `cause`.
     throw new Error('The daemon could not start the server.', { cause: `daemon: ${rawDetail}` });
   }
 
   // The container is up — the server now holds a reservation on its node.
   await prisma.server.update({ where: { UUID: serverId }, data: { Running: true } }).catch(() => {});
+  emitRealtime(serverEvent('server.power.started', serverId, { state: { running: true } }));
 }
 
 async function resolveServerMounts(
