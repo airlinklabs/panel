@@ -14,7 +14,7 @@
         <div class="flex items-center gap-4">
           <div class="relative shrink-0">
             <img loading="lazy" decoding="async" id="avatar-preview"
-              src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>"
+              src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>"
               alt="Avatar"
               class="h-12 w-12 rounded-xl border object-cover" style="border-color:var(--theme-border);">
             <label for="avatar-input" title="Upload photo"
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('remove-avatar-btn')?.addEventListener('click', async () => {
     const res = await fetch('/remove-avatar', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken } });
     if (res.ok) {
-      avatarPreview.src = 'https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>';
+      avatarPreview.src = '/avatar/<%= encodeURIComponent(user.username) %>';
       const removeAvatarBtn = document.getElementById('remove-avatar-btn');
       if (removeAvatarBtn) removeAvatarBtn.style.display = 'none';
       showToast('Profile picture removed.', 'success');

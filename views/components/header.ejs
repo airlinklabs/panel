@@ -33,8 +33,6 @@ const wallpaperExcluded = req && req.path && (
     <link rel="stylesheet" href="<%= settings.darkTheme %>" id="dark-theme-css" data-theme-mode="dark">
     <% } %>
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"></noscript>
     <script nonce="<%- nonce %>" defer src="/js/csrf.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/js/shared/al-icon.js?v=8"></script>
     <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>

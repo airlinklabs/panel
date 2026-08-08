@@ -60,7 +60,7 @@
           <% users.forEach(function(user) { %>
           <div class="al-card flex items-center gap-3" data-user-id="<%= user.id %>">
             <div class="relative shrink-0">
-              <img loading="lazy" decoding="async" class="w-8 h-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
+              <img loading="lazy" decoding="async" class="w-8 h-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
               <% if (onlineUsers.has(user.username)) { %>
                 <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
                   <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
@@ -109,7 +109,7 @@
                   <td class="al-table-td sm:pl-6">
                     <div class="flex items-center gap-3">
                       <div class="relative shrink-0">
-                        <img loading="lazy" decoding="async" class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
+                        <img loading="lazy" decoding="async" class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
                         <% if (onlineUsers.has(user.username)) { %>
                           <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
                             <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>

@@ -98,6 +98,11 @@ app.use(
 );
 
 app.use(
+  '/vendor/marked',
+  express.static(path.join(__dirname, '../node_modules', 'marked/lib')),
+);
+
+app.use(
   '/vendor/xterm-addon-fit',
   express.static(path.join(__dirname, '../node_modules', '@xterm/addon-fit/lib')),
 );

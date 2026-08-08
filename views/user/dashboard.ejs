@@ -174,7 +174,7 @@
               </div>
               <div class="flex items-center justify-between pt-2 border-t" style="border-color:var(--theme-border);">
                 <div class="flex items-center gap-1.5 min-w-0">
-                  <img loading="lazy" decoding="async" class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="<%= server.owner ? server.owner.username : 'Unknown' %>">
+                  <img loading="lazy" decoding="async" class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : '/avatar/' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="<%= server.owner ? server.owner.username : 'Unknown' %>">
                   <span class="text-xs truncate" style="color:var(--theme-text-muted);"><%= server.owner ? server.owner.username : 'Unknown' %></span>
                 </div>
                 <% if (server.node) { %>

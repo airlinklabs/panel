@@ -13,7 +13,7 @@
     <!-- Static: user info — clicking goes to account page -->
     <% if (user != null) { %>
     <a href="/account" id="sidebar-account-link" class="sidebar-special-link flex items-center space-x-4 py-4 px-4 border-y shrink-0 transition-colors group" style="border-color:var(--theme-nav-border);">
-      <img loading="lazy" decoding="async" class="h-8 w-8 rounded-xl shrink-0" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
+      <img loading="lazy" decoding="async" class="h-8 w-8 rounded-xl shrink-0" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="User avatar">
       <div class="min-w-0">
         <p class="text-sm font-medium truncate transition-colors" style="color:var(--theme-text-strong);">
           <span id="sidebar-username"><%= user.username %></span>

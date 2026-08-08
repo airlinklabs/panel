@@ -199,7 +199,7 @@ function closeGroup() {
 async function getMd() {
   if (mdParse) return mdParse;
   try {
-    var mod = await import('https://cdn.jsdelivr.net/npm/marked@15.0.6/+esm');
+    var mod = await import('/vendor/marked/marked.esm.js');
     mdParse = mod.marked;
     mdParse.setOptions({gfm:true, breaks:true});
   } catch(e) {

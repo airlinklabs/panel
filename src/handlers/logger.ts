@@ -43,18 +43,45 @@ const consola = createConsola({
 
 type LogContext = Record<string, unknown>;
 
+const REDACTED = '***REDACTED***';
+
+// Keys whose values are treated as secrets in any serialized object/log output.
+const SENSITIVE_KEYS =
+  /("(?:password|passwd|secret|token|api[_ -]?key|client[_ -]?secret|access[_ -]?key|access[_ -]?token|auth(?:orization)?|authorization|refresh[_ -]?token|session[_ -]?id|cookie)"\s*[:=]\s*)(?:"([^"]*)"|'([^']*)'|([^\s,;]+))/gi;
+
+// Unquoted key form produced by util.inspect, e.g. `password: 'hunter2'`.
+const SENSITIVE_KEYS_UNQUOTED =
+  /(\b(?:password|passwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?key|access[_-]?token|authorization|refresh[_-]?token|session[_-]?id)\b\s*:\s*)(?:"([^"]*)"|'([^']*)'|([^\s,;{}]+))/gi;
+
+// Header-style values such as `Authorization: Bearer <jwt>`.
+const SENSITIVE_HEADERS =
+  /((?:authorization|set-cookie|cookie|proxy-authorization)\s*[:=]\s*)(?:bearer\s+)?[^\s,;]+/gi;
+
+// Query-string secrets such as `?token=...` or `&api_key=...`.
+const SENSITIVE_QUERY = /([?&](?:token|key|secret|api_key|access_token|password|auth)=)[^&\s]+/gi;
+
+const redact = (input: string): string => {
+  return input
+    .replace(SENSITIVE_HEADERS, (match, prefix) => `${prefix}${REDACTED}`)
+    .replace(SENSITIVE_QUERY, (match, prefix) => `${prefix}${REDACTED}`)
+    .replace(SENSITIVE_KEYS, (match, prefix) => `${prefix}${REDACTED}`)
+    .replace(SENSITIVE_KEYS_UNQUOTED, (match, prefix) => `${prefix}${REDACTED}`);
+};
+
+export { redact };
+
 const serializeValue = (value: unknown): string => {
   if (value instanceof Error) {
-    return value.stack || `${value.name}: ${value.message}`;
+    return redact(value.stack || `${value.name}: ${value.message}`);
   }
 
-  if (typeof value === 'string') return value;
+  if (typeof value === 'string') return redact(value);
 
-  return util.inspect(value, {
+  return redact(util.inspect(value, {
     depth: 5,
     breakLength: 160,
     compact: true,
-  });
+  }));
 };
 
 const serializeContext = (context?: unknown): string => {
@@ -64,7 +91,7 @@ const serializeContext = (context?: unknown): string => {
 
 const writeToLogFile = (level: string, message: string): void => {
   const timestamp = new Date().toISOString();
-  const logMessage = `[${timestamp}] ${level}: ${message}\n`;
+  const logMessage = `[${timestamp}] ${level}: ${redact(message)}\n`;
   fs.appendFile(path.join(logsDir, 'combined.log'), logMessage, (err) => {
     if (err) consola.error('Failed to write to combined log file:', err);
   });
@@ -88,12 +115,13 @@ const formatLogMessage = (badge: string, message: string, maxWidth = 120): strin
 const logger = {
   error(message: string, error?: unknown, context?: LogContext): void {
     const badge = `${colors.bgRed}${colors.white}${colors.bright} ERROR ${colors.reset}`;
-    const fileMessage = `${message}${serializeContext(context)}${error === undefined ? '' : `\n${serializeValue(error)}`}`;
+    const safeMessage = redact(message);
+    const fileMessage = `${safeMessage}${serializeContext(context)}${error === undefined ? '' : `\n${serializeValue(error)}`}`;
 
     if (error instanceof Error) {
-      consola.error(formatLogMessage(badge, message), error);
+      consola.error(formatLogMessage(badge, safeMessage), error);
     } else {
-      consola.error(formatLogMessage(badge, `${message}${serializeContext(error)}`));
+      consola.error(formatLogMessage(badge, `${safeMessage}${serializeContext(error)}`));
     }
 
     const timestamp = new Date().toISOString();
@@ -105,21 +133,21 @@ const logger = {
 
   warn(message: string, context?: LogContext): void {
     const badge = `${colors.bgYellow}${colors.white}${colors.bright} WARN ${colors.reset}`;
-    const text = `${message}${serializeContext(context)}`;
+    const text = `${redact(message)}${serializeContext(context)}`;
     consola.warn(formatLogMessage(badge, text));
     writeToLogFile('WARN', text);
   },
 
   info(message: string, context?: LogContext): void {
     const badge = `${colors.bgBlue}${colors.white}${colors.bright} INFO ${colors.reset}`;
-    const text = `${message}${serializeContext(context)}`;
+    const text = `${redact(message)}${serializeContext(context)}`;
     consola.info(formatLogMessage(badge, `${colors.blue}${text}${colors.reset}`));
     writeToLogFile('INFO', text);
   },
 
   success(message: string, context?: LogContext): void {
     const badge = `${colors.bgGreen}${colors.white}${colors.bright} SUCCESS ${colors.reset}`;
-    const text = `${message}${serializeContext(context)}`;
+    const text = `${redact(message)}${serializeContext(context)}`;
     consola.success(formatLogMessage(badge, text));
     writeToLogFile('SUCCESS', text);
   },
@@ -128,13 +156,13 @@ const logger = {
     if (!isDebugMode) return;
 
     const badge = `${colors.bgMagenta}${colors.white}${colors.bright} DEBUG ${colors.reset}`;
-    const text = `${message}${serializeContext(context)}`;
+    const text = `${redact(message)}${serializeContext(context)}`;
     consola.debug(formatLogMessage(badge, text));
   },
 
   log(message: string, context?: LogContext): void {
     const badge = `${colors.bgWhite}${colors.white}${colors.bright} LOG ${colors.reset}`;
-    const text = `${message}${serializeContext(context)}`;
+    const text = `${redact(message)}${serializeContext(context)}`;
     consola.log(formatLogMessage(badge, text));
     writeToLogFile('LOG', text);
   },

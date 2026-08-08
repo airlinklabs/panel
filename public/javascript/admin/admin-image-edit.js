@@ -40,7 +40,7 @@
           console.error('Monaco loader not loaded');
           return;
         }
-        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } });
+        require.config({ paths: { vs: '/monaco/vs' } });
         require(['vs/editor/editor.main'], function() {
           monacoEditor = monaco.editor.create(document.getElementById('json-editor'), {
             value: buildExportJson(),

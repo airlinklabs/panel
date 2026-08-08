@@ -11,7 +11,7 @@
     </button>
     <% if (user != null) { %>
     <a href="/account" class="p-1 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-text-muted);">
-      <img loading="lazy" decoding="async" class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
+      <img loading="lazy" decoding="async" class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="User avatar">
     </a>
     <% } %>
   </div>
@@ -209,7 +209,7 @@
       <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
         <% if (user != null) { %>
         <a href="/account" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:20">
-          <img loading="lazy" decoding="async" class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
+          <img loading="lazy" decoding="async" class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="">
           <span class="text-sm">Account</span>
         </a>
         <a href="/logout" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:21">

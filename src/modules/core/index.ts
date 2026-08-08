@@ -285,6 +285,28 @@ const coreModule: Module = {
       }
     });
 
+    // Local deterministic avatar generation. Replaces the remote DiceBear API
+    // that was used as the default avatar in layouts across the panel.
+    // The seed is the (already escaped) avatar seed — render an SVG locally.
+    // Only the seed matters; the route is public and content is static per seed.
+    router.get('/avatar/:seed', async (req: Request, res: Response) => {
+      const { avatarSvg, isValidAvatarSeed } = await import('../../utils/avatar');
+      const seed = Array.isArray(req.params.seed) ? req.params.seed[0] : req.params.seed;
+      if (!isValidAvatarSeed(seed)) {
+        res.status(400).type('text/plain').send('invalid avatar seed');
+        return;
+      }
+      try {
+        const svg = await avatarSvg(seed);
+        res.setHeader('Content-Type', 'image/svg+xml');
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=86400');
+        res.send(svg);
+      } catch (error) {
+        logger.error('Avatar generation failed:', error);
+        res.status(500).type('text/plain').send('avatar generation failed');
+      }
+    });
+
     return router;
   },
 };
