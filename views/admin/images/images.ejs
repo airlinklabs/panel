@@ -48,7 +48,7 @@
 
       <div id="tab-panel-installed" class="mt-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <div class="text-sm" style="color:var(--theme-text-muted);"><%= images.length %> image<%= images.length !== 1 ? 's' : '' %> installed on this panel</div>
+          <div class="text-sm" style="color:var(--theme-text-muted);"><span id="installedImagesCount"><%= images.length %></span> image<%= images.length !== 1 ? 's' : '' %> installed on this panel</div>
         </div>
 
       <% if (images.length === 0) { %>

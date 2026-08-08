@@ -17,6 +17,18 @@
     location.href = '/admin/users/create';
   });
 
+  function syncUserCounts() {
+    const rows = document.querySelectorAll('#userTable tbody tr[data-user-id]');
+    const totalEl = document.getElementById('totalUsersCount');
+    const adminEl = document.getElementById('adminUsersTotal');
+    if (totalEl) totalEl.textContent = rows.length;
+    if (adminEl) {
+      let admins = 0;
+      rows.forEach(function (r) { if (r.getAttribute('data-admin') === 'true') admins++; });
+      adminEl.textContent = admins;
+    }
+  }
+
   window.deleteUser = function(userId) {
     window.modal.confirm({
       title: pageData.deleteUserTitle || 'Delete User',
@@ -30,12 +42,15 @@
               showToast('User deleted.', 'success');
               const tbody = document.querySelector('#userTable tbody');
               const nodes = document.querySelectorAll('[data-user-id="' + userId + '"]');
-              nodes.forEach(function(node) {
-                if (window.al) al.removeRow(node);
+              const removals = Array.from(nodes).map(function(node) {
+                return window.al ? al.removeRow(node) : Promise.resolve();
               });
-              if (tbody && !tbody.querySelector('[data-user-id]')) {
-                al.showEmpty(tbody, 'No users yet.', 4);
-              }
+              Promise.all(removals).then(function() {
+                if (tbody && !tbody.querySelector('[data-user-id]')) {
+                  al.showEmpty(tbody, 'No users yet.', 4);
+                }
+                syncUserCounts();
+              });
             } else {
               showToast('Failed to delete user.', 'error');
             }

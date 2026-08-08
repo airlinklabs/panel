@@ -14,7 +14,31 @@ function removeNodeRow(nodeId) {
   al.removeRow(row).then(function () {
     const tbody = document.querySelector('#nodeTable tbody');
     if (tbody && !tbody.querySelector('[data-node-id]')) al.showEmpty(tbody, 'No nodes yet.', 4);
+    syncNodeStats();
   });
+}
+
+function syncNodeStats() {
+  const rows = Array.from(document.querySelectorAll('#nodeTable tbody tr[data-node-id]'));
+  const total = rows.length;
+  let instances = 0;
+  let online = 0;
+  let assigned = 0;
+  rows.forEach(function (r) {
+    instances += parseInt(r.getAttribute('data-instances') || '0', 10) || 0;
+    if (r.getAttribute('data-online') === 'true') online++;
+    if (r.getAttribute('data-location') === 'true') assigned++;
+  });
+  const setVal = function (id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+  setVal('totalNodesTotal', total);
+  setVal('totalNodeInstancesTotal', instances);
+  setVal('onlineNodesTotal', online);
+  setVal('avgNodeInstancesTotal', total > 0 ? (instances / total).toFixed(2) : 0);
+  setVal('nodesAssignedTotal', assigned);
+  setVal('nodesUnassignedTotal', total - assigned);
 }
 
 async function deleteNode(nodeId) {

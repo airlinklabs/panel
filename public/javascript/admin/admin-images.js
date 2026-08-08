@@ -61,6 +61,10 @@ async function renderImageTable() {
   });
   const noResults = document.getElementById('noResults');
   if (noResults) noResults.classList.toggle('hidden', data.images.length === 0 || n > 0 || !q);
+  const installedCountEl = document.getElementById('tabCountInstalled');
+  if (installedCountEl) installedCountEl.textContent = data.images.length;
+  const installedTextEl = document.getElementById('installedImagesCount');
+  if (installedTextEl) installedTextEl.textContent = data.images.length;
   if (window.alTableScan) alTableScan(tbody);
 }
 

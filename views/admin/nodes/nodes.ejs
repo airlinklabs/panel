@@ -31,23 +31,23 @@
         <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 mt-6">
           <div class="al-card">
             <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= req.translations.totalNodes %></h2>
-            <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);"><%= nodes.length %></p>
+            <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="totalNodesTotal"><%= nodes.length %></p>
             <% if (nodes.length > 0) { %>
-            <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineNodes %>: <%= nodes.filter(node => node.status === 'Online').length %></p>
+            <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineNodes %>: <span id="onlineNodesTotal"><%= nodes.filter(node => node.status === 'Online').length %></span></p>
             <% } else { %>
               <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noNodesAvailable || 'No nodes available' %></p>
             <% } %>
           </div>
           <div class="al-card">
             <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);">Servers</h2>
-            <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);">
+            <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="totalNodeInstancesTotal">
               <%= nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) %>
             </p>
             <% const totalInstances = nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0); %>
             <% if (totalInstances > 0 && nodes.length > 0) { %>
               <p class="text-xs mt-2" style="color:var(--theme-text-muted);">
                 <%= req.translations.averageInstanceDensity %>:
-                <%= (totalInstances / nodes.length).toFixed(2) %>
+                <span id="avgNodeInstancesTotal"><%= (totalInstances / nodes.length).toFixed(2) %></span>
               </p>
             <% } else { %>
               <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noInstancesAvailable %></p>
@@ -102,7 +102,7 @@
             </thead>
             <tbody>
               <% let nodeIdx = 0; nodes.forEach(function(node) { %>
-                <tr data-node-id="<%= node.id %>" style="--i:<%= nodeIdx++ %>" class="al-table-tr cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
+                <tr data-node-id="<%= node.id %>" data-instances="<%= node.instances ? node.instances.length : 0 %>" data-online="<%= node.status === 'Online' ? 'true' : '' %>" data-location="<%= node.locationId ? 'true' : '' %>" style="--i:<%= nodeIdx++ %>" class="al-table-tr cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
                   <td class="al-table-td sm:pl-6">
                     <div class="flex items-center">
                       <div class="mr-5">
@@ -172,7 +172,7 @@
                 <%- icon('server', { class: 'size-5' }) %>
               </div>
               <div>
-                <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);"><%= nodes.filter(n => n.locationId).length %></p>
+                <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);" id="nodesAssignedTotal"><%= nodes.filter(n => n.locationId).length %></p>
                 <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Nodes assigned</p>
               </div>
             </div>
@@ -181,7 +181,7 @@
                 <%- icon('network', { class: 'size-5' }) %>
               </div>
               <div>
-                <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);"><%= nodes.filter(n => !n.locationId).length %></p>
+                <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);" id="nodesUnassignedTotal"><%= nodes.filter(n => !n.locationId).length %></p>
                 <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Nodes without a location</p>
               </div>
             </div>

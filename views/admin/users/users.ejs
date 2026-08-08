@@ -23,7 +23,7 @@
         <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div class="al-card">
             <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= req.translations.totalUsers %></h2>
-            <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);"><%= users.length %></p>
+            <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="totalUsersCount"><%= users.length %></p>
             <% if (onlineUsers.size > 0) { %>
               <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineUsers || 'Online Users' %>: <%= onlineUsers.size %></p>
             <% } else { %>
@@ -32,7 +32,7 @@
           </div>
           <div class="al-card">
             <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= req.translations.admins || 'Admins' %></h2>
-              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);"><%= users.filter(user => user.isAdmin).length %></p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="adminUsersTotal"><%= users.filter(user => user.isAdmin).length %></p>
               <% if (onlineUsers.size > 0) { %>
                 <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineUsers || 'Online Admins' %>: <%= Array.from(onlineUsers).filter(username => users.some(user => user.username === username && user.isAdmin)).length %></p>
               <% } else { %>
@@ -58,7 +58,7 @@
         <!-- Mobile card view -->
         <div class="lg:hidden space-y-2 mb-6">
           <% users.forEach(function(user) { %>
-          <div class="al-card flex items-center gap-3" data-user-id="<%= user.id %>">
+          <div class="al-card flex items-center gap-3" data-user-id="<%= user.id %>" data-admin="<%= user.isAdmin %>">
             <div class="relative shrink-0">
               <img loading="lazy" decoding="async" class="w-8 h-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
               <% if (onlineUsers.has(user.username)) { %>
@@ -105,7 +105,7 @@
             </thead>
             <tbody>
               <% let userIdx = 0; users.forEach(function(user) { %>
-                <tr style="--i:<%= userIdx++ %>" class="al-table-tr cursor-pointer" tabindex="0" role="link" data-user-id="<%= user.id %>" onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleRowClick(event, '/admin/users/view/<%= user.id %>/');}">
+                <tr style="--i:<%= userIdx++ %>" class="al-table-tr cursor-pointer" tabindex="0" role="link" data-user-id="<%= user.id %>" data-admin="<%= user.isAdmin %>" onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleRowClick(event, '/admin/users/view/<%= user.id %>/');}">
                   <td class="al-table-td sm:pl-6">
                     <div class="flex items-center gap-3">
                       <div class="relative shrink-0">
