@@ -93,9 +93,11 @@ const accountModule: Module = {
           ]);
           if (!user) {
             errorMessage.message = 'User not found.';
-            res.render('user/account', { errorMessage, user, req });
+            res.render('user/account', { errorMessage, user, req, allowed: false });
             return;
           }
+
+          const allowed = user.isAdmin === true || settings?.allowUserCreateImages === true;
 
           res.render('user/account', {
             errorMessage,
@@ -104,6 +106,7 @@ const accountModule: Module = {
             settings,
             loginHistory,
             nodes,
+            allowed,
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
@@ -115,6 +118,7 @@ const accountModule: Module = {
             settings,
             loginHistory: [],
             nodes: [],
+            allowed: false,
           });
         }
       },

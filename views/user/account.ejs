@@ -1,5 +1,20 @@
 <%- include('../components/header', { title: req.translations.userAccountTitle || 'Account' }) %>
 
+<style>
+  .field-label { font-size: 11px; font-weight: 500; color: var(--theme-text-muted, #737373); display: block; margin-bottom: 5px; }
+  .field-input {
+    width: 100%; border-radius: 9px; border: 1px solid var(--theme-border, #e5e5e5);
+    background: var(--theme-bg-input, #fafafa); padding: 8px 12px;
+    font-size: 13px; color: var(--theme-text-strong, #171717); outline: none;
+    transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
+  }
+  html.dark .field-input { background: var(--theme-bg-hover, rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.1)); color: var(--theme-text, #e5e5e5); }
+  .field-input:focus { border-color: var(--theme-border, #a3a3a3); }
+  html.dark .field-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.25)); }
+  .field-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
+  html.dark .field-input::placeholder { color: var(--theme-text-muted, #525252); }
+</style>
+
 <main class="min-h-screen">
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0">
@@ -161,6 +176,31 @@
           </div>
         </div>
 
+        <!-- Custom image submissions -->
+        <div class="al-card p-5" id="customImagesSection">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p class="flex items-center gap-1.5 text-sm font-medium mb-1" style="color:var(--theme-text-strong)">
+                <%- icon('image', { class: 'w-4 h-4', strokeWidth: 1.5 }) %> <%= req.translations.customImages || 'Custom images' %>
+              </p>
+              <p class="text-xs" style="color:var(--theme-text-muted)"><%= req.translations.customImagesDesc || 'Submit an egg JSON or import from a URL. Admins review submissions before they become usable.' %></p>
+            </div>
+            <a href="/my-images" class="al-btn-ghost text-xs inline-flex items-center gap-1.5 shrink-0">
+              <%- icon('list', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.myImages || 'My Images' %>
+            </a>
+          </div>
+          <% if (allowed) { %>
+          <div class="mt-4">
+            <button id="openSubmitBtn" type="button" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+              <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+              <%= req.translations.submitImage || 'Submit Image' %>
+            </button>
+          </div>
+          <% } else { %>
+          <p class="text-xs mt-3" style="color:var(--theme-text-muted)"><%= req.translations.imageSubmissionsDisabledText || 'An administrator has turned off user image submissions.' %></p>
+          <% } %>
+        </div>
+
         <!-- Login history -->
         <div class="al-card p-5">
           <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= req.translations.loginHistory || 'Login history' %></p>
@@ -196,10 +236,76 @@
         </div>
 
       </div>
-    </div>
+</div>
   </div>
 </main>
 
+<div id="image-submit-data" style="display:none"
+  data-submitting="<%= req.translations.submitting || 'Submitting image...' %>"
+  data-submit-error="<%= req.translations.errorSubmitting || 'Failed to submit the image.' %>"
+></div>
+
+<!-- Image submission popup -->
+<% if (allowed) { %>
+<div id="imModal" class="al-sheet-overlay fixed inset-0 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none">
+  <div class="al-sheet-panel rounded-2xl max-w-lg w-full shadow-xl max-h-[88vh] flex flex-col will-change-transform" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+    <div class="al-sheet-header" style="border-color:var(--theme-border)">
+      <div>
+        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.submitImage || 'Submit Image' %></h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= req.translations.submitImageText || 'Admins review submissions before they are usable.' %></p>
+      </div>
+      <button type="button" id="imClose" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
+      <div class="flex gap-1 p-1 rounded-xl mb-4" style="background:var(--theme-bg-secondary)">
+        <button type="button" id="imModeManual" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-strong); background:var(--theme-bg-card);"><%= req.translations.manualEnter || 'Enter details' %></button>
+        <button type="button" id="imModeJson" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-muted);"><%= req.translations.pasteJson || 'Paste JSON' %></button>
+        <button type="button" id="imModeUrl" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-muted);"><%= req.translations.importFromUrl || 'Import from URL' %></button>
+      </div>
+
+      <!-- Manual form -->
+      <form id="imManualForm" class="flex flex-col gap-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required placeholder="e.g. My Custom Game"></div>
+          <div><label class="field-label">Author</label><input class="field-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
+          <div><label class="field-label">Author Name</label><input class="field-input" type="text" name="authorName" placeholder="Your Name"></div>
+          <div class="col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+          <div class="col-span-2"><label class="field-label">Docker images (JSON array) <span class="text-red-500">*</span></label><input class="field-input" type="text" name="dockerImages" required placeholder='[{"game":"ghcr.io/you/image:latest"}]' style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+          <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
+          <div class="col-span-2"><label class="field-label">Variables <span class="text-neutral-400 font-normal">(JSON array, optional)</span></label><textarea class="field-input" name="variables" rows="4" placeholder="[]" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;">[]</textarea></div>
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button type="button" id="imManualCancel" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
+          <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
+        </div>
+      </form>
+
+      <!-- JSON paste -->
+      <div id="imJsonSection" class="hidden">
+        <label class="field-label" for="imJsonInput">Egg JSON</label>
+        <textarea id="imJsonInput" class="field-input" rows="12" placeholder='{ "name": "...", "startup": "...", "docker_images": { "game": "ghcr.io/example/image:latest" } }' style="resize:none;font-family:ui-monospace,monospace;font-size:12px;"></textarea>
+        <div class="flex gap-2 pt-4">
+          <button type="button" id="imJsonCancel" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5">Cancel</button>
+          <button type="button" id="imSubmitJsonBtn" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
+        </div>
+      </div>
+
+      <!-- URL import -->
+      <div id="imUrlSection" class="hidden">
+        <label class="field-label" for="imUrlInput">Image URL</label>
+        <input id="imUrlInput" type="url" class="field-input" placeholder="https://raw.githubusercontent.com/…/egg.json">
+        <p class="mt-2 text-xs" style="color:var(--theme-text-muted)">Fetch a Pterodactyl egg JSON from a raw URL and submit it for review.</p>
+        <div class="flex gap-2 pt-4">
+          <button type="button" id="imUrlCancel" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5">Cancel</button>
+          <button type="button" id="imSubmitUrlBtn" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Fetch &amp; Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>
 
 <script nonce="<%- nonce %>">
 document.addEventListener('DOMContentLoaded', () => {
@@ -501,5 +607,152 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+
+<% if (allowed) { %>
+<script nonce="<%- nonce %>">
+(function() {
+  const pd = document.getElementById('image-submit-data')?.dataset || {};
+
+  const modal = document.getElementById('imModal');
+  if (!modal) return;
+
+  function openModal() {
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+  }
+  function closeModal() {
+    modal.classList.add('opacity-0', 'pointer-events-none');
+  }
+
+  function setMode(mode) {
+    const manual = document.getElementById('imManualForm');
+    const json = document.getElementById('imJsonSection');
+    const url = document.getElementById('imUrlSection');
+    const manualBtn = document.getElementById('imModeManual');
+    const jsonBtn = document.getElementById('imModeJson');
+    const urlBtn = document.getElementById('imModeUrl');
+    manual.classList.toggle('hidden', mode !== 'manual');
+    json.classList.toggle('hidden', mode !== 'json');
+    url.classList.toggle('hidden', mode !== 'url');
+    manualBtn.style.background = mode === 'manual' ? 'var(--theme-bg-card)' : 'transparent';
+    jsonBtn.style.background = mode === 'json' ? 'var(--theme-bg-card)' : 'transparent';
+    urlBtn.style.background = mode === 'url' ? 'var(--theme-bg-card)' : 'transparent';
+    manualBtn.style.color = mode === 'manual' ? 'var(--theme-text-strong)' : 'var(--theme-text-muted)';
+    jsonBtn.style.color = mode === 'json' ? 'var(--theme-text-strong)' : 'var(--theme-text-muted)';
+    urlBtn.style.color = mode === 'url' ? 'var(--theme-text-strong)' : 'var(--theme-text-muted)';
+  }
+
+function loader() {
+    try {
+      return showLoadingPopup(pd.submitting, '');
+    } catch {
+      return { close: function() {}, updateProgress: function() {} };
+    }
+  }
+
+  function goToMyImages() {
+    setTimeout(function() { window.location.href = '/my-images'; }, 1000);
+  }
+
+  document.getElementById('openSubmitBtn')?.addEventListener('click', openModal);
+  document.getElementById('imClose')?.addEventListener('click', closeModal);
+  document.getElementById('imManualCancel')?.addEventListener('click', closeModal);
+  document.getElementById('imJsonCancel')?.addEventListener('click', closeModal);
+  document.getElementById('imUrlCancel')?.addEventListener('click', closeModal);
+
+  document.getElementById('imModeManual').addEventListener('click', function() { setMode('manual'); });
+  document.getElementById('imModeJson').addEventListener('click', function() { setMode('json'); });
+  document.getElementById('imModeUrl').addEventListener('click', function() { setMode('url'); });
+  setMode('manual');
+
+  document.getElementById('imManualForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const l = loader();
+    try {
+      const payload = new FormData(this);
+      const data = {};
+      for (const [key, value] of payload.entries()) data[key] = value;
+      const response = await fetch('/my-images/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      l.close();
+      if (result.error && !result.success) {
+        showToast(result.error, 'error');
+      } else {
+        showToast(result.message || 'Submitted', 'success');
+        goToMyImages();
+      }
+    } catch (error) {
+      l.close();
+      console.error('Failed to submit image:', error);
+      showToast(pd.submitError || 'Failed to submit the image.', 'error');
+    }
+  });
+
+  document.getElementById('imSubmitJsonBtn').addEventListener('click', async function() {
+    const raw = document.getElementById('imJsonInput').value;
+    if (!raw.trim()) { showToast('Paste an egg JSON first.', 'error'); return; }
+    let payload;
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      showToast('Invalid JSON.', 'error');
+      return;
+    }
+    const l = loader();
+    try {
+      const response = await fetch('/my-images/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      l.close();
+      if (result.error && !result.success) {
+        showToast(result.error, 'error');
+      } else {
+        showToast(result.message || 'Submitted', 'success');
+        goToMyImages();
+      }
+    } catch (error) {
+      l.close();
+      console.error('Failed to submit image:', error);
+      showToast(pd.submitError || 'Failed to submit the image.', 'error');
+    }
+  });
+
+  document.getElementById('imSubmitUrlBtn').addEventListener('click', async function() {
+    const url = document.getElementById('imUrlInput').value;
+    if (!url.trim()) { showToast('Please enter an image URL.', 'error'); return; }
+    const l = loader();
+    try {
+      const response = await fetch('/my-images/import-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url.trim() }),
+      });
+      const result = await response.json();
+      l.close();
+      if (result.error && !result.success) {
+        showToast(result.error, 'error');
+      } else {
+        showToast(result.message || 'Imported', 'success');
+        goToMyImages();
+      }
+    } catch (error) {
+      l.close();
+      console.error('Failed to import image:', error);
+      showToast(pd.submitError || 'Failed to submit the image.', 'error');
+    }
+  });
+
+  if (window.location.hash === '#submit-image') {
+    openModal();
+  }
+})();
+</script>
+<% } %>
 
 <%- include('../components/footer') %>

@@ -72,8 +72,32 @@ const adminModule: Module = {
           if (!user) {return res.redirect('/login');}
 
           const images = await prisma.images.findMany();
+          const pending = await prisma.images.findMany({
+            where: { status: 'pending' },
+            orderBy: { createdAt: 'asc' },
+          });
+
+          const creatorIds = [...new Set(pending.map((i) => i.createdById).filter((id): id is number => id != null))];
+          const creators = creatorIds.length > 0
+            ? await prisma.users.findMany({
+                where: { id: { in: creatorIds } },
+                select: { id: true, username: true, email: true },
+              })
+            : [];
+          const creatorMap = new Map(creators.map((c) => [c.id, c]));
+          const pendingWithCreators = pending.map((i) => ({
+            ...i,
+            creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
+          }));
+
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-          res.render('admin/images/images', { user, req, settings, images });
+          res.render('admin/images/images', {
+            user,
+            req,
+            settings,
+            images,
+            pending: pendingWithCreators,
+          });
         } catch (error: unknown) {
           logger.error('Error fetching images:', error);
           return res.redirect('/login');

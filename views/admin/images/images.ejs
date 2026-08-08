@@ -40,10 +40,16 @@
       </div>
 
       <div class="al-page-body">
-      <div class="flex">
-        <span class="px-3 py-2 mr-4 text-sm font-medium text-white dark:text-black bg-neutral-900 dark:bg-white rounded-lg">Installed <span class="ml-1 text-xs text-neutral-400"><%= images.length %></span></span>
-        <a href="/admin/images/store" class="px-3 py-2 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition">Store</a>
+      <div class="flex items-center border-b" style="border-color:var(--theme-border);">
+        <button type="button" id="tab-btn-installed" data-tab="installed" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition">Installed <span id="tabCountInstalled" class="ml-1 text-xs text-neutral-400"><%= images.length %></span></button>
+        <button type="button" id="tab-btn-approvals" data-tab="approvals" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition">Approvals <% if (pending && pending.length > 0) { %><span id="tabCountApprovals" class="ml-1 text-xs font-semibold" style="color:var(--theme-warning);"><%= pending.length %></span><% } %></button>
+        <a href="/admin/images/store" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition">Store</a>
       </div>
+
+      <div id="tab-panel-installed" class="mt-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="text-sm" style="color:var(--theme-text-muted);"><%= images.length %> image<%= images.length !== 1 ? 's' : '' %> installed on this panel</div>
+        </div>
 
       <% if (images.length === 0) { %>
       <div class="flex flex-col items-center justify-center py-24 text-center">
@@ -98,9 +104,80 @@
       </div>
       <% } %>
       </div>
+
+      <div id="tab-panel-approvals" class="hidden">
+        <div class="mt-5 space-y-4" id="pendingApprovalsList">
+          <% if (pending.length === 0) { %>
+          <div class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-12 h-12 rounded-full bg-emerald-600/10 flex items-center justify-center mb-4">
+              <%- icon('check', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
+            </div>
+            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">No images waiting for review.</p>
+            <p class="text-sm mt-1" style="color:var(--theme-text-muted)">User submissions will appear here for approval.</p>
+          </div>
+          <% } else { pending.forEach(function(image) { %>
+          <div class="rounded-xl border p-5 pending-card" data-pending-image="<%= image.id %>" style="border-color:var(--theme-border); background:var(--theme-bg-card);">
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-semibold truncate" style="color:var(--theme-text-strong)"><%= image.name %></h3>
+                  <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset bg-amber-600/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/20">Pending</span>
+                </div>
+                <% if (image.description) { %><p class="text-sm mt-1 line-clamp-2" style="color:var(--theme-text-muted)"><%= image.description %></p><% } %>
+                <% if (image.creator) { %>
+                <p class="text-xs mt-2" style="color:var(--theme-text-muted)">Submitted by <span class="font-medium" style="color:var(--theme-text-strong)"><%= image.creator.username || image.creator.email %></span> &middot; <%= new Date(image.createdAt).toLocaleString() %></p>
+                <% } %>
+                <div class="flex flex-wrap gap-4 mt-3 text-xs" style="color:var(--theme-text-muted)">
+                  <span class="inline-flex items-center gap-1.5"><%- icon('terminal', { class: 'size-3.5', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.startup || '' %></code></span>
+                  <span class="inline-flex items-center gap-1.5"><%- icon('container', { class: 'size-3.5', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.dockerImages || '[]' %></code></span>
+                </div>
+              </div>
+              <div class="flex gap-2 shrink-0">
+                <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost inline-flex items-center gap-1.5 text-xs"><%- icon('external-link', { class: 'size-4', strokeWidth: 1.5 }) %>View</a>
+                <button type="button" class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" data-approve-image="<%= image.id %>"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>Approve</button>
+                <button type="button" class="al-btn-danger inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" data-reject-image="<%= image.id %>"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Reject</button>
+              </div>
+            </div>
+          </div>
+          <% }); } %>
+        </div>
+      </div>
+      </div>
     </div>
   </div>
 </main>
+
+<!-- Reject modal -->
+<div id="rejectModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+  <div class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+    <div class="al-sheet-header" style="border-color:var(--theme-border)">
+      <div>
+        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Reject image</h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" id="rejectImageName"></p>
+      </div>
+      <button type="button" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" data-close-reject aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
+    </div>
+    <div class="px-6 py-4">
+      <label class="field-label" for="rejectReason">Reason <span class="text-neutral-400 font-normal">(shown to the user)</span></label>
+      <textarea id="rejectReason" class="al-input w-full" rows="3" placeholder="e.g. Missing startup exit detection or required docker image."></textarea>
+    </div>
+    <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
+      <button type="button" class="al-btn-secondary px-4 py-2 text-xs font-medium" data-close-reject>Cancel</button>
+      <button type="button" id="confirmReject" class="al-btn-danger px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
+        <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %>Reject
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="page-data" style="display:none"
+  data-approve-confirm="Approve this image? It will become available to all users."
+  data-approved="Image approved."
+  data-rejected="Image rejected."
+  data-error="Something went wrong."
+></div>
 
 <!-- Upload modal -->
 <div id="uploadImageModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
@@ -180,6 +257,38 @@
   </form>
 </div>
 
+<script nonce="<%- nonce %>">
+  (function() {
+    var tabs = ['installed', 'approvals'];
+
+    function active(k) {
+      tabs.forEach(function(key) {
+        var btn = document.getElementById('tab-btn-' + key);
+        var panel = document.getElementById('tab-panel-' + key);
+        var isActive = key === k;
+        btn.classList.toggle('bg-neutral-900', isActive);
+        btn.classList.toggle('text-white', isActive);
+        btn.classList.toggle('dark:bg-white', isActive);
+        btn.classList.toggle('dark:text-black', isActive);
+        btn.classList.toggle('text-neutral-400', !isActive);
+        btn.classList.toggle('hover:text-neutral-600', !isActive);
+        btn.classList.toggle('dark:hover:text-neutral-300', !isActive);
+        panel.classList.toggle('hidden', !isActive);
+      });
+    }
+
+    tabs.forEach(function(key) {
+      document.getElementById('tab-btn-' + key).addEventListener('click', function() {
+        active(key);
+      });
+    });
+
+    var hashTab = window.location.hash.replace('#', '');
+    active(tabs.indexOf(hashTab) !== -1 ? hashTab : 'installed');
+  })();
+</script>
+
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-images.js?v=6"></script>
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-image-approvals.js?v=2"></script>
 
 <%- include('../../components/footer') %>

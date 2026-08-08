@@ -58,6 +58,7 @@ const locationsModule: Module = {
 
           const location = await prisma.location.create({
             data: { name, shortCode },
+            include: { _count: { select: { nodes: true } } },
           });
 
           res.status(200).json({ message: 'Location created successfully.', location });

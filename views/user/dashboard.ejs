@@ -355,8 +355,6 @@
   });
 </script>
 
-<script nonce="<%- nonce %>" src="/javascript/user/dashboard.js?v=6"></script>
-
 <% if (needsOnboarding && req.session?.user) { %>
 <div id="onboardingModal" class="al-sheet-overlay fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
   <div id="onboardingPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
@@ -419,5 +417,7 @@
   </div>
 </div>
 <% } %>
+
+<script nonce="<%- nonce %>" src="/javascript/user/dashboard.js?v=7"></script>
 
 <%- include('../components/footer') %>

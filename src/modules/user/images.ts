@@ -109,7 +109,7 @@ const userImagesModule: Module = {
           const allowed = await canSubmitImages(user);
           if (!allowed) return res.redirect('/my-images');
 
-          res.render('user/my-images-new', { user, req });
+          res.redirect('/account#submit-image');
         } catch (error: unknown) {
           logger.error('Error loading my images create page:', error);
           return res.redirect('/my-images');
