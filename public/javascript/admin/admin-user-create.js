@@ -72,6 +72,8 @@ createBtn.addEventListener('click', async () => {
   const usernameVal = usernameInput.value.trim();
   const passwordVal = passwordInput.value;
   const isAdmin = document.getElementById('userIsAdminSwitch').checked;
+  const roleEl = document.getElementById('userRole');
+  const role = roleEl ? roleEl.value : (isAdmin ? 'admin' : 'user');
 
   const limits = {};
   ['serverLimit', 'maxCpu', 'maxDatabases'].forEach(id => {
@@ -107,7 +109,7 @@ createBtn.addEventListener('click', async () => {
     const response = await fetch('/admin/users/create-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailVal, username: usernameVal, password: passwordVal, isAdmin, ...limits }),
+      body: JSON.stringify({ email: emailVal, username: usernameVal, password: passwordVal, isAdmin, role, ...limits }),
     });
 
     if (response.ok) {

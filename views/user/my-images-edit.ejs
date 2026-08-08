@@ -1,0 +1,65 @@
+<%- include('../components/header', { title: 'Edit Image' }) %>
+
+<style>
+  ::-webkit-scrollbar { display: none; }
+  .field-label { font-size: 11px; font-weight: 500; color: var(--theme-text-muted, #737373); display: block; margin-bottom: 5px; }
+  .field-input {
+    width: 100%; border-radius: 9px; border: 1px solid var(--theme-border, #e5e5e5);
+    background: var(--theme-bg-input, #fafafa); padding: 8px 12px;
+    font-size: 13px; color: var(--theme-text-strong, #171717); outline: none;
+    transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
+  }
+  html.dark .field-input { background: var(--theme-bg-hover, rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.1)); color: var(--theme-text, #e5e5e5); }
+  .field-input:focus { border-color: var(--theme-border, #a3a3a3); }
+  html.dark .field-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.25)); }
+</style>
+
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0">
+      <%- include('../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../components/ui/breadcrumb', { items: [
+        { label: req.translations.myImages || 'My Images', href: '/my-images' },
+        { label: req.translations.editImage || 'Edit Image' }
+      ] }) %>
+
+      <div class="al-page-header">
+        <h1 class="al-page-title"><%= req.translations.editImage || 'Edit Image' %></h1>
+        <p class="al-page-desc"><%= image.name %> &mdash; <%= req.translations.updateImageText || 'Changes are resubmitted for review.' %></p>
+      </div>
+
+      <div class="al-page-body">
+        <div class="bg-white dark:bg-neutral-800/50 rounded-xl p-6 shadow-lg border border-neutral-200 dark:border-neutral-700/30">
+          <form id="imageEditForm" class="flex flex-col gap-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required value="<%= image.name || '' %>"></div>
+              <div><label class="field-label"><%= req.translations.author || 'Author' %></label><input class="field-input" type="text" name="author" value="<%= image.author || '' %>"></div>
+              <div><label class="field-label"><%= req.translations.authorName || 'Author Name' %></label><input class="field-input" type="text" name="authorName" value="<%= image.authorName || '' %>"></div>
+              <div class="col-span-2"><label class="field-label"><%= req.translations.startupCommand || 'Startup Command' %> <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required value="<%= image.startup || '' %>" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+              <div class="col-span-2"><label class="field-label"><%= req.translations.dockerImages || 'Docker images (JSON array)' %> <span class="text-red-500">*</span></label><input class="field-input" type="text" name="dockerImages" required value="<%= image.dockerImages || '[]' %>" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+              <div class="col-span-2"><label class="field-label"><%= req.translations.description || 'Description' %></label><textarea class="field-input" name="description" rows="2" style="resize:none;"><%= image.description || '' %></textarea></div>
+              <div class="col-span-2"><label class="field-label"><%= req.translations.variables || 'Variables' %> <span class="text-neutral-400 font-normal">(JSON array, optional)</span></label><textarea class="field-input" name="variables" rows="4" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;"><%= image.variables || '[]' %></textarea></div>
+            </div>
+            <div class="flex gap-2 pt-1">
+              <a href="/my-images" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</a>
+              <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.resubmitForReview || 'Save & resubmit' %></button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="page-data" style="display:none"
+  data-image-id="<%= image.id %>"
+  data-state="<%= image.status === 'approved' ? 'published' : 'pending' %>"
+  data-updated="<%= req.translations.imageUpdated || 'Image updated.' %>"
+  data-submit-error="<%= req.translations.errorSubmitting || 'Failed to update the image.' %>"
+></div>
+
+<script nonce="<%- nonce %>" src="/javascript/user/my-images-edit.js?v=1"></script>
+
+<%- include('../components/footer') %>

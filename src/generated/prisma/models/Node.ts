@@ -344,6 +344,7 @@ export type NodeWhereInput = {
   servers?: Prisma.ServerListRelationFilter
   databaseHosts?: Prisma.DatabaseHostListRelationFilter
   allocations?: Prisma.AllocationListRelationFilter
+  preferredUsers?: Prisma.UsersListRelationFilter
 }
 
 export type NodeOrderByWithRelationInput = {
@@ -367,6 +368,7 @@ export type NodeOrderByWithRelationInput = {
   servers?: Prisma.ServerOrderByRelationAggregateInput
   databaseHosts?: Prisma.DatabaseHostOrderByRelationAggregateInput
   allocations?: Prisma.AllocationOrderByRelationAggregateInput
+  preferredUsers?: Prisma.UsersOrderByRelationAggregateInput
 }
 
 export type NodeWhereUniqueInput = Prisma.AtLeast<{
@@ -393,6 +395,7 @@ export type NodeWhereUniqueInput = Prisma.AtLeast<{
   servers?: Prisma.ServerListRelationFilter
   databaseHosts?: Prisma.DatabaseHostListRelationFilter
   allocations?: Prisma.AllocationListRelationFilter
+  preferredUsers?: Prisma.UsersListRelationFilter
 }, "id">
 
 export type NodeOrderByWithAggregationInput = {
@@ -460,6 +463,7 @@ export type NodeCreateInput = {
   servers?: Prisma.ServerCreateNestedManyWithoutNodeInput
   databaseHosts?: Prisma.DatabaseHostCreateNestedManyWithoutNodeInput
   allocations?: Prisma.AllocationCreateNestedManyWithoutNodeInput
+  preferredUsers?: Prisma.UsersCreateNestedManyWithoutPreferredNodeInput
 }
 
 export type NodeUncheckedCreateInput = {
@@ -482,6 +486,7 @@ export type NodeUncheckedCreateInput = {
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutNodeInput
   databaseHosts?: Prisma.DatabaseHostUncheckedCreateNestedManyWithoutNodeInput
   allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutNodeInput
+  preferredUsers?: Prisma.UsersUncheckedCreateNestedManyWithoutPreferredNodeInput
 }
 
 export type NodeUpdateInput = {
@@ -503,6 +508,7 @@ export type NodeUpdateInput = {
   servers?: Prisma.ServerUpdateManyWithoutNodeNestedInput
   databaseHosts?: Prisma.DatabaseHostUpdateManyWithoutNodeNestedInput
   allocations?: Prisma.AllocationUpdateManyWithoutNodeNestedInput
+  preferredUsers?: Prisma.UsersUpdateManyWithoutPreferredNodeNestedInput
 }
 
 export type NodeUncheckedUpdateInput = {
@@ -525,6 +531,7 @@ export type NodeUncheckedUpdateInput = {
   servers?: Prisma.ServerUncheckedUpdateManyWithoutNodeNestedInput
   databaseHosts?: Prisma.DatabaseHostUncheckedUpdateManyWithoutNodeNestedInput
   allocations?: Prisma.AllocationUncheckedUpdateManyWithoutNodeNestedInput
+  preferredUsers?: Prisma.UsersUncheckedUpdateManyWithoutPreferredNodeNestedInput
 }
 
 export type NodeCreateManyInput = {
@@ -582,14 +589,14 @@ export type NodeUncheckedUpdateManyInput = {
   maintenanceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
-export type NodeScalarRelationFilter = {
-  is?: Prisma.NodeWhereInput
-  isNot?: Prisma.NodeWhereInput
-}
-
 export type NodeNullableScalarRelationFilter = {
   is?: Prisma.NodeWhereInput | null
   isNot?: Prisma.NodeWhereInput | null
+}
+
+export type NodeScalarRelationFilter = {
+  is?: Prisma.NodeWhereInput
+  isNot?: Prisma.NodeWhereInput
 }
 
 export type NodeCountOrderByAggregateInput = {
@@ -685,6 +692,22 @@ export type NodeOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type NodeCreateNestedOneWithoutPreferredUsersInput = {
+  create?: Prisma.XOR<Prisma.NodeCreateWithoutPreferredUsersInput, Prisma.NodeUncheckedCreateWithoutPreferredUsersInput>
+  connectOrCreate?: Prisma.NodeCreateOrConnectWithoutPreferredUsersInput
+  connect?: Prisma.NodeWhereUniqueInput
+}
+
+export type NodeUpdateOneWithoutPreferredUsersNestedInput = {
+  create?: Prisma.XOR<Prisma.NodeCreateWithoutPreferredUsersInput, Prisma.NodeUncheckedCreateWithoutPreferredUsersInput>
+  connectOrCreate?: Prisma.NodeCreateOrConnectWithoutPreferredUsersInput
+  upsert?: Prisma.NodeUpsertWithoutPreferredUsersInput
+  disconnect?: Prisma.NodeWhereInput | boolean
+  delete?: Prisma.NodeWhereInput | boolean
+  connect?: Prisma.NodeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.NodeUpdateToOneWithWhereWithoutPreferredUsersInput, Prisma.NodeUpdateWithoutPreferredUsersInput>, Prisma.NodeUncheckedUpdateWithoutPreferredUsersInput>
+}
+
 export type NodeCreateNestedOneWithoutServersInput = {
   create?: Prisma.XOR<Prisma.NodeCreateWithoutServersInput, Prisma.NodeUncheckedCreateWithoutServersInput>
   connectOrCreate?: Prisma.NodeCreateOrConnectWithoutServersInput
@@ -771,6 +794,108 @@ export type NodeUncheckedUpdateManyWithoutLocationNestedInput = {
   deleteMany?: Prisma.NodeScalarWhereInput | Prisma.NodeScalarWhereInput[]
 }
 
+export type NodeCreateWithoutPreferredUsersInput = {
+  name: string
+  ram?: number
+  cpu?: number
+  disk?: number
+  overallocateMemory?: number
+  overallocateDisk?: number
+  overallocateCpu?: number
+  address?: string
+  port?: number
+  key: string
+  createdAt?: Date | string
+  allocatedPorts?: string | null
+  sftpPort?: number
+  maintenanceMode?: boolean
+  location?: Prisma.LocationCreateNestedOneWithoutNodesInput
+  servers?: Prisma.ServerCreateNestedManyWithoutNodeInput
+  databaseHosts?: Prisma.DatabaseHostCreateNestedManyWithoutNodeInput
+  allocations?: Prisma.AllocationCreateNestedManyWithoutNodeInput
+}
+
+export type NodeUncheckedCreateWithoutPreferredUsersInput = {
+  id?: number
+  name: string
+  ram?: number
+  cpu?: number
+  disk?: number
+  overallocateMemory?: number
+  overallocateDisk?: number
+  overallocateCpu?: number
+  locationId?: number | null
+  address?: string
+  port?: number
+  key: string
+  createdAt?: Date | string
+  allocatedPorts?: string | null
+  sftpPort?: number
+  maintenanceMode?: boolean
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutNodeInput
+  databaseHosts?: Prisma.DatabaseHostUncheckedCreateNestedManyWithoutNodeInput
+  allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutNodeInput
+}
+
+export type NodeCreateOrConnectWithoutPreferredUsersInput = {
+  where: Prisma.NodeWhereUniqueInput
+  create: Prisma.XOR<Prisma.NodeCreateWithoutPreferredUsersInput, Prisma.NodeUncheckedCreateWithoutPreferredUsersInput>
+}
+
+export type NodeUpsertWithoutPreferredUsersInput = {
+  update: Prisma.XOR<Prisma.NodeUpdateWithoutPreferredUsersInput, Prisma.NodeUncheckedUpdateWithoutPreferredUsersInput>
+  create: Prisma.XOR<Prisma.NodeCreateWithoutPreferredUsersInput, Prisma.NodeUncheckedCreateWithoutPreferredUsersInput>
+  where?: Prisma.NodeWhereInput
+}
+
+export type NodeUpdateToOneWithWhereWithoutPreferredUsersInput = {
+  where?: Prisma.NodeWhereInput
+  data: Prisma.XOR<Prisma.NodeUpdateWithoutPreferredUsersInput, Prisma.NodeUncheckedUpdateWithoutPreferredUsersInput>
+}
+
+export type NodeUpdateWithoutPreferredUsersInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  ram?: Prisma.IntFieldUpdateOperationsInput | number
+  cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  disk?: Prisma.IntFieldUpdateOperationsInput | number
+  overallocateMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  overallocateDisk?: Prisma.IntFieldUpdateOperationsInput | number
+  overallocateCpu?: Prisma.IntFieldUpdateOperationsInput | number
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  port?: Prisma.IntFieldUpdateOperationsInput | number
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  allocatedPorts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sftpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  maintenanceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  location?: Prisma.LocationUpdateOneWithoutNodesNestedInput
+  servers?: Prisma.ServerUpdateManyWithoutNodeNestedInput
+  databaseHosts?: Prisma.DatabaseHostUpdateManyWithoutNodeNestedInput
+  allocations?: Prisma.AllocationUpdateManyWithoutNodeNestedInput
+}
+
+export type NodeUncheckedUpdateWithoutPreferredUsersInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  ram?: Prisma.IntFieldUpdateOperationsInput | number
+  cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  disk?: Prisma.IntFieldUpdateOperationsInput | number
+  overallocateMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  overallocateDisk?: Prisma.IntFieldUpdateOperationsInput | number
+  overallocateCpu?: Prisma.IntFieldUpdateOperationsInput | number
+  locationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  port?: Prisma.IntFieldUpdateOperationsInput | number
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  allocatedPorts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sftpPort?: Prisma.IntFieldUpdateOperationsInput | number
+  maintenanceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutNodeNestedInput
+  databaseHosts?: Prisma.DatabaseHostUncheckedUpdateManyWithoutNodeNestedInput
+  allocations?: Prisma.AllocationUncheckedUpdateManyWithoutNodeNestedInput
+}
+
 export type NodeCreateWithoutServersInput = {
   name: string
   ram?: number
@@ -789,6 +914,7 @@ export type NodeCreateWithoutServersInput = {
   location?: Prisma.LocationCreateNestedOneWithoutNodesInput
   databaseHosts?: Prisma.DatabaseHostCreateNestedManyWithoutNodeInput
   allocations?: Prisma.AllocationCreateNestedManyWithoutNodeInput
+  preferredUsers?: Prisma.UsersCreateNestedManyWithoutPreferredNodeInput
 }
 
 export type NodeUncheckedCreateWithoutServersInput = {
@@ -810,6 +936,7 @@ export type NodeUncheckedCreateWithoutServersInput = {
   maintenanceMode?: boolean
   databaseHosts?: Prisma.DatabaseHostUncheckedCreateNestedManyWithoutNodeInput
   allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutNodeInput
+  preferredUsers?: Prisma.UsersUncheckedCreateNestedManyWithoutPreferredNodeInput
 }
 
 export type NodeCreateOrConnectWithoutServersInput = {
@@ -846,6 +973,7 @@ export type NodeUpdateWithoutServersInput = {
   location?: Prisma.LocationUpdateOneWithoutNodesNestedInput
   databaseHosts?: Prisma.DatabaseHostUpdateManyWithoutNodeNestedInput
   allocations?: Prisma.AllocationUpdateManyWithoutNodeNestedInput
+  preferredUsers?: Prisma.UsersUpdateManyWithoutPreferredNodeNestedInput
 }
 
 export type NodeUncheckedUpdateWithoutServersInput = {
@@ -867,6 +995,7 @@ export type NodeUncheckedUpdateWithoutServersInput = {
   maintenanceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   databaseHosts?: Prisma.DatabaseHostUncheckedUpdateManyWithoutNodeNestedInput
   allocations?: Prisma.AllocationUncheckedUpdateManyWithoutNodeNestedInput
+  preferredUsers?: Prisma.UsersUncheckedUpdateManyWithoutPreferredNodeNestedInput
 }
 
 export type NodeCreateWithoutDatabaseHostsInput = {
@@ -887,6 +1016,7 @@ export type NodeCreateWithoutDatabaseHostsInput = {
   location?: Prisma.LocationCreateNestedOneWithoutNodesInput
   servers?: Prisma.ServerCreateNestedManyWithoutNodeInput
   allocations?: Prisma.AllocationCreateNestedManyWithoutNodeInput
+  preferredUsers?: Prisma.UsersCreateNestedManyWithoutPreferredNodeInput
 }
 
 export type NodeUncheckedCreateWithoutDatabaseHostsInput = {
@@ -908,6 +1038,7 @@ export type NodeUncheckedCreateWithoutDatabaseHostsInput = {
   maintenanceMode?: boolean
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutNodeInput
   allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutNodeInput
+  preferredUsers?: Prisma.UsersUncheckedCreateNestedManyWithoutPreferredNodeInput
 }
 
 export type NodeCreateOrConnectWithoutDatabaseHostsInput = {
@@ -944,6 +1075,7 @@ export type NodeUpdateWithoutDatabaseHostsInput = {
   location?: Prisma.LocationUpdateOneWithoutNodesNestedInput
   servers?: Prisma.ServerUpdateManyWithoutNodeNestedInput
   allocations?: Prisma.AllocationUpdateManyWithoutNodeNestedInput
+  preferredUsers?: Prisma.UsersUpdateManyWithoutPreferredNodeNestedInput
 }
 
 export type NodeUncheckedUpdateWithoutDatabaseHostsInput = {
@@ -965,6 +1097,7 @@ export type NodeUncheckedUpdateWithoutDatabaseHostsInput = {
   maintenanceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   servers?: Prisma.ServerUncheckedUpdateManyWithoutNodeNestedInput
   allocations?: Prisma.AllocationUncheckedUpdateManyWithoutNodeNestedInput
+  preferredUsers?: Prisma.UsersUncheckedUpdateManyWithoutPreferredNodeNestedInput
 }
 
 export type NodeCreateWithoutAllocationsInput = {
@@ -985,6 +1118,7 @@ export type NodeCreateWithoutAllocationsInput = {
   location?: Prisma.LocationCreateNestedOneWithoutNodesInput
   servers?: Prisma.ServerCreateNestedManyWithoutNodeInput
   databaseHosts?: Prisma.DatabaseHostCreateNestedManyWithoutNodeInput
+  preferredUsers?: Prisma.UsersCreateNestedManyWithoutPreferredNodeInput
 }
 
 export type NodeUncheckedCreateWithoutAllocationsInput = {
@@ -1006,6 +1140,7 @@ export type NodeUncheckedCreateWithoutAllocationsInput = {
   maintenanceMode?: boolean
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutNodeInput
   databaseHosts?: Prisma.DatabaseHostUncheckedCreateNestedManyWithoutNodeInput
+  preferredUsers?: Prisma.UsersUncheckedCreateNestedManyWithoutPreferredNodeInput
 }
 
 export type NodeCreateOrConnectWithoutAllocationsInput = {
@@ -1042,6 +1177,7 @@ export type NodeUpdateWithoutAllocationsInput = {
   location?: Prisma.LocationUpdateOneWithoutNodesNestedInput
   servers?: Prisma.ServerUpdateManyWithoutNodeNestedInput
   databaseHosts?: Prisma.DatabaseHostUpdateManyWithoutNodeNestedInput
+  preferredUsers?: Prisma.UsersUpdateManyWithoutPreferredNodeNestedInput
 }
 
 export type NodeUncheckedUpdateWithoutAllocationsInput = {
@@ -1063,6 +1199,7 @@ export type NodeUncheckedUpdateWithoutAllocationsInput = {
   maintenanceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   servers?: Prisma.ServerUncheckedUpdateManyWithoutNodeNestedInput
   databaseHosts?: Prisma.DatabaseHostUncheckedUpdateManyWithoutNodeNestedInput
+  preferredUsers?: Prisma.UsersUncheckedUpdateManyWithoutPreferredNodeNestedInput
 }
 
 export type NodeCreateWithoutLocationInput = {
@@ -1083,6 +1220,7 @@ export type NodeCreateWithoutLocationInput = {
   servers?: Prisma.ServerCreateNestedManyWithoutNodeInput
   databaseHosts?: Prisma.DatabaseHostCreateNestedManyWithoutNodeInput
   allocations?: Prisma.AllocationCreateNestedManyWithoutNodeInput
+  preferredUsers?: Prisma.UsersCreateNestedManyWithoutPreferredNodeInput
 }
 
 export type NodeUncheckedCreateWithoutLocationInput = {
@@ -1104,6 +1242,7 @@ export type NodeUncheckedCreateWithoutLocationInput = {
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutNodeInput
   databaseHosts?: Prisma.DatabaseHostUncheckedCreateNestedManyWithoutNodeInput
   allocations?: Prisma.AllocationUncheckedCreateNestedManyWithoutNodeInput
+  preferredUsers?: Prisma.UsersUncheckedCreateNestedManyWithoutPreferredNodeInput
 }
 
 export type NodeCreateOrConnectWithoutLocationInput = {
@@ -1189,6 +1328,7 @@ export type NodeUpdateWithoutLocationInput = {
   servers?: Prisma.ServerUpdateManyWithoutNodeNestedInput
   databaseHosts?: Prisma.DatabaseHostUpdateManyWithoutNodeNestedInput
   allocations?: Prisma.AllocationUpdateManyWithoutNodeNestedInput
+  preferredUsers?: Prisma.UsersUpdateManyWithoutPreferredNodeNestedInput
 }
 
 export type NodeUncheckedUpdateWithoutLocationInput = {
@@ -1210,6 +1350,7 @@ export type NodeUncheckedUpdateWithoutLocationInput = {
   servers?: Prisma.ServerUncheckedUpdateManyWithoutNodeNestedInput
   databaseHosts?: Prisma.DatabaseHostUncheckedUpdateManyWithoutNodeNestedInput
   allocations?: Prisma.AllocationUncheckedUpdateManyWithoutNodeNestedInput
+  preferredUsers?: Prisma.UsersUncheckedUpdateManyWithoutPreferredNodeNestedInput
 }
 
 export type NodeUncheckedUpdateManyWithoutLocationInput = {
@@ -1239,12 +1380,14 @@ export type NodeCountOutputType = {
   servers: number
   databaseHosts: number
   allocations: number
+  preferredUsers: number
 }
 
 export type NodeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   servers?: boolean | NodeCountOutputTypeCountServersArgs
   databaseHosts?: boolean | NodeCountOutputTypeCountDatabaseHostsArgs
   allocations?: boolean | NodeCountOutputTypeCountAllocationsArgs
+  preferredUsers?: boolean | NodeCountOutputTypeCountPreferredUsersArgs
 }
 
 /**
@@ -1278,6 +1421,13 @@ export type NodeCountOutputTypeCountAllocationsArgs<ExtArgs extends runtime.Type
   where?: Prisma.AllocationWhereInput
 }
 
+/**
+ * NodeCountOutputType without action
+ */
+export type NodeCountOutputTypeCountPreferredUsersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UsersWhereInput
+}
+
 
 export type NodeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1300,6 +1450,7 @@ export type NodeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   servers?: boolean | Prisma.Node$serversArgs<ExtArgs>
   databaseHosts?: boolean | Prisma.Node$databaseHostsArgs<ExtArgs>
   allocations?: boolean | Prisma.Node$allocationsArgs<ExtArgs>
+  preferredUsers?: boolean | Prisma.Node$preferredUsersArgs<ExtArgs>
   _count?: boolean | Prisma.NodeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["node"]>
 
@@ -1368,6 +1519,7 @@ export type NodeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   servers?: boolean | Prisma.Node$serversArgs<ExtArgs>
   databaseHosts?: boolean | Prisma.Node$databaseHostsArgs<ExtArgs>
   allocations?: boolean | Prisma.Node$allocationsArgs<ExtArgs>
+  preferredUsers?: boolean | Prisma.Node$preferredUsersArgs<ExtArgs>
   _count?: boolean | Prisma.NodeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type NodeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1384,6 +1536,7 @@ export type $NodePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     servers: Prisma.$ServerPayload<ExtArgs>[]
     databaseHosts: Prisma.$DatabaseHostPayload<ExtArgs>[]
     allocations: Prisma.$AllocationPayload<ExtArgs>[]
+    preferredUsers: Prisma.$UsersPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1800,6 +1953,7 @@ export interface Prisma__NodeClient<T, Null = never, ExtArgs extends runtime.Typ
   servers<T extends Prisma.Node$serversArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Node$serversArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   databaseHosts<T extends Prisma.Node$databaseHostsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Node$databaseHostsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatabaseHostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   allocations<T extends Prisma.Node$allocationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Node$allocationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AllocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  preferredUsers<T extends Prisma.Node$preferredUsersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Node$preferredUsersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UsersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2332,6 +2486,30 @@ export type Node$allocationsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.AllocationScalarFieldEnum | Prisma.AllocationScalarFieldEnum[]
+}
+
+/**
+ * Node.preferredUsers
+ */
+export type Node$preferredUsersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Users
+   */
+  select?: Prisma.UsersSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Users
+   */
+  omit?: Prisma.UsersOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UsersInclude<ExtArgs> | null
+  where?: Prisma.UsersWhereInput
+  orderBy?: Prisma.UsersOrderByWithRelationInput | Prisma.UsersOrderByWithRelationInput[]
+  cursor?: Prisma.UsersWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UsersScalarFieldEnum | Prisma.UsersScalarFieldEnum[]
 }
 
 /**

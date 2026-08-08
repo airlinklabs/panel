@@ -115,8 +115,8 @@
     } else {
       // Non-manage pages render install-gated content server-side; a single
       // state-transition reload after install completes is required to show
-      // the page content. Toast first so the result is visible on arrival.
-      if (window.showToast) showToast('Installation complete.', 'success');
+      // the page content. The persisted install toast already celebrates the
+      // result, so no second toast is needed here.
       setTimeout(function() {
         if (banner) banner.classList.add('hidden');
       }, 400);
@@ -200,6 +200,18 @@
     heartbeat();
   }
   startPolling();
+
+  // Persistent install-progress toast. The record + job live in session
+  // storage, so the toast survives navigation and keeps polling /status on
+  // whatever page the user lands on until the server is installed or the
+  // install fails. Group dedupe stops every server page from stacking one.
+  if (window.showProgressToast) {
+    window.showProgressToast('Installing server…', {
+      indeterminate: true,
+      group: 'install:' + serverUUID,
+      job: { url: '/server/' + serverUUID + '/status', intervalMs: 3000 },
+    });
+  }
   }
 })();
 </script>

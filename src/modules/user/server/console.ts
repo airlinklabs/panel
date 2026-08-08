@@ -18,9 +18,8 @@ import {
   getServerStatusInput,
   getImageFeatures,
   stopServerContainer,
-  startServerContainer,
-  restartServerContainer,
 } from './shared';
+import { runtimeStartQueue, QueueBannedError } from '../../../handlers/runtimeQueue';
 
 const LOG_HISTORY_TIMEOUT_MS = 8_000;
 const STATUS_TIMEOUT_MS = 4_000;
@@ -202,6 +201,7 @@ export function registerConsoleRoutes(router: Router): void {
           error: installResult?.error
             ? safeClientMessage(installResult.error, 'The server could not be installed.')
             : undefined,
+          queue: await runtimeStartQueue.getPublicQueueState(server.UUID, node),
         });
         return;
       } catch (error) {
@@ -492,6 +492,7 @@ export function registerConsoleRoutes(router: Router): void {
             });
             logger.info('Container stopped successfully: ' + serverId);
             await prisma.server.update({ where: { UUID: String(serverId) }, data: { Running: false } }).catch(() => {});
+            runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
             await logActivity(req, 'server:stop', { serverId: String(serverId) });
             return;
           } catch (stopError: unknown) {
@@ -504,6 +505,7 @@ export function registerConsoleRoutes(router: Router): void {
               );
 
               await prisma.server.update({ where: { UUID: String(serverId) }, data: { Running: false } }).catch(() => {});
+              runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
 
               const cacheKey = `server_stopping_${serverId}`;
               if (
@@ -538,42 +540,77 @@ export function registerConsoleRoutes(router: Router): void {
 
           try {
             await new Promise(resolve => setTimeout(resolve, RESTART_DELAY_MS));
-            await startServerContainer(server, String(serverId));
-          } catch (error) {
-            if (error instanceof Error && error.message === 'Docker image not found.') {
-              res.status(400).json({ error: 'Docker image not found.' });
+            // Restarts pass through the capacity queue like fresh starts. The
+            // stop above (releaseResources:false) keeps this server's own
+            // reservation, so a restart is granted immediately when the node
+            // has room and otherwise waits in line.
+            const q = await runtimeStartQueue.enqueueStart({
+              serverId: String(serverId),
+              userId: user.id,
+              priority: user.isAdmin === true || server.ownerId === user.id || user.role === 'privileged',
+            });
+            if (q.queued) {
+              res.status(202).json({
+                queued: true,
+                position: q.position,
+                message: `Server queued to restart (position ${q.position}).`,
+              });
               return;
             }
-            if (error instanceof NodeCapacityExceededError) {
-              res.status(409).json({ error: error.message });
+          } catch (error) {
+            if (error instanceof QueueBannedError) {
+              res.status(403).json({ error: error.message });
+              return;
+            }
+            if (error instanceof Error && error.message === 'Server not found.') {
+              res.status(404).json({ error: 'Server not found.' });
               return;
             }
             throw error;
           }
 
-          logger.info('Container restarted successfully: ' + serverId);
+          logger.info('Container restart queued successfully: ' + serverId);
           await logActivity(req, 'server:restart', { serverId: String(serverId) });
           res.status(200).json({ success: true, message: 'Server restarted successfully' });
           return;
         }
 
         try {
-          await startServerContainer(server, String(serverId));
-        } catch (error) {
-          if (error instanceof Error && error.message === 'Docker image not found.') {
-            res.status(400).json({ error: 'Docker image not found.' });
+          // Runtime starts go through the capacity-aware queue: the processor
+          // starts the container immediately when the node has capacity, and
+          // waits in line otherwise. The manage page polls for the queue
+          // position via GET /server/:id/status.
+          const q = await runtimeStartQueue.enqueueStart({
+            serverId: String(serverId),
+            userId: user.id,
+            priority: user.isAdmin === true || server.ownerId === user.id || user.role === 'privileged',
+          });
+          if (q.queued) {
+            await logActivity(req, 'server:start', {
+              serverId: String(serverId),
+              metadata: { queued: true, position: q.position },
+            });
+            res.status(202).json({
+              queued: true,
+              position: q.position,
+              message: `Server queued to start (position ${q.position}).`,
+            });
             return;
           }
-          if (error instanceof NodeCapacityExceededError) {
-            res.status(409).json({ error: error.message });
+          await logActivity(req, 'server:start', { serverId: String(serverId) });
+          res.status(200).json({ message: 'Container is starting.' });
+          return;
+        } catch (error) {
+          if (error instanceof QueueBannedError) {
+            res.status(403).json({ error: error.message });
+            return;
+          }
+          if (error instanceof Error && error.message === 'Server not found.') {
+            res.status(404).json({ error: 'Server not found.' });
             return;
           }
           throw error;
         }
-        logger.info('Container started successfully: ' + serverId);
-        await logActivity(req, 'server:start', { serverId: String(serverId) });
-        res.status(200).json({ message: 'Container started successfully.' });
-        return;
       } catch (error) {
         logger.error('Failed to process power action', error, {
           serverId: String(serverId),
@@ -636,8 +673,22 @@ export function registerConsoleRoutes(router: Router): void {
           return;
         }
 
-        await restartServerContainer(server, String(serverId));
-        logger.info('Container restarted successfully: ' + serverId);
+        await stopServerContainer(server, String(serverId), 'stop', { releaseResources: false }).catch(() => {});
+        const q = await runtimeStartQueue.enqueueStart({
+          serverId: String(serverId),
+          userId: user.id,
+          priority: user.isAdmin === true || server.ownerId === user.id || user.role === 'privileged',
+        });
+        logger.info('Container restart queued successfully: ' + serverId);
+
+        if (q.queued) {
+          res.status(202).json({
+            queued: true,
+            position: q.position,
+            message: `Server queued to restart (position ${q.position}).`,
+          });
+          return;
+        }
 
         res
           .status(200)
@@ -645,6 +696,43 @@ export function registerConsoleRoutes(router: Router): void {
       } catch (error) {
         logger.error('Error restarting server:', error);
         res.status(500).json({ error: 'Failed to restart server' });
+      }
+    },
+  );
+
+  router.post(
+    '/server/:id/power/queue/cancel',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
+    async (req: Request, res: Response) => {
+      const serverId = req.params?.id;
+      try {
+        const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
+        if (!user) {
+          res.status(404).json({ error: 'User not found' });
+          return;
+        }
+
+        const server = await prisma.server.findUnique({
+          where: { UUID: String(serverId) },
+          select: { UUID: true, ownerId: true },
+        });
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        // Only the owning user or an admin may pull a server off the queue.
+        if (server.ownerId !== user.id && !user.isAdmin) {
+          res.status(403).json({ error: 'You do not own this server.' });
+          return;
+        }
+
+        const removed = await runtimeStartQueue.cancelQueuedStart(server.UUID);
+        res.json({ success: true, wasQueued: removed });
+      } catch (error) {
+        logger.error('Error cancelling queued start:', error);
+        res.status(500).json({ error: 'Failed to cancel queued start.' });
       }
     },
   );

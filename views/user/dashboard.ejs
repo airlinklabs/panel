@@ -355,6 +355,69 @@
   });
 </script>
 
-<script nonce="<%- nonce %>" src="/javascript/user/dashboard.js?v=5"></script>
+<script nonce="<%- nonce %>" src="/javascript/user/dashboard.js?v=6"></script>
+
+<% if (needsOnboarding && req.session?.user) { %>
+<div id="onboardingModal" class="al-sheet-overlay fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+  <div id="onboardingPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+    <div class="flex items-start justify-between mb-5">
+      <div>
+        <h2 id="onboardingTitle" class="text-base font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.onboardingWelcome || 'Welcome to the panel!' %></h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= req.translations.onboardingIntro || 'A few quick tips to get you started.' %></p>
+      </div>
+      <button type="button" id="onboardingSkip" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
+    </div>
+
+    <div class="mb-5">
+      <div class="flex gap-2 mb-4">
+        <% for (let i = 0; i < 3; i++) { %>
+        <div class="flex-1 h-1 rounded-full transition-colors duration-300 onboarding-dot" data-step="<%= i %>" style="background:var(--theme-border-subtle);"></div>
+        <% } %>
+      </div>
+
+      <div class="onboarding-step" data-step="0">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style="background:var(--theme-bg-secondary)">
+          <%- icon('layout-dashboard', { class: 'w-6 h-6', style: 'color:var(--theme-text)' }) %>
+        </div>
+        <h3 class="text-sm font-semibold mb-1.5" style="color:var(--theme-text-strong)"><%= req.translations.onboardingStep1Title || 'Your dashboard' %></h3>
+        <p class="text-sm leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.onboardingStep1Text || 'This is where all your servers live. Start, stop, and manage them from the server view once you create an instance.' %></p>
+      </div>
+
+      <div class="onboarding-step hidden" data-step="1">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style="background:var(--theme-bg-secondary)">
+          <%- icon('server', { class: 'w-6 h-6', style: 'color:var(--theme-text)' }) %>
+        </div>
+        <h3 class="text-sm font-semibold mb-1.5" style="color:var(--theme-text-strong)"><%= req.translations.onboardingStep2Title || 'Create your first server' %></h3>
+        <p class="text-sm leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.onboardingStep2Text || 'Pick an image, choose a node, and allocate resources. Your instance is ready to install in a couple of clicks.' %></p>
+      </div>
+
+      <div class="onboarding-step hidden" data-step="2">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style="background:var(--theme-bg-secondary)">
+          <%- icon('user', { class: 'w-6 h-6', style: 'color:var(--theme-text)' }) %>
+        </div>
+        <h3 class="text-sm font-semibold mb-1.5" style="color:var(--theme-text-strong)"><%= req.translations.onboardingStep3Title || 'Make it yours' %></h3>
+        <p class="text-sm leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.onboardingStep3Text || 'Set your avatar and profile in Account settings so everyone on this panel recognises you.' %></p>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between gap-3">
+      <button type="button" id="onboardingPrev" class="al-btn-ghost px-3 py-2 text-xs font-medium hidden">
+        <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <%= req.translations.back || 'Back' %>
+      </button>
+      <span class="flex-1"></span>
+      <button type="button" id="onboardingNext" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+        <%= req.translations.next || 'Next' %>
+        <%- icon('arrow-right', { class: 'size-4', strokeWidth: 1.5 }) %>
+      </button>
+      <a href="<%= canCreateServerForOnboarding ? '/create-server' : '/account' %>" id="onboardingFinish" class="al-btn-primary hidden px-4 py-2 text-sm font-medium">
+        <%= canCreateServerForOnboarding ? (req.translations.createServer || 'Create a server') : (req.translations.getStarted || 'Get started') %>
+      </a>
+    </div>
+  </div>
+</div>
+<% } %>
 
 <%- include('../components/footer') %>

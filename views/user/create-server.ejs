@@ -72,9 +72,9 @@
               <div>
                 <label class="al-label" for="nodeId">Node</label>
                 <select id="nodeId" class="hidden">
-                  <option value="" disabled selected>Select a node</option>
+                  <option value="" disabled>Select a node</option>
                   <% nodes.forEach(node => { %>
-                  <option value="<%= node.id %>"><%= node.name %> — <%= node.address %></option>
+                  <option value="<%= node.id %>"<%= recommendedNodeId === node.id ? ' selected' : '' %>><%= node.name %> — <%= node.address %><% if (recommendedNodeId === node.id) { %> (recommended)<% } %></option>
                   <% }); %>
                 </select>
                 <div class="custom-select" data-for="nodeId"></div>
@@ -205,7 +205,11 @@
 </main>
 
 <div id="portsContent" style="display:none;">
+  <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3">External ports are assigned automatically to the next free node port. Edit the name and internal container port below.</p>
   <div id="requiredPortsList" class="space-y-2"></div>
+  <button type="button" id="addPortBtn" class="mt-3 text-sm font-medium inline-flex items-center gap-1.5 text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition">
+    <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Add port
+  </button>
   <div class="flex justify-end mt-4">
     <button type="button" id="portsOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition inline-flex items-center gap-2"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>OK</button>
   </div>

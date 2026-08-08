@@ -96,6 +96,26 @@
                   <div class="flex items-center justify-between">
                     <div>
                       <h3 class="text-sm font-medium text-neutral-800 dark:text-white">
+                        <%= req.translations.role || 'Role' %>
+                      </h3>
+                      <p class="text-xs text-neutral-400 mt-1">
+                        <%= req.translations.roleDescription || 'Privileged and admin roles get expanded limits and powers.' %>
+                      </p>
+                    </div>
+                    <select id="userRole" name="role" class="al-input w-44">
+                      <option value="user"><%= req.translations.roleUser || 'Normal user' %></option>
+                      <option value="privileged"><%= req.translations.rolePrivileged || 'Privileged user' %></option>
+                      <option value="admin"><%= req.translations.roleAdmin || 'Admin' %></option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="md:col-span-2">
+                <div class="bg-neutral-400/10 dark:bg-neutral-600/20 p-4 rounded-xl border border-neutral-800/10 dark:border-white/5 w-full">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">
                         <%= req.translations.adminStatus || 'Administrator Status' %>
                       </h3>
                       <p class="text-xs text-neutral-400 mt-1">

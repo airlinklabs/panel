@@ -106,6 +106,10 @@ export const UsersScalarFieldEnum = {
   maxCpu: 'maxCpu',
   maxStorage: 'maxStorage',
   maxDatabases: 'maxDatabases',
+  role: 'role',
+  onboardingCompleted: 'onboardingCompleted',
+  onboardingSkipped: 'onboardingSkipped',
+  preferredNodeId: 'preferredNodeId',
   loginAttempts: 'loginAttempts',
   lockedUntil: 'lockedUntil',
   totpSecret: 'totpSecret',
@@ -263,7 +267,10 @@ export const ImagesScalarFieldEnum = {
   info: 'info',
   scripts: 'scripts',
   variables: 'variables',
-  portRequirements: 'portRequirements'
+  portRequirements: 'portRequirements',
+  status: 'status',
+  createdById: 'createdById',
+  rejectionReason: 'rejectionReason'
 } as const
 
 export type ImagesScalarFieldEnum = (typeof ImagesScalarFieldEnum)[keyof typeof ImagesScalarFieldEnum]
@@ -365,7 +372,15 @@ export const SettingsScalarFieldEnum = {
   s3Bucket: 's3Bucket',
   s3AccessKey: 's3AccessKey',
   s3SecretKey: 's3SecretKey',
-  s3PathStyle: 's3PathStyle'
+  s3PathStyle: 's3PathStyle',
+  allowPrivilegedServerLimit: 'allowPrivilegedServerLimit',
+  allowPrivilegedMaxMemory: 'allowPrivilegedMaxMemory',
+  allowPrivilegedMaxCpu: 'allowPrivilegedMaxCpu',
+  allowPrivilegedMaxStorage: 'allowPrivilegedMaxStorage',
+  allowPrivilegedMaxDatabases: 'allowPrivilegedMaxDatabases',
+  allowUserCreateImages: 'allowUserCreateImages',
+  onboardingEnabled: 'onboardingEnabled',
+  onboardingSteps: 'onboardingSteps'
 } as const
 
 export type SettingsScalarFieldEnum = (typeof SettingsScalarFieldEnum)[keyof typeof SettingsScalarFieldEnum]

@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import { registerPermission, type Permission } from '../../handlers/permissions';
+import { isRoleInput as isRole, type UserRole, roleFields } from '../../handlers/utils/auth/roles';
 
 const USERNAME_REGEX = /^[a-zA-Z0-9]{3,20}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -18,6 +19,14 @@ registerPermission('airlink.admin.users.view' as Permission);
 registerPermission('airlink.admin.users.create' as Permission);
 registerPermission('airlink.admin.users.edit' as Permission);
 registerPermission('airlink.admin.users.delete' as Permission);
+
+function isRoleValue(value: unknown): boolean {
+  return isRole(value);
+}
+
+function requestedOrNull(value: unknown): number | null {
+  return value === '' || value === null || value === undefined ? null : parseInt(String(value), 10);
+}
 
 async function countAdmins(): Promise<number> {
   return prisma.users.count({ where: { isAdmin: true } });
@@ -109,7 +118,7 @@ const adminModule: Module = {
       '/admin/users/create-user',
       isAuthenticated(true, 'airlink.admin.users.create'),
       async (req: Request, res: Response) => {
-        const { email, username, password, isAdmin, serverLimit, maxMemory, maxCpu, maxStorage, maxDatabases } = req.body;
+        const { email, username, password, isAdmin, role, serverLimit, maxMemory, maxCpu, maxStorage, maxDatabases } = req.body;
 
         if (!email || !username || !password) {
           res.status(400).json({
@@ -138,6 +147,9 @@ const adminModule: Module = {
         }
 
         const isAdminBool = typeof isAdmin === 'boolean' ? isAdmin : isAdmin === 'true';
+        // Explicit role wins; otherwise derive from the legacy isAdmin flag.
+        const requestedRole: UserRole = isRoleValue(role) ? role : isAdminBool ? 'admin' : 'user';
+        const roleData = roleFields(requestedRole);
 
         try {
           const existingUser = await prisma.users.findFirst({
@@ -158,12 +170,13 @@ const adminModule: Module = {
               email,
               username,
               password: await bcrypt.hash(password, BCRYPT_SALT_ROUNDS),
-              isAdmin: isAdminBool,
-              serverLimit: serverLimit === '' || serverLimit === null || serverLimit === undefined ? null : parseInt(serverLimit, 10),
-              maxMemory: maxMemory === '' || maxMemory === null || maxMemory === undefined ? null : parseInt(maxMemory, 10),
-              maxCpu: maxCpu === '' || maxCpu === null || maxCpu === undefined ? null : parseInt(maxCpu, 10),
-              maxStorage: maxStorage === '' || maxStorage === null || maxStorage === undefined ? null : parseInt(maxStorage, 10),
-              maxDatabases: maxDatabases === '' || maxDatabases === null || maxDatabases === undefined ? null : parseInt(maxDatabases, 10),
+              role: roleData.role,
+              isAdmin: roleData.isAdmin,
+              serverLimit: requestedOrNull(serverLimit),
+              maxMemory: requestedOrNull(maxMemory),
+              maxCpu: requestedOrNull(maxCpu),
+              maxStorage: requestedOrNull(maxStorage),
+              maxDatabases: requestedOrNull(maxDatabases),
             },
           });
 
@@ -182,8 +195,8 @@ const adminModule: Module = {
     );
 
 router.get(
-      '/admin/users/create',
-      isAuthenticated(true, 'airlink.admin.users.view'),
+      '/admin/users/edit/:id/',
+      isAuthenticated(true, 'airlink.admin.users.edit'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -205,7 +218,13 @@ router.get(
             where: { id: 1 },
           });
 
-          res.render('admin/users/user', { user, req, settings, dataUser });
+          res.render('admin/users/edit', {
+            user,
+            req,
+            settings,
+            dataUser,
+            canTransferOwner: user.role === 'owner' && dataUser.role !== 'owner',
+          });
         } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -238,7 +257,12 @@ router.get(
             where: { id: 1 },
           });
 
-          res.render('admin/users/edit', { user, req, settings, dataUser });
+          res.render('admin/users/user', {
+            user,
+            req,
+            settings,
+            dataUser,
+          });
         } catch (error: unknown) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -269,6 +293,11 @@ router.get(
 
           if (userId === targetId) {
             res.status(400).json({ error: 'Cannot delete your own account' });
+            return;
+          }
+
+          if (dataUser.role === 'owner') {
+            res.status(403).json({ error: 'The owner cannot be deleted. Transfer ownership first.' });
             return;
           }
 
@@ -325,7 +354,7 @@ router.get(
             return;
           }
 
-          const { email, username, description, isAdmin, password, serverLimit, maxMemory, maxCpu, maxStorage, maxDatabases } = req.body;
+          const { email, username, description, isAdmin, role, password, serverLimit, maxMemory, maxCpu, maxStorage, maxDatabases } = req.body;
 
           // Validate updated values before writing anything
           if (email && (typeof email !== 'string' || !EMAIL_REGEX.test(email))) {
@@ -403,9 +432,32 @@ router.get(
           if (username) updateData.username = username;
           if (description) updateData.description = description;
 
+          // Role handling: the owner cannot be renamed, demoted, or
+          // restricted by anyone — ownership only moves through the explicit
+          // owner-transfer flow.
+          if (targetUser.role === 'owner' && userId !== targetUserId) {
+            res.status(403).json({ error: 'The owner cannot be edited by anyone but the owner.' });
+            return;
+          }
+
           // Handle isAdmin field (convert to boolean)
           if (isAdmin !== undefined) {
             updateData.isAdmin = isAdmin === true || isAdmin === 'true';
+          }
+
+          // Role field stays in sync with isAdmin when either is provided.
+          const nextRole = role !== undefined ? (isRoleValue(role) ? role : undefined) : isAdmin !== undefined
+            ? (isAdmin === true || isAdmin === 'true' ? 'admin' : 'user')
+            : undefined;
+          if (nextRole !== undefined) {
+            // Admins must never be able to grant or strip the owner role.
+            if (nextRole === 'owner') {
+              res.status(403).json({ error: 'Only the owner-transfer flow can assign the owner role.' });
+              return;
+            }
+            const { role: updatedRole, isAdmin: updatedIsAdmin } = roleFields(nextRole);
+            updateData.role = updatedRole;
+            updateData.isAdmin = updatedIsAdmin;
           }
 
           // Handle optional resource limits — null means "use global default"
@@ -441,6 +493,65 @@ router.get(
           res.status(200).json({ message: 'User updated successfully' });
         } catch (error: unknown) {
           logger.error('Error updating user:', error);
+          res.status(500).json({ error: 'Internal server error' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/users/transfer-owner/:id/',
+      isAuthenticated(true, 'airlink.admin.users.edit'),
+      async (req: Request, res: Response): Promise<void> => {
+        try {
+          const actorId = req.session?.user?.id;
+          const actor = await prisma.users.findUnique({ where: { id: actorId } });
+          if (!actor) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+          }
+
+          // Only the current owner may hand over ownership. This guards the
+          // owner role even from a session that has admin permissions.
+          if (actor.role !== 'owner') {
+            res.status(403).json({ error: 'Only the current owner can transfer ownership.' });
+            return;
+          }
+
+          const targetUserId = getParamAsNumber(req.params.id);
+          const targetUser = await prisma.users.findUnique({
+            where: { id: targetUserId },
+          });
+          if (!targetUser) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          if (targetUser.role === 'owner') {
+            res.status(400).json({ error: 'The target user is already the owner.' });
+            return;
+          }
+
+          const ownerData = roleFields('owner');
+          const adminData = roleFields('admin');
+
+          await prisma.$transaction([
+            prisma.users.update({
+              where: { id: targetUserId },
+              data: { role: ownerData.role, isAdmin: ownerData.isAdmin },
+            }),
+            prisma.users.update({
+              where: { id: actorId },
+              data: { role: adminData.role, isAdmin: adminData.isAdmin },
+            }),
+          ]);
+
+          await logActivity(req, 'user:update', {
+            metadata: { event: 'owner.transfer', targetUserId, username: targetUser.username },
+          });
+
+          res.status(200).json({ message: `Ownership transferred to ${targetUser.username}.` });
+        } catch (error: unknown) {
+          logger.error('Error transferring owner role:', error);
           res.status(500).json({ error: 'Internal server error' });
         }
       },

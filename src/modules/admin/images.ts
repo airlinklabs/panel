@@ -10,6 +10,7 @@ import {
   parseEgg,
   normalizeEggForDb,
   validateEggData,
+  fetchEggFromUrl,
 } from '../../handlers/utils/egg/eggParser';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
 
@@ -90,56 +91,13 @@ const adminModule: Module = {
             res.status(400).json({ success: false, error: 'URL is required' });
             return;
           }
-          let parsed: URL;
-          try {
-            parsed = new URL(url);
-          } catch {
-            res.status(400).json({ success: false, error: 'Invalid URL' });
-            return;
-          }
-          if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-            res.status(400).json({ success: false, error: 'Only http(s) URLs are allowed' });
-            return;
-          }
-          if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.hostname === '::1') {
-            res.status(400).json({ success: false, error: 'Local URLs are not allowed' });
-            return;
-          }
 
-          const hostname = parsed.hostname;
-          if (
-            /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
-            /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(hostname) ||
-            /^192\.168\.\d+\.\d+$/.test(hostname) ||
-            /^169\.254\.\d+\.\d+$/.test(hostname) ||
-            /^0\.\d+\.\d+\.\d+$/.test(hostname)
-          ) {
-            res.status(400).json({ success: false, error: 'Private/internal network URLs are not allowed' });
+          const result = await fetchEggFromUrl(url);
+          if (!result.ok) {
+            res.status(400).json({ success: false, error: result.error });
             return;
           }
-
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 15_000);
-          let payload: unknown;
-          try {
-            const response = await fetch(url, { signal: controller.signal });
-            if (!response.ok) {
-              res.status(400).json({ success: false, error: `Remote returned ${response.status}` });
-              return;
-            }
-            const text = await response.text();
-            if (text.length > 2_000_000) {
-              res.status(400).json({ success: false, error: 'Egg file is too large (>2MB)' });
-              return;
-            }
-            payload = JSON.parse(text);
-          } catch (error: unknown) {
-            logger.error('Failed to fetch egg from URL:', error);
-            res.status(400).json({ success: false, error: 'Failed to fetch egg from URL' });
-            return;
-          } finally {
-            clearTimeout(timeout);
-          }
+          const payload = result.payload;
 
           const { valid, errors } = validateEggData(payload as Record<string, unknown>);
           if (!valid) {
@@ -554,6 +512,98 @@ const adminModule: Module = {
         } catch (error: unknown) {
           logger.error('Failed to start image store refresh:', error);
           res.status(500).json({ error: 'Failed to start refresh.' });
+        }
+      },
+    );
+
+    // ── Image approval queue ──────────────────────────────────────────────
+    router.get(
+      '/admin/images/approvals',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {return res.redirect('/login');}
+
+          const pending = await prisma.images.findMany({
+            where: { status: 'pending' },
+            orderBy: { createdAt: 'asc' },
+          });
+
+          const creatorIds = [...new Set(pending.map((i) => i.createdById).filter((id): id is number => id != null))];
+          const creators = creatorIds.length > 0
+            ? await prisma.users.findMany({
+                where: { id: { in: creatorIds } },
+                select: { id: true, username: true, email: true },
+              })
+            : [];
+          const creatorMap = new Map(creators.map((c) => [c.id, c]));
+          const pendingWithCreators = pending.map((i) => ({
+            ...i,
+            creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
+          }));
+
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          res.render('admin/images/approvals', { user, req, settings, pending: pendingWithCreators });
+        } catch (error: unknown) {
+          logger.error('Error loading image approvals:', error);
+          return res.redirect('/admin/images');
+        }
+      },
+    );
+
+    router.post(
+      '/admin/images/approve/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const id = Number(req.params.id);
+          const image = await prisma.images.findUnique({ where: { id } });
+          if (!image) {
+            res.status(404).json({ error: 'Image not found.' });
+            return;
+          }
+
+          await prisma.images.update({
+            where: { id },
+            data: { status: 'approved', rejectionReason: null },
+          });
+          await logActivity(req, 'image:approve', {
+            metadata: { imageId: image.id, name: image.name },
+          });
+          res.json({ success: true, message: `Approved "${image.name}".` });
+        } catch (error: unknown) {
+          logger.error('Error approving image:', error);
+          res.status(500).json({ error: 'Failed to approve image.' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/images/reject/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const id = Number(req.params.id);
+          const reason = String(req.body?.reason ?? '').trim().slice(0, 500);
+          const image = await prisma.images.findUnique({ where: { id } });
+          if (!image) {
+            res.status(404).json({ error: 'Image not found.' });
+            return;
+          }
+
+          await prisma.images.update({
+            where: { id },
+            data: { status: 'rejected', rejectionReason: reason || null },
+          });
+          await logActivity(req, 'image:reject', {
+            metadata: { imageId: image.id, name: image.name },
+          });
+          res.json({ success: true, message: `Rejected "${image.name}".` });
+        } catch (error: unknown) {
+          logger.error('Error rejecting image:', error);
+          res.status(500).json({ error: 'Failed to reject image.' });
         }
       },
     );

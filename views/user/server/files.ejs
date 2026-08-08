@@ -1014,12 +1014,28 @@ function openCreateFileModal() {
     const fileSize = file.size;
 
     closeUploadFileModal();
-    const loader = showLoadingPopup('Uploading File', 'Preparing to upload...');
+    // Persisted progress toast — same status-area experience as backup
+    // creation. The XHR itself is page-scoped, so a full page navigation still
+    // aborts the transfer, but while it is running the upload is visible and
+    // tracked from the shared toast system rather than a blocking modal.
+    let uploadToast = window.showProgressToast ? window.showProgressToast(`Uploading ${fileName}…`, {
+      group: 'upload:<%= server.UUID %>',
+      autoCompleteAt100: false,
+    }) : window.showLoadingToast('Uploading File');
+
+    window.addEventListener('beforeunload', function handleUploadUnload() {
+      if (uploadToast) {
+        uploadToast.close();
+        uploadToast = null;
+      }
+      window.removeEventListener('beforeunload', handleUploadUnload);
+    });
 
     try {
     const MAX_FILE_SIZE = 100 * 1024 * 1024;
       if (fileSize > MAX_FILE_SIZE) {
-        loader.close();
+        uploadToast.close();
+        uploadToast = null;
         showToast('File is too large. Maximum size is 100MB', 'error');
         return;
       }
@@ -1030,7 +1046,9 @@ function openCreateFileModal() {
       formData.append('path', '<%= currentPath %>');
       formData.append('fileName', fileName);
 
-      loader.updateProgress(30, 'Uploading file...');
+      if (uploadToast.setMessage) {
+        uploadToast.setMessage(`Uploading ${fileName}… 0%`);
+      }
 
       try {
         // Use XMLHttpRequest for better progress tracking and reliability
@@ -1039,22 +1057,27 @@ function openCreateFileModal() {
         xhr.open('POST', `/server/<%= server.UUID %>/upload`, true);
 
         xhr.upload.onprogress = function(e) {
-          if (e.lengthComputable) {
+          if (uploadToast && e.lengthComputable) {
             const percentComplete = Math.round((e.loaded / e.total) * 100);
-            loader.updateProgress(30 + (percentComplete * 0.6), `Uploading: ${percentComplete}%`);
+            uploadToast.updateProgress(percentComplete);
+            if (uploadToast.setMessage) {
+              uploadToast.setMessage(`Uploading ${fileName}… ${percentComplete}%`);
+            }
           }
         };
 
         xhr.onload = function() {
           if (xhr.status >= 200 && xhr.status < 300) {
-            loader.updateProgress(100, 'File uploaded successfully!');
+            if (uploadToast) {
+              uploadToast.complete(true, `File ${fileName} uploaded.`);
+              uploadToast = null;
+            }
             setTimeout(() => {
-              loader.close();
-               showToast(`File ${fileName} uploaded.`, 'success');
               refreshFileList();
             }, 500);
           } else {
-            loader.close();
+            let uploadFailToast = uploadToast;
+            uploadToast = null;
             try {
               const errorData = JSON.parse(xhr.responseText);
               console.error('Upload error response:', errorData);
@@ -1066,22 +1089,32 @@ function openCreateFileModal() {
                 errorMessage = errorData.details.error;
               }
 
+              uploadFailToast.close();
+              uploadFailToast = null;
               showToast(errorMessage, 'error');
             } catch (e) {
-      console.error('Error parsing error response:', e);
+              console.error('Error parsing error response:', e);
+              uploadFailToast.close();
+              uploadFailToast = null;
               showToast(`Failed to upload file: ${xhr.status} ${xhr.statusText}`, 'error');
             }
           }
         };
 
         xhr.onerror = function() {
-          loader.close();
+          if (uploadToast) {
+            uploadToast.close();
+            uploadToast = null;
+          }
           console.error('XHR error during upload');
           showToast('Connection error during file upload', 'error');
         };
 
         xhr.ontimeout = function() {
-          loader.close();
+          if (uploadToast) {
+            uploadToast.close();
+            uploadToast = null;
+          }
           console.error('XHR timeout during upload');
           showToast('Upload timed out. Try a smaller file.', 'error');
         };
@@ -1090,12 +1123,18 @@ function openCreateFileModal() {
 
         xhr.send(formData);
       } catch (error) {
-        loader.close();
+        if (uploadToast) {
+          uploadToast.close();
+          uploadToast = null;
+        }
         console.error('Error uploading file:', error);
          showToast('Something went wrong.', 'error');
       }
     } catch (error) {
-      loader.close();
+      if (uploadToast) {
+        uploadToast.close();
+        uploadToast = null;
+      }
       console.error('Error uploading file:', error);
       showToast('An error occurred while uploading the file', 'error');
     }

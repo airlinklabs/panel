@@ -144,6 +144,23 @@
           </div>
         </div>
 
+        <!-- Preferred node -->
+        <div class="al-card p-5">
+          <p class="text-sm font-medium mb-1" style="color:var(--theme-text-strong)"><%= req.translations.preferredNode || 'Preferred node' %></p>
+          <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= req.translations.preferredNodeDesc || 'Pick the node your servers are created on by default.' %></p>
+          <select id="preferredNode" class="al-input">
+            <option value=""><%= req.translations.autoSelectNode || 'Auto (least loaded)' %></option>
+            <% if (nodes && nodes.length) { nodes.forEach(node => { %>
+            <option value="<%= node.id %>"<%= user?.preferredNodeId === node.id ? ' selected' : '' %>><%= node.name %> — <%= node.address %></option>
+            <% }); } %>
+          </select>
+          <div class="mt-4">
+            <button id="savePreferredNodeBtn" type="button" class="al-btn-primary px-4 py-2 text-sm font-medium">
+              <%= req.translations.saveChanges || 'Save' %>
+            </button>
+          </div>
+        </div>
+
         <!-- Login history -->
         <div class="al-card p-5">
           <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= req.translations.loginHistory || 'Login history' %></p>
@@ -256,6 +273,26 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = false;
     btn.textContent = 'Save Changes';
     if (!hasError) showToast('All changes saved.', 'success');
+  });
+
+  // Preferred node — saved on its own so creating servers lands on the
+  // node the user prefers rather than the least-loaded default.
+  document.getElementById('savePreferredNodeBtn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('savePreferredNodeBtn');
+    const nodeId = document.getElementById('preferredNode')?.value;
+    btn.disabled = true;
+    try {
+      const r = await post('/set-preferred-node', { preferredNodeId: nodeId || null });
+      if (r.ok) {
+        showToast(r.message || 'Preferred node saved.', 'success');
+      } else {
+        showToast(r.message || r.text || 'Failed to save preferred node.', 'error');
+      }
+    } catch {
+      showToast('Failed to save preferred node.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
   });
 
   // Username availability check

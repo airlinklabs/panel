@@ -42,6 +42,11 @@ export type SettingsAvgAggregateOutputType = {
   loginMaxAttempts: number | null
   loginLockoutMinutes: number | null
   smtpPort: number | null
+  allowPrivilegedServerLimit: number | null
+  allowPrivilegedMaxMemory: number | null
+  allowPrivilegedMaxCpu: number | null
+  allowPrivilegedMaxStorage: number | null
+  allowPrivilegedMaxDatabases: number | null
 }
 
 export type SettingsSumAggregateOutputType = {
@@ -60,6 +65,11 @@ export type SettingsSumAggregateOutputType = {
   loginMaxAttempts: number | null
   loginLockoutMinutes: number | null
   smtpPort: number | null
+  allowPrivilegedServerLimit: number | null
+  allowPrivilegedMaxMemory: number | null
+  allowPrivilegedMaxCpu: number | null
+  allowPrivilegedMaxStorage: number | null
+  allowPrivilegedMaxDatabases: number | null
 }
 
 export type SettingsMinAggregateOutputType = {
@@ -115,6 +125,14 @@ export type SettingsMinAggregateOutputType = {
   s3AccessKey: string | null
   s3SecretKey: string | null
   s3PathStyle: boolean | null
+  allowPrivilegedServerLimit: number | null
+  allowPrivilegedMaxMemory: number | null
+  allowPrivilegedMaxCpu: number | null
+  allowPrivilegedMaxStorage: number | null
+  allowPrivilegedMaxDatabases: number | null
+  allowUserCreateImages: boolean | null
+  onboardingEnabled: boolean | null
+  onboardingSteps: string | null
 }
 
 export type SettingsMaxAggregateOutputType = {
@@ -170,6 +188,14 @@ export type SettingsMaxAggregateOutputType = {
   s3AccessKey: string | null
   s3SecretKey: string | null
   s3PathStyle: boolean | null
+  allowPrivilegedServerLimit: number | null
+  allowPrivilegedMaxMemory: number | null
+  allowPrivilegedMaxCpu: number | null
+  allowPrivilegedMaxStorage: number | null
+  allowPrivilegedMaxDatabases: number | null
+  allowUserCreateImages: boolean | null
+  onboardingEnabled: boolean | null
+  onboardingSteps: string | null
 }
 
 export type SettingsCountAggregateOutputType = {
@@ -225,6 +251,14 @@ export type SettingsCountAggregateOutputType = {
   s3AccessKey: number
   s3SecretKey: number
   s3PathStyle: number
+  allowPrivilegedServerLimit: number
+  allowPrivilegedMaxMemory: number
+  allowPrivilegedMaxCpu: number
+  allowPrivilegedMaxStorage: number
+  allowPrivilegedMaxDatabases: number
+  allowUserCreateImages: number
+  onboardingEnabled: number
+  onboardingSteps: number
   _all: number
 }
 
@@ -245,6 +279,11 @@ export type SettingsAvgAggregateInputType = {
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
   smtpPort?: true
+  allowPrivilegedServerLimit?: true
+  allowPrivilegedMaxMemory?: true
+  allowPrivilegedMaxCpu?: true
+  allowPrivilegedMaxStorage?: true
+  allowPrivilegedMaxDatabases?: true
 }
 
 export type SettingsSumAggregateInputType = {
@@ -263,6 +302,11 @@ export type SettingsSumAggregateInputType = {
   loginMaxAttempts?: true
   loginLockoutMinutes?: true
   smtpPort?: true
+  allowPrivilegedServerLimit?: true
+  allowPrivilegedMaxMemory?: true
+  allowPrivilegedMaxCpu?: true
+  allowPrivilegedMaxStorage?: true
+  allowPrivilegedMaxDatabases?: true
 }
 
 export type SettingsMinAggregateInputType = {
@@ -318,6 +362,14 @@ export type SettingsMinAggregateInputType = {
   s3AccessKey?: true
   s3SecretKey?: true
   s3PathStyle?: true
+  allowPrivilegedServerLimit?: true
+  allowPrivilegedMaxMemory?: true
+  allowPrivilegedMaxCpu?: true
+  allowPrivilegedMaxStorage?: true
+  allowPrivilegedMaxDatabases?: true
+  allowUserCreateImages?: true
+  onboardingEnabled?: true
+  onboardingSteps?: true
 }
 
 export type SettingsMaxAggregateInputType = {
@@ -373,6 +425,14 @@ export type SettingsMaxAggregateInputType = {
   s3AccessKey?: true
   s3SecretKey?: true
   s3PathStyle?: true
+  allowPrivilegedServerLimit?: true
+  allowPrivilegedMaxMemory?: true
+  allowPrivilegedMaxCpu?: true
+  allowPrivilegedMaxStorage?: true
+  allowPrivilegedMaxDatabases?: true
+  allowUserCreateImages?: true
+  onboardingEnabled?: true
+  onboardingSteps?: true
 }
 
 export type SettingsCountAggregateInputType = {
@@ -428,6 +488,14 @@ export type SettingsCountAggregateInputType = {
   s3AccessKey?: true
   s3SecretKey?: true
   s3PathStyle?: true
+  allowPrivilegedServerLimit?: true
+  allowPrivilegedMaxMemory?: true
+  allowPrivilegedMaxCpu?: true
+  allowPrivilegedMaxStorage?: true
+  allowPrivilegedMaxDatabases?: true
+  allowUserCreateImages?: true
+  onboardingEnabled?: true
+  onboardingSteps?: true
   _all?: true
 }
 
@@ -570,6 +638,14 @@ export type SettingsGroupByOutputType = {
   s3AccessKey: string | null
   s3SecretKey: string | null
   s3PathStyle: boolean
+  allowPrivilegedServerLimit: number
+  allowPrivilegedMaxMemory: number
+  allowPrivilegedMaxCpu: number
+  allowPrivilegedMaxStorage: number
+  allowPrivilegedMaxDatabases: number
+  allowUserCreateImages: boolean
+  onboardingEnabled: boolean
+  onboardingSteps: string
   _count: SettingsCountAggregateOutputType | null
   _avg: SettingsAvgAggregateOutputType | null
   _sum: SettingsSumAggregateOutputType | null
@@ -648,6 +724,14 @@ export type settingsWhereInput = {
   s3AccessKey?: Prisma.StringNullableFilter<"settings"> | string | null
   s3SecretKey?: Prisma.StringNullableFilter<"settings"> | string | null
   s3PathStyle?: Prisma.BoolFilter<"settings"> | boolean
+  allowPrivilegedServerLimit?: Prisma.IntFilter<"settings"> | number
+  allowPrivilegedMaxMemory?: Prisma.IntFilter<"settings"> | number
+  allowPrivilegedMaxCpu?: Prisma.IntFilter<"settings"> | number
+  allowPrivilegedMaxStorage?: Prisma.IntFilter<"settings"> | number
+  allowPrivilegedMaxDatabases?: Prisma.IntFilter<"settings"> | number
+  allowUserCreateImages?: Prisma.BoolFilter<"settings"> | boolean
+  onboardingEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  onboardingSteps?: Prisma.StringFilter<"settings"> | string
 }
 
 export type settingsOrderByWithRelationInput = {
@@ -703,6 +787,14 @@ export type settingsOrderByWithRelationInput = {
   s3AccessKey?: Prisma.SortOrderInput | Prisma.SortOrder
   s3SecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
   s3PathStyle?: Prisma.SortOrder
+  allowPrivilegedServerLimit?: Prisma.SortOrder
+  allowPrivilegedMaxMemory?: Prisma.SortOrder
+  allowPrivilegedMaxCpu?: Prisma.SortOrder
+  allowPrivilegedMaxStorage?: Prisma.SortOrder
+  allowPrivilegedMaxDatabases?: Prisma.SortOrder
+  allowUserCreateImages?: Prisma.SortOrder
+  onboardingEnabled?: Prisma.SortOrder
+  onboardingSteps?: Prisma.SortOrder
 }
 
 export type settingsWhereUniqueInput = Prisma.AtLeast<{
@@ -761,6 +853,14 @@ export type settingsWhereUniqueInput = Prisma.AtLeast<{
   s3AccessKey?: Prisma.StringNullableFilter<"settings"> | string | null
   s3SecretKey?: Prisma.StringNullableFilter<"settings"> | string | null
   s3PathStyle?: Prisma.BoolFilter<"settings"> | boolean
+  allowPrivilegedServerLimit?: Prisma.IntFilter<"settings"> | number
+  allowPrivilegedMaxMemory?: Prisma.IntFilter<"settings"> | number
+  allowPrivilegedMaxCpu?: Prisma.IntFilter<"settings"> | number
+  allowPrivilegedMaxStorage?: Prisma.IntFilter<"settings"> | number
+  allowPrivilegedMaxDatabases?: Prisma.IntFilter<"settings"> | number
+  allowUserCreateImages?: Prisma.BoolFilter<"settings"> | boolean
+  onboardingEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  onboardingSteps?: Prisma.StringFilter<"settings"> | string
 }, "id">
 
 export type settingsOrderByWithAggregationInput = {
@@ -816,6 +916,14 @@ export type settingsOrderByWithAggregationInput = {
   s3AccessKey?: Prisma.SortOrderInput | Prisma.SortOrder
   s3SecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
   s3PathStyle?: Prisma.SortOrder
+  allowPrivilegedServerLimit?: Prisma.SortOrder
+  allowPrivilegedMaxMemory?: Prisma.SortOrder
+  allowPrivilegedMaxCpu?: Prisma.SortOrder
+  allowPrivilegedMaxStorage?: Prisma.SortOrder
+  allowPrivilegedMaxDatabases?: Prisma.SortOrder
+  allowUserCreateImages?: Prisma.SortOrder
+  onboardingEnabled?: Prisma.SortOrder
+  onboardingSteps?: Prisma.SortOrder
   _count?: Prisma.settingsCountOrderByAggregateInput
   _avg?: Prisma.settingsAvgOrderByAggregateInput
   _max?: Prisma.settingsMaxOrderByAggregateInput
@@ -879,6 +987,14 @@ export type settingsScalarWhereWithAggregatesInput = {
   s3AccessKey?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
   s3SecretKey?: Prisma.StringNullableWithAggregatesFilter<"settings"> | string | null
   s3PathStyle?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  allowPrivilegedServerLimit?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  allowPrivilegedMaxMemory?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  allowPrivilegedMaxCpu?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  allowPrivilegedMaxStorage?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  allowPrivilegedMaxDatabases?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  allowUserCreateImages?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  onboardingEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  onboardingSteps?: Prisma.StringWithAggregatesFilter<"settings"> | string
 }
 
 export type settingsCreateInput = {
@@ -933,6 +1049,14 @@ export type settingsCreateInput = {
   s3AccessKey?: string | null
   s3SecretKey?: string | null
   s3PathStyle?: boolean
+  allowPrivilegedServerLimit?: number
+  allowPrivilegedMaxMemory?: number
+  allowPrivilegedMaxCpu?: number
+  allowPrivilegedMaxStorage?: number
+  allowPrivilegedMaxDatabases?: number
+  allowUserCreateImages?: boolean
+  onboardingEnabled?: boolean
+  onboardingSteps?: string
 }
 
 export type settingsUncheckedCreateInput = {
@@ -988,6 +1112,14 @@ export type settingsUncheckedCreateInput = {
   s3AccessKey?: string | null
   s3SecretKey?: string | null
   s3PathStyle?: boolean
+  allowPrivilegedServerLimit?: number
+  allowPrivilegedMaxMemory?: number
+  allowPrivilegedMaxCpu?: number
+  allowPrivilegedMaxStorage?: number
+  allowPrivilegedMaxDatabases?: number
+  allowUserCreateImages?: boolean
+  onboardingEnabled?: boolean
+  onboardingSteps?: string
 }
 
 export type settingsUpdateInput = {
@@ -1042,6 +1174,14 @@ export type settingsUpdateInput = {
   s3AccessKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   s3SecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   s3PathStyle?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowPrivilegedServerLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxCpu?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
+  allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type settingsUncheckedUpdateInput = {
@@ -1097,6 +1237,14 @@ export type settingsUncheckedUpdateInput = {
   s3AccessKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   s3SecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   s3PathStyle?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowPrivilegedServerLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxCpu?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
+  allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type settingsCreateManyInput = {
@@ -1152,6 +1300,14 @@ export type settingsCreateManyInput = {
   s3AccessKey?: string | null
   s3SecretKey?: string | null
   s3PathStyle?: boolean
+  allowPrivilegedServerLimit?: number
+  allowPrivilegedMaxMemory?: number
+  allowPrivilegedMaxCpu?: number
+  allowPrivilegedMaxStorage?: number
+  allowPrivilegedMaxDatabases?: number
+  allowUserCreateImages?: boolean
+  onboardingEnabled?: boolean
+  onboardingSteps?: string
 }
 
 export type settingsUpdateManyMutationInput = {
@@ -1206,6 +1362,14 @@ export type settingsUpdateManyMutationInput = {
   s3AccessKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   s3SecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   s3PathStyle?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowPrivilegedServerLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxCpu?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
+  allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type settingsUncheckedUpdateManyInput = {
@@ -1261,6 +1425,14 @@ export type settingsUncheckedUpdateManyInput = {
   s3AccessKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   s3SecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   s3PathStyle?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowPrivilegedServerLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxCpu?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
+  allowPrivilegedMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
+  allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type settingsCountOrderByAggregateInput = {
@@ -1316,6 +1488,14 @@ export type settingsCountOrderByAggregateInput = {
   s3AccessKey?: Prisma.SortOrder
   s3SecretKey?: Prisma.SortOrder
   s3PathStyle?: Prisma.SortOrder
+  allowPrivilegedServerLimit?: Prisma.SortOrder
+  allowPrivilegedMaxMemory?: Prisma.SortOrder
+  allowPrivilegedMaxCpu?: Prisma.SortOrder
+  allowPrivilegedMaxStorage?: Prisma.SortOrder
+  allowPrivilegedMaxDatabases?: Prisma.SortOrder
+  allowUserCreateImages?: Prisma.SortOrder
+  onboardingEnabled?: Prisma.SortOrder
+  onboardingSteps?: Prisma.SortOrder
 }
 
 export type settingsAvgOrderByAggregateInput = {
@@ -1334,6 +1514,11 @@ export type settingsAvgOrderByAggregateInput = {
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   smtpPort?: Prisma.SortOrder
+  allowPrivilegedServerLimit?: Prisma.SortOrder
+  allowPrivilegedMaxMemory?: Prisma.SortOrder
+  allowPrivilegedMaxCpu?: Prisma.SortOrder
+  allowPrivilegedMaxStorage?: Prisma.SortOrder
+  allowPrivilegedMaxDatabases?: Prisma.SortOrder
 }
 
 export type settingsMaxOrderByAggregateInput = {
@@ -1389,6 +1574,14 @@ export type settingsMaxOrderByAggregateInput = {
   s3AccessKey?: Prisma.SortOrder
   s3SecretKey?: Prisma.SortOrder
   s3PathStyle?: Prisma.SortOrder
+  allowPrivilegedServerLimit?: Prisma.SortOrder
+  allowPrivilegedMaxMemory?: Prisma.SortOrder
+  allowPrivilegedMaxCpu?: Prisma.SortOrder
+  allowPrivilegedMaxStorage?: Prisma.SortOrder
+  allowPrivilegedMaxDatabases?: Prisma.SortOrder
+  allowUserCreateImages?: Prisma.SortOrder
+  onboardingEnabled?: Prisma.SortOrder
+  onboardingSteps?: Prisma.SortOrder
 }
 
 export type settingsMinOrderByAggregateInput = {
@@ -1444,6 +1637,14 @@ export type settingsMinOrderByAggregateInput = {
   s3AccessKey?: Prisma.SortOrder
   s3SecretKey?: Prisma.SortOrder
   s3PathStyle?: Prisma.SortOrder
+  allowPrivilegedServerLimit?: Prisma.SortOrder
+  allowPrivilegedMaxMemory?: Prisma.SortOrder
+  allowPrivilegedMaxCpu?: Prisma.SortOrder
+  allowPrivilegedMaxStorage?: Prisma.SortOrder
+  allowPrivilegedMaxDatabases?: Prisma.SortOrder
+  allowUserCreateImages?: Prisma.SortOrder
+  onboardingEnabled?: Prisma.SortOrder
+  onboardingSteps?: Prisma.SortOrder
 }
 
 export type settingsSumOrderByAggregateInput = {
@@ -1462,6 +1663,11 @@ export type settingsSumOrderByAggregateInput = {
   loginMaxAttempts?: Prisma.SortOrder
   loginLockoutMinutes?: Prisma.SortOrder
   smtpPort?: Prisma.SortOrder
+  allowPrivilegedServerLimit?: Prisma.SortOrder
+  allowPrivilegedMaxMemory?: Prisma.SortOrder
+  allowPrivilegedMaxCpu?: Prisma.SortOrder
+  allowPrivilegedMaxStorage?: Prisma.SortOrder
+  allowPrivilegedMaxDatabases?: Prisma.SortOrder
 }
 
 
@@ -1519,6 +1725,14 @@ export type settingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   s3AccessKey?: boolean
   s3SecretKey?: boolean
   s3PathStyle?: boolean
+  allowPrivilegedServerLimit?: boolean
+  allowPrivilegedMaxMemory?: boolean
+  allowPrivilegedMaxCpu?: boolean
+  allowPrivilegedMaxStorage?: boolean
+  allowPrivilegedMaxDatabases?: boolean
+  allowUserCreateImages?: boolean
+  onboardingEnabled?: boolean
+  onboardingSteps?: boolean
 }, ExtArgs["result"]["settings"]>
 
 export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1574,6 +1788,14 @@ export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   s3AccessKey?: boolean
   s3SecretKey?: boolean
   s3PathStyle?: boolean
+  allowPrivilegedServerLimit?: boolean
+  allowPrivilegedMaxMemory?: boolean
+  allowPrivilegedMaxCpu?: boolean
+  allowPrivilegedMaxStorage?: boolean
+  allowPrivilegedMaxDatabases?: boolean
+  allowUserCreateImages?: boolean
+  onboardingEnabled?: boolean
+  onboardingSteps?: boolean
 }, ExtArgs["result"]["settings"]>
 
 export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1629,6 +1851,14 @@ export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   s3AccessKey?: boolean
   s3SecretKey?: boolean
   s3PathStyle?: boolean
+  allowPrivilegedServerLimit?: boolean
+  allowPrivilegedMaxMemory?: boolean
+  allowPrivilegedMaxCpu?: boolean
+  allowPrivilegedMaxStorage?: boolean
+  allowPrivilegedMaxDatabases?: boolean
+  allowUserCreateImages?: boolean
+  onboardingEnabled?: boolean
+  onboardingSteps?: boolean
 }, ExtArgs["result"]["settings"]>
 
 export type settingsSelectScalar = {
@@ -1684,9 +1914,17 @@ export type settingsSelectScalar = {
   s3AccessKey?: boolean
   s3SecretKey?: boolean
   s3PathStyle?: boolean
+  allowPrivilegedServerLimit?: boolean
+  allowPrivilegedMaxMemory?: boolean
+  allowPrivilegedMaxCpu?: boolean
+  allowPrivilegedMaxStorage?: boolean
+  allowPrivilegedMaxDatabases?: boolean
+  allowUserCreateImages?: boolean
+  onboardingEnabled?: boolean
+  onboardingSteps?: boolean
 }
 
-export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "panelWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "require2faForAdmins" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle", ExtArgs["result"]["settings"]>
+export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "panelWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "require2faForAdmins" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle" | "allowPrivilegedServerLimit" | "allowPrivilegedMaxMemory" | "allowPrivilegedMaxCpu" | "allowPrivilegedMaxStorage" | "allowPrivilegedMaxDatabases" | "allowUserCreateImages" | "onboardingEnabled" | "onboardingSteps", ExtArgs["result"]["settings"]>
 
 export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "settings"
@@ -1744,6 +1982,14 @@ export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     s3AccessKey: string | null
     s3SecretKey: string | null
     s3PathStyle: boolean
+    allowPrivilegedServerLimit: number
+    allowPrivilegedMaxMemory: number
+    allowPrivilegedMaxCpu: number
+    allowPrivilegedMaxStorage: number
+    allowPrivilegedMaxDatabases: number
+    allowUserCreateImages: boolean
+    onboardingEnabled: boolean
+    onboardingSteps: string
   }, ExtArgs["result"]["settings"]>
   composites: {}
 }
@@ -2219,6 +2465,14 @@ export interface settingsFieldRefs {
   readonly s3AccessKey: Prisma.FieldRef<"settings", 'String'>
   readonly s3SecretKey: Prisma.FieldRef<"settings", 'String'>
   readonly s3PathStyle: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly allowPrivilegedServerLimit: Prisma.FieldRef<"settings", 'Int'>
+  readonly allowPrivilegedMaxMemory: Prisma.FieldRef<"settings", 'Int'>
+  readonly allowPrivilegedMaxCpu: Prisma.FieldRef<"settings", 'Int'>
+  readonly allowPrivilegedMaxStorage: Prisma.FieldRef<"settings", 'Int'>
+  readonly allowPrivilegedMaxDatabases: Prisma.FieldRef<"settings", 'Int'>
+  readonly allowUserCreateImages: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly onboardingEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly onboardingSteps: Prisma.FieldRef<"settings", 'String'>
 }
     
 

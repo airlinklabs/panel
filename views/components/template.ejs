@@ -57,12 +57,19 @@
               sidebarItems.forEach((item, i) => {
             %>
               <li class="nav-item sidebar-view-item" style="--i:<%= i + 1 %>">
-                <a href="<%= item.url %>" class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);"<% if (item.matchPrefix) { %> data-match-prefix="<%= item.matchPrefix %>"<% } %>>
+                <a href="<%= item.url %>" class="nav-link mt-1 px-4 mx-2 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);"<% if (item.matchPrefix) { %> data-match-prefix="<%= item.matchPrefix %>"<% } %>>
                   <%- item.icon %>
                   <span><%= item.label %></span>
                 </a>
               </li>
             <% }); } %>
+            <% const myImagesIdx = (sidebarItems && sidebarItems.length || 0) + 1; %>
+            <li class="nav-item sidebar-view-item" style="--i:<%= myImagesIdx %>">
+              <a href="/my-images" class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);" data-search="images custom eggs submissions">
+                <%- icon('image', { class: 'w-5 h-5 mt-0.5' }) %>
+                <span><%= req.translations.navMyImages || 'My Images' %></span>
+              </a>
+            </li>
             
             <% if (user != null && user.isAdmin === true) { %>
             <% let adminAnimIdx = 0; %>
@@ -105,6 +112,12 @@
 <a href="/admin/images" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                               <%- icon('box', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                               <span><%= req.translations.navImages || 'Images' %></span>
+                            </a>
+                          </li>
+                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+<a href="/admin/images/approvals" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
+                              <%- icon('badge-check', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
+                              <span><%= req.translations.navImageApprovals || 'Image Approvals' %></span>
                             </a>
                           </li>
 

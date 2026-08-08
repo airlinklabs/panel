@@ -45,10 +45,77 @@
     }
   }
 
-  function updateRequiredPorts() {
-    const ports = getRequiredPorts();
-    assignPortsLabel.textContent = ports.length ? `Assign ports (${ports.length})` : 'Assign ports';
+  // port state for the "assign ports" flow. Each entry is { name, internalPort }.
+  // External ports are auto-assigned by the server; users can only pick the
+  // internal container port and a friendly name.
+  let portsState = [];
+
+  function seedPortsFromImage() {
+    portsState = getRequiredPorts()
+      .filter(function (p) { return p && p.internalPort; })
+      .map(function (p) {
+        return { name: String(p.name || ''), internalPort: Number(p.internalPort) };
+      });
+    updateRequiredPorts();
   }
+
+  function updateRequiredPorts() {
+    assignPortsLabel.textContent = portsState.length ? 'Ports (' + portsState.length + ')' : 'Assign ports';
+  }
+
+  function renderPortRows() {
+    requiredPortsList.innerHTML = '';
+    if (!portsState.length) {
+      requiredPortsList.innerHTML = '<p class="text-xs text-neutral-500 dark:text-neutral-400">No ports yet. Add one below, or leave empty for a single auto-assigned port.</p>';
+      return;
+    }
+    portsState.forEach(function (port, index) {
+      const row = document.createElement('div');
+      row.className = 'grid grid-cols-[1fr_auto_auto] gap-2 items-center';
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.placeholder = 'Name';
+      nameInput.maxLength = 32;
+      nameInput.value = port.name || '';
+      nameInput.className = 'al-input';
+      nameInput.addEventListener('input', function () {
+        portsState[index].name = nameInput.value.trim();
+      });
+
+      const internalInput = document.createElement('input');
+      internalInput.type = 'number';
+      internalInput.min = '1';
+      internalInput.max = '65535';
+      internalInput.value = port.internalPort;
+      internalInput.className = 'al-input font-mono';
+      internalInput.title = 'Internal (container) port';
+      internalInput.addEventListener('input', function () {
+        portsState[index].internalPort = parseInt(internalInput.value, 10);
+      });
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'px-2 py-2 rounded-lg text-neutral-500 hover:text-red-500 hover:bg-red-500/10 transition';
+      removeBtn.title = 'Remove port';
+      removeBtn.setAttribute('aria-label', 'Remove port');
+      removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 4.5v9A6 6 0 0 1 6 21a6 6 0 0 1-3-5.2V6.5A6 6 0 0 0 12 3"/></svg>'.replace(/<svg/g, '<svg ');
+      removeBtn.addEventListener('click', function () {
+        portsState.splice(index, 1);
+        renderPortRows();
+      });
+
+      row.appendChild(nameInput);
+      row.appendChild(internalInput);
+      row.appendChild(removeBtn);
+      requiredPortsList.appendChild(row);
+    });
+  }
+
+  const addPortBtn = document.getElementById('addPortBtn');
+  addPortBtn.addEventListener('click', function () {
+    portsState.push({ name: 'Port ' + (portsState.length + 1), internalPort: 25565 });
+    renderPortRows();
+  });
 
   imageSelect.addEventListener('change', function () {
     const opt = this.options[this.selectedIndex];
@@ -75,22 +142,11 @@
       }
     }
     dockerSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    updateRequiredPorts();
+    seedPortsFromImage();
   });
 
   assignPortsBtn.addEventListener('click', function () {
-    const ports = getRequiredPorts();
-    requiredPortsList.innerHTML = '';
-    if (!ports.length) {
-      requiredPortsList.innerHTML = '<p class="text-xs text-neutral-500">This image does not require ports.</p>';
-    } else {
-      ports.forEach(function (port, index) {
-        const row = document.createElement('div');
-        row.className = 'grid grid-cols-2 gap-2 rounded-lg border border-neutral-200 dark:border-white/10 p-3 text-xs text-neutral-600 dark:text-neutral-300';
-        row.innerHTML = '<span>' + (port.name || 'Port ' + (index + 1)) + '</span><span class="font-mono text-right">internal ' + (port.internalPort || '') + '</span>';
-        requiredPortsList.appendChild(row);
-      });
-    }
+    renderPortRows();
     window.modal.show({
       title: 'Assign ports',
       bodyNode: document.getElementById('portsContent'),
@@ -183,6 +239,7 @@
   document.addEventListener('click', function (e) {
     if (e.target && e.target.closest && e.target.closest('.al-format-switcher')) refreshHeadroom();
   });
+  seedPortsFromImage();
   refreshHeadroom();
 
   function showConfirm(title, body) {
@@ -231,6 +288,12 @@
     if (storage < MIN_STORAGE) validationErrors.push('Storage must be at least ' + MIN_STORAGE + ' MB.');
     if (cpu < MIN_CPU) validationErrors.push('CPU must be at least ' + MIN_CPU + '%.');
 
+    if (portsState.some(function (entry) {
+      return !entry.name || !Number.isInteger(entry.internalPort) || entry.internalPort < 1 || entry.internalPort > 65535;
+    })) {
+      validationErrors.push('Every port needs a name and a valid internal port (1-65535).');
+    }
+
     if (validationErrors.length > 0) {
       btn.disabled = false;
       btn.textContent = origText;
@@ -253,7 +316,7 @@
       var r = await fetch('/create-server', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, description: description, nodeId: nodeId, imageId: imageId, dockerImage: dockerImage, Memory: mem, Cpu: cpu, Storage: storage, Swap: swap }),
+        body: JSON.stringify({ name: name, description: description, nodeId: nodeId, imageId: imageId, dockerImage: dockerImage, Memory: mem, Cpu: cpu, Storage: storage, Swap: swap, ports: portsState }),
       });
       var d = await r.json();
       if (d.success) {

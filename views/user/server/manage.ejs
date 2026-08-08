@@ -205,6 +205,13 @@
                   <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.Status %>:</h2>
                   <p id="status" role="status" aria-live="polite" class="mt-1 text-lg font-medium tracking-tight leading-snug" style="color:var(--theme-text-strong)">-</p>
                   <p id="status-msg" class="text-xs font-medium mt-0.5 leading-snug transition-all duration-300 opacity-0 translate-y-1 pointer-events-none" style="color:var(--theme-text-muted)"></p>
+                  <div id="queue-status" class="hidden mt-2 text-xs leading-snug" style="color:var(--theme-text-muted)">
+                    <p id="queue-position" class="font-medium" style="color:var(--theme-warning)"></p>
+                    <p id="queue-available" class="mt-0.5"></p>
+                    <% if (!server.Suspended) { %>
+                    <button type="button" id="cancelQueueBtn" class="mt-2 px-2.5 py-1 rounded-lg text-xs font-medium border transition hover:bg-neutral-900/5 dark:hover:bg-white/10" style="border-color:var(--theme-border);color:var(--theme-text-muted)">Cancel start</button>
+                    <% } %>
+                  </div>
                 </div>
               </div>
 
@@ -1019,6 +1026,37 @@ connectWebSocket();
     const startButton = document.getElementById('startButton');
     const consoleInput = document.getElementById('input');
 
+    // Cancel a queued start without disturbing anything else. Only reachable
+    // while the queue status box is shown on this page.
+    const cancelQueueBtn = document.getElementById('cancelQueueBtn');
+    if (cancelQueueBtn) {
+        cancelQueueBtn.addEventListener('click', async () => {
+            const serverUUID = '<%= server.UUID %>';
+            cancelQueueBtn.disabled = true;
+            cancelQueueBtn.textContent = 'Cancelling...';
+            try {
+                const r = await fetch(`/server/${serverUUID}/power/queue/cancel`, {
+                    method: 'POST',
+                    headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+                });
+                const d = await r.json();
+                if (d.success) {
+                    hideQueueStatus();
+                    setStatusLog(null);
+                    setStatusText('Offline', 'var(--theme-danger)');
+                    showToast('Queued start cancelled.', 'success');
+                } else {
+                    showToast((d && d.error) || 'Failed to cancel the queued start.', 'error');
+                }
+            } catch {
+                showToast('Failed to cancel the queued start.', 'error');
+            } finally {
+                cancelQueueBtn.disabled = false;
+                cancelQueueBtn.textContent = 'Cancel start';
+            }
+        });
+    }
+
     function lockInput(reason) {
         if (!consoleInput) return;
         consoleInput.disabled = true;
@@ -1087,8 +1125,17 @@ connectWebSocket();
                     evtSocket.close();
                     return;
                 }
+                // The runtime start went through the capacity queue: show its
+                // position now and keep the status card updated while we wait.
+                if (d.queued) {
+                    setStatusText('Queued', 'var(--theme-warning)');
+                    setStatusLog('Waiting for capacity...');
+                    showQueueStatus(d.position, d.total, null);
+                    showToast('Server queued to start (position ' + (d.position || '?') + ').', 'info');
+                }
                 let attempts = 0;
                 const maxAttempts = 28;
+                const maxQueuedAttempts = 120;
                 const poll = setInterval(() => {
                     attempts++;
                     fetch(`/server/${serverUUID}/status`)
@@ -1099,14 +1146,27 @@ connectWebSocket();
                                 evtSocket.close();
                                 setStatusText('Online', 'var(--theme-success)');
                                 setStatusLog(null);
+                                hideQueueStatus();
                                 updateStatusChart('success', 0.1, 0.2);
                                 showToast('Server is alive!', 'success');
                                 clearButtonLoading(startButton);
                                 restartWebSocket();
+                            } else if (data.queued && typeof data.queue?.position === 'number') {
+                                setStatusText('Queued', 'var(--theme-warning)');
+                                setStatusLog('Waiting for capacity...');
+                                showQueueStatus(data.queue.position, data.queue.total, data.queue.available);
+                                if (attempts >= maxQueuedAttempts) {
+                                    clearInterval(poll);
+                                    evtSocket.close();
+                                    setStatusLog(null);
+                                    showToast('Still queued — check back in a bit.', 'info');
+                                    clearButtonLoading(startButton);
+                                }
                             } else if (attempts >= maxAttempts) {
                                 clearInterval(poll);
                                 evtSocket.close();
                                 setStatusLog(null);
+                                hideQueueStatus();
                                 showToast('Woke it up — give it a sec.', 'success');
                                 clearButtonLoading(startButton);
                                 restartWebSocket();
@@ -1730,6 +1790,31 @@ connectWebSocket();
         statusChart.data.labels = [''];
         statusChart.data.datasets[0].data = [100];
         statusChart.update();
+    }
+
+    // Shows live queue details in the status card while a start is queued.
+    function showQueueStatus(position, total, available) {
+        const box = document.getElementById('queue-status');
+        const posEl = document.getElementById('queue-position');
+        const availEl = document.getElementById('queue-available');
+        if (!box || !posEl || !availEl) return;
+        posEl.textContent = `Queued — position ${position || '?'} of ${total || '?'}`;
+        if (available && (typeof available.memoryMb === 'number' || typeof available.cpuPercent === 'number' || typeof available.diskMb === 'number')) {
+            const parts = [];
+            if (typeof available.memoryMb === 'number' && available.memoryMb > 0) parts.push(`${Math.round(available.memoryMb)} MB RAM`);
+            if (typeof available.cpuPercent === 'number' && available.cpuPercent > 0) parts.push(`${Math.round(available.cpuPercent)}% CPU`);
+            if (typeof available.diskMb === 'number' && available.diskMb > 0) parts.push(`${Math.round(available.diskMb)} MB disk`);
+            availEl.textContent = parts.length ? 'Available: ' + parts.join(' · ') : '';
+        } else {
+            availEl.textContent = '';
+        }
+        box.classList.remove('hidden');
+    }
+
+    function hideQueueStatus() {
+        const box = document.getElementById('queue-status');
+        if (!box) return;
+        box.classList.add('hidden');
     }
 
     // Function to set all stats to offline state

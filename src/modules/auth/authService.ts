@@ -14,6 +14,9 @@ declare module 'express-session' {
       isAdmin: boolean;
       username: string;
       description: string;
+      role?: string;
+      onboardingCompleted?: boolean;
+      onboardingSkipped?: boolean;
     };
   }
 }
@@ -123,6 +126,9 @@ const authServiceModule: Module = {
           isAdmin:     user.isAdmin,
           description: user.description ?? '',
           username:    user.username    ?? '',
+          role:        user.role,
+          onboardingCompleted: user.onboardingCompleted,
+          onboardingSkipped:   user.onboardingSkipped,
         };
 
         await prisma.loginHistory.create({
@@ -181,6 +187,9 @@ const authServiceModule: Module = {
             username,
             password:    await bcrypt.hash(password, 12),
             description: 'No About Me',
+            // The first user to register owns the panel; everyone else starts
+            // as a normal user.
+            role:        isFirstUser ? 'owner' : 'user',
             isAdmin:     isFirstUser,
           },
         });

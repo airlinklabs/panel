@@ -5,7 +5,7 @@ import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
-import { startServerContainer } from '../../user/server/shared';
+import { runtimeStartQueue } from '../../../handlers/runtimeQueue';
 import { NodeCapacityExceededError } from '../../../handlers/utils/server/resourceCheck';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import { nextRunFromCron } from '../../../utils/cron';
@@ -138,16 +138,23 @@ const clientApiModule: Module = {
         if (server.Suspended) return jsonError(res, 'Server is suspended', 403);
 
         if (action === 'start') {
-          // start requires the full runtime config (image, env, ports, limits);
-          // resolve it here instead of sending a bare { id } that the daemon rejects
-          const fullServer = await prisma.server.findUnique({
-            where: { UUID: server.UUID },
-            include: { node: true, image: true },
+          const apiUser = await prisma.users.findUnique({
+            where: { id: userId },
+            select: { isAdmin: true, role: true },
           });
-          if (!fullServer) {
-            return jsonError(res, 'Server not found', 404);
+          const priority = apiUser?.isAdmin === true || server.ownerId === userId || apiUser?.role === 'privileged';
+          const queued = await runtimeStartQueue.enqueueStart({
+            serverId: server.UUID,
+            userId,
+            priority,
+          });
+          if (queued.queued) {
+            await logActivity(req, 'server:start' as Parameters<typeof logActivity>[1], {
+              serverId: server.UUID,
+              metadata: { source: 'client-api', queued: true, position: queued.position },
+            });
+            return res.status(202).json({ message: `Server queued to start (position ${queued.position})` });
           }
-          await startServerContainer(fullServer, server.UUID);
         } else {
           const method = action === 'kill' ? 'DELETE' : 'POST';
           const path = action === 'kill' ? '/container/kill' : `/container/${action}`;
@@ -164,6 +171,7 @@ const clientApiModule: Module = {
 
           if (action === 'stop' || action === 'kill') {
             await prisma.server.update({ where: { UUID: server.UUID }, data: { Running: false } }).catch(() => {});
+            runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
           }
         }
 

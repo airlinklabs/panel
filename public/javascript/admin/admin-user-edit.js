@@ -6,6 +6,36 @@
     const isAdminToggle = document.getElementById('isAdmin');
     const adminStatusLabel = document.getElementById('adminStatusLabel');
 
+    if (pd.canTransferOwner) {
+      const transferBtn = document.getElementById('transferOwnerBtn');
+      if (transferBtn) {
+        transferBtn.addEventListener('click', async function() {
+          if (!confirm(pd.transferOwnerConfirm)) return;
+          const loader = showLoadingPopup(pd.transferringOwnership, '');
+          try {
+            const response = await fetch('/admin/users/transfer-owner/' + pd.userId + '/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+            });
+            const responseData = await response.json();
+            loader.close();
+            if (responseData.error) {
+              showToast(responseData.error, 'error');
+            } else {
+              showToast(responseData.message || pd.transferringOwnership, 'success');
+              setTimeout(() => {
+                window.location.href = '/admin/users';
+              }, 1000);
+            }
+          } catch (error) {
+            loader.close();
+            console.error('Failed to transfer ownership:', error);
+            showToast(pd.errorUpdatingUser, 'error');
+          }
+        });
+      }
+    }
+
     isAdminToggle.addEventListener('change', function() {
       adminStatusLabel.textContent = this.checked
         ? pd.enabledText
@@ -33,6 +63,9 @@
       }
 
       data.isAdmin = isAdminToggle.checked;
+
+      const roleSelect = document.getElementById('role');
+      if (roleSelect) data.role = roleSelect.value;
 
       const serverLimitVal = document.getElementById('serverLimit').value;
       data.serverLimit = serverLimitVal === '' ? null : parseInt(serverLimitVal, 10);

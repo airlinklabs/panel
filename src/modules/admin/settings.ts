@@ -398,6 +398,8 @@ const adminModule: Module = {
         try {
           const allowUserCreateServer = req.body.allowUserCreateServer === true || req.body.allowUserCreateServer === 'true';
           const allowUserDeleteServer = req.body.allowUserDeleteServer === true || req.body.allowUserDeleteServer === 'true';
+          const allowUserCreateImages = req.body.allowUserCreateImages === true || req.body.allowUserCreateImages === 'true';
+          const onboardingEnabled = req.body.onboardingEnabled === true || req.body.onboardingEnabled === 'true';
           const defaultServerLimit    = parseInt(req.body.defaultServerLimit, 10);
           const defaultMaxMemory      = parseInt(req.body.defaultMaxMemory,   10);
           const defaultMaxCpu         = parseInt(req.body.defaultMaxCpu,      10);
@@ -423,6 +425,8 @@ const adminModule: Module = {
           const serverPolicyData: Record<string, unknown> = {
             allowUserCreateServer,
             allowUserDeleteServer,
+            allowUserCreateImages,
+            onboardingEnabled,
             defaultServerLimit,
             defaultMaxMemory,
             defaultMaxCpu,

@@ -220,6 +220,8 @@ const DEFAULT_UPLOAD_LIMIT = 100;
     post('/admin/settings/server-policy', {
       allowUserCreateServer: document.getElementById('allowUserCreateServer').checked,
       allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
+      allowUserCreateImages: document.getElementById('allowUserCreateImages').checked,
+      onboardingEnabled: document.getElementById('onboardingEnabled').checked,
       defaultServerLimit:    parseInt(document.getElementById('defaultServerLimit').value, 10) || 0,
       defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value,   10) || 0,
       defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value,      10) || 0,

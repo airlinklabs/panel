@@ -28,10 +28,12 @@ export type AggregateImages = {
 
 export type ImagesAvgAggregateOutputType = {
   id: number | null
+  createdById: number | null
 }
 
 export type ImagesSumAggregateOutputType = {
   id: number | null
+  createdById: number | null
 }
 
 export type ImagesMinAggregateOutputType = {
@@ -52,6 +54,9 @@ export type ImagesMinAggregateOutputType = {
   scripts: string | null
   variables: string | null
   portRequirements: string | null
+  status: string | null
+  createdById: number | null
+  rejectionReason: string | null
 }
 
 export type ImagesMaxAggregateOutputType = {
@@ -72,6 +77,9 @@ export type ImagesMaxAggregateOutputType = {
   scripts: string | null
   variables: string | null
   portRequirements: string | null
+  status: string | null
+  createdById: number | null
+  rejectionReason: string | null
 }
 
 export type ImagesCountAggregateOutputType = {
@@ -92,16 +100,21 @@ export type ImagesCountAggregateOutputType = {
   scripts: number
   variables: number
   portRequirements: number
+  status: number
+  createdById: number
+  rejectionReason: number
   _all: number
 }
 
 
 export type ImagesAvgAggregateInputType = {
   id?: true
+  createdById?: true
 }
 
 export type ImagesSumAggregateInputType = {
   id?: true
+  createdById?: true
 }
 
 export type ImagesMinAggregateInputType = {
@@ -122,6 +135,9 @@ export type ImagesMinAggregateInputType = {
   scripts?: true
   variables?: true
   portRequirements?: true
+  status?: true
+  createdById?: true
+  rejectionReason?: true
 }
 
 export type ImagesMaxAggregateInputType = {
@@ -142,6 +158,9 @@ export type ImagesMaxAggregateInputType = {
   scripts?: true
   variables?: true
   portRequirements?: true
+  status?: true
+  createdById?: true
+  rejectionReason?: true
 }
 
 export type ImagesCountAggregateInputType = {
@@ -162,6 +181,9 @@ export type ImagesCountAggregateInputType = {
   scripts?: true
   variables?: true
   portRequirements?: true
+  status?: true
+  createdById?: true
+  rejectionReason?: true
   _all?: true
 }
 
@@ -269,6 +291,9 @@ export type ImagesGroupByOutputType = {
   scripts: string | null
   variables: string | null
   portRequirements: string
+  status: string
+  createdById: number | null
+  rejectionReason: string | null
   _count: ImagesCountAggregateOutputType | null
   _avg: ImagesAvgAggregateOutputType | null
   _sum: ImagesSumAggregateOutputType | null
@@ -312,6 +337,9 @@ export type ImagesWhereInput = {
   scripts?: Prisma.StringNullableFilter<"Images"> | string | null
   variables?: Prisma.StringNullableFilter<"Images"> | string | null
   portRequirements?: Prisma.StringFilter<"Images"> | string
+  status?: Prisma.StringFilter<"Images"> | string
+  createdById?: Prisma.IntNullableFilter<"Images"> | number | null
+  rejectionReason?: Prisma.StringNullableFilter<"Images"> | string | null
   servers?: Prisma.ServerListRelationFilter
 }
 
@@ -333,6 +361,9 @@ export type ImagesOrderByWithRelationInput = {
   scripts?: Prisma.SortOrderInput | Prisma.SortOrder
   variables?: Prisma.SortOrderInput | Prisma.SortOrder
   portRequirements?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
+  rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   servers?: Prisma.ServerOrderByRelationAggregateInput
 }
 
@@ -357,6 +388,9 @@ export type ImagesWhereUniqueInput = Prisma.AtLeast<{
   scripts?: Prisma.StringNullableFilter<"Images"> | string | null
   variables?: Prisma.StringNullableFilter<"Images"> | string | null
   portRequirements?: Prisma.StringFilter<"Images"> | string
+  status?: Prisma.StringFilter<"Images"> | string
+  createdById?: Prisma.IntNullableFilter<"Images"> | number | null
+  rejectionReason?: Prisma.StringNullableFilter<"Images"> | string | null
   servers?: Prisma.ServerListRelationFilter
 }, "id" | "UUID">
 
@@ -378,6 +412,9 @@ export type ImagesOrderByWithAggregationInput = {
   scripts?: Prisma.SortOrderInput | Prisma.SortOrder
   variables?: Prisma.SortOrderInput | Prisma.SortOrder
   portRequirements?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
+  rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ImagesCountOrderByAggregateInput
   _avg?: Prisma.ImagesAvgOrderByAggregateInput
   _max?: Prisma.ImagesMaxOrderByAggregateInput
@@ -406,6 +443,9 @@ export type ImagesScalarWhereWithAggregatesInput = {
   scripts?: Prisma.StringNullableWithAggregatesFilter<"Images"> | string | null
   variables?: Prisma.StringNullableWithAggregatesFilter<"Images"> | string | null
   portRequirements?: Prisma.StringWithAggregatesFilter<"Images"> | string
+  status?: Prisma.StringWithAggregatesFilter<"Images"> | string
+  createdById?: Prisma.IntNullableWithAggregatesFilter<"Images"> | number | null
+  rejectionReason?: Prisma.StringNullableWithAggregatesFilter<"Images"> | string | null
 }
 
 export type ImagesCreateInput = {
@@ -425,6 +465,9 @@ export type ImagesCreateInput = {
   scripts?: string | null
   variables?: string | null
   portRequirements?: string
+  status?: string
+  createdById?: number | null
+  rejectionReason?: string | null
   servers?: Prisma.ServerCreateNestedManyWithoutImageInput
 }
 
@@ -446,6 +489,9 @@ export type ImagesUncheckedCreateInput = {
   scripts?: string | null
   variables?: string | null
   portRequirements?: string
+  status?: string
+  createdById?: number | null
+  rejectionReason?: string | null
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutImageInput
 }
 
@@ -466,6 +512,9 @@ export type ImagesUpdateInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   servers?: Prisma.ServerUpdateManyWithoutImageNestedInput
 }
 
@@ -487,6 +536,9 @@ export type ImagesUncheckedUpdateInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   servers?: Prisma.ServerUncheckedUpdateManyWithoutImageNestedInput
 }
 
@@ -508,6 +560,9 @@ export type ImagesCreateManyInput = {
   scripts?: string | null
   variables?: string | null
   portRequirements?: string
+  status?: string
+  createdById?: number | null
+  rejectionReason?: string | null
 }
 
 export type ImagesUpdateManyMutationInput = {
@@ -527,6 +582,9 @@ export type ImagesUpdateManyMutationInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ImagesUncheckedUpdateManyInput = {
@@ -547,6 +605,9 @@ export type ImagesUncheckedUpdateManyInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ImagesScalarRelationFilter = {
@@ -572,10 +633,14 @@ export type ImagesCountOrderByAggregateInput = {
   scripts?: Prisma.SortOrder
   variables?: Prisma.SortOrder
   portRequirements?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
+  rejectionReason?: Prisma.SortOrder
 }
 
 export type ImagesAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
 }
 
 export type ImagesMaxOrderByAggregateInput = {
@@ -596,6 +661,9 @@ export type ImagesMaxOrderByAggregateInput = {
   scripts?: Prisma.SortOrder
   variables?: Prisma.SortOrder
   portRequirements?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
+  rejectionReason?: Prisma.SortOrder
 }
 
 export type ImagesMinOrderByAggregateInput = {
@@ -616,10 +684,14 @@ export type ImagesMinOrderByAggregateInput = {
   scripts?: Prisma.SortOrder
   variables?: Prisma.SortOrder
   portRequirements?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
+  rejectionReason?: Prisma.SortOrder
 }
 
 export type ImagesSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
 }
 
 export type ImagesCreateNestedOneWithoutServersInput = {
@@ -653,6 +725,9 @@ export type ImagesCreateWithoutServersInput = {
   scripts?: string | null
   variables?: string | null
   portRequirements?: string
+  status?: string
+  createdById?: number | null
+  rejectionReason?: string | null
 }
 
 export type ImagesUncheckedCreateWithoutServersInput = {
@@ -673,6 +748,9 @@ export type ImagesUncheckedCreateWithoutServersInput = {
   scripts?: string | null
   variables?: string | null
   portRequirements?: string
+  status?: string
+  createdById?: number | null
+  rejectionReason?: string | null
 }
 
 export type ImagesCreateOrConnectWithoutServersInput = {
@@ -708,6 +786,9 @@ export type ImagesUpdateWithoutServersInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ImagesUncheckedUpdateWithoutServersInput = {
@@ -728,6 +809,9 @@ export type ImagesUncheckedUpdateWithoutServersInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -779,6 +863,9 @@ export type ImagesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   scripts?: boolean
   variables?: boolean
   portRequirements?: boolean
+  status?: boolean
+  createdById?: boolean
+  rejectionReason?: boolean
   servers?: boolean | Prisma.Images$serversArgs<ExtArgs>
   _count?: boolean | Prisma.ImagesCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["images"]>
@@ -801,6 +888,9 @@ export type ImagesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   scripts?: boolean
   variables?: boolean
   portRequirements?: boolean
+  status?: boolean
+  createdById?: boolean
+  rejectionReason?: boolean
 }, ExtArgs["result"]["images"]>
 
 export type ImagesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -821,6 +911,9 @@ export type ImagesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   scripts?: boolean
   variables?: boolean
   portRequirements?: boolean
+  status?: boolean
+  createdById?: boolean
+  rejectionReason?: boolean
 }, ExtArgs["result"]["images"]>
 
 export type ImagesSelectScalar = {
@@ -841,9 +934,12 @@ export type ImagesSelectScalar = {
   scripts?: boolean
   variables?: boolean
   portRequirements?: boolean
+  status?: boolean
+  createdById?: boolean
+  rejectionReason?: boolean
 }
 
-export type ImagesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "description" | "author" | "authorName" | "createdAt" | "meta" | "dockerImages" | "startup" | "stop" | "startup_done" | "config_files" | "info" | "scripts" | "variables" | "portRequirements", ExtArgs["result"]["images"]>
+export type ImagesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "description" | "author" | "authorName" | "createdAt" | "meta" | "dockerImages" | "startup" | "stop" | "startup_done" | "config_files" | "info" | "scripts" | "variables" | "portRequirements" | "status" | "createdById" | "rejectionReason", ExtArgs["result"]["images"]>
 export type ImagesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   servers?: boolean | Prisma.Images$serversArgs<ExtArgs>
   _count?: boolean | Prisma.ImagesCountOutputTypeDefaultArgs<ExtArgs>
@@ -874,6 +970,9 @@ export type $ImagesPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     scripts: string | null
     variables: string | null
     portRequirements: string
+    status: string
+    createdById: number | null
+    rejectionReason: string | null
   }, ExtArgs["result"]["images"]>
   composites: {}
 }
@@ -1315,6 +1414,9 @@ export interface ImagesFieldRefs {
   readonly scripts: Prisma.FieldRef<"Images", 'String'>
   readonly variables: Prisma.FieldRef<"Images", 'String'>
   readonly portRequirements: Prisma.FieldRef<"Images", 'String'>
+  readonly status: Prisma.FieldRef<"Images", 'String'>
+  readonly createdById: Prisma.FieldRef<"Images", 'Int'>
+  readonly rejectionReason: Prisma.FieldRef<"Images", 'String'>
 }
     
 

@@ -219,6 +219,30 @@
                   </div>
                 </label>
               </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow users to submit images</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Users can submit custom images for admin approval. Approved images appear in the create-server flow.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="allowUserCreateImages" class="sr-only peer" aria-label="Allow users to submit images" <%= settings.allowUserCreateImages ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Show onboarding tutorial</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">New users get a short 3-step tutorial after their first login.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="onboardingEnabled" class="sr-only peer" aria-label="Show onboarding tutorial" <%= settings.onboardingEnabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
 

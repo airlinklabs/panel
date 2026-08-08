@@ -1,0 +1,119 @@
+<%- include('../../components/header', { title: 'Image Approvals' }) %>
+
+<style>
+  .field-label { font-size: 11px; font-weight: 500; color: var(--theme-text-muted, #737373); display: block; margin-bottom: 5px; }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
+
+<main class="min-h-screen m-auto">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Images', href: '/admin/images' },
+        { label: 'Approvals' }
+      ] }) %>
+
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title">Image Approvals</h1>
+          <p class="al-page-desc">Review images submitted by users. Approved images become available in the server-creation flow.</p>
+        </div>
+        <div class="flex gap-2 shrink-0">
+          <a href="/admin/images" class="al-btn-secondary inline-flex items-center gap-1.5">
+            <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %>Back to Images
+          </a>
+        </div>
+      </div>
+
+      <div class="al-page-body">
+        <% if (pending.length === 0) { %>
+        <div class="flex flex-col items-center justify-center py-24 text-center">
+          <div class="w-12 h-12 rounded-full bg-emerald-600/10 flex items-center justify-center mb-4">
+            <%- icon('check', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
+          </div>
+          <p class="text-sm font-medium" style="color:var(--theme-text-strong)">No images waiting for review.</p>
+          <p class="text-sm mt-1" style="color:var(--theme-text-muted)">User submissions will appear here for approval.</p>
+        </div>
+        <% } else { %>
+        <div class="space-y-4">
+          <% pending.forEach(function(image) { %>
+          <div class="rounded-xl border p-5" style="border-color:var(--theme-border); background:var(--theme-bg-card);">
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-semibold truncate" style="color:var(--theme-text-strong)"><%= image.name %></h3>
+                  <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset bg-amber-600/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/20">
+                    Pending
+                  </span>
+                </div>
+                <% if (image.description) { %><p class="text-sm mt-1 line-clamp-2" style="color:var(--theme-text-muted)"><%= image.description %></p><% } %>
+                <% if (image.creator) { %>
+                <p class="text-xs mt-2" style="color:var(--theme-text-muted)">
+                  Submitted by <span class="font-medium" style="color:var(--theme-text-strong)"><%= image.creator.username || image.creator.email %></span>
+                  &middot; <%= new Date(image.createdAt).toLocaleString() %>
+                </p>
+                <% } %>
+                <div class="flex flex-wrap gap-4 mt-3 text-xs" style="color:var(--theme-text-muted)">
+                  <span class="inline-flex items-center gap-1.5"><%- icon('terminal', { class: 'size-3.5', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.startup || '' %></code></span>
+                  <span class="inline-flex items-center gap-1.5"><%- icon('container', { class: 'size-3.5', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.dockerImages || '[]' %></code></span>
+                </div>
+              </div>
+              <div class="flex gap-2 shrink-0">
+                <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost inline-flex items-center gap-1.5 text-xs">
+                  <%- icon('external-link', { class: 'size-4', strokeWidth: 1.5 }) %>View
+                </a>
+                <button type="button" class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" data-approve-image="<%= image.id %>">
+                  <%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>Approve
+                </button>
+                <button type="button" class="al-btn-danger inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" data-reject-image="<%= image.id %>">
+                  <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Reject
+                </button>
+              </div>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Reject modal -->
+<div id="rejectModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+  <div class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+    <div class="al-sheet-header" style="border-color:var(--theme-border)">
+      <div>
+        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Reject image</h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" id="rejectImageName"></p>
+      </div>
+      <button type="button" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" data-close-reject aria-label="Close">
+        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      </button>
+    </div>
+    <div class="px-6 py-4">
+      <label class="field-label" for="rejectReason">Reason <span class="text-neutral-400 font-normal">(shown to the user)</span></label>
+      <textarea id="rejectReason" class="al-input w-full" rows="3" placeholder="e.g. Missing startup exit detection or required docker image."></textarea>
+    </div>
+    <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
+      <button type="button" class="al-btn-secondary px-4 py-2 text-xs font-medium" data-close-reject>Cancel</button>
+      <button type="button" id="confirmReject" class="al-btn-danger px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
+        <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %>Reject
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="page-data" style="display:none"
+  data-approve-confirm="Approve this image? It will become available to all users."
+  data-approved="Image approved."
+  data-rejected="Image rejected."
+  data-error="Something went wrong."
+></div>
+
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-image-approvals.js?v=1"></script>
+
+<%- include('../../components/footer') %>

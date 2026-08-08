@@ -8,6 +8,7 @@ import prisma from '../../../db';
 import { daemonRequest, daemonBaseUrl } from '../../../handlers/utils/core/daemonRequest';
 import { AirlinkCloudClient } from '../../../handlers/utils/core/airlinkCloud';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
+import { startJob, getJob, isRunning, finishJob, describeJob } from '../../../handlers/jobRegistry';
 import {
   uploadStreamToS3,
   deleteFromS3,
@@ -107,6 +108,11 @@ export function registerBackupRoutes(router: Router): void {
         return;
       }
 
+      // The registry job is tracked so the persisted progress toast can keep
+      // polling across page changes; it is settled on every exit path below
+      // (success, daemon failure, and unexpected error).
+      let jobKey: string | null = null;
+
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
@@ -132,6 +138,17 @@ export function registerBackupRoutes(router: Router): void {
           res.status(400).json({ error: `Backup limit reached (${server.backupLimit}). Delete an existing backup first.` });
           return;
         }
+
+        const serverKey = getParamAsString(serverId);
+        jobKey = serverKey;
+        // Track the create in the job registry so the persisted progress
+        // toast can keep polling across page changes; also prevents two
+        // backups from being created for the same server at once.
+        if (isRunning('backup', serverKey)) {
+          res.status(409).json({ error: 'A backup is already being created for this server.' });
+          return;
+        }
+        startJob('backup', serverKey, `Creating backup "${name.trim()}…`);
 
         let ignoreList: string[] = [];
         if (server.backupIgnoreList) {
@@ -262,6 +279,7 @@ export function registerBackupRoutes(router: Router): void {
             message = 'Backup created successfully';
           }
 
+          finishJob('backup', serverKey, true, undefined, 'Backup created.');
           res.json({
             success: true,
             message,
@@ -275,14 +293,36 @@ export function registerBackupRoutes(router: Router): void {
             },
           });
         } else {
+          finishJob('backup', serverKey, false, 'Backup creation failed.', 'Backup creation failed.');
           res
             .status(500)
             .json({ error: 'Failed to create backup on daemon' });
         }
       } catch (error: unknown) {
+        if (jobKey) finishJob('backup', jobKey, false, 'Backup creation failed.', 'Backup creation failed.');
         logger.error('Error creating backup:', error);
         res.status(500).json({ error: safeClientMessage(error, 'Failed to create backup') });
       }
+    },
+  );
+
+  router.get(
+    '/server/:id/backups/progress',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('backups'),
+    async (req: Request, res: Response): Promise<void> => {
+      const job = getJob('backup', getParamAsString(req.params.id));
+      res.json(describeJob(job));
+    },
+  );
+
+  router.get(
+    '/server/:id/backups/restore/progress',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('backups'),
+    async (req: Request, res: Response): Promise<void> => {
+      const job = getJob('restore', getParamAsString(req.params.id));
+      res.json(describeJob(job));
     },
   );
 
@@ -320,6 +360,16 @@ export function registerBackupRoutes(router: Router): void {
           res.status(404).json({ error: 'Backup not found' });
           return;
         }
+
+        const serverKey = getParamAsString(serverId);
+        if (isRunning('restore', serverKey)) {
+          res.status(409).json({ error: 'A restore is already in progress for this server.' });
+          return;
+        }
+        // Track the restore in the job registry so the persisted progress
+        // toast can keep polling across page changes; settled on every exit
+        // path below (success, daemon failure, and unexpected error).
+        startJob('restore', serverKey, 'Restoring backup…');
 
         let backupPath = backup.filePath;
 
@@ -426,16 +476,19 @@ export function registerBackupRoutes(router: Router): void {
 
         if (response.data.success) {
           await logActivity(req, 'backup:restore', { serverId: getParamAsString(serverId), metadata: { name: backup.name, uuid: backup.UUID } });
+          finishJob('restore', serverKey, true, undefined, 'Backup restored.');
           res.json({
             success: true,
             message: 'Backup restored successfully',
           });
         } else {
+          finishJob('restore', serverKey, false, 'Restore failed.', 'Restore failed.');
           res
             .status(500)
             .json({ error: 'Failed to restore backup on daemon' });
         }
       } catch (error: unknown) {
+        finishJob('restore', getParamAsString(serverId), false, 'Restore failed.', 'Restore failed.');
         logger.error('Error restoring backup:', error);
         res.status(500).json({ error: safeClientMessage(error, 'Failed to restore backup') });
       }

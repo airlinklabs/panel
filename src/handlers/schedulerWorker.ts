@@ -2,12 +2,12 @@ import CronParser from 'cron-parser';
 import prisma from '../db';
 import { daemonRequest, type HttpResponse } from './utils/core/daemonRequest';
 import {
-  restartServerContainer,
-  startServerContainer,
+  stopServerContainer,
   type ServerRuntimeConfig,
   type ServerPageServer,
 } from '../modules/user/server/shared';
 import { persistBackupRecord } from '../modules/user/server/backups';
+import { runtimeStartQueue } from './runtimeQueue';
 import logger from './logger';
 
 export interface ScheduleWithRelations {
@@ -95,13 +95,32 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
         }
         if (action === 'start') {
           try {
-            await startServerContainer(schedule.server, schedule.server.UUID);
+            // Scheduled starts also pass through the capacity-aware queue; the
+            // queue processor grants them when the node has room.
+            const ownerRow = await prisma.server.findUnique({
+              where: { UUID: schedule.server.UUID },
+              select: { ownerId: true },
+            });
+            await runtimeStartQueue.enqueueStart({
+              serverId: schedule.server.UUID,
+              userId: ownerRow?.ownerId ?? 0,
+              priority: false,
+            });
           } catch (err) {
             errors.push(`task ${task.id}: ${describeThrownError(err)}`);
           }
         } else if (action === 'restart') {
           try {
-            await restartServerContainer(schedule.server, schedule.server.UUID);
+            await stopServerContainer(schedule.server, schedule.server.UUID, 'stop', { releaseResources: false }).catch(() => {});
+            const ownerRow = await prisma.server.findUnique({
+              where: { UUID: schedule.server.UUID },
+              select: { ownerId: true },
+            });
+            await runtimeStartQueue.enqueueStart({
+              serverId: schedule.server.UUID,
+              userId: ownerRow?.ownerId ?? 0,
+              priority: false,
+            });
           } catch (err) {
             errors.push(`task ${task.id}: ${describeThrownError(err)}`);
           }
@@ -120,6 +139,7 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
             errors.push(`task ${task.id}: ${describeDaemonError(resp)}`);
           } else if (action === 'stop' || action === 'kill') {
             await prisma.server.update({ where: { UUID: schedule.server.UUID }, data: { Running: false } }).catch(() => {});
+            runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
           }
         }
       } else if (task.action === 'backup') {

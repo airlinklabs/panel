@@ -9,6 +9,7 @@ import {
   getPrimaryExternalPort,
   getUsedExternalPorts,
   validatePortAssignments,
+  pickRandomFreePorts,
 } from '../src/handlers/utils/server/ports';
 
 describe('isValidPort', () => {
@@ -161,6 +162,42 @@ describe('getUsedExternalPorts', () => {
 
   it('returns empty array for no servers', () => {
     expect(getUsedExternalPorts([])).toEqual([]);
+  });
+});
+
+describe('pickRandomFreePorts', () => {
+  const pool = [25565, 25566, 25567, 25568, 25569];
+
+  it('returns the requested number of free ports', () => {
+    const picked = pickRandomFreePorts(pool, [], 3);
+    expect(picked).toHaveLength(3);
+    expect(new Set(picked).size).toBe(3);
+    picked.forEach(port => expect(pool).toContain(port));
+  });
+
+  it('never picks used ports', () => {
+    const picked = pickRandomFreePorts(pool, [25565, 25567], 2);
+    expect(picked).not.toContain(25565);
+    expect(picked).not.toContain(25567);
+  });
+
+  it('returns fewer when not enough free ports', () => {
+    const picked = pickRandomFreePorts(pool, [25565, 25566, 25567, 25568], 3);
+    expect(picked).toHaveLength(1);
+    expect(picked).toEqual([25569]);
+  });
+
+  it('spreads picks across the pool over many calls', () => {
+    const seen = new Set<number>();
+    for (let i = 0; i < 200; i += 1) {
+      pickRandomFreePorts(pool, [], 1).forEach(port => seen.add(port));
+    }
+    // Randomness should eventually touch more than one pool port.
+    expect(seen.size).toBeGreaterThan(1);
+  });
+
+  it('returns empty array when the pool is fully used', () => {
+    expect(pickRandomFreePorts(pool, pool, 1)).toEqual([]);
   });
 });
 

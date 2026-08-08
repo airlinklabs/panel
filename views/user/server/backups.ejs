@@ -187,12 +187,6 @@
 <script nonce="<%- nonce %>">
 const serverUUID = '<%= server.UUID %>';
 
-function showLoading(title, message) {
-  showLoadingPopup(title, message);
-}
-function hideLoading() {
-  hideLoadingPopup();
-}
 function showConfirmation(title, message, onConfirm) {
   window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Confirm', onConfirm });
 }
@@ -237,44 +231,40 @@ async function confirmCreateBackup() {
   }
 
   closeCreateBackupModal();
-// Show loading toast with progress
-const loading = showLoadingToast('Creating backup...');
-let progress = 0;
+  // Persisted progress toast — it survives page changes (and keeps making
+  // progress via the /backups/progress job) if the user navigates while the
+  // daemon is still compressing the backup.
+  const loading = window.showProgressToast ? window.showProgressToast('Creating backup…', {
+    group: 'backup:' + serverUUID,
+    autoCompleteAt100: false,
+    job: { url: '/server/' + serverUUID + '/backups/progress', intervalMs: 2000 },
+  }) : window.showLoadingToast('Creating backup...');
 
-// Simulate progress until request finishes
-const progressInterval = setInterval(() => {
-  progress += 10;
-  loading.updateProgress(progress);
-  if (progress >= 90) clearInterval(progressInterval); // cap at 90% until response
-});
+  try {
+    const response = await fetch(`/server/${serverUUID}/backups/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name }),
+    });
 
-try {
-  const response = await fetch(`/server/${serverUUID}/backups/create`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ name }),
-  });
+    const data = await response.json();
 
-  const data = await response.json();
-
-  if (data.success) {
-    // Complete the progress bar
-    loading.updateProgress(100);
-     showToast('Backup created.', 'success');
-
-    // Reload page to show new backup
-    addBackupRow(data.backup);
-  } else {
+    if (data.success) {
+      // Complete the progress toast with the server's result message.
+      loading.complete(true, data.message || 'Backup created.');
+      // Reload page to show new backup
+      addBackupRow(data.backup);
+    } else {
+      loading.close();
+      showToast(data.error || 'Failed to create backup', 'error');
+    }
+  } catch (error) {
     loading.close();
-    showToast(data.error || 'Failed to create backup', 'error');
+    console.error('Failed to create backup:', error);
+    showToast('Failed to create backup. Try again.', 'error');
   }
-} catch (error) {
-  loading.close();
-  console.error('Failed to create backup:', error);
-  showToast('Failed to create backup. Try again.', 'error');
-}
 }
 
 // Download backup
@@ -288,7 +278,12 @@ function restoreBackup(backupId, backupName) {
     'Restore Backup',
     `Are you sure you want to restore the backup "${backupName}"? This will replace all current server files and cannot be undone.`,
     async () => {
-      showLoading('Restoring backup...', 'Restoring backup. This may take a few minutes.');
+      // Persisted progress toast — survives page changes and keeps polling the
+      // restore job (see /backups/restore/progress) while the daemon restores.
+      const loading = window.showProgressToast ? window.showProgressToast('Restoring backup…', {
+        group: 'restore:' + serverUUID,
+        job: { url: '/server/' + serverUUID + '/backups/restore/progress', intervalMs: 2000 },
+      }) : window.showLoadingToast('Restoring backup...');
 
       try {
         const response = await fetch(`/server/${serverUUID}/backups/${backupId}/restore`, {
@@ -301,15 +296,15 @@ function restoreBackup(backupId, backupName) {
         const data = await response.json();
 
         if (data.success) {
-           showToast('Backup restored.', 'success');
+          loading.complete(true, data.message || 'Backup restored.');
         } else {
+          loading.close();
           showToast(data.error || 'Failed to restore backup. Give it another try, or check that the node is online.', 'error');
         }
       } catch (error) {
+        loading.close();
         console.error('Failed to restore backup:', error);
         showToast('Failed to restore backup. Give it another try, or check that the node is online.', 'error');
-      } finally {
-        hideLoading();
       }
     }
   );

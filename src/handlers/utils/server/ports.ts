@@ -102,6 +102,25 @@ export function getUsedExternalPorts(servers: { Ports: string }[]): number[] {
   return servers.flatMap((server) => parseServerPorts(server.Ports).map((port) => port.externalPort));
 }
 
+// Pick `count` free external ports at random from the node pool. Deterministic
+// lowest-first picking makes the same ports hot spots; randomizing spreads new
+// servers across the pool.
+export function pickRandomFreePorts(pool: number[], usedPorts: number[], count: number): number[] {
+  const used = new Set(usedPorts);
+  const remaining = new Set(pool.filter((port) => !used.has(port)));
+  const out: number[] = [];
+  while (out.length < count && remaining.size > 0) {
+    const arr = Array.from(remaining);
+    const pick = arr[Math.floor(Math.random() * arr.length)];
+    if (pick === undefined) {
+      break;
+    }
+    out.push(pick);
+    remaining.delete(pick);
+  }
+  return out;
+}
+
 export function validatePortAssignments(
   ports: ServerPortAssignment[],
   allocatedPorts: number[],

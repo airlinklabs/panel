@@ -27,6 +27,7 @@ import {
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import { sendServerSuspended } from '../../handlers/utils/core/mailer';
 import { startTransfer, getTransferState } from '../../handlers/utils/server/serverTransfer';
+import { runtimeStartQueue } from '../../handlers/runtimeQueue';
 
 const DEFAULT_SERVER_PORT = 25565;
 const DEFAULT_SERVER_PORT_RANGE = `${DEFAULT_SERVER_PORT}:${DEFAULT_SERVER_PORT}`;
@@ -1071,6 +1072,104 @@ const adminModule: Module = {
         } catch (error: unknown) {
           logger.error('Error getting transfer status:', error);
           res.status(500).json({ error: 'Failed to get transfer status' });
+        }
+      },
+    );
+
+    router.get(
+      '/admin/queue',
+      isAuthenticated(true, 'airlink.admin.servers.view'),
+      async (req: Request, res: Response) => {
+        try {
+          const entries = runtimeStartQueue.listQueueForAdmin();
+          if (entries.length === 0) {
+            res.json({ entries: [] });
+            return;
+          }
+
+          const serverIds = [...new Set(entries.map(e => e.serverId))];
+          const userIds = [...new Set(entries.map(e => e.userId))];
+          const [servers, users] = await Promise.all([
+            prisma.server.findMany({
+              where: { UUID: { in: serverIds } },
+              select: { UUID: true, name: true },
+            }),
+            prisma.users.findMany({
+              where: { id: { in: userIds } },
+              select: { id: true, username: true },
+            }),
+          ]);
+          const serverName = new Map(servers.map((s) => [s.UUID, s.name]));
+          const userName = new Map(users.map((u) => [u.id, u.username]));
+
+          res.json({
+            entries: entries.map((e) => ({
+              ...e,
+              serverName: serverName.get(e.serverId) || null,
+              userName: userName.get(e.userId) || null,
+            })),
+          });
+        } catch (error: unknown) {
+          logger.error('Error fetching runtime queue:', error);
+          res.status(500).json({ error: 'Failed to fetch runtime queue' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/queue/:serverId/kick',
+      isAuthenticated(true, 'airlink.admin.servers.view'),
+      async (req: Request, res: Response) => {
+        try {
+          const serverId = getParamAsString(req.params.serverId);
+          if (!serverId) {
+            res.status(400).json({ error: 'Invalid server ID' });
+            return;
+          }
+          const removed = await runtimeStartQueue.cancelQueuedStart(serverId);
+          res.json({ removed });
+        } catch (error: unknown) {
+          logger.error('Error kicking queued start:', error);
+          res.status(500).json({ error: 'Failed to kick queued start' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/queue/users/:userId/ban',
+      isAuthenticated(true, 'airlink.admin.servers.view'),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = getParamAsNumber(req.params.userId);
+          if (isNaN(userId)) {
+            res.status(400).json({ error: 'Invalid user ID' });
+            return;
+          }
+          const minutes = Number(req.body?.minutes) || 30;
+          const removed = await runtimeStartQueue.banUserFromQueue(userId, minutes);
+          res.json({ removed, banned: true });
+        } catch (error: unknown) {
+          logger.error('Error banning user from queue:', error);
+          res.status(500).json({ error: 'Failed to ban user from queue' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/queue/users/:userId/unban',
+      isAuthenticated(true, 'airlink.admin.servers.view'),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = getParamAsNumber(req.params.userId);
+          if (isNaN(userId)) {
+            res.status(400).json({ error: 'Invalid user ID' });
+            return;
+          }
+          const unbanned = await runtimeStartQueue.unbanUserFromQueue(userId);
+          res.json({ unbanned });
+        } catch (error: unknown) {
+          logger.error('Error unbanning user from queue:', error);
+          res.status(500).json({ error: 'Failed to unban user from queue' });
         }
       },
     );

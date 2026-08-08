@@ -111,6 +111,28 @@
                   <div class="flex items-center justify-between">
                     <div>
                       <h3 class="text-sm font-medium text-neutral-800 dark:text-white">
+                        <%= req.translations.role || 'Role' %>
+                      </h3>
+                      <p class="text-xs text-neutral-400 mt-1">
+                        <%= req.translations.roleDescription || 'Owner and admin roles are signaled by isAdmin below. Privileged normally haven't admin powers but get expanded settings.' %>
+                      </p>
+                    </div>
+                    <select id="role" name="role" class="al-input w-44">
+                      <% const currentRole = dataUser.role || (dataUser.isAdmin ? 'admin' : 'user'); %>
+                      <option value="user" <%= currentRole === 'user' ? 'selected' : '' %>><%= req.translations.roleUser || 'Normal user' %></option>
+                      <option value="privileged" <%= currentRole === 'privileged' ? 'selected' : '' %>><%= req.translations.rolePrivileged || 'Privileged user' %></option>
+                      <option value="admin" <%= currentRole === 'admin' ? 'selected' : '' %>><%= req.translations.roleAdmin || 'Admin' %></option>
+                      <option value="owner" <%= currentRole === 'owner' ? 'selected' : '' %>><%= req.translations.roleOwner || 'Owner' %></option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="md:col-span-2">
+                <div class="bg-neutral-400/10 dark:bg-neutral-600/20 p-4 rounded-xl border border-neutral-800/10 dark:border-white/5 w-full">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">
                         <%= req.translations.adminStatus || 'Administrator Status' %>
                       </h3>
                       <p class="text-xs text-neutral-400 mt-1">
@@ -181,6 +203,20 @@
               </div>
             </div>
           </div>
+
+          <% if (canTransferOwner) { %>
+          <div class="al-card border-red-600/20">
+            <h2 class="al-card-header" style="color:#ef4444">Transfer Ownership</h2>
+            <p class="text-xs mb-4" style="color:var(--theme-text-muted)">You are the owner. Hand over ownership of this panel to <%= dataUser.username %>. The current owner becomes an admin.</p>
+            <div class="flex items-center gap-3">
+              <button type="button" id="transferOwnerBtn" class="al-btn-danger">
+                <%- icon('shield-alert', { size: 16 }) %>
+                Transfer ownership to <%= dataUser.username %>
+              </button>
+              <span class="text-xs text-neutral-500">This cannot be undone without transferring back.</span>
+            </div>
+          </div>
+          <% } %>
         </form>
       </div>
     </div>
@@ -203,6 +239,10 @@
   data-sending-user-information="<%= req.translations.sendingUserInformation || 'Sending user information...' %>"
   data-user-updated-successfully="<%= req.translations.userUpdatedSuccessfully || 'User updated successfully!' %>"
   data-error-updating-user="<%= req.translations.errorUpdatingUser || 'Error updating user' %>"
+  data-transfer-owner-title="<%= req.translations.transferOwnerTitle || 'Transfer ownership?' %>"
+  data-transfer-owner-confirm="<%= req.translations.transferOwnerConfirm || 'This will make the current owner an admin. Continue?' %>"
+  data-transferring-ownership="<%= req.translations.transferringOwnership || 'Transferring ownership...' %>"
+  data-can-transfer-owner="<%= canTransferOwner ? '1' : '' %>"
 ></div>
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-user-edit.js?v=5"></script>

@@ -229,6 +229,14 @@ const dashboardModule: Module = {
           return;
         }
 
+        const needsOnboarding = Boolean(
+          settings?.onboardingEnabled &&
+          !user.onboardingCompleted &&
+          !user.onboardingSkipped,
+        );
+        res.locals.needsOnboarding = needsOnboarding;
+        res.locals.canCreateServerForOnboarding = !user.isAdmin && (settings?.allowUserCreateServer ?? false);
+
         const servers = await prisma.server.findMany({
           where: { ownerId: user.id },
           include: { node: true, owner: true },

@@ -580,4 +580,65 @@
     pollAllServers();
     setInterval(pollAllServers, POLL_INTERVAL);
   }
+
+  /* ── Onboarding modal ─────────────────────── */
+  var onboardingModal = document.getElementById('onboardingModal');
+  if (onboardingModal) {
+    var currentStep = 0;
+    var TOTAL_STEPS = 3;
+    var dots = onboardingModal.querySelectorAll('.onboarding-dot');
+    var steps = onboardingModal.querySelectorAll('.onboarding-step');
+    var nextBtn = document.getElementById('onboardingNext');
+    var prevBtn = document.getElementById('onboardingPrev');
+    var finishBtn = document.getElementById('onboardingFinish');
+    var skipBtn = document.getElementById('onboardingSkip');
+
+    function renderStep() {
+      steps.forEach(function (s) { s.classList.toggle('hidden', Number(s.dataset.step) !== currentStep); });
+      dots.forEach(function (d) { d.style.background = Number(d.dataset.step) <= currentStep ? 'var(--theme-text)' : 'var(--theme-border-subtle)'; });
+      prevBtn.classList.toggle('hidden', currentStep === 0);
+      nextBtn.classList.toggle('hidden', currentStep === TOTAL_STEPS - 1);
+      finishBtn.classList.toggle('hidden', currentStep !== TOTAL_STEPS - 1);
+    }
+
+    function setCompleted() {
+      fetch('/onboarding/complete', { method: 'POST' })
+        .then(function () {
+          onboardingModal.remove();
+        })
+        .catch(function () {
+          onboardingModal.remove();
+        });
+    }
+
+    nextBtn.addEventListener('click', function () {
+      if (currentStep < TOTAL_STEPS - 1) {
+        currentStep++;
+        renderStep();
+      }
+    });
+
+    prevBtn.addEventListener('click', function () {
+      if (currentStep > 0) {
+        currentStep--;
+        renderStep();
+      }
+    });
+
+    finishBtn.addEventListener('click', setCompleted);
+    skipBtn.addEventListener('click', function () {
+      fetch('/onboarding/skip', { method: 'POST' })
+        .then(function () { onboardingModal.remove(); })
+        .catch(function () { onboardingModal.remove(); });
+    });
+    onboardingModal.addEventListener('click', function (e) {
+      if (e.target === onboardingModal) {
+        fetch('/onboarding/skip', { method: 'POST' })
+          .then(function () { onboardingModal.remove(); })
+          .catch(function () { onboardingModal.remove(); });
+      }
+    });
+
+    renderStep();
+  }
 })();

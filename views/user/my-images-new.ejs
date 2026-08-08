@@ -1,0 +1,97 @@
+<%- include('../components/header', { title: 'Submit Image' }) %>
+
+<style>
+  ::-webkit-scrollbar { display: none; }
+  .field-label { font-size: 11px; font-weight: 500; color: var(--theme-text-muted, #737373); display: block; margin-bottom: 5px; }
+  .field-input {
+    width: 100%; border-radius: 9px; border: 1px solid var(--theme-border, #e5e5e5);
+    background: var(--theme-bg-input, #fafafa); padding: 8px 12px;
+    font-size: 13px; color: var(--theme-text-strong, #171717); outline: none;
+    transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
+  }
+  html.dark .field-input { background: var(--theme-bg-hover, rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.1)); color: var(--theme-text, #e5e5e5); }
+  .field-input:focus { border-color: var(--theme-border, #a3a3a3); }
+  html.dark .field-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.25)); }
+</style>
+
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0">
+      <%- include('../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../components/ui/breadcrumb', { items: [
+        { label: req.translations.myImages || 'My Images', href: '/my-images' },
+        { label: req.translations.submitImage || 'Submit Image' }
+      ] }) %>
+
+      <div class="al-page-header">
+        <h1 class="al-page-title"><%= req.translations.submitImage || 'Submit Image' %></h1>
+        <p class="al-page-desc"><%= req.translations.submitImageText || 'Paste an egg JSON or point us at a raw URL. Admins review submissions before they are usable.' %></p>
+      </div>
+
+      <div class="al-page-body">
+        <div class="bg-white dark:bg-neutral-800/50 rounded-xl p-6 shadow-lg border border-neutral-200 dark:border-neutral-700/30">
+          <div class="flex gap-1 p-1 rounded-xl mb-4" style="background:var(--theme-bg-secondary)">
+            <button type="button" id="modeManual" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-strong); background:var(--theme-bg-card);">
+              <%= req.translations.manualEnter || 'Enter details' %>
+            </button>
+            <button type="button" id="modeJson" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-muted);">
+              <%= req.translations.pasteJson || 'Paste JSON' %>
+            </button>
+            <button type="button" id="modeUrl" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-muted);">
+              <%= req.translations.importFromUrl || 'Import from URL' %>
+            </button>
+          </div>
+
+          <!-- Manual form -->
+          <form id="manualForm" class="flex flex-col gap-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required placeholder="e.g. My Custom Game"></div>
+              <div><label class="field-label">Author</label><input class="field-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
+              <div><label class="field-label">Author Name</label><input class="field-input" type="text" name="authorName" placeholder="Your Name"></div>
+              <div class="col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+              <div class="col-span-2"><label class="field-label">Docker images (JSON array) <span class="text-red-500">*</span></label><input class="field-input" type="text" name="dockerImages" required placeholder='[{"game":"ghcr.io/you/image:latest"}]' style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+              <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
+              <div class="col-span-2"><label class="field-label">Variables <span class="text-neutral-400 font-normal">(JSON array, optional)</span></label><textarea class="field-input" name="variables" rows="4" placeholder="[]" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;">[]</textarea></div>
+            </div>
+            <div class="flex gap-2 pt-1">
+              <a href="/my-images" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</a>
+              <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
+            </div>
+          </form>
+
+          <!-- JSON paste -->
+          <div id="jsonSection" class="hidden">
+            <label class="field-label" for="jsonInput">Egg JSON</label>
+            <textarea id="jsonInput" class="field-input" rows="14" placeholder='{ "name": "...", "startup": "...", "docker_images": { "game": "ghcr.io/example/image:latest" } }' style="resize:none;font-family:ui-monospace,monospace;font-size:12px;"></textarea>
+            <div class="flex gap-2 pt-4">
+              <a href="/my-images" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5">Cancel</a>
+              <button type="button" id="submitJsonBtn" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
+            </div>
+          </div>
+
+          <!-- URL import -->
+          <div id="urlSection" class="hidden">
+            <label class="field-label" for="urlInput">Image URL</label>
+            <input id="urlInput" type="url" class="field-input" placeholder="https://raw.githubusercontent.com/…/egg.json">
+            <p class="mt-2 text-xs" style="color:var(--theme-text-muted)">Fetch a Pterodactyl egg JSON from a raw URL and submit it for review.</p>
+            <div class="flex gap-2 pt-4">
+              <a href="/my-images" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5">Cancel</a>
+              <button type="button" id="submitUrlBtn" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Fetch &amp; Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="page-data" style="display:none"
+  data-submit-error="<%= req.translations.errorSubmitting || 'Failed to submit the image.' %>"
+  data-submitting="<%= req.translations.submitting || 'Submitting image...' %>"
+></div>
+
+<script nonce="<%- nonce %>" src="/javascript/user/my-images-new.js?v=1"></script>
+
+<%- include('../components/footer') %>

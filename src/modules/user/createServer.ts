@@ -15,18 +15,35 @@ import {
 } from '../../handlers/utils/server/allocations';
 import {
   getUsedExternalPorts,
+  isValidPort,
   parseImagePortRequirements,
+  pickRandomFreePorts,
   serializeServerPorts,
 } from '../../handlers/utils/server/ports';
 import type { ServerVariable } from './server/shared';
 
-function pickAvailablePorts(pool: number[], usedPorts: number[], count: number): number[] {
-  const picked: number[] = [];
-  for (const port of pool) {
-    if (!usedPorts.includes(port)) picked.push(port);
-    if (picked.length === count) return picked;
+interface ClientPort {
+  name: string;
+  internalPort: number;
+}
+
+// Users choose internal ports (and names) themselves; external ports are always
+// auto-assigned from the node pool. Returns null when `raw` is invalid so the
+// request is rejected; the create flow falls back to the image's requirements
+// when no ports are supplied at all.
+function parseClientPorts(raw: unknown): ClientPort[] | null {
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  const out: ClientPort[] = [];
+  for (const item of raw) {
+    const obj = item && typeof item === 'object' ? (item as Record<string, unknown>) : {};
+    const internalPort = Number(obj.internalPort ?? obj.port);
+    const name = typeof obj.name === 'string' ? obj.name.trim() : '';
+    if (!Number.isInteger(internalPort) || !isValidPort(internalPort) || !name) {
+      return null;
+    }
+    out.push({ name, internalPort });
   }
-  return picked;
+  return out;
 }
 
 const DEFAULT_MAX_MEMORY_MB = 512;
@@ -43,19 +60,39 @@ interface PortAllocation {
   createdServer: { UUID: string; id: number };
 }
 
-async function resolveUserServerLimit(userId: number, settings: { defaultServerLimit?: number | null } | null): Promise<number> {
-  const user = await prisma.users.findUnique({ where: { id: userId } });
+async function resolveUserServerLimit(
+  userId: number,
+  settings: {
+    defaultServerLimit?: number | null;
+    allowPrivilegedServerLimit?: number | null;
+  } | null,
+): Promise<number> {
+const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) return 0;
+  // Owner and admins are not subject to per-user server limits.
+  if (user.role === 'owner' || user.role === 'admin') return Number.MAX_SAFE_INTEGER;
   if (user.serverLimit !== null && user.serverLimit !== undefined) return user.serverLimit;
+  if (user.role === 'privileged') return settings?.allowPrivilegedServerLimit ?? 5;
   return settings?.defaultServerLimit ?? 0;
 }
 
-async function resolveUserResourceLimits(userId: number, settings: { defaultMaxMemory?: number | null; defaultMaxCpu?: number | null; defaultMaxStorage?: number | null } | null) {
+async function resolveUserResourceLimits(
+  userId: number,
+  settings: {
+    defaultMaxMemory?: number | null;
+    defaultMaxCpu?: number | null;
+    defaultMaxStorage?: number | null;
+    allowPrivilegedMaxMemory?: number | null;
+    allowPrivilegedMaxCpu?: number | null;
+    allowPrivilegedMaxStorage?: number | null;
+  } | null,
+) {
   const user = await prisma.users.findUnique({ where: { id: userId } });
+  const isPrivilegedRole = user?.role === 'privileged';
   return {
-    maxMemory: user?.maxMemory ?? settings?.defaultMaxMemory ?? DEFAULT_MAX_MEMORY_MB,
-    maxCpu: user?.maxCpu ?? settings?.defaultMaxCpu ?? DEFAULT_MAX_CPU_PERCENT,
-    maxStorage: user?.maxStorage ?? settings?.defaultMaxStorage ?? DEFAULT_MAX_STORAGE_MB,
+    maxMemory: user?.maxMemory ?? settings?.[isPrivilegedRole ? 'allowPrivilegedMaxMemory' : 'defaultMaxMemory'] ?? DEFAULT_MAX_MEMORY_MB,
+    maxCpu: user?.maxCpu ?? settings?.[isPrivilegedRole ? 'allowPrivilegedMaxCpu' : 'defaultMaxCpu'] ?? DEFAULT_MAX_CPU_PERCENT,
+    maxStorage: user?.maxStorage ?? settings?.[isPrivilegedRole ? 'allowPrivilegedMaxStorage' : 'defaultMaxStorage'] ?? DEFAULT_MAX_STORAGE_MB,
   };
 }
 
@@ -96,14 +133,21 @@ const userCreateServerModule: Module = {
 
         const resourceLimits = await resolveUserResourceLimits(userId!, settings);
         const nodes = await prisma.node.findMany();
-        const images = await prisma.images.findMany();
+        const images = await prisma.images.findMany({ where: { status: 'approved' } });
 
         const nodeHeadroom: Record<number, unknown> = {};
+        // Recommend the node with the most free capacity so new servers land on
+        // the least-loaded node by default (a local "prefer nearby node" proxy).
+        let recommendedNodeId: number | null = null;
+        let bestRatio = Infinity;
         for (const n of nodes) {
           const agg = await prisma.server.aggregate({
             where: { nodeId: n.id },
             _sum: { Memory: true, Cpu: true, Storage: true },
           });
+          const usedMemory = agg._sum.Memory ?? 0;
+          const usedCpu = agg._sum.Cpu ?? 0;
+          const usedStorage = agg._sum.Storage ?? 0;
           nodeHeadroom[n.id] = {
             ram: n.ram,
             cpu: n.cpu,
@@ -111,10 +155,36 @@ const userCreateServerModule: Module = {
             overMemory: n.overallocateMemory,
             overCpu: n.overallocateCpu,
             overDisk: n.overallocateDisk,
-            usedMemory: agg._sum.Memory ?? 0,
-            usedCpu: agg._sum.Cpu ?? 0,
-            usedStorage: agg._sum.Storage ?? 0,
+            usedMemory,
+            usedCpu,
+            usedStorage,
           };
+
+          const caps: number[] = [];
+          const ratios: number[] = [];
+          if (n.ram > 0) {
+            caps.push(n.ram);
+            ratios.push(usedMemory / (n.ram * 1024));
+          }
+          if (n.cpu > 0) {
+            caps.push(n.cpu);
+            ratios.push(usedCpu / n.cpu);
+          }
+          if (n.disk > 0) {
+            caps.push(n.disk);
+            ratios.push(usedStorage / (n.disk * 1024));
+          }
+          const ratio = ratios.length > 0 ? ratios.reduce((sum, r) => sum + r, 0) / ratios.length : 0;
+          if (ratio < bestRatio) {
+            bestRatio = ratio;
+            recommendedNodeId = n.id;
+          }
+        }
+
+        // Prefer the node the user chose in their account settings; the
+        // least-loaded node remains the fallback default.
+        if (user.preferredNodeId && nodes.some(n => n.id === user.preferredNodeId)) {
+          recommendedNodeId = user.preferredNodeId;
         }
 
         res.render('user/create-server', {
@@ -127,6 +197,7 @@ const userCreateServerModule: Module = {
           currentCount,
           resourceLimits,
           nodeHeadroom,
+          recommendedNodeId,
         });
       } catch (error) {
         logger.error('Error loading user create server page:', error);
@@ -217,9 +288,27 @@ const userCreateServerModule: Module = {
 
         const image = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
         if (!image) return res.status(400).json({ error: 'Image not found.' });
+        if (image.status !== 'approved') {
+          return res.status(400).json({ error: 'This image is not approved yet.' });
+        }
 
         const portRequirements = parseImagePortRequirements(image.portRequirements);
-        const requiredPortCount = Math.max(1, portRequirements.length);
+        // Port specs the client may supply (the multi-port flow). When omitted,
+        // fall back to the image's required ports. External ports are always
+        // auto-assigned from the node pool below.
+        const hasClientPorts = Array.isArray(req.body.ports) && (req.body.ports as unknown[]).length > 0;
+        let portSpecs: ClientPort[] = portRequirements.map((r) => ({ name: r.name, internalPort: r.internalPort }));
+        if (hasClientPorts) {
+          const parsed = parseClientPorts(req.body.ports);
+          if (!parsed) {
+            return res.status(400).json({ error: 'Invalid port configuration.' });
+          }
+          if (parsed.length > 20) {
+            return res.status(400).json({ error: 'Too many ports (max 20).' });
+          }
+          portSpecs = parsed;
+        }
+        const requiredPortCount = Math.max(1, portSpecs.length);
 
         let dockerImages: Record<string, string>[] = [];
         try {
@@ -250,16 +339,16 @@ const userCreateServerModule: Module = {
         const { assignedPorts, createdServer }: PortAllocation = await withNodePortLock(node.id, async () => {
           const pool = await getNodePortPool(node.id);
           const existingServers = await prisma.server.findMany({ where: { nodeId: node.id } });
-          const picked = pickAvailablePorts(pool, getUsedExternalPorts(existingServers), requiredPortCount);
+          const picked = pickRandomFreePorts(pool, getUsedExternalPorts(existingServers), requiredPortCount);
           if (picked.length < requiredPortCount) {
             throw new Error(`No available ports on the selected node. ${requiredPortCount} port(s) required.`);
           }
 
           const portsJson = serializeServerPorts(picked.map((externalPort, index) => {
-            const requirement = portRequirements[index];
+            const spec = portSpecs[index];
             return {
-              name: requirement?.name || `Port ${index + 1}`,
-              internalPort: requirement?.internalPort || externalPort,
+              name: spec?.name ?? `Port ${index + 1}`,
+              internalPort: spec?.internalPort ?? externalPort,
               externalPort,
               primary: index === 0,
             };

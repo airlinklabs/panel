@@ -79,12 +79,16 @@ const accountModule: Module = {
         const userId = req.session?.user?.id;
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
-          const [user, loginHistory] = await Promise.all([
+          const [user, loginHistory, nodes] = await Promise.all([
             prisma.users.findUnique({ where: { id: userId } }),
             prisma.loginHistory.findMany({
               where: { userId },
               orderBy: { timestamp: 'desc' },
               take: 10,
+            }),
+            prisma.node.findMany({
+              select: { id: true, name: true, address: true },
+              orderBy: { id: 'asc' },
             }),
           ]);
           if (!user) {
@@ -99,6 +103,7 @@ const accountModule: Module = {
             req,
             settings,
             loginHistory,
+            nodes,
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
@@ -109,6 +114,7 @@ const accountModule: Module = {
             req,
             settings,
             loginHistory: [],
+            nodes: [],
           });
         }
       },
@@ -362,6 +368,44 @@ const accountModule: Module = {
           res.status(200).json({ message: 'Email updated successfully.' });
         } catch (error) {
           logger.error('Error updating email:', error);
+          res.status(500).json({ message: 'Internal Server Error' });
+        }
+      },
+    );
+
+    router.post(
+      '/set-preferred-node',
+      isAuthenticated(),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const { preferredNodeId } = req.body;
+
+        if (preferredNodeId === undefined || preferredNodeId === null || preferredNodeId === '') {
+          res.status(400).json({ message: 'A preferred node is required.' });
+          return;
+        }
+
+        const nodeId = parseInt(String(preferredNodeId), 10);
+        if (Number.isNaN(nodeId) || nodeId < 1) {
+          res.status(400).json({ message: 'Invalid node.' });
+          return;
+        }
+
+        try {
+          const node = await prisma.node.findUnique({ where: { id: nodeId } });
+          if (!node) {
+            res.status(400).json({ message: 'Node not found.' });
+            return;
+          }
+
+          await prisma.users.update({
+            where: { id: userId },
+            data: { preferredNodeId: node.id },
+          });
+
+          res.status(200).json({ message: 'Preferred node saved.', preferredNodeId: node.id });
+        } catch (error) {
+          logger.error('Error saving preferred node:', error);
           res.status(500).json({ message: 'Internal Server Error' });
         }
       },

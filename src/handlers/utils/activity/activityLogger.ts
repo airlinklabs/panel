@@ -56,7 +56,10 @@ export type ActivityEvent =
   | 'user:update'
   | 'image:create'
   | 'image:update'
-  | 'image:delete';
+  | 'image:delete'
+  | 'image:submit'
+  | 'image:approve'
+  | 'image:reject';
 
 // Per-user (or per-IP when unauthenticated) sliding-window rate limit so a
 // single actor cannot flood the audit table. Dropping excess logs is a

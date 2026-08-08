@@ -1,0 +1,124 @@
+<%- include('../components/header', { title: 'My Images' }) %>
+
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0">
+      <%- include('../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../components/ui/breadcrumb', { items: [
+        { label: req.translations.myImages || 'My Images' }
+      ] }) %>
+
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title"><%= req.translations.myImages || 'My Images' %></h1>
+          <p class="al-page-desc"><%= req.translations.myImagesText || 'Submit and manage custom images. They become usable once an admin approves them.' %></p>
+        </div>
+        <% if (allowed) { %>
+        <div class="flex gap-2 shrink-0">
+          <a href="/my-images/new" class="al-btn-primary inline-flex items-center gap-1.5">
+            <%- icon('plus', { size: 16 }) %>
+            <%= req.translations.submitImage || 'Submit Image' %>
+          </a>
+        </div>
+        <% } %>
+      </div>
+
+      <div class="al-page-body">
+        <% if (!allowed) { %>
+        <div class="flex flex-col items-center justify-center py-24 text-center">
+          <div class="w-12 h-12 rounded-full bg-neutral-400/10 flex items-center justify-center mb-4">
+            <%- icon('ban', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
+          </div>
+          <p class="text-sm font-medium" style="color:var(--theme-text-strong)">
+            <%= req.translations.imageSubmissionsDisabled || 'Image submissions are disabled.' %>
+          </p>
+          <p class="text-sm mt-1" style="color:var(--theme-text-muted)">
+            <%= req.translations.imageSubmissionsDisabledText || 'An administrator has turned off user image submissions.' %>
+          </p>
+        </div>
+        <% } else if (images.length === 0) { %>
+        <div class="flex flex-col items-center justify-center py-24 text-center">
+          <div class="w-12 h-12 rounded-full bg-neutral-400/10 flex items-center justify-center mb-4">
+            <%- icon('image', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
+          </div>
+          <p class="text-sm font-medium" style="color:var(--theme-text-strong)">
+            <%= req.translations.noSubmittedImages || 'No submitted images yet.' %>
+          </p>
+          <p class="text-sm mt-1" style="color:var(--theme-text-muted)">
+            <%= req.translations.noSubmittedImagesText || 'Submit an egg JSON and it will appear here with review status.' %>
+          </p>
+          <a href="/my-images/new" class="mt-4 al-btn-primary inline-flex items-center gap-1.5">
+            <%- icon('plus', { size: 16 }) %>
+            <%= req.translations.submitImage || 'Submit Image' %>
+          </a>
+        </div>
+        <% } else { %>
+        <div class="overflow-x-auto shadow-sm rounded-xl border" style="border-color:var(--theme-border)">
+          <table class="al-table min-w-full">
+            <thead class="al-table-head">
+              <tr>
+                <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
+                <th class="al-table-th px-3 py-3.5">Submitted</th>
+                <th class="al-table-th px-3 py-3.5">Status</th>
+                <th class="al-table-th px-3 py-3.5">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y" style="border-color:var(--theme-border)">
+              <% let imgIdx = 0; images.forEach(function(image) { %>
+              <tr class="al-table-tr transition-colors" style="--i:<%= imgIdx++ %>">
+                <td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3 font-medium" style="color:var(--theme-text-strong)">
+                  <%= image.name %>
+                  <% if (image.status === 'rejected' && image.rejectionReason) { %>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-danger)"><%= image.rejectionReason %></p>
+                  <% } %>
+                </td>
+                <td class="al-table-td whitespace-nowrap px-3 py-4"><%= new Date(image.createdAt).toLocaleDateString() %></td>
+                <td class="al-table-td whitespace-nowrap px-3 py-4">
+                  <% if (image.status === 'approved') { %>
+                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-emerald-600/10 text-emerald-600 ring-emerald-600/20 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-emerald-400/20">
+                    <%= req.translations.approved || 'Approved' %>
+                  </span>
+                  <% } else if (image.status === 'rejected') { %>
+                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-red-600/10 text-red-600 ring-red-600/20 dark:bg-red-400/10 dark:text-red-400 dark:ring-red-400/20">
+                    <%= req.translations.rejected || 'Rejected' %>
+                  </span>
+                  <% } else { %>
+                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-amber-600/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/20">
+                    <%= req.translations.pendingApproval || 'Pending review' %>
+                  </span>
+                  <% } %>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <div class="flex gap-2">
+                    <% if (image.status !== 'approved') { %>
+                    <a href="/my-images/edit/<%= image.id %>" class="al-btn-secondary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+                      <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>Edit
+                    </a>
+                    <% } %>
+                    <button type="button" class="al-btn-danger" data-delete-image="<%= image.id %>" aria-label="Delete <%= image.name %>">
+                      <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="page-data" style="display:none"
+  data-delete-confirm="<%= req.translations.deleteImageConfirm || 'Delete this image?' %>"
+  data-deleted="<%= req.translations.imageDeleted || 'Image deleted.' %>"
+  data-error="<%= req.translations.errorOccurred || 'Something went wrong.' %>"
+></div>
+
+<script nonce="<%- nonce %>" src="/javascript/user/my-images.js?v=1"></script>
+
+<%- include('../components/footer') %>
