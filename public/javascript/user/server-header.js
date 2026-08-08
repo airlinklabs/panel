@@ -4,7 +4,6 @@
   var SECONDS_PER_DAY = 86400;
   var SECONDS_PER_HOUR = 3600;
   var SECONDS_PER_MINUTE = 60;
-  var POLL_INTERVAL = 10000;
   var TICK_INTERVAL = 1000;
 
   var headerEl = document.getElementById('server-header-data');
@@ -67,6 +66,13 @@
       '</span>' +
       '<span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Starting</span>' +
     '</div>',
+    stopping: '<div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">' +
+      '<span class="relative flex h-2 w-2 mr-2">' +
+        '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>' +
+        '<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>' +
+      '</span>' +
+      '<span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Stopping</span>' +
+    '</div>',
     offline: '<div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">' +
       '<span class="inline-flex h-2 w-2 rounded-full bg-red-500 mr-2"></span>' +
       '<span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Offline</span>' +
@@ -87,10 +93,18 @@
         if (statusData.uptime != null) updateUptime(statusData.uptime);
       }
       lastOnline = true;
+    } else if (statusData && statusData.stopping) {
+      lastOnline = false;
+      if (uptimeInterval) { clearInterval(uptimeInterval); uptimeInterval = null; }
+      statusContainer.innerHTML = STATUS_HTML.stopping;
     } else if (statusData && statusData.starting) {
       lastOnline = false;
       if (uptimeInterval) { clearInterval(uptimeInterval); uptimeInterval = null; }
       statusContainer.innerHTML = STATUS_HTML.starting;
+    } else if (statusData && statusData.daemonOffline) {
+      lastOnline = false;
+      if (uptimeInterval) { clearInterval(uptimeInterval); uptimeInterval = null; }
+      statusContainer.innerHTML = STATUS_HTML.offline;
     } else {
       lastOnline = false;
       if (uptimeInterval) { clearInterval(uptimeInterval); uptimeInterval = null; }
@@ -109,35 +123,9 @@
     }, TICK_INTERVAL);
   }
 
-  function pollServerStatus() {
-    fetch('/server/' + serverUUID + '/status')
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        updateServerHeaderStatus(data);
-      })
-      .catch(function (err) {
-        console.warn('Failed to poll server status:', err);
-      });
-  }
-
-  var pollTimer = null;
-  var realtimeConnected = false;
-
-  function startPolling() {
-    if (pollTimer) return;
-    pollTimer = setInterval(pollServerStatus, POLL_INTERVAL);
-  }
-
-  function stopPolling() {
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-  }
-
-  pollServerStatus();
-  startPolling();
-
   // Live status over the shared /ws/realtime socket (bootstrapped in
-  // footer.ejs). While connected, watch the daemon stream instead of polling;
-  // a disconnect falls back to polling until the socket returns.
+  // footer.ejs). There is no poll loop; the socket is the single source of
+  // truth and every status.changed refresh reloads the freshest snapshot.
   var realtimeWired = false;
 
   function onRealtimeStatus(snap) {
@@ -146,6 +134,8 @@
     updateServerHeaderStatus({
       online: s.running === true,
       starting: s.starting === true || s.status === 'starting' || s.status === 'restarting',
+      stopping: s.stopping === true || s.status === 'stopping',
+      daemonOffline: s.daemonOffline === true,
       uptime: typeof s.uptime === 'number' ? s.uptime : null,
       startedAt: s.startedAt || null,
     });
@@ -158,21 +148,19 @@
     if (!rt || !st) return;
     realtimeWired = true;
 
-    function resubscribe() {
-      rt.watch(serverUUID);
-      rt.watchEvents(serverUUID);
-    }
-
-    resubscribe();
-    rt.onStatusChange(function (status) {
-      var connected = status === 'connected';
-      if (connected) resubscribe();
-      if (connected === realtimeConnected) return;
-      realtimeConnected = connected;
-      if (connected) stopPolling();
-      else { startPolling(); pollServerStatus(); }
-    });
     st.observe('server:status:' + serverUUID, onRealtimeStatus);
+    rt.watchEvents(serverUUID);
+
+    // Drop the daemon watchers when navigating away (Turbo SPA navigation
+    // keeps this script's context alive across page loads) so the panel's
+    // reference counts fall to zero and the daemon socket closes.
+    window.addEventListener('pagehide', function () {
+      try {
+        window.alRealtime.unwatchEvents(serverUUID);
+      } catch (e) {
+        /* already closed */
+      }
+    }, { once: true });
   }
 
   if (window.alRealtime) wireRealtime();

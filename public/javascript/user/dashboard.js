@@ -506,7 +506,6 @@
   });
 
   var serverUUIDs = allServers.map(function (s) { return s.UUID; });
-  var lastPollAt = null;
 
   function fmtUptime(sec) {
     if (sec === null || typeof sec === 'undefined') return '';
@@ -528,8 +527,8 @@
     var badge = card.querySelector('.al-badge-online, .al-badge-offline, .al-badge-warning, .al-badge-info');
     if (!badge) return;
 
-    var ago = lastPollAt ? Math.max(0, Math.round((Date.now() - lastPollAt) / 1000)) + 's ago' : '';
-    var liveTitle = 'Live · updated ' + ago;
+    var liveTitle = 'Live';
+    if (status.updatedAt) liveTitle += ' · ' + new Date(status.updatedAt).toLocaleTimeString();
 
     if (status.daemonOffline) {
       badge.className = 'al-badge-offline';
@@ -540,70 +539,41 @@
     if (status.starting) {
       badge.className = 'al-badge-warning';
       badge.innerHTML = '<span class="al-dot-warning"></span> Starting';
+      badge.title = liveTitle;
       return;
     }
     if (status.stopping) {
       badge.className = 'al-badge-warning';
       badge.innerHTML = '<span class="al-dot-warning"></span> Stopping';
+      badge.title = liveTitle;
       return;
     }
     if (status.online) {
       var uptime = fmtUptime(status.uptime);
       badge.className = 'al-badge-online';
       badge.innerHTML = '<span class="al-dot-online"></span> Online' + (uptime ? ' · ' + uptime : '');
-      badge.title = uptime ? 'Up for ' + uptime : 'Online';
+      badge.title = liveTitle + (uptime ? ' · Up for ' + uptime : '');
       return;
     }
     badge.className = 'al-badge-offline';
     badge.innerHTML = '<span class="al-dot-offline"></span> Offline';
-  }
-
-  function pollAllServers() {
-    lastPollAt = Date.now();
-    Promise.all(serverUUIDs.map(function (uuid) {
-      return fetch('/server/' + uuid + '/status')
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .catch(function (err) {
-          console.warn('Failed to poll status for ' + uuid + ':', err);
-          return null;
-        });
-    })).then(function (results) {
-      results.forEach(function (status, i) {
-        if (status !== null) {
-          applyServerStatus(serverUUIDs[i], status);
-        }
-      });
-    });
-  }
-
-  var pollTimer = null;
-  var realtimeConnected = false;
-
-  function startPolling() {
-    if (pollTimer) return;
-    pollTimer = setInterval(pollAllServers, POLL_INTERVAL);
-  }
-
-  function stopPolling() {
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-  }
-
-  if (serverUUIDs.length > 0) {
-    pollAllServers();
-    startPolling();
+    badge.title = liveTitle;
   }
 
   /* ── Realtime live status ──────────────────────────
      The shared /ws/realtime socket (bootstrapped in footer.ejs) streams
-     server.status.changed events via the state cache. While it is connected
-     we stop the poll loop above and render those instead; a disconnect falls
-     back to polling until the socket returns. */
+     server.status.changed events via the state cache. There is no poll
+     loop; when the socket is connected the cached snapshots drive the
+     cards, and every status change re-reads the freshest snapshot so the
+     dashboard always reflects the last known live state. */
   var realtimeWired = false;
+  var rt = null;
+  var st = null;
 
   function onRealtimeStatus(uuid, snap) {
     if (!snap || snap.status !== 'success' || !snap.data) return;
     var s = snap.data;
-    lastPollAt = Date.now();
+    var since = s.updatedAt || s.since || null;
     applyServerStatus(uuid, {
       online: s.running === true,
       starting: s.starting === true || s.status === 'starting' || s.status === 'restarting',
@@ -611,32 +581,49 @@
       daemonOffline: s.daemonOffline === true,
       uptime: typeof s.uptime === 'number' ? s.uptime : null,
       error: s.error,
+      updatedAt: since,
     });
+    var entry = allServers.find(function (s) { return s.UUID === uuid; });
+    if (entry) {
+      if (s.online && s.running === true) entry.status = 'running';
+      else if (s.starting === true) entry.status = 'starting';
+      else if (s.stopping === true) entry.status = 'stopping';
+      else if (s.daemonOffline === true) entry.status = 'stopped';
+      else if (s.running === false) entry.status = 'stopped';
+    }
+  }
+
+  function onRealtimeConnect() {
+    serverUUIDs.forEach(function (uuid) { rt.watch(uuid); });
   }
 
   function wireRealtime() {
     if (realtimeWired) return;
-    var rt = window.alRealtime;
-    var st = window.alState;
+    rt = window.alRealtime;
+    st = window.alState;
     if (!rt || !st) return;
     realtimeWired = true;
 
-    function resubscribe() {
-      serverUUIDs.forEach(function (uuid) { rt.watch(uuid); });
+    function unwatchAll() {
+      serverUUIDs.forEach(function (uuid) {
+        try {
+          window.alRealtime.unwatch(uuid);
+          window.alRealtime.unwatchEvents(uuid);
+        } catch (e) { /* already released */ }
+      });
     }
 
-    resubscribe();
     rt.onStatusChange(function (status) {
-      var connected = status === 'connected';
-      if (connected) resubscribe();
-      if (connected === realtimeConnected) return;
-      realtimeConnected = connected;
-      if (connected) stopPolling();
-      else { startPolling(); pollAllServers(); }
+      if (status === 'connected') onRealtimeConnect();
     });
     serverUUIDs.forEach(function (uuid) {
       st.observe('server:status:' + uuid, function (snap) { onRealtimeStatus(uuid, snap); });
     });
+
+    // Drop the daemon watchers when navigating away (Turbo SPA navigation
+    // keeps this script's context alive across page loads) so reference
+    // counts fall to zero and the daemon sockets close.
+    window.addEventListener('pagehide', unwatchAll, { once: true });
   }
 
   if (window.alRealtime) wireRealtime();

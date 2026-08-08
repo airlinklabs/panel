@@ -193,6 +193,9 @@ function copyCommand(copyBtn, command) {
     }
   }
 
+  // Nodes don't have their own daemon WS streams, but the shared realtime bus
+  // fires `node.*` / `admin.servers.updated` events on any change. Re-fetch the
+  // list only when the cache invalidates instead of polling every 15s.
   function pollNodeStatus() {
     fetch('/admin/nodes/list')
       .then(function(r) { return r.json(); })
@@ -225,5 +228,15 @@ function copyCommand(copyBtn, command) {
       .catch(function() {});
   };
 
-  setInterval(pollNodeStatus, 15000);
+  function wireNodeStatusRealtime() {
+    var rt = window.alRealtime;
+    var st = window.alState;
+    if (!rt || !st) return;
+    if (rt.watchAll) rt.watchAll();
+    st.observe('admin:nodes', pollNodeStatus);
+    st.observe('node', pollNodeStatus);
+  }
+
+  if (window.alRealtime && window.alState) wireNodeStatusRealtime();
+  else window.addEventListener('al:realtime-ready', function () { wireNodeStatusRealtime(); }, { once: true });
 })();

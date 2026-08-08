@@ -26,7 +26,14 @@
   window.alOps = ops;
   window.alRouting = routing;
   window.alRealtime = realtime;
-  window.dispatchEvent(new CustomEvent('al:realtime-ready', { detail: { state: state, realtime: realtime, ops: ops } }));
+  // Dispatch after a microtask so page-level `al:realtime-ready` listeners
+  // registered during DOMContentLoaded/parse have already attached. Without
+  // this the event can fire synchronously before any page script subscribes.
+  Promise.resolve().then(function () {
+    window.dispatchEvent(new CustomEvent('al:realtime-ready', {
+      detail: { state: state, realtime: realtime, ops: ops },
+    }));
+  });
 })();
 </script>
 </body>

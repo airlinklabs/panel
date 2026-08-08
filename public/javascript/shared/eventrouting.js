@@ -57,13 +57,17 @@
       });
     } else if (t.indexOf('server.install.') === 0 || t.indexOf('server.reinstall.') === 0) {
       if (serverId) actions.push({ type: 'invalidate', prefix: 'server:install:' + serverId });
-      if (serverId) actions.push({ type: 'invalidate', prefix: 'server' });
+      if (t === 'server.install.progress' && event.progress !== undefined) {
+        if (serverId) actions.push({ type: 'put', key: 'server:install:progress:' + serverId, data: stamp(event, event.state || { progress: event.progress }, 'install') });
+      }
+      actions.push({ type: 'invalidate', prefix: 'server' });
     } else if (t === 'backup.started' || t === 'backup.progress') {
       if (serverId) actions.push({ type: 'put', key: 'server:backups:active:' + serverId, data: stamp(event, event.state, 'backups') });
-    } else if (t === 'backup.completed' || t === 'backup.failed') {
+    } else if (t === 'backup.deleted' || t === 'backup.completed' || t === 'backup.failed') {
       if (serverId) {
         actions.push({ type: 'invalidate', prefix: 'server:backups:' + serverId });
         actions.push({ type: 'put', key: 'server:backups:active:' + serverId, data: null });
+        if (t === 'backup.deleted') actions.push({ type: 'remove', prefix: 'server:backups:active:' + serverId });
       }
     } else if (t === 'restore.started' || t === 'restore.progress' || t === 'restore.completed' || t === 'restore.failed') {
       if (serverId) {
@@ -77,6 +81,8 @@
       if (t === 'server.deleted') {
         actions.push({ type: 'remove', prefix: 'server:' });
       }
+    } else if (t === 'player.stats.updated') {
+      actions.push({ type: 'invalidate', prefix: 'admin:playerstats' });
     } else if (t.indexOf('node.') === 0) {
       actions.push({ type: 'invalidate', prefix: 'node' });
       actions.push({ type: 'invalidate', prefix: 'admin:nodes' });

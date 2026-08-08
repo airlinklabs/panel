@@ -20,7 +20,7 @@ interface CachedMembership {
 const membershipCache = new Map<number, CachedMembership>();
 
 // Event types that change which servers a user may observe.
-const MEMBERSHIP_EVENT_TYPES = new Set([
+export const MEMBERSHIP_EVENT_TYPES = new Set([
   'server.created',
   'server.deleted',
   'server.updated',

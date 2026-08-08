@@ -1,6 +1,5 @@
 (function () {
 var _rootStyle = getComputedStyle(document.documentElement);
-const REFRESH_INTERVAL_MS = 300000;
 const DATA_COLLECTION_DELAY_MS = 1000;
 var CHART_TICK_COLOR = _rootStyle.getPropertyValue('--theme-text').trim() || '#FFFFFF';
 var CHART_GRID_COLOR = 'rgba(255, 255, 255, 0.1)';
@@ -191,9 +190,21 @@ async function fetchPlayerData() {
 
 fetchPlayerData();
 
-const refreshInterval = setInterval(fetchPlayerData, REFRESH_INTERVAL_MS);
-
 document.getElementById('refreshBtn').addEventListener('click', fetchPlayerData);
+
+// Live updates over the shared realtime bus: the collector emits
+// `player.stats.updated` after each collection run (every 5 min), which
+// invalidates the `admin:playerstats` cache key. Re-fetch on that instead of
+// running our own timer. The manual refresh button still works on demand.
+function wirePlayerStatsRealtime() {
+  const rt = window.alRealtime;
+  const st = window.alState;
+  if (!rt || !st) return;
+  st.observe('admin:playerstats', function () { fetchPlayerData(); });
+}
+
+if (window.alRealtime && window.alState) wirePlayerStatsRealtime();
+else window.addEventListener('al:realtime-ready', function () { wirePlayerStatsRealtime(); }, { once: true });
 
 async function triggerDataCollection() {
   try {
@@ -219,9 +230,5 @@ async function triggerDataCollection() {
 document.getElementById('refreshBtn').addEventListener('dblclick', (e) => {
   e.preventDefault();
   triggerDataCollection();
-});
-
-window.addEventListener('beforeunload', () => {
-  clearInterval(refreshInterval);
 });
 })();

@@ -1,6 +1,6 @@
 import type { WebSocket } from 'ws';
 import logger from '../logger';
-import { invalidateMembershipForEvents } from './access';
+import { getUserServerIds, invalidateMembershipForEvents, MEMBERSHIP_EVENT_TYPES } from './access';
 import {
   type RealtimeEventEnvelope,
   currentRealtimeCursor,
@@ -42,6 +42,24 @@ function ensureBusListener(): void {
 async function fanOut(event: RealtimeEventEnvelope): Promise<void> {
   if (realtimeSessions.size === 0) return;
   invalidateMembershipForEvents(event.type);
+  // Membership-affecting events (server.created/deleted, subuser.*, …) change
+  // which servers a user may observe. Sessions cached their serverIds at
+  // connect time, so re-resolve them now — without waiting for the TTL — or
+  // the affected user keeps the stale set (new servers invisible, deleted
+  // servers still delivered) until they reconnect.
+  if (MEMBERSHIP_EVENT_TYPES.has(event.type)) {
+    for (const session of realtimeSessions.values()) {
+      if (session.alive && !session.isAdmin) {
+        getUserServerIds(session.userId, false)
+          .then((ids) => {
+            session.serverIds = ids;
+          })
+          .catch(() => {
+            /* keep the previous set on failure */
+          });
+      }
+    }
+  }
   await Promise.allSettled(
     Array.from(realtimeSessions.values()).map(async (session) => {
       if (!session.alive) return;

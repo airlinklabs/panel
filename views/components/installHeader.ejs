@@ -228,6 +228,16 @@
 
   startPolling();
 
+  // Release the daemon event stream when navigating away (Turbo SPA keeps
+  // this context alive across page loads), matching the watcher cleanup in
+  // manage.ejs so the panel's event watcher can close its daemon socket.
+  window.addEventListener('pagehide', function () {
+    if (poller) { clearInterval(poller); poller = null; }
+    if (window.alRealtime) {
+      try { window.alRealtime.unwatchEvents(serverUUID); } catch (e) {}
+    }
+  }, { once: true });
+
   // Persistent install-progress toast. The record + job live in session
   // storage, so the toast survives navigation and keeps polling /status on
   // whatever page the user lands on until the server is installed or the

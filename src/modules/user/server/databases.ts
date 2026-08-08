@@ -12,6 +12,7 @@ import {
   deprovisionDatabase,
   rotateDatabasePassword,
 } from '../../../handlers/utils/core/mysqlProvisioner';
+import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
 
 async function loadServerForUser(serverId: string, userId: number, req: Request) {
   const server = await prisma.server.findUnique({
@@ -167,6 +168,9 @@ router.post(
             include: { host: true },
           });
           await logActivity(req, 'database:create', { serverId: String(server.UUID), metadata: { databaseId: db.id, hostId: host.id } });
+          emitRealtime(serverEvent('database.created', String(server.UUID), {
+            state: { id: db.id, name: db.databaseName, hostId: host.id },
+          }));
           return res.json({ success: true, database: db });
         } catch (error) {
           logger.error('Failed to provision database:', error);
@@ -217,6 +221,9 @@ router.post(
           await deprovisionDatabase(db.host, db);
           await prisma.serverDatabase.delete({ where: { id: db.id } });
           await logActivity(req, 'database:delete', { serverId: String(server.UUID), metadata: { databaseId: db.id } });
+          emitRealtime(serverEvent('database.deleted', String(server.UUID), {
+            state: { id: db.id, name: db.databaseName },
+          }));
           return res.json({ success: true });
         } catch (error) {
           logger.error('Failed to deprovision database:', error);
@@ -269,6 +276,9 @@ router.post(
             where: { id: db.id },
             data: { databasePassword: newPassword },
           });
+          emitRealtime(serverEvent('database.updated', String(server.UUID), {
+            state: { id: db.id, name: db.databaseName },
+          }));
           return res.json({ success: true, password: newPassword });
         } catch (error) {
           logger.error('Failed to rotate database password:', error);

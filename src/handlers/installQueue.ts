@@ -3,6 +3,7 @@ import logger from './logger';
 import { daemonRequest } from './utils/core/daemonRequest';
 import { queueer } from './queueer';
 import { getPrimaryExternalPort } from './utils/server/ports';
+import { emitRealtime, serverEvent } from './realtime/events';
 
 const INSTALL_TIMEOUT_MS = 600_000;
 
@@ -13,6 +14,10 @@ export async function processQueuedServerInstalls(): Promise<void> {
   });
 
   for (const server of servers) {
+    emitRealtime(serverEvent('server.install.started', server.UUID, {
+      operationId: server.UUID,
+      state: { queued: true, installing: true },
+    }));
     if (!server.Variables) {
       await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
       continue;
@@ -47,6 +52,10 @@ export async function processQueuedServerInstalls(): Promise<void> {
       }, {});
 
     if (!server.image?.scripts) {
+      emitRealtime(serverEvent('server.install.failed', server.UUID, {
+        operationId: server.UUID,
+        error: { message: 'No install scripts for this image' },
+      }));
       await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
       continue;
     }
@@ -100,6 +109,10 @@ export async function processQueuedServerInstalls(): Promise<void> {
         });
       }
       await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
+      emitRealtime(serverEvent('server.install.completed', server.UUID, {
+        operationId: server.UUID,
+        state: { installing: false, queued: false },
+      }));
     } catch (err) {
       // The daemon never received the install, so nothing will ever flip the
       // state. Clear both flags so the server surfaces as failed instead of
@@ -109,6 +122,10 @@ export async function processQueuedServerInstalls(): Promise<void> {
         where: { id: server.id },
         data: { Queued: false, Installing: false },
       });
+      emitRealtime(serverEvent('server.install.failed', server.UUID, {
+        operationId: server.UUID,
+        error: { message: err instanceof Error ? err.message : 'Install dispatch failed' },
+      }));
     }
   }
 }

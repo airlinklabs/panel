@@ -16,6 +16,7 @@ import {
   isS3Backup,
   S3_KEY_PREFIX,
 } from '../../../handlers/utils/core/s3Client';
+import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
 
 function s3KeyFor(serverId: string, uuid: string): string {
   return `backups/${serverId}/${uuid}.tar.gz`;
@@ -149,6 +150,10 @@ export function registerBackupRoutes(router: Router): void {
           return;
         }
         startJob('backup', serverKey, `Creating backup "${name.trim()}…`);
+        emitRealtime(serverEvent('backup.started', serverKey, {
+          operationId: serverKey,
+          state: { name: name.trim(), uuid: null },
+        }));
 
         let ignoreList: string[] = [];
         if (server.backupIgnoreList) {
@@ -269,6 +274,10 @@ export function registerBackupRoutes(router: Router): void {
           });
 
           await logActivity(req, 'backup:create', { serverId: getParamAsString(serverId), metadata: { name: name.trim(), uuid: backup.UUID } });
+          emitRealtime(serverEvent('backup.completed', getParamAsString(serverId), {
+            operationId: getParamAsString(serverId),
+            state: { uuid: backup.UUID, name: name.trim(), size: response.data.backup!.size },
+          }));
 
           let message: string;
           if (remoteRedirect === 'ok') {
@@ -294,12 +303,20 @@ export function registerBackupRoutes(router: Router): void {
           });
         } else {
           finishJob('backup', serverKey, false, 'Backup creation failed.', 'Backup creation failed.');
+          emitRealtime(serverEvent('backup.failed', getParamAsString(serverId), {
+            operationId: getParamAsString(serverId),
+            error: { message: 'Failed to create backup on daemon' },
+          }));
           res
             .status(500)
             .json({ error: 'Failed to create backup on daemon' });
         }
       } catch (error: unknown) {
         if (jobKey) finishJob('backup', jobKey, false, 'Backup creation failed.', 'Backup creation failed.');
+        emitRealtime(serverEvent('backup.failed', getParamAsString(serverId), {
+          operationId: getParamAsString(serverId),
+          error: { message: safeClientMessage(error, 'Failed to create backup') },
+        }));
         logger.error('Error creating backup:', error);
         res.status(500).json({ error: safeClientMessage(error, 'Failed to create backup') });
       }
@@ -370,6 +387,10 @@ export function registerBackupRoutes(router: Router): void {
         // toast can keep polling across page changes; settled on every exit
         // path below (success, daemon failure, and unexpected error).
         startJob('restore', serverKey, 'Restoring backup…');
+        emitRealtime(serverEvent('restore.started', serverKey, {
+          operationId: getParamAsString(backupId),
+          state: { uuid: backup.UUID },
+        }));
 
         let backupPath = backup.filePath;
 
@@ -477,18 +498,30 @@ export function registerBackupRoutes(router: Router): void {
         if (response.data.success) {
           await logActivity(req, 'backup:restore', { serverId: getParamAsString(serverId), metadata: { name: backup.name, uuid: backup.UUID } });
           finishJob('restore', serverKey, true, undefined, 'Backup restored.');
+          emitRealtime(serverEvent('restore.completed', serverKey, {
+            operationId: getParamAsString(backupId),
+            state: { uuid: backup.UUID },
+          }));
           res.json({
             success: true,
             message: 'Backup restored successfully',
           });
         } else {
           finishJob('restore', serverKey, false, 'Restore failed.', 'Restore failed.');
+          emitRealtime(serverEvent('restore.failed', serverKey, {
+            operationId: getParamAsString(backupId),
+            error: { message: 'Failed to restore backup on daemon' },
+          }));
           res
             .status(500)
             .json({ error: 'Failed to restore backup on daemon' });
         }
       } catch (error: unknown) {
         finishJob('restore', getParamAsString(serverId), false, 'Restore failed.', 'Restore failed.');
+        emitRealtime(serverEvent('restore.failed', getParamAsString(serverId), {
+          operationId: getParamAsString(backupId),
+          error: { message: safeClientMessage(error, 'Restore failed') },
+        }));
         logger.error('Error restoring backup:', error);
         res.status(500).json({ error: safeClientMessage(error, 'Failed to restore backup') });
       }
@@ -673,6 +706,9 @@ export function registerBackupRoutes(router: Router): void {
         await prisma.backup.delete({
           where: { UUID: getParamAsString(backupId) },
         });
+        emitRealtime(serverEvent('backup.deleted', getParamAsString(serverId), {
+          state: { uuid: backup.UUID, name: backup.name },
+        }));
 
         await logActivity(req, 'backup:delete', { serverId: getParamAsString(serverId), metadata: { name: backup.name, uuid: backup.UUID } });
         res.json({

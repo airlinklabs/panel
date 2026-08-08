@@ -28,6 +28,7 @@ import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import { sendServerSuspended } from '../../handlers/utils/core/mailer';
 import { startTransfer, getTransferState } from '../../handlers/utils/server/serverTransfer';
 import { runtimeStartQueue } from '../../handlers/runtimeQueue';
+import { emitRealtime, serverEvent, userEvent } from '../../handlers/realtime/events';
 
 const DEFAULT_SERVER_PORT = 25565;
 const DEFAULT_SERVER_PORT_RANGE = `${DEFAULT_SERVER_PORT}:${DEFAULT_SERVER_PORT}`;
@@ -277,6 +278,14 @@ const adminModule: Module = {
               Ports: serializeServerPorts(submittedPorts),
               Suspended: newSuspendedState,
             },
+          });
+          emitRealtime(serverEvent('server.updated', server.UUID, {
+            state: { id: server.id, name, suspended: newSuspendedState },
+          }));
+          emitRealtime({
+            type: 'admin.servers.updated',
+            scope: { admin: true },
+            state: {},
           });
 
           // Update allowStartupEdit field using raw SQL
@@ -603,6 +612,10 @@ const adminModule: Module = {
             });
 
             for (const server of servers) {
+              emitRealtime(serverEvent('server.install.started', server.UUID, {
+                operationId: server.UUID,
+                state: { queued: true, installing: true },
+              }));
               if (!server.Variables) {
                 await prisma.server.update({
                   where: { id: server.id },
@@ -611,17 +624,17 @@ const adminModule: Module = {
                 continue;
               }
 
-              let ServerEnv: Array<{ env: string; value: unknown }>;
-              try {
-                const parsed: unknown[] = JSON.parse(server.Variables);
+let ServerEnv: Array<{ env: string; value: unknown }>;
+                try {
+                  const parsed: unknown[] = JSON.parse(server.Variables);
 
-                // Normalize variable shape — Pterodactyl uses env_variable, legacy uses env
-                ServerEnv = (parsed as Record<string, unknown>[]).map((v) => ({
-                  env: String(v.env_variable ?? v.env ?? ''),
-                  value: v.value ?? v.default_value ?? '',
-                }));
+                  // Normalize variable shape — Pterodactyl uses env_variable, legacy uses env
+                  ServerEnv = (parsed as Record<string, unknown>[]).map((v) => ({
+                    env: String(v.env_variable ?? v.env ?? ''),
+                    value: v.value ?? v.default_value ?? '',
+                  }));
 
-                let serverPort = String(parseServerPorts(Port)[0]?.externalPort ?? '');
+                  let serverPort = String(parseServerPorts(Port)[0]?.externalPort ?? '');
                 const primaryExternalPort = getPrimaryExternalPort(server.Ports);
                 if (primaryExternalPort) {
                   serverPort = String(primaryExternalPort);
@@ -744,9 +757,17 @@ const adminModule: Module = {
                   }
 
                   await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
+                  emitRealtime(serverEvent('server.install.completed', server.UUID, {
+                    operationId: server.UUID,
+                    state: { installing: false, queued: false },
+                  }));
                 } catch (error: unknown) {
                   logger.error(`Error sending install request for server ID ${server.id}:`, error);
                   await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
+                  emitRealtime(serverEvent('server.install.failed', server.UUID, {
+                    operationId: server.UUID,
+                    error: { message: error instanceof Error ? error.message : 'Install dispatch failed' },
+                  }));
                 }
               } else {
                 logger.warn(`No scripts found for server ID ${server.id}, marking as installed`);
@@ -757,6 +778,14 @@ const adminModule: Module = {
 
           res.status(200).json({ success: true, message: 'Server created successfully' });
           await logActivity(req, 'server:create', { serverId: String(createdServer.UUID), metadata: { name, nodeId: createdServer.nodeId } });
+          emitRealtime(serverEvent('server.created', createdServer.UUID, {
+            state: { id: createdServer.id, name, UUID: createdServer.UUID },
+          }));
+          emitRealtime({
+            type: 'admin.servers.updated',
+            scope: { admin: true },
+            state: {},
+          });
         } catch (error: unknown) {
           logger.error('Error creating server:', error);
           res.status(500).json({ error: 'Error creating server' });
@@ -856,6 +885,15 @@ const adminModule: Module = {
             });
             await releaseServerAllocations(server.UUID).catch(() => {});
 
+            emitRealtime(serverEvent('server.deleted', server.UUID, {
+              state: { id: server.id, name: server.name },
+            }));
+            emitRealtime({
+              type: 'admin.servers.updated',
+              scope: { admin: true },
+              state: {},
+            });
+
             logger.info(`Server ${serverId} successfully deleted`);
             await logActivity(req, 'server:delete', { metadata: { name: server.name, nodeId: server.nodeId, serverUUID: server.UUID } });
             res.redirect('/admin/servers');
@@ -922,6 +960,12 @@ const adminModule: Module = {
 
           logger.info(`Server ${serverId} suspended by user ${userId}`);
           await logActivity(req, 'server:suspend', { serverId: String(server.UUID), metadata: { name: server.name } });
+          emitRealtime(serverEvent('server.updated', server.UUID, {
+            state: { name: server.name, suspended: true },
+          }));
+          if (server.ownerId) {
+            emitRealtime(userEvent('account.suspended', Number(server.ownerId), { state: { suspended: true } }));
+          }
 
           const owner = server.ownerId
             ? await prisma.users.findUnique({ where: { id: Number(server.ownerId) }, select: { email: true } })
@@ -977,6 +1021,12 @@ const adminModule: Module = {
 
           logger.info(`Server ${serverId} unsuspended by user ${userId}`);
           await logActivity(req, 'server:unsuspend', { serverId: String(server.UUID), metadata: { name: server.name } });
+          emitRealtime(serverEvent('server.updated', server.UUID, {
+            state: { name: server.name, suspended: false },
+          }));
+          if (server.ownerId) {
+            emitRealtime(userEvent('account.suspended', Number(server.ownerId), { state: { suspended: false } }));
+          }
           res.json({ success: true, message: 'Server unsuspended' });
         } catch (error: unknown) {
           logger.error('Error unsuspending server:', error);

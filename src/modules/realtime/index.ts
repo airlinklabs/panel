@@ -24,6 +24,11 @@ import {
 const HEARTBEAT_INTERVAL_MS = 20_000;
 const HEARTBEAT_TIMEOUT_MS = 12_000;
 
+/** Realtime socket with the pending heartbeat timeout attached. */
+interface RealtimeWS extends WebSocket {
+  __pongTimer?: NodeJS.Timeout;
+}
+
 // ── Watch registry ────────────────────────────────────────────────────────────
 // Sessions may ask the server to stream a server's daemon status/stats and/or
 // lifecycle events onto the bus. The daemon connections are shared (watchers
@@ -148,7 +153,8 @@ const realtimeModule: Module = {
     const router = Router();
     if (applyWs) applyWs(router);
 
-    router.ws('/ws/realtime', async (ws: WebSocket, req: Request) => {
+    router.ws('/ws/realtime', async (rawWs: WebSocket, req: Request) => {
+      const ws = rawWs as RealtimeWS;
       const userId = req.session?.user?.id;
       if (!userId) {
         ws.close(4401, 'unauthenticated');
@@ -195,7 +201,7 @@ const realtimeModule: Module = {
         }, HEARTBEAT_TIMEOUT_MS);
         ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
         // Remember the pending timeout on the socket for cancellation.
-        (ws as WebSocket & { __pongTimer?: NodeJS.Timeout }).__pongTimer = timeout;
+        ws.__pongTimer = timeout;
       }, HEARTBEAT_INTERVAL_MS);
 
       ws.on('message', async (raw) => {
@@ -208,10 +214,10 @@ const realtimeModule: Module = {
         if (!msg || typeof msg !== 'object' || typeof msg.type !== 'string') return;
 
         if (msg.type === 'pong') {
-          const pending = (ws as WebSocket & { __pongTimer?: NodeJS.Timeout }).__pongTimer;
+          const pending = ws.__pongTimer;
           if (pending) {
             clearTimeout(pending);
-            (ws as WebSocket & { __pongTimer?: NodeJS.Timeout }).__pongTimer = undefined;
+            ws.__pongTimer = undefined;
           }
           return;
         }
@@ -266,7 +272,7 @@ const realtimeModule: Module = {
 
       ws.on('close', () => {
         clearInterval(heartbeat);
-        const pending = (ws as WebSocket & { __pongTimer?: NodeJS.Timeout }).__pongTimer;
+        const pending = ws.__pongTimer;
         if (pending) clearTimeout(pending);
         releaseSessionWatches(sessionId);
         dropRealtimeSession(sessionId);
@@ -274,7 +280,7 @@ const realtimeModule: Module = {
 
       ws.on('error', () => {
         clearInterval(heartbeat);
-        const pending = (ws as WebSocket & { __pongTimer?: NodeJS.Timeout }).__pongTimer;
+        const pending = ws.__pongTimer;
         if (pending) clearTimeout(pending);
         releaseSessionWatches(sessionId);
         dropRealtimeSession(sessionId);

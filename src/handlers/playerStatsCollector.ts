@@ -3,6 +3,7 @@ import prisma from '../db';
 import logger from './logger';
 import { daemonRequest } from './utils/core/daemonRequest';
 import { parseServerPorts } from './utils/server/ports';
+import { emitRealtime } from './realtime/events';
 
 
 // Interval in milliseconds (5 minutes)
@@ -107,6 +108,14 @@ export async function collectPlayerStats(): Promise<void> {
         }
       });
     }
+
+    // Player stats were just collected — tell any admin playerstats page to
+    // re-fetch instead of waiting out its own poll interval.
+    emitRealtime({
+      type: 'player.stats.updated',
+      scope: { admin: true },
+      state: {},
+    });
   } catch (error) {
     logger.warn('Player stats collection failed', { error });
   }

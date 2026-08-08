@@ -10,6 +10,7 @@ import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import { syncNodeAllocations } from '../../handlers/utils/server/allocations';
 import { generateApiKey } from '../../utils/apiKey';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
+import { emitRealtime } from '../../handlers/realtime/events';
 
 const UNLIMITED_RESOURCE = 'all';
 const MIN_PORT_NUMBER = 1024;
@@ -333,6 +334,12 @@ const adminModule: Module = {
           await syncNodeAllocations(node.id, parsedPorts).catch(() => {});
 
           await logActivity(req, 'node:create', { metadata: { nodeId: node.id, name } });
+          emitRealtime({
+            type: 'node.created',
+            scope: { admin: true },
+            resource: { type: 'node', id: node.id },
+            state: { id: node.id, name },
+          });
 
           res.status(200).json({ message: 'Node created successfully.', node });
           return;
@@ -413,6 +420,12 @@ const adminModule: Module = {
             await prisma.node.delete({ where: { id: nodeId } });
 
             await logActivity(req, 'node:delete', { metadata: { nodeId } });
+            emitRealtime({
+              type: 'node.deleted',
+              scope: { admin: true },
+              resource: { type: 'node', id: nodeId },
+              state: { id: nodeId },
+            });
 
             res.status(200).json({
               message: deleteInstances
@@ -683,6 +696,12 @@ const adminModule: Module = {
           await syncNodeAllocations(nodeId, parsedPorts).catch(() => {});
 
           await logActivity(req, 'node:update', { metadata: { nodeId, name } });
+          emitRealtime({
+            type: 'node.updated',
+            scope: { admin: true },
+            resource: { type: 'node', id: nodeId },
+            state: { id: nodeId, name },
+          });
 
           res.status(200).json({ message: 'Node updated successfully.', node });
           return;

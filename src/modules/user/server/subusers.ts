@@ -7,6 +7,7 @@ import { checkForServerInstallation } from '../../../handlers/checkForServerInst
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import { sendSubUserInvite } from '../../../handlers/utils/core/mailer';
 import { serverPageInclude } from './shared';
+import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
 
 const PERMISSION_LABELS: Record<string, string> = {
   'websocket.connect': 'Live console',
@@ -200,6 +201,9 @@ export function registerSubUserRoutes(router: Router): void {
         });
 
         await logActivity(req, 'subuser:create', { serverId: String(server.UUID), metadata: { targetUserId: target.id } });
+        emitRealtime(serverEvent('subuser.created', String(server.UUID), {
+          state: { userId: target.id, username: target.username },
+        }));
 
         if (target.email) {
           await sendSubUserInvite({
@@ -253,6 +257,9 @@ export function registerSubUserRoutes(router: Router): void {
         await prisma.subUser.delete({ where: { id: subUser.id } });
 
         await logActivity(req, 'subuser:delete', { serverId: String(server.UUID), metadata: { subUserId: String(subUserId) } });
+        emitRealtime(serverEvent('subuser.deleted', String(server.UUID), {
+          state: { subUserId: subUser.id, userId: subUser.userId },
+        }));
         res.json({ success: true, message: 'Subuser removed.' });
         return;
       } catch (error) {
@@ -305,6 +312,9 @@ export function registerSubUserRoutes(router: Router): void {
         });
 
         await logActivity(req, 'subuser:update', { serverId: String(server.UUID), metadata: { subUserId: String(subUserId) } });
+        emitRealtime(serverEvent('subuser.updated', String(server.UUID), {
+          state: { subUserId: subUser.id, userId: subUser.userId },
+        }));
         res.json({ success: true, message: 'Subuser permissions updated.' });
         return;
       } catch (error) {

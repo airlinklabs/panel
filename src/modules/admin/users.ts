@@ -9,6 +9,7 @@ import { getParamAsNumber } from '../../utils/typeHelpers';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import { registerPermission, type Permission } from '../../handlers/permissions';
 import { isRoleInput as isRole, type UserRole, roleFields } from '../../handlers/utils/auth/roles';
+import { emitRealtime, userEvent } from '../../handlers/realtime/events';
 
 const USERNAME_REGEX = /^[a-zA-Z0-9]{3,20}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -489,6 +490,7 @@ router.get(
           });
 
           await logActivity(req, 'user:update', { metadata: { targetUserId, username: targetUser.username } });
+          emitRealtime(userEvent('user.updated', targetUserId, { state: { username: targetUser.username } }));
 
           res.status(200).json({ message: 'User updated successfully' });
         } catch (error: unknown) {

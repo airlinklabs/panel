@@ -7,6 +7,7 @@ import prisma from '../../../db';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { serverPageInclude } from './shared';
 import { runSchedule } from '../../../handlers/schedulerWorker';
+import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
 
 const POWER_ACTIONS = ['start', 'stop', 'restart', 'kill'] as const;
 const TASK_ACTIONS = ['command', 'power', 'backup'] as const;
@@ -149,6 +150,9 @@ export function registerScheduleRoutes(router: Router): void {
             nextRunAt: nextRunFromCron(cron.trim()),
           },
         });
+        emitRealtime(serverEvent('schedule.created', String(server.UUID), {
+          state: { id: schedule.id, name: schedule.name },
+        }));
 
         res.json({ success: true, message: 'Schedule created.', schedule });
       } catch (error) {
@@ -210,6 +214,9 @@ export function registerScheduleRoutes(router: Router): void {
             nextRunAt: wantEnabled ? nextRunFromCron(schedule.cron, offset) : null,
           },
         });
+        emitRealtime(serverEvent('schedule.updated', String(server.UUID), {
+          state: { id: schedule.id, enabled: wantEnabled },
+        }));
 
         res.json({ success: true, message: wantEnabled ? 'Schedule enabled.' : 'Schedule disabled.' });
       } catch (error) {
@@ -256,6 +263,9 @@ export function registerScheduleRoutes(router: Router): void {
         }
 
         await prisma.schedule.delete({ where: { id: schedule.id } });
+        emitRealtime(serverEvent('schedule.deleted', String(server.UUID), {
+          state: { id: schedule.id, name: schedule.name },
+        }));
         res.json({ success: true, message: 'Schedule deleted.' });
       } catch (error) {
         logger.error('Error deleting schedule:', error);

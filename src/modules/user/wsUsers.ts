@@ -4,9 +4,17 @@ import prisma from '../../db';
 import { WebSocket } from 'ws';
 import logger from '../../handlers/logger';
 
+// Presence is tracked per connection, not per username: a user with several
+// open tabs/sockets stays online until the LAST connection closes. The set of
+// socket ids per username is updated immediately on connect/close, so there is
+// no stale 1-second window and no timeout bookkeeping.
 export const onlineUsers: Set<string> = new Set();
-export const userTimeouts: Map<string, NodeJS.Timeout> = new Map();
+export const onlineConnections = new Map<string, Set<string>>();
 
+function connectionKey(): string {
+  // Connection identity is what matters; the socket's own id is opaque.
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 const wsUsersModule: Module = {
   info: {
@@ -37,26 +45,26 @@ const wsUsersModule: Module = {
         }
 
         const username = user.username;
+        const connectionId = connectionKey();
 
-        if (onlineUsers.has(username)) {
-          const existingTimeout = userTimeouts.get(username);
-          if (existingTimeout) {
-            clearTimeout(existingTimeout);
-            userTimeouts.delete(username);
-          }
+        let connections = onlineConnections.get(username);
+        if (!connections) {
+          connections = new Set();
+          onlineConnections.set(username, connections);
         }
-
+        connections.add(connectionId);
         onlineUsers.add(username);
 
         ws.send(JSON.stringify({ online: true }));
 
         ws.on('close', () => {
-          const timeout = setTimeout(() => {
+          const conns = onlineConnections.get(username);
+          if (!conns) return;
+          conns.delete(connectionId);
+          if (conns.size === 0) {
+            onlineConnections.delete(username);
             onlineUsers.delete(username);
-            userTimeouts.delete(username);
-          }, 1000);
-
-          userTimeouts.set(username, timeout);
+          }
         });
       } catch (error) {
         logger.error('Error fetching user:', error);
@@ -67,6 +75,5 @@ const wsUsersModule: Module = {
     return router;
   },
 };
-
 
 export default wsUsersModule;
