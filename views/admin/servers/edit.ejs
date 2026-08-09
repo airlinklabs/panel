@@ -335,12 +335,9 @@
               </div>
               <div>
                 <div id="transferStatus" class="hidden rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
-                  <div class="flex items-center gap-2 mb-2">
+                  <div class="flex items-center gap-2">
                     <div class="animate-spin rounded-full h-4 w-4 border-2 border-purple-500 border-t-transparent"></div>
                     <span id="transferStatusText" class="text-sm font-medium">Transfer in progress...</span>
-                  </div>
-                  <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mt-2">
-                    <div id="transferProgressBar" class="bg-purple-500 h-2 rounded-full transition-all duration-500" style="transform: scaleX(0); transform-origin: left center"></div>
                   </div>
                   <p id="transferStatusDetail" class="text-xs text-neutral-500 mt-2"></p>
                 </div>
@@ -682,7 +679,6 @@ window.generateRandomName = generateRandomName;
     const confirmTransferBtn = document.getElementById('confirmTransferBtn');
     const transferStatusDiv = document.getElementById('transferStatus');
     const transferStatusText = document.getElementById('transferStatusText');
-    const transferProgressBar = document.getElementById('transferProgressBar');
     const transferStatusDetail = document.getElementById('transferStatusDetail');
 
     let transferPorts = [];
@@ -692,16 +688,16 @@ window.generateRandomName = generateRandomName;
     const DEFAULT_PORT = 25565;
 
     const statusSteps = {
-      'pending': { pct: 5, text: 'Queued...' },
-      'stopping': { pct: 15, text: 'Stopping server on source node...' },
-      'archiving': { pct: 30, text: 'Archiving server files...' },
-      'transferring': { pct: 50, text: 'Streaming data to destination...' },
-      'restoring': { pct: 70, text: 'Restoring files on destination...' },
-      'installing': { pct: 85, text: 'Installing server on destination...' },
-      'updating-db': { pct: 92, text: 'Updating database records...' },
-      'starting': { pct: 97, text: 'Starting server on destination...' },
-      'completed': { pct: 100, text: 'Transfer complete!' },
-      'failed': { pct: 0, text: 'Transfer failed' },
+      'pending': { text: 'Queued...' },
+      'stopping': { text: 'Stopping server on source node...' },
+      'archiving': { text: 'Archiving server files...' },
+      'transferring': { text: 'Streaming data to destination...' },
+      'restoring': { text: 'Restoring files on destination...' },
+      'installing': { text: 'Installing server on destination...' },
+      'updating-db': { text: 'Updating database records...' },
+      'starting': { text: 'Starting server on destination...' },
+      'completed': { text: 'Transfer complete!' },
+      'failed': { text: 'Transfer failed' },
     };
 
     async function fetchNodesData() {
@@ -919,21 +915,16 @@ window.generateRandomName = generateRandomName;
           return;
         }
 
-        const step = statusSteps[state.status] || { pct: 0, text: state.status };
-        transferProgressBar.style.transform = 'scaleX(' + (step.pct / 100) + ')';
+        const step = statusSteps[state.status] || { text: state.status };
         transferStatusText.textContent = step.text;
         transferStatusDetail.textContent = state.error || '';
 
         if (state.status === 'completed') {
-          transferProgressBar.classList.remove('bg-purple-500');
-          transferProgressBar.classList.add('bg-green-500');
           clearInterval(pollInterval);
           transferStatusText.textContent = 'Transfer complete!';
           transferStatusDetail.textContent = '';
           showToast('Transfer complete!', 'success');
         } else if (state.status === 'failed') {
-          transferProgressBar.classList.remove('bg-purple-500');
-          transferProgressBar.classList.add('bg-red-500');
           clearInterval(pollInterval);
         }
       } catch (err) {

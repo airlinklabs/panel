@@ -1,13 +1,9 @@
 (function () {
   if (window.loadingPopupSystem) return;
 
-  const OVERLAY_Z_INDEX = 9999;
-  const OVERLAY_BG = 'rgba(0,0,0,0.5)';
-
   let overlay = null;
   let panel = null;
   let currentSteps = [];
-  let currentStepIndex = -1;
 
   function createOverlay() {
     if (overlay) return;
@@ -15,7 +11,7 @@
     overlay = document.createElement('div');
     overlay.id = 'loadingPopupOverlay';
     overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center al-modal-overlay';
-    overlay.style.background = OVERLAY_BG;
+    overlay.style.background = 'rgba(0,0,0,0.5)';
 
     panel = document.createElement('div');
     panel.className = 'al-sheet-panel al-modal-panel rounded-2xl shadow-2xl w-full max-w-sm mx-4 border';
@@ -33,12 +29,6 @@
             <h3 id="lp-title" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Loading...</h3>
             <p id="lp-message" class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Please wait</p>
           </div>
-        </div>
-        <div id="lp-progress-container" class="mb-4 hidden">
-          <div class="h-1.5 rounded-full overflow-hidden" style="background:var(--theme-border)">
-            <div id="lp-progress-fill" class="h-full rounded-full transition-all duration-300" style="transform:scaleX(0);transform-origin:left center;background:var(--theme-text-strong)"></div>
-          </div>
-          <p id="lp-progress-text" class="text-[11px] mt-1.5 text-right" style="color:var(--theme-text-muted)">0%</p>
         </div>
         <div id="lp-steps" class="space-y-2"></div>
       </div>
@@ -63,17 +53,13 @@
   function show() {
     createOverlay();
     currentSteps = [];
-    currentStepIndex = -1;
 
     document.getElementById('lp-spinner').classList.remove('hidden');
     document.getElementById('lp-check').classList.add('hidden');
     document.getElementById('lp-error').classList.add('hidden');
-    document.getElementById('lp-progress-container').classList.add('hidden');
     document.getElementById('lp-steps').innerHTML = '';
     document.getElementById('lp-cancel').classList.remove('hidden');
     document.getElementById('lp-close').classList.add('hidden');
-    document.getElementById('lp-progress-fill').style.transform = 'scaleX(0)';
-    document.getElementById('lp-progress-text').textContent = '0%';
 
     Animate.openModal(overlay, panel);
   }
@@ -89,14 +75,6 @@
 
   function setMessage(text) {
     document.getElementById('lp-message').textContent = text;
-  }
-
-  function setProgress(percent, message) {
-    const container = document.getElementById('lp-progress-container');
-    container.classList.remove('hidden');
-    document.getElementById('lp-progress-fill').style.transform = 'scaleX(' + (percent / 100) + ')';
-    document.getElementById('lp-progress-text').textContent = Math.round(percent) + '%';
-    if (typeof message === 'string' && message) setMessage(message);
   }
 
   function addStep(text, status) {
@@ -155,7 +133,7 @@
     close: hide,
     setTitle: setTitle,
     setMessage: setMessage,
-    setProgress: setProgress,
+    setProgress: function() {},
     addStep: addStep,
     updateStep: updateStep,
     complete: complete,
@@ -167,7 +145,7 @@
     if (title) setTitle(title);
     if (message) setMessage(message);
     return {
-      updateProgress: setProgress,
+      updateProgress: function() {},
       updateMessage: setMessage,
       close: hide
     };

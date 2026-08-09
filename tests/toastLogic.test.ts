@@ -59,7 +59,6 @@ describe('toast-logic', () => {
     it('handles unknown state', () => {
       const result = interpretJob({ state: 'installing' });
       expect(result.done).toBeFalsy();
-      expect(result.progress).toBeNull();
     });
 
     it('handles unknown state with error string', () => {
@@ -67,9 +66,8 @@ describe('toast-logic', () => {
       expect(result.message).toBe('Compiling...');
     });
 
-    it('handles progress payload', () => {
-      const result = interpretJob({ progress: 42, message: 'Downloading...' });
-      expect(result.progress).toBe(42);
+    it('handles message payload', () => {
+      const result = interpretJob({ message: 'Downloading...' });
       expect(result.message).toBe('Downloading...');
       expect(result.done).toBeFalsy();
     });
@@ -105,22 +103,15 @@ describe('toast-logic', () => {
       expect(rec.group).toBeNull();
     });
 
-    it('creates a progress record when type is loading', () => {
+    it('creates an active record when type is loading', () => {
       const rec = createRecord('Working...', 'loading', {});
-      expect(rec.mode).toBe('progress');
-      expect(rec.progress).toBe(0);
+      expect(rec.mode).toBe('active');
       expect(rec.duration).toBe(0);
     });
 
-    it('creates a progress record when opts.progress is true', () => {
+    it('creates an active record when opts.progress is true', () => {
       const rec = createRecord('Working...', 'info', { progress: true });
-      expect(rec.mode).toBe('progress');
-      expect(rec.progress).toBe(0);
-    });
-
-    it('creates indeterminate progress record', () => {
-      const rec = createRecord('Working...', 'loading', { indeterminate: true });
-      expect(rec.indeterminate).toBe(true);
+      expect(rec.mode).toBe('active');
     });
 
     it('sets custom duration', () => {
@@ -138,11 +129,6 @@ describe('toast-logic', () => {
       const rec = createRecord('Installing', 'loading', { job });
       expect(rec.job).toEqual(job);
       expect(rec.job).not.toBe(job); // shallow copy
-    });
-
-    it('sets autoCompleteAt100', () => {
-      const rec = createRecord('Installing', 'loading', { autoCompleteAt100: false });
-      expect(rec.autoCompleteAt100).toBe(false);
     });
   });
 });

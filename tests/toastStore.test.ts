@@ -13,15 +13,14 @@ function memoryStorage() {
   };
 }
 
-function progressRecord(overrides: Record<string, unknown> = {}) {
+function activeRecord(overrides: Record<string, unknown> = {}) {
   return Object.assign(
     {
       id: ToastStore.uid(),
-      mode: 'progress',
+      mode: 'active',
       message: 'Working…',
       type: 'loading',
       startedAt: Date.now(),
-      progress: 40,
       finished: false,
       success: null,
       finishedAt: null,
@@ -36,30 +35,29 @@ describe('toast-store', () => {
   it('round-trips records through the injected storage', () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const rec = progressRecord();
+    const rec = activeRecord();
 
     store.save([rec]);
     const loaded = store.load();
     expect(loaded).toHaveLength(1);
     expect(loaded[0].id).toBe(rec.id);
-    expect(loaded[0].progress).toBe(40);
   });
 
   it('upserts by id and updates existing records in place', () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const rec = progressRecord();
+    const rec = activeRecord();
     store.upsert(rec);
-    store.upsert(Object.assign({}, rec, { progress: 75 }));
+    store.upsert(Object.assign({}, rec, { message: 'Still working…' }));
     expect(store.load()).toHaveLength(1);
-    expect(store.load()[0].progress).toBe(75);
+    expect(store.load()[0].message).toBe('Still working…');
   });
 
   it('removes a record by id', () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const a = progressRecord();
-    const b = progressRecord();
+    const a = activeRecord();
+    const b = activeRecord();
     store.save([a, b]);
     store.remove(a.id);
     expect(store.load().map((r) => r.id)).toEqual([b.id]);
@@ -70,7 +68,7 @@ describe('toast-store', () => {
     vi.setSystemTime(now);
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const done = progressRecord({ finished: true, success: true, finishedAt: now - 10_000 });
+    const done = activeRecord({ finished: true, success: true, finishedAt: now - 10_000 });
     store.save([done]);
     expect(store.load()).toHaveLength(0);
   });
@@ -80,7 +78,7 @@ describe('toast-store', () => {
     vi.setSystemTime(now);
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const done = progressRecord({ finished: true, success: false, finishedAt: now - 3_000 });
+    const done = activeRecord({ finished: true, success: false, finishedAt: now - 3_000 });
     store.save([done]);
     expect(store.load()).toHaveLength(1);
   });
@@ -90,31 +88,31 @@ describe('toast-store', () => {
     vi.setSystemTime(now);
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const toast = progressRecord({ mode: 'toast', startedAt: now - 6_000, duration: 5_000 });
+    const toast = activeRecord({ mode: 'toast', startedAt: now - 6_000, duration: 5_000 });
     store.save([toast]);
     expect(store.load()).toHaveLength(0);
   });
 
-  it('never expires a running progress job on its own', () => {
+  it('never expires a running active job on its own', () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const rec = progressRecord({ finished: false });
+    const rec = activeRecord({ finished: false });
     store.save([rec]);
     expect(store.load()).toHaveLength(1);
   });
 
   it('remainingMs returns 0 once the record cannot be shown anymore', () => {
     const now = 3_000_000;
-    const toast = progressRecord({ mode: 'toast', startedAt: now - 10_000, duration: 5_000 });
+    const toast = activeRecord({ mode: 'toast', startedAt: now - 10_000, duration: 5_000 });
     expect(ToastStore.remainingMs(toast, now)).toBe(0);
-    const live = progressRecord({ mode: 'toast', startedAt: now - 1_000, duration: 5_000 });
+    const live = activeRecord({ mode: 'toast', startedAt: now - 1_000, duration: 5_000 });
     expect(ToastStore.remainingMs(live, now)).toBe(4_000);
   });
 
   it('caps the number of persisted records', () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const many = Array.from({ length: 30 }, () => progressRecord());
+    const many = Array.from({ length: 30 }, () => activeRecord());
     store.save(many);
     expect(store.load().length).toBeLessThanOrEqual(20);
   });
@@ -122,8 +120,8 @@ describe('toast-store', () => {
   it('finds records by group', () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const g = progressRecord({ group: 'backup:abc' });
-    const other = progressRecord({ group: null });
+    const g = activeRecord({ group: 'backup:abc' });
+    const other = activeRecord({ group: null });
     store.save([g, other]);
     const found = store.byGroup('backup:abc');
     expect(found).toHaveLength(1);
@@ -141,7 +139,7 @@ describe('toast-store', () => {
     } as Storage;
     const store = ToastStore.createStore(throwing);
     expect(store.load()).toEqual([]);
-    expect(store.save([progressRecord()])).toBe(false);
+    expect(store.save([activeRecord()])).toBe(false);
     expect(store.load()).toEqual([]);
   });
 

@@ -342,18 +342,6 @@
 .al-refresh-spinning { animation: al-spin 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
 @keyframes al-spin { to { transform: rotate(360deg); } }
 
-/* ── Page loader ────────────────────────────────────────────── */
-.al-page-loader {
-  position: fixed;
-  inset: 0;
-  z-index: 99998;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  background: var(--theme-bg);
-}
-
 /* ── Wallpaper layer ──────────────────────────────────────────
    Set via body.al-wallpaper + --al-wallpaper-image. The layer is a
    fixed full-viewport div behind all surfaces so cards, tables,

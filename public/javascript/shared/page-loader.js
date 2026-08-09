@@ -1,35 +1,13 @@
 (function () {
 
-  const NAV_FLAG    = 'al_nav';
-  const FADE_OUT_MS = 160;
-  const STAGGER_MS  = 65;
-  const CHILD_DUR   = 480;
-  var _rootStyle = getComputedStyle(document.documentElement);
-  var EASE_OUT    = _rootStyle.getPropertyValue('--ease-in').trim() || 'cubic-bezier(0.4,0,1,1)';
-  var EASE_IN     = _rootStyle.getPropertyValue('--ease-out').trim() || 'cubic-bezier(0.16,1,0.3,1)';
-  const SPRINT_MS   = 340;
-  const HOLD_MS     = 160;
-  const OV_FADE_MS  = 240;
+  const NAV_FLAG = 'al_nav';
+  const FADE_OUT_MS = 120;
+  const EASE_OUT = 'cubic-bezier(0.16,1,0.3,1)';
+  const EASE_IN = 'cubic-bezier(0.4,0,1,1)';
   const LOAD_GUARD_MS = 2000;
   const EXACT_MATCH_SCORE = 9999;
-
-  var _isDark = document.documentElement.classList.contains('dark');
-  var COLOR_DARK_BG    = _rootStyle.getPropertyValue('--theme-bg').trim() || '#161616';
-  var COLOR_LIGHT_BG   = _rootStyle.getPropertyValue('--theme-bg').trim() || '#f5f5f5';
-  var COLOR_DARK_TEXT  = _rootStyle.getPropertyValue('--theme-text').trim() || '#e0e0e0';
-  var COLOR_LIGHT_TEXT = _rootStyle.getPropertyValue('--theme-text').trim() || '#404040';
-  var COLOR_DARK_LOGO_BG  = _rootStyle.getPropertyValue('--theme-bg').trim() || '#f0f0f0';
-  var COLOR_LIGHT_LOGO_BG = '#000000';
-
-  const PROGRESS_CEILING  = 82;
-  const PROGRESS_DECAY    = 0.065;
-  const PROGRESS_INCREMENT = 1.2;
-  const PROGRESS_INTERVAL_MS = 90;
-  const CLEARANCE_OVERHEAD_MS = 40;
-
   const ACTIVE_BORDER_RADIUS = '0.75rem';
   var PILL_TRANSITION = 'none';
-
   const MOBILE_ACTIVE_CLASSES = ['text-neutral-900', 'dark:text-white', 'active-mobile'];
   const MOBILE_INACTIVE_CLASSES = ['text-neutral-500', 'dark:text-neutral-400'];
 
@@ -43,10 +21,6 @@
   })();
 
   if (_fromNav) {
-    // Hide only the content column so the sidebar stays painted during the
-    // swap — hiding <html> hides the sidebar too (it blinks out/in) and the
-    // invisible page lets the browser's white canvas show through in dark
-    // mode. The content wrapper is faded back in by revealAfterNav().
     const _pc = el('page-content') || el('server-page-body');
     if (_pc) _pc.style.opacity = '0';
   }
@@ -74,10 +48,6 @@
   }
 
   // ── Turbo Drive interop ────────────────────────────────────────────────────
-  // When Turbo is present it takes over same-origin link clicks and form
-  // submits (swapping <body> via fetch), so the sessionStorage nav-flag + full
-  // reload flow is only needed for links/forms Turbo deliberately skips.
-  // Highlights and the reveal animation re-run after the swap on turbo:load.
 
   const USING_TURBO = !!(window.Turbo);
 
@@ -87,7 +57,71 @@
     return t !== 'false';
   }
 
-  // ── Animated element ──────────────────────────────────────────────────────
+  // ── Network activity chip ────────────────────────────────────────────────
+
+  let chipEl = null;
+  let chipTimer = null;
+
+  function ensureChip() {
+    if (chipEl && chipEl.isConnected) return chipEl;
+    chipEl = document.createElement('div');
+    chipEl.id = 'al-activity-chip';
+    chipEl.setAttribute('role', 'status');
+    chipEl.setAttribute('aria-live', 'polite');
+    chipEl.setAttribute('aria-label', 'Loading page');
+    chipEl.style.cssText = [
+      'position:fixed',
+      'top:12px',
+      'right:16px',
+      'z-index:10000',
+      'display:flex',
+      'align-items:center',
+      'gap:6px',
+      'padding:6px 12px',
+      'border-radius:999px',
+      'font-size:12px',
+      'font-weight:500',
+      'font-family:General Sans,sans-serif',
+      'background:var(--theme-bg-card)',
+      'border:1px solid var(--theme-border)',
+      'color:var(--theme-text-muted)',
+      'box-shadow:0 2px 8px rgba(0,0,0,0.08)',
+      'opacity:0',
+      'transform:translateY(-4px)',
+      'transition:opacity 180ms ease,transform 180ms ease',
+      'pointer-events:none',
+    ].join(';');
+    const spinner = document.createElement('span');
+    spinner.style.cssText = 'width:12px;height:12px;border:2px solid var(--theme-border);border-top-color:var(--theme-text-muted);border-radius:50%;animation:al-spin 0.6s linear infinite;';
+    chipEl.appendChild(spinner);
+    const label = document.createElement('span');
+    label.textContent = 'Loading';
+    chipEl.appendChild(label);
+    document.body.appendChild(chipEl);
+    return chipEl;
+  }
+
+  function showChip(msg) {
+    if (chipTimer) { clearTimeout(chipTimer); chipTimer = null; }
+    const chip = ensureChip();
+    const label = chip.querySelector('span:last-child');
+    if (label) label.textContent = msg || 'Loading';
+    requestAnimationFrame(function () {
+      chip.style.opacity = '1';
+      chip.style.transform = 'translateY(0)';
+    });
+  }
+
+  function hideChip() {
+    if (chipTimer) clearTimeout(chipTimer);
+    chipTimer = setTimeout(function () {
+      if (!chipEl) return;
+      chipEl.style.opacity = '0';
+      chipEl.style.transform = 'translateY(-4px)';
+    }, 200);
+  }
+
+  // ── Content fade ─────────────────────────────────────────────────────────
 
   function getAnimEl() {
     return el('server-page-body') || el('page-content') || null;
@@ -112,57 +146,40 @@
     });
   }
 
-  // ── Content animation ─────────────────────────────────────────────────────
-
   function animateOut(c) {
     if (!c) return;
     const children = getAnimatableChildren(c);
-    const targets  = children.length ? children : [c];
+    const targets = children.length ? children : [c];
     targets.forEach(function (t) {
-      t.style.transition = 'opacity ' + FADE_OUT_MS + 'ms ' + EASE_OUT + ', transform ' + FADE_OUT_MS + 'ms ' + EASE_OUT;
-      t.style.opacity    = '0';
-      t.style.transform  = 'translateY(6px)';
+      t.style.transition = 'opacity ' + FADE_OUT_MS + 'ms ' + EASE_OUT;
+      t.style.opacity = '0';
     });
   }
 
   function animateIn(c) {
     if (!c) return;
-
     const children = getAnimatableChildren(c);
-
     children.forEach(function (child) {
       child.style.transition = 'none';
-      child.style.opacity    = '0';
-      child.style.transform  = 'translateY(14px)';
+      child.style.opacity = '0';
     });
-
     document.documentElement.classList.remove('js-loading');
-
     c.style.transition = 'none';
-    c.style.opacity    = '1';
-    c.style.transform  = '';
-
+    c.style.opacity = '1';
+    c.style.transform = '';
     if (!children.length) return;
-
     void c.offsetHeight;
-
-    children.forEach(function (child, i) {
-      const delay = i * STAGGER_MS;
-      child.style.transition =
-        'opacity ' + CHILD_DUR + 'ms ' + EASE_IN + ' ' + delay + 'ms, ' +
-        'transform ' + CHILD_DUR + 'ms ' + EASE_IN + ' ' + delay + 'ms';
-      child.style.opacity   = '1';
-      child.style.transform = 'translateY(0)';
+    children.forEach(function (child) {
+      child.style.transition = 'opacity 200ms ' + EASE_IN;
+      child.style.opacity = '1';
     });
-
-    const totalDur = (children.length - 1) * STAGGER_MS + CHILD_DUR + CLEARANCE_OVERHEAD_MS;
     setTimeout(function () {
       children.forEach(function (child) {
         child.style.transition = '';
-        child.style.opacity    = '';
-        child.style.transform  = '';
+        child.style.opacity = '';
+        child.style.transform = '';
       });
-    }, totalDur);
+    }, 250);
   }
 
   function fadeContentOut() {
@@ -179,16 +196,10 @@
 
   // ── Reveal after navigation ───────────────────────────────────────────────
 
-  let barEl = null;
-  let hiding = false;
-
   function revealAfterNav() {
     const _pc = el('page-content') || el('server-page-body');
     if (_pc) _pc.style.opacity = '';
-    const ov = el('pl-overlay');
-    if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
-    barEl = null;
-    hiding = false;
+    hideChip();
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         animateIn(getAnimEl());
@@ -202,7 +213,7 @@
     let best = null;
     let bestLen = 0;
     document.querySelectorAll('.nav-link').forEach(function (link) {
-      const href        = normalizePath(link.getAttribute('href') || '');
+      const href = normalizePath(link.getAttribute('href') || '');
       const matchPrefix = link.getAttribute('data-match-prefix');
       if (!href) return;
       if (path === href) { best = link; bestLen = EXACT_MATCH_SCORE; return; }
@@ -228,10 +239,8 @@
   function setDesktopActiveLink(link) {
     var rs = getComputedStyle(document.documentElement);
     var isDark = document.documentElement.classList.contains('dark');
-    // Inverted pill — background is the theme's text color, foreground is the
-    // theme's background color (same as the account link highlight).
-    var pillBg = rs.getPropertyValue('--theme-text').trim() || (isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT);
-    var pillFg = rs.getPropertyValue('--theme-bg').trim() || (isDark ? COLOR_LIGHT_BG : COLOR_DARK_BG);
+    var pillBg = rs.getPropertyValue('--theme-text').trim() || (isDark ? '#e0e0e0' : '#404040');
+    var pillFg = rs.getPropertyValue('--theme-bg').trim() || (isDark ? '#f5f5f5' : '#161616');
     document.querySelectorAll('.nav-link').forEach(function (l) {
       l.classList.remove('active', 'font-medium');
       l.style.color = '';
@@ -248,11 +257,11 @@
     const bg = el('active-background');
     if (!bg || !link) return;
     const top = getPillTop(link);
-    const h   = link.getBoundingClientRect().height;
+    const h = link.getBoundingClientRect().height;
     bg.style.transition = animate ? PILL_TRANSITION : 'none';
-    bg.style.height    = h + 'px';
+    bg.style.height = h + 'px';
     bg.style.transform = 'translateY(' + top + 'px)';
-    bg.style.opacity   = '1';
+    bg.style.opacity = '1';
   }
 
   function initDesktopHighlight(fromNav) {
@@ -263,7 +272,7 @@
       setTimeout(function () { initDesktopHighlight(fromNav); }, 0);
       return;
     }
-    const path   = normalizePath(window.location.pathname);
+    const path = normalizePath(window.location.pathname);
     const active = findDesktopActiveLink(path);
     setDesktopActiveLink(active);
     if (!active) { bg.style.opacity = '0'; return; }
@@ -272,13 +281,11 @@
     void bg.offsetHeight;
     if (!fromNav) {
       bg.style.transition = 'opacity 0.18s ease';
-      bg.style.opacity    = '1';
+      bg.style.opacity = '1';
     }
     setTimeout(function () {
       const bgEl = el('active-background');
-      if (bgEl) {
-        bgEl.style.transition = PILL_TRANSITION;
-      }
+      if (bgEl) bgEl.style.transition = PILL_TRANSITION;
     }, fromNav ? 0 : 200);
   }
 
@@ -287,75 +294,30 @@
   function initMobileHighlight() {
     const path = normalizePath(window.location.pathname);
     document.querySelectorAll('.mobile-nav-link').forEach(function (link) {
-      const href     = normalizePath(link.getAttribute('href') || '');
-      const mPrefix  = link.getAttribute('data-match-prefix');
-      const mAlso    = link.getAttribute('data-match-prefix-also');
-      const mExact   = link.getAttribute('data-match-exact') === 'true';
-      let active     = false;
-      if (mPrefix)     active = path.startsWith(mPrefix);
+      const href = normalizePath(link.getAttribute('href') || '');
+      const mPrefix = link.getAttribute('data-match-prefix');
+      const mAlso = link.getAttribute('data-match-prefix-also');
+      const mExact = link.getAttribute('data-match-exact') === 'true';
+      let active = false;
+      if (mPrefix) active = path.startsWith(mPrefix);
       else if (mExact) active = path === href;
-      else             active = path === href || (href !== '/' && path.startsWith(href));
+      else active = path === href || (href !== '/' && path.startsWith(href));
       if (!active && mAlso && path.startsWith(mAlso)) active = true;
       link.classList.remove(...MOBILE_INACTIVE_CLASSES, ...MOBILE_ACTIVE_CLASSES);
       link.classList.add(active ? 'text-neutral-900' : 'text-neutral-500');
-      link.classList.add(active ? 'dark:text-white'  : 'dark:text-neutral-400');
+      link.classList.add(active ? 'dark:text-white' : 'dark:text-neutral-400');
       if (active) link.classList.add('active-mobile');
     });
-  }
-
-  // ── Initial overlay ───────────────────────────────────────────────────────
-
-  function startProgress() {
-    barEl = el('pl-bar');
-    let pct = 0;
-    const iv = setInterval(function () {
-      if (hiding) { clearInterval(iv); return; }
-      pct = Math.min(pct + (PROGRESS_CEILING - pct) * PROGRESS_DECAY + PROGRESS_INCREMENT, PROGRESS_CEILING);
-      if (barEl) barEl.style.transform = 'scaleX(' + (pct / 100) + ')';
-    }, PROGRESS_INTERVAL_MS);
-  }
-
-  function hideOverlaySlow() {
-    const ov = el('pl-overlay');
-    if (!ov || hiding) return;
-    hiding = true;
-    if (!barEl) barEl = el('pl-bar');
-    if (barEl) {
-      barEl.style.transition = 'transform ' + SPRINT_MS + 'ms ' + _rootStyle.getPropertyValue('--ease-out').trim();
-      barEl.style.transform = 'scaleX(1)';
-    }
-    setTimeout(function () {
-      const ov2 = el('pl-overlay');
-      if (!ov2) return;
-      ov2.style.transition = 'opacity ' + OV_FADE_MS + 'ms ease';
-      ov2.style.opacity = '0';
-      const inner = el('pl-inner');
-      if (inner) {
-        inner.style.transition = 'opacity ' + (OV_FADE_MS - 40) + 'ms ease';
-        inner.style.opacity = '0';
-      }
-      setTimeout(function () {
-        const ov3 = el('pl-overlay');
-        if (ov3 && ov3.parentNode) ov3.parentNode.removeChild(ov3);
-        barEl = null;
-        hiding = false;
-      }, OV_FADE_MS);
-    }, SPRINT_MS + HOLD_MS);
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   function revealAfterStuckLoad() {
     if (document.documentElement.classList.contains('js-loading')) {
-      hideOverlaySlow();
+      hideChip();
       fadeContentIn();
     }
   }
-
-  // turbo:load also fires for the initial page (Turbo boots it), so only treat
-  // subsequent fires as boundary-after-navigation. pageRenderer's body swap
-  // leaves `<html class="js-loading">` behind, so the new content is hidden by
-  // CSS until revealAfterNav animates it in — no flash between swap and reveal.
 
   var _turboVisits = 0;
   document.addEventListener('turbo:load', function () {
@@ -376,7 +338,6 @@
     if (_fromNav) {
       revealAfterNav();
     } else {
-      if (el('pl-overlay')) startProgress();
       window.__alLoadGuard = setTimeout(revealAfterStuckLoad, LOAD_GUARD_MS);
     }
   });
@@ -387,7 +348,7 @@
         clearTimeout(window.__alLoadGuard);
         window.__alLoadGuard = null;
       }
-      hideOverlaySlow();
+      hideChip();
       fadeContentIn();
     }
   });
@@ -420,6 +381,7 @@
     }
     if (!willTurboHandle(a)) markNavigation();
     fadeContentOut();
+    showChip('Loading');
   }, true);
 
   window.addEventListener('al:themechange', function () {
@@ -434,8 +396,8 @@
       const onAccount = path === '/account' || path.startsWith('/account/');
       const userText = accountLink.querySelector('#sidebar-username');
       var pillRs = getComputedStyle(document.documentElement);
-      var pillBg = pillRs.getPropertyValue('--theme-text').trim() || (isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT);
-      var pillFg = pillRs.getPropertyValue('--theme-bg').trim() || (isDark ? COLOR_LIGHT_BG : COLOR_DARK_BG);
+      var pillBg = pillRs.getPropertyValue('--theme-text').trim() || (isDark ? '#e0e0e0' : '#404040');
+      var pillFg = pillRs.getPropertyValue('--theme-bg').trim() || (isDark ? '#f5f5f5' : '#161616');
       if (onAccount) {
         accountLink.style.background = pillBg;
         accountLink.style.color = pillFg;
@@ -456,13 +418,13 @@
       const logoImg = logo.querySelector('img');
       if (onCredits) {
         if (logoBlock) {
-          logoBlock.style.background = isDark ? COLOR_DARK_LOGO_BG : COLOR_LIGHT_LOGO_BG;
+          logoBlock.style.background = isDark ? '#f0f0f0' : '#000000';
           logoBlock.style.borderRadius = ACTIVE_BORDER_RADIUS;
         }
-        logo.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
-        if (logoImg) logoImg.style.background = COLOR_LIGHT_LOGO_BG;
+        logo.style.color = isDark ? '#e0e0e0' : '#404040';
+        if (logoImg) logoImg.style.background = '#000000';
         if (logoTitle) {
-          logoTitle.style.color = isDark ? COLOR_DARK_TEXT : COLOR_LIGHT_TEXT;
+          logoTitle.style.color = isDark ? '#e0e0e0' : '#404040';
           logoTitle.style.fontWeight = '700';
         }
       } else {
@@ -484,6 +446,7 @@
     const form = e.target && e.target.closest && e.target.closest('form');
     if (form && !willTurboHandle(form)) markNavigation();
     fadeContentOut();
+    showChip('Loading');
   }, true);
 
 })();

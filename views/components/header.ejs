@@ -89,14 +89,7 @@ const wallpaperExcluded = req && req.path && (
 
 <a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white dark:focus:bg-neutral-950 focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
 
-<!-- Page loader overlay -->
-<div id="pl-overlay" class="al-page-loader" style="display:none;">
-  <div id="pl-inner" style="display:flex;flex-direction:column;align-items:center;gap:18px;">
-    <img src="/assets/logo.svg" alt="" style="width:42px;height:42px;object-fit:contain;border-radius:10px;display:block;" onerror="this.style.display='none'">
-    <p style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:14px;font-weight:600;letter-spacing:-0.015em;color:var(--theme-text-strong);" id="pl-title"><%= settings.title %></p>
-    <p id="pl-msg" style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:11px;color:var(--theme-text-muted);letter-spacing:0.01em;transition:opacity 180ms ease;">Preparing your experience...</p>
-  </div>
-</div>
+<!-- Network activity chip is created dynamically by page-loader.js -->
 <script nonce="<%- nonce %>">
 function initializeTheme() {
     const userPreference = localStorage.getItem('theme');

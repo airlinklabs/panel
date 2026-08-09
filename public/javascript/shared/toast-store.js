@@ -65,7 +65,7 @@
         : FINISHED_VIEW_MS.success;
       return now - record.finishedAt > view + FINISHED_GRACE_MS;
     }
-    if (record.mode !== 'progress' && typeof record.duration === 'number' && record.duration > 0) {
+    if (record.mode !== 'active' && typeof record.duration === 'number' && record.duration > 0) {
       return now - started > record.duration + TOAST_GRACE_MS;
     }
     return false;
@@ -79,7 +79,7 @@
         : FINISHED_VIEW_MS.success;
       return Math.max(0, record.finishedAt + view - now);
     }
-    if (record.mode !== 'progress' && typeof record.duration === 'number') {
+    if (record.mode !== 'active' && typeof record.duration === 'number') {
       return Math.max(0, (record.startedAt || now) + record.duration - now);
     }
     return Number.MAX_SAFE_INTEGER;

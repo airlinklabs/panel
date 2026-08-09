@@ -241,24 +241,8 @@
       resize();
       window.addEventListener('resize', resize);
 
-      // Start only after the page overlay is gone
-      const plOverlay = document.getElementById('pl-overlay');
-      if (!plOverlay) {
-        start();
-      } else {
-        const obs = new MutationObserver(function (mutations) {
-          mutations.forEach(function (m) {
-            m.removedNodes.forEach(function (n) {
-              if (n && n.id === 'pl-overlay') {
-                obs.disconnect();
-                setTimeout(start, 80);
-              }
-            });
-          });
-        });
-        obs.observe(document.body, { childList: true });
-        if (!document.getElementById('pl-overlay')) setTimeout(start, 80);
-      }
+      // Start immediately — no overlay to wait for
+      start();
 
       // Fade out and stop on navigation
       document.addEventListener('click', function (e) {

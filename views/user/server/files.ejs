@@ -1059,10 +1059,8 @@ function openCreateFileModal() {
 
         xhr.upload.onprogress = function(e) {
           if (uploadToast && e.lengthComputable) {
-            const percentComplete = Math.round((e.loaded / e.total) * 100);
-            uploadToast.updateProgress(percentComplete);
             if (uploadToast.setMessage) {
-              uploadToast.setMessage(`Uploading ${fileName}… ${percentComplete}%`);
+              uploadToast.setMessage(`Uploading ${fileName}…`);
             }
           }
         };

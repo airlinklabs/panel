@@ -1,8 +1,7 @@
 <style>
-  @keyframes al-toast-indeterminate {
-    0%   { transform: scaleX(0.08); opacity: 0.35; }
-    50%  { transform: scaleX(0.7);  opacity: 1; }
-    100% { transform: scaleX(0.08); opacity: 0.35; }
+  @keyframes al-toast-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 </style>
 <script nonce="<%- nonce %>">
@@ -27,13 +26,6 @@
       x: '<%- icon('x', { class: 'w-5 h-5' }) %>',
     };
 
-    /*
-     * Persistence — every toast is mirrored as a lightweight record in
-     * session storage (expiry/dedup rules live in shared/toast-store.js).
-     * Navigation keeps the record, so the toast is re-rendered on the next
-     * page. Progress toasts may carry a `job` (a polled endpoint) that keeps
-     * resolving after the page that started it is gone.
-     */
     let storage = null;
     try {
       if (window.sessionStorage) {
@@ -48,11 +40,8 @@
     const uid = () => (window.ALToastStore ? window.ALToastStore.uid() : 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
     const remainingMs = (r, n) => (window.ALToastStore ? remainingMs(r, n) : 0);
 
-    // Live toasts on this page — record id -> { record, handle }.
     const active = new Map();
-    // Record id -> stop() for running job pollers.
     const jobPolls = new Map();
-    // Record ids already re-rendered on this page.
     const hydrated = new Set();
     let saveTimer = null;
 
@@ -68,10 +57,7 @@
 
     function stopJobFor(id) {
       const stop = jobPolls.get(id);
-      if (stop) {
-        stop();
-        jobPolls.delete(id);
-      }
+      if (stop) { stop(); jobPolls.delete(id); }
     }
 
     let toastContainer = null;
@@ -91,23 +77,16 @@
       return toastContainer;
     }
 
-    /*
-     * interpretJob maps a polled endpoint payload to a minimal view:
-     *   { progress?, message?, done, success, error }
-     * Handles both the generic progress convention and the server status
-     * convention ({ state: installed|failed }) used by installs.
-     */
     function interpretJob(data) {
       if (!data || typeof data !== 'object') return {};
       if (typeof data.state === 'string') {
         const st = data.state;
         if (st === 'installed') return { done: true, success: true, message: 'Installation complete.' };
         if (st === 'failed') return { done: true, success: false, error: data.error || 'Installation failed.' };
-        return { progress: null, message: typeof data.error === 'string' ? data.error : undefined };
+        return { message: typeof data.error === 'string' ? data.error : undefined };
       }
       const done = data.done === true || data.success === true || data.success === false || !!data.error;
       return {
-        progress: typeof data.progress === 'number' ? data.progress : undefined,
         message: typeof data.message === 'string' ? data.message : undefined,
         done: done,
         success: !(data.success === false || !!data.error),
@@ -116,36 +95,28 @@
     }
 
     function createRecord(message, type, opts) {
-      const progressMode = opts.progress === true || type === 'loading';
+      const isActive = opts.progress === true || type === 'loading';
       return {
         id: uid(),
         group: typeof opts.group === 'string' && opts.group ? opts.group : null,
-        mode: progressMode ? 'progress' : 'toast',
+        mode: isActive ? 'active' : 'toast',
         message: String(message),
         type: type,
         startedAt: Date.now(),
-        progress: progressMode ? 0 : null,
-        indeterminate: progressMode && opts.indeterminate === true ? true : null,
-        duration: progressMode ? 0 : (typeof opts.duration === 'number' ? opts.duration : 5000),
+        duration: isActive ? 0 : (typeof opts.duration === 'number' ? opts.duration : 5000),
         finished: false,
         success: null,
         finishedAt: null,
         job: opts.job && typeof opts.job === 'object' ? Object.assign({}, opts.job) : null,
-        autoCompleteAt100: opts.autoCompleteAt100,
       };
     }
 
     function showToast(message, type, opts) {
       opts = opts || {};
       const isPreset = opts._record != null;
-
-      // Rehydrated records are prebuilt so their id/progress/job survive the
-      // navigation. Fresh toasts are created from scratch.
       const rec = isPreset ? Object.assign({}, opts._record) : createRecord(message, type, opts);
       if (isPreset && typeof opts.duration === 'number') rec.duration = opts.duration;
 
-      // Same group + still active => dedupe, return the first handle so the
-      // caller (e.g. the install banner on every server page) still works.
       if (rec.group && !isPreset) {
         let existing = null;
         active.forEach(function (entry) {
@@ -153,17 +124,14 @@
             existing = entry;
           }
         });
-        if (existing && existing.handle) {
-          return existing.handle;
-        }
+        if (existing && existing.handle) return existing.handle;
       }
 
       return renderToast(rec, opts);
     }
 
-    function renderToast(rec, opts) {
-      const progressMode = rec.mode === 'progress';
-      const indeterminate = rec.indeterminate === true;
+    function renderToast(rec) {
+      const isActive = rec.mode === 'active';
       const toast = ensureContainer();
 
       const el = document.createElement('div');
@@ -177,7 +145,7 @@
       el.style.cursor = 'grab';
       el.style.userSelect = 'none';
       el.style.overflowWrap = 'break-word';
-      el.style.transition = 'transform var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), opacity var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1))';
+      el.style.transition = 'transform 320ms cubic-bezier(0.16,1,0.3,1), opacity 320ms cubic-bezier(0.16,1,0.3,1)';
       el.style.willChange = 'transform, opacity';
       el.style.color = 'var(--theme-text)';
 
@@ -197,26 +165,14 @@
       messageSpan.textContent = rec.message;
       body.appendChild(messageSpan);
 
-      const progressRow = document.createElement('div');
-      progressRow.className = 'hidden items-center gap-2 mt-2';
-      const barTrack = document.createElement('div');
-      barTrack.className = 'h-1 flex-1 rounded overflow-hidden';
-      barTrack.style.background = 'var(--theme-border)';
-      const barFill = document.createElement('div');
-      barFill.className = 'h-full rounded transition-all duration-300';
-      barFill.style.transform = 'scaleX(0)';
-      barFill.style.transformOrigin = 'left center';
-      barFill.style.background = 'var(--theme-info)';
-      barTrack.appendChild(barFill);
-      const pctLabel = document.createElement('span');
-      pctLabel.className = 'text-[10px] tabular-nums shrink-0';
-      pctLabel.style.color = 'var(--theme-text-muted)';
-      pctLabel.textContent = '0%';
-      progressRow.appendChild(barTrack);
-      progressRow.appendChild(pctLabel);
-      body.appendChild(progressRow);
+      // Stage line: shows plain-language status updates from job polling
+      const stageSpan = document.createElement('div');
+      stageSpan.className = 'text-xs mt-0.5';
+      stageSpan.style.color = 'var(--theme-text-muted)';
+      stageSpan.style.display = 'none';
+      body.appendChild(stageSpan);
 
-      if (!progressMode) {
+      if (!isActive) {
         const dismissBtn = document.createElement('button');
         dismissBtn.type = 'button';
         dismissBtn.className = 'shrink-0 p-1 rounded-lg transition-opacity hover:opacity-70 ml-1';
@@ -241,29 +197,6 @@
       let dismissTimer = null;
       let completed = false;
 
-      const showProgressRow = function () {
-        progressRow.classList.remove('hidden');
-        progressRow.classList.add('flex');
-      };
-
-      function setFill(percent) {
-        const p = Math.max(0, Math.min(100, Number(percent) || 0));
-        barFill.style.transform = 'scaleX(' + (p / 100) + ')';
-        pctLabel.textContent = Math.round(p) + '%';
-      }
-
-      if (progressMode) {
-        if (indeterminate) {
-          showProgressRow();
-          barFill.style.transform = 'scaleX(0.6)';
-          barFill.style.animation = 'al-toast-indeterminate 1.4s ease-in-out infinite';
-          pctLabel.textContent = '';
-        } else if (typeof rec.progress === 'number' && rec.progress > 0) {
-          showProgressRow();
-          setFill(rec.progress);
-        }
-      }
-
       const removeToast = function () {
         if (removed) return;
         removed = true;
@@ -271,7 +204,7 @@
         stopJobFor(rec.id);
         active.delete(rec.id);
         scheduleSave();
-        el.style.transition = 'transform var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)), opacity var(--dur-exit, 180ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1))';
+        el.style.transition = 'transform 180ms cubic-bezier(0.4,0,1,1), opacity 180ms cubic-bezier(0.4,0,1,1)';
         el.style.transform = 'translateX(calc(100% + 1rem))';
         el.style.opacity = '0';
         setTimeout(function () {
@@ -296,21 +229,13 @@
         scheduleSave();
       };
 
-      const updateProgress = function (percent, msg) {
-        if (removed) return;
-        if (typeof msg === 'string') setMessage(msg);
-        rec.progress = Math.max(0, Math.min(100, Number(percent) || 0));
-        showProgressRow();
-        if (indeterminate) {
-          barFill.style.animation = null;
-          barFill.style.transformOrigin = 'left center';
-          barFill.style.transform = 'scaleX(' + (rec.progress / 100) + ')';
-          pctLabel.textContent = Math.round(rec.progress) + '%';
+      const setStage = function (msg) {
+        if (typeof msg === 'string' && msg) {
+          stageSpan.textContent = msg;
+          stageSpan.style.display = '';
         } else {
-          setFill(rec.progress);
+          stageSpan.style.display = 'none';
         }
-        scheduleSave();
-        if (rec.progress >= 100 && rec.autoCompleteAt100 !== false) complete(true);
       };
 
       const complete = function (success, msg) {
@@ -321,19 +246,14 @@
         rec.finishedAt = Date.now();
         rec.success = !!success;
         scheduleSave();
-        if (progressMode) {
-          showProgressRow();
-          barFill.style.animation = null;
-          setFill(100);
-          barFill.style.background = success ? 'var(--theme-success)' : 'var(--theme-danger)';
-        }
         if (success) setType('success');
         else setType('error');
         icon.innerHTML = success ? iconMap.check : iconMap.x;
+        setStage('');
         scheduleDismiss(success ? 1600 : 4000);
       };
 
-      // ===== job continuation ======================================
+      // Job continuation — polls endpoint and updates stage text (no progress bar)
       let stopJob = function () {};
       if (rec.job && typeof rec.job === 'object') {
         const jobCfg = rec.job;
@@ -351,11 +271,13 @@
             .then(function (data) {
               if (stopped || removed || completed) return;
               const view = interpretJob(data);
-              if (view.progress != null) updateProgress(view.progress);
-              if (typeof view.message === 'string' && view.message !== rec.message) setMessage(view.message);
+              if (typeof view.message === 'string' && view.message !== rec.message) {
+                setMessage(view.message);
+                setStage(view.message);
+              }
               if (view.done) complete(view.success, view.error || view.message || 'Done.');
             })
-            .catch(function () { /* transient network blips are normal — keep polling */ })
+            .catch(function () { /* transient network blips are normal */ })
             .then(function () {
               if (!stopped && !removed && !completed) timer = setTimeout(tick, intervalMs);
             });
@@ -368,11 +290,10 @@
         tick();
       }
 
-      if (!progressMode && !rec.finished) {
+      if (!isActive && !rec.finished) {
         scheduleDismiss(typeof rec.duration === 'number' ? rec.duration : 5000);
       }
 
-      // Rehydrated finished toast: sit out its remaining visibility window.
       if (rec.finished === true) {
         const remain = remainingMs(rec, Date.now());
         if (remain <= 0) {
@@ -380,21 +301,13 @@
           if (el.parentNode) toast.removeChild(el);
           return noopHandle();
         }
-        // Render the settled state (icon + message) without re-driving it.
-        if (progressMode) {
-          showProgressRow();
-          setFill(100);
-          barFill.style.animation = null;
-          barFill.style.background = rec.success ? 'var(--theme-success)' : 'var(--theme-danger)';
-        }
         icon.innerHTML = rec.success === false ? iconMap.x : iconMap.check;
         scheduleDismiss(remain);
       }
 
       const handle = {
-        updateProgress: updateProgress,
-        update: updateProgress,
         setMessage: setMessage,
+        setStage: setStage,
         setType: setType,
         complete: complete,
         close: removeToast,
@@ -407,13 +320,9 @@
 
     function noopHandle() {
       const noop = function () {};
-      return { updateProgress: noop, update: noop, setMessage: noop, setType: noop, complete: noop, close: noop };
+      return { setMessage: noop, setStage: noop, setType: noop, complete: noop, close: noop };
     }
 
-    // ===== hydration ===============================================
-    // Whatever survived the navigation is re-rendered on this page; plain
-    // toasts only come back inside their lifespan, progress toasts resume
-    // (and keep polling their job) until they settle.
     function hydrate() {
       if (!store) return;
       const records = store.load();
@@ -431,7 +340,7 @@
           return;
         }
 
-        if (rec.mode === 'progress') {
+        if (rec.mode === 'active') {
           showToast(rec.message, 'loading', { _record: rec });
           return;
         }
@@ -455,7 +364,7 @@
     };
     window.showToast = showToast;
     window.showProgressToast = function (message, opts) {
-      return showToast(message, 'loading', Object.assign({ progress: true }, opts || {}));
+      return showToast(message, 'loading', Object.assign({}, opts || {}));
     };
     window.showLoadingToast = function (message) {
       return showToast(message, 'loading');

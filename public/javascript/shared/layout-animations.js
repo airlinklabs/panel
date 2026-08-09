@@ -20,7 +20,7 @@
     'no-anim',
     'collapsible-row',
   ];
-  const SKIP_IDS = new Set(['pl-overlay', 'pl-bar', 'active-background']);
+  const SKIP_IDS = new Set(['al-activity-chip', 'active-background']);
 
   function shouldSkip(el) {
     if (!el || el.nodeType !== 1) return true;

@@ -21,7 +21,7 @@
 
   /**
    * interpretJob maps a polled endpoint payload to a minimal view:
-   *   { progress?, message?, done, success, error }
+   *   { message?, done, success, error }
    * Handles both the generic progress convention and the server status
    * convention ({ state: installed|failed }) used by installs.
    */
@@ -31,11 +31,10 @@
       var st = data.state;
       if (st === 'installed') return { done: true, success: true, message: 'Installation complete.' };
       if (st === 'failed') return { done: true, success: false, error: data.error || 'Installation failed.' };
-      return { progress: null, message: typeof data.error === 'string' ? data.error : undefined };
+      return { message: typeof data.error === 'string' ? data.error : undefined };
     }
     var done = data.done === true || data.success === true || data.success === false || !!data.error;
     return {
-      progress: typeof data.progress === 'number' ? data.progress : undefined,
       message: typeof data.message === 'string' ? data.message : undefined,
       done: done,
       success: !(data.success === false || !!data.error),
@@ -52,22 +51,19 @@
 
   function createRecord(message, type, opts) {
     opts = opts || {};
-    var progressMode = opts.progress === true || type === 'loading';
+    var isActive = opts.progress === true || type === 'loading';
     return {
       id: uid(),
       group: typeof opts.group === 'string' && opts.group ? opts.group : null,
-      mode: progressMode ? 'progress' : 'toast',
+      mode: isActive ? 'active' : 'toast',
       message: String(message),
       type: type,
       startedAt: Date.now(),
-      progress: progressMode ? 0 : null,
-      indeterminate: progressMode && opts.indeterminate === true ? true : null,
-      duration: progressMode ? 0 : (typeof opts.duration === 'number' ? opts.duration : 5000),
+      duration: isActive ? 0 : (typeof opts.duration === 'number' ? opts.duration : 5000),
       finished: false,
       success: null,
       finishedAt: null,
       job: opts.job && typeof opts.job === 'object' ? Object.assign({}, opts.job) : null,
-      autoCompleteAt100: opts.autoCompleteAt100,
     };
   }
 
