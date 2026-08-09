@@ -10,17 +10,17 @@
         <p class="mt-0.5 text-sm text-neutral-500">Manage Modrinth integration settings and content filters.</p>
       </div>
 
-      <div class="px-8 mt-5">
+      <div class="px-8 mt-5" data-al-tabs data-tabs-default="general" data-tabs-hash>
 
         <!-- Tab bar -->
-        <div class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
-          <button type="button" data-tab="general"   class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">General</button>
-          <button type="button" data-tab="warning"   class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Warning</button>
-          <button type="button" data-tab="advanced"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Advanced</button>
+        <div role="tablist" class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
+          <button type="button" data-tab="general"  role="tab" aria-selected="true" tabindex="0" aria-controls="panel-general"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">General</button>
+          <button type="button" data-tab="warning"  role="tab" aria-selected="false" tabindex="-1" aria-controls="panel-warning"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Warning</button>
+          <button type="button" data-tab="advanced" role="tab" aria-selected="false" tabindex="-1" aria-controls="panel-advanced" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Advanced</button>
         </div>
 
         <!-- ── GENERAL ──────────────────────────────────────────────────── -->
-        <div data-tab-panel="general" class="tab-panel space-y-5 hidden">
+        <div data-tab-panel="general" class="tab-panel space-y-5">
 
           <!-- Config file status -->
           <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
@@ -113,7 +113,7 @@
         </div>
 
         <!-- ── WARNING ──────────────────────────────────────────────────── -->
-        <div data-tab-panel="warning" class="tab-panel hidden space-y-5">
+        <div data-tab-panel="warning" class="tab-panel space-y-5" hidden>
 
           <!-- Warning toggle -->
           <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
@@ -154,7 +154,7 @@
         </div>
 
         <!-- ── ADVANCED ─────────────────────────────────────────────────── -->
-        <div data-tab-panel="advanced" class="tab-panel hidden space-y-5">
+        <div data-tab-panel="advanced" class="tab-panel space-y-5" hidden>
 
           <!-- Disabled project types -->
           <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">

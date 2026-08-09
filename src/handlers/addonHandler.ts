@@ -1,14 +1,22 @@
 import fs from 'fs';
 import path from 'path';
-import { exec } from 'child_process';
-import express, { Express, Router, Request, Response, NextFunction } from 'express';
-import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
-import { slotRegistry, SlotId } from './addonSlotRegistry';
-import { commandRegistry, scheduler, RegisteredCommand, ScheduledTask } from './addonCommands';
-import { createConfigStore, AddonConfigStore } from './addonConfigStore';
-import { parseAddonManifest, AddonManifestV2, isVersionInRange } from './addonManifest';
+import { execFile } from 'child_process';
+import type { Express, Request, Response, NextFunction } from 'express';
+import express, { Router } from 'express';
+import type { SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
+import { uiComponentStore } from './uiComponentHandler';
+import type { SlotId } from './addonSlotRegistry';
+import { slotRegistry } from './addonSlotRegistry';
+import type { RegisteredCommand, ScheduledTask } from './addonCommands';
+import { commandRegistry, scheduler } from './addonCommands';
+import type { AddonConfigStore } from './addonConfigStore';
+import { createConfigStore } from './addonConfigStore';
+import type { AddonManifestV2} from './addonManifest';
+import { parseAddonManifest, isVersionInRange, isReservedRoutePrefix } from './addonManifest';
+import { resolveAddonViewPath, isValidAddonSlug } from './addonViewResolver';
 import { registerAddonPermission, clearAddonPermissions } from './permissions';
 import { containPath } from '../utils/pathSecurity';
+import { isPrivateHostname } from '../utils/ssrf';
 import { icon as renderIcon } from '../utils/icon';
 import prisma from '../db';
 import type { PrismaClient } from '../generated/prisma/client';
@@ -27,27 +35,23 @@ const ALLOWED_MIGRATION_SQL = /^\s*(CREATE\s+(TABLE|INDEX)\s+(IF\s+NOT\s+EXISTS\
  * Returns the resolved absolute path if it stays within baseDir, or null if it escapes.
  */
 function sanitizePath(baseDir: string, userPath: string): string | null {
-  const realBase = fs.realpathSync(baseDir);
-  let resolved: string;
-  try {
-    resolved = fs.realpathSync(path.resolve(baseDir, userPath));
-  } catch {
-    resolved = path.resolve(baseDir, userPath);
-  }
-  if (resolved.startsWith(realBase + path.sep) || resolved === realBase) {
-    return resolved;
-  }
-  return null;
+  const resolved = path.resolve(baseDir, userPath);
+  if (!containPath(baseDir, resolved)) {return null;}
+  return resolved;
 }
 
 /**
  * Validate a URL is safe to fetch: must be HTTPS and from an allowed domain.
+ * Also rejects literal private/internal hostnames (SSRF guard). The DNS-level
+ * check lives in the async egg-import path (src/utils/ssrf.ts) which also
+ * re-validates every redirect hop.
  */
 function validateUrl(urlStr: string, allowedDomains: string[]): boolean {
   try {
     const url = new URL(urlStr);
-    if (url.protocol !== 'https:') return false;
-    if (allowedDomains.length > 0 && !allowedDomains.some(d => url.hostname === d || url.hostname.endsWith('.' + d))) {
+    if (url.protocol !== 'https:') {return false;}
+    if (isPrivateHostname(url.hostname)) {return false;}
+    if (allowedDomains.length > 0 && !allowedDomains.some(d => url.hostname === d || url.hostname.endsWith(`.${  d}`))) {
       return false;
     }
     return true;
@@ -98,21 +102,29 @@ export function setAppInstance(app: Express): void {
 }
 
 function getApp(): Express {
-  if (!_appInstance) throw new Error('App instance not initialized');
+  if (!_appInstance) {throw new Error('App instance not initialized');}
   return _appInstance;
 }
 
 function buildTailwind() {
   const tailwindBin = path.join(__dirname, '../../node_modules/.bin/tailwindcss');
-  const fallbackNpx = 'npx tailwindcss';
-  const cmd = fs.existsSync(tailwindBin) ? tailwindBin : fallbackNpx;
-  exec(`${cmd} -i ./public/tw.css -o ./public/styles.css`, (error, stdout, stderr) => {
-    if (error) {
-      logger.error('Tailwind build failed:', error.message);
-      return;
-    }
-    if (stderr) logger.warn('Tailwind reported warnings', { stderr: stderr.trim() });
-  });
+  // execFile — never exec. Arguments are fixed literals, but shell-form
+  // execution is one injection away from being dangerous; execFile skips the
+  // shell entirely.
+  execFile(
+    tailwindBin,
+    ['-i', './public/tw.css', '-o', './public/styles.css'],
+    { cwd: path.join(__dirname, '../..') },
+    (error, stdout, stderr) => {
+      if (error) {
+        logger.error('Tailwind build failed:', error.message);
+        return;
+      }
+      if (stderr) {
+        logger.warn('Tailwind reported warnings', { stderr: stderr.trim() });
+      }
+    },
+  );
 }
 
 export interface AddonLifecycleHooks {
@@ -286,6 +298,11 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
 
   return {
     registerRoute: (routePath: string, router: Router) => {
+      if (typeof routePath !== 'string' || routePath.length === 0) {return;}
+      if (isReservedRoutePrefix(routePath)) {
+        logger.warn(`Addon "${slug}" attempted to register reserved route prefix "${routePath}" — blocked`);
+        return;
+      }
       getApp().use(routePath, router);
     },
     logger,
@@ -339,7 +356,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
       },
       getServerPorts: (server: AddonServerData) => {
         try {
-          if (!server.Ports) return [];
+          if (!server.Ports) {return [];}
           return JSON.parse(server.Ports) as AddonServerPort[];
         } catch (error) {
           logger.error('Error parsing server ports:', error);
@@ -348,7 +365,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
       },
       getPrimaryPort: (server: AddonServerData) => {
         try {
-          if (!server.Ports) return null;
+          if (!server.Ports) {return null;}
           const ports = JSON.parse(server.Ports) as AddonServerPort[];
           return ports.find(port => port.primary === true) ?? null;
         } catch (error) {
@@ -365,21 +382,24 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
       requireAuth: (isAdmin?: boolean, permission?: string) => createRequireAuth(isAdmin, permission),
       requireCsrf: () => createRequireCsrf(),
     },
-    renderView: async (viewName: string, data: AddonViewData = {}, isMobile: boolean = false): Promise<string> => {
+    renderView: async (viewName: string, data: AddonViewData = {}, isMobile = false): Promise<string> => {
       const ejs = require('ejs');
-      const viewportDir = isMobile ? addonMobileViewsPath : addonDesktopViewsPath;
-      const viewportPath = path.join(viewportDir, viewName);
-      const fallbackPath = path.join(addonViewsPath, viewName);
-      const viewPath = fs.existsSync(viewportPath) ? viewportPath : fallbackPath;
+      // Resolve through the validated addon view resolver so view names from
+      // any source cannot escape the addon's views directory. The viewport
+      // split (views/desktop vs views/mobile) is honoured when present.
+      const subdir = isMobile ? 'mobile' : 'desktop';
+      const viewportPath = resolveAddonViewPath(addonPath, slug, `${subdir}/${viewName}`);
+      const fallbackPath = resolveAddonViewPath(addonPath, slug, viewName);
+      const viewPath = viewportPath ?? fallbackPath;
 
-      if (!fs.existsSync(viewPath)) {
+      if (!viewPath) {
         throw new Error(`View ${viewName} not found in addon ${slug}`);
       }
 
       let panelSettings: Record<string, unknown> = {};
       try {
         const row = await (prisma as any).settings.findUnique({ where: { id: 1 } });
-        if (row) panelSettings = row;
+        if (row) {panelSettings = row;}
       } catch {
         // settings table may not exist yet
       }
@@ -412,7 +432,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
       const hasFooter = fs.existsSync(footerPath);
       const hasTemplate = fs.existsSync(templatePath);
 
-      if (!hasHeader && !hasFooter) return content;
+      if (!hasHeader && !hasFooter) {return content;}
 
       const templateData: AddonViewData & { regularMenuItems: SidebarItem[]; adminMenuItems: SidebarItem[]; addonSidebarIds: Set<string>; addonUrls: string[]; icon: (name: string, opts?: Record<string, unknown>) => string } = {
         ...data,
@@ -520,7 +540,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
 
 function setupStaticAssetServing(appExpress: Express, slug: string, addonPath: string): string | undefined {
   const publicPath = path.join(addonPath, 'public');
-  if (!fs.existsSync(publicPath)) return undefined;
+  if (!fs.existsSync(publicPath)) {return undefined;}
 
   const realAddonPath = fs.realpathSync(addonPath);
   const realPublicPath = fs.realpathSync(publicPath);
@@ -537,7 +557,7 @@ function setupStaticAssetServing(appExpress: Express, slug: string, addonPath: s
 
 function removeStaticAssetServing(appExpress: Express, mountPath: string): void {
   const routerStack = (appExpress as any)._router?.stack;
-  if (!routerStack) return;
+  if (!routerStack) {return;}
 
   for (let i = routerStack.length - 1; i >= 0; i--) {
     const layer = routerStack[i];
@@ -592,6 +612,10 @@ export async function loadAddons(appExpress: Express | any) {
 
   for (const folder of addonFolders) {
     const addonPath = path.join(addonsDir, folder);
+    if (!isValidAddonSlug(folder)) {
+      logger.warn(`Addon folder "${folder}" is not a valid slug, skipping`);
+      continue;
+    }
     if (!containPath(addonsDir, addonPath)) {
       logger.warn(`Addon ${folder}: path escapes addons directory, skipping`);
       continue;
@@ -612,7 +636,7 @@ export async function loadAddons(appExpress: Express | any) {
 
   for (const folder of loadOrder) {
     const result = parseResults.get(folder);
-    if (!result || !result.success) continue;
+    if (!result || !result.success) {continue;}
 
     const addonPath = path.join(addonsDir, folder);
     const manifest = result.manifest;
@@ -709,9 +733,9 @@ export async function loadAddons(appExpress: Express | any) {
     const addonDesktopViewsPath = path.join(addonViewsPath, 'desktop');
     const addonMobileViewsPath = path.join(addonViewsPath, 'mobile');
 
-    if (!fs.existsSync(addonViewsPath)) fs.mkdirSync(addonViewsPath, { recursive: true });
-    if (!fs.existsSync(addonDesktopViewsPath)) fs.mkdirSync(addonDesktopViewsPath, { recursive: true });
-    if (!fs.existsSync(addonMobileViewsPath)) fs.mkdirSync(addonMobileViewsPath, { recursive: true });
+    if (!fs.existsSync(addonViewsPath)) {fs.mkdirSync(addonViewsPath, { recursive: true });}
+    if (!fs.existsSync(addonDesktopViewsPath)) {fs.mkdirSync(addonDesktopViewsPath, { recursive: true });}
+    if (!fs.existsSync(addonMobileViewsPath)) {fs.mkdirSync(addonMobileViewsPath, { recursive: true });}
 
     const addonRouter = Router();
     const addonAPI = buildAddonAPI(folder, addonPath, manifest);
@@ -809,7 +833,7 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
       }
 
       const addon = await prisma.addon.findUnique({ where: { slug } });
-      if (!addon) throw new Error(`Addon ${slug} not found`);
+      if (!addon) {throw new Error(`Addon ${slug} not found`);}
 
       const loaded = loadedAddons.get(slug);
 
@@ -873,7 +897,7 @@ export async function getAllAddons() {
 
 function unloadAddon(app: Express | any, slug: string): void {
   const addon = loadedAddons.get(slug);
-  if (!addon) return;
+  if (!addon) {return;}
 
   const routerStack = (app as any)._router?.stack;
   if (routerStack) {
@@ -979,7 +1003,7 @@ function topologicalSort(graph: Map<string, { manifest: AddonManifestV2; folder:
   const order: string[] = [];
 
   function visit(folder: string) {
-    if (visited.has(folder)) return;
+    if (visited.has(folder)) {return;}
     if (visiting.has(folder)) {
       logger.warn(`Circular dependency detected involving addon "${folder}"`);
       return;

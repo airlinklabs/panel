@@ -1,4 +1,5 @@
 import logger from '../../logger';
+import { fetchPublic } from '../../../utils/ssrf';
 
 export interface EggVariable {
   name: string;
@@ -169,8 +170,8 @@ export function normalizeEggForDb(egg: ParsedEgg): NormalizedImageData {
 export function validateEggData(data: Record<string, unknown>): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  if (!data.name) errors.push('name is required');
-  if (!data.startup) errors.push('startup command is required');
+  if (!data.name) {errors.push('name is required');}
+  if (!data.startup) {errors.push('startup command is required');}
 
   if (isPterodactylEgg(data)) {
     if (!data.docker_images || typeof data.docker_images !== 'object') {
@@ -187,50 +188,23 @@ export function validateEggData(data: Record<string, unknown>): { valid: boolean
 
 /**
  * Safely fetch an egg JSON payload from a remote URL, guarding against SSRF
- * and oversized payloads. Returns { ok: true, payload } or { ok: false, error }.
+ * (private/loopback hosts — literal and DNS-resolved — plus unsafe redirect
+ * hops) and oversized payloads. Returns { ok: true, payload } or { ok: false, error }.
  */
 export async function fetchEggFromUrl(
   url: string,
 ): Promise<{ ok: true; payload: Record<string, unknown> } | { ok: false; error: string }> {
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return { ok: false, error: 'Invalid URL' };
-  }
-  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-    return { ok: false, error: 'Only http(s) URLs are allowed' };
-  }
-  const hostname = parsed.hostname;
-  if (
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    hostname === '::1' ||
-    /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
-    /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(hostname) ||
-    /^192\.168\.\d+\.\d+$/.test(hostname) ||
-    /^169\.254\.\d+\.\d+$/.test(hostname) ||
-    /^0\.\d+\.\d+\.\d+$/.test(hostname)
-  ) {
-    return { ok: false, error: 'Private/internal network URLs are not allowed' };
-  }
+  const result = await fetchPublic(url, {
+    allowHttp: true,
+    timeoutMs: 15_000,
+    maxBytes: 2_000_000,
+  });
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15_000);
+  if (!result.ok) {return { ok: false, error: result.error };}
+
   try {
-    const response = await fetch(url, { signal: controller.signal });
-    if (!response.ok) {
-      return { ok: false, error: `Remote returned ${response.status}` };
-    }
-    const text = await response.text();
-    if (text.length > 2_000_000) {
-      return { ok: false, error: 'Egg file is too large (>2MB)' };
-    }
-    return { ok: true, payload: JSON.parse(text) as Record<string, unknown> };
-  } catch (error: unknown) {
-    logger.error('Failed to fetch egg from URL:', error);
-    return { ok: false, error: 'Failed to fetch egg from URL' };
-  } finally {
-    clearTimeout(timeout);
+    return { ok: true, payload: JSON.parse(result.body) as Record<string, unknown> };
+  } catch {
+    return { ok: false, error: 'Remote response is not valid JSON' };
   }
 }

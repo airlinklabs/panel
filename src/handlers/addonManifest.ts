@@ -2,6 +2,7 @@ import { z } from 'zod';
 import fs from 'fs';
 import path from 'path';
 import logger from './logger';
+import { isValidAddonSlug } from './addonViewResolver';
 
 const RESERVED_IDENTIFIER_WORDS = [
   'admin', 'api', 'auth', 'login', 'logout', 'static', 'assets',
@@ -21,6 +22,12 @@ const RESERVED_ROUTE_PREFIXES = [
   '/dashboard', '/account', '/files', '/console', '/terminal',
   '/player', '/players', '/world', '/worlds', '/startup', '/schedule',
 ];
+
+/** True when a route prefix collides with a reserved panel namespace. */
+export function isReservedRoutePrefix(routePrefix: string): boolean {
+  const routerPath = routePrefix.startsWith('/') ? routePrefix : `/${routePrefix}`;
+  return RESERVED_ROUTE_PREFIXES.some(p => routerPath === p || routerPath.startsWith(`${p  }/`));
+}
 
 export const addonManifestSchema = z.object({
   name: z.string().min(1),
@@ -102,6 +109,17 @@ export function parseAddonManifest(filePath: string, addonSlug?: string): ParseM
     const manifest = result.data;
     const slug = displayName;
 
+    // The folder name is the addon slug; it must be a safe path segment and
+    // match the identifier pattern. Without this, a crafted folder name could
+    // feed path building elsewhere (view resolution, route mounting).
+    if (!isValidAddonSlug(slug)) {
+      return {
+        success: false,
+        error: `Invalid addon slug: "${slug}"`,
+        filePath,
+      };
+    }
+
     if (manifest.identifier && manifest.identifier !== slug) {
       return {
         success: false,
@@ -122,9 +140,7 @@ export function parseAddonManifest(filePath: string, addonSlug?: string): ParseM
     }
 
     if (manifest.router) {
-      const routerPath = manifest.router.startsWith('/') ? manifest.router : `/${manifest.router}`;
-      const isReserved = RESERVED_ROUTE_PREFIXES.some(p => routerPath === p || routerPath.startsWith(p + '/'));
-      if (isReserved) {
+      if (isReservedRoutePrefix(manifest.router)) {
         return {
           success: false,
           error: `Reserved route prefix: "${manifest.router}"`,
@@ -162,7 +178,7 @@ export function getManifestIdentifier(manifest: AddonManifestV2, fallbackSlug: s
 }
 
 export function isVersionInRange(version: string, range: string): boolean {
-  if (!range || range === '*') return true;
+  if (!range || range === '*') {return true;}
 
   const cleanVersion = version.replace(/^[^\d]*/, '');
   const parts = cleanVersion.split('.').map(Number);
@@ -171,8 +187,8 @@ export function isVersionInRange(version: string, range: string): boolean {
     return clean === '' ? null : Number(clean);
   });
 
-  while (parts.length < 3) parts.push(0);
-  while (rangeParts.length < 3) rangeParts.push(null);
+  while (parts.length < 3) {parts.push(0);}
+  while (rangeParts.length < 3) {rangeParts.push(null);}
 
   const cleanRangeParts = rangeParts.filter((x): x is number => x !== null);
 
@@ -205,7 +221,7 @@ export function isVersionInRange(version: string, range: string): boolean {
 function parseVersion(v: string): number[] {
   const clean = v.replace(/^[^\d]*/, '');
   const parts = clean.split('.').map(Number);
-  while (parts.length < 3) parts.push(0);
+  while (parts.length < 3) {parts.push(0);}
   return parts;
 }
 
@@ -213,8 +229,8 @@ function compareVersions(a: number[], b: number[]): number {
   for (let i = 0; i < 3; i++) {
     const av = a[i] ?? 0;
     const bv = b[i] ?? 0;
-    if (av > bv) return 1;
-    if (av < bv) return -1;
+    if (av > bv) {return 1;}
+    if (av < bv) {return -1;}
   }
   return 0;
 }
