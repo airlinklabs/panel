@@ -238,9 +238,7 @@ const wsServerConsoleModule: Module = {
       isAuthenticatedForServerWS('id'),
       async (ws: WebSocket, req: Request) => {
         const userId = req.session?.user?.id;
-        const subUser = (req as any).subUser as
-          | { permissions: string | null | undefined }
-          | undefined;
+        const subUser = req.subUser;
         if (subUser && !subUserHasPermission(subUser, 'console')) {
           ws.send(JSON.stringify({ error: 'You do not have permission to access the console.' }));
           ws.close();

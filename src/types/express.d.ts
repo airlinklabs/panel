@@ -1,4 +1,23 @@
-import type { ApiKey } from '../generated/prisma/client';
+import type { ApiKey, SubUser } from '../generated/prisma/client';
+
+export interface PanelSessionUser {
+  id: number;
+  email: string;
+  isAdmin: boolean;
+  username: string;
+  description: string;
+  role?: string;
+  onboardingCompleted?: boolean;
+  onboardingSkipped?: boolean;
+}
+
+declare module 'express-session' {
+  interface SessionData {
+    user: PanelSessionUser;
+    pendingUserId?: number;
+    pendingTotpSecret?: string;
+  }
+}
 
 declare global {
   namespace Express {
@@ -8,6 +27,9 @@ declare global {
       lang?: string;
       translations?: Record<string, unknown>;
       cookies?: Record<string, string>;
+      // Attached by isAuthenticatedForServer / isAuthenticatedForServerWS when
+      // the request is made by a subuser rather than an owner or admin.
+      subUser?: SubUser;
     }
   }
 }

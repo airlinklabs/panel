@@ -42,7 +42,7 @@ async function loadServerForUser(serverId: string, userId: number, req: Request)
   });
   if (!server) return null;
   if (server.ownerId === userId || (req.session?.user?.isAdmin ?? false)) return server;
-  const subUser = (req as any).subUser as { permissions?: string | null } | undefined;
+  const subUser = req.subUser;
   if (subUser) return server;
   return null;
 }

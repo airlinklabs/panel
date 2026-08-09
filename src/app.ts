@@ -28,7 +28,6 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import icon from './utils/icon';
 import { getClientIp } from './utils/ip';
-import { isProductionPosture } from './utils/errors';
 // hpp removed: Express 5's req.query parsing (qs with arrayLimit: 0) already
 // prevents HTTP Parameter Pollution. No replacement needed.
 import fs from 'fs';
@@ -44,11 +43,8 @@ import {
 } from './handlers/errorPages';
 
 import { getConfig } from './config';
-import { resolveAddonViewPath, isValidAddonSlug } from './handlers/addonViewResolver';
-import ejs from 'ejs';
-
-type RenderCallback = (err: Error | null, html?: string) => void;
-
+import { installRenderResolver } from './handlers/renderResolver';
+import { isValidAddonSlug } from './handlers/addonViewResolver';
 
 loadEnv();
 
@@ -419,76 +415,19 @@ app.use((_req, res, next) => {
   );
 
   res.locals.isMobileViewport = false;
-  const originalRenderBase = res.render.bind(res);
-
-  const renderOverride = function (
-    view: string,
-    options?: object | RenderCallback,
-    callback?: RenderCallback,
-  ): void {
-    const isAbsolutePath = path.isAbsolute(view);
-    const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
-
-    if (typeof options === 'function') {
-      callback = options as RenderCallback;
-      options = {};
-    }
-    const opts = options || {};
-
-    if (isAbsolutePath || isAddonView) {
-      const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-      (ejs as any).renderFile(view, data, {}, (err: Error | null, html: string) => {
-        if (err) {
-          if (typeof callback === 'function') {return callback(err);}
-          logger.error('View render error:', err);
-          return res.status(500).send('View render error');
-        }
-        if (typeof callback === 'function') {return callback(null, html);}
-        res.send(html);
-      });
-      return;
-    }
-
-    // Check addon views as fallback. Slugs are validated and every resolved
-    // path is contained inside the addon's views directory (see
-    // addonViewResolver.ts) — request-derived slug/view values cannot escape.
-    const viewPath = path.join(viewsPath, `${view  }.ejs`);
-    if (!fs.existsSync(viewPath)) {
-      const tryRenderAddonView = (addonSlug: string): boolean => {
-        const addonFallbackPath = resolveAddonViewPath(addonViewsDir, addonSlug, `${view  }.ejs`);
-        if (!addonFallbackPath) {return false;}
-        const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-        (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
-          if (err) {
-            if (typeof callback === 'function') {return callback(err);}
-            return res.status(500).send(
-              isProductionPosture() ? 'View render error' : `View render error: ${  err.message}`,
-            );
-          }
-          if (typeof callback === 'function') {return callback(null, html);}
-          res.send(html);
-        });
-        return true;
-      };
-
-      const requestedSlug = (opts as any).addonSlug as unknown;
-      if (isValidAddonSlug(requestedSlug) && tryRenderAddonView(requestedSlug)) {
-        return;
-      }
-
-      for (const addonDir of getAddonDirs()) {
-        if (requestedSlug === addonDir) {continue;}
-        if (tryRenderAddonView(addonDir)) {return;}
-      }
-    }
-
-    return originalRenderBase(view, opts, callback);
-  };
-
-  res.render = renderOverride as typeof res.render;
 
   next();
 });
+
+// Explicit primary/addon view resolver — replaces the old global EJS
+// monkey-patch and the inline res.render override (see renderResolver.ts).
+app.use(
+  installRenderResolver({
+    viewsPath,
+    addonViewsDir,
+    getAddonDirs,
+  }),
+);
 
 // Catch errors from global middleware registered before modules.
 app.use(errorPageHandler);

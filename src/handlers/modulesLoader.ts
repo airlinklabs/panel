@@ -1,10 +1,7 @@
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
+import type express from 'express';
 import logger from './logger';
 import chalk from 'chalk';
-
-const isDebugMode = process.env.DEBUG === 'true';
+import { registeredModules } from '../modules/registry';
 
 export const loadModules = async (
   app: express.Express,
@@ -12,16 +9,7 @@ export const loadModules = async (
   serverPort?: number,
   wsInstance?: { applyTo: (router: express.Router) => void },
 ) => {
-  const modulesDir = path.join(__dirname, '../modules');
-
-  const getFilesRecursively = (dir: string): string[] => {
-    return fs.readdirSync(dir, { withFileTypes: true }).flatMap((dirent) => {
-      const fullPath = path.join(dir, dirent.name);
-      return dirent.isDirectory() ? getFilesRecursively(fullPath) : [fullPath];
-    }).filter((f) => f.endsWith('.js') || f.endsWith('.ts'));
-  };
-
-  const files = getFilesRecursively(modulesDir);
+  const modules = registeredModules();
 
   const ascii = [
     '                                              ',
@@ -54,46 +42,39 @@ export const loadModules = async (
   console.log(border);
   console.log(padLine('Initializing - Loading core modules and components.'));
 
-  const results = await Promise.all(
-    files.map((file) =>
-      import(file)
-        .then((mod) => ({ file, mod }))
-        .catch((error) => ({ file, error })),
-    ),
-  );
-
+  const panelMajor = airlinkVersion.split('.')[0];
   let loaded = 0;
-  let skipped = 0;
   let errors = 0;
 
-  for (const result of results) {
-    if ('error' in result) {
-      logger.error(`Failed to load module ${result.file}:`, result.error);
-      errors++;
-      continue;
-    }
-
-    const mod = result.mod?.default;
-    if (!mod || !mod.info || typeof mod.router !== 'function') {
-      if (isDebugMode) logger.warn(`Skipping non-module file: ${result.file}`);
-      skipped++;
-      continue;
-    }
-
+  for (const entry of modules) {
+    const mod = entry.module;
     const modMajor = mod.info.version.split('.')[0];
-    const panelMajor = airlinkVersion.split('.')[0];
+
+    // Version compatibility is a hard contract: an incompatible module is a
+    // misconfiguration that must surface at startup, not a silent skip.
     if (modMajor !== panelMajor) {
-      logger.warn(`Skipping incompatible module: ${mod.info.name} (requires v${mod.info.version}, found v${airlinkVersion})`);
-      skipped++;
+      errors++;
+      logger.error(
+        `[feature-registry] '${entry.name}' requires panel v${mod.info.version} (found v${airlinkVersion})`,
+      );
       continue;
     }
 
-    const router = mod.router(wsInstance ? (r: any) => wsInstance.applyTo(r) : undefined);
-    app.use(router);
-    loaded++;
+    try {
+      const router = mod.router(wsInstance ? (r: express.Router) => wsInstance.applyTo(r) : undefined);
+      app.use(router);
+      loaded++;
+    } catch (error) {
+      errors++;
+      logger.error(`[feature-registry] Failed to mount '${entry.name}':`, error);
+    }
   }
 
-  console.log(padLine(`Loaded ${loaded} modules, skipped ${skipped}, errors ${errors}`));
+  console.log(padLine(`Loaded ${loaded} modules, errors ${errors}`));
+
+  if (errors > 0) {
+    logger.error(`[feature-registry] ${errors} module(s) failed to load`);
+  }
 
   if (serverPort) {
     console.log(padLine(`Server running on http://localhost:${serverPort}`));

@@ -141,7 +141,7 @@ export const isAuthenticatedForServer =
             renderErrorPage(req, res, 403, 'This server is suspended.');
             return;
           }
-          (req as any).subUser = subUser;
+          req.subUser = subUser;
           next();
           return;
         }
@@ -155,7 +155,7 @@ export const isAuthenticatedForServer =
 
 export const isAuthenticatedForServerWS =
   (serverIdParam: string = 'id') =>
-    async (ws: WebSocket, req: any, next: NextFunction): Promise<void> => {
+    async (ws: WebSocket, req: Request, next: NextFunction): Promise<void> => {
       const userId = req.session?.user?.id;
 
       if (!userId) {
@@ -196,7 +196,7 @@ export const isAuthenticatedForServerWS =
             ws.close();
             return;
           }
-          (req as any).subUser = subUser;
+          req.subUser = subUser;
           next();
           return;
         }
@@ -215,7 +215,7 @@ export const isAuthenticatedForServerWS =
 export const requireSubUserPermission =
   (permission: SubUserPermission) =>
     (req: Request, res: Response, next: NextFunction): void => {
-      const subUser = (req as any).subUser as { permissions: string | null | undefined } | undefined;
+      const subUser = req.subUser;
 
       if (!subUser) {
         next();

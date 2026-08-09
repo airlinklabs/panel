@@ -5,21 +5,11 @@ import { Module } from '../../handlers/moduleInit';
 import logger from '../../handlers/logger';
 import rateLimit from 'express-rate-limit';
 import { getClientIp } from '../../utils/ip';
-
-declare module 'express-session' {
-  interface SessionData {
-    user: {
-      id: number;
-      email: string;
-      isAdmin: boolean;
-      username: string;
-      description: string;
-      role?: string;
-      onboardingCompleted?: boolean;
-      onboardingSkipped?: boolean;
-    };
-  }
-}
+import {
+  loginSchema,
+  registerSchema,
+  authValidationErrorCode,
+} from './schemas';
 
 // Tight rate limit applied only to auth routes — separate from the global limit.
 // 10 attempts per minute per IP before they get a 429.
@@ -60,11 +50,13 @@ const authServiceModule: Module = {
 
     // ── POST /login ─────────────────────────────────────────────────────────
     router.post('/login', authRateLimit, async (req: Request, res: Response) => {
-      const { identifier, password } = req.body as { identifier: string; password: string };
+      const parsed = loginSchema.safeParse(req.body);
 
-      if (!identifier || !password) {
+      if (!parsed.success) {
         return res.redirect('/login?err=invalid_credentials');
       }
+
+      const { identifier, password } = parsed.data;
 
       try {
         const { maxAttempts, lockoutMinutes } = await getSecuritySettings();
@@ -148,22 +140,20 @@ const authServiceModule: Module = {
 
     // ── POST /register ───────────────────────────────────────────────────────
     router.post('/register', authRateLimit, async (req: Request, res: Response) => {
-      const { email, username, password } = req.body;
+      const parsed = registerSchema.safeParse(req.body);
 
-      if (!email || !username || !password) {
-        return res.redirect('/register?err=missing_credentials');
-      }
-
-      const emailRegex    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const usernameRegex = /^[a-zA-Z0-9]{3,20}$/;
-      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
-
-      if (!emailRegex.test(email) || !passwordRegex.test(password)) {
+      if (!parsed.success) {
+        const code = authValidationErrorCode(parsed.error.issues);
+        if (code === 'missing') {
+          return res.redirect('/register?err=missing_credentials');
+        }
+        if (code === 'invalid_username') {
+          return res.redirect('/register?err=invalid_username');
+        }
         return res.redirect('/register?err=invalid_input');
       }
-      if (!usernameRegex.test(username)) {
-        return res.redirect('/register?err=invalid_username');
-      }
+
+      const { email, username, password } = parsed.data;
 
       try {
         const userCount   = await prisma.users.count();

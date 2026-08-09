@@ -9,13 +9,6 @@ import logger from '../../handlers/logger';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getClientIp } from '../../utils/ip';
 
-declare module 'express-session' {
-  interface SessionData {
-    pendingUserId?: number;
-    pendingTotpSecret?: string;
-  }
-}
-
 const TOTP_ISSUER = 'Airlink';
 const RECOVERY_CODE_COUNT = 10;
 
