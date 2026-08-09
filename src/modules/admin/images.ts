@@ -450,20 +450,28 @@ const adminModule: Module = {
       },
     );
 
-    // Store page shell — just renders the HTML, all data comes from /catalogue
+    // Store page shell — just renders the HTML, all data comes from /catalogue.
+    // Legacy entry: shared/bookmarked links land on the canonical #store tab.
     router.get(
       '/admin/images/store',
       isAuthenticated(true),
-      async (req: Request, res: Response) => {
+      (_req: Request, res: Response) => {
+        res.redirect('/admin/images#store');
+      },
+    );
+
+    // Store panel fragment — the lazy "Store" tab on /admin/images fetches
+    // this via data-tab-src. Only the panel body is rendered; the host page
+    // owns the sidebar/header/tablist.
+    router.get(
+      '/admin/images/store/panel',
+      isAuthenticated(true),
+      async (_req: Request, res: Response) => {
         try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {return res.redirect('/login');}
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-          res.render('admin/images/store', { user, req, settings });
+          res.render('admin/images/store-panel');
         } catch (error: unknown) {
-          logger.error('Error rendering store:', error);
-          return res.redirect('/admin/images');
+          logger.error('Error rendering store panel:', error);
+          res.status(500).json({ error: 'Failed to load store panel.' });
         }
       },
     );
@@ -541,39 +549,12 @@ const adminModule: Module = {
     );
 
     // ── Image approval queue ──────────────────────────────────────────────
+    // Legacy entry: the queue lives as the #approvals tab on /admin/images.
     router.get(
       '/admin/images/approvals',
       isAuthenticated(true),
-      async (req: Request, res: Response) => {
-        try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {return res.redirect('/login');}
-
-          const pending = await prisma.images.findMany({
-            where: { status: 'pending' },
-            orderBy: { createdAt: 'asc' },
-          });
-
-          const creatorIds = [...new Set(pending.map((i) => i.createdById).filter((id): id is number => id != null))];
-          const creators = creatorIds.length > 0
-            ? await prisma.users.findMany({
-                where: { id: { in: creatorIds } },
-                select: { id: true, username: true, email: true },
-              })
-            : [];
-          const creatorMap = new Map(creators.map((c) => [c.id, c]));
-          const pendingWithCreators = pending.map((i) => ({
-            ...i,
-            creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
-          }));
-
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-          res.render('admin/images/approvals', { user, req, settings, pending: pendingWithCreators });
-        } catch (error: unknown) {
-          logger.error('Error loading image approvals:', error);
-          return res.redirect('/admin/images');
-        }
+      (_req: Request, res: Response) => {
+        res.redirect('/admin/images#approvals');
       },
     );
 

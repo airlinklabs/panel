@@ -24,7 +24,8 @@
     "postinstall": "prisma generate",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.prisma.json --noEmit && tsc -p tsconfig.tui.json --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "secret": "node dist/cli/secret.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1100.0",

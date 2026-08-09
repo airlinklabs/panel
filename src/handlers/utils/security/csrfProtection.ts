@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { doubleCsrf } from 'csrf-csrf';
 import crypto from 'crypto';
 import logger from '../../logger';
@@ -9,7 +9,7 @@ const CSRF_TOKEN_SIZE = 32;
 function ensureCsrfSessionId(req: Request): string {
   const session = req.session as { csrfSessionId?: string } | undefined;
 
-  if (!session) return '';
+  if (!session) {return '';}
 
   if (!session.csrfSessionId) {
     session.csrfSessionId = crypto.randomBytes(16).toString('hex');
@@ -23,7 +23,7 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
   // If somehow missing at runtime, fail hard rather than using an insecure default.
   getSecret: () => {
     const secret = process.env.SESSION_SECRET;
-    if (!secret) throw new Error('SESSION_SECRET is required but not set');
+    if (!secret) {throw new Error('SESSION_SECRET is required but not set');}
     return secret;
   },
   getSessionIdentifier: (req: Request) => ensureCsrfSessionId(req),
@@ -51,7 +51,11 @@ export const handleCsrfError = (err: unknown, req: Request, res: Response, next:
     return next(err);
   }
   logger.warn(`CSRF attack detected: IP=${getClientIp(req)}, Path=${req.path}, Method=${req.method}`);
-  if (req.xhr || req.headers.accept?.includes('application/json')) {
+  const wantsJson =
+    req.xhr ||
+    req.headers.accept?.includes('application/json') ||
+    req.headers['content-type']?.includes('application/json');
+  if (wantsJson) {
     res.status(403).json({ error: 'CSRF token validation failed' });
   } else {
     res.redirect('/login?err=session_expired');
