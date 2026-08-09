@@ -202,28 +202,90 @@
         </div>
 
         <div role="tabpanel" data-tab-panel="images" id="account-panel-images" hidden>
-        <!-- Custom image submissions -->
+        <!-- Custom image submissions — full workspace -->
         <div class="al-card p-5" id="customImagesSection">
-          <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
             <div>
               <p class="flex items-center gap-1.5 text-sm font-medium mb-1" style="color:var(--theme-text-strong)">
                 <%- icon('image', { class: 'w-4 h-4', strokeWidth: 1.5 }) %> <%= req.translations.customImages || 'Custom images' %>
               </p>
               <p class="text-xs" style="color:var(--theme-text-muted)"><%= req.translations.customImagesDesc || 'Submit an egg JSON or import from a URL. Admins review submissions before they become usable.' %></p>
             </div>
-            <a href="/my-images" class="al-btn-ghost text-xs inline-flex items-center gap-1.5 shrink-0">
-              <%- icon('list', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.myImages || 'My Images' %>
-            </a>
-          </div>
-          <% if (allowed) { %>
-          <div class="mt-4">
-            <button id="openSubmitBtn" type="button" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+            <% if (allowed) { %>
+            <button id="openSubmitBtn" type="button" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5 shrink-0">
               <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
               <%= req.translations.submitImage || 'Submit Image' %>
             </button>
+            <% } %>
           </div>
+
+          <% if (!allowed) { %>
+          <p class="text-xs" style="color:var(--theme-text-muted)"><%= req.translations.imageSubmissionsDisabledText || 'An administrator has turned off user image submissions.' %></p>
           <% } else { %>
-          <p class="text-xs mt-3" style="color:var(--theme-text-muted)"><%= req.translations.imageSubmissionsDisabledText || 'An administrator has turned off user image submissions.' %></p>
+            <!-- Inline image list (replaces /my-images standalone page) -->
+            <div id="myImagesEmpty" class="flex flex-col items-center justify-center py-12 text-center <%= (!images || images.length === 0) ? '' : 'hidden' %>">
+              <div class="w-10 h-10 rounded-full bg-neutral-400/10 flex items-center justify-center mb-3">
+                <%- icon('image', { class: 'w-5 h-5', style: 'color:var(--theme-text-muted)' }) %>
+              </div>
+              <p class="text-sm font-medium" style="color:var(--theme-text-strong)">
+                <%= req.translations.noSubmittedImages || 'No submitted images yet.' %>
+              </p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
+                <%= req.translations.noSubmittedImagesText || 'Submit an egg JSON and it will appear here with review status.' %>
+              </p>
+            </div>
+            <div id="myImagesTable" class="overflow-x-auto rounded-xl border <%= (!images || images.length === 0) ? 'hidden' : '' %>" style="border-color:var(--theme-border)">
+              <table class="al-table min-w-full">
+                <thead class="al-table-head">
+                  <tr>
+                    <th class="al-table-th py-3 pl-6 pr-3"><%= req.translations.name || 'Name' %></th>
+                    <th class="al-table-th px-3 py-3"><%= req.translations.submitted || 'Submitted' %></th>
+                    <th class="al-table-th px-3 py-3"><%= req.translations.status || 'Status' %></th>
+                    <th class="al-table-th px-3 py-3"><%= req.translations.actions || 'Actions' %></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y" style="border-color:var(--theme-border)">
+                  <% let imgIdx = 0; (images || []).forEach(function(image) { %>
+                  <tr class="al-table-tr transition-colors" style="--i:<%= imgIdx++ %>" data-image-id="<%= image.id %>">
+                    <td class="al-table-td whitespace-nowrap py-3 pl-6 pr-3 font-medium" style="color:var(--theme-text-strong)">
+                      <%= image.name %>
+                      <% if (image.status === 'rejected' && image.rejectionReason) { %>
+                      <p class="text-xs mt-0.5" style="color:var(--theme-danger)"><%= image.rejectionReason %></p>
+                      <% } %>
+                    </td>
+                    <td class="al-table-td whitespace-nowrap px-3 py-3"><%= new Date(image.createdAt).toLocaleDateString() %></td>
+                    <td class="al-table-td whitespace-nowrap px-3 py-3">
+                      <% if (image.status === 'approved') { %>
+                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-emerald-600/10 text-emerald-600 ring-emerald-600/20 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-emerald-400/20">
+                        <%= req.translations.approved || 'Approved' %>
+                      </span>
+                      <% } else if (image.status === 'rejected') { %>
+                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-red-600/10 text-red-600 ring-red-600/20 dark:bg-red-400/10 dark:text-red-400 dark:ring-red-400/20">
+                        <%= req.translations.rejected || 'Rejected' %>
+                      </span>
+                      <% } else { %>
+                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-amber-600/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/20">
+                        <%= req.translations.pendingApproval || 'Pending review' %>
+                      </span>
+                      <% } %>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-3 text-sm">
+                      <div class="flex gap-2">
+                        <% if (image.status !== 'approved') { %>
+                        <a href="/my-images/edit/<%= image.id %>" class="al-btn-secondary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
+                          <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.edit || 'Edit' %>
+                        </a>
+                        <% } %>
+                        <button type="button" class="al-btn-danger" data-delete-image="<%= image.id %>" aria-label="Delete <%= image.name %>">
+                          <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
           <% } %>
         </div>
         </div>
@@ -276,8 +338,8 @@
 
 <!-- Image submission popup -->
 <% if (allowed) { %>
-<div id="imModal" class="al-sheet-overlay fixed inset-0 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none">
-  <div class="al-sheet-panel rounded-2xl max-w-lg w-full shadow-xl max-h-[88vh] flex flex-col will-change-transform" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+<dialog id="imModal" class="rounded-2xl max-w-lg w-full shadow-xl max-h-[88vh] p-0 backdrop:bg-black/50" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+  <div class="flex flex-col max-h-[88vh]">
     <div class="al-sheet-header" style="border-color:var(--theme-border)">
       <div>
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.submitImage || 'Submit Image' %></h2>
@@ -333,7 +395,7 @@
       </div>
     </div>
   </div>
-</div>
+</dialog>
 <% } %>
 
 <script nonce="<%- nonce %>">
@@ -648,10 +710,19 @@ window.ALMount(() => {
   if (!modal) return;
 
   function openModal() {
-    modal.classList.remove('opacity-0', 'pointer-events-none');
+    if (typeof modal.showModal === 'function') {
+      modal.showModal();
+    } else {
+      // Fallback for browsers without <dialog> support
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
   }
   function closeModal() {
-    modal.classList.add('opacity-0', 'pointer-events-none');
+    if (typeof modal.close === 'function') {
+      modal.close();
+    } else {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
   }
 
   function setMode(mode) {
@@ -681,7 +752,8 @@ function loader() {
   }
 
   function goToMyImages() {
-    setTimeout(function() { window.location.href = '/my-images'; }, 1000);
+    closeModal();
+    showToast('Image submitted. It will appear in the table below once processed.', 'success');
   }
 
   document.getElementById('openSubmitBtn')?.addEventListener('click', openModal);
@@ -689,6 +761,14 @@ function loader() {
   document.getElementById('imManualCancel')?.addEventListener('click', closeModal);
   document.getElementById('imJsonCancel')?.addEventListener('click', closeModal);
   document.getElementById('imUrlCancel')?.addEventListener('click', closeModal);
+
+  // Native <dialog> handles Escape via cancel event; also close on backdrop click.
+  modal.addEventListener('cancel', function(e) {
+    // Allow default close behavior (Escape key)
+  });
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) closeModal();
+  });
 
   document.getElementById('imModeManual').addEventListener('click', function() { setMode('manual'); });
   document.getElementById('imModeJson').addEventListener('click', function() { setMode('json'); });
@@ -782,6 +862,48 @@ function loader() {
   if (window.location.hash === '#submit-image') {
     openModal();
   }
+})();
+</script>
+<% } %>
+
+<% if (allowed) { %>
+<script nonce="<%- nonce %>">
+(function() {
+  // Inline image list: delete handler + empty state sync
+  function syncImageEmptyState() {
+    const tbody = document.querySelector('#myImagesTable tbody');
+    const hasRows = tbody ? !!tbody.querySelector('[data-image-id]') : false;
+    const empty = document.getElementById('myImagesEmpty');
+    const table = document.getElementById('myImagesTable');
+    if (empty) empty.classList.toggle('hidden', hasRows);
+    if (table) table.classList.toggle('hidden', !hasRows);
+  }
+
+  window.ALMount(function() {
+    document.querySelectorAll('[data-delete-image]').forEach(function(btn) {
+      btn.addEventListener('click', async function() {
+        const id = btn.dataset.deleteImage;
+        const msg = 'Delete this image?';
+        if (!confirm(msg)) return;
+        const row = btn.closest('[data-image-id]');
+        try {
+          const response = await fetch('/my-images/' + id, { method: 'DELETE' });
+          const data = await response.json();
+          if (data.error) {
+            showToast(data.error, 'error');
+          } else {
+            showToast('Image deleted.', 'success');
+            if (row && window.al) al.removeRow(row).then(syncImageEmptyState);
+            else if (row) { row.remove(); syncImageEmptyState(); }
+            else syncImageEmptyState();
+          }
+        } catch (error) {
+          console.error('Failed to delete image:', error);
+          showToast('Something went wrong.', 'error');
+        }
+      });
+    });
+  });
 })();
 </script>
 <% } %>

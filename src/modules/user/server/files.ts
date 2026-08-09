@@ -3,6 +3,7 @@ import { isAuthenticatedForServer, requireSubUserPermission } from '../../../han
 import logger from '../../../handlers/logger';
 import multer from 'multer';
 import { isWorld } from '../../../handlers/features';
+import { fsListSchema, parseDaemonResponse, type FsFileEntry } from '../../../platform/daemon/dtos';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
@@ -18,13 +19,6 @@ import {
   getServerStatusInput,
   getImageFeatures,
 } from './shared';
-
-interface FsFileEntry {
-  name: string;
-  type: 'file' | 'directory';
-  size?: number;
-  modified?: string;
-}
 
 export function registerFilesRoutes(router: Router): void {
   /*
@@ -68,7 +62,7 @@ export function registerFilesRoutes(router: Router): void {
           return;
         }
 
-        const filesResponse = await daemonRequest<FsFileEntry[]>({
+        const filesResponse = await daemonRequest<unknown>({
           method: 'GET',
           path: '/fs/list',
           nodeAddress: server.node.address,
@@ -77,12 +71,11 @@ export function registerFilesRoutes(router: Router): void {
           params: { id: server.UUID, path },
         });
 
-        let files: FsFileEntry[] = filesResponse.data as FsFileEntry[];
-        files = typeof files === 'string' ? JSON.parse(files as unknown as string) : files;
+        const files = (parseDaemonResponse(fsListSchema, filesResponse.data) ?? []).filter(
+          (file) => file.name !== 'airlink',
+        );
 
-        files = files.filter((file) => file.name !== 'airlink');
-
-        files = files.sort((a, b) => {
+        files.sort((a, b) => {
           if (a.type === 'directory' && b.type === 'file') {
             return -1;
           } else if (a.type === 'file' && b.type === 'directory') {
@@ -172,7 +165,7 @@ export function registerFilesRoutes(router: Router): void {
         path = typeof path === 'string' ? path : String(path);
         path = path.replace(/\/+/g, '/');
 
-        const filesResponse = await daemonRequest<FsFileEntry[]>({
+        const filesResponse = await daemonRequest<unknown>({
           method: 'GET',
           path: '/fs/list',
           nodeAddress: server.node.address,
@@ -181,10 +174,11 @@ export function registerFilesRoutes(router: Router): void {
           params: { id: server.UUID, path },
         });
 
-        let files: FsFileEntry[] = filesResponse.data as FsFileEntry[];
-        files = typeof files === 'string' ? JSON.parse(files as unknown as string) : files;
-        files = (files || []).filter((file) => file.name !== 'airlink');
-        files = files.sort((a, b) => {
+        const files = (parseDaemonResponse(fsListSchema, filesResponse.data) ?? []).filter(
+          (file) => file.name !== 'airlink',
+        );
+
+        files.sort((a, b) => {
           if (a.type === 'directory' && b.type === 'file') {return -1;}
           if (a.type === 'file' && b.type === 'directory') {return 1;}
           return 0;

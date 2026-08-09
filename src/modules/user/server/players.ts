@@ -6,6 +6,7 @@ import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { daemonPlayerListSchema, parseDaemonResponse } from '../../../platform/daemon/dtos';
 import {
   type ServerPageServer,
   getServerStatusInput,
@@ -36,13 +37,7 @@ export function registerPlayersRoutes(router: Router): void {
         `Fetching players for server ${server.UUID} on port ${primaryPort}`,
       );
 
-      const playersResponse = await daemonRequest<{
-        online?: boolean;
-        version?: string;
-        players?: Array<{ name: string; uuid: string }>;
-        maxPlayers?: number;
-        onlinePlayers?: number;
-      }>({
+      const playersResponse = await daemonRequest<unknown>({
         method: 'GET',
         path: '/minecraft/players',
         nodeAddress: server.node.address,
@@ -56,20 +51,20 @@ export function registerPlayersRoutes(router: Router): void {
         timeout: 8000,
       });
 
-      if (playersResponse.data) {
-        serverIsOnline =
-          typeof playersResponse.data.online === 'boolean'
-            ? playersResponse.data.online
-            : !!playersResponse.data.version;
+      const playersData = parseDaemonResponse(daemonPlayerListSchema, playersResponse.data);
 
-        if (Array.isArray(playersResponse.data.players)) {
-          players = playersResponse.data.players;
+      if (playersData) {
+        serverIsOnline =
+          typeof playersData.online === 'boolean' ? playersData.online : !!playersData.version;
+
+        if (Array.isArray(playersData.players)) {
+          players = playersData.players;
         }
 
         serverInfo = {
-          maxPlayers: playersResponse.data.maxPlayers || 0,
-          onlinePlayers: playersResponse.data.onlinePlayers || 0,
-          version: playersResponse.data.version || 'Unknown',
+          maxPlayers: playersData.maxPlayers || 0,
+          onlinePlayers: playersData.onlinePlayers || 0,
+          version: playersData.version || 'Unknown',
         };
 
         logger.info(`Successfully fetched server data for ${server.UUID}`);

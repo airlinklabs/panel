@@ -51,3 +51,16 @@ export function resolveAddonViewPath(
   }
   return target;
 }
+
+/**
+ * Lists the slugs of installed addons that have a `views/` directory, newest
+ * last. Only slugs matching the addon identifier pattern are returned; the
+ * resolver never trusts request-derived names.
+ */
+export function getAddonDirs(addonsRoot: string): string[] {
+  if (!fs.existsSync(addonsRoot)) {return [];}
+  return fs
+    .readdirSync(addonsRoot, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && isValidAddonSlug(d.name))
+    .map((d) => d.name);
+}

@@ -10,6 +10,26 @@ const REQUIRED_ENV_VARS = ['DATABASE_URL'];
 // Optional vars from example.env — warn if not set, don't exit.
 const EXAMPLE_ENV_PATH = path.resolve(process.cwd(), 'example.env');
 
+/**
+ * Pure parser: parse .env content into a key→value record.
+ * Compatible with Node --env-file semantics (comments, quotes, blank lines).
+ */
+export function parseEnv(content: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIndex = trimmed.indexOf('=');
+    if (eqIndex === -1) continue;
+    const key = trimmed.slice(0, eqIndex).trim();
+    const value = trimmed.slice(eqIndex + 1).trim().replace(/^["']|["']$/g, '');
+    if (key) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
 export function loadEnv() {
   const envPath = path.resolve(process.cwd(), '.env');
 
@@ -27,18 +47,10 @@ export function loadEnv() {
 
   try {
     const data = fs.readFileSync(envPath, 'utf8');
-
-    data.split('\n').forEach((line) => {
-      const eqIndex = line.indexOf('=');
-      if (eqIndex === -1) return;
-
-      const key = line.slice(0, eqIndex).trim();
-      const value = line.slice(eqIndex + 1).trim().replace(/^["']|["']$/g, '');
-
-      if (key) {
-        process.env[key] = value;
-      }
-    });
+    const parsed = parseEnv(data);
+    for (const [key, value] of Object.entries(parsed)) {
+      process.env[key] = value;
+    }
   } catch (error) {
     logger.error('Error loading .env file:', error);
   }

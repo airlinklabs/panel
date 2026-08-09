@@ -467,9 +467,7 @@ const adminModule: Module = {
             .json(
               'configure -- -- --panel "' +
                 process.env.URL +
-                '" --key "' +
-                node.key +
-                '"',
+                '" --key "$(cat /path/to/daemon/.env | grep ^key= | cut -d= -f2)"',
             );
           return;
         } catch (error: unknown) {

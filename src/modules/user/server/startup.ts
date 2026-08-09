@@ -6,6 +6,7 @@ import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { containerStatusSchema, parseDaemonResponse } from '../../../platform/daemon/dtos';
 import {
   type ErrorMessage,
   type ServerVariable,
@@ -231,7 +232,7 @@ export function registerStartupRoutes(router: Router): void {
           `Startup command updated in database for server ${serverId}`,
         );
         try {
-          const statusResponse = await daemonRequest<{ running?: boolean }>({
+          const statusResponse = await daemonRequest<unknown>({
             method: 'GET',
             path: '/container/status',
             nodeAddress: server.node.address,
@@ -239,7 +240,7 @@ export function registerStartupRoutes(router: Router): void {
             nodeKey: server.node.key,
             params: { id: getParamAsString(serverId) },
           });
-          const isRunning = statusResponse.data?.running === true;
+          const isRunning = parseDaemonResponse(containerStatusSchema, statusResponse.data)?.running === true;
 
           if (isRunning) {
             if (!server.dockerImage) {
@@ -387,7 +388,7 @@ export function registerStartupRoutes(router: Router): void {
         );
 
         try {
-          const statusResponse = await daemonRequest<{ running?: boolean }>({
+          const statusResponse = await daemonRequest<unknown>({
             method: 'GET',
             path: '/container/status',
             nodeAddress: server.node.address,
@@ -395,7 +396,7 @@ export function registerStartupRoutes(router: Router): void {
             nodeKey: server.node.key,
             params: { id: getParamAsString(serverId) },
           });
-          const isRunning = statusResponse.data?.running === true;
+          const isRunning = parseDaemonResponse(containerStatusSchema, statusResponse.data)?.running === true;
 
           if (isRunning) {
             await restartServerContainer(server, String(serverId), {
@@ -578,7 +579,7 @@ export function registerStartupRoutes(router: Router): void {
         logger.info(`Variables updated in database for server ${serverId}`);
 
         try {
-          const statusResponse = await daemonRequest<{ running?: boolean }>({
+          const statusResponse = await daemonRequest<unknown>({
             method: 'GET',
             path: '/container/status',
             nodeAddress: server.node.address,
@@ -586,7 +587,7 @@ export function registerStartupRoutes(router: Router): void {
             nodeKey: server.node.key,
             params: { id: getParamAsString(serverId) },
           });
-          const isRunning = statusResponse.data?.running === true;
+          const isRunning = parseDaemonResponse(containerStatusSchema, statusResponse.data)?.running === true;
 
           if (isRunning) {
             if (!server.dockerImage) {

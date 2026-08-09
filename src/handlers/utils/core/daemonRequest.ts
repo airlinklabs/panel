@@ -10,6 +10,67 @@ import { httpGet, httpPost, httpPut, httpPatch, httpDelete, type HttpResponse } 
 const SIGNATURE_WINDOW_S = 30;
 const NONCE_BYTE_LENGTH = 16;
 
+// ---------------------------------------------------------------------------
+// Canonical request target encoder (P0 — query string tamper fix).
+//
+// HMAC must cover the exact URI the daemon receives, including query params.
+// Both panel and daemon use this same canonical form:
+//   1. Percent-encode each key and value once.
+//   2. Sort entries by (encoded key, encoded value) ascending.
+//   3. Forbid duplicate scalar keys (same encoded key appearing twice).
+//   4. Result is "pathname?sorted-encoded-params" or just "pathname" if empty.
+// ---------------------------------------------------------------------------
+
+export interface CanonicalParams {
+  [key: string]: string | number | boolean | undefined;
+}
+
+function percentEncode(s: string): string {
+  // RFC 3986 unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
+  // Encode everything else, including spaces (no + form).
+  return encodeURIComponent(s).replace(
+    /[!'()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
+/**
+ * Builds the canonical request target that HMAC covers.
+ *
+ * - Sorts params by (key, value) ascending.
+ * - Forbids duplicate scalar keys (throws).
+ * - Returns `pathname` or `pathname?encodedSortedParams`.
+ */
+export function buildCanonicalTarget(
+  pathname: string,
+  params?: Record<string, string | number | boolean | undefined>,
+): string {
+  if (!params) return pathname;
+
+  const entries: [string, string][] = [];
+  const seen = new Set<string>();
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) continue;
+    const encodedKey = percentEncode(key);
+    const encodedVal = percentEncode(String(value));
+
+    if (seen.has(encodedKey)) {
+      throw new Error(`duplicate query key "${key}" in daemon request params`);
+    }
+    seen.add(encodedKey);
+    entries.push([encodedKey, encodedVal]);
+  }
+
+  if (entries.length === 0) return pathname;
+
+  // Sort by encoded key, then by encoded value for deterministic signing.
+  entries.sort((a, b) => a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]));
+
+  const qs = entries.map(([k, v]) => `${k}=${v}`).join('&');
+  return `${pathname}?${qs}`;
+}
+
 let cachedScheme: 'http' | 'https' = 'http';
 let schemeCachedAt = 0;
 const SCHEME_CACHE_TTL_MS = 60_000;
@@ -37,6 +98,11 @@ export async function daemonBaseUrl(address: string, port: number | string): Pro
 }
 
 export const HMAC_PAYLOAD_VERSION = 1;
+
+// Basic auth is deprecated. It is retained only during a versioned migration
+// period. When the panel no longer sends Basic auth, set this to false.
+// The daemon should log a deprecation warning when it receives Basic auth.
+export const SEND_BASIC_AUTH = true;
 
 // HMAC v1: bodies are signed as `digest:<sha256 hex of the exact bytes sent>`.
 // The digest must be computed over the same bytes that hit the wire — strings
@@ -141,21 +207,14 @@ async function bodyToWire(
 function buildDaemonHeaders(
   key: string,
   method: string,
-  url: string,
+  canonicalTarget: string,
   bodyRepr: string,
   digest: string | null,
 ): Record<string, string> {
   const timestamp = Math.floor(Date.now() / 1000);
   const nonce = crypto.randomBytes(NONCE_BYTE_LENGTH).toString('hex');
 
-  let urlPath: string;
-  try {
-    urlPath = new URL(url).pathname;
-  } catch {
-    urlPath = url.split('?')[0] ?? '/';
-  }
-
-  const signature = hmacSign(key, method, urlPath, bodyRepr, timestamp, nonce);
+  const signature = hmacSign(key, method, canonicalTarget, bodyRepr, timestamp, nonce);
 
   return {
     'X-Airlink-Timestamp': String(timestamp),
@@ -182,12 +241,22 @@ export interface DaemonRequestOptions {
   params?: Record<string, string | number | boolean | undefined>;
   timeout?: number;
   responseType?: 'json' | 'text' | 'arraybuffer' | 'stream';
+  /** Stable request ID for distributed tracing (forwarded as X-Request-Id). */
+  requestId?: string;
+  /** Idempotency key for unsafe operations (POST/PUT/PATCH/DELETE). Prevents duplicate side effects on retry. */
+  idempotencyKey?: string;
 }
 
 export async function daemonRequest<T = unknown>(options: DaemonRequestOptions): Promise<HttpResponse<T>> {
-  const { nodeAddress, nodePort, nodeKey, method, path, body, contentDigest, params, timeout, responseType } = options;
-  const url = `${await daemonScheme()}://${nodeAddress}:${nodePort}${path}`;
+  const { nodeAddress, nodePort, nodeKey, method, path, body, contentDigest, params, timeout, responseType, requestId, idempotencyKey } = options;
   const methodUpper = method.toUpperCase();
+
+  // Build the canonical request target BEFORE signing. This includes the
+  // pathname and sorted, percent-encoded query params so the HMAC covers
+  // the exact URI the daemon will receive. Previously params were appended
+  // unsigned after signing — an on-path attacker could tamper with them.
+  const canonicalTarget = buildCanonicalTarget(path, params);
+  const url = `${await daemonScheme()}://${nodeAddress}:${nodePort}${canonicalTarget}`;
 
   const isBodyless = methodUpper === 'GET' || methodUpper === 'HEAD';
   const wire = isBodyless
@@ -197,17 +266,22 @@ export async function daemonRequest<T = unknown>(options: DaemonRequestOptions):
   const hmacHeaders = buildDaemonHeaders(
     nodeKey,
     methodUpper,
-    url,
+    canonicalTarget,
     wire.digest ? `digest:${wire.digest}` : '',
     wire.digest,
   );
 
   const httpOpts = {
-    params,
     timeout,
     responseType,
-    headers: hmacHeaders,
-    auth: { username: 'Airlink', password: nodeKey },
+    headers: {
+      ...hmacHeaders,
+      ...(requestId ? { 'X-Request-Id': requestId } : {}),
+      ...(idempotencyKey ? { 'X-Idempotency-Key': idempotencyKey } : {}),
+    },
+    // Basic auth is deprecated — only sent during migration period.
+    // HMAC is the authoritative auth mechanism.
+    ...(SEND_BASIC_AUTH ? { auth: { username: 'Airlink', password: nodeKey } } : {}),
   };
 
   try {

@@ -6,14 +6,13 @@ import { onlineUsers } from '../user/wsUsers';
 import logger from '../../handlers/logger';
 import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../utils/typeHelpers';
+import { parseBody, validationErrorBoundary } from '../../utils/validation';
+import { createUserSchema, updateUserSchema, type CreateUserInput, type UpdateUserInput } from './schemas';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import { registerPermission, type Permission } from '../../handlers/permissions';
 import { isRoleInput as isRole, type UserRole, roleFields } from '../../handlers/utils/auth/roles';
 import { emitRealtime, userEvent } from '../../handlers/realtime/events';
 
-const USERNAME_REGEX = /^[a-zA-Z0-9]{3,20}$/;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PASSWORD_MIN_LENGTH = 8;
 const BCRYPT_SALT_ROUNDS = 12;
 
 registerPermission('airlink.admin.users.view' as Permission);
@@ -21,7 +20,7 @@ registerPermission('airlink.admin.users.create' as Permission);
 registerPermission('airlink.admin.users.edit' as Permission);
 registerPermission('airlink.admin.users.delete' as Permission);
 
-function isRoleValue(value: unknown): boolean {
+function isRoleValue(value: unknown): value is UserRole {
   return isRole(value);
 }
 
@@ -118,34 +117,20 @@ const adminModule: Module = {
     router.post(
       '/admin/users/create-user',
       isAuthenticated(true, 'airlink.admin.users.create'),
+      parseBody(createUserSchema),
       async (req: Request, res: Response) => {
-        const { email, username, password, isAdmin, role, serverLimit, maxMemory, maxCpu, maxStorage, maxDatabases } = req.body;
-
-        if (!email || !username || !password) {
-          res.status(400).json({
-            message: 'Missing required fields: email, username, or password.',
-          });
-          return;
-        }
-
-        if (typeof email !== 'string' || !EMAIL_REGEX.test(email)) {
-          res.status(400).json({ message: 'Please provide a valid email address.' });
-          return;
-        }
-
-        if (!USERNAME_REGEX.test(username)) {
-          res.status(400).json({
-            message: 'Username must be 3–20 characters and contain only letters and numbers.',
-          });
-          return;
-        }
-
-        if (password.length < PASSWORD_MIN_LENGTH || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
-          res.status(400).json({
-            message: 'Password must be at least 8 characters and contain at least one letter and one number.',
-          });
-          return;
-        }
+        const {
+          email,
+          username,
+          password,
+          isAdmin,
+          role,
+          serverLimit,
+          maxMemory,
+          maxCpu,
+          maxStorage,
+          maxDatabases,
+        } = req.validatedBody as CreateUserInput;
 
         const isAdminBool = typeof isAdmin === 'boolean' ? isAdmin : isAdmin === 'true';
         // Explicit role wins; otherwise derive from the legacy isAdmin flag.
@@ -336,6 +321,7 @@ router.get(
     router.post(
       '/admin/users/update/:id/',
       isAuthenticated(true, 'airlink.admin.users.edit'),
+      parseBody(updateUserSchema),
       async (req: Request, res: Response): Promise<void> => {
         try {
           const userId = req.session?.user?.id;
@@ -355,32 +341,19 @@ router.get(
             return;
           }
 
-          const { email, username, description, isAdmin, role, password, serverLimit, maxMemory, maxCpu, maxStorage, maxDatabases } = req.body;
-
-          // Validate updated values before writing anything
-          if (email && (typeof email !== 'string' || !EMAIL_REGEX.test(email))) {
-            res.status(400).json({ error: 'Please provide a valid email address.' });
-            return;
-          }
-
-          if (username && (typeof username !== 'string' || !USERNAME_REGEX.test(username))) {
-            res.status(400).json({
-              error: 'Username must be 3–20 characters and contain only letters and numbers.',
-            });
-            return;
-          }
-
-          if (
-            password &&
-            typeof password === 'string' &&
-            password.trim() !== '' &&
-            (password.length < PASSWORD_MIN_LENGTH || !/[A-Za-z]/.test(password) || !/\d/.test(password))
-          ) {
-            res.status(400).json({
-              error: 'Password must be at least 8 characters and contain at least one letter and one number.',
-            });
-            return;
-          }
+          const {
+            email,
+            username,
+            description,
+            isAdmin,
+            role,
+            password,
+            serverLimit,
+            maxMemory,
+            maxCpu,
+            maxStorage,
+            maxDatabases,
+          } = req.validatedBody as UpdateUserInput;
 
           // Check if email or username is already taken by another user
           if (email && email !== targetUser.email) {
@@ -462,20 +435,24 @@ router.get(
           }
 
           // Handle optional resource limits — null means "use global default"
+          const toLimitOrNull = (value: number | string | null | undefined): number | null => {
+            if (value === '' || value === null) {return null;}
+            return parseInt(String(value), 10);
+          };
           if (serverLimit !== undefined) {
-            updateData.serverLimit = serverLimit === '' || serverLimit === null ? null : parseInt(serverLimit, 10);
+            updateData.serverLimit = toLimitOrNull(serverLimit);
           }
           if (maxMemory !== undefined) {
-            updateData.maxMemory = maxMemory === '' || maxMemory === null ? null : parseInt(maxMemory, 10);
+            updateData.maxMemory = toLimitOrNull(maxMemory);
           }
           if (maxCpu !== undefined) {
-            updateData.maxCpu = maxCpu === '' || maxCpu === null ? null : parseInt(maxCpu, 10);
+            updateData.maxCpu = toLimitOrNull(maxCpu);
           }
           if (maxStorage !== undefined) {
-            updateData.maxStorage = maxStorage === '' || maxStorage === null ? null : parseInt(maxStorage, 10);
+            updateData.maxStorage = toLimitOrNull(maxStorage);
           }
           if (maxDatabases !== undefined) {
-            updateData.maxDatabases = maxDatabases === '' || maxDatabases === null || maxDatabases === 'null' ? null : parseInt(maxDatabases, 10);
+            updateData.maxDatabases = toLimitOrNull(maxDatabases);
           }
 
           // Handle password update if provided
@@ -558,6 +535,8 @@ router.get(
         }
       },
     );
+
+    router.use(validationErrorBoundary);
 
     return router;
   },

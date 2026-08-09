@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import crypto from 'crypto';
+import { buildCanonicalTarget } from '../src/handlers/utils/core/daemonRequest';
 
 // Test the HMAC signing logic directly (same as daemonRequest.ts).
 // HMAC v1: non-GET bodies are signed as `digest:<sha256 hex of the exact bytes>`.
@@ -82,5 +83,41 @@ describe('HMAC signing (protocol v1 — digest-signed bodies)', () => {
   it('returns hex string of correct length', () => {
     const sig = hmacSign(testKey, 'GET', '/test', '', 1700000000, 'nonce');
     expect(sig).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  // --- Query string canonicalization + HMAC coverage (P0 fix) ---
+
+  it('includes sorted query params in the HMAC path', () => {
+    // buildCanonicalTarget sorts by key then value
+    const target = buildCanonicalTarget('/fs/list', { path: '/data', id: '42' });
+    expect(target).toBe('/fs/list?id=42&path=%2Fdata');
+
+    // HMAC covers the full canonical target, not just pathname
+    const sig = hmacSign(testKey, 'GET', target, '', 1700000000, 'nonce');
+    expect(sig).toMatch(/^[a-f0-9]{64}$/);
+
+    // Different param order produces same canonical target
+    const target2 = buildCanonicalTarget('/fs/list', { id: '42', path: '/data' });
+    expect(target2).toBe(target);
+  });
+
+  it('produces same HMAC for reordered params (canonical form)', () => {
+    const t1 = buildCanonicalTarget('/fs/list', { z: '1', a: '2' });
+    const t2 = buildCanonicalTarget('/fs/list', { a: '2', z: '1' });
+    expect(t1).toBe(t2);
+
+    const sig1 = hmacSign(testKey, 'GET', t1, '', 1700000000, 'nonce');
+    const sig2 = hmacSign(testKey, 'GET', t2, '', 1700000000, 'nonce');
+    expect(sig1).toBe(sig2);
+  });
+
+  it('returns just pathname when no params', () => {
+    expect(buildCanonicalTarget('/container/status')).toBe('/container/status');
+    expect(buildCanonicalTarget('/fs/list', {})).toBe('/fs/list');
+  });
+
+  it('percent-encodes special characters in params', () => {
+    const target = buildCanonicalTarget('/fs/list', { path: '/data/file.txt' });
+    expect(target).toContain(encodeURIComponent('/data/file.txt'));
   });
 });

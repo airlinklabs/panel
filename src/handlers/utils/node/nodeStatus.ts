@@ -1,4 +1,5 @@
 import { isHttpError } from '../../../utils/http';
+import { daemonInfoSchema, parseDaemonResponse } from '../../../platform/daemon/dtos';
 import { daemonRequest } from '../core/daemonRequest';
 import logger from '../../logger';
 
@@ -17,16 +18,9 @@ interface Node {
   error?: string;
 }
 
-interface DaemonStatusResponse {
-  versionFamily?: string;
-  versionRelease?: string;
-  status?: string;
-  remote?: boolean;
-}
-
 export async function checkNodeStatus(node: Node): Promise<Node> {
   try {
-    const response = await daemonRequest<DaemonStatusResponse>({
+    const response = await daemonRequest<unknown>({
       nodeAddress: node.address,
       nodePort: node.port,
       nodeKey: node.key,
@@ -35,7 +29,8 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
       timeout: NODE_STATUS_TIMEOUT_MS,
     });
 
-    const { versionFamily, versionRelease, status, remote } = response.data;
+    const { versionFamily, versionRelease, status, remote } =
+      parseDaemonResponse(daemonInfoSchema, response.data) ?? {};
 
     const finalStatus = status || NODE_STATUS_ONLINE;
 

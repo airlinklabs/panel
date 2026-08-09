@@ -75,7 +75,7 @@ describe('Client API Module', () => {
 
   it('exports correct module info', () => {
     expect(clientApiModule.info.name).toBe('Client API Module');
-    expect(clientApiModule.info.version).toBe('1.0.0');
+    expect(clientApiModule.info.version).toBe('2.0.0');
     expect(clientApiModule.info.author).toBe('AirLinkLab');
   });
 

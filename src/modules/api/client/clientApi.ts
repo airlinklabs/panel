@@ -4,20 +4,38 @@ import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
 import { getParamAsString } from '../../../utils/typeHelpers';
+import { fsListSchema, parseDaemonResponse } from '../../../platform/daemon/dtos';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { runtimeStartQueue } from '../../../handlers/runtimeQueue';
 import { NodeCapacityExceededError } from '../../../handlers/utils/server/resourceCheck';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import { nextRunFromCron } from '../../../utils/cron';
+import { parseBody, validationErrorBoundary } from '../../../utils/validation';
+import {
+  CLIENT_API_VERSION,
+  powerBodySchema,
+  writeFileBodySchema,
+  deleteFileBodySchema,
+  renameFileBodySchema,
+  createBackupBodySchema,
+  createScheduleBodySchema,
+  type PowerBody,
+  type WriteFileBody,
+  type DeleteFileBody,
+  type RenameFileBody,
+  type CreateBackupBody,
+  type CreateScheduleBody,
+  type ClientServer,
+  type ClientBackup,
+  type ClientSchedule,
+} from './dto';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-type AuthenticatedRequest = Request & { apiKey?: { userId?: number } };
-
 function getApiKeyUserId(req: Request): number | undefined {
-  return (req as AuthenticatedRequest).apiKey?.userId;
+  return req.apiKey?.userId ?? undefined;
 }
 
 function jsonError(res: Response, error: string, status = 400): void {
@@ -46,8 +64,8 @@ const clientApiModule: Module = {
   info: {
     name: 'Client API Module',
     description: 'User-facing API for server management via API keys.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
+    version: '2.0.0',
+    moduleVersion: '2.0.0',
     author: 'AirLinkLab',
     license: 'MIT',
   },
@@ -82,8 +100,9 @@ const clientApiModule: Module = {
           },
           orderBy: { createdAt: 'desc' },
         });
+        const data = servers satisfies ClientServer[];
 
-        res.json({ data: servers });
+        res.json({ data });
       } catch (err) {
         logger.error('Client API: list servers error', err);
         jsonError(res, 'Internal error', 500);
@@ -99,18 +118,18 @@ const clientApiModule: Module = {
         const server = await resolveServerForUser(serverId, userId);
         if (!server) return jsonError(res, 'Server not found', 404);
 
-        res.json({
-          data: {
-            UUID: server.UUID,
-            name: server.name,
-            description: server.description,
-            Installing: server.Installing,
-            Queued: server.Queued,
-            Suspended: server.Suspended,
-            nodeId: server.nodeId,
-            createdAt: server.createdAt,
-          },
-        });
+        const data = {
+          UUID: server.UUID,
+          name: server.name,
+          description: server.description,
+          Installing: server.Installing,
+          Queued: server.Queued,
+          Suspended: server.Suspended,
+          nodeId: server.nodeId,
+          createdAt: server.createdAt,
+        } satisfies ClientServer;
+
+        res.json({ data });
       } catch (err) {
         logger.error('Client API: get server error', err);
         jsonError(res, 'Internal error', 500);
@@ -121,7 +140,7 @@ const clientApiModule: Module = {
     // Power
     // -----------------------------------------------------------------------
 
-    router.post('/api/client/servers/:id/power', async (req: Request, res: Response) => {
+    router.post('/api/client/servers/:id/power', parseBody(powerBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
@@ -130,10 +149,7 @@ const clientApiModule: Module = {
         const server = await resolveServerForUser(serverId, userId);
         if (!server) return jsonError(res, 'Server not found', 404);
 
-        const { action } = req.body as { action?: string };
-        if (!action || !['start', 'stop', 'restart', 'kill'].includes(action)) {
-          return jsonError(res, 'action must be start, stop, restart, or kill');
-        }
+        const { action } = req.validatedBody as PowerBody;
 
         if (server.Suspended) return jsonError(res, 'Server is suspended', 403);
 
@@ -206,7 +222,7 @@ const clientApiModule: Module = {
 
         const dir = (req.query.dir as string) || '/';
 
-        const response = await daemonRequest({
+        const response = await daemonRequest<unknown>({
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
@@ -216,7 +232,7 @@ const clientApiModule: Module = {
           timeout: 15000,
         });
 
-        res.json({ data: response.data });
+        res.json({ data: parseDaemonResponse(fsListSchema, response.data) ?? [] });
       } catch (err) {
         logger.error('Client API: list files error', err);
         jsonError(res, 'Failed to list files', 500);
@@ -252,7 +268,7 @@ const clientApiModule: Module = {
       }
     });
 
-    router.post('/api/client/servers/:id/files/content', async (req: Request, res: Response) => {
+    router.post('/api/client/servers/:id/files/content', parseBody(writeFileBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
@@ -261,8 +277,7 @@ const clientApiModule: Module = {
         const server = await resolveServerForUser(serverId, userId);
         if (!server) return jsonError(res, 'Server not found', 404);
 
-        const { file, content } = req.body as { file?: string; content?: string };
-        if (!file || content === undefined) return jsonError(res, 'file and content are required');
+        const { file, content } = req.validatedBody as WriteFileBody;
 
         await daemonRequest({
           nodeAddress: server.node.address,
@@ -286,7 +301,7 @@ const clientApiModule: Module = {
       }
     });
 
-    router.delete('/api/client/servers/:id/files', async (req: Request, res: Response) => {
+    router.delete('/api/client/servers/:id/files', parseBody(deleteFileBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
@@ -295,8 +310,7 @@ const clientApiModule: Module = {
         const server = await resolveServerForUser(serverId, userId);
         if (!server) return jsonError(res, 'Server not found', 404);
 
-        const { file } = req.body as { file?: string };
-        if (!file) return jsonError(res, 'file is required');
+        const { file } = req.validatedBody as DeleteFileBody;
 
         await daemonRequest({
           nodeAddress: server.node.address,
@@ -320,7 +334,7 @@ const clientApiModule: Module = {
       }
     });
 
-    router.post('/api/client/servers/:id/files/rename', async (req: Request, res: Response) => {
+    router.post('/api/client/servers/:id/files/rename', parseBody(renameFileBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
@@ -329,8 +343,7 @@ const clientApiModule: Module = {
         const server = await resolveServerForUser(serverId, userId);
         if (!server) return jsonError(res, 'Server not found', 404);
 
-        const { file, newname } = req.body as { file?: string; newname?: string };
-        if (!file || !newname) return jsonError(res, 'file and newname are required');
+        const { file, newname } = req.validatedBody as RenameFileBody;
 
         await daemonRequest({
           nodeAddress: server.node.address,
@@ -379,14 +392,25 @@ const clientApiModule: Module = {
           orderBy: { createdAt: 'desc' },
         });
 
-        res.json({ data: backups });
+        const data = backups.map(
+          (backup) =>
+            ({
+              UUID: backup.UUID,
+              name: backup.name,
+              createdAt: backup.createdAt,
+              locked: backup.locked,
+              size: backup.size ? backup.size.toString() : null,
+            }) satisfies ClientBackup,
+        );
+
+        res.json({ data });
       } catch (err) {
         logger.error('Client API: list backups error', err);
         jsonError(res, 'Internal error', 500);
       }
     });
 
-    router.post('/api/client/servers/:id/backups', async (req: Request, res: Response) => {
+    router.post('/api/client/servers/:id/backups', parseBody(createBackupBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
@@ -400,8 +424,7 @@ const clientApiModule: Module = {
           return jsonError(res, 'Backup limit reached', 400);
         }
 
-        const { name } = req.body as { name?: string };
-        if (!name) return jsonError(res, 'name is required');
+        const { name } = req.validatedBody as CreateBackupBody;
 
         const response = await daemonRequest<{
           success: boolean;
@@ -513,15 +536,16 @@ const clientApiModule: Module = {
           },
           orderBy: { createdAt: 'desc' },
         });
+        const data = schedules satisfies ClientSchedule[];
 
-        res.json({ data: schedules });
+        res.json({ data });
       } catch (err) {
         logger.error('Client API: list schedules error', err);
         jsonError(res, 'Internal error', 500);
       }
     });
 
-    router.post('/api/client/servers/:id/schedules', async (req: Request, res: Response) => {
+    router.post('/api/client/servers/:id/schedules', parseBody(createScheduleBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
         if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
@@ -530,30 +554,7 @@ const clientApiModule: Module = {
         const server = await resolveServerForUser(serverId, userId);
         if (!server) return jsonError(res, 'Server not found', 404);
 
-        const { name, cron, action, payload } = req.body as {
-          name?: string;
-          cron?: string;
-          action?: string;
-          payload?: string;
-        };
-        if (!name || !cron || !action) {
-          return jsonError(res, 'name, cron, and action are required');
-        }
-        if (!['command', 'power', 'backup'].includes(action)) {
-          return jsonError(res, 'action must be command, power, or backup');
-        }
-        if (action === 'power') {
-          const parsed = (() => {
-            try {
-              return JSON.parse(payload ?? '{}');
-            } catch {
-              return {};
-            }
-          })() as { action?: string };
-          if (!parsed.action || !['start', 'stop', 'restart', 'kill'].includes(parsed.action)) {
-            return jsonError(res, 'power payload must include a valid action');
-          }
-        }
+        const { name, cron, action, payload } = req.validatedBody as CreateScheduleBody;
 
         const schedule = await prisma.schedule.create({
           data: {
@@ -622,7 +623,7 @@ const clientApiModule: Module = {
 
     router.get('/api/client', (_req: Request, res: Response) => {
       res.json({
-        version: 'client-v1',
+        version: CLIENT_API_VERSION,
         endpoints: [
           { method: 'GET', path: '/api/client', description: 'Introspection – list client API routes' },
           { method: 'GET', path: '/api/client/servers', description: 'List your servers' },
@@ -642,6 +643,10 @@ const clientApiModule: Module = {
         ],
       });
     });
+
+    // Any ValidationError raised by parseBody middleware becomes a
+    // standardized 400 instead of Express's default error response.
+    router.use(validationErrorBoundary);
 
     return router;
   },

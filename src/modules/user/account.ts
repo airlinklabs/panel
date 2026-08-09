@@ -60,7 +60,7 @@ const accountModule: Module = {
         const userId = req.session?.user?.id;
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
-          const [user, loginHistory, nodes] = await Promise.all([
+          const [user, loginHistory, nodes, images] = await Promise.all([
             prisma.users.findUnique({ where: { id: userId } }),
             prisma.loginHistory.findMany({
               where: { userId },
@@ -71,10 +71,14 @@ const accountModule: Module = {
               select: { id: true, name: true, address: true },
               orderBy: { id: 'asc' },
             }),
+            prisma.images.findMany({
+              where: { createdById: userId },
+              orderBy: { createdAt: 'desc' },
+            }),
           ]);
           if (!user) {
             errorMessage.message = 'User not found.';
-            res.render('user/account', { errorMessage, user, req, allowed: false });
+            res.render('user/account', { errorMessage, user, req, allowed: false, images: [] });
             return;
           }
 
@@ -87,6 +91,7 @@ const accountModule: Module = {
             settings,
             loginHistory,
             nodes,
+            images,
             allowed,
           });
         } catch (error) {
@@ -99,6 +104,7 @@ const accountModule: Module = {
             settings,
             loginHistory: [],
             nodes: [],
+            images: [],
             allowed: false,
           });
         }

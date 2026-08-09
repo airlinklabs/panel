@@ -1,4 +1,5 @@
 import { isHttpError } from '../../../utils/http';
+import { containerStatusSchema, parseDaemonResponse } from '../../../platform/daemon/dtos';
 import { daemonRequest } from '../core/daemonRequest';
 
 const SERVER_STATUS_TIMEOUT_MS = 3000;
@@ -8,12 +9,6 @@ interface ServerInfo {
   nodePort: number;
   serverUUID: string;
   nodeKey: string;
-}
-
-interface DaemonStatusResponse {
-  running?: boolean;
-  status?: string;
-  startedAt?: string;
 }
 
 interface ServerStatus {
@@ -28,7 +23,7 @@ interface ServerStatus {
 
 export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerStatus> {
   try {
-    const response = await daemonRequest<DaemonStatusResponse>({
+    const response = await daemonRequest<unknown>({
       nodeAddress: serverInfo.nodeAddress,
       nodePort: serverInfo.nodePort,
       nodeKey: serverInfo.nodeKey,
@@ -38,7 +33,7 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
       timeout: SERVER_STATUS_TIMEOUT_MS,
     });
 
-    const data = response.data;
+    const data = parseDaemonResponse(containerStatusSchema, response.data);
     const status: ServerStatus = {
       online: false,
       starting: false,

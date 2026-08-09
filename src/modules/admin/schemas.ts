@@ -1,95 +1,159 @@
 // ── Admin Route Input Validation Schemas ─────────────────────────────────────
-// Zod schemas for admin mutation routes. Apply at route boundaries before
-// any DB call. Import and use with `schema.parse(req.body)` or the
-// `validateBody` middleware.
+// Feature-local Zod schemas for admin mutation routes. Mount with
+// `parseBody` (src/utils/validation.ts) at the route edge so handlers read
+// normalized typed input and failures flow to one consistent error boundary.
+//
+// These schemas mirror the panel's historical server-side validation rules and
+// messages exactly (see the hand-rolled checks they replaced in users.ts). The
+// first failing check wins, matching the old short-circuit behavior.
 
 import { z } from 'zod';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USERNAME_REGEX = /^[a-zA-Z0-9]{3,20}$/;
+const PASSWORD_MIN_LENGTH = 8;
+const LETTER_PATTERN = /[A-Za-z]/;
+const NUMBER_PATTERN = /\d/;
+
+/** A limit field: numbers, form-encoded strings, or null/empty (use default). */
+const optionalLimit = z.union([z.number(), z.string(), z.null()]).optional();
+
 // ── User Management ─────────────────────────────────────────────────────────
 
-export const createUserSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  username: z.string().min(3, 'Username must be at least 3 characters').max(32).optional(),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  isAdmin: z.boolean().optional().default(false),
-  description: z.string().max(500).optional(),
-  serverLimit: z.number().int().min(0).optional().default(0),
-  maxMemory: z.number().int().min(0).optional().default(0),
-  maxCpu: z.number().int().min(0).optional().default(0),
-  maxStorage: z.number().int().min(0).optional().default(0),
-});
+/**
+ * POST /admin/users/create-user body. The three core fields are required and
+ * validated in the same order and with the same messages as the legacy route.
+ */
+export const createUserSchema = z
+  .object({
+    email: z.unknown().optional(),
+    username: z.unknown().optional(),
+    password: z.unknown().optional(),
+    isAdmin: z.union([z.boolean(), z.string()]).optional(),
+    role: z.string().optional(),
+    description: z.string().optional(),
+    serverLimit: optionalLimit,
+    maxMemory: optionalLimit,
+    maxCpu: optionalLimit,
+    maxStorage: optionalLimit,
+    maxDatabases: optionalLimit,
+  })
+  .superRefine((value, ctx) => {
+    if (!value.email || !value.username || !value.password) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Missing required fields: email, username, or password.' });
+      return;
+    }
+    if (typeof value.email !== 'string' || !EMAIL_REGEX.test(value.email)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please provide a valid email address.', path: ['email'] });
+      return;
+    }
+    if (typeof value.username !== 'string' || !USERNAME_REGEX.test(value.username)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Username must be 3–20 characters and contain only letters and numbers.',
+        path: ['username'],
+      });
+      return;
+    }
+    if (
+      typeof value.password !== 'string' ||
+      value.password.length < PASSWORD_MIN_LENGTH ||
+      !LETTER_PATTERN.test(value.password) ||
+      !NUMBER_PATTERN.test(value.password)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Password must be at least 8 characters and contain at least one letter and one number.',
+        path: ['password'],
+      });
+    }
+  })
+  .transform((value) => {
+    // superRefine guarantees the core fields are present, non-empty strings.
+    const email = typeof value.email === 'string' ? value.email : '';
+    const username = typeof value.username === 'string' ? value.username : '';
+    const password = typeof value.password === 'string' ? value.password : '';
+    return {
+      email,
+      username,
+      password,
+      isAdmin: value.isAdmin,
+      role: value.role,
+      description: value.description,
+      serverLimit: value.serverLimit,
+      maxMemory: value.maxMemory,
+      maxCpu: value.maxCpu,
+      maxStorage: value.maxStorage,
+      maxDatabases: value.maxDatabases,
+    };
+  });
 
-export const updateUserSchema = createUserSchema.partial().extend({
-  permissions: z.array(z.string()).optional(),
-});
+export type CreateUserInput = z.infer<typeof createUserSchema>;
 
-// ── Node Management ─────────────────────────────────────────────────────────
+/**
+ * POST /admin/users/update/:id/ body. All fields optional; a field is only
+ * validated when present and (for password) non-blank, matching the legacy
+ * "validate only what changed" behavior.
+ */
+export const updateUserSchema = z
+  .object({
+    email: z.unknown().optional(),
+    username: z.unknown().optional(),
+    password: z.unknown().optional(),
+    isAdmin: z.union([z.boolean(), z.string()]).optional(),
+    role: z.string().optional(),
+    description: z.string().optional(),
+    serverLimit: optionalLimit,
+    maxMemory: optionalLimit,
+    maxCpu: optionalLimit,
+    maxStorage: optionalLimit,
+    maxDatabases: optionalLimit,
+  })
+  .superRefine((value, ctx) => {
+    if (value.email && (typeof value.email !== 'string' || !EMAIL_REGEX.test(value.email))) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please provide a valid email address.', path: ['email'] });
+      return;
+    }
+    if (value.username && (typeof value.username !== 'string' || !USERNAME_REGEX.test(value.username))) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Username must be 3–20 characters and contain only letters and numbers.',
+        path: ['username'],
+      });
+      return;
+    }
+    if (
+      value.password &&
+      typeof value.password === 'string' &&
+      value.password.trim() !== '' &&
+      (value.password.length < PASSWORD_MIN_LENGTH ||
+        !LETTER_PATTERN.test(value.password) ||
+        !NUMBER_PATTERN.test(value.password))
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Password must be at least 8 characters and contain at least one letter and one number.',
+        path: ['password'],
+      });
+    }
+  })
+  .transform((value) => {
+    const email = typeof value.email === 'string' ? value.email : undefined;
+    const username = typeof value.username === 'string' ? value.username : undefined;
+    const password = typeof value.password === 'string' ? value.password : undefined;
+    return {
+      email,
+      username,
+      password,
+      isAdmin: value.isAdmin,
+      role: value.role,
+      description: value.description,
+      serverLimit: value.serverLimit,
+      maxMemory: value.maxMemory,
+      maxCpu: value.maxCpu,
+      maxStorage: value.maxStorage,
+      maxDatabases: value.maxDatabases,
+    };
+  });
 
-export const createNodeSchema = z.object({
-  name: z.string().min(1, 'Node name is required').max(64),
-  address: z.string().min(1, 'Address is required'),
-  port: z.number().int().min(1).max(65535),
-  memory: z.number().int().min(0),
-  disk: z.number().int().min(0),
-  cpu: z.number().int().min(0),
-  isPublic: z.boolean().optional().default(true),
-});
-
-export const updateNodeSchema = createNodeSchema.partial();
-
-// ── Server Management ───────────────────────────────────────────────────────
-
-export const createServerSchema = z.object({
-  name: z.string().min(1, 'Server name is required').max(128),
-  description: z.string().max(500).optional(),
-  nodeId: z.number().int().positive('Node ID is required'),
-  imageId: z.number().int().positive('Image ID is required'),
-  ownerId: z.number().int().positive('Owner ID is required'),
-  memory: z.number().int().min(64, 'Minimum memory is 64 MB'),
-  cpu: z.number().int().min(1, 'Minimum CPU is 1%'),
-  storage: z.number().int().min(1, 'Minimum storage is 1 MB'),
-  ports: z.string().optional(),
-  env: z.record(z.string(), z.string()).optional(),
-  startCommand: z.string().optional(),
-  variables: z.string().optional(),
-});
-
-// ── Image Management ────────────────────────────────────────────────────────
-
-export const createImageSchema = z.object({
-  name: z.string().min(1, 'Image name is required').max(128),
-  description: z.string().max(500).optional(),
-  egg: z.string().optional(),
-  dockerImage: z.string().min(1, 'Docker image is required'),
-  startup: z.string().optional(),
-  variables: z.array(z.object({
-    name: z.string(),
-    env: z.string(),
-    type: z.enum(['boolean', 'text', 'number']),
-    default: z.union([z.string(), z.number(), z.boolean()]),
-  })).optional(),
-});
-
-// ── Settings ────────────────────────────────────────────────────────────────
-
-export const updateSettingsSchema = z.object({
-  app_name: z.string().max(128).optional(),
-  app_url: z.string().url().optional(),
-  registration_enabled: z.boolean().optional(),
-  server_limit_default: z.number().int().min(0).optional(),
-  default_memory: z.number().int().min(0).optional(),
-  default_cpu: z.number().int().min(0).optional(),
-  default_storage: z.number().int().min(0).optional(),
-  enforce_daemon_https: z.boolean().optional(),
-  rate_limit_enabled: z.boolean().optional(),
-  rate_limit_window: z.number().int().min(1000).optional(),
-  rate_limit_max: z.number().int().min(1).optional(),
-});
-
-// ── API Keys ────────────────────────────────────────────────────────────────
-
-export const createApiKeySchema = z.object({
-  label: z.string().min(1, 'Label is required').max(128),
-  permissions: z.array(z.string()).min(1, 'At least one permission is required'),
-  expiresAt: z.string().datetime().optional(),
-});
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;

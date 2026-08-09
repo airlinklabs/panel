@@ -53,7 +53,8 @@
 
               <div>
                 <label for="nodeKey" class="al-label"><%= req.translations.daemonKey %></label>
-                <input id="nodeKey" value="<%= node.key %>" class="al-input" placeholder="<%= node.key %>" disabled>
+                <input id="nodeKey" value="" class="al-input" placeholder="Use CLI to retrieve key" disabled>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted)">Key is redacted for security. Use the configure command to view.</p>
               </div>
             </div>
           </div>

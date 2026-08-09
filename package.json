@@ -15,6 +15,8 @@
     "start:headless": "node --env-file=.env dist/app.js start",
     "dev": "prisma migrate deploy && prisma generate && (trap 'kill 0' EXIT; tailwindcss -i ./public/tw.css -o ./public/styles.css --watch & nodemon)",
     "build": "tsc && tsc -p tsconfig.prisma.json && tailwindcss -i ./public/tw.css -o ./public/styles.css",
+    "build:vendor": "node scripts/build-vendor.mjs",
+    "verify:vendor": "node scripts/build-vendor.mjs --check",
     "build:css": "tailwindcss -i ./public/tw.css -o ./public/styles.css --watch",
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy && prisma generate",

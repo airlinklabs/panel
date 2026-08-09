@@ -1,5 +1,6 @@
 import { isHttpError } from '../utils/http';
 import prisma from '../db';
+import { daemonStateSchema, parseDaemonResponse } from '../platform/daemon/dtos';
 import { checkNodeStatus } from './utils/node/nodeStatus';
 import { daemonRequest } from './utils/core/daemonRequest';
 
@@ -50,7 +51,7 @@ export async function checkForServerInstallation(
       return { installed: false, state: 'offline' };
     }
 
-    const response = await daemonRequest<{ state?: string; error?: string }>({
+    const response = await daemonRequest<unknown>({
       nodeAddress: server.node.address,
       nodePort: server.node.port,
       nodeKey: server.node.key,
@@ -59,8 +60,9 @@ export async function checkForServerInstallation(
       timeout: 4000,
     });
 
-    const state = response.data.state;
-    const installError = response.data.error;
+    const data = parseDaemonResponse(daemonStateSchema, response.data) ?? {};
+    const state = data.state;
+    const installError = data.error;
     const isInstalled = state === 'installed';
 
     cache.set(serverId, { state: state ?? '', error: installError, timestamp: now });

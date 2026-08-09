@@ -23,6 +23,7 @@ import { isProductionPosture } from '../utils/errors';
 import {
   resolveAddonViewPath,
   isValidAddonSlug,
+  getAddonDirs,
 } from './addonViewResolver';
 
 type RenderCallback = (err: Error | null, html?: string) => void;
@@ -57,7 +58,7 @@ export interface RenderResolverOptions {
  * Mount before any route handlers; views resolve lazily at render time.
  */
 export function installRenderResolver(options: RenderResolverOptions) {
-  const { viewsPath, addonViewsDir, getAddonDirs = () => [] } = options;
+  const { viewsPath, addonViewsDir, getAddonDirs: listAddonDirs = () => getAddonDirs(addonViewsDir) } = options;
 
   return (req: Request, res: Response, next: NextFunction): void => {
     const originalRenderBase = res.render.bind(res);
@@ -108,7 +109,7 @@ export function installRenderResolver(options: RenderResolverOptions) {
           return;
         }
 
-        for (const addonDir of getAddonDirs()) {
+        for (const addonDir of listAddonDirs()) {
           if (requestedSlug === addonDir) {continue;}
           if (tryRenderAddonView(addonDir)) {return;}
         }

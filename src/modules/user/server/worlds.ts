@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { isWorld } from '../../../handlers/features';
+import { fsListSchema, parseDaemonResponse } from '../../../platform/daemon/dtos';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
@@ -40,7 +41,7 @@ export function registerWorldsRoutes(router: Router): void {
 
         try {
           const serverStatusInput = getServerStatusInput(server);
-          const response = await daemonRequest<{ name: string; type: string }[]>({
+          const response = await daemonRequest<unknown>({
             method: 'GET',
             path: '/fs/list',
             nodeAddress: server.node.address,
@@ -48,7 +49,7 @@ export function registerWorldsRoutes(router: Router): void {
             nodeKey: server.node.key,
             params: { id: server.UUID },
           });
-          const Folders = response.data;
+          const Folders = parseDaemonResponse(fsListSchema, response.data) ?? [];
 
           const worlds = [];
           for (const folder of Folders) {

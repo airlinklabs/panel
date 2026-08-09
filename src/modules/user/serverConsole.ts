@@ -10,6 +10,7 @@ import prisma from '../../db';
 import { WebSocket } from 'ws';
 import { isAuthenticatedForServerWS, subUserHasPermission } from '../../handlers/utils/auth/serverAuthUtil';
 import { verifyWsToken } from '../../handlers/utils/security/wsToken';
+import { mintCapabilityToken } from '../../handlers/utils/security/capabilityToken';
 import logger from '../../handlers/logger';
 import { getParamAsString } from '../../utils/typeHelpers';
 import { daemonRequest, daemonScheme } from '../../handlers/utils/core/daemonRequest';
@@ -143,6 +144,24 @@ async function proxyConsole(
     const pendingClientMessages: ProxiedMessage[] = [];
     let clientClosed = false;
 
+    // Determine which daemon WS routes this connection needs.
+    const daemonRoutes: Array<'container' | 'containerstatus' | 'containerevents'> = [];
+    if (daemonPath.toString().includes('/container/')) daemonRoutes.push('container');
+    if (daemonPath.toString().includes('/containerstatus')) daemonRoutes.push('containerstatus');
+    if (daemonPath.toString().includes('/containerevents')) daemonRoutes.push('containerevents');
+    // Fallback: if we can't determine the route from the function, grant all
+    // routes that this panel module uses. The daemon will reject mismatches.
+    if (daemonRoutes.length === 0) daemonRoutes.push('container', 'containerstatus', 'containerevents');
+
+    // Mint a short-lived capability token instead of sending the raw node key.
+    // The daemon verifies this token's signature, expiry, and route match.
+    const capabilityToken = mintCapabilityToken({
+      nodeKey: node.key,
+      nodeId: node.id,
+      serverId,
+      routes: daemonRoutes,
+    });
+
     function flushPendingClientMessages(): void {
       while (pendingClientMessages.length > 0 && isOpen(socket)) {
         const message = pendingClientMessages.shift();
@@ -190,7 +209,9 @@ async function proxyConsole(
     }
 
     socket.onopen = () => {
-      socket.send(JSON.stringify({ event: 'auth', args: [node.key] }));
+      // Send capability token instead of raw node key. The daemon verifies
+      // the token's signature, expiry, and route match before allowing access.
+      socket.send(JSON.stringify({ event: 'auth', args: [capabilityToken] }));
       flushPendingClientMessages();
     };
 

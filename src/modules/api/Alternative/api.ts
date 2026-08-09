@@ -229,7 +229,6 @@ const coreModule: Module = {
                     disk: server.node.disk,
                     address: server.node.address,
                     port: server.node.port,
-                    key: server.node.key,
                     createdAt: server.node.createdAt,
                   },
                 },

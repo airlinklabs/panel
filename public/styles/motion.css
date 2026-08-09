@@ -4,17 +4,17 @@
    ============================================ */
 
 :root {
-  /* Easing curves */
+  /* Easing curves — canonical values from tw.css design system */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);          /* Decelerate — reveals, modals, slide-ins */
-  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);       /* Standard — hover states, tabs, color */
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);     /* Standard — hover states, tabs, color */
   --ease-in: cubic-bezier(0.4, 0, 1, 1);               /* Accelerate — exits only */
   --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);       /* M3 Emphasized — spatial transitions */
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);    /* Overshoot — checkbox, toggle micro-interaction */
 
-  /* Durations */
+  /* Durations — canonical values from tw.css design system */
   --dur-instant: 80ms;    /* Color/border changes, focus rings */
   --dur-quick: 150ms;     /* Hover states, button press */
-  --dur-default: 220ms;   /* Most transitions */
+  --dur-default: 200ms;   /* Most transitions */
   --dur-enter: 320ms;     /* Modal open, panel slide, reveal */
   --dur-exit: 180ms;      /* Modal close, panel hide */
   --dur-stagger: 40ms;    /* Per-item delay in lists */

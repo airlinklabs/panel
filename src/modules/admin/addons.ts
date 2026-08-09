@@ -11,6 +11,7 @@ import { registerPermission, Permission } from '../../handlers/permissions';
 import { parseAddonManifest } from '../../handlers/addonManifest';
 import { getParamAsString } from '../../utils/typeHelpers';
 import { containPath } from '../../utils/pathSecurity';
+import { logActivity } from '../../handlers/utils/activity/activityLogger';
 
 registerPermission('airlink.admin.addons.view');
 registerPermission('airlink.admin.addons.toggle');
@@ -169,6 +170,7 @@ const addonsModule: Module = {
 
           if (result.success) {
             await reloadAddons(req.app);
+            await logActivity(req, 'addon:toggle', { metadata: { slug, enabled: enabledBool } });
             res.json({ success: true, message: result.message });
           } else {
             res.status(500).json({ success: false, message: result.message || 'Failed to update addon status' });
@@ -186,6 +188,7 @@ const addonsModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const result = await reloadAddons(req.app);
+          await logActivity(req, 'addon:reload', { metadata: { success: result.success } });
           res.json({ success: result.success, message: result.message });
         } catch (error: unknown) {
           logger.error('Error reloading addons:', error);
@@ -259,6 +262,7 @@ const addonsModule: Module = {
           const args = req.body.args || [];
           const key = `${slug}:${command}`;
           const result = await commandRegistry.execute(key, args);
+          await logActivity(req, 'addon:command', { metadata: { slug, command } });
           res.json({ success: true, output: result });
         } catch (error: unknown) {
           logger.error('Error executing addon command:', error);
@@ -286,6 +290,7 @@ const addonsModule: Module = {
             update: { value: enabled ? 'true' : 'false' },
           });
 
+          await logActivity(req, 'addon:capability', { metadata: { slug, capability, enabled } });
           return res.json({ success: true, message: `Capability "${capability}" ${enabled ? 'enabled' : 'disabled'}` });
         } catch (error: unknown) {
           logger.error('Error updating addon capability:', error);
@@ -314,6 +319,7 @@ const addonsModule: Module = {
 
           await uninstallAddon(slug, req.app);
           await reloadAddons(req.app);
+          await logActivity(req, 'addon:uninstall', { metadata: { slug } });
 
           return res.json({ success: true, message: `Addon "${slug}" uninstalled` });
         } catch (error: unknown) {

@@ -216,12 +216,15 @@
   // Panel pages still contain route-owned scripts that initialise consoles,
   // charts and form controls. A Turbo snapshot restores their DOM without
   // re-evaluating those scripts, leaving a partially live page on Back/Forward.
-  // Keep Drive for navigation, but always render a fresh server response.
+  //
+  // Previously this handler called exemptPageFromCache() on every page,
+  // defeating Turbo's caching entirely. Now we only exempt specific pages
+  // that declare themselves incompatible via data-turbo-cache="false".
+  // All other pages use Turbo's normal cache/restore lifecycle.
   document.addEventListener('turbo:before-cache', function () {
-    var turbo = window.Turbo || T;
-    if (turbo && turbo.cache && typeof turbo.cache.exemptPageFromCache === 'function') {
-      turbo.cache.exemptPageFromCache();
-    }
+    document.querySelectorAll('[data-turbo-cache="false"]').forEach(function (el) {
+      el.remove();
+    });
   });
 
   function updateTurboState() {

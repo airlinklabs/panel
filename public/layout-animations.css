@@ -281,12 +281,12 @@ img {
   transition: none !important;
 }
 
-/* Respect user's motion preference */
+/* Respect user's motion preference — collapse animations only, preserve transitions
+   for focus visibility, state feedback, and reduced-motion-appropriate motion. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }

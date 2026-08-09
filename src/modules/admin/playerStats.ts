@@ -6,6 +6,7 @@ import logger from '../../handlers/logger';
 import { registerPermission } from '../../handlers/permissions';
 import { collectPlayerStats } from '../../handlers/playerStatsCollector';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { daemonPlayerListSchema, parseDaemonResponse } from '../../platform/daemon/dtos';
 import { getPrimaryExternalPort } from '../../handlers/utils/server/ports';
 
 registerPermission('airlink.admin.playerstats.view');
@@ -92,7 +93,7 @@ const adminModule: Module = {
                   };
                 }
 
-                const response = await daemonRequest({
+                const response = await daemonRequest<unknown>({
                   nodeAddress: server.node.address,
                   nodePort: server.node.port,
                   nodeKey: server.node.key,
@@ -106,13 +107,15 @@ const adminModule: Module = {
                   timeout: 5000
                 });
 
+                const playersData = parseDaemonResponse(daemonPlayerListSchema, response.data) ?? {};
+
                 return {
                   serverId: server.UUID,
                   serverName: server.name,
-                  playerCount: Number((response.data as Record<string, unknown>)?.onlinePlayers) || 0,
-                  maxPlayers: Number((response.data as Record<string, unknown>)?.maxPlayers) || 0,
-                  online: Boolean((response.data as Record<string, unknown>)?.online),
-                  version: String((response.data as Record<string, unknown>)?.version || 'Unknown')
+                  playerCount: playersData.onlinePlayers || 0,
+                  maxPlayers: playersData.maxPlayers || 0,
+                  online: playersData.online || false,
+                  version: playersData.version || 'Unknown'
                 };
               } catch {
                 return {

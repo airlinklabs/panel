@@ -59,7 +59,13 @@ export type ActivityEvent =
   | 'image:delete'
   | 'image:submit'
   | 'image:approve'
-  | 'image:reject';
+  | 'image:reject'
+  | 'addon:toggle'
+  | 'addon:reload'
+  | 'addon:settings'
+  | 'addon:capability'
+  | 'addon:uninstall'
+  | 'addon:command';
 
 // Per-user (or per-IP when unauthenticated) sliding-window rate limit so a
 // single actor cannot flood the audit table. Dropping excess logs is a

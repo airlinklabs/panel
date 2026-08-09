@@ -5,6 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
 import logger from '../../handlers/logger';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { containerStatusSchema, parseDaemonResponse } from '../../platform/daemon/dtos';
 import type { ErrorMessage } from './server/shared';
 
 interface ServerSnapshot {
@@ -94,7 +95,7 @@ function fetchServerSnapshot(
       fetchedAt,
     };
     try {
-      const statusResponse = await daemonRequest({
+      const statusResponse = await daemonRequest<unknown>({
         nodeAddress: node.address,
         nodePort: node.port,
         nodeKey: node.key,
@@ -104,7 +105,7 @@ function fetchServerSnapshot(
         timeout: 2000,
       });
 
-      const data = statusResponse.data as { running?: boolean; status?: string } | undefined;
+      const data = parseDaemonResponse(containerStatusSchema, statusResponse.data);
       const isRunning = data?.running === true;
       snapshot.status = isRunning ? 'running' : 'stopped';
       const dockerStatus = data?.status;

@@ -30,7 +30,6 @@ import icon from './utils/icon';
 import { getClientIp } from './utils/ip';
 // hpp removed: Express 5's req.query parsing (qs with arrayLimit: 0) already
 // prevents HTTP Parameter Pollution. No replacement needed.
-import fs from 'fs';
 import csrfProtection, {
   handleCsrfError,
   addCsrfTokenToLocals,
@@ -44,7 +43,7 @@ import {
 
 import { getConfig } from './config';
 import { installRenderResolver } from './handlers/renderResolver';
-import { isValidAddonSlug } from './handlers/addonViewResolver';
+import { validationErrorBoundary } from './utils/validation';
 
 loadEnv();
 
@@ -142,14 +141,6 @@ app.set('view engine', 'ejs');
 
 const addonViewsDir = path.join(__dirname, '../../storage/addons');
 
-function getAddonDirs(): string[] {
-  if (!fs.existsSync(addonViewsDir)) {return [];}
-  return fs
-    .readdirSync(addonViewsDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && isValidAddonSlug(d.name))
-    .map((d) => d.name);
-}
-
 // Load compression
 app.use(compression());
 
@@ -173,6 +164,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   const nonce = crypto.randomBytes(16).toString('base64');
   res.locals.nonce = nonce;
   req.nonce = nonce;
+  next();
+});
+
+// ---------------------------------------------------------------------------
+// X-Request-Id middleware — propagates a stable request identifier from
+// browser → panel → daemon for distributed tracing. If the browser sends
+// one we honor it; otherwise we generate a new UUID.
+// ---------------------------------------------------------------------------
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const incoming = req.headers['x-request-id'];
+  const requestId = (typeof incoming === 'string' && incoming.trim()) || crypto.randomUUID();
+  req.headers['x-request-id'] = requestId;
+  res.setHeader('X-Request-Id', requestId);
   next();
 });
 
@@ -381,23 +385,6 @@ app.use((req, res, next) => {
 // Handle CSRF errors
 app.use(handleCsrfError);
 
-interface SidebarItem {
-  id: string;
-  label: string;
-  link: string;
-}
-
-interface GlobalWithCustomProperties {
-  uiComponentStore: InstanceType<typeof import('./handlers/uiComponentHandler').UIComponentStore>;
-  appName: string;
-  airlinkVersion: string;
-  airlinkCodename: string;
-  adminMenuItems: SidebarItem[];
-  regularMenuItems: SidebarItem[];
-}
-
-declare const global: GlobalWithCustomProperties;
-
 app.use((_req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
@@ -425,7 +412,6 @@ app.use(
   installRenderResolver({
     viewsPath,
     addonViewsDir,
-    getAddonDirs,
   }),
 );
 
@@ -442,6 +428,10 @@ app.use(errorPageHandler);
     await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
     setAppInstance(app);
     await loadAddons(app);
+
+    // Consistent request-validation boundary: converts schema failures from
+    // any feature into a standardized 400 response (see src/utils/validation.ts).
+    app.use(validationErrorBoundary);
 
     app.use(notFoundHandler);
     app.use(errorPageHandler);

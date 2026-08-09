@@ -30,6 +30,12 @@ declare global {
       // Attached by isAuthenticatedForServer / isAuthenticatedForServerWS when
       // the request is made by a subuser rather than an owner or admin.
       subUser?: SubUser;
+      // Attached by the validation boundary (src/utils/validation.ts) after a
+      // feature-local Zod schema parses the raw request. Handlers must read
+      // the parsed value, never req.body/params/query directly.
+      validatedBody?: unknown;
+      validatedParams?: unknown;
+      validatedQuery?: unknown;
     }
   }
 }

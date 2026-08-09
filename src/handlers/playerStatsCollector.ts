@@ -2,6 +2,7 @@
 import prisma from '../db';
 import logger from './logger';
 import { daemonRequest } from './utils/core/daemonRequest';
+import { daemonPlayerListSchema, parseDaemonResponse } from '../platform/daemon/dtos';
 import { parseServerPorts } from './utils/server/ports';
 import { emitRealtime } from './realtime/events';
 
@@ -42,7 +43,7 @@ export async function collectPlayerStats(): Promise<void> {
           }
 
           // Fetch player data from the daemon
-          const response = await daemonRequest<{ onlinePlayers?: number; maxPlayers?: number; online?: boolean }>({
+          const response = await daemonRequest<unknown>({
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -56,11 +57,13 @@ export async function collectPlayerStats(): Promise<void> {
             timeout: 5000
           });
 
+          const playersData = parseDaemonResponse(daemonPlayerListSchema, response.data) ?? {};
+
           return {
             serverId: server.UUID,
-            playerCount: response.data.onlinePlayers || 0,
-            maxPlayers: response.data.maxPlayers || 0,
-            online: response.data.online || false,
+            playerCount: playersData.onlinePlayers || 0,
+            maxPlayers: playersData.maxPlayers || 0,
+            online: playersData.online || false,
           };
         } catch {
           return {

@@ -1,5 +1,6 @@
 import { isHttpError } from '../utils/http';
 import prisma from '../db';
+import { fsListSchema, parseDaemonResponse } from '../platform/daemon/dtos';
 import { checkNodeStatus } from './utils/node/nodeStatus';
 import logger from './logger';
 import { daemonRequest } from './utils/core/daemonRequest';
@@ -74,7 +75,7 @@ export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promi
   }
 
   try {
-    const response = await daemonRequest<Array<{ name: string }>>({
+    const response = await daemonRequest<unknown>({
       nodeAddress: serverInfo.nodeAddress,
       nodePort: serverInfo.nodePort,
       nodeKey: serverInfo.nodeKey,
@@ -84,7 +85,7 @@ export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promi
       timeout: 5000,
     });
 
-    const content = response.data;
+    const content = parseDaemonResponse(fsListSchema, response.data) ?? [];
     const names = new Set(content.map((item) => item.name));
 
     const hasRequiredFiles = REQUIRED_WORLD_FILES.some((f) => names.has(f));
