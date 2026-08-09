@@ -58,9 +58,30 @@
   }
 
   // ── Network activity chip ────────────────────────────────────────────────
+  // Reference-counted: multiple concurrent fetches each call requestActivity();
+  // only when all have called releaseActivity() does the chip hide.
 
   let chipEl = null;
-  let chipTimer = null;
+  let chipSpinner = null;
+  let chipLabel = null;
+  let chipHideTimer = null;
+  let activeCount = 0;
+
+  function applyChipTheme() {
+    if (!chipEl) return;
+    const rs = getComputedStyle(document.documentElement);
+    const bg = rs.getPropertyValue('--theme-bg-card').trim() || '#fff';
+    const border = rs.getPropertyValue('--theme-border').trim() || '#e5e5e5';
+    const muted = rs.getPropertyValue('--theme-text-muted').trim() || '#737373';
+    chipEl.style.background = bg;
+    chipEl.style.border = '1px solid ' + border;
+    chipEl.style.color = muted;
+    chipEl.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+    if (chipSpinner) {
+      chipSpinner.style.borderColor = border;
+      chipSpinner.style.borderTopColor = muted;
+    }
+  }
 
   function ensureChip() {
     if (chipEl && chipEl.isConnected) return chipEl;
@@ -68,55 +89,54 @@
     chipEl.id = 'al-activity-chip';
     chipEl.setAttribute('role', 'status');
     chipEl.setAttribute('aria-live', 'polite');
-    chipEl.setAttribute('aria-label', 'Loading page');
+    chipEl.setAttribute('aria-label', 'Page loading');
     chipEl.style.cssText = [
-      'position:fixed',
-      'top:12px',
-      'right:16px',
-      'z-index:10000',
-      'display:flex',
-      'align-items:center',
-      'gap:6px',
-      'padding:6px 12px',
-      'border-radius:999px',
-      'font-size:12px',
-      'font-weight:500',
+      'position:fixed', 'top:12px', 'right:16px', 'z-index:10000',
+      'display:flex', 'align-items:center', 'gap:6px',
+      'padding:6px 12px', 'border-radius:999px',
+      'font-size:12px', 'font-weight:500',
       'font-family:General Sans,sans-serif',
-      'background:var(--theme-bg-card)',
-      'border:1px solid var(--theme-border)',
-      'color:var(--theme-text-muted)',
-      'box-shadow:0 2px 8px rgba(0,0,0,0.08)',
-      'opacity:0',
-      'transform:translateY(-4px)',
+      'opacity:0', 'transform:translateY(-4px)',
       'transition:opacity 180ms ease,transform 180ms ease',
       'pointer-events:none',
     ].join(';');
-    const spinner = document.createElement('span');
-    spinner.style.cssText = 'width:12px;height:12px;border:2px solid var(--theme-border);border-top-color:var(--theme-text-muted);border-radius:50%;animation:al-spin 0.6s linear infinite;';
-    chipEl.appendChild(spinner);
-    const label = document.createElement('span');
-    label.textContent = 'Loading';
-    chipEl.appendChild(label);
+    chipSpinner = document.createElement('span');
+    chipSpinner.style.cssText = 'width:12px;height:12px;border-radius:50%;animation:al-spin 0.6s linear infinite;';
+    chipEl.appendChild(chipSpinner);
+    chipLabel = document.createElement('span');
+    chipLabel.textContent = '';
+    chipEl.appendChild(chipLabel);
+    applyChipTheme();
     document.body.appendChild(chipEl);
     return chipEl;
   }
 
-  function showChip(msg) {
-    if (chipTimer) { clearTimeout(chipTimer); chipTimer = null; }
+  function requestActivity(msg) {
+    activeCount++;
+    if (chipHideTimer) { clearTimeout(chipHideTimer); chipHideTimer = null; }
     const chip = ensureChip();
-    const label = chip.querySelector('span:last-child');
-    if (label) label.textContent = msg || 'Loading';
+    applyChipTheme();
+    if (chipLabel) chipLabel.textContent = msg || 'Loading';
     requestAnimationFrame(function () {
       chip.style.opacity = '1';
       chip.style.transform = 'translateY(0)';
     });
   }
 
-  function hideChip() {
-    if (chipTimer) clearTimeout(chipTimer);
-    chipTimer = setTimeout(function () {
-      if (!chipEl) return;
+  function releaseActivity() {
+    activeCount = Math.max(0, activeCount - 1);
+    if (activeCount > 0) return;
+    if (chipHideTimer) clearTimeout(chipHideTimer);
+    chipHideTimer = setTimeout(function () {
+      if (!chipEl || activeCount > 0) return;
       chipEl.style.opacity = '0';
+      chipEl.style.transform = 'translateY(-4px)';
+    }, 200);
+  }
+
+  window.addEventListener('al:themechange', function () {
+    applyChipTheme();
+  });
       chipEl.style.transform = 'translateY(-4px)';
     }, 200);
   }
@@ -199,7 +219,7 @@
   function revealAfterNav() {
     const _pc = el('page-content') || el('server-page-body');
     if (_pc) _pc.style.opacity = '';
-    hideChip();
+    releaseActivity();
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         animateIn(getAnimEl());
@@ -314,7 +334,7 @@
 
   function revealAfterStuckLoad() {
     if (document.documentElement.classList.contains('js-loading')) {
-      hideChip();
+      releaseActivity();
       fadeContentIn();
     }
   }
@@ -348,7 +368,7 @@
         clearTimeout(window.__alLoadGuard);
         window.__alLoadGuard = null;
       }
-      hideChip();
+      releaseActivity();
       fadeContentIn();
     }
   });
@@ -381,7 +401,7 @@
     }
     if (!willTurboHandle(a)) markNavigation();
     fadeContentOut();
-    showChip('Loading');
+    requestActivity('Loading');
   }, true);
 
   window.addEventListener('al:themechange', function () {
@@ -446,7 +466,7 @@
     const form = e.target && e.target.closest && e.target.closest('form');
     if (form && !willTurboHandle(form)) markNavigation();
     fadeContentOut();
-    showChip('Loading');
+    requestActivity('Loading');
   }, true);
 
 })();

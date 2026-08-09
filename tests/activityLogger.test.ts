@@ -85,6 +85,7 @@ describe('admin activity module', () => {
         `<svg data-icon="${name}" ${opts?.class ? `class="${opts.class}"` : ''}></svg>`;
       res.locals.adminMenuItems = [];
       res.locals.regularMenuItems = [];
+      res.locals.adminSidebarGroups = [];
       res.locals.name = 'Airlink';
       res.locals.airlinkVersion = 'test';
       res.locals.airlinkCodename = 'test';

@@ -66,81 +66,32 @@
 
             <% if (user != null && user.isAdmin === true) { %>
             <% let adminAnimIdx = 0; %>
-                          <p class="pl-8 text-xs font-medium pt-6 pb-2" style="color:var(--theme-nav-text);"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>
-
-                          <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span>Core</span></p>
-                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
-<a href="/admin/overview" searchdata="admin overview control" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                              <%- icon('layout-grid', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
-                              <span><%= req.translations.navOverview || 'Overview' %></span>
-                            </a>
-                          </li>
-                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
-<a href="/admin/servers" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                              <%- icon('server', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
-                              <span><%= req.translations.navServers || 'Servers' %></span>
-                            </a>
-                          </li>
-                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
-<a href="/admin/users" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                              <%- icon('users', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
-                              <span><%= req.translations.navUsers || 'Users' %></span>
-                            </a>
-                          </li>
-
-                          <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span>Infrastructure</span></p>
-                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
-<a href="/admin/nodes" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                              <%- icon('network', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
-                              <span><%= req.translations.navNodes || 'Nodes' %></span>
-                            </a>
-                          </li>
-                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
-<a href="/admin/activity" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                              <%- icon('activity', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
-                              <span>Activity Log</span>
-                            </a>
-                          </li>
-                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
-<a href="/admin/images" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                              <%- icon('box', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
-                              <span><%= req.translations.navImages || 'Images' %></span>
-                            </a>
-                          </li>
-
-                          <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span>Extensions</span></p>
-                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
-<a href="/admin/addons" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                              <%- icon('puzzle', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
-                              <span><%= req.translations.navAddons || 'Addons' %></span>
-                            </a>
-                          </li>
-                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
-<a href="/admin/apikeys" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                              <%- icon('key', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
-                              <span><%= req.translations.navApiKeys || 'API Keys' %></span>
-                            </a>
-                          </li>
-
-                          <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span>Configuration</span></p>
-                          <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
-<a href="/admin/settings" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                              <%- icon('settings', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
-                              <span><%= req.translations.navSettings || 'Settings' %></span>
-                            </a>
-                          </li>
-
-              <% if (adminMenuItems && adminMenuItems.length > 0) {
-                adminMenuItems.forEach(item => {
-              %>
+            <% const adminGroups = adminSidebarGroups || []; %>
+            <% if (adminGroups.length > 0) { %>
+              <p class="pl-8 text-xs font-medium pt-6 pb-2" style="color:var(--theme-nav-text);"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>
+              <% adminGroups.forEach(function(group) { %>
+                <p class="pl-8 text-xs font-medium pt-4 pb-1.5 uppercase tracking-wide" style="color:var(--theme-text-muted);"><span><%= group.label %></span></p>
+                <% group.items.forEach(function(item) { %>
+                  <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
+                    <a href="<%= item.url %>" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);"<% if (item.matchPrefix) { %> data-match-prefix="<%= item.matchPrefix %>"<% } %>>
+                      <%- item.icon %>
+                      <span><%= item.label %></span>
+                    </a>
+                  </li>
+                <% }); %>
+              <% }); %>
+            <% } %>
+            <% if (adminMenuItems && adminMenuItems.length > 0) {
+              adminMenuItems.forEach(item => {
+            %>
               <li class="sidebar-view-item" style="--i:<%= adminAnimIdx++ %>">
                 <a href="<%= item.url %>" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
-                              <%- item.icon %>
-                              <span><%= item.label %></span>
-                            </a>
-                          </li>
-                          <% }); } %>
-                        <% } %>
+                  <%- item.icon %>
+                  <span><%= item.label %></span>
+                </a>
+              </li>
+            <% }); } %>
+            <% } %>
             </div>
 
             <% if (isServerPage && global.uiComponentStore) {

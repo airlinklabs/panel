@@ -1,15 +1,19 @@
 import type { SidebarItem, UIComponentStore } from '../handlers/uiComponentHandler';
 
+interface AdminSidebarGroup {
+  section: string;
+  label: string;
+  items: SidebarItem[];
+}
+
 declare global {
-  // Globals attached by the app composition root (src/app.ts). Declared as
-  // `var` on the global object so they are reachable as global.<name> anywhere
-  // in the process, matching the pattern already used for serverStoppingStates.
   var uiComponentStore: UIComponentStore;
   var appName: string;
   var airlinkVersion: string;
   var airlinkCodename: string;
   var adminMenuItems: SidebarItem[];
   var regularMenuItems: SidebarItem[];
+  var adminSidebarGroups: AdminSidebarGroup[];
   namespace NodeJS {
     interface Global {
       uiComponentStore: UIComponentStore;
@@ -18,6 +22,7 @@ declare global {
       airlinkCodename: string;
       adminMenuItems: SidebarItem[];
       regularMenuItems: SidebarItem[];
+      adminSidebarGroups: AdminSidebarGroup[];
     }
   }
 }

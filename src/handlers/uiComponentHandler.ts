@@ -105,6 +105,26 @@ export class UIComponentStore {
     return ids;
   }
 
+  public getAdminSidebarGroups(): Array<{ section: string; label: string; items: SidebarItem[] }> {
+    const items = this.getSidebarItems(undefined, true);
+    const sectionOrder = ['core', 'infrastructure', 'extensions', 'configuration'];
+    const sectionLabels: Record<string, string> = {
+      core: 'Core',
+      infrastructure: 'Infrastructure',
+      extensions: 'Extensions',
+      configuration: 'Configuration',
+    };
+    const grouped = new Map<string, SidebarItem[]>();
+    for (const item of items) {
+      const s = item.section || 'core';
+      if (!grouped.has(s)) grouped.set(s, []);
+      grouped.get(s)!.push(item);
+    }
+    return sectionOrder
+      .filter(s => grouped.has(s))
+      .map(s => ({ section: s, label: sectionLabels[s] || s, items: grouped.get(s)! }));
+  }
+
   public addServerMenuItem(item: ServerMenuItem, addonSlug?: string): void {
     const existingIndex = this.serverMenuItems.findIndex(i => i.id === item.id);
     if (existingIndex !== -1) {
@@ -207,6 +227,7 @@ export class UIComponentStore {
 export const uiComponentStore = new UIComponentStore();
 
 export function initializeDefaultUIComponents(): void {
+  // ── User workspace ──────────────────────────────────────────────────────
   uiComponentStore.addSidebarItem({
     id: 'servers',
     label: 'Dashboard',
@@ -216,6 +237,123 @@ export function initializeDefaultUIComponents(): void {
     matchPrefix: '/server'
   });
 
+  // ── Admin: Core ─────────────────────────────────────────────────────────
+  uiComponentStore.addSidebarItem({
+    id: 'admin-overview',
+    label: 'Overview',
+    icon: icon('layout-grid', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/overview',
+    priority: 90,
+    isAdminItem: true,
+    section: 'core'
+  });
+  uiComponentStore.addSidebarItem({
+    id: 'admin-servers',
+    label: 'Servers',
+    icon: icon('server', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/servers',
+    priority: 88,
+    isAdminItem: true,
+    section: 'core'
+  });
+  uiComponentStore.addSidebarItem({
+    id: 'admin-users',
+    label: 'Users',
+    icon: icon('users', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/users',
+    priority: 86,
+    isAdminItem: true,
+    section: 'core'
+  });
+
+  // ── Admin: Infrastructure ───────────────────────────────────────────────
+  uiComponentStore.addSidebarItem({
+    id: 'admin-nodes',
+    label: 'Nodes',
+    icon: icon('network', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/nodes',
+    priority: 80,
+    isAdminItem: true,
+    section: 'infrastructure'
+  });
+  uiComponentStore.addSidebarItem({
+    id: 'admin-activity',
+    label: 'Activity Log',
+    icon: icon('activity', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/activity',
+    priority: 78,
+    isAdminItem: true,
+    section: 'infrastructure'
+  });
+  uiComponentStore.addSidebarItem({
+    id: 'admin-images',
+    label: 'Images',
+    icon: icon('box', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/images',
+    priority: 76,
+    isAdminItem: true,
+    section: 'infrastructure'
+  });
+
+  // ── Admin: Extensions ───────────────────────────────────────────────────
+  uiComponentStore.addSidebarItem({
+    id: 'admin-addons',
+    label: 'Addons',
+    icon: icon('puzzle', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/addons',
+    priority: 70,
+    isAdminItem: true,
+    section: 'extensions'
+  });
+  uiComponentStore.addSidebarItem({
+    id: 'admin-apikeys',
+    label: 'API Keys',
+    icon: icon('key', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/apikeys',
+    priority: 68,
+    isAdminItem: true,
+    section: 'extensions'
+  });
+
+  // ── Admin: Configuration ────────────────────────────────────────────────
+  uiComponentStore.addSidebarItem({
+    id: 'admin-settings',
+    label: 'Settings',
+    icon: icon('settings', { class: 'w-5 h-5 mt-0.5', strokeWidth: 1.5 }),
+    url: '/admin/settings',
+    priority: 60,
+    isAdminItem: true,
+    section: 'configuration'
+  });
+  uiComponentStore.addSidebarItem({
+    id: 'admin-analytics',
+    label: 'Analytics',
+    icon: icon('chart-column', { class: 'w-5 h-5 mt-0.5' }),
+    url: '/admin/analytics',
+    priority: 58,
+    isAdminItem: true,
+    section: 'configuration'
+  });
+  uiComponentStore.addSidebarItem({
+    id: 'admin-databases',
+    label: 'Databases',
+    icon: icon('database', { class: 'w-5 h-5 mt-0.5' }),
+    url: '/admin/databases',
+    priority: 56,
+    isAdminItem: true,
+    section: 'configuration'
+  });
+  uiComponentStore.addSidebarItem({
+    id: 'admin-mounts',
+    label: 'Mounts',
+    icon: icon('box', { class: 'w-5 h-5 mt-0.5' }),
+    url: '/admin/mounts',
+    priority: 54,
+    isAdminItem: true,
+    section: 'configuration'
+  });
+
+  // ── Server menu items ──────────────────────────────────────────────────
   uiComponentStore.addServerMenuItem({
     id: 'console',
     label: 'Console',
@@ -225,42 +363,6 @@ export function initializeDefaultUIComponents(): void {
     isDefault: true,
     group: 'run'
   });
-
-  uiComponentStore.addSidebarItem({
-    id: 'analytics',
-    label: 'Analytics',
-    icon: icon('chart-column', { class: 'w-5 h-5 mt-0.5' }),
-    url: '/admin/analytics',
-    priority: 85,
-    isAdminItem: true
-  });
-  uiComponentStore.addSidebarItem({
-    id: 'databases',
-    label: 'Databases',
-    icon: icon('database', { class: 'w-5 h-5 mt-0.5' }),
-    url: '/admin/databases',
-    priority: 50,
-    isAdminItem: true
-  });
-  uiComponentStore.addSidebarItem({
-    id: 'mounts',
-    label: 'Mounts',
-    icon: icon('box', { class: 'w-5 h-5 mt-0.5' }),
-    url: '/admin/mounts',
-    priority: 45,
-    isAdminItem: true
-  });
-  uiComponentStore.addServerMenuItem({
-    id: 'admin',
-    label: 'Admin',
-    icon: icon('square-arrow-up-right', { class: 'size-5 mb-0.5 inline-flex mr-1' }),
-    url: '/admin/servers/edit/:id',
-    priority: 55,
-    isAdminItem: true,
-    isDefault: true,
-    group: 'settings'
-  });
-
   uiComponentStore.addServerMenuItem({
     id: 'files',
     label: 'Files',
@@ -270,7 +372,6 @@ export function initializeDefaultUIComponents(): void {
     isDefault: true,
     group: 'data'
   });
-
   uiComponentStore.addServerMenuItem({
     id: 'players',
     label: 'Players',
@@ -281,7 +382,6 @@ export function initializeDefaultUIComponents(): void {
     isDefault: true,
     group: 'run'
   });
-
   uiComponentStore.addServerMenuItem({
     id: 'schedules',
     label: 'Schedules',
@@ -291,7 +391,6 @@ export function initializeDefaultUIComponents(): void {
     isDefault: true,
     group: 'data'
   });
-
   uiComponentStore.addServerMenuItem({
     id: 'worlds',
     label: 'Worlds',
@@ -302,7 +401,6 @@ export function initializeDefaultUIComponents(): void {
     isDefault: true,
     group: 'manage'
   });
-
   uiComponentStore.addServerMenuItem({
     id: 'startup',
     label: 'Startup',
@@ -312,7 +410,6 @@ export function initializeDefaultUIComponents(): void {
     isDefault: true,
     group: 'manage'
   });
-
   uiComponentStore.addServerMenuItem({
     id: 'backups',
     label: 'Backups',
@@ -322,7 +419,6 @@ export function initializeDefaultUIComponents(): void {
     isDefault: true,
     group: 'data'
   });
-
   uiComponentStore.addServerMenuItem({
     id: 'subusers',
     label: 'Subusers',
@@ -332,7 +428,6 @@ export function initializeDefaultUIComponents(): void {
     ownerOnly: true,
     group: 'manage'
   });
-
   uiComponentStore.addServerMenuItem({
     id: 'databases',
     label: 'Databases',
@@ -342,13 +437,22 @@ export function initializeDefaultUIComponents(): void {
     isDefault: true,
     group: 'data'
   });
-
-uiComponentStore.addServerMenuItem({
+  uiComponentStore.addServerMenuItem({
     id: 'settings',
     label: 'Settings',
     icon: icon('settings', { class: 'size-5 mb-0.5 inline-flex mr-1' }),
     url: '/server/:uuid/settings',
     priority: 60,
+    isDefault: true,
+    group: 'settings'
+  });
+  uiComponentStore.addServerMenuItem({
+    id: 'admin',
+    label: 'Admin',
+    icon: icon('square-arrow-up-right', { class: 'size-5 mb-0.5 inline-flex mr-1' }),
+    url: '/admin/servers/edit/:id',
+    priority: 55,
+    isAdminItem: true,
     isDefault: true,
     group: 'settings'
   });

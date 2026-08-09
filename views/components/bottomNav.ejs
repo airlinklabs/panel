@@ -223,56 +223,20 @@
         </a>
         <% } %>
       <% if (isAdminUser) { %>
-      <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
       <% let admSheetIdx = 20; %>
-      <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide" style="color:var(--theme-text-muted);">Admin</p>
-
-        <!-- Core -->
-        <a href="/admin/overview" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
-          <%- icon('layout-grid', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Overview</span>
+      <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
+      <% const admGroups = adminSidebarGroups || []; %>
+      <% if (admGroups.length > 0) { %>
+        <% admGroups.forEach(function(group) { %>
+        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide<%= group !== admGroups[0] ? ' mt-2' : '' %>" style="color:var(--theme-text-muted);"><%= group.label %></p>
+        <% group.items.forEach(function(item) { %>
+        <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
+          <%- item.icon %>
+          <span class="text-sm"><%= item.label %></span>
         </a>
-        <a href="/admin/servers" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
-          <%- icon('server', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Servers</span>
-        </a>
-        <a href="/admin/users" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
-          <%- icon('users', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Users</span>
-        </a>
-
-        <!-- Infrastructure -->
-        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Infrastructure</p>
-        <a href="/admin/nodes" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
-          <%- icon('network', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Nodes</span>
-        </a>
-        <a href="/admin/activity" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
-          <%- icon('activity', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Activity Log</span>
-        </a>
-        <a href="/admin/images" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
-          <%- icon('box', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Images</span>
-        </a>
-
-        <!-- Extensions -->
-        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Extensions</p>
-        <a href="/admin/addons" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
-          <%- icon('puzzle', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Addons</span>
-        </a>
-        <a href="/admin/apikeys" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
-          <%- icon('key', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">API Keys</span>
-        </a>
-
-        <!-- Configuration -->
-        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Configuration</p>
-        <a href="/admin/settings" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
-          <%- icon('settings', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Settings</span>
-        </a>
+        <% }); %>
+        <% }); %>
+      <% } %>
         <% if (adminMenuItems && adminMenuItems.length > 0) {
           adminMenuItems.forEach(item => { %>
         <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">

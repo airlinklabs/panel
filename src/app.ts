@@ -400,6 +400,7 @@ app.use((_req, res, next) => {
     undefined,
     false,
   );
+  res.locals.adminSidebarGroups = uiComponentStore.getAdminSidebarGroups();
 
   res.locals.isMobileViewport = false;
 
