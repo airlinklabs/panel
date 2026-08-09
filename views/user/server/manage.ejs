@@ -786,6 +786,7 @@ function teardownPage() {
 }
 window.alListener(window, 'beforeunload', 'manage-teardown-unload', teardownPage);
 window.alListener(window, 'pagehide', 'manage-teardown-pagehide', teardownPage);
+window.alListener(document, 'turbo:before-cache', 'manage-teardown-turbo', teardownPage);
 
 // Two-tab console guard — exactly one tab owns console input; every other
 // tab renders view-only (notices shown, inputs disabled, sends refused).

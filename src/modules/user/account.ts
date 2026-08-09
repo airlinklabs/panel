@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
@@ -9,6 +10,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import validator from 'validator';
+import { inspectImage, isSafeUserDirName, normalizeUserText } from '../../utils/imageSecurity';
 import type { ErrorMessage } from './server/shared';
 
 const AVATAR_MAX_SIZE_BYTES = 2 * 1024 * 1024;
@@ -20,42 +22,21 @@ const COOKIE_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
 
 const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'es', 'pt', 'it', 'ru', 'zh', 'ja', 'ta'] as const;
 
-const avatarStorage = multer.diskStorage({
-  destination: (req, _file, cb) => {
-    const username = req.session?.user?.username;
-    if (!username) return cb(new Error('Not authenticated'), '');
-
-    const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
-
-    if (!fs.existsSync(userDir)) {
-      fs.mkdirSync(userDir, { recursive: true });
-    } else {
-      const existing = fs.readdirSync(userDir);
-      existing.forEach(f => {
-        try { fs.unlinkSync(path.join(userDir, f)); } catch { /* ignore per-file errors */ }
-      });
-    }
-
-    cb(null, userDir);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase() || '.png';
-    cb(null, `avatar${ext}`);
-  },
-});
-
+// Avatars are buffered in memory so the server can verify the real content
+// before anything touches disk. The stored filename and extension come from
+// the detected magic bytes (src/utils/imageSecurity.ts), never from the
+// client-declared mimetype or original filename.
 const avatarUpload = multer({
-  storage: avatarStorage,
-  fileFilter: (_req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (allowed.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed.'));
-    }
-  },
-  limits: { fileSize: AVATAR_MAX_SIZE_BYTES },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: AVATAR_MAX_SIZE_BYTES, files: 1 },
 });
+
+const AVATARS_DIR = path.join(process.cwd(), 'public', 'uploads', 'avatars');
+
+function avatarUserDir(username: string): string | null {
+  if (!isSafeUserDirName(username)) {return null;}
+  return path.join(AVATARS_DIR, username);
+}
 
 
 const accountModule: Module = {
@@ -129,12 +110,14 @@ const accountModule: Module = {
       isAuthenticated(),
       async (req: Request, res: Response) => {
         const { description } = req.body;
-        if (!description) {
+        if (description === undefined || description === null) {
           res.status(400).send('Description parameter is required.');
           return;
         }
 
-        const cleanDesc = validator.trim(String(description).slice(0, DESCRIPTION_MAX_LENGTH));
+        // Normalize (strip control chars/NUL, trim, cap length) and store the
+        // cleaned value — the raw body was being persisted before.
+        const cleanDesc = normalizeUserText(description, DESCRIPTION_MAX_LENGTH);
         if (cleanDesc.length === 0) {
           res.status(400).send('Description cannot be empty.');
           return;
@@ -153,7 +136,7 @@ const accountModule: Module = {
 
           await prisma.users.update({
             where: { id: userId },
-            data: { description },
+            data: { description: cleanDesc },
           });
 
           res.status(200).json({ message: 'Description updated successfully.' });
@@ -356,7 +339,7 @@ const accountModule: Module = {
 
         try {
           const user = await prisma.users.findFirst({
-            where: { email: email },
+            where: { email },
           });
 
           if (user) {
@@ -458,10 +441,42 @@ const accountModule: Module = {
           return;
         }
 
+        const userId = req.session?.user?.id;
+        const username = req.session?.user?.username;
+        if (!userId || !username) {
+          res.status(401).json({ message: 'Not authenticated.' });
+          return;
+        }
+
+        // Real content validation: magic bytes + polyglot rejection. The
+        // client-declared mimetype/originalname are never trusted.
+        const inspection = inspectImage(req.file.buffer);
+        if (!inspection.ok) {
+          res.status(400).json({ message: inspection.reason ?? 'Invalid image file.' });
+          return;
+        }
+
+        // username is validated at registration, but the session value still
+        // drives the on-disk directory — guard it anyway.
+        const userDir = avatarUserDir(username);
+        if (!userDir) {
+          res.status(400).json({ message: 'Invalid user directory.' });
+          return;
+        }
+
         try {
-          const userId = req.session?.user?.id;
-          const username = req.session?.user?.username;
-          const avatarPath = `/uploads/avatars/${username}/${req.file.filename}`;
+          if (!fs.existsSync(userDir)) {
+            fs.mkdirSync(userDir, { recursive: true });
+          } else {
+            const existing = fs.readdirSync(userDir);
+            existing.forEach(f => {
+              try { fs.unlinkSync(path.join(userDir, f)); } catch { /* ignore per-file errors */ }
+            });
+          }
+
+          const filename = `avatar${inspection.ext}`;
+          fs.writeFileSync(path.join(userDir, filename), req.file.buffer);
+          const avatarPath = `/uploads/avatars/${username}/${filename}`;
 
           await prisma.users.update({
             where: { id: userId },
@@ -489,7 +504,11 @@ const accountModule: Module = {
             return;
           }
 
-          const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
+          const userDir = avatarUserDir(username);
+          if (!userDir) {
+            res.status(400).json({ message: 'Invalid user directory.' });
+            return;
+          }
           if (fs.existsSync(userDir)) {
             fs.readdirSync(userDir).forEach(f => {
               try { fs.unlinkSync(path.join(userDir, f)); } catch { /* ignore per-file errors */ }
@@ -521,7 +540,7 @@ const accountModule: Module = {
             prisma.users.findUnique({ where: { id: userId } }),
             prisma.settings.findUnique({ where: { id: 1 } }),
           ]);
-          if (!user) return res.redirect('/login');
+          if (!user) {return res.redirect('/login');}
           const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'));
           res.render('user/credits', { user, req, settings, version: pkg.version });
         } catch (error) {

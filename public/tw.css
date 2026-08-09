@@ -3,6 +3,28 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ── Motion tokens (Phase 3) ──────────────────────────────────
+   Central duration/easing scale for all UI motion. Consumers use
+   these tokens (e.g. transition: transform var(--dur-enter)
+   var(--ease-decelerate)) instead of ad-hoc timings so reduced-motion
+   handling and design-system tuning stay in one place. */
+:root {
+  --dur-fast: 120ms;
+  --dur-quick: 150ms;
+  --dur-default: 200ms;
+  --dur-enter: 320ms;
+  --dur-exit: 180ms;
+  --dur-stagger: 40ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-fast: 120ms;
+  --motion-default: 180ms;
+  --motion-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+}
+
 @layer base {
   html {
     text-rendering: optimizeLegibility;
@@ -155,6 +177,53 @@
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
   }
+
+  /* ── al-action: semantic action button states ─────────────────────────
+     Loading, success/error flash, and a practical 44px target. The loading
+     spinner is a border-only ring so it animates under prefers-reduced-motion
+     (opacity/state feedback is preserved, never globally killed). */
+  .al-action-loading { @apply relative pointer-events-none; }
+  .al-action-loading::before {
+    content: '';
+    @apply inline-block w-4 h-4 rounded-full shrink-0;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: al-spin var(--motion-default, 180ms) linear infinite;
+  }
+  .al-action-loading > * { opacity: 0; } /* spinner replaces content visually */
+  .al-action-success { color: var(--theme-success, #16a34a) !important; }
+  .al-action-error { color: var(--theme-danger, #dc2626) !important; }
+  @keyframes al-spin {
+    to { transform: rotate(360deg); }
+  }
+  /* Icon-only buttons need an explicit minimum practical target; accessible
+     names are enforced by the markup contract (aria-label / visually hidden
+     text), not by the button's visible content. */
+  .al-btn-icon-only { @apply inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-xl; }
+
+  /* ── al-field: error/success association ────────────────────────────── */
+  .al-field-invalid .al-input { border-color: var(--theme-danger, #dc2626); }
+  .al-field-invalid .al-input:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-danger, #dc2626) 15%, transparent); }
+  .al-field-success .al-input { border-color: var(--theme-success, #16a34a); }
+  .al-field-message { @apply text-xs mt-1.5; }
+  .al-field-invalid .al-field-message { color: var(--theme-danger, #dc2626); }
+  .al-field-success .al-field-message { color: var(--theme-success, #16a34a); }
+
+  /* ── al-dialog: native <dialog> entry/exit ────────────────────────────
+     Travel/scale collapse to opacity under prefers-reduced-motion via
+     motion.css; focus outline and final state are never collapsed. */
+  dialog.al-dialog { @apply m-auto p-0 border-0 bg-transparent; }
+  dialog.al-dialog[open] { animation: al-dialog-in var(--motion-fast, 120ms) var(--motion-ease-decelerate, cubic-bezier(0,0,0.2,1)); }
+  dialog.al-dialog::backdrop { background: rgba(0,0,0,0.4); }
+  @keyframes al-dialog-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ── al-state: section state panels ─────────────────────────────────── */
+  .al-state-panel { @apply flex flex-col items-center justify-center py-12 text-center; }
+  .al-state-panel[hidden] { display: none; }
+  .al-state-panel[aria-busy="true"] .al-state-icon { animation: al-spin var(--motion-default, 180ms) linear infinite; }
 
   /* Page layout */
   .al-page-header { @apply px-6 sm:px-8 pt-6 pb-4; }
@@ -369,14 +438,43 @@ html.dark { --al-wallpaper-scrim: rgba(0, 0, 0, 0.55); }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Collapse decorative travel/scale/stagger keyframes to their end state
+     so layout and focus are stable. Opacity/color transitions are kept:
+     they carry state feedback (success/error, focus visibility, busy) and
+     must not be zeroed out. */
   *,
   ::before,
   ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
   }
+
+  /* Subtle opacity pulse replaces rotation for busy indicators so a busy
+     action is still announced without a traveling animation. */
+  .al-spin,
+  .al-action-spinner,
+  .al-refresh-spinning {
+    animation: al-motion-pulse 1.2s ease-in-out infinite !important;
+  }
+
+  @keyframes al-motion-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  /* Traveling entrances (dialogs, sheets, cards) land at their final state
+     via a fast fade instead of sliding/scaling. */
+  dialog.al-dialog[open],
+  .al-dialog-panel,
+  .al-sheet-panel,
+  .al-card,
+  .pa-row {
+    animation: none !important;
+    transition: opacity var(--dur-quick, 150ms) ease !important;
+  }
+  .al-sheet-overlay.open .al-sheet-panel { transform: none !important; }
+  .al-sheet-overlay .al-sheet-panel.closing { transform: none !important; opacity: 0; }
 }
 
 /* ── Custom select (shared .custom-select / .cs-*) ─────────────── */

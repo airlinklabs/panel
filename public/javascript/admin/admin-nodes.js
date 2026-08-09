@@ -228,15 +228,21 @@ function copyCommand(copyBtn, command) {
       .catch(function() {});
   };
 
+  var stopNodeObservers = [];
+
   function wireNodeStatusRealtime() {
     var rt = window.alRealtime;
     var st = window.alState;
     if (!rt || !st) return;
     if (rt.watchAll) rt.watchAll();
-    st.observe('admin:nodes', pollNodeStatus);
-    st.observe('node', pollNodeStatus);
+    if (stopNodeObservers.length) return;
+    stopNodeObservers.push(st.observe('admin:nodes', pollNodeStatus));
+    stopNodeObservers.push(st.observe('node', pollNodeStatus));
   }
 
   if (window.alRealtime && window.alState) wireNodeStatusRealtime();
-  else window.addEventListener('al:realtime-ready', function () { wireNodeStatusRealtime(); }, { once: true });
+  else window.alListener(window, 'al:realtime-ready', 'admin-nodes-realtime-ready', wireNodeStatusRealtime);
+  window.alListener(document, 'turbo:before-cache', 'admin-nodes-realtime-teardown', function () {
+    stopNodeObservers.splice(0).forEach(function (stop) { stop(); });
+  });
 })();

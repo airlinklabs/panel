@@ -41,7 +41,7 @@ const wallpaperExcluded = req && req.path && (
     <script nonce="<%- nonce %>" defer src="/javascript/vendor/stimulus.js?v=1"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/vendor/turbo.js?v=1"></script>
     <!-- turbo-shell must load synchronously: inline body/page scripts call ALMount during parse -->
-    <script nonce="<%- nonce %>" src="/javascript/shared/turbo-shell.js?v=1"></script>
+    <script nonce="<%- nonce %>" src="/javascript/shared/turbo-shell.js?v=2"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/format-switcher.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/animations.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/custom-select.js?v=8"></script>
@@ -49,6 +49,11 @@ const wallpaperExcluded = req && req.path && (
     <script nonce="<%- nonce %>" defer src="/javascript/shared/checkbox-anim.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/layout-animations.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/al-table.js?v=7"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/al-tabs.js?v=1"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/al-dialog.js?v=1"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/al-action.js?v=1"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/al-field.js?v=1"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/al-state.js?v=1"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/data-layer.js?v=1"></script>
     <style>
       * { scrollbar-width: thin; scrollbar-color: var(--theme-border) transparent; }

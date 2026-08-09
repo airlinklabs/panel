@@ -28,7 +28,7 @@
   const CLEARANCE_OVERHEAD_MS = 40;
 
   const ACTIVE_BORDER_RADIUS = '0.75rem';
-  var PILL_TRANSITION = 'transform 0.22s ' + _rootStyle.getPropertyValue('--ease-standard').trim() + ', height 0.18s ease, opacity 0.15s ease';
+  var PILL_TRANSITION = 'none';
 
   const MOBILE_ACTIVE_CLASSES = ['text-neutral-900', 'dark:text-white', 'active-mobile'];
   const MOBILE_INACTIVE_CLASSES = ['text-neutral-500', 'dark:text-neutral-400'];

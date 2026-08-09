@@ -4,8 +4,7 @@
   try { currentSettings = JSON.parse(pageData.dataset.modrinthSettings || '{}'); } catch (e) { console.error('Failed to parse Modrinth settings:', e); }
   const PROJECT_TYPES = ['mod', 'modpack', 'resourcepack', 'shader', 'datapack', 'plugin'];
 
-  document.addEventListener('DOMContentLoaded', function() {
-    setupTabs();
+  window.ALMount(function() {
     loadCurrentSettings();
     refreshFileStatus();
     setupProjectTypeButtons();
@@ -16,26 +15,20 @@
   });
 
   /* ── Tabs ─────────────────────────────────────────────────────── */
-  function setupTabs() {
-    const btns = document.querySelectorAll('.tab-btn');
-    const panels = document.querySelectorAll('.tab-panel');
-    btns.forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        const target = btn.getAttribute('data-tab');
-        btns.forEach(function(b) {
-          b.classList.remove('text-neutral-800', 'dark:text-white', 'border-neutral-800', 'dark:border-white');
-          b.classList.add('text-neutral-400', 'border-transparent');
-        });
-        btn.classList.add('text-neutral-800', 'dark:text-white', 'border-neutral-800', 'dark:border-white');
-        btn.classList.remove('text-neutral-400', 'border-transparent');
-        panels.forEach(function(p) { p.classList.add('hidden'); });
-        const active = document.querySelector('[data-tab-panel="' + target + '"]');
-        if (active) active.classList.remove('hidden');
-      });
+  // Selection (aria state, panel visibility, URL hash) is owned by
+  // al-tabs; this only repaints the active-tab border underline.
+  window.alListener(document, 'al:tabs-change', 'modrinth-tabs', function(e) {
+    const name = e.detail && e.detail.name;
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      const on = btn.getAttribute('data-tab') === name;
+      btn.classList.toggle('text-neutral-800', on);
+      btn.classList.toggle('dark:text-white', on);
+      btn.classList.toggle('border-neutral-800', on);
+      btn.classList.toggle('dark:border-white', on);
+      btn.classList.toggle('text-neutral-400', !on);
+      btn.classList.toggle('border-transparent', !on);
     });
-    // Activate first tab
-    if (btns.length) btns[0].click();
-  }
+  });
 
   /* ── Project type pills ───────────────────────────────────────── */
   function setupProjectTypeButtons() {

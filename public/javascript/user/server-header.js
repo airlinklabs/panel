@@ -127,6 +127,7 @@
   // footer.ejs). There is no poll loop; the socket is the single source of
   // truth and every status.changed refresh reloads the freshest snapshot.
   var realtimeWired = false;
+  var stopStatusObserver = null;
 
   function onRealtimeStatus(snap) {
     if (!snap || snap.status !== 'success' || !snap.data) return;
@@ -148,21 +149,29 @@
     if (!rt || !st) return;
     realtimeWired = true;
 
-    st.observe('server:status:' + serverUUID, onRealtimeStatus);
+    stopStatusObserver = st.observe('server:status:' + serverUUID, onRealtimeStatus);
+    rt.watch(serverUUID);
     rt.watchEvents(serverUUID);
 
-    // Drop the daemon watchers when navigating away (Turbo SPA navigation
-    // keeps this script's context alive across page loads) so the panel's
-    // reference counts fall to zero and the daemon socket closes.
-    window.addEventListener('pagehide', function () {
+    function teardownRealtime() {
+      if (stopStatusObserver) {
+        stopStatusObserver();
+        stopStatusObserver = null;
+      }
       try {
+        window.alRealtime.unwatch(serverUUID);
         window.alRealtime.unwatchEvents(serverUUID);
       } catch (e) {
         /* already closed */
       }
-    }, { once: true });
+    }
+
+    // Turbo navigation does not fire pagehide. Release on its cache boundary
+    // too, otherwise each visited server leaves daemon watchers behind.
+    window.alListener(document, 'turbo:before-cache', 'server-header-realtime-teardown', teardownRealtime);
+    window.alListener(window, 'pagehide', 'server-header-realtime-teardown', teardownRealtime);
   }
 
   if (window.alRealtime) wireRealtime();
-  else window.addEventListener('al:realtime-ready', wireRealtime);
+  else window.alListener(window, 'al:realtime-ready', 'server-header-realtime-ready', wireRealtime);
 })();

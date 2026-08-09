@@ -10,7 +10,7 @@
     if (table) table.classList.toggle('hidden', !hasRows);
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
+  window.ALMount(function() {
     document.querySelectorAll('[data-delete-image]').forEach(function(btn) {
       btn.addEventListener('click', async function() {
         const id = btn.dataset.deleteImage;

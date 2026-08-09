@@ -91,4 +91,10 @@
   } else {
     initAll();
   }
+
+  // Turbo swaps the body without re-firing DOMContentLoaded — rescan the
+  // fresh initialisers/selects after every navigation.
+  document.addEventListener('al:navigated', function () {
+    initAll();
+  });
 })();

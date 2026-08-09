@@ -9,37 +9,12 @@
   const CHART_BORDER_RADIUS = 4;
   const MAX_TICKS = 10;
 
-  const tabBtns   = document.querySelectorAll('.tab-btn');
-  const tabPanels = document.querySelectorAll('.tab-panel');
   let analyticsData = null;
   let loginChart  = null;
 
-  function activateTab(id) {
-    tabBtns.forEach(btn => {
-      const on = btn.dataset.tab === id;
-      btn.setAttribute('aria-selected', on ? 'true' : 'false');
-      btn.setAttribute('tabindex', on ? '0' : '-1');
-    });
-    tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
-  }
-
-  tabBtns.forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
-
-  const tabList = document.querySelector('[role="tablist"]');
-  if (tabList) {
-    tabList.addEventListener('keydown', function (e) {
-      const tabs = Array.from(tabBtns);
-      const currentIndex = tabs.findIndex(t => t === document.activeElement);
-      if (currentIndex === -1) return;
-      let newIndex = currentIndex;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIndex = (currentIndex + 1) % tabs.length; }
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIndex = (currentIndex - 1 + tabs.length) % tabs.length; }
-      else if (e.key === 'Home') { e.preventDefault(); newIndex = 0; }
-      else if (e.key === 'End') { e.preventDefault(); newIndex = tabs.length - 1; }
-      if (newIndex !== currentIndex) { tabs[newIndex].focus(); activateTab(tabs[newIndex].dataset.tab); }
-    });
-  }
-  activateTab('servers');
+  // Tab selection is owned by al-tabs (`[data-al-tabs]` on .al-page-body),
+  // which drives panel visibility through the `hidden` attribute and syncs
+  // the URL hash. This script only renders data into the active panel.
 
   const isDark    = () => document.documentElement.classList.contains('dark');
   const textColor = () => isDark() ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)';
@@ -205,7 +180,6 @@
     const loading = document.getElementById('loading-state');
     icon.classList.add('animate-spin');
     loading.classList.remove('hidden');
-    tabPanels.forEach(p => p.classList.add('hidden'));
 
     try {
       const res = await fetch('/api/admin/analytics/summary');
@@ -213,7 +187,6 @@
       analyticsData = await res.json();
 
       loading.classList.add('hidden');
-      activateTab('servers');
 
       renderServers(analyticsData);
       renderNodes(analyticsData);

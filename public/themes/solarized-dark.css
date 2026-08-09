@@ -40,8 +40,8 @@
   --theme-danger-border:    rgba(220, 50, 47, 0.30);
 
   /* --- Text --- */
-  --theme-text:             #839496;
-  --theme-text-strong:      #93a1a1;
+  --theme-text:             #93a1a1;
+  --theme-text-strong:      #eee8d5;
   --theme-text-muted:       #586e75;
   --theme-text-placeholder: #3d5f69;
   --theme-text-link:        #268bd2;

@@ -3,13 +3,11 @@
 
   var FOCUS_DELAY = 80;
   var DRAG_END_DELAY = 50;
-  var POLL_INTERVAL = 15000;
-
   var SECONDS_PER_DAY = 86400;
   var SECONDS_PER_HOUR = 3600;
   var SECONDS_PER_MINUTE = 60;
 
-  document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  window.alListener(document, 'contextmenu', 'dashboard-contextmenu', function (e) { e.preventDefault(); });
 
   var bridge = document.getElementById('dashboard-data');
   var allFolders = JSON.parse(bridge.dataset.folders || '[]');
@@ -416,7 +414,7 @@
     }
   });
 
-  document.addEventListener('click', function () {
+  window.alListener(document, 'click', 'dashboard-close-context-menu', function () {
     document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
   });
 
@@ -496,7 +494,7 @@
     openOverlay(folderPopupOverlay, folderPopupPanel);
   }
 
-  document.addEventListener('keydown', function (e) {
+  window.alListener(document, 'keydown', 'dashboard-escape', function (e) {
     if (e.key === 'Escape') {
       document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
       closeOverlay(folderPopupOverlay, folderPopupPanel);
@@ -569,6 +567,7 @@
   var realtimeWired = false;
   var rt = null;
   var st = null;
+  var realtimeDisposers = [];
 
   function onRealtimeStatus(uuid, snap) {
     if (!snap || snap.status !== 'success' || !snap.data) return;
@@ -594,7 +593,10 @@
   }
 
   function onRealtimeConnect() {
-    serverUUIDs.forEach(function (uuid) { rt.watch(uuid); });
+    serverUUIDs.forEach(function (uuid) {
+      rt.watch(uuid);
+      rt.watchEvents(uuid);
+    });
   }
 
   function wireRealtime() {
@@ -605,6 +607,7 @@
     realtimeWired = true;
 
     function unwatchAll() {
+      realtimeDisposers.splice(0).forEach(function (dispose) { dispose(); });
       serverUUIDs.forEach(function (uuid) {
         try {
           window.alRealtime.unwatch(uuid);
@@ -613,21 +616,23 @@
       });
     }
 
-    rt.onStatusChange(function (status) {
+    realtimeDisposers.push(rt.onStatusChange(function (status) {
       if (status === 'connected') onRealtimeConnect();
-    });
+    }));
     serverUUIDs.forEach(function (uuid) {
-      st.observe('server:status:' + uuid, function (snap) { onRealtimeStatus(uuid, snap); });
+      realtimeDisposers.push(st.observe('server:status:' + uuid, function (snap) { onRealtimeStatus(uuid, snap); }));
     });
 
     // Drop the daemon watchers when navigating away (Turbo SPA navigation
     // keeps this script's context alive across page loads) so reference
     // counts fall to zero and the daemon sockets close.
-    window.addEventListener('pagehide', unwatchAll, { once: true });
+    window.alListener(document, 'turbo:before-cache', 'dashboard-realtime-teardown', unwatchAll);
+    window.alListener(window, 'pagehide', 'dashboard-realtime-teardown', unwatchAll);
+    if (rt.status && rt.status() === 'connected') onRealtimeConnect();
   }
 
   if (window.alRealtime) wireRealtime();
-  else window.addEventListener('al:realtime-ready', wireRealtime);
+  else window.alListener(window, 'al:realtime-ready', 'dashboard-realtime-ready', wireRealtime);
 
   /* ── Onboarding modal ─────────────────────── */
   var onboardingModal = document.getElementById('onboardingModal');

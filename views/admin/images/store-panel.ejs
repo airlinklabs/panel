@@ -1,0 +1,215 @@
+<%- /*
+ * store-panel.ejs — the image store body, shared by the full store page
+ * (store.ejs) and the lazy "Store" tab on /admin/images (loaded via
+ * data-tab-src on the store tab panel).
+ *
+ * Includes the search row, loading/error/empty/list states and the group
+ * and egg templates the store's modal drill-downs clone into the shared
+ * #globalModalContent shell. No page chrome here — the host owns the
+ * sidebar, header, breadcrumb and tablist.
+ */ %>
+
+<style>
+  .modal-sheet { display: flex; flex-direction: column; }
+  .modal-two-col { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+  .modal-left { width: 250px; min-width: 180px; flex-shrink: 0; border-right: 1px solid var(--theme-border,#e5e5e5); overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  html.dark .modal-left { border-right-color: var(--theme-border-subtle,rgba(255,255,255,0.06)); }
+  .modal-right { flex: 1; min-width: 0; overflow-y: auto; padding: 16px; }
+  .modal-single-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .grp-img-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--theme-border,#e5e5e5);
+    transition: background 0.12s, border-color 0.12s;
+  }
+  html.dark .grp-img-row { border-color: var(--theme-border-subtle,rgba(255,255,255,0.07)); }
+  .grp-img-row:hover { background: var(--theme-bg-secondary,#f5f5f5); border-color: var(--theme-border-strong,#d4d4d4); }
+  html.dark .grp-img-row:hover { background: var(--theme-bg-hover,rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle,rgba(255,255,255,0.13)); }
+
+  .md-body { font-size: 12.5px; line-height: 1.75; color: var(--theme-text-muted,#525252); }
+  html.dark .md-body { color: var(--theme-text-muted,#737373); }
+  .md-body h1, .md-body h2 { font-size: 13px; font-weight: 600; color: var(--theme-text-strong,#171717); margin: 0 0 6px; }
+  html.dark .md-body h1, html.dark .md-body h2 { color: var(--theme-text,#e5e5e5); }
+  .md-body h3 { font-size: 12px; font-weight: 600; color: var(--theme-text-muted,#525252); margin: 10px 0 3px; }
+  .md-body p { margin: 0 0 8px; }
+  .md-body a { color: var(--theme-accent,#6366f1); text-decoration: none; }
+  .md-body a:hover { text-decoration: underline; }
+  .md-body code { font-family: ui-monospace,monospace; font-size: 11px; background: var(--theme-bg-secondary,#f4f4f5); padding: 1px 5px; border-radius: 4px; color: var(--theme-text-muted,#3f3f46); }
+  html.dark .md-body code { background: rgba(255,255,255,0.07); color: var(--theme-text-strong,#d4d4d4); }
+  .md-body pre { background: var(--theme-bg-secondary,#f4f4f5); border: 1px solid var(--theme-border,#e5e5e5); border-radius: 8px; padding: 10px 12px; overflow-x: auto; margin: 0 0 8px; }
+  html.dark .md-body pre { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.07); }
+  .md-body pre code { background: none; padding: 0; }
+  .md-body ul, .md-body ol { padding-left: 16px; margin: 0 0 8px; }
+  .md-body li { margin-bottom: 2px; }
+  .md-body hr { border: none; border-top: 1px solid var(--theme-border,#e5e5e5); margin: 10px 0; }
+  .md-body strong { color: var(--theme-text-strong,#171717); }
+  html.dark .md-body strong { color: var(--theme-text,#e5e5e5); }
+
+  .cat-game        { background: rgba(124,58,237,0.1); color: #6d28d9; }
+  .cat-application { background: rgba(2,132,199,0.1);  color: #0369a1; }
+  .cat-generic     { background: rgba(22,163,74,0.1);  color: #15803d; }
+  html.dark .cat-game        { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  html.dark .cat-application { background: rgba(14,165,233,0.15); color: #38bdf8; }
+  html.dark .cat-generic     { background: rgba(34,197,94,0.15);  color: #4ade80; }
+
+  .sortable-th {
+    cursor: pointer; user-select: none;
+    transition: color 0.12s;
+  }
+  .sortable-th:hover { color: var(--theme-text-strong,#171717); }
+  .sortable-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: none; border: 0; padding: 0; margin: 0;
+    font: inherit; color: inherit; cursor: pointer;
+    transition: color 0.12s;
+  }
+  .sortable-btn:hover { color: var(--theme-text-strong,#171717); }
+
+  .group-hdr-tr td {
+    background: var(--theme-bg-secondary,#f9fafb);
+    border-bottom: 1px solid var(--theme-border,#e5e5e5);
+  }
+  html.dark .group-hdr-tr td { background: var(--theme-bg-secondary,#1c1c1c); border-bottom-color: var(--theme-border-subtle,rgba(255,255,255,0.06)); }
+
+  #listEl { max-height: calc(100vh - 250px); overflow-y: auto; }
+  #listEl thead { position: sticky; top: 0; z-index: 2; }
+  #listEl thead th { background: var(--theme-table-header-bg,var(--theme-bg,#fafafa)); }
+  html.dark #listEl thead th { background: var(--theme-table-header-bg,#1a1a1a); }
+  #listBody td:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  @media (max-width: 640px) {
+    .modal-two-col { flex-direction: column; }
+    .modal-left { width: 100%; border-right: none; border-bottom: 1px solid var(--theme-border,#e5e5e5); }
+    .search-row { flex-wrap: wrap; }
+  }
+</style>
+
+<!-- Search + Refresh -->
+<div class="flex items-center gap-3 mt-5 mb-2 search-row">
+  <div class="relative flex-1 max-w-xs min-w-0">
+    <input id="image-store-search-input" type="text" placeholder="Search images&hellip;" aria-label="Search images" class="al-input w-full pl-3 pr-3" autocomplete="off">
+  </div>
+  <span id="countLabel" class="text-xs font-medium px-2 py-1 rounded-md shrink-0" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"></span>
+  <span id="statusText" class="text-xs shrink-0" style="color:var(--theme-text-muted)"></span>
+  <button id="refreshBtnLoad" onclick="doRefresh()" type="button" class="al-btn-secondary px-2.5 py-1.5 shrink-0" title="Refresh catalogue">
+    <%- icon('refresh-cw', { size: 14 }) %>
+  </button>
+</div>
+
+<!-- Loading skeleton -->
+<div id="loadingEl" class="overflow-hidden rounded-xl mt-3 border" style="border-color:var(--theme-border)">
+  <% for(var i=0;i<8;i++){%>
+  <div class="flex items-center gap-4 px-6 py-4" style="border-bottom:1px solid var(--theme-border)">
+    <div class="h-3 rounded-md bg-[var(--theme-bg-secondary)] flex-1 max-w-[30%]" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%);animation:al-shimmer 1.5s ease-in-out infinite"></div></div>
+    <div class="h-3 rounded-md bg-[var(--theme-bg-secondary)] w-16" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%);animation:al-shimmer 1.5s ease-in-out infinite"></div></div>
+    <div class="h-3 rounded-md bg-[var(--theme-bg-secondary)] w-24 ml-auto" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%);animation:al-shimmer 1.5s ease-in-out infinite"></div></div>
+    <div class="h-8 w-20 rounded-lg bg-[var(--theme-bg-secondary)]" style="position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--theme-skeleton-shine) 50%,transparent 100%);animation:al-shimmer 1.5s ease-in-out infinite"></div></div>
+  </div>
+  <% } %>
+</div>
+
+<!-- Error state -->
+<div id="errorEl" style="display:none">
+  <div class="flex flex-col items-center justify-center py-24 text-center">
+    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+      <%- icon('alert-triangle', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
+    </div>
+    <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Couldn&rsquo;t load the catalogue</h3>
+    <p class="text-sm mt-1" style="color:var(--theme-text-muted)">Check your connection and try again.</p>
+    <button type="button" onclick="loadCatalogue()" class="mt-4 al-btn-secondary"><%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>Retry</button>
+  </div>
+</div>
+
+<!-- Empty state -->
+<div id="emptyEl" style="display:none">
+  <div class="flex flex-col items-center justify-center py-24 text-center">
+    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+      <%- icon('inbox', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
+    </div>
+    <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">No images found</h3>
+    <p id="emptyTxt" class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted)"></p>
+  </div>
+</div>
+
+<!-- List table -->
+<div id="listEl" style="display:none;box-shadow:0 0 0 1px var(--theme-border)" class="overflow-x-auto overflow-y-hidden rounded-xl mt-3">
+  <table class="al-table" style="table-layout:auto">
+    <colgroup>
+      <col style="min-width:200px">
+      <col style="min-width:90px">
+      <col style="min-width:90px">
+      <col style="min-width:180px">
+    </colgroup>
+    <thead class="al-table-head">
+      <tr>
+        <th class="al-table-th py-3.5 pl-6 pr-3 sortable-th" style="min-width:200px" aria-sort="ascending">
+          <button type="button" class="sortable-btn" data-sort="app" aria-label="Sort by app name">App <span id="sortApp" class="text-[10px] ml-1 align-middle" aria-hidden="true">&#9650;</span></button>
+        </th>
+        <th class="al-table-th px-3 py-3.5 sortable-th col-hide" style="min-width:90px" aria-sort="none">
+          <button type="button" class="sortable-btn" data-sort="type" aria-label="Sort by type">Type <span id="sortType" class="text-[10px] ml-1 align-middle" aria-hidden="true"></span></button>
+        </th>
+        <th class="al-table-th px-3 py-3.5 sortable-th col-hide" style="min-width:90px" aria-sort="none">
+          <button type="button" class="sortable-btn" data-sort="author" aria-label="Sort by number of images">Images <span id="sortAuthor" class="text-[10px] ml-1 align-middle" aria-hidden="true"></span></button>
+        </th>
+        <th class="al-table-th px-3 py-3.5 sortable-th col-hide" style="min-width:160px" aria-sort="none">
+          <button type="button" class="sortable-btn" data-sort="desc" aria-label="Sort by description">Description <span id="sortDesc" class="text-[10px] ml-1 align-middle" aria-hidden="true"></span></button>
+        </th>
+      </tr>
+    </thead>
+    <tbody id="listBody" class="divide-y" style="border-color:var(--theme-border)"></tbody>
+  </table>
+</div>
+
+<!-- Group drill-down content — staged via a <template> so the 2-step
+     popup never has to move DOM nodes back and forth. openGroup() clones
+     this into #globalModalContent (the shared window.modal body) and
+     populates it there, so getElementById always resolves against fresh,
+     unattached-free nodes. -->
+<template id="groupTpl">
+  <div class="modal-sheet" style="height:540px;">
+    <div class="flex items-center gap-2 mb-3">
+      <p id="grpCount" class="text-xs shrink-0" style="color:var(--theme-text-muted)"></p>
+    </div>
+    <div class="modal-two-col">
+      <div class="modal-left">
+        <p class="text-[10px] font-semibold uppercase tracking-wider" style="color:var(--theme-text-muted)">Images</p>
+        <div id="grpSubList" class="space-y-1.5"></div>
+      </div>
+      <div class="modal-right">
+        <p class="text-[10px] font-semibold uppercase tracking-wider mb-3" style="color:var(--theme-text-muted)">README</p>
+        <div id="grpReadme" class="md-body"></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- Image detail / install step — same treatment: cloned into the modal -->
+<template id="eggTpl">
+  <div class="modal-sheet" style="height:480px;">
+    <div class="space-y-1 mb-3">
+      <span id="eggCat" class="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 ring-1 ring-inset"></span>
+      <p id="eggDesc" class="text-xs leading-relaxed" style="color:var(--theme-text-muted)"></p>
+      <p id="eggAuthor" class="text-[11px]" style="color:var(--theme-text-muted)"></p>
+    </div>
+    <div class="modal-single-body">
+      <div class="flex-1 overflow-y-auto min-h-0">
+        <p class="text-[10px] font-semibold uppercase tracking-wider mb-2" style="color:var(--theme-text-muted)">README</p>
+        <div id="eggReadme" class="md-body"></div>
+      </div>
+      <div id="eggErr" style="display:none" class="err-box"><p id="eggErrTxt" class="err-txt"></p></div>
+      <button id="eggInstallBtn" onclick="confirmInstall()" type="button" class="al-btn-primary w-full py-2.5 text-sm font-medium" style="flex-shrink:0"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Install</button>
+    </div>
+  </div>
+</template>
+
+<style>
+  @keyframes al-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .err-box { background: var(--theme-danger-bg); border: 1px solid var(--theme-danger-border, color-mix(in srgb, var(--theme-danger) 20%, transparent)); border-radius: 10px; padding: 10px 14px; }
+  .err-txt { font-size: 11.5px; color: var(--theme-btn-danger-bg); }
+  html.dark .err-txt { color: var(--theme-danger); }
+  @media (max-width: 640px) { .col-hide { display: none; } }
+</style>

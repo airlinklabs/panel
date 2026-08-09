@@ -1,7 +1,7 @@
 (function() {
   const pd = document.getElementById('page-data').dataset;
 
-  document.addEventListener('DOMContentLoaded', function() {
+  window.ALMount(function() {
     const form = document.getElementById('editUserForm');
     const isAdminToggle = document.getElementById('isAdmin');
     const adminStatusLabel = document.getElementById('adminStatusLabel');

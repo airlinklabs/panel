@@ -139,7 +139,7 @@ const pageCatalog = (function() {
       { label: 'Player Stats', url: '/admin/playerstats', kw: 'players analytics stats leaderboard top' },
       { label: 'Analytics', url: '/admin/analytics', kw: 'charts stats metrics graphs' },
       { label: 'Addon Store', url: '/admin/addons/store', kw: 'plugins store marketplace extensions install' },
-      { label: 'Image Store', url: '/admin/images/store', kw: 'images store marketplace eggs templates install' },
+      { label: 'Image Store', url: '/admin/images#store', kw: 'images store marketplace eggs templates install' },
       { label: 'API Documentation', url: '/admin/api/docs', kw: 'documentation api reference endpoints docs' },
       { label: 'Create Server', url: '/admin/servers/create', kw: 'new server deploy create admin' },
       { label: 'Create User', url: '/admin/users/create', kw: 'new user account add admin' },

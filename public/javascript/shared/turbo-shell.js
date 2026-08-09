@@ -39,6 +39,19 @@
 
   var T = (typeof window !== 'undefined' && window.Turbo) || null;
 
+  // ALMount must always exist (even if Turbo is absent), so page scripts can
+  // rely on it without splitting init paths.
+  if (typeof window.ALMount !== 'function') {
+    window.ALMount = function (fn) {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fn);
+      } else {
+        fn();
+      }
+      return fn;
+    };
+  }
+
   var raf = (typeof requestAnimationFrame === 'function')
     ? requestAnimationFrame
     : function (fn) { return setTimeout(fn, 0); };
@@ -97,6 +110,38 @@
   }
 
   /* ------------------------------------------------------------------ *
+     In-page component controllers (al-tabs, al-dialog, al-field, al-state)
+     ------------------------------------------------------------------ */
+
+  // Remount component controllers against the current DOM. destroyAll first
+  // keeps this idempotent: the initial DOMContentLoaded and the first
+  // turbo:load both fire for the first rendition, and a body swap happens
+  // after the old controllers were torn down, so exactly one live set
+  // survives.
+  var COMPONENT_SYSTEMS = [
+    { key: 'ALTabSystem', scan: 'scan' },
+    { key: 'ALDialog', scan: 'scan' },
+    { key: 'ALField', scan: 'enhance', root: function () { return document.body; } },
+    { key: 'ALStateView', scan: 'scan' },
+  ];
+
+  function syncComponents() {
+    for (var i = 0; i < COMPONENT_SYSTEMS.length; i++) {
+      var sys = COMPONENT_SYSTEMS[i];
+      var api = window[sys.key];
+      if (typeof api !== 'object') continue;
+      try {
+        if (typeof api.destroyAll === 'function') api.destroyAll();
+        var method = api[sys.scan];
+        if (typeof method === 'function') {
+          if (sys.root) method.call(api, sys.root());
+          else method.call(api);
+        }
+      } catch (e) { /* a component must never kill the shell */ }
+    }
+  }
+
+  /* ------------------------------------------------------------------ *
      Keyed single listeners for document/window (no stacking on re-run)
      * ------------------------------------------------------------------ */
 
@@ -142,11 +187,13 @@
       runMounts();
       dispatchNavigated();
       runNavHandlers();
+      syncComponents();
     });
   } else {
     scheduleFlush();
     dispatchNavigated();
     runNavHandlers();
+    syncComponents();
   }
 
   document.addEventListener('turbo:render', function () { scheduleFlush(); });
@@ -154,12 +201,35 @@
     scheduleFlush();
     dispatchNavigated();
     runNavHandlers();
+    syncComponents();
   });
 
   // Before the refresh body arrives, drop the previous page's keyed listener
-  // handlers so nothing leaks into the new rendition.
-  document.addEventListener('turbo:before-render', function () { dropPageKeyedListeners(); });
+  // handlers and tab controllers so nothing leaks into the new rendition.
+  document.addEventListener('turbo:before-render', function () {
+    dropPageKeyedListeners();
+    if (typeof window.ALTabSystem === 'object' && typeof window.ALTabSystem.destroyAll === 'function') {
+      try { window.ALTabSystem.destroyAll(); } catch (e) { /* isolate */ }
+    }
+  });
 
-  window.ALTurboAvailable = !!(typeof window !== 'undefined' && window.Turbo);
-  window.ALTurboEnabled = !!(T && T.session && T.session.drive);
+  // Panel pages still contain route-owned scripts that initialise consoles,
+  // charts and form controls. A Turbo snapshot restores their DOM without
+  // re-evaluating those scripts, leaving a partially live page on Back/Forward.
+  // Keep Drive for navigation, but always render a fresh server response.
+  document.addEventListener('turbo:before-cache', function () {
+    var turbo = window.Turbo || T;
+    if (turbo && turbo.cache && typeof turbo.cache.exemptPageFromCache === 'function') {
+      turbo.cache.exemptPageFromCache();
+    }
+  });
+
+  function updateTurboState() {
+    var turbo = window.Turbo || T;
+    window.ALTurboAvailable = !!turbo;
+    window.ALTurboEnabled = !!(turbo && turbo.session && turbo.session.drive);
+  }
+
+  updateTurboState();
+  document.addEventListener('DOMContentLoaded', updateTurboState, { once: true });
 })();

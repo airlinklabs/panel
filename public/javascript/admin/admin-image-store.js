@@ -11,6 +11,14 @@ var CAT_COLOR = {
 let allImages = [], pendingEgg = null, mdParse = null;
 let searchQuery = '', sortBy = 'app', sortDir = 'asc';
 
+/* Mountable controller. `mount(panel)` binds the store search input inside
+   the given root and loads the catalogue; `destroy()` tears the state down
+   so a Turbo round-trip or tab switch cannot leak handlers. The store is
+   reachable either as a full page (/admin/images/store) or as the lazy
+   "Store" tab on /admin/images, so the same script serves both. */
+let mountedRoot = null;
+let inited = false;
+
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function cap(s) { return s.replace(/[-_]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()}); }
 function show(id, d) { var e=document.getElementById(id); if(e) e.style.display=d||'block'; }
@@ -69,6 +77,13 @@ function updateSortArrows() {
   Object.keys(cols).forEach(function(k) {
     var el = document.getElementById(cols[k]);
     if (el) el.textContent = k === sortBy ? (sortDir === 'asc' ? '\u25B2' : '\u25BC') : '';
+  });
+  // Announce sort direction on the column header (aria-sort on the th).
+  document.querySelectorAll('#listEl th').forEach(function(th) {
+    var btn = th.querySelector('[data-sort]');
+    var col = btn && btn.getAttribute('data-sort');
+    if (!col) return;
+    th.setAttribute('aria-sort', col === sortBy ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none');
   });
 }
 
@@ -272,15 +287,50 @@ function doSearch(val) {
   searchQuery = val;
   render();
 }
-document.getElementById('searchInput').addEventListener('input', function() {
-  doSearch(this.value);
-});
 
-loadCatalogue();
+function mount(root) {
+  if (inited) return;
+  inited = true;
+  mountedRoot = root || document;
+  var input = mountedRoot.querySelector ? mountedRoot.querySelector('#image-store-search-input') : null;
+  if (input && !input._alStoreBound) {
+    input._alStoreBound = true;
+    input.addEventListener('input', function() { doSearch(this.value); });
+  }
+  if (mountedRoot && mountedRoot.addEventListener && !mountedRoot._alStoreSortBound) {
+    mountedRoot._alStoreSortBound = true;
+    mountedRoot.addEventListener('click', function(e) {
+      var btn = e.target && e.target.closest ? e.target.closest('[data-sort]') : null;
+      if (btn && mountedRoot.contains(btn)) {
+        e.preventDefault();
+        sortKey(btn.getAttribute('data-sort'));
+      }
+    });
+  }
+  loadCatalogue();
+}
+
+function destroy() {
+  inited = false;
+  mountedRoot = null;
+  allImages = [];
+  pendingEgg = null;
+  searchQuery = ''; sortBy = 'app'; sortDir = 'asc';
+}
+
+window.AdminImageStore = {
+  mount: mount,
+  destroy: destroy,
+  VERSION: 2,
+};
 
 window.doSearch = doSearch;
 window.doRefresh = doRefresh;
 window.loadCatalogue = loadCatalogue;
 window.sortKey = sortKey;
 window.confirmInstall = confirmInstall;
+
+/* Full-page entry (/admin/images/store): the panel markup is already in the
+   DOM when this script runs, so mount immediately. */
+if (document.getElementById('image-store-search-input')) mount(document);
 })();

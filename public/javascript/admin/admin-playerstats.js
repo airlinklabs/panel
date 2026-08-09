@@ -196,15 +196,24 @@ document.getElementById('refreshBtn').addEventListener('click', fetchPlayerData)
 // `player.stats.updated` after each collection run (every 5 min), which
 // invalidates the `admin:playerstats` cache key. Re-fetch on that instead of
 // running our own timer. The manual refresh button still works on demand.
+let unsubscribeRealtime = null;
+
 function wirePlayerStatsRealtime() {
   const rt = window.alRealtime;
   const st = window.alState;
-  if (!rt || !st) return;
-  st.observe('admin:playerstats', function () { fetchPlayerData(); });
+  if (!rt || !st || unsubscribeRealtime) return;
+  unsubscribeRealtime = st.observe('admin:playerstats', function () { fetchPlayerData(); });
 }
 
 if (window.alRealtime && window.alState) wirePlayerStatsRealtime();
-else window.addEventListener('al:realtime-ready', function () { wirePlayerStatsRealtime(); }, { once: true });
+else window.alListener(window, 'al:realtime-ready', 'admin-playerstats-realtime-ready', wirePlayerStatsRealtime);
+
+window.alListener(document, 'turbo:before-cache', 'admin-playerstats-realtime-teardown', function () {
+  if (unsubscribeRealtime) {
+    unsubscribeRealtime();
+    unsubscribeRealtime = null;
+  }
+});
 
 async function triggerDataCollection() {
   try {

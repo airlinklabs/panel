@@ -20,7 +20,7 @@
         </div>
       </div>
 
-      <div class="al-page-body">
+      <div class="al-page-body" data-al-tabs data-tabs-default="appearance" data-tabs-hash>
 
         <!-- Tab bar -->
         <div role="tablist" class="flex gap-1 mb-6">
@@ -30,7 +30,7 @@
         </div>
 
         <!-- ── APPEARANCE ──────────────────────────────────────────────────── -->
-        <div id="panel-appearance" role="tabpanel" aria-labelledby="tab-appearance" data-tab-panel="appearance" class="tab-panel space-y-5 hidden">
+        <div id="panel-appearance" role="tabpanel" aria-labelledby="tab-appearance" data-tab-panel="appearance" class="tab-panel space-y-5">
           <form id="form-appearance" enctype="multipart/form-data" class="space-y-6">
 
           <!-- Branding -->
@@ -190,7 +190,7 @@
         </div>
 
         <!-- ── SERVERS ─────────────────────────────────────────────────────── -->
-        <div id="panel-servers" role="tabpanel" aria-labelledby="tab-servers" data-tab-panel="servers" class="tab-panel hidden space-y-5">
+        <div id="panel-servers" role="tabpanel" aria-labelledby="tab-servers" data-tab-panel="servers" class="tab-panel space-y-5" hidden>
 
           <div class="al-card">
             <h2 class="al-card-header">User permissions</h2>
@@ -326,7 +326,7 @@
         </div>
 
         <!-- ── SECURITY ────────────────────────────────────────────────────── -->
-        <div id="panel-security" role="tabpanel" aria-labelledby="tab-security" data-tab-panel="security" class="tab-panel hidden space-y-5">
+        <div id="panel-security" role="tabpanel" aria-labelledby="tab-security" data-tab-panel="security" class="tab-panel space-y-5" hidden>
 
           <!-- Registration -->
           <div class="al-card">
@@ -605,23 +605,8 @@
 
         <script nonce="<%- nonce %>">
         (function(){
-          const tabBtns = document.querySelectorAll('.tab-btn');
-          const tabPanels = document.querySelectorAll('.tab-panel');
-          const tabList = document.querySelector('[role="tablist"]');
           const saveBtn = document.getElementById('tab-save-btn');
           const resetBtn = document.getElementById('tab-reset-btn');
-          function activate(id) {
-            tabBtns.forEach(function(btn) {
-              const on = btn.dataset.tab === id;
-              btn.setAttribute('aria-selected', on ? 'true' : 'false');
-              btn.setAttribute('tabindex', on ? '0' : '-1');
-            });
-            tabPanels.forEach(function(p) { p.classList.toggle('hidden', p.dataset.tabPanel !== id); });
-            rebind(id);
-            try { localStorage.setItem('settings_tab', id); } catch (e) {
-              console.warn('[settings] Failed to save tab state:', e);
-            }
-          }
           function rebind(id) {
             if (window.tabHandlers && saveBtn) {
               saveBtn.onclick = window.tabHandlers[id] || null;
@@ -635,25 +620,13 @@
             const active = document.querySelector('.tab-btn[aria-selected="true"]');
             if (active) rebind(active.dataset.tab);
           };
-          tabBtns.forEach(function(btn) { btn.addEventListener('click', function() { activate(this.dataset.tab); }); });
-          if (tabList) {
-            tabList.addEventListener('keydown', function(e) {
-              const tabs = Array.from(tabBtns);
-              const currentIndex = tabs.findIndex(function(t) { return t === document.activeElement; });
-              if (currentIndex === -1) return;
-              let newIndex = currentIndex;
-              if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIndex = (currentIndex + 1) % tabs.length; }
-              else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIndex = (currentIndex - 1 + tabs.length) % tabs.length; }
-              else if (e.key === 'Home') { e.preventDefault(); newIndex = 0; }
-              else if (e.key === 'End') { e.preventDefault(); newIndex = tabs.length - 1; }
-              if (newIndex !== currentIndex) { tabs[newIndex].focus(); activate(tabs[newIndex].dataset.tab); }
-            });
-          }
-          let saved = null;
-          try { saved = localStorage.getItem('settings_tab'); } catch (e) {
-            console.warn('[settings] Failed to read tab state:', e);
-          }
-          activate(saved || 'appearance');
+          // al-tabs owns selection (and the URL hash); we only re-point the
+          // Save/Reset buttons at the newly active tab's handlers.
+          window.alListener(document, 'al:tabs-change', 'settings-tabs', function(e) {
+            const name = e.detail && e.detail.name;
+            if (name) rebind(name);
+          });
+          window._rebindTabHandlers();
         })();
         </script>
 

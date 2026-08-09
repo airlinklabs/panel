@@ -63,14 +63,7 @@
                 </a>
               </li>
             <% }); } %>
-            <% const myImagesIdx = (sidebarItems && sidebarItems.length || 0) + 1; %>
-            <li class="nav-item sidebar-view-item" style="--i:<%= myImagesIdx %>">
-              <a href="/my-images" class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);" data-search="images custom eggs submissions">
-                <%- icon('image', { class: 'w-5 h-5 mt-0.5' }) %>
-                <span><%= req.translations.navMyImages || 'My Images' %></span>
-              </a>
-            </li>
-            
+
             <% if (user != null && user.isAdmin === true) { %>
             <% let adminAnimIdx = 0; %>
                           <p class="pl-8 text-xs font-medium pt-6 pb-2" style="color:var(--theme-nav-text);"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>

@@ -1,4 +1,5 @@
-import express, { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import prisma from './db';
 import path from 'path';
 import session from 'express-session';
@@ -35,11 +36,16 @@ import csrfProtection, {
   handleCsrfError,
   addCsrfTokenToLocals,
 } from './handlers/utils/security/csrfProtection';
+import { isCsrfExempt } from './handlers/utils/security/csrfRouting';
 import {
   errorPageHandler,
   notFoundHandler,
   renderErrorPage,
 } from './handlers/errorPages';
+
+import { getConfig } from './config';
+import { resolveAddonViewPath, isValidAddonSlug } from './handlers/addonViewResolver';
+import ejs from 'ejs';
 
 type RenderCallback = (err: Error | null, html?: string) => void;
 
@@ -50,8 +56,21 @@ loadEnv();
 process.setMaxListeners(20);
 
 const app = express();
-const port = process.env.PORT || 3000;
-const name = process.env.NAME || 'AirLink';
+
+// Validated configuration. In production, a missing/weak SESSION_SECRET makes
+// getConfig() throw, which aborts startup with a clear message instead of
+// silently generating a fresh secret (invalidating all sessions).
+let panelConfig: ReturnType<typeof getConfig>;
+try {
+  panelConfig = getConfig();
+} catch (error) {
+  logger.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+}
+process.env.SESSION_SECRET = panelConfig.sessionSecret;
+
+const port = panelConfig.port;
+const name = panelConfig.name;
 const airlinkVersion = config.meta.version;
 const airlinkCodename = config.meta.codename;
 
@@ -120,61 +139,20 @@ const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
 
-import ejs from 'ejs';
-
-const originalRenderFile = (ejs as any).renderFile
-  ? (ejs as any).renderFile.bind(ejs)
-  : (ejs as any).__express?.bind(ejs);
+// The global ejs.renderFile monkey-patch used to live here, falling back to
+// addon views for any missing template. It has been replaced by the explicit
+// addon view resolver (src/handlers/addonViewResolver.ts), which validates
+// addon slugs and keeps every resolved path inside the addon's views dir.
 
 const addonViewsDir = path.join(__dirname, '../../storage/addons');
 
 function getAddonDirs(): string[] {
-  if (!fs.existsSync(addonViewsDir)) return [];
+  if (!fs.existsSync(addonViewsDir)) {return [];}
   return fs
     .readdirSync(addonViewsDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
+    .filter((d) => d.isDirectory() && isValidAddonSlug(d.name))
     .map((d) => d.name);
 }
-
-(ejs as any).renderFile = function (
-  file: string,
-  data: any,
-  options: any,
-  callback: any,
-) {
-  try {
-    if (fs.existsSync(file)) {
-      return originalRenderFile(file, data, options, callback);
-    }
-
-    const viewName = path.basename(file);
-
-    if (data?.addonSlug) {
-      const addonViewPath = path.join(addonViewsDir, data.addonSlug, 'views', viewName);
-      if (fs.existsSync(addonViewPath)) {
-        return originalRenderFile(addonViewPath, data, options, callback);
-      }
-    }
-
-    const mainViewPath = path.join(viewsPath, viewName);
-    if (fs.existsSync(mainViewPath)) {
-      return originalRenderFile(mainViewPath, data, options, callback);
-    }
-
-    for (const addonDir of getAddonDirs()) {
-      if (data?.addonSlug && addonDir === data.addonSlug) continue;
-      const addonViewPath = path.join(addonViewsDir, addonDir, 'views', viewName);
-      if (fs.existsSync(addonViewPath)) {
-        return originalRenderFile(addonViewPath, data, options, callback);
-      }
-    }
-
-    return originalRenderFile(file, data, options, callback);
-  } catch (error) {
-    logger.error('Error in EJS renderFile override:', error);
-    return originalRenderFile(file, data, options, callback);
-  }
-};
 
 // Load compression
 app.use(compression());
@@ -182,8 +160,8 @@ app.use(compression());
 // =============================================================================
 // Security middleware
 // =============================================================================
-const isHttps = process.env.URL?.startsWith('https://') ?? false;
-const isProduction = process.env.NODE_ENV === 'production';
+const isHttps = panelConfig.isHttps;
+const isProduction = panelConfig.isProduction;
 
 // ---------------------------------------------------------------------------
 // Nonce middleware — runs before helmet so the nonce is available when we
@@ -336,40 +314,15 @@ app.use(
 // Only mark cookies as secure when the server is actually serving over HTTPS.
 // Setting secure:true on a plain HTTP server causes browsers to silently drop
 // all session cookies, breaking login on local network setups.
-const useSecureCookie = process.env.URL?.startsWith('https://') ?? false;
+const useSecureCookie = panelConfig.isHttps;
 
-let sessionSecret = process.env.SESSION_SECRET;
-if (!sessionSecret || sessionSecret === 'change_me') {
-  sessionSecret = crypto.randomBytes(32).toString('hex');
-  const envPath = path.join(process.cwd(), '.env');
-  const examplePath = path.join(process.cwd(), 'example.env');
-  try {
-    // If .env doesn't exist, copy from example.env first
-    if (!fs.existsSync(envPath) && fs.existsSync(examplePath)) {
-      fs.copyFileSync(examplePath, envPath);
-    }
-    // Replace or append SESSION_SECRET in .env
-    if (fs.existsSync(envPath)) {
-      let envContent = fs.readFileSync(envPath, 'utf8');
-      if (envContent.includes('SESSION_SECRET=')) {
-        envContent = envContent.replace(/SESSION_SECRET=.*/, `SESSION_SECRET="${sessionSecret}"`);
-      } else {
-        envContent += `\nSESSION_SECRET="${sessionSecret}"\n`;
-      }
-      fs.writeFileSync(envPath, envContent);
-    } else {
-      fs.writeFileSync(envPath, `SESSION_SECRET="${sessionSecret}"\n`);
-    }
-    process.env.SESSION_SECRET = sessionSecret;
-    logger.info('Generated and saved SESSION_SECRET to .env');
-  } catch {
-    logger.warn('Could not write SESSION_SECRET to .env — sessions will not persist across restarts');
-  }
-}
+// Session secret comes from the validated config (src/config.ts). The panel
+// never writes secrets to .env at runtime; use `node dist/cli/secret.js`.
+const sessionSecret = panelConfig.sessionSecret;
 
 app.use(
   session({
-    secret: sessionSecret || 'dev-only-insecure-secret-change-me',
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     store: new PrismaSessionStore(),
@@ -411,10 +364,11 @@ app.use(cookieParser());
 // Load translation
 app.use(translationMiddleware);
 
-// Apply CSRF protection to all routes except for API routes and WebSocket routes
+// Apply CSRF protection to all routes except WebSocket upgrades and the
+// bearer-only API mounts. Session-authenticated /api/* routes (folders,
+// admin endpoints, search) ARE protected — see csrfRouting.ts.
 app.use((req, res, next) => {
-  // Skip CSRF protection for WebSocket routes and API routes
-  if (req.path.startsWith('/ws') || req.path.startsWith('/api/')) {
+  if (isCsrfExempt(req)) {
     return next();
   }
   csrfProtection(req, res, next);
@@ -422,7 +376,7 @@ app.use((req, res, next) => {
 
 // Add CSRF token to view locals
 app.use((req, res, next) => {
-  if (req.path.startsWith('/ws') || req.path.startsWith('/api/')) {
+  if (isCsrfExempt(req)) {
     return next();
   }
   addCsrfTokenToLocals(req, res, next);
@@ -485,55 +439,46 @@ app.use((_req, res, next) => {
       const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
       (ejs as any).renderFile(view, data, {}, (err: Error | null, html: string) => {
         if (err) {
-          if (typeof callback === 'function') return callback(err);
+          if (typeof callback === 'function') {return callback(err);}
           logger.error('View render error:', err);
           return res.status(500).send('View render error');
         }
-        if (typeof callback === 'function') return callback(null, html);
+        if (typeof callback === 'function') {return callback(null, html);}
         res.send(html);
       });
       return;
     }
 
-    // Check addon views as fallback
-    const viewPath = path.join(viewsPath, view + '.ejs');
+    // Check addon views as fallback. Slugs are validated and every resolved
+    // path is contained inside the addon's views directory (see
+    // addonViewResolver.ts) — request-derived slug/view values cannot escape.
+    const viewPath = path.join(viewsPath, `${view  }.ejs`);
     if (!fs.existsSync(viewPath)) {
-      if ((opts as any).addonSlug) {
-        const addonSlug = (opts as any).addonSlug as string;
-        const addonFallbackPath = path.join(addonViewsDir, addonSlug, 'views', view + '.ejs');
-        if (fs.existsSync(addonFallbackPath)) {
-          const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-          (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
-            if (err) {
-              if (typeof callback === 'function') return callback(err);
-              return res.status(500).send(
-                isProductionPosture() ? 'View render error' : 'View render error: ' + err.message,
-              );
-            }
-            if (typeof callback === 'function') return callback(null, html);
-            res.send(html);
-          });
-          return;
-        }
+      const tryRenderAddonView = (addonSlug: string): boolean => {
+        const addonFallbackPath = resolveAddonViewPath(addonViewsDir, addonSlug, `${view  }.ejs`);
+        if (!addonFallbackPath) {return false;}
+        const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
+        (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
+          if (err) {
+            if (typeof callback === 'function') {return callback(err);}
+            return res.status(500).send(
+              isProductionPosture() ? 'View render error' : `View render error: ${  err.message}`,
+            );
+          }
+          if (typeof callback === 'function') {return callback(null, html);}
+          res.send(html);
+        });
+        return true;
+      };
+
+      const requestedSlug = (opts as any).addonSlug as unknown;
+      if (isValidAddonSlug(requestedSlug) && tryRenderAddonView(requestedSlug)) {
+        return;
       }
 
       for (const addonDir of getAddonDirs()) {
-        if ((opts as any).addonSlug && addonDir === (opts as any).addonSlug) continue;
-        const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
-        if (fs.existsSync(addonFallbackPath)) {
-          const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-          (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
-            if (err) {
-              if (typeof callback === 'function') return callback(err);
-              return res.status(500).send(
-                isProductionPosture() ? 'View render error' : 'View render error: ' + err.message,
-              );
-            }
-            if (typeof callback === 'function') return callback(null, html);
-            res.send(html);
-          });
-          return;
-        }
+        if (requestedSlug === addonDir) {continue;}
+        if (tryRenderAddonView(addonDir)) {return;}
       }
     }
 
@@ -573,7 +518,7 @@ app.use(errorPageHandler);
     let shuttingDown = false;
 
     async function shutdown(signal: string) {
-      if (shuttingDown) return;
+      if (shuttingDown) {return;}
       shuttingDown = true;
 
       logger.info(`Shutting down (${signal})...`);

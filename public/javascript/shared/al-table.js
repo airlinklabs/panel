@@ -12,7 +12,20 @@
      data-table-empty-colspan="n" — colspan for empty state (default: 6)
 
    Auto-scans on DOMContentLoaded and via MutationObserver.
-   Exposes window.alTableScan(root) for manual re-scan after DOM changes. */
+   Exposes window.alTableScan(root) for manual re-scan after DOM changes.
+ *
+ * Contract summary:
+ *   - Tests:        tests/alTable.test.ts
+ *   - Motion:       none required for the fallback; row reveal animations
+ *                   live in the view and are collapsed by the reduced-motion
+ *                   block (tw.css).
+ *   - Mobile:       `.al-table-card` (tw.css) turns rows into stacked cards;
+ *                   `data-label` injected here feeds that layout. The sort
+ *                   header must be a semantic `<button>` (see the store), not
+ *                   a `th onclick`.
+ *   - Turbo cleanup: rescan on `al:navigated` (registered below); the sort
+ *                   binding in the store panel is owned by the store mount.
+ */
 (function () {
   function headerLabels(table) {
     var thead = table.querySelector('thead');
@@ -143,6 +156,9 @@
   } else {
     scan();
   }
+
+  // Turbo swaps the body without re-firing DOMContentLoaded — rescan tables.
+  document.addEventListener('al:navigated', function () { scan(); });
 
   if (window.MutationObserver) {
     var scheduled = false;

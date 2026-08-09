@@ -32,7 +32,7 @@
         </div>
       <% } %>
 
-      <div class="al-page-body">
+      <div class="al-page-body" data-al-tabs data-tabs-default="general">
         <!-- Tab nav -->
         <div role="tablist" class="flex gap-1 mb-6">
           <button type="button" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" data-tab="general" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('layout-grid', { class: 'size-4', strokeWidth: 1.5 }) %>General</button>
@@ -44,7 +44,7 @@
         </div>
 
         <!-- General tab -->
-        <div id="panel-general" role="tabpanel" aria-labelledby="tab-general" data-tab-panel="general" class="tab-panel space-y-5 hidden">
+        <div id="panel-general" role="tabpanel" aria-labelledby="tab-general" data-tab-panel="general" class="tab-panel space-y-5">
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Basics</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
@@ -92,7 +92,7 @@
         </div>
 
         <!-- Docker Images tab -->
-        <div id="panel-docker" role="tabpanel" aria-labelledby="tab-docker" data-tab-panel="docker" class="tab-panel space-y-5 hidden">
+        <div id="panel-docker" role="tabpanel" aria-labelledby="tab-docker" data-tab-panel="docker" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <div class="flex items-center justify-between px-5 py-3.5 rounded-t-xl" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
               <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Docker Images</h2>
@@ -112,7 +112,7 @@
         </div>
 
         <!-- Variables tab -->
-        <div id="panel-variables" role="tabpanel" aria-labelledby="tab-variables" data-tab-panel="variables" class="tab-panel space-y-5 hidden">
+        <div id="panel-variables" role="tabpanel" aria-labelledby="tab-variables" data-tab-panel="variables" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <div class="flex items-center justify-between px-5 py-3.5 rounded-t-xl" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
               <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Egg Variables</h2>
@@ -132,7 +132,7 @@
         </div>
 
         <!-- Install Script tab -->
-        <div id="panel-install" role="tabpanel" aria-labelledby="tab-install" data-tab-panel="install" class="tab-panel space-y-5 hidden">
+        <div id="panel-install" role="tabpanel" aria-labelledby="tab-install" data-tab-panel="install" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Installation Script</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
@@ -159,7 +159,7 @@
         </div>
 
         <!-- Settings tab -->
-        <div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-tab-panel="settings" class="tab-panel space-y-5 hidden">
+        <div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-tab-panel="settings" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <div class="flex items-center justify-between px-5 py-3.5 rounded-t-xl" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
               <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Required Ports</h2>
@@ -177,7 +177,7 @@
         </div>
 
         <!-- Raw JSON tab -->
-        <div id="panel-raw" role="tabpanel" aria-labelledby="tab-raw" data-tab-panel="raw" class="tab-panel space-y-5 hidden">
+        <div id="panel-raw" role="tabpanel" aria-labelledby="tab-raw" data-tab-panel="raw" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Raw JSON</h2>
             <div class="px-5 py-5">
@@ -189,20 +189,8 @@
 
         <script nonce="<%- nonce %>">
         (function(){
-          const tabBtns = document.querySelectorAll('.tab-btn');
-          const tabPanels = document.querySelectorAll('.tab-panel');
-          const tabList = document.querySelector('[role="tablist"]');
           const saveBtn = document.getElementById('tab-save-btn');
           const resetBtn = document.getElementById('tab-reset-btn');
-          function activate(id) {
-            tabBtns.forEach(function(btn) {
-              const on = btn.dataset.tab === id;
-              btn.setAttribute('aria-selected', on ? 'true' : 'false');
-              btn.setAttribute('tabindex', on ? '0' : '-1');
-            });
-            tabPanels.forEach(function(p) { p.classList.toggle('hidden', p.dataset.tabPanel !== id); });
-            rebind(id);
-          }
           function rebind(id) {
             if (window.tabHandlers && saveBtn) {
               saveBtn.onclick = window.tabHandlers[id] || null;
@@ -216,21 +204,13 @@
             const active = document.querySelector('.tab-btn[aria-selected="true"]');
             if (active) rebind(active.dataset.tab);
           };
-          tabBtns.forEach(function(btn) { btn.addEventListener('click', function() { activate(this.dataset.tab); }); });
-          if (tabList) {
-            tabList.addEventListener('keydown', function(e) {
-              const tabs = Array.from(tabBtns);
-              const currentIndex = tabs.findIndex(function(t) { return t === document.activeElement; });
-              if (currentIndex === -1) return;
-              let newIndex = currentIndex;
-              if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIndex = (currentIndex + 1) % tabs.length; }
-              else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIndex = (currentIndex - 1 + tabs.length) % tabs.length; }
-              else if (e.key === 'Home') { e.preventDefault(); newIndex = 0; }
-              else if (e.key === 'End') { e.preventDefault(); newIndex = tabs.length - 1; }
-              if (newIndex !== currentIndex) { tabs[newIndex].focus(); activate(tabs[newIndex].dataset.tab); }
-            });
-          }
-          activate('general');
+          // al-tabs owns selection here; we only re-point the Save/Reset
+          // buttons at the newly active tab's handlers.
+          window.alListener(document, 'al:tabs-change', 'image-edit-tabs', function(e) {
+            const name = e.detail && e.detail.name;
+            if (name) rebind(name);
+          });
+          window._rebindTabHandlers();
         })();
         </script>
 

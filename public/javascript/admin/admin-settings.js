@@ -196,7 +196,7 @@ const DEFAULT_UPLOAD_LIMIT = 100;
       }
     });
   };
-  window.tabLabels['appearance'] = 'Save';
+  window.tabLabels['appearance'] = 'Save appearance';
   window.tabResetHandlers['appearance'] = function() {
     window.modal.confirm({
       title: 'Reset settings',
@@ -234,7 +234,7 @@ const DEFAULT_UPLOAD_LIMIT = 100;
       uploadLimit:           parseInt(document.getElementById('uploadLimitInput').value,   10) || DEFAULT_UPLOAD_LIMIT,
     }, btn);
   };
-  window.tabLabels['servers'] = 'Save';
+  window.tabLabels['servers'] = 'Save server policy';
   window.tabResetHandlers['servers'] = function() {
     restoreForm();
     showToast('Changes discarded.', 'success');
@@ -281,13 +281,13 @@ const DEFAULT_UPLOAD_LIMIT = 100;
         s3PathStyle:  document.getElementById('s3PathStyle').checked,
       }),
     ]).then(function() {
-      btn.disabled = false; btn.textContent = 'Save';
+      btn.disabled = false; btn.textContent = (window.tabLabels && window.tabLabels['security']) || 'Save security';
     }).catch(function(err) {
       console.error('Security settings save error:', err);
-      btn.disabled = false; btn.textContent = 'Save';
+      btn.disabled = false; btn.textContent = (window.tabLabels && window.tabLabels['security']) || 'Save security';
     });
   };
-  window.tabLabels['security'] = 'Save';
+  window.tabLabels['security'] = 'Save security';
   window.tabResetHandlers['security'] = function() {
     restoreForm();
     showToast('Changes discarded.', 'success');

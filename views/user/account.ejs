@@ -56,8 +56,18 @@
         </div>
       </div>
 
-      <div class="al-page-body space-y-4">
+      <div class="al-page-body space-y-4" data-al-tabs data-tabs-default="profile" data-tabs-hash>
+        <div role="tablist" aria-label="<%= req.translations.userAccountTitle || 'Account' %>"
+          class="flex gap-1 p-1 rounded-xl mb-5 overflow-x-auto" style="background:var(--theme-bg-secondary)">
+          <button type="button" role="tab" data-tab="profile" aria-selected="true" tabindex="0" aria-controls="account-panel-profile"
+            class="px-3 py-2 text-sm font-medium rounded-lg transition bg-neutral-900 text-white dark:bg-white dark:text-black"><%- icon('user', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.profileTab || 'Profile' %></button>
+          <button type="button" role="tab" data-tab="images" aria-selected="false" tabindex="-1" aria-controls="account-panel-images"
+            class="px-3 py-2 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"><%- icon('image', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.imagesTab || 'Images' %></button>
+          <button type="button" role="tab" data-tab="history" aria-selected="false" tabindex="-1" aria-controls="account-panel-history"
+            class="px-3 py-2 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"><%- icon('history', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.historyTab || 'Login History' %></button>
+        </div>
 
+        <div role="tabpanel" data-tab-panel="profile" id="account-panel-profile">
         <div class="al-card p-5">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
 
@@ -82,20 +92,34 @@
             </div>
 
             <!-- Current password -->
-            <div>
-              <label class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
+            <div class="al-field" data-al-field>
+              <label for="currentPassword" class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('lock', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.currentPassword || 'Current password' %>
               </label>
-              <span id="current-password-feedback" class="text-[11px] block mb-1 hidden" style="color:var(--theme-text-muted);"></span>
-              <input id="currentPassword" type="password" name="currentPassword" placeholder="<%= req.translations.currentPassword || 'Current password' %>" class="al-input">
+              <div class="flex items-center gap-2">
+                <div class="relative flex-1">
+                  <input id="currentPassword" type="password" name="currentPassword" placeholder="<%= req.translations.currentPassword || 'Current password' %>" class="al-input pr-10" data-al-field-input autocomplete="current-password">
+                  <button type="button" data-al-field-toggle aria-label="Show password" aria-pressed="false" class="al-btn-ghost absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
+                    <%- icon('eye', { class: 'w-4 h-4' }) %>
+                  </button>
+                </div>
+              </div>
+              <span id="current-password-feedback" class="text-[11px] block mt-1.5 hidden" style="color:var(--theme-text-muted);"></span>
+              <p class="al-field-message" data-al-field-message id="current-password-message" role="alert" hidden></p>
             </div>
 
             <!-- New password -->
-            <div>
-              <label class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
+            <div class="al-field" data-al-field>
+              <label for="newPassword" class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('lock', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.newPassword || 'New password' %>
               </label>
-              <input id="newPassword" type="password" name="newPassword" placeholder="<%= req.translations.newPassword || 'New password' %>" disabled class="al-input disabled:opacity-50">
+              <div class="relative">
+                <input id="newPassword" type="password" name="newPassword" placeholder="<%= req.translations.newPassword || 'New password' %>" disabled class="al-input pr-10 disabled:opacity-50" data-al-field-input autocomplete="new-password">
+                <button type="button" data-al-field-toggle aria-label="Show password" aria-pressed="false" class="al-btn-ghost absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
+                  <%- icon('eye', { class: 'w-4 h-4' }) %>
+                </button>
+              </div>
+              <p class="al-field-message" data-al-field-message id="new-password-message" role="alert" hidden></p>
             </div>
 
             <!-- Description (full width) -->
@@ -175,7 +199,9 @@
             </button>
           </div>
         </div>
+        </div>
 
+        <div role="tabpanel" data-tab-panel="images" id="account-panel-images" hidden>
         <!-- Custom image submissions -->
         <div class="al-card p-5" id="customImagesSection">
           <div class="flex flex-wrap items-start justify-between gap-3">
@@ -200,7 +226,9 @@
           <p class="text-xs mt-3" style="color:var(--theme-text-muted)"><%= req.translations.imageSubmissionsDisabledText || 'An administrator has turned off user image submissions.' %></p>
           <% } %>
         </div>
+        </div>
 
+        <div role="tabpanel" data-tab-panel="history" id="account-panel-history" hidden>
         <!-- Login history -->
         <div class="al-card p-5">
           <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= req.translations.loginHistory || 'Login history' %></p>
@@ -233,6 +261,7 @@
               </tbody>
             </table>
           </div>
+        </div>
         </div>
 
       </div>
@@ -339,8 +368,8 @@ window.ALMount(() => {
 
   document.getElementById('saveAccountBtn')?.addEventListener('click', async () => {
     const btn = document.getElementById('saveAccountBtn');
-    btn.disabled = true;
-    btn.textContent = 'Saving\u2026';
+    if (window.ALAction && typeof window.ALAction.loading === 'function') ALAction.loading(btn, true);
+    else btn.disabled = true;
     let hasError = false;
 
     const username = document.getElementById('username')?.value?.trim();
@@ -376,8 +405,8 @@ window.ALMount(() => {
       if (!r.ok) { showToast(r.text || 'Failed to update language', 'error'); hasError = true; }
     }
 
-    btn.disabled = false;
-    btn.textContent = 'Save Changes';
+    if (window.ALAction && typeof window.ALAction.loading === 'function') ALAction.loading(btn, false);
+    else { btn.disabled = false; btn.textContent = 'Save Changes'; }
     if (!hasError) showToast('All changes saved.', 'success');
   });
 
@@ -386,7 +415,8 @@ window.ALMount(() => {
   document.getElementById('savePreferredNodeBtn')?.addEventListener('click', async () => {
     const btn = document.getElementById('savePreferredNodeBtn');
     const nodeId = document.getElementById('preferredNode')?.value;
-    btn.disabled = true;
+    if (window.ALAction && typeof window.ALAction.loading === 'function') ALAction.loading(btn, true);
+    else btn.disabled = true;
     try {
       const r = await post('/set-preferred-node', { preferredNodeId: nodeId || null });
       if (r.ok) {
@@ -397,7 +427,8 @@ window.ALMount(() => {
     } catch {
       showToast('Failed to save preferred node.', 'error');
     } finally {
-      btn.disabled = false;
+      if (window.ALAction && typeof window.ALAction.loading === 'function') ALAction.loading(btn, false);
+      else btn.disabled = false;
     }
   });
 

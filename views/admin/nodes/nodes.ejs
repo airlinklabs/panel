@@ -19,14 +19,14 @@
                  '<button id="createButton" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
       }) %>
 
-      <div class="al-page-body">
+      <div class="al-page-body" data-al-tabs data-tabs-default="nodes" data-tabs-hash>
 
-        <div class="flex items-center border-b" style="border-color:var(--theme-border);">
-          <button id="tab-btn-nodes" type="button" data-tab="nodes" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition">Nodes</button>
-          <button id="tab-btn-locations" type="button" data-tab="locations" class="px-3 py-2 text-sm font-medium rounded-lg transition">Locations</button>
+        <div role="tablist" class="flex items-center border-b" style="border-color:var(--theme-border);">
+          <button id="tab-btn-nodes" type="button" data-tab="nodes" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-nodes" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-white dark:text-black bg-neutral-900 dark:bg-white">Nodes</button>
+          <button id="tab-btn-locations" type="button" data-tab="locations" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-locations" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">Locations</button>
         </div>
 
-        <div id="tab-panel-nodes">
+        <div id="tab-panel-nodes" role="tabpanel" aria-labelledby="tab-btn-nodes" data-tab-panel="nodes">
 
         <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 mt-6">
           <div class="al-card">
@@ -148,7 +148,7 @@
         </div>
 
         <!-- Locations Tab -->
-        <div id="tab-panel-locations" class="hidden">
+        <div id="tab-panel-locations" role="tabpanel" aria-labelledby="tab-btn-locations" data-tab-panel="locations" hidden>
         <div id="locations" class="mt-6 space-y-5">
           <div class="flex items-center justify-between">
             <div>
@@ -268,7 +268,7 @@
 <script nonce="<%- nonce %>">
   document.getElementById('page-data').dataset.nodes = '<%- JSON.stringify(nodes.map(n => ({ id: n.id, status: n.status }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
 </script>
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-nodes.js?v=8"></script>
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-nodes.js?v=9"></script>
 <script nonce="<%- nonce %>">
 (function () {
   const toast = window.showToast || function (m) { console.warn('[locations]', m); };
@@ -404,41 +404,22 @@
 (function () {
   const btnNodes = document.getElementById('tab-btn-nodes');
   const btnLocs = document.getElementById('tab-btn-locations');
-  const panelNodes = document.getElementById('tab-panel-nodes');
-  const panelLocs = document.getElementById('tab-panel-locations');
-  if (!btnNodes || !btnLocs || !panelNodes || !panelLocs) return;
+  if (!btnNodes || !btnLocs) return;
 
-  const ACTIVE = 'px-3 py-2 mr-4 text-sm font-medium text-white dark:text-black bg-neutral-900 dark:bg-white rounded-lg transition';
-  const INACTIVE = 'px-3 py-2 mr-4 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 rounded-lg transition';
+  const ACTIVE = 'px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-white dark:text-black bg-neutral-900 dark:bg-white';
+  const INACTIVE = 'px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300';
 
-  function activateTab(name, scroll) {
-    const isLoc = name === 'locations';
+  // al-tabs owns selection (attributes, panel visibility and the URL hash);
+  // this only repaints the button classes and preserves the locations scroll.
+  window.alListener(document, 'al:tabs-change', 'nodes-tabs', function (e) {
+    const isLoc = e.detail && e.detail.name === 'locations';
     btnNodes.className = isLoc ? INACTIVE : ACTIVE;
     btnLocs.className = isLoc ? ACTIVE : INACTIVE;
-    panelNodes.classList.toggle('hidden', isLoc);
-    panelLocs.classList.toggle('hidden', !isLoc);
-    if (scroll && isLoc) {
+    if (isLoc) {
       const locEl = document.getElementById('locations');
       if (locEl) locEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }
-
-  btnNodes.addEventListener('click', function () {
-    activateTab('nodes');
-    history.replaceState(null, '', '#nodes');
   });
-  btnLocs.addEventListener('click', function () {
-    activateTab('locations');
-    history.replaceState(null, '', '#locations');
-  });
-
-  function handleHash() {
-    if (window.location.hash === '#locations') activateTab('locations', true);
-    else activateTab('nodes');
-  }
-
-  handleHash();
-  window.addEventListener('hashchange', handleHash);
 })();
 </script>
 

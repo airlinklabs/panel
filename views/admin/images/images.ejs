@@ -35,25 +35,25 @@
         <div class="flex gap-2 shrink-0">
           <button id="uploadBtn" type="button" class="al-btn-secondary"><%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.uploadJson || 'Upload JSON' %></button>
           <button onclick="openCreate()" type="button" class="al-btn-secondary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>New Image</button>
-          <a href="/admin/images/store" class="al-btn-secondary">Browse Store</a>
+          <a href="/admin/images#store" class="al-btn-secondary">Browse Store</a>
         </div>
       </div>
 
-      <div class="al-page-body">
-      <div class="flex items-center border-b" style="border-color:var(--theme-border);">
-        <button type="button" id="tab-btn-installed" data-tab="installed" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition">Installed <span id="tabCountInstalled" class="ml-1 text-xs text-neutral-400"><%= images.length %></span></button>
-        <button type="button" id="tab-btn-approvals" data-tab="approvals" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition">Approvals <% if (pending && pending.length > 0) { %><span id="tabCountApprovals" class="ml-1 text-xs font-semibold" style="color:var(--theme-warning);"><%= pending.length %></span><% } %></button>
-        <a href="/admin/images/store" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition">Store</a>
+      <div class="al-page-body" data-al-tabs data-tabs-default="installed" data-tabs-hash>
+      <div role="tablist" class="flex items-center border-b" style="border-color:var(--theme-border);">
+        <button type="button" id="tab-btn-installed" data-tab="installed" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-installed" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition bg-neutral-900 text-white dark:bg-white dark:text-black">Installed <span id="tabCountInstalled" class="ml-1 text-xs text-neutral-400"><%= images.length %></span></button>
+        <button type="button" id="tab-btn-approvals" data-tab="approvals" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-approvals" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">Approvals <% if (pending && pending.length > 0) { %><span id="tabCountApprovals" class="ml-1 text-xs font-semibold" style="color:var(--theme-warning);"><%= pending.length %></span><% } %></button>
+        <button type="button" id="tab-btn-store" data-tab="store" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-store" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">Store</button>
       </div>
 
-      <div id="tab-panel-installed" class="mt-5">
+      <div id="tab-panel-installed" role="tabpanel" aria-labelledby="tab-btn-installed" data-tab-panel="installed" class="mt-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="text-sm" style="color:var(--theme-text-muted);"><span id="installedImagesCount"><%= images.length %></span> image<%= images.length !== 1 ? 's' : '' %> installed on this panel</div>
         </div>
 
       <div id="installedEmptyState" class="flex flex-col items-center justify-center py-24 text-center <%= images.length === 0 ? '' : 'hidden' %>">
         <p class="text-sm text-neutral-500">No images installed yet.</p>
-        <a href="/admin/images/store" class="mt-4 al-btn-secondary inline-flex items-center gap-1.5"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Browse Store</a>
+        <a href="/admin/images#store" class="mt-4 al-btn-secondary inline-flex items-center gap-1.5"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Browse Store</a>
       </div>
 
       <div id="installedTableSection" class="<%= images.length === 0 ? 'hidden' : '' %>">
@@ -105,7 +105,7 @@
       </div>
       </div>
 
-      <div id="tab-panel-approvals" class="hidden">
+      <div id="tab-panel-approvals" role="tabpanel" aria-labelledby="tab-btn-approvals" data-tab-panel="approvals" hidden>
         <div class="mt-5 space-y-4" id="pendingApprovalsList">
           <% if (pending.length === 0) { %>
           <div class="flex flex-col items-center justify-center py-20 text-center">
@@ -142,6 +142,8 @@
           <% }); } %>
         </div>
       </div>
+
+      <div id="tab-panel-store" role="tabpanel" aria-labelledby="tab-btn-store" data-tab-panel="store" data-tab-src="/admin/images/store/panel" hidden></div>
       </div>
     </div>
   </div>
@@ -259,12 +261,13 @@
 
 <script nonce="<%- nonce %>">
   (function() {
-    var tabs = ['installed', 'approvals'];
-
-    function active(k) {
-      tabs.forEach(function(key) {
+    // al-tabs owns selection (attributes, panel visibility, URL hash); this
+    // only repaints the active-tab button classes.
+    window.alListener(document, 'al:tabs-change', 'images-tabs', function(e) {
+      var k = e.detail && e.detail.name;
+      ['installed', 'approvals', 'store'].forEach(function(key) {
         var btn = document.getElementById('tab-btn-' + key);
-        var panel = document.getElementById('tab-panel-' + key);
+        if (!btn) return;
         var isActive = key === k;
         btn.classList.toggle('bg-neutral-900', isActive);
         btn.classList.toggle('text-white', isActive);
@@ -273,22 +276,22 @@
         btn.classList.toggle('text-neutral-400', !isActive);
         btn.classList.toggle('hover:text-neutral-600', !isActive);
         btn.classList.toggle('dark:hover:text-neutral-300', !isActive);
-        panel.classList.toggle('hidden', !isActive);
-      });
-    }
-
-    tabs.forEach(function(key) {
-      document.getElementById('tab-btn-' + key).addEventListener('click', function() {
-        active(key);
       });
     });
 
-    var hashTab = window.location.hash.replace('#', '');
-    active(tabs.indexOf(hashTab) !== -1 ? hashTab : 'installed');
+    // Lazy store tab: al-tabs fetched /admin/images/store/panel and injected
+    // it; now hand the panel to the store controller so it binds and loads.
+    window.alListener(document, 'al:tabs-loaded', 'images-store-load', function(e) {
+      var detail = e.detail;
+      if (detail && detail.name === 'store' && detail.panel && window.AdminImageStore) {
+        window.AdminImageStore.mount(detail.panel);
+      }
+    });
   })();
 </script>
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-images.js?v=6"></script>
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-image-approvals.js?v=2"></script>
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-image-store.js?v=9"></script>
 
 <%- include('../../components/footer') %>

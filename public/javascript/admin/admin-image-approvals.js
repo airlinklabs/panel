@@ -2,7 +2,7 @@
   const pd = document.getElementById('page-data')?.dataset;
   let pendingRejectId = null;
 
-  document.addEventListener('DOMContentLoaded', function() {
+  window.ALMount(function() {
     const rejectModal = document.getElementById('rejectModal');
     const openReject = (id, name) => {
       pendingRejectId = id;

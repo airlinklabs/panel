@@ -189,7 +189,7 @@ function confirmImageUpload() {
 
 document.getElementById('uploadBtn').addEventListener('click', openUploadImageModal);
 
-document.addEventListener('DOMContentLoaded', function() {
+window.ALMount(function() {
   const dropZone = document.getElementById('imageDropZone');
   const fileInput = document.getElementById('imageFileInput');
   const uploadButton = document.getElementById('imageUploadButton');
