@@ -1,0 +1,74 @@
+<!-- Mount list fragment — replaces the card body on create/delete -->
+<div id="admin-mounts-list" class="al-card">
+  <h2 class="al-card-header">All Mounts</h2>
+  <% if (mounts.length === 0) { %>
+    <div class="flex flex-col items-center justify-center py-20 text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
+        <%- icon('folder', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
+      </div>
+      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong);">No mounts yet</h3>
+      <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);">Create a mount to expose a host directory to server containers.</p>
+      <div class="mt-5">
+        <button type="button" class="al-btn-primary" hx-get="/admin/mounts/new" hx-target="#admin-mounts-dialog" hx-swap="innerHTML">
+          <span class="inline-flex items-center gap-1.5"><%- icon('plus', { class: 'w-4 h-4' }) %> New mount</span>
+        </button>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="-mx-4 overflow-x-auto">
+      <table class="al-table">
+        <colgroup>
+          <col style="min-width:160px">
+          <col style="min-width:200px">
+          <col style="min-width:200px">
+          <col style="min-width:110px">
+          <col style="min-width:110px">
+        </colgroup>
+        <thead class="al-table-head">
+          <tr>
+            <th scope="col" class="al-table-th sm:pl-6">Name</th>
+            <th scope="col" class="al-table-th sm:pl-6">Source</th>
+            <th scope="col" class="al-table-th sm:pl-6">Target</th>
+            <th scope="col" class="al-table-th sm:pl-6">Read-only</th>
+            <th scope="col" class="al-table-th sm:pl-6">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% mounts.forEach(m => { %>
+          <tr class="al-table-tr" data-mount-id="<%= m.id %>">
+            <td class="al-table-td sm:pl-6">
+              <div class="font-medium" style="color:var(--theme-text-strong);"><%= m.name %></div>
+            </td>
+            <td class="al-table-td">
+              <code class="inline-block max-w-full truncate rounded-md bg-neutral-100 px-2 py-1 font-mono text-xs dark:bg-neutral-800" style="color:var(--theme-text);" title="<%= m.source %>"><%= m.source %></code>
+            </td>
+            <td class="al-table-td">
+              <code class="inline-block max-w-full truncate rounded-md bg-neutral-100 px-2 py-1 font-mono text-xs dark:bg-neutral-800" style="color:var(--theme-text);" title="<%= m.target %>"><%= m.target %></code>
+            </td>
+            <td class="al-table-td">
+              <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <%= m.readOnly ? 'bg-amber-600/10 text-amber-700 dark:text-yellow-400 ring-amber-600/20' : 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20' %>">
+                <%= m.readOnly ? 'Read-only' : 'Read-write' %>
+              </span>
+            </td>
+            <td class="al-table-td">
+              <div class="flex gap-3">
+                <button
+                  hx-delete="/admin/mounts/<%= m.id %>"
+                  hx-target="#admin-mounts-list"
+                  hx-swap="outerHTML"
+                  hx-confirm="Delete this mount? Servers using it will no longer be able to attach it."
+                  type="button"
+                  class="al-btn-ghost"
+                  style="color:var(--theme-danger);"
+                  aria-label="Delete mount">
+                  <%- icon('trash-2', { size: 16 }) %>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

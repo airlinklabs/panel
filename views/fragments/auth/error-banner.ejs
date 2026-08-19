@@ -1,0 +1,7 @@
+<!-- Auth error banner fragment — reused by 2FA, login, and password reset routes -->
+<div id="<%= targetId %>-error" class="rounded-xl px-4 py-3 mb-5 text-sm font-medium" role="alert" aria-live="assertive" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);color:var(--theme-danger)">
+  <p><%= message %></p>
+  <% if (hint) { %>
+    <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= hint %></p>
+  <% } %>
+</div>

@@ -1,9 +1,10 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { onlineUsers } from '../user/wsUsers';
 import logger from '../../handlers/logger';
+import { rawErrorMessage } from '../../utils/errors';
 import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import { parseBody, validationErrorBoundary } from '../../utils/validation';
@@ -32,21 +33,42 @@ async function countAdmins(): Promise<number> {
   return prisma.users.count({ where: { isAdmin: true } });
 }
 
+// ── Shared view-model ─────────────────────────────────────────────────────
+// Used by both full-page and fragment responses.
 
-async function listUsers(res: Response) {
-  try {
-    const users = await prisma.users.findMany({
-      include: {
-        servers: true
-      }
-    });
+interface AdminUsersViewModel {
+  user: { id: number; isAdmin: boolean; role: string };
+  settings: { title: string } | null;
+  users: Array<{
+    id: number;
+    username: string | null;
+    email: string;
+    avatar: string | null;
+    isAdmin: boolean;
+    role: string;
+    servers: Array<{ id: number }>;
+  }>;
+  onlineUsers: Set<string>;
+}
 
-    return users;
-  } catch (error: unknown) {
-    logger.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Error fetching users.' });
-    return;
+export async function buildAdminUsersViewModel(actorId: number): Promise<AdminUsersViewModel> {
+  const user = await prisma.users.findUnique({ where: { id: actorId } });
+  if (!user) {
+    throw new Error('User not found');
   }
+
+  const users = await prisma.users.findMany({
+    include: { servers: true },
+  });
+
+  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+
+  return {
+    user: { id: user.id, isAdmin: user.isAdmin, role: user.role },
+    settings,
+    users,
+    onlineUsers,
+  };
 }
 
 const adminModule: Module = {
@@ -65,29 +87,24 @@ const adminModule: Module = {
     router.get(
       '/admin/users',
       isAuthenticated(true, 'airlink.admin.users.view'),
-      async (req: Request, res: Response) => {
+      async (req: Request, res: Response, next: NextFunction) => {
         try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            return res.redirect('/login');
+          const vm = await buildAdminUsersViewModel(req.session!.user!.id);
+
+          res.vary('HX-Request');
+          if (req.get('HX-Request') === 'true') {
+            return res.render('fragments/admin/users/user-list', vm);
           }
 
-          const users = await listUsers(res);
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-
-          res.render('admin/users/users', {
-            user,
-            req,
-            settings,
-            users,
-            onlineUsers,
-          });
+          return res.render('admin/users/users', { ...vm, req });
         } catch (error: unknown) {
-          logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          logger.error('[admin/users] Failed to load users list', {
+            route: '/admin/users',
+            fragment: 'fragments/admin/users/user-list',
+            requestId: req.headers['x-request-id'],
+            error: rawErrorMessage(error),
+          });
+          return next(error);
         }
       },
     );
@@ -145,6 +162,14 @@ const adminModule: Module = {
           });
 
           if (existingUser) {
+            if (req.get('HX-Request') === 'true') {
+              const vm = await buildAdminUsersViewModel(req.session!.user!.id);
+              return res.status(422).render('fragments/admin/users/user-create-form', {
+                ...vm,
+                errors: { message: 'Email or username already exists.' },
+                form: { email, username, description: req.body.description },
+              });
+            }
             res
               .status(400)
               .json({ message: 'Email or username already exists.' });
@@ -168,10 +193,24 @@ const adminModule: Module = {
 
           await logActivity(req, 'user:create', { metadata: { username, email } });
 
+          if (req.get('HX-Request') === 'true') {
+            const vm = await buildAdminUsersViewModel(req.session!.user!.id);
+            res.setHeader('HX-Trigger', JSON.stringify({
+              al: { toast: { type: 'success', message: 'User created' } },
+            }));
+            return res.render('fragments/admin/users/user-list', vm);
+          }
+
           res.status(200).json({ message: 'User created successfully.' });
           return;
         } catch (error: unknown) {
           logger.error('Error creating user:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/admin/users/user-create-form', {
+              errors: { message: 'Failed to create user. Please try again.' },
+              form: { email, username, description: req.body.description },
+            });
+          }
           res
             .status(500)
             .json({ message: 'Error creating user. Please try again later.' });
@@ -264,6 +303,12 @@ router.get(
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(401).render('fragments/shared/error-banner', {
+                targetId: 'admin-users',
+                message: 'Unauthorized',
+              });
+            }
             res.status(401).json({ error: 'Unauthorized' });
             return;
           }
@@ -273,27 +318,57 @@ router.get(
             where: { id: targetId },
           });
           if (!dataUser) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(404).render('fragments/shared/error-banner', {
+                targetId: 'admin-users',
+                message: 'User not found',
+              });
+            }
             res.status(404).json({ error: 'User not found' });
             return;
           }
 
           if (userId === targetId) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/shared/error-banner', {
+                targetId: 'admin-users',
+                message: 'Cannot delete your own account',
+              });
+            }
             res.status(400).json({ error: 'Cannot delete your own account' });
             return;
           }
 
           if (dataUser.role === 'owner') {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(403).render('fragments/shared/error-banner', {
+                targetId: 'admin-users',
+                message: 'The owner cannot be deleted. Transfer ownership first.',
+              });
+            }
             res.status(403).json({ error: 'The owner cannot be deleted. Transfer ownership first.' });
             return;
           }
 
           if (dataUser.isAdmin && (await countAdmins()) <= 1) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/shared/error-banner', {
+                targetId: 'admin-users',
+                message: 'Cannot delete the last admin account',
+              });
+            }
             res.status(400).json({ error: 'Cannot delete the last admin account' });
             return;
           }
 
           const serverCount = await prisma.server.count({ where: { ownerId: targetId } });
           if (serverCount > 0) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(409).render('fragments/shared/error-banner', {
+                targetId: 'admin-users',
+                message: 'Cannot delete user: they own servers. Delete or reassign those servers first.',
+              });
+            }
             res.status(409).json({
               error: 'Cannot delete user: they own servers. Delete or reassign those servers first.',
             });
@@ -310,9 +385,23 @@ router.get(
             where: { id: targetId },
           });
 
+          if (req.get('HX-Request') === 'true') {
+            const vm = await buildAdminUsersViewModel(req.session!.user!.id);
+            res.setHeader('HX-Trigger', JSON.stringify({
+              al: { toast: { type: 'success', message: 'User deleted' } },
+            }));
+            return res.render('fragments/admin/users/user-list', vm);
+          }
+
           res.status(200).json({ message: 'User deleted successfully.' });
         } catch (error: unknown) {
           logger.error('Error deleting user:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/shared/error-banner', {
+              targetId: 'admin-users',
+              message: 'Failed to delete user. Please try again.',
+            });
+          }
           res.status(500).json({ error: 'Internal server error' });
         }
       },

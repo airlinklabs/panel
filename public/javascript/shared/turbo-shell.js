@@ -110,34 +110,16 @@
   }
 
   /* ------------------------------------------------------------------ *
-     In-page component controllers (al-tabs, al-dialog, al-field, al-state)
+     In-page component controllers (delegated to Islands registry)
      ------------------------------------------------------------------ */
 
-  // Remount component controllers against the current DOM. destroyAll first
-  // keeps this idempotent: the initial DOMContentLoaded and the first
-  // turbo:load both fire for the first rendition, and a body swap happens
-  // after the old controllers were torn down, so exactly one live set
-  // survives.
-  var COMPONENT_SYSTEMS = [
-    { key: 'ALTabSystem', scan: 'scan' },
-    { key: 'ALDialog', scan: 'scan' },
-    { key: 'ALField', scan: 'enhance', root: function () { return document.body; } },
-    { key: 'ALStateView', scan: 'scan' },
-  ];
+  // Islands.sync() handles full-document destroyAll/scan for all registered
+  // component systems (ALTabSystem, ALDialog, ALField, ALStateView).
+  // The Islands module must be loaded before turbo-shell.js.
 
   function syncComponents() {
-    for (var i = 0; i < COMPONENT_SYSTEMS.length; i++) {
-      var sys = COMPONENT_SYSTEMS[i];
-      var api = window[sys.key];
-      if (typeof api !== 'object') continue;
-      try {
-        if (typeof api.destroyAll === 'function') api.destroyAll();
-        var method = api[sys.scan];
-        if (typeof method === 'function') {
-          if (sys.root) method.call(api, sys.root());
-          else method.call(api);
-        }
-      } catch (e) { /* a component must never kill the shell */ }
+    if (window.Islands && typeof Islands.sync === 'function') {
+      try { Islands.sync(); } catch (e) { /* isolate */ }
     }
   }
 
@@ -205,11 +187,11 @@
   });
 
   // Before the refresh body arrives, drop the previous page's keyed listener
-  // handlers and tab controllers so nothing leaks into the new rendition.
+  // handlers and component controllers so nothing leaks into the new rendition.
   document.addEventListener('turbo:before-render', function () {
     dropPageKeyedListeners();
-    if (typeof window.ALTabSystem === 'object' && typeof window.ALTabSystem.destroyAll === 'function') {
-      try { window.ALTabSystem.destroyAll(); } catch (e) { /* isolate */ }
+    if (window.Islands && typeof Islands.destroyAll === 'function') {
+      try { Islands.destroyAll(); } catch (e) { /* isolate */ }
     }
   });
 

@@ -129,6 +129,32 @@ app.use(
   express.static(path.join(__dirname, '../node_modules', 'chart.js/dist')),
 );
 
+// HTMX — self-hosted, versioned, CSP-compatible
+app.use(
+  '/vendor/htmx',
+  express.static(path.join(__dirname, '../public/javascript/vendor'), {
+    maxAge: '1y',
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      }
+    },
+  }),
+);
+
+// Alpine.js — self-hosted, versioned, CSP-compatible
+app.use(
+  '/vendor/alpine',
+  express.static(path.join(__dirname, '../public/javascript/vendor'), {
+    maxAge: '1y',
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      }
+    },
+  }),
+);
+
 // Load views
 const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);

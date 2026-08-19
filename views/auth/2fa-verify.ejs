@@ -24,9 +24,19 @@
     </div>
     <% } %>
 
-    <p id="feedback" class="rounded-xl px-4 py-3 mb-5 text-sm font-medium hidden" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);color:var(--theme-danger)"></p>
+    <div id="two-factor-verify-status"></div>
 
-    <form id="verifyForm" method="POST" action="/2fa" autocomplete="off" novalidate>
+    <form
+      id="verifyForm"
+      hx-post="/2fa"
+      hx-target="#two-factor-verify-status"
+      hx-swap="innerHTML"
+      hx-disabled-elt="find button[type='submit']"
+      hx-indicator="#verify-form-status"
+      method="POST"
+      action="/2fa"
+      autocomplete="off"
+      novalidate>
       <%- include('../components/csrf') %>
       <div class="space-y-4">
         <div>
@@ -40,6 +50,7 @@
           <span class="btn-label">Verify and sign in</span>
           <span class="spinner"></span>
         </button>
+        <p id="verify-form-status" class="htmx-indicator text-sm text-center" style="color:var(--theme-text-muted)">Verifying…</p>
       </div>
     </form>
 
@@ -64,10 +75,10 @@
     });
   });
 
-  let recoveryMode = false;
-  const tokenInput = document.getElementById('token');
-  const tokenLabel = document.getElementById('tokenLabel');
-  const toggleBtn = document.getElementById('toggleRecovery');
+  var recoveryMode = false;
+  var tokenInput = document.getElementById('token');
+  var tokenLabel = document.getElementById('tokenLabel');
+  var toggleBtn = document.getElementById('toggleRecovery');
 
   toggleBtn.addEventListener('click', function () {
     recoveryMode = !recoveryMode;
@@ -93,39 +104,6 @@
       toggleBtn.textContent = 'Use a recovery code instead';
     }
     tokenInput.focus();
-  });
-
-  document.getElementById('verifyForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.classList.add('loading');
-    submitBtn.disabled = true;
-
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    const token = document.getElementById('token').value.trim();
-
-    try {
-      const res = await fetch('/2fa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
-        body: JSON.stringify({ token: token }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        window.location.href = data.redirect || '/';
-        return;
-      }
-      const fb = document.getElementById('feedback');
-      fb.textContent = data.error || 'Invalid code. Try again.';
-      fb.classList.remove('hidden');
-    } catch (err) {
-      const fb2 = document.getElementById('feedback');
-      fb2.textContent = 'Something went wrong. Try again.';
-      fb2.classList.remove('hidden');
-    }
-    submitBtn.classList.remove('loading');
-    submitBtn.disabled = false;
-    document.getElementById('token').focus();
   });
 })();
 </script>
