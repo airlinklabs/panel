@@ -3,8 +3,9 @@
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-full">
     <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
+      <%- include('../../components/sidebar') %>
     </div>
+<%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
@@ -149,7 +150,7 @@
       e.preventDefault();
       const formData = new FormData(serverSettingsForm);
       const settings = { name: formData.get('name'), description: formData.get('description') };
-      const loader = showLoadingPopup('Updating Server Settings', 'Saving your changes...');
+      const loader = showProgressToast ? showProgressToast('Updating Server Settings…') : showLoadingToast('Updating Server Settings...');
       fetch(`/server/<%= server.UUID %>/settings`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings),
       })
@@ -166,35 +167,32 @@
     if (deleteServerButton) {
       deleteServerButton.addEventListener('click', () => {
         window.modal.confirm({
-          title: 'Delete Server', body: 'This will permanently delete the server and all its data. This cannot be undone.',
-          danger: true, confirmLabel: 'Delete Server',
+          title: 'Delete Server',
+          body: 'This will permanently delete the server and all its data. Type <strong>DELETE</strong> to confirm.',
+          danger: true,
+          confirmLabel: 'Delete Server',
+          prompt: { label: 'Type DELETE to confirm', pattern: /^DELETE$/i, invalidMessage: 'You must type DELETE to confirm.' },
           onConfirm: () => {
-            window.modal.confirm({
-              title: 'Final Warning', body: 'All server data will be permanently lost. Are you absolutely sure?',
-              danger: true, confirmLabel: 'Yes, Delete',
-              onConfirm: () => {
-                const loader = showLoadingPopup('Deleting Server', 'Removing server and all data...');
-                loader.updateProgress(20, 'Contacting node...');
-                <% if (user && user.isAdmin) { %>
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-                fetch('/admin/server/delete/<%= server.id %>', {
-                  method: 'POST',
-                  headers: { 'csrf-token': csrfToken },
-                })
-                  .then(r => {
-                    loader.close();
-                    if (r.ok) window.location.href = '/';
-                    else return r.json().then(d => showToast((d && d.error) || "Couldn't delete the server.", 'error'));
-                  })
-                  .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
-                <% } else { %>
-                fetch('/user/server/<%= server.UUID %>', { method: 'DELETE' })
-                  .then(r => r.json())
-                  .then(d => { loader.close(); if (d.success) window.location.href = '/'; else showToast(d.error || "Couldn't delete the server.", 'error'); })
-                  .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
-                <% } %>
-              }
-            });
+            const loader = showProgressToast ? showProgressToast('Deleting Server…') : showLoadingToast('Deleting Server...');
+            loader.updateProgress(20, 'Contacting node...');
+            <% if (user && user.isAdmin) { %>
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            fetch('/admin/server/delete/<%= server.id %>', {
+              method: 'POST',
+              headers: { 'csrf-token': csrfToken },
+            })
+              .then(r => {
+                loader.close();
+                if (r.ok) window.location.href = '/';
+                else return r.json().then(d => showToast((d && d.error) || "Couldn't delete the server.", 'error'));
+              })
+              .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
+            <% } else { %>
+            fetch('/user/server/<%= server.UUID %>', { method: 'DELETE' })
+              .then(r => r.json())
+              .then(d => { loader.close(); if (d.success) window.location.href = '/'; else showToast(d.error || "Couldn't delete the server.", 'error'); })
+              .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
+            <% } %>
           }
         });
       });
@@ -206,7 +204,7 @@
         body: 'Re-run the install scripts. Your files, worlds and settings are kept. Continue?',
         confirmLabel: '<%= req.translations.reinstall || "Reinstall" %>',
         onConfirm: () => {
-          const loader = showLoadingPopup('Reinstalling Server', 'Initiating server reinstallation...');
+          const loader = showProgressToast ? showProgressToast('Reinstalling Server…') : showLoadingToast('Reinstalling Server...');
           loader.updateProgress(10, 'Preparing for reinstallation...');
           fetch(`/server/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: true }) })
             .then(r => r.json())
@@ -224,24 +222,19 @@
       reinstallWipeButton.addEventListener('click', () => {
         window.modal.confirm({
           title: 'Reinstall & Delete All Data',
-          body: 'This wipes the server volume (worlds, configs, files) and reinstalls from scratch.',
+          body: 'This wipes the server volume (worlds, configs, files) and reinstalls from scratch. Type <strong>DELETE</strong> to confirm.',
           danger: true, confirmLabel: 'Continue',
+          prompt: { label: 'Type DELETE to confirm', pattern: /^DELETE$/i, invalidMessage: 'You must type DELETE to confirm.' },
           onConfirm: () => {
-            window.modal.confirm({
-              title: 'Final Warning', body: 'All server data will be permanently deleted. There is no recovery. Continue?',
-              danger: true, confirmLabel: 'Yes, Delete All Data',
-              onConfirm: () => {
-                const loader = showLoadingPopup('Reinstalling Server', 'Deleting all data and reinstalling...');
-                loader.updateProgress(10, 'Preparing for reinstallation...');
-                fetch(`/server/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: false }) })
-                  .then(r => r.json())
-                  .then(data => {
-                    loader.updateProgress(100, 'Reinstallation initiated!');
-                    setTimeout(() => { loader.close(); if (data.success) showToast('Server reinstalling. All data was deleted.', 'success'); else showToast('Failed to reinstall server: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
-                  })
-                  .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
-              }
-            });
+                const loader = showProgressToast ? showProgressToast('Reinstalling Server…') : showLoadingToast('Reinstalling Server...');
+            loader.updateProgress(10, 'Preparing for reinstallation...');
+            fetch(`/server/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: false }) })
+              .then(r => r.json())
+              .then(data => {
+                loader.updateProgress(100, 'Reinstallation initiated!');
+                setTimeout(() => { loader.close(); if (data.success) showToast('Server reinstalling. All data was deleted.', 'success'); else showToast('Failed to reinstall server: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
+              })
+              .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
           }
         });
       });

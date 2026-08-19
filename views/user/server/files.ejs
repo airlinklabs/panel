@@ -62,8 +62,9 @@ function escJS(val) {
   <div class="flex h-full">
     <!-- Sidebar -->
     <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
+      <%- include('../../components/sidebar') %>
     </div>
+<%- include('../../components/template') %>
 
     <!-- Content -->
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
@@ -543,6 +544,8 @@ function escJS(val) {
   async function refreshFileList() {
     const tbody = document.getElementById('fileTableBody');
     if (!tbody) { location.reload(); return; }
+    const loadingRows = '<tr><td colspan="4" class="px-4 py-8 text-center text-sm" style="color:var(--theme-text-muted)"><span class="inline-flex items-center gap-2"><svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Loading files…</span></td></tr>';
+    tbody.innerHTML = loadingRows;
     try {
       const res = await fetch('/server/<%= server.UUID %>/files/list?path=' + encodeURIComponent(fileListPath || '/'));
       const data = await res.json();
@@ -643,13 +646,6 @@ document.getElementById('massArchiveBtn').addEventListener('click', () => {
     }
 });
 
-function initializeSelectedFiles() {
-  const storedSelectedFiles = JSON.parse(sessionStorage.getItem('selectedFiles') || '[]');
-  fileCheckboxes.forEach(checkbox => {
-    checkbox.checked = storedSelectedFiles.includes(checkbox.dataset.filename);
-  });
-  updateSelectedFiles();
-}
 
 // Select All functionality
 selectAllCheckbox.addEventListener('change', event => {
@@ -775,11 +771,6 @@ confirmMassDeleteBtn.addEventListener('click', async function() {
   }
 });
 
-window.ALMount(initializeSelectedFiles);
-
-window.alListener(window, 'beforeunload', 'files-clear-selection', () => {
-  sessionStorage.removeItem('selectedFiles');
-});
 
 updateSelectedFiles();
 
@@ -836,8 +827,6 @@ function openCreateFileModal() {
     Animate.closeModal(modal, panel, done);
   }
 
-  function confirmRename() { /* overridden below */ }
-
   // Add event listener for Enter key in rename modal
   document.getElementById('newFileName').addEventListener('keydown', function(event) {
     if (event.key === 'Enter') {
@@ -887,8 +876,7 @@ function openCreateFileModal() {
   }
 
   // File Upload Functions
-  // Use window object to ensure the variable is globally accessible
-  window.selectedFile = null;
+  let selectedFile = null;
 
   function openUploadFileModal() {
     const modal = document.getElementById('uploadFileModal');
@@ -926,7 +914,7 @@ function openCreateFileModal() {
   }
 
   function removeSelectedFile() {
-    window.selectedFile = null;
+    selectedFile = null;
 
     const filePreview = document.getElementById('filePreview');
     const dropZone = document.getElementById('dropZone');
@@ -967,7 +955,7 @@ function openCreateFileModal() {
       return;
     }
 
-    window.selectedFile = file;
+    selectedFile = file;
 
     const fileNameElement = document.getElementById('selectedFileName');
     const fileSizeElement = document.getElementById('selectedFileSize');
@@ -998,19 +986,19 @@ function openCreateFileModal() {
 
   async function confirmFileUpload() {
 
-    if (!window.selectedFile) {
+    if (!selectedFile) {
       showToast('Select a file to upload', 'error');
       return;
     }
 
-    if (!(window.selectedFile instanceof File)) {
-      console.error('Selected file is not a valid File object:', window.selectedFile);
+    if (!(selectedFile instanceof File)) {
+      console.error('Selected file is not a valid File object:', selectedFile);
       showToast('Invalid file selected', 'error');
       return;
     }
 
     // Store file info before closing modal
-    const file = window.selectedFile;
+    const file = selectedFile;
     const fileName = file.name;
     const fileSize = file.size;
 
@@ -1047,9 +1035,7 @@ function openCreateFileModal() {
       formData.append('path', '<%= currentPath %>');
       formData.append('fileName', fileName);
 
-      if (uploadToast.setMessage) {
-        uploadToast.setMessage(`Uploading ${fileName}… 0%`);
-      }
+      uploadToast.setMessage(`Uploading ${fileName}… 0%`);
 
       try {
         // Use XMLHttpRequest for better progress tracking and reliability
@@ -1059,9 +1045,7 @@ function openCreateFileModal() {
 
         xhr.upload.onprogress = function(e) {
           if (uploadToast && e.lengthComputable) {
-            if (uploadToast.setMessage) {
-              uploadToast.setMessage(`Uploading ${fileName}…`);
-            }
+            uploadToast.setMessage(`Uploading ${fileName}…`);
           }
         };
 
@@ -1139,7 +1123,6 @@ function openCreateFileModal() {
     }
   }
 
-  window.selectedFile = null;
 
   // Direct handler for file input change
   function handleFileInputChange(event) {

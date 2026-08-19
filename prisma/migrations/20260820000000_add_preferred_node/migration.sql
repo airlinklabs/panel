@@ -1,2 +1,2 @@
--- AlterTable
-ALTER TABLE "Users" ADD COLUMN "preferredNodeId" INTEGER;
+-- Column already exists from 20260809100711_new (Users table rebuild).
+-- This migration is intentionally a no-op.

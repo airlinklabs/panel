@@ -67,55 +67,16 @@ const userImagesModule: Module = {
   router: () => {
     const router = Router();
 
-    router.get(
-      '/my-images',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
-        try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
-
-          const allowed = await canSubmitImages(user);
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-          const images = await prisma.images.findMany({
-            where: { createdById: user.id },
-            orderBy: { createdAt: 'desc' },
-          });
-
-          res.render('user/my-images', {
-            user,
-            req,
-            settings,
-            images,
-            allowed,
-          });
-        } catch (error: unknown) {
-          logger.error('Error fetching my images:', error);
-          return res.redirect('/');
-        }
-      },
-    );
-
-    router.get(
-      '/my-images/new',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
-        try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
-
-          const allowed = await canSubmitImages(user);
-          if (!allowed) return res.redirect('/my-images');
-
-          res.redirect('/account#submit-image');
-        } catch (error: unknown) {
-          logger.error('Error loading my images create page:', error);
-          return res.redirect('/my-images');
-        }
-      },
-    );
+    // Legacy /my-images pages redirect to Account #images (Phase 12)
+    router.get('/my-images', isAuthenticated(), (_req, res) => {
+      res.redirect('/account#images');
+    });
+    router.get('/my-images/new', isAuthenticated(), (_req, res) => {
+      res.redirect('/account#images');
+    });
+    router.get('/my-images/edit/:id', isAuthenticated(), (_req, res) => {
+      res.redirect('/account#images');
+    });
 
     router.post(
       '/my-images/create',
@@ -250,29 +211,6 @@ const userImagesModule: Module = {
         } catch (error: unknown) {
           logger.error('Failed to import image from URL:', error);
           res.status(500).json({ error: 'Failed to import image from URL.' });
-        }
-      },
-    );
-
-    router.get(
-      '/my-images/edit/:id',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
-        try {
-          const userId = req.session?.user?.id;
-          const [user, image] = await Promise.all([
-            prisma.users.findUnique({ where: { id: userId } }),
-            prisma.images.findUnique({ where: { id: Number(req.params.id) } }),
-          ]);
-          if (!user) return res.redirect('/login');
-          if (!image || image.createdById !== user.id) {
-            return res.redirect('/my-images');
-          }
-
-          res.render('user/my-images-edit', { user, req, image });
-        } catch (error: unknown) {
-          logger.error('Error loading edit image page:', error);
-          return res.redirect('/my-images');
         }
       },
     );

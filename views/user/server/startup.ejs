@@ -1,13 +1,12 @@
 <%- include('../../components/header', { title: 'Startup' }) %>
 
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
-  <!-- Success/Error Messages -->
-  <div id="message-container" class="fixed top-4 right-4 z-50 max-w-md"></div>
   <div class="flex h-full">
     <!-- Sidebar -->
     <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
+      <%- include('../../components/sidebar') %>
     </div>
+<%- include('../../components/template') %>
 
     <!-- Main Content -->
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
@@ -36,7 +35,6 @@
 
       <!-- Startup Configuration -->
       <div class="px-4 sm:px-8 mt-8">
-        <div class="al-card p-6 shadow-lg">
           <div class="al-card overflow-hidden mb-6">
             <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
               <div>
@@ -68,12 +66,12 @@
               <% } %>
             </div>
 
-            <form id="startupForm" action="/server/<%= server.UUID %>/startup/command" method="POST" enctype="application/x-www-form-urlencoded">
+            <form id="startupForm" novalidate>
               <%- include('../../components/csrf') %>
               <div class="p-5">
                 <div class="mb-4">
                   <label for="startCommand" class="block text-sm font-medium mb-2" style="color:var(--theme-text-muted)"><%= req.translations.startupCommand || 'Startup Command' %></label>
-                  <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 <%= !isStartupEditAllowed ? 'bg-neutral-100 dark:bg-neutral-800/50 cursor-not-allowed' : 'bg-white dark:bg-neutral-600/20' %> border border-neutral-300 dark:border-white/5" <%= !isStartupEditAllowed ? 'readonly' : '' %> aria-label="<%= req.translations.startupCommand || 'Startup Command' %>"><%= server.StartCommand %></textarea>
+                  <textarea id="startCommand" name="startCommand" rows="3" class="al-input <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'readonly' : '' %> aria-label="<%= req.translations.startupCommand || 'Startup Command' %>"><%= server.StartCommand %></textarea>
                   <% if (!isStartupEditAllowed) { %>
                     <p class="mt-2 text-xs" style="color:var(--theme-danger);"><%= req.translations.startupCommandDisabled || 'Startup command editing is disabled for this server. Contact an administrator to enable this feature.' %></p>
                   <% } else { %>
@@ -103,7 +101,7 @@
               </div>
             </div>
 
-            <form id="dockerImageForm" action="/server/<%= server.UUID %>/startup/docker-image" method="POST" enctype="application/x-www-form-urlencoded">
+            <form id="dockerImageForm" novalidate>
               <%- include('../../components/csrf') %>
               <div class="p-5">
                 <div class="mb-4">
@@ -153,14 +151,13 @@
               </div>
             </form>
           </div>
-        </div>
 
         <!-- Server Variables -->
         <div class="al-card p-6 shadow-lg mt-8">
           <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.serverVariables || 'Server Variables' %></h2>
           <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
 
-          <form id="variablesForm" action="/server/<%= server.UUID %>/startup/variables" method="POST" enctype="application/x-www-form-urlencoded">
+          <form id="variablesForm" novalidate>
             <%- include('../../components/csrf') %>
             <div id="variablesContainer" class="space-y-4">
               <% if (serverVariables && serverVariables.length > 0) { %>
@@ -183,11 +180,10 @@
                           });
                         </script>
                       <% } else if (variable.type === 'number') { %>
-                        <input type="number" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5" aria-label="<%= variable.name %>">
+                        <input type="number" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="al-input" aria-label="<%= variable.name %>">
                       <% } else { %>
-                        <input type="text" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5" aria-label="<%= variable.name %>">
+                        <input type="text" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="al-input" aria-label="<%= variable.name %>">
                       <% } %>
-                      <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Type: <%= variable.type %></p>
                     </div>
                   </div>
                 <% }); %>
@@ -214,58 +210,6 @@
 
 <script nonce="<%- nonce %>">
   window.ALMount(function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const success = urlParams.get('success');
-    const error = urlParams.get('error');
-    const message = urlParams.get('message');
-
-    if (message) {
-      if (success === 'true') {
-        showMessage(message, 'success');
-      } else if (error === 'true') {
-        showMessage(message, 'error');
-      }
-    }
-
-    function showMessage(message, type) {
-      const messageContainer = document.getElementById('message-container');
-      const messageElement = document.createElement('div');
-      messageElement.className = `p-4 mb-4 rounded-xl shadow-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200 dark:bg-green-500/15 dark:text-green-400 dark:border-green-500/30' : 'bg-red-100 text-red-800 border border-red-200 dark:bg-red-500/15 dark:text-red-400 dark:border-red-500/30'}`;
-      
-      const flex = document.createElement('div');
-      flex.className = 'flex items-center';
-      
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('class', 'w-5 h-5 mr-2');
-      svg.setAttribute('fill', 'currentColor');
-      svg.setAttribute('viewBox', '0 0 20 20');
-      
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('fill-rule', 'evenodd');
-      path.setAttribute('clip-rule', 'evenodd');
-      if (type === 'success') {
-        path.setAttribute('d', 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z');
-      } else {
-        path.setAttribute('d', 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z');
-      }
-      svg.appendChild(path);
-      
-      const span = document.createElement('span');
-      span.textContent = message;
-      
-      flex.appendChild(svg);
-      flex.appendChild(span);
-      messageElement.appendChild(flex);
-
-      messageContainer.appendChild(messageElement);
-
-      setTimeout(() => {
-        messageElement.classList.add('opacity-0', 'transition-opacity', 'duration-500');
-        setTimeout(() => {
-          messageContainer.removeChild(messageElement);
-        }, 500);
-      }, 5000);
-    }
     const startupForm = document.getElementById('startupForm');
     const dockerImageForm = document.getElementById('dockerImageForm');
     const variablesForm = document.getElementById('variablesForm');
@@ -282,7 +226,7 @@
       const formData = new FormData(startupForm);
 
       // Submit via fetch (CSRF token will be added automatically by csrf.js)
-      fetch(startupForm.action, {
+      fetch('/server/<%= server.UUID %>/startup/command', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -302,15 +246,15 @@
         submitButton.disabled = false;
 
         if (data.success !== false) {
-          showMessage('Startup command saved successfully!', 'success');
+          showToast('Startup command saved successfully!', 'success');
         } else {
-          showMessage(data.error || 'Failed to save startup command', 'error');
+          showToast(data.error || 'Failed to save startup command', 'error');
         }
       })
       .catch(error => {
         submitButton.textContent = originalButtonText;
         submitButton.disabled = false;
-        showMessage(error.message || error.error || 'Failed to save startup command', 'error');
+        showToast(error.message || error.error || 'Failed to save startup command', 'error');
       });
     });
 
@@ -326,7 +270,7 @@
       const formData = new FormData(dockerImageForm);
 
       // Submit via fetch (CSRF token will be added automatically by csrf.js)
-      fetch(dockerImageForm.action, {
+      fetch('/server/<%= server.UUID %>/startup/docker-image', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -346,15 +290,15 @@
         submitButton.disabled = false;
 
         if (data.success !== false) {
-          showMessage('Docker image updated successfully! Server will be restarted if it was running.', 'success');
+          showToast('Docker image updated successfully! Server will be restarted if it was running.', 'success');
         } else {
-          showMessage(data.error || 'Failed to update Docker image', 'error');
+          showToast(data.error || 'Failed to update Docker image', 'error');
         }
       })
       .catch(error => {
         submitButton.textContent = originalButtonText;
         submitButton.disabled = false;
-        showMessage(error.message || error.error || 'Failed to update Docker image', 'error');
+        showToast(error.message || error.error || 'Failed to update Docker image', 'error');
       });
     });
 
@@ -376,7 +320,7 @@
       }
 
       // Submit via fetch (CSRF token will be added automatically by csrf.js)
-      fetch(variablesForm.action, {
+      fetch('/server/<%= server.UUID %>/startup/variables', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -397,15 +341,15 @@
         submitButton.disabled = false;
 
         if (data.success !== false) {
-          showMessage('Variables saved successfully!', 'success');
+          showToast('Variables saved successfully!', 'success');
         } else {
-          showMessage(data.error || 'Failed to save variables', 'error');
+          showToast(data.error || 'Failed to save variables', 'error');
         }
       })
       .catch(error => {
         submitButton.textContent = originalButtonText;
         submitButton.disabled = false;
-        showMessage(error.message || error.error || 'Failed to save variables', 'error');
+        showToast(error.message || error.error || 'Failed to save variables', 'error');
       });
     });
   });

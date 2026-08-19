@@ -18,8 +18,9 @@
 <main class="min-h-screen">
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0">
-      <%- include('../components/template') %>
+      <%- include('../components/sidebar') %>
     </div>
+<%- include('../components/template') %>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
         { label: 'Account' }
@@ -60,11 +61,11 @@
         <div role="tablist" aria-label="<%= req.translations.userAccountTitle || 'Account' %>"
           class="flex gap-1 p-1 rounded-xl mb-5 overflow-x-auto" style="background:var(--theme-bg-secondary)">
           <button type="button" role="tab" data-tab="profile" aria-selected="true" tabindex="0" aria-controls="account-panel-profile"
-            class="px-3 py-2 text-sm font-medium rounded-lg transition bg-neutral-900 text-white dark:bg-white dark:text-black"><%- icon('user', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.profileTab || 'Profile' %></button>
+            class="px-3 py-2 text-sm font-medium rounded-lg transition" style="background:var(--theme-text);color:var(--theme-bg);"><%- icon('user', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.profileTab || 'Profile' %></button>
           <button type="button" role="tab" data-tab="images" aria-selected="false" tabindex="-1" aria-controls="account-panel-images"
-            class="px-3 py-2 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"><%- icon('image', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.imagesTab || 'Images' %></button>
+            class="px-3 py-2 text-sm font-medium rounded-lg transition" style="color:var(--theme-text-muted);"><%- icon('image', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.imagesTab || 'Images' %></button>
           <button type="button" role="tab" data-tab="history" aria-selected="false" tabindex="-1" aria-controls="account-panel-history"
-            class="px-3 py-2 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"><%- icon('history', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.historyTab || 'Login History' %></button>
+            class="px-3 py-2 text-sm font-medium rounded-lg transition" style="color:var(--theme-text-muted);"><%- icon('history', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.historyTab || 'Login History' %></button>
         </div>
 
         <div role="tabpanel" data-tab-panel="profile" id="account-panel-profile">
@@ -224,7 +225,7 @@
           <% } else { %>
             <!-- Inline image list (replaces /my-images standalone page) -->
             <div id="myImagesEmpty" class="flex flex-col items-center justify-center py-12 text-center <%= (!images || images.length === 0) ? '' : 'hidden' %>">
-              <div class="w-10 h-10 rounded-full bg-neutral-400/10 flex items-center justify-center mb-3">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center mb-3" style="background:var(--theme-bg-secondary)">
                 <%- icon('image', { class: 'w-5 h-5', style: 'color:var(--theme-text-muted)' }) %>
               </div>
               <p class="text-sm font-medium" style="color:var(--theme-text-strong)">
@@ -365,11 +366,11 @@
           <div class="col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
           <div class="col-span-2"><label class="field-label">Docker images (JSON array) <span class="text-red-500">*</span></label><input class="field-input" type="text" name="dockerImages" required placeholder='[{"game":"ghcr.io/you/image:latest"}]' style="font-family:ui-monospace,monospace;font-size:12px;"></div>
           <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
-          <div class="col-span-2"><label class="field-label">Variables <span class="text-neutral-400 font-normal">(JSON array, optional)</span></label><textarea class="field-input" name="variables" rows="4" placeholder="[]" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;">[]</textarea></div>
+          <div class="col-span-2"><label class="field-label">Variables <span class="font-normal" style="color:var(--theme-text-muted)">(JSON array, optional)</span></label><textarea class="field-input" name="variables" rows="4" placeholder="[]" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;">[]</textarea></div>
         </div>
         <div class="flex gap-2 pt-1">
-          <button type="button" id="imManualCancel" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
-          <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
+          <button type="button" id="imManualCancel" class="flex-1 py-2 rounded-xl border text-sm font-medium transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
+          <button type="submit" class="flex-1 py-2 rounded-xl border text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg);color:var(--theme-text-strong);"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
         </div>
       </form>
 
@@ -378,8 +379,8 @@
         <label class="field-label" for="imJsonInput">Egg JSON</label>
         <textarea id="imJsonInput" class="field-input" rows="12" placeholder='{ "name": "...", "startup": "...", "docker_images": { "game": "ghcr.io/example/image:latest" } }' style="resize:none;font-family:ui-monospace,monospace;font-size:12px;"></textarea>
         <div class="flex gap-2 pt-4">
-          <button type="button" id="imJsonCancel" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5">Cancel</button>
-          <button type="button" id="imSubmitJsonBtn" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
+          <button type="button" id="imJsonCancel" class="flex-1 py-2 rounded-xl border text-sm font-medium transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text-muted);">Cancel</button>
+          <button type="button" id="imSubmitJsonBtn" class="flex-1 py-2 rounded-xl border text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg);color:var(--theme-text-strong);"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
         </div>
       </div>
 
@@ -389,8 +390,8 @@
         <input id="imUrlInput" type="url" class="field-input" placeholder="https://raw.githubusercontent.com/…/egg.json">
         <p class="mt-2 text-xs" style="color:var(--theme-text-muted)">Fetch a Pterodactyl egg JSON from a raw URL and submit it for review.</p>
         <div class="flex gap-2 pt-4">
-          <button type="button" id="imUrlCancel" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5">Cancel</button>
-          <button type="button" id="imSubmitUrlBtn" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Fetch &amp; Submit</button>
+          <button type="button" id="imUrlCancel" class="flex-1 py-2 rounded-xl border text-sm font-medium transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text-muted);">Cancel</button>
+          <button type="button" id="imSubmitUrlBtn" class="flex-1 py-2 rounded-xl border text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg);color:var(--theme-text-strong);"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Fetch &amp; Submit</button>
         </div>
       </div>
     </div>
@@ -599,7 +600,7 @@ window.ALMount(() => {
             <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
           </button>
         </div>
-        <div class="relative bg-neutral-900 dark:bg-neutral-950 select-none overflow-hidden" style="height:340px" id="crop-stage">
+        <div class="relative select-none overflow-hidden" style="height:340px;background:var(--theme-bg);" id="crop-stage">
           <img id="crop-img" src="${dataUrl}" draggable="false" alt="Crop preview" style="position:absolute;top:0;left:0;user-select:none;max-width:none"/>
           <div id="crop-box" style="position:absolute;border:2px solid white;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);cursor:move;box-sizing:border-box">
             <div class="crop-handle" data-dir="nw" style="position:absolute;top:-5px;left:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:nw-resize"></div>

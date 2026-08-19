@@ -98,7 +98,7 @@ describe('element id integrity', () => {
       const localIds = new Set<string>();
       for (const m of content.matchAll(/id="([^"]+)"/g)) localIds.add(m[1]);
       // shared includes known to own their ids
-      for (const shared of ['al-activity-chip', 'topbar-breadcrumbs', 'sidebar-username', 'toast-container']) {
+      for (const shared of ['al-activity-chip', 'topbar-breadcrumbs', 'sidebar-username', 'toast-container', 'colcont']) {
         localIds.add(shared);
       }
       for (const m of content.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)) {

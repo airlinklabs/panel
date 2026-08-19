@@ -36,6 +36,41 @@ declare global {
       validatedBody?: unknown;
       validatedParams?: unknown;
       validatedQuery?: unknown;
+      // Server context when on a server page (attached by isAuthenticatedForServer)
+      server?: {
+        id: number;
+        UUID: string;
+        name: string;
+        nodeId: number;
+        // ... other server fields
+      };
+      // Node context when on a server page
+      node?: {
+        id: number;
+        name: string;
+        address: string;
+        port: number;
+        // ... other node fields
+      };
+      // Features array for feature-gating
+      features?: string[];
+    }
+
+    interface Response {
+      // Admin sidebar groups for navigation
+      adminSidebarGroups?: Array<{
+        label: string;
+        items: Array<{
+          url: string;
+          label: string;
+          icon: string;
+          matchPrefix?: string;
+          isAdminItem?: boolean;
+          ownerOnly?: boolean;
+          feature?: string;
+          group?: string;
+        }>;
+      }>;
     }
   }
 }

@@ -26,8 +26,9 @@
 <main class="min-h-screen m-auto">
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
+      <%- include('../../components/sidebar') %>
     </div>
+<%- include('../../components/template') %>
     <div id="page-content" class="admin-overview-bg flex-1 overflow-y-auto pt-16 pb-12"<% if (vcodeBg) { %> style="--vcode-bg: url('<%= vcodeBg %>');"<% } %>>
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },

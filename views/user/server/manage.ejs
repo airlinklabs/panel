@@ -81,8 +81,9 @@
   <div class="flex h-full">
     <!-- Sidebar -->
     <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
+      <%- include('../../components/sidebar') %>
     </div>
+<%- include('../../components/template') %>
 
     <!-- Content -->
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
@@ -155,12 +156,12 @@
 
 <!-- Left side: Console -->
 <div class="w-full lg:w-2/3 lg:pr-5 flex flex-col min-w-0">
-    <div class="flex flex-col rounded-xl overflow-hidden shadow-lg flex-1 console-wrap border border-neutral-200 dark:border-neutral-700/50">
+    <div class="flex flex-col rounded-xl overflow-hidden shadow-lg flex-1 console-wrap" style="border:1px solid var(--theme-border)">
         <div class="flex items-center gap-2 px-3 py-2 shrink-0" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
             <span class="text-[11px] font-medium select-none tracking-wide" style="color:var(--theme-text-muted)">console</span>
             <span class="flex-1"></span>
             <span id="consoleReadOnlyNotice" class="hidden text-[11px] font-medium" style="color:var(--theme-text-muted)">View-only — console input is active in another tab</span>
-            <button id="loadHistoryBtn" type="button" class="text-[11px] font-medium rounded-md px-2 py-1 transition-colors inline-flex items-center gap-1" style="color:var(--theme-text-muted)" aria-label="Load recent logs">
+            <button id="loadHistoryBtn" type="button" class="text-[11px] font-medium rounded-md px-2 py-1 transition-colors inline-flex items-center gap-1" style="color:var(--theme-text-muted)" aria-label="Load recent logs" title="Load recent console output from disk">
               <%- icon('file-clock', { class: 'size-3', strokeWidth: 1.5 }) %>
               Load recent logs
             </button>
@@ -175,7 +176,7 @@
                 class="w-full px-4 py-3 text-sm rounded-b-xl focus:ring-1 focus:border-transparent placeholder:font-medium bg-transparent relative z-[1]"
                 style="color:var(--theme-text-strong);border-top:1px solid var(--theme-border)">
             <div id="ghost-text-bg" class="absolute inset-0 px-4 py-3 text-sm pointer-events-none rounded-b-xl overflow-hidden z-0" style="border-top:1px solid var(--theme-border);background:var(--theme-bg-secondary)">
-                <span id="ghost-typed" class="invisible"></span><span id="ghost-suggestion" class="text-neutral-400"></span>
+                <span id="ghost-typed" class="invisible"></span><span id="ghost-suggestion" style="color:var(--theme-text-muted)"></span>
             </div>
         </div>
     </div>
@@ -251,7 +252,7 @@
 <!-- ═══════════════════════════════════════════════════════════════
      MOBILE LAYOUT (< lg) — compact chrome + 2x2 grid + terminal
      ═══════════════════════════════════════════════════════════════ -->
-<main id="mobile-manage" class="lg:hidden min-h-screen pt-16 text-neutral-800 dark:text-white">
+<section id="mobile-manage" class="lg:hidden min-h-screen pt-16 text-neutral-800 dark:text-white">
 
   <div class="px-4">
     <!-- Server Header + Meta -->
@@ -260,16 +261,16 @@
         <%- include('../../components/serverHeader') %>
         <div class="shrink-0 text-right mt-0.5 space-y-0.5">
           <div class="flex items-center justify-end gap-1.5">
-            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 truncate max-w-[110px]"><%= server.image.name %></span>
-            <%- icon('box', { class: 'h-2.5 w-2.5 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
+            <span class="text-[10px] truncate max-w-[110px]" style="color:var(--theme-text-muted)"><%= server.image.name %></span>
+            <%- icon('box', { class: 'h-2.5 w-2.5 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
           </div>
           <div class="flex items-center justify-end gap-1.5">
-            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 truncate max-w-[110px]"><%= server.node.name %></span>
-            <%- icon('server', { class: 'h-2.5 w-2.5 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
+            <span class="text-[10px] truncate max-w-[110px]" style="color:var(--theme-text-muted)"><%= server.node.name %></span>
+            <%- icon('server', { class: 'h-2.5 w-2.5 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
           </div>
           <div class="flex items-center justify-end gap-1.5">
-            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono"><%= server.UUID.split('-')[0] %></span>
-            <%- icon('hash', { class: 'h-2.5 w-2.5 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
+            <span class="text-[10px] font-mono" style="color:var(--theme-text-muted)"><%= server.UUID.split('-')[0] %></span>
+            <%- icon('hash', { class: 'h-2.5 w-2.5 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
           </div>
         </div>
       </div>
@@ -332,18 +333,18 @@
     <!-- IP Address -->
     <div class="mt-3 mb-3">
       <div class="rounded-xl px-3 py-2.5 flex items-center gap-2" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm)">
-        <%- icon('globe', { class: 'h-4 w-4 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
-        <span class="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 shrink-0"><%= req.translations.addressIP %>:</span>
-        <span class="text-xs font-medium font-mono text-neutral-800 dark:text-white truncate flex-1" id="mobile-server-ip-text"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></span>
+        <%- icon('globe', { class: 'h-4 w-4 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+        <span class="text-[10px] font-medium shrink-0" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %>:</span>
+        <span class="text-xs font-medium font-mono truncate flex-1" id="mobile-server-ip-text" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></span>
         <button type="button" id="mobile-copy-ip-btn" onclick="copyMobileServerIP()" class="shrink-0 rounded-md p-1 transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">
-          <%- icon('copy', { id: 'mobile-copy-icon', class: 'h-3.5 w-3.5 text-neutral-600 dark:text-neutral-300', strokeWidth: 2 }) %>
+          <%- icon('copy', { id: 'mobile-copy-icon', class: 'h-3.5 w-3.5', style: 'color:var(--theme-text-muted)', strokeWidth: 2 }) %>
           <%- icon('check', { id: 'mobile-check-icon', class: 'h-3.5 w-3.5 text-emerald-500 hidden', strokeWidth: 2.5 }) %>
         </button>
       </div>
     </div>
 
     <!-- Mobile Terminal -->
-    <div class="rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700/50">
+    <div class="rounded-xl overflow-hidden" style="border:1px solid var(--theme-border)">
       <div class="flex items-center px-3 py-2 shrink-0" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
         <span class="text-[11px] font-medium select-none tracking-wide" style="color:var(--theme-text-muted)">console</span>
       </div>
@@ -394,7 +395,7 @@
       </div>
     </div>
   </div>
-</main>
+</section>
 
 
 <%- include('../../components/footer') %>
@@ -473,6 +474,7 @@ function updateLoadLogsButton() {
     b.disabled = disabled;
     b.style.opacity = disabled ? '0.45' : '';
     b.style.pointerEvents = disabled ? 'none' : '';
+    b.title = disabled ? 'Live console active — logs are streamed in real time' : 'Load recent console output from disk';
 }
 if (typeof serverStatus !== 'undefined' && serverStatus && serverStatus.online) {
     serverOnline = true;
@@ -630,6 +632,7 @@ let maxReconnectAttempts = 10;
 let reconnectInterval = 2000;
 let reconnectTimer = null;
 let wsErrorCount = 0;  // only show offline banner after sustained failures
+let connectionErrorFired = false;
 let historyLoaded = false; // only fetch log history once per page load
 let pageHidden = document.visibilityState === 'hidden';
 let consoleOwner = false;
@@ -682,6 +685,7 @@ function retryDaemonConnection() {
     }
     resubscribeRealtime();
 }
+window.retryDaemonConnection = retryDaemonConnection;
 
 async function openConsoleSocket() {
     try {
@@ -693,6 +697,7 @@ async function openConsoleSocket() {
             reconnectAttempts = 0;
             reconnectInterval = 2000;
             wsErrorCount = 0;
+            connectionErrorFired = false;
             setDaemonOfflineBanner(false);
 
             if (!historyLoaded) {
@@ -713,6 +718,8 @@ async function openConsoleSocket() {
         socket.onmessage = handleWebSocketMessage;
 
         socket.onerror = () => {
+            if (connectionErrorFired) return;
+            connectionErrorFired = true;
             wsErrorCount++;
             if (wsErrorCount >= 3) {
                 setDaemonOfflineBanner(true);
@@ -1264,6 +1271,7 @@ connectWebSocket();
             }, 2000);
         });
     }
+    window.copyServerIP = copyServerIP;
 
     function formatBytes(bytes, decimals = 2) {
         if (bytes === 0) return '0 Bytes';
@@ -1324,7 +1332,7 @@ connectWebSocket();
                         x: { display: false },
                         y: { display: false }
                     },
-                    animation: true
+                    animation: { duration: 0 }
                 }
             });
         }
@@ -1333,6 +1341,8 @@ connectWebSocket();
     const ramChart = createBackgroundChart('ramChart');
     const cpuChart = createBackgroundChart('cpuChart');
     const diskChart = createBackgroundChart('diskChart', 'doughnut');
+    diskChart.options.animation = { duration: 0 };
+    diskChart.update();
 
     function updateRamUsage(stats) {
     const ramStatsUsage = stats?.data?.memory?.usage || 0;
@@ -1547,7 +1557,7 @@ connectWebSocket();
             hideConsolePlaceholder();
             // Use the clean label — never raw layer output in the status card
             const label = statusLabel(eventType) || msg;
-            const color = (statusColors[eventType] || { cls: 'text-neutral-500 dark:text-neutral-400' }).cls;
+            const color = (statusColors[eventType] || { cls: 'var(--theme-text-muted)' }).cls;
             msgEl.classList.add('opacity-0', 'translate-y-1');
             statusMsgFadeTimer = setTimeout(() => {
                 msgEl.textContent = label;
@@ -1867,6 +1877,7 @@ connectWebSocket();
     // ═══════════════════════════════════════════════════════════════
     // MOBILE LAYOUT — separate terminal, charts, buttons
     // ═══════════════════════════════════════════════════════════════
+    let mobileTerm = null;
     (function () {
         const mobileEl = document.getElementById('mobile-manage');
         if (!mobileEl) return;
@@ -1875,7 +1886,7 @@ connectWebSocket();
         const mobileTermEl = document.getElementById('mobile-terminal');
         if (!mobileTermEl) return;
 
-        const mobileTerm = new Terminal({
+        mobileTerm = new Terminal({
             disableStdin: true,
             lineHeight: 1.3,
             fontFamily: 'Menlo, Monaco, Consolas, monospace',
@@ -1945,6 +1956,9 @@ connectWebSocket();
             logEl.style.color = color;
             logEl.classList.remove('hidden');
         }
+
+        setStatusText = patchedSetStatusText;
+        setStatusLog = patchedSetStatusLog;
 
         // Override to also write to mobile terminal
         const origWriteConsole = writeConsole;

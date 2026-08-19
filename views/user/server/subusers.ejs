@@ -76,13 +76,23 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
   }
+
+  function escHtml(val) {
+    return String(val)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 %>
 
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-full">
     <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
+      <%- include('../../components/sidebar') %>
     </div>
+<%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
@@ -326,7 +336,7 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
 const serverId = '<%= server.UUID %>';
 let editingSubUserId = null;
 
-const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m) => console.warn('[subusers]', m) };
+const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: window.showToast || ((m) => console.warn('[subusers]', m)) };
 
 function openModal(id) {
   const el = document.getElementById(id);
@@ -358,9 +368,57 @@ document.querySelectorAll('.add-perm, .edit-perm').forEach(cb => {
   });
 });
 
+document.querySelectorAll('.add-perm, .edit-perm').forEach(cb => {
+  cb.addEventListener('change', () => {
+    const prefix = cb.value + '.';
+    const isParent = cb.value.indexOf('.') === -1;
+    if (isParent) {
+      // Cascade to children
+      const modal = cb.closest('.al-sheet-panel');
+      if (modal) {
+        modal.querySelectorAll('.add-perm, .edit-perm').forEach(child => {
+          if (child.value.startsWith(prefix)) {
+            child.checked = cb.checked;
+            if (window.animateCheckbox) window.animateCheckbox(child);
+          }
+        });
+      }
+    } else {
+      // Check if parent should be unchecked
+      const parentName = cb.value.split('.')[0];
+      const parentCb = document.querySelector(`.add-perm[value="${parentName}"], .edit-perm[value="${parentName}"]`);
+      if (parentCb && !cb.checked) {
+        const modal = cb.closest('.al-sheet-panel');
+        const anySiblingChecked = modal && [...modal.querySelectorAll('.add-perm, .edit-perm')].some(s => s.value.startsWith(parentName + '.') && s.checked);
+        if (!anySiblingChecked) {
+          parentCb.checked = false;
+          if (window.animateCheckbox) window.animateCheckbox(parentCb);
+        }
+      } else if (parentCb && cb.checked) {
+        parentCb.checked = true;
+        if (window.animateCheckbox) window.animateCheckbox(parentCb);
+      }
+    }
+  });
+});
+
 window.openAddSubUserModal = () => {
   document.getElementById('addSubUserEmail').value = '';
-  document.querySelectorAll('.add-perm').forEach(cb => cb.checked = cb.value.indexOf('.') === -1);
+  document.querySelectorAll('.add-perm').forEach(cb => {
+    const isTopLevel = cb.value.indexOf('.') === -1;
+    cb.checked = isTopLevel;
+    if (isTopLevel) {
+      // Also check all children of this top-level perm
+      const prefix = cb.value + '.';
+      document.querySelectorAll('.add-perm').forEach(child => {
+        if (child.value.startsWith(prefix)) {
+          child.checked = true;
+          if (window.animateCheckbox) window.animateCheckbox(child);
+        }
+      });
+    }
+    if (window.animateCheckbox) window.animateCheckbox(cb);
+  });
   openModal('addSubUserModal');
   setTimeout(() => document.getElementById('addSubUserEmail').focus(), 50);
 };
@@ -400,10 +458,10 @@ document.getElementById('confirmAddSubUser')?.addEventListener('click', async ()
       <tr class="al-table-tr al-subuser-row" data-subuser-id="${sub.id}">
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="flex items-center gap-3">
-            <span class="flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">${subName.slice(0, 1).toUpperCase()}</span>
+            <span class="flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">${escHtml(subName).slice(0, 1).toUpperCase()}</span>
             <div class="min-w-0">
-              <div class="text-sm font-medium" style="color:var(--theme-text-strong)">${subName}</div>
-              <div class="text-xs truncate max-w-[200px]" style="color:var(--theme-text-muted)">${sub.user?.email || email}</div>
+              <div class="text-sm font-medium" style="color:var(--theme-text-strong)">${escHtml(subName)}</div>
+              <div class="text-xs truncate max-w-[200px]" style="color:var(--theme-text-muted)">${escHtml(sub.user?.email || email)}</div>
             </div>
           </div>
         </td>
@@ -419,8 +477,8 @@ document.getElementById('confirmAddSubUser')?.addEventListener('click', async ()
             <button type="button"
               class="edit-subuser-btn inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
               data-id="${sub.id}"
-              data-name="${subName.replace(/"/g, '&quot;')}"
-              data-perms="${JSON.stringify(perms).replace(/"/g, '&quot;')}"
+              data-name="${escAttr(subName)}"
+              data-perms="${escAttr(JSON.stringify(perms))}"
               style="color:var(--theme-accent);background:var(--theme-accent-subtle)"
             >
               <%- icon('settings', { class: 'w-3 h-3 mr-1' }) %>
@@ -429,7 +487,7 @@ document.getElementById('confirmAddSubUser')?.addEventListener('click', async ()
             <button type="button"
               class="remove-subuser-btn inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
               data-id="${sub.id}"
-              data-name="${subName.replace(/"/g, '&quot;')}"
+              data-name="${escAttr(subName)}"
               style="color:var(--theme-danger);background:var(--theme-danger-bg)"
             >
               <%- icon('trash-2', { class: 'w-3 h-3 mr-1' }) %>

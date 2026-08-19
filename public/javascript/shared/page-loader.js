@@ -137,9 +137,6 @@
   window.addEventListener('al:themechange', function () {
     applyChipTheme();
   });
-      chipEl.style.transform = 'translateY(-4px)';
-    }, 200);
-  }
 
   // ── Content fade ─────────────────────────────────────────────────────────
 

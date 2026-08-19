@@ -237,13 +237,6 @@
         <% }); %>
         <% }); %>
       <% } %>
-        <% if (adminMenuItems && adminMenuItems.length > 0) {
-          adminMenuItems.forEach(item => { %>
-        <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
-          <%- item.icon %>
-          <span class="text-sm"><%= item.label %></span>
-        </a>
-        <% }); } %>
       </div>
       <% } %>
       </div>
@@ -284,9 +277,12 @@
     sheet.classList.remove('closing');
     sheet.classList.add('open');
     btn.setAttribute('aria-expanded', 'true');
+    sheet.style.maxHeight = '';
     sheet.removeAttribute('inert');
     lastFocus = document.activeElement;
     markActiveSheetItems();
+    const focusable = sheet.querySelector('a[href], button:not([disabled])');
+    if (focusable) focusable.focus();
   }
 
   function closeSheet() {

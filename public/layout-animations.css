@@ -21,10 +21,6 @@
 /* manage.ejs — install banner */
 #installBanner,
 
-/* manage.ejs — server page body and stats cards */
-#server-page-body,
-.console-wrap,
-
 /* dashboard — folder popup, new folder dialog */
 .folder-popup-overlay .folder-popup,
 .dialog-overlay .dialog-box,
@@ -111,8 +107,6 @@
   #daemonOfflineWarning,
   #daemonOfflineWarningRow,
   #installBanner,
-  #server-page-body,
-  .console-wrap,
   .folder-popup-overlay .folder-popup,
   .dialog-overlay .dialog-box,
   #updateStatus,

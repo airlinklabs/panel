@@ -1,8 +1,6 @@
 -- Phase 9: roles, onboarding state, image approval, privileged limits
--- AlterTable
-ALTER TABLE "Users" ADD COLUMN "role" TEXT NOT NULL DEFAULT 'user';
-ALTER TABLE "Users" ADD COLUMN "onboardingCompleted" BOOLEAN NOT NULL DEFAULT false;
-ALTER TABLE "Users" ADD COLUMN "onboardingSkipped" BOOLEAN NOT NULL DEFAULT false;
+-- Columns "role", "onboardingCompleted", "onboardingSkipped" already exist
+-- from 20260809100711_new (Users table rebuild). Only the following are new:
 
 -- Backfill existing admins as the 'admin' role; the first user becomes owner.
 UPDATE "Users" SET "role" = 'owner' WHERE "id" = (SELECT "id" FROM "Users" WHERE "isAdmin" = 1 ORDER BY "id" ASC LIMIT 1);

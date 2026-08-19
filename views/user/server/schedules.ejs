@@ -3,8 +3,9 @@
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-full">
     <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
+      <%- include('../../components/sidebar') %>
     </div>
+<%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
@@ -327,7 +328,16 @@
 (function () {
 const serverId = '<%= server.UUID %>';
 
-const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: (m) => console.warn('[schedules]', m) };
+const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: window.showToast || ((m) => console.warn('[schedules]', m)) };
+
+function escHtml(val) {
+  return String(val)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function getFocusableElements(panel) {
   return Array.from((panel || document).querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'))
@@ -734,7 +744,7 @@ document.getElementById('confirmAddSchedule')?.addEventListener('click', async (
       const rowHtml = `<tr class="al-table-tr transition-colors" data-schedule-id="${result.id}">
           <td class="px-6 py-4">
             <div class="flex items-center gap-2 flex-wrap">
-              <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">${result.name}</h3>
+              <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">${escHtml(result.name)}</h3>
               ${!result.enabled ? '<span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Disabled</span>' : ''}
             </div>
             <div class="flex items-center gap-x-4 gap-y-1 mt-1.5 flex-wrap text-[11px]" style="color:var(--theme-text-muted)">
@@ -850,9 +860,15 @@ document.getElementById('confirmAddSchedule')?.addEventListener('click', async (
 document.querySelectorAll('.sched-toggle').forEach((toggle) => {
   toggle.addEventListener('change', function () {
     const scheduleId = this.closest('[data-schedule-id]').dataset.scheduleId;
+    this.setAttribute('aria-label', this.checked ? 'Disable schedule' : 'Enable schedule');
+    this.closest('label').setAttribute('title', this.checked ? 'Disable schedule' : 'Enable schedule');
     api('/server/' + serverId + '/schedules/' + scheduleId, 'PATCH', { enabled: this.checked }).then((r) => {
       if (r) showToast(this.checked ? 'Schedule enabled.' : 'Schedule disabled.', 'success');
-      else this.checked = !this.checked;
+      else {
+        this.checked = !this.checked;
+        this.setAttribute('aria-label', this.checked ? 'Disable schedule' : 'Enable schedule');
+        this.closest('label').setAttribute('title', this.checked ? 'Disable schedule' : 'Enable schedule');
+      }
     });
   });
 });

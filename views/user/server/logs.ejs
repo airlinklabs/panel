@@ -3,13 +3,13 @@
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-full">
     <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
+      <%- include('../../components/sidebar') %>
     </div>
+<%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: server.UUID },
         { label: 'Logs' }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
@@ -48,7 +48,7 @@
           <div class="al-card-header">
             <div>
               <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Recent output</h2>
-              <p class="text-xs" style="color:var(--theme-text-muted)">Last N lines from disk</p>
+              <p class="text-xs" style="color:var(--theme-text-muted)">Recent console output</p>
             </div>
           </div>
           <div id="logsViewer" class="h-96 overflow-y-auto p-3 font-mono text-[12px] leading-relaxed whitespace-pre-wrap break-words"

@@ -22,8 +22,9 @@
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-full">
     <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
+      <%- include('../../components/sidebar') %>
     </div>
+<%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
@@ -123,24 +124,24 @@
               <div class="al-editor-status flex flex-col xl:flex-row xl:justify-between xl:items-center px-3 py-2 border-t text-xs font-mono overflow-x-auto" style="background:var(--theme-bg-secondary);border-top-color:var(--theme-border);color:var(--theme-text-muted);">
                 <div class="flex items-center gap-3 whitespace-nowrap">
                   <div id="editor-status">Line: 1, Column: 1</div>
-                  <div id="file-info" class="px-2 py-0.5 bg-neutral-200 dark:bg-neutral-600 rounded text-neutral-600 dark:text-neutral-300">Loading...</div>
+                  <div id="file-info" class="px-2 py-0.5 rounded" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Loading...</div>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                   <div class="flex items-center">
                     <span class="opacity-75 mr-1.5">Word Wrap:</span>
-                    <button type="button" id="toggle-wordwrap" class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 transition-colors">Off</button>
+                    <button type="button" id="toggle-wordwrap" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Off</button>
                   </div>
                   <div class="flex items-center">
                     <span class="opacity-75 mr-1.5">Minimap:</span>
-                    <button type="button" id="toggle-minimap" class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 transition-colors">Off</button>
+                    <button type="button" id="toggle-minimap" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Off</button>
                   </div>
                   <div class="flex items-center">
                     <span class="opacity-75 mr-1.5">Theme:</span>
-                    <button type="button" id="toggle-theme" class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 transition-colors">Auto</button>
+                    <button type="button" id="toggle-theme" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Auto</button>
                   </div>
                   <div class="flex items-center">
                     <span class="opacity-75 mr-1.5">Save:</span>
-                    <span data-kbd class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600">Ctrl+S</span>
+                    <span data-kbd class="px-1.5 py-0.5 rounded" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Ctrl+S</span>
                   </div>
                 </div>
               </div>

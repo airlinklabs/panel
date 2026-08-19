@@ -4,8 +4,9 @@
   <div class="flex h-screen">
     <!-- Sidebar -->
     <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
+      <%- include('../../components/sidebar') %>
     </div>
+<%- include('../../components/template') %>
     <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
