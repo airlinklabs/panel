@@ -151,20 +151,28 @@ describe('Migration invariant: header.ejs loads required lifecycle scripts', () 
     'utf8'
   );
 
-  it('loads turbo.js', () => {
-    expect(header).toContain('turbo.js');
+  it('loads htmx.min.js', () => {
+    expect(header).toContain('htmx.min.js');
   });
 
-  it('loads stimulus.js', () => {
-    expect(header).toContain('stimulus.js');
+  it('loads alpine.min.js', () => {
+    expect(header).toContain('alpine.min.js');
   });
 
   it('loads query-core.js', () => {
     expect(header).toContain('query-core.js');
   });
 
-  it('loads turbo-shell.js', () => {
-    expect(header).toContain('turbo-shell.js');
+  it('does not load turbo.js', () => {
+    expect(header).not.toMatch(/src="[^"]*\/turbo\.js/);
+  });
+
+  it('does not load stimulus.js', () => {
+    expect(header).not.toMatch(/src="[^"]*\/stimulus\.js/);
+  });
+
+  it('does not load turbo-shell.js', () => {
+    expect(header).not.toMatch(/src="[^"]*\/turbo-shell\.js/);
   });
 
   it('loads csrf.js', () => {

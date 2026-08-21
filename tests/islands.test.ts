@@ -8,7 +8,7 @@
  * - sync() full-document operation
  * - Specialist island registration
  * - Edge cases: null targets, missing APIs, duplicate mounts
- * - Integration with turbo-shell.js and htmx-bootstrap.js
+ * - Integration with htmx-bootstrap.js
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'fs';
@@ -260,7 +260,7 @@ describe('HTMX lifecycle bridge source', () => {
   });
 });
 
-describe('turbo-shell.js integration', () => {
+describe('turbo-shell.js (deprecated, not loaded)', () => {
   const code = fs.readFileSync(turboShellPath, 'utf8');
 
   it('delegates to Islands.sync() instead of inline syncComponents', () => {

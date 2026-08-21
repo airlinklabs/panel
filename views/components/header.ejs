@@ -38,13 +38,9 @@ const wallpaperExcluded = req && req.path && (
     <script nonce="<%- nonce %>" defer src="/js/csrf.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/js/shared/al-icon.js?v=8"></script>
 
-    <!-- ── Legacy lifecycle (Turbo/Stimulus/Query) — retained until migration wave ── -->
+    <!-- ── Legacy lifecycle — retained dependencies ──────────────────────── -->
     <script nonce="<%- nonce %>" defer src="/javascript/vendor/query-core.js?v=1"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/vendor/reconnecting-websocket.js?v=1"></script>
-    <script nonce="<%- nonce %>" defer src="/javascript/vendor/stimulus.js?v=1"></script>
-    <script nonce="<%- nonce %>" defer src="/javascript/vendor/turbo.js?v=1"></script>
-    <!-- turbo-shell must load synchronously: inline body/page scripts call ALMount during parse -->
-    <script nonce="<%- nonce %>" src="/javascript/shared/turbo-shell.js?v=2"></script>
 
     <!-- ── HTMX: self-hosted, CSP-compatible ──────────────────────────── -->
     <script nonce="<%- nonce %>" defer src="/javascript/vendor/htmx.min.js?v=2.0.4"></script>
@@ -91,8 +87,6 @@ const wallpaperExcluded = req && req.path && (
         opacity: 0;
         transform: translateY(14px);
       }
-      /* Turbo Drive's default top progress bar is hidden: the panel draws its own page-loader overlay */
-      turbo-progress-bar { visibility: hidden; }
     </style>
 </head>
 <body style="font-family: 'General Sans';<%= (settings.panelWallpaper && !wallpaperExcluded) ? `--al-wallpaper-image:url('${settings.panelWallpaper}');` : '' %>" class="h-full<%= (settings.panelWallpaper && !wallpaperExcluded) ? ' al-wallpaper' : '' %>">
@@ -108,7 +102,7 @@ const wallpaperExcluded = req && req.path && (
 <script nonce="<%- nonce %>" src="/javascript/shared/theme-init.js?v=1"></script>
 <%- include("./bottomNav") %>
 <%- include("./modal") %>
-<script nonce="<%- nonce %>" src="/javascript/shared/toast-store.js?v=1" data-turbo-eval="false"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/toast-store.js?v=1"></script>
 <%- include("./toast") %>
-<script nonce="<%- nonce %>" src="/javascript/shared/escape.js?v=1" data-turbo-eval="false"></script>
-<script nonce="<%- nonce %>" src="/javascript/shared/api.js?v=1" data-turbo-eval="false"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/escape.js?v=1"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/api.js?v=1"></script>
