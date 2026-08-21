@@ -2,7 +2,7 @@
   const pd = document.getElementById('page-data')?.dataset;
   let pendingRejectId = null;
 
-  window.ALMount(function() {
+  function init() {
     const rejectModal = document.getElementById('rejectModal');
     const openReject = (id, name) => {
       pendingRejectId = id;
@@ -103,5 +103,11 @@
         showToast(pd.error, 'error');
       }
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

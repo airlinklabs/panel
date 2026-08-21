@@ -206,7 +206,7 @@ function wirePlayerStatsRealtime() {
 }
 
 if (window.alRealtime && window.alState) wirePlayerStatsRealtime();
-else window.alListener(window, 'al:realtime-ready', 'admin-playerstats-realtime-ready', wirePlayerStatsRealtime);
+else window.addEventListener('al:realtime-ready', wirePlayerStatsRealtime);
 
 async function triggerDataCollection() {
   try {

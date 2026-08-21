@@ -4,7 +4,7 @@
   try { currentSettings = JSON.parse(pageData.dataset.modrinthSettings || '{}'); } catch (e) { console.error('Failed to parse Modrinth settings:', e); }
   const PROJECT_TYPES = ['mod', 'modpack', 'resourcepack', 'shader', 'datapack', 'plugin'];
 
-  window.ALMount(function() {
+  function init() {
     loadCurrentSettings();
     refreshFileStatus();
     setupProjectTypeButtons();
@@ -12,12 +12,18 @@
     document.getElementById('newProjectId').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') addBlockedProject();
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 
   /* ── Tabs ─────────────────────────────────────────────────────── */
   // Selection (aria state, panel visibility, URL hash) is owned by
   // al-tabs; this only repaints the active-tab border underline.
-  window.alListener(document, 'al:tabs-change', 'modrinth-tabs', function(e) {
+  document.addEventListener('al:tabs-change', function(e) {
     const name = e.detail && e.detail.name;
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
       const on = btn.getAttribute('data-tab') === name;

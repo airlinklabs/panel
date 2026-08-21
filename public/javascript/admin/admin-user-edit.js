@@ -1,7 +1,7 @@
 (function() {
   const pd = document.getElementById('page-data').dataset;
 
-  window.ALMount(function() {
+  function init() {
     const form = document.getElementById('editUserForm');
     const isAdminToggle = document.getElementById('isAdmin');
     const adminStatusLabel = document.getElementById('adminStatusLabel');
@@ -117,5 +117,11 @@
         showToast(pd.errorUpdatingUser, 'error');
       }
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

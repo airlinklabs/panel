@@ -166,9 +166,9 @@
       }
     }
 
-    window.alListener(window, 'pagehide', 'server-header-realtime-teardown', teardownRealtime);
+    window.addEventListener('pagehide', teardownRealtime);
   }
 
   if (window.alRealtime) wireRealtime();
-  else window.alListener(window, 'al:realtime-ready', 'server-header-realtime-ready', wireRealtime);
+  else window.addEventListener('al:realtime-ready', wireRealtime);
 })();

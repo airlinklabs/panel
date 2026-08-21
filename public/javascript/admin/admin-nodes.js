@@ -175,5 +175,5 @@ function copyCommand(copyBtn, command) {
   }
 
   if (window.alRealtime && window.alState) wireNodeStatusRealtime();
-  else window.alListener(window, 'al:realtime-ready', 'admin-nodes-realtime-ready', wireNodeStatusRealtime);
+  else window.addEventListener('al:realtime-ready', wireNodeStatusRealtime);
 })();
