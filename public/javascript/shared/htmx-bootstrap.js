@@ -16,7 +16,8 @@
   window.__htmxBootstrap = true;
 
   // ── CSRF token injection ─────────────────────────────────────────────
-  document.body.addEventListener('htmx:configRequest', function (event) {
+  // Listen on both document and body to ensure coverage across HTMX versions
+  function injectCsrfToken(event) {
     var meta = document.querySelector('meta[name="csrf-token"]');
     if (!meta) return;
     var token = meta.getAttribute('content');
@@ -25,13 +26,13 @@
     var method = (event.detail.verb || 'get').toUpperCase();
     if (method === 'GET') return;
 
-    // Ensure headers object exists and set the CSRF token directly
     if (!event.detail.headers) event.detail.headers = {};
     event.detail.headers['CSRF-Token'] = token;
-  });
+  }
+  document.addEventListener('htmx:configRequest', injectCsrfToken);
 
   // ── Session expiry handling ──────────────────────────────────────────
-  document.body.addEventListener('htmx:beforeSend', function (event) {
+  document.addEventListener('htmx:beforeSend', function (event) {
     var xhr = event.detail.xhr;
     if (!xhr) return;
 
@@ -64,7 +65,7 @@
   });
 
   // ── HX-Trigger event → toast wiring ──────────────────────────────────
-  document.body.addEventListener('htmx:beforeSwap', function (event) {
+  document.addEventListener('htmx:beforeSwap', function (event) {
     var xhr = event.detail.xhr;
     if (!xhr) return;
 
@@ -104,13 +105,13 @@
   });
 
   // ── HTMX swap lifecycle — destroy/initialize islands ──────────────────
-  document.body.addEventListener('htmx:beforeSwap', function (event) {
+  document.addEventListener('htmx:beforeSwap', function (event) {
     if (event.detail.target && window.Islands && typeof Islands.destroyWithin === 'function') {
       Islands.destroyWithin(event.detail.target);
     }
   });
 
-  document.body.addEventListener('htmx:afterSettle', function (event) {
+  document.addEventListener('htmx:afterSettle', function (event) {
     var target = event.detail.target;
     if (!target) return;
 
