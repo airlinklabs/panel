@@ -16,7 +16,6 @@ import * as path from 'path';
 
 const islandsPath = path.resolve(__dirname, '../public/javascript/shared/islands.js');
 const htmxBootstrapPath = path.resolve(__dirname, '../public/javascript/shared/htmx-bootstrap.js');
-const turboShellPath = path.resolve(__dirname, '../public/javascript/shared/turbo-shell.js');
 const headerPath = path.resolve(__dirname, '../views/components/header.ejs');
 
 function loadIslands(mockWindow) {
@@ -257,20 +256,6 @@ describe('HTMX lifecycle bridge source', () => {
 
   it('includes focus management for error alerts', () => {
     expect(code).toContain('role="alert"');
-  });
-});
-
-describe('turbo-shell.js (deprecated, not loaded)', () => {
-  const code = fs.readFileSync(turboShellPath, 'utf8');
-
-  it('delegates to Islands.sync() instead of inline syncComponents', () => {
-    expect(code).toContain('Islands.sync');
-    expect(code).not.toContain('COMPONENT_SYSTEMS');
-    expect(code).not.toContain('ALTabSystem.destroyAll');
-  });
-
-  it('uses Islands.destroyAll() in turbo:before-render', () => {
-    expect(code).toContain('Islands.destroyAll');
   });
 });
 
