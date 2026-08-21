@@ -32,7 +32,7 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
       ? '__Host-psifi.x-csrf-token'
       : 'psifi.x-csrf-token',
   cookieOptions: {
-    sameSite: 'strict',
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
   },
