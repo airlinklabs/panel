@@ -58,14 +58,13 @@
       </div>
 
       <div class="al-page-body space-y-4" data-al-tabs data-tabs-default="profile" data-tabs-hash>
-        <div role="tablist" aria-label="<%= req.translations.userAccountTitle || 'Account' %>"
-          class="flex gap-1 p-1 rounded-xl mb-5 overflow-x-auto" style="background:var(--theme-bg-secondary)">
+        <div role="tablist" aria-label="<%= req.translations.userAccountTitle || 'Account' %>" class="flex gap-1 mb-6">
           <button type="button" role="tab" data-tab="profile" aria-selected="true" tabindex="0" aria-controls="account-panel-profile"
-            class="px-3 py-2 text-sm font-medium rounded-lg transition" style="background:var(--theme-text);color:var(--theme-bg);"><%- icon('user', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.profileTab || 'Profile' %></button>
+            class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('user', { class: 'size-4', strokeWidth: 1.5 }) %> <%= req.translations.profileTab || 'Profile' %></button>
           <button type="button" role="tab" data-tab="images" aria-selected="false" tabindex="-1" aria-controls="account-panel-images"
-            class="px-3 py-2 text-sm font-medium rounded-lg transition" style="color:var(--theme-text-muted);"><%- icon('image', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.imagesTab || 'Images' %></button>
+            class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('image', { class: 'size-4', strokeWidth: 1.5 }) %> <%= req.translations.imagesTab || 'Images' %></button>
           <button type="button" role="tab" data-tab="history" aria-selected="false" tabindex="-1" aria-controls="account-panel-history"
-            class="px-3 py-2 text-sm font-medium rounded-lg transition" style="color:var(--theme-text-muted);"><%- icon('history', { class: 'size-4 inline-block align-text-bottom', strokeWidth: 1.5 }) %> <%= req.translations.historyTab || 'Login History' %></button>
+            class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('history', { class: 'size-4', strokeWidth: 1.5 }) %> <%= req.translations.historyTab || 'Login History' %></button>
         </div>
 
         <div role="tabpanel" data-tab-panel="profile" id="account-panel-profile">

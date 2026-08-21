@@ -41,10 +41,10 @@
       </div>
 
       <div class="al-page-body" data-al-tabs data-tabs-default="installed" data-tabs-hash>
-      <div role="tablist" class="flex items-center border-b" style="border-color:var(--theme-border);">
-        <button type="button" id="tab-btn-installed" data-tab="installed" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-installed" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition bg-neutral-900 text-white dark:bg-white dark:text-black">Installed <span id="tabCountInstalled" class="ml-1 text-xs text-neutral-400"><%= images.length %></span></button>
-        <button type="button" id="tab-btn-approvals" data-tab="approvals" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-approvals" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">Approvals <% if (pending && pending.length > 0) { %><span id="tabCountApprovals" class="ml-1 text-xs font-semibold" style="color:var(--theme-warning);"><%= pending.length %></span><% } %></button>
-        <button type="button" id="tab-btn-store" data-tab="store" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-store" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">Store</button>
+      <div role="tablist" class="flex gap-1 mb-6">
+        <button type="button" id="tab-btn-installed" data-tab="installed" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-installed" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('box', { class: 'size-4', strokeWidth: 1.5 }) %>Installed <span id="tabCountInstalled" class="ml-1 text-xs text-neutral-400"><%= images.length %></span></button>
+        <button type="button" id="tab-btn-approvals" data-tab="approvals" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-approvals" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('clock', { class: 'size-4', strokeWidth: 1.5 }) %>Approvals <% if (pending && pending.length > 0) { %><span id="tabCountApprovals" class="ml-1 text-xs font-semibold" style="color:var(--theme-warning);"><%= pending.length %></span><% } %></button>
+        <button type="button" id="tab-btn-store" data-tab="store" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-store" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Store</button>
       </div>
 
       <div id="tab-panel-installed" role="tabpanel" aria-labelledby="tab-btn-installed" data-tab-panel="installed" class="mt-5">
@@ -182,22 +182,6 @@
 
 <script nonce="<%- nonce %>">
   (function() {
-    document.addEventListener('al:tabs-change', function(e) {
-      var k = e.detail && e.detail.name;
-      ['installed', 'approvals', 'store'].forEach(function(key) {
-        var btn = document.getElementById('tab-btn-' + key);
-        if (!btn) return;
-        var isActive = key === k;
-        btn.classList.toggle('bg-neutral-900', isActive);
-        btn.classList.toggle('text-white', isActive);
-        btn.classList.toggle('dark:bg-white', isActive);
-        btn.classList.toggle('dark:text-black', isActive);
-        btn.classList.toggle('text-neutral-400', !isActive);
-        btn.classList.toggle('hover:text-neutral-600', !isActive);
-        btn.classList.toggle('dark:hover:text-neutral-300', !isActive);
-      });
-    });
-
     document.addEventListener('al:tabs-loaded', function(e) {
       var detail = e.detail;
       if (detail && detail.name === 'store' && detail.panel && window.AdminImageStore) {

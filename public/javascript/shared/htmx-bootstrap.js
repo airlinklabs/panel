@@ -25,14 +25,9 @@
     var method = (event.detail.verb || 'get').toUpperCase();
     if (method === 'GET') return;
 
-    // Add CSRF header — do not duplicate if already set
-    var headers = event.detail.headers || {};
-    var hasToken = Object.keys(headers).some(function (h) {
-      return h.toLowerCase() === 'csrf-token';
-    });
-    if (!hasToken) {
-      headers['CSRF-Token'] = token;
-    }
+    // Ensure headers object exists and set the CSRF token directly
+    if (!event.detail.headers) event.detail.headers = {};
+    event.detail.headers['CSRF-Token'] = token;
   });
 
   // ── Session expiry handling ──────────────────────────────────────────

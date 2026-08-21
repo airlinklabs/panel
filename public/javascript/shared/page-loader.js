@@ -166,27 +166,14 @@
   function animateIn(c) {
     if (!c) return;
     const children = getAnimatableChildren(c);
-    children.forEach(function (child) {
-      child.style.transition = 'none';
-      child.style.opacity = '0';
-    });
     document.documentElement.classList.remove('js-loading');
-    c.style.transition = 'none';
     c.style.opacity = '1';
     c.style.transform = '';
     if (!children.length) return;
-    void c.offsetHeight;
     children.forEach(function (child) {
-      child.style.transition = 'opacity 200ms ' + EASE_IN;
       child.style.opacity = '1';
+      child.style.transform = '';
     });
-    setTimeout(function () {
-      children.forEach(function (child) {
-        child.style.transition = '';
-        child.style.opacity = '';
-        child.style.transform = '';
-      });
-    }, 250);
   }
 
   function fadeContentOut() {
@@ -207,11 +194,7 @@
     const _pc = el('page-content') || el('server-page-body');
     if (_pc) _pc.style.opacity = '';
     releaseActivity();
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        animateIn(getAnimEl());
-      });
-    });
+    animateIn(getAnimEl());
   }
 
   // ── Desktop sidebar highlight ─────────────────────────────────────────────
