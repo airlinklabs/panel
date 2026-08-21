@@ -1,0 +1,51 @@
+<!-- Location list fragment — replaces #locationsList on create/delete -->
+<div id="admin-locations-list">
+  <% if (locations.length === 0) { %>
+    <div class="text-center py-10">
+      <div class="mx-auto mb-3 w-12 h-12 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-border) 35%, transparent); color:var(--theme-text-muted);">
+        <%- icon('map-pin', { class: 'size-6', strokeWidth: 1.5 }) %>
+      </div>
+      <p class="text-sm font-medium" style="color:var(--theme-text-strong);">No locations yet</p>
+      <p class="text-xs mt-1" style="color:var(--theme-text-muted);">Create your first location above to start grouping nodes by region.</p>
+    </div>
+  <% } else { %>
+    <% const byRegion = new Map(); locations.forEach(loc => {
+         const region = loc.shortCode.split('-')[0] || 'Other';
+         if (!byRegion.has(region)) byRegion.set(region, []);
+         byRegion.get(region).push(loc);
+       }); %>
+    <% for (const [region, regionLocs] of byRegion) { %>
+      <div class="mb-6 last:mb-0" data-region="<%= region %>">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-[11px] font-semibold uppercase tracking-widest" style="color:var(--theme-text-muted);"><%= region %></span>
+          <span class="h-px flex-1" style="background:var(--theme-border);"></span>
+          <span class="text-xs" style="color:var(--theme-text-muted);"><%= regionLocs.length %></span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% regionLocs.forEach(loc => { %>
+            <div class="rounded-xl border p-4 flex items-center justify-between gap-3 transition-shadow hover:shadow-sm" style="border-color:var(--theme-border); background:var(--theme-bg-card);" data-location-id="<%= loc.id %>">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="shrink-0 w-2 h-2 rounded-full" style="background:<%= (loc._count && loc._count.nodes > 0) ? 'var(--theme-success)' : 'var(--theme-border)' %>;"></span>
+                  <p class="font-medium text-sm truncate" style="color:var(--theme-text-strong);"><%= loc.name %></p>
+                </div>
+                <p class="text-xs mt-1.5 font-mono" style="color:var(--theme-text-muted);"><%= loc.shortCode %></p>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= (loc._count && loc._count.nodes) || 0 %> node(s)</p>
+              </div>
+              <button
+                hx-delete="/admin/location/<%= loc.id %>"
+                hx-target="#admin-locations-list"
+                hx-swap="outerHTML"
+                hx-confirm="Delete &quot;<%= loc.name %>&quot;? Servers in it will lose their grouping."
+                type="button"
+                class="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
+                aria-label="Delete location <%= loc.name %>">
+                <%- icon('trash', { class: 'size-4', strokeWidth: 1.5, style: 'color:var(--theme-danger);' }) %>
+              </button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+</div>
