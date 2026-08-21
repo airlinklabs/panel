@@ -271,7 +271,7 @@ async function main() {
 
   header('════════════════════════════════════════');
   ok('Setup complete!');
-  info('Start the panel with: pnpm run start:panel');
+  info('Start the panel with: pnpm run start');
   header('════════════════════════════════════════');
   console.log();
 }

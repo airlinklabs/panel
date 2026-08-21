@@ -32,7 +32,6 @@
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "src/tui"
+    "dist"
   ]
 }

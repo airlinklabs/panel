@@ -85,7 +85,7 @@ cd /var/www/
 git clone https://github.com/AirlinkLabs/panel.git
 cd panel
 node public/setup.mjs
-pnpm run start:panel
+pnpm run start
 ```
 
 The setup script automatically:
@@ -121,14 +121,14 @@ pnpm install
 npx prisma generate
 npx prisma db push
 pnpm run build
-pnpm run start:panel
+pnpm run start
 ```
 
 ### Running with pm2
 
 ```bash
 npm install -g pm2
-pm2 start "pnpm run start:panel" --name airlink-panel
+pm2 start "pnpm run start" --name airlink-panel
 pm2 save
 pm2 startup
 ```
