@@ -467,8 +467,8 @@ app.use(errorPageHandler);
       startPlayerStatsCollection();
       startScheduler();
       reenqueueQueuedInstalls();
-      // Clone/pull egg repos on startup; auto-refreshes every 2 days
       initEggCatalogue().catch(err => logger.warn(`Store catalogue init failed: ${err?.message || err}`));
+      import('./handlers/realtime/nodeStatsWs').then(m => m.attachNodeStatsWs(server));
     });
 
     let shuttingDown = false;

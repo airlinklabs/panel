@@ -12,7 +12,6 @@
   var allocatedCpu = parseFloat(pd.dataset.cpu) || 0;
   var allocatedDisk = parseFloat(pd.dataset.disk) || 0;
   var MAX_PTS = 30;
-  var POLL = 3000;
 
   function fmtBytes(b) {
     if (b >= 1073741824) return (b / 1073741824).toFixed(1) + ' GB';
@@ -34,53 +33,54 @@
 
   function timeNow() { return new Date().toLocaleTimeString(); }
 
-  var initStats = JSON.parse(pd.dataset.stats || '[]');
-  var initHost = JSON.parse(pd.dataset.host || '{}');
-  var ramL = initStats.map(function(s) { return new Date(s.timestamp).toLocaleTimeString(); });
-  var ramD = initStats.map(function(s) { return parseFloat(s.Ram.replace(' MB', '')); });
-  var cpuL = ramL.slice();
-  var cpuD = initStats.map(function(s) { return parseFloat(s.Cores.replace('%', '')); });
+  function el(id) { return document.getElementById(id); }
 
-  var ramChart = new Chart(document.getElementById('ramChart').getContext('2d'), {
+  function setText(id, text) {
+    var e = el(id);
+    if (e) e.textContent = text;
+  }
+
+  var ramChart = new Chart(el('ramChart').getContext('2d'), {
     type: 'line',
-    data: { labels: ramL, datasets: [{ label: 'RAM (MB)', data: ramD, borderColor: ACCENT, backgroundColor: ACCENT + '33', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0 }] },
+    data: { labels: [], datasets: [{ label: 'RAM (MB)', data: [], borderColor: ACCENT, backgroundColor: ACCENT + '33', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0 }] },
     options: { responsive: true, maintainAspectRatio: false, animation: { duration: 250 }, plugins: { legend: { display: false } },
       scales: { x: { ticks: { color: TICK, maxTicksLimit: 8, maxRotation: 0 }, grid: { color: GRID } }, y: { beginAtZero: true, ticks: { color: TICK }, grid: { color: GRID }, title: { display: true, text: 'MB', color: TICK } } } }
   });
 
-  var cpuChart = new Chart(document.getElementById('cpuChart').getContext('2d'), {
+  var cpuChart = new Chart(el('cpuChart').getContext('2d'), {
     type: 'line',
-    data: { labels: cpuL, datasets: [{ label: 'CPU (%)', data: cpuD, borderColor: '#f97316', backgroundColor: '#f9731633', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0 }] },
+    data: { labels: [], datasets: [{ label: 'CPU (%)', data: [], borderColor: '#f97316', backgroundColor: '#f9731633', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0 }] },
     options: { responsive: true, maintainAspectRatio: false, animation: { duration: 250 }, plugins: { legend: { display: false } },
       scales: { x: { ticks: { color: TICK, maxTicksLimit: 8, maxRotation: 0 }, grid: { color: GRID } }, y: { beginAtZero: true, suggestedMax: 100, ticks: { color: TICK }, grid: { color: GRID }, title: { display: true, text: '%', color: TICK } } } }
   });
 
-  function push(chart, labels, data, label, value) {
-    labels.push(label); data.push(value);
-    if (labels.length > MAX_PTS) { labels.shift(); data.shift(); }
+  function pushChart(chart, value) {
+    chart.data.labels.push(timeNow());
+    chart.data.datasets[0].data.push(value);
+    if (chart.data.labels.length > MAX_PTS) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
     chart.update('none');
   }
 
-  function updateCards(d) {
+  function handleData(d) {
     var h = d.host || {};
-    var s = d.stats || {};
-    var ts = s.totalStats || [];
-    var latest = ts.length ? ts[ts.length - 1] : null;
+    var ts = (d.stats || {}).totalStats || [];
+    var uptime = (d.stats || {}).uptime;
+    var latest = d.current || (ts.length ? ts[ts.length - 1] : null);
 
     if (h.ram) {
-      document.getElementById('host-ram').textContent = (h.ram.used / 1073741824).toFixed(1) + ' GB';
-      document.getElementById('host-ram-detail').textContent = 'of ' + (h.ram.total / 1073741824).toFixed(1) + ' GB';
+      setText('host-ram', (h.ram.used / 1073741824).toFixed(1) + ' GB');
+      setText('host-ram-detail', 'of ' + (h.ram.total / 1073741824).toFixed(1) + ' GB');
     }
     if (latest) {
       var cpuPct = parseFloat(latest.Cores.replace('%', ''));
-      document.getElementById('host-cpu').textContent = cpuPct.toFixed(1) + '%';
-      document.getElementById('host-cpu-detail').textContent = (h.cpu ? h.cpu.cores : '--') + ' cores';
+      setText('host-cpu', cpuPct.toFixed(1) + '%');
+      setText('host-cpu-detail', (h.cpu ? h.cpu.cores : '--') + ' cores');
     }
     if (h.disk && h.disk.total > 0) {
-      document.getElementById('host-disk').textContent = fmtBytes(h.disk.used);
-      document.getElementById('host-disk-detail').textContent = 'of ' + fmtBytes(h.disk.total);
+      setText('host-disk', fmtBytes(h.disk.used));
+      setText('host-disk-detail', 'of ' + fmtBytes(h.disk.total));
     }
-    if (s.uptime) document.getElementById('host-uptime').textContent = s.uptime;
+    if (uptime) setText('host-uptime', uptime);
 
     if (allocatedRam > 0 && h.ram) {
       var usedMB = h.ram.used / 1048576;
@@ -100,26 +100,31 @@
       setBar('alloc-disk', (h.disk.used / h.disk.total * 100), fmtBytes(h.disk.used) + ' / ' + fmtBytes(h.disk.total));
     }
 
-    if (d.instances !== undefined) document.getElementById('count-instances').textContent = d.instances;
-    if (d.allocationsInUse !== undefined) document.getElementById('count-alloc').textContent = d.allocationsInUse + '/' + d.allocations;
+    if (d.instances !== undefined) setText('count-instances', d.instances);
+    if (d.allocationsInUse !== undefined) setText('count-alloc', d.allocationsInUse + '/' + d.allocations);
 
     if (latest) {
-      push(ramChart, ramChart.data.labels, ramChart.data.datasets[0].data, timeNow(), parseFloat(latest.Ram.replace(' MB', '')));
-      push(cpuChart, cpuChart.data.labels, cpuChart.data.datasets[0].data, timeNow(), parseFloat(latest.Cores.replace('%', '')));
+      pushChart(ramChart, parseFloat(latest.Ram.replace(' MB', '')));
+      pushChart(cpuChart, parseFloat(latest.Cores.replace('%', '')));
     }
   }
 
-  if (initStats.length || Object.keys(initHost).length) {
-    updateCards({
-      stats: { totalStats: initStats, uptime: '--' },
-      host: initHost,
-      instances: parseInt(pd.dataset.instances) || 0,
-      allocations: parseInt(pd.dataset.allocations) || 0,
-      allocationsInUse: parseInt(pd.dataset.allocationsInUse) || 0
-    });
+  function connect() {
+    var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var ws = new WebSocket(proto + '//' + location.host + '/ws/node/' + nodeId + '/stats');
+
+    ws.onmessage = function(evt) {
+      try { handleData(JSON.parse(evt.data)); } catch (_) {}
+    };
+
+    ws.onclose = function() {
+      setTimeout(connect, 3000);
+    };
+
+    ws.onerror = function() {
+      ws.close();
+    };
   }
 
-  setInterval(function() {
-    fetch('/admin/node/' + nodeId + '/stats/live').then(function(r) { return r.ok ? r.json() : null; }).then(function(d) { if (d) updateCards(d); }).catch(function() {});
-  }, POLL);
+  connect();
 })();
