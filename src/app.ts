@@ -220,6 +220,12 @@ const addonViewsDir = path.join(__dirname, '../../storage/addons');
 // Load compression
 app.use(compression());
 
+// htmx detection — sets req.htmx for all downstream handlers
+app.use((req: any, _res, next) => {
+  req.htmx = req.headers['hx-request'] === 'true';
+  next();
+});
+
 // =============================================================================
 // Security middleware
 // =============================================================================

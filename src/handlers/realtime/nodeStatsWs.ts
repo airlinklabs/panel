@@ -48,7 +48,7 @@ export function attachNodeStatsWs(server: Server): void {
     try {
       daemonWs = new WebSocket(wsUrl);
     } catch (err) {
-      logger.warn(`nodestats ws connect failed for node ${nodeId}`, err);
+      logger.warn(`nodestats ws connect failed for node ${nodeId}`, err as Record<string, unknown>);
       ws.close(1011, 'could not connect to daemon');
       return;
     }
