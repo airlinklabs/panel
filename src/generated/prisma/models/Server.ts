@@ -455,6 +455,7 @@ export type ServerOrderByWithRelationInput = {
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
   allocations?: Prisma.AllocationOrderByRelationAggregateInput
   serverMounts?: Prisma.ServerMountOrderByRelationAggregateInput
+  _relevance?: Prisma.ServerOrderByRelevanceInput
 }
 
 export type ServerWhereUniqueInput = Prisma.AtLeast<{
@@ -788,6 +789,12 @@ export type ServerListRelationFilter = {
 
 export type ServerOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ServerOrderByRelevanceInput = {
+  fields: Prisma.ServerOrderByRelevanceFieldEnum | Prisma.ServerOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type ServerCountOrderByAggregateInput = {
@@ -1239,6 +1246,7 @@ export type ServerCreateOrConnectWithoutOwnerInput = {
 
 export type ServerCreateManyOwnerInputEnvelope = {
   data: Prisma.ServerCreateManyOwnerInput | Prisma.ServerCreateManyOwnerInput[]
+  skipDuplicates?: boolean
 }
 
 export type ServerUpsertWithWhereUniqueWithoutOwnerInput = {
@@ -1825,6 +1833,7 @@ export type ServerCreateOrConnectWithoutImageInput = {
 
 export type ServerCreateManyImageInputEnvelope = {
   data: Prisma.ServerCreateManyImageInput | Prisma.ServerCreateManyImageInput[]
+  skipDuplicates?: boolean
 }
 
 export type ServerUpsertWithWhereUniqueWithoutImageInput = {
@@ -2073,6 +2082,7 @@ export type ServerCreateOrConnectWithoutNodeInput = {
 
 export type ServerCreateManyNodeInputEnvelope = {
   data: Prisma.ServerCreateManyNodeInput | Prisma.ServerCreateManyNodeInput[]
+  skipDuplicates?: boolean
 }
 
 export type ServerUpsertWithWhereUniqueWithoutNodeInput = {
@@ -3349,65 +3359,7 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   _count?: boolean | Prisma.ServerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["server"]>
 
-export type ServerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  UUID?: boolean
-  name?: boolean
-  description?: boolean
-  createdAt?: boolean
-  Ports?: boolean
-  Memory?: boolean
-  Swap?: boolean
-  Cpu?: boolean
-  Storage?: boolean
-  Variables?: boolean
-  StartCommand?: boolean
-  dockerImage?: boolean
-  allowStartupEdit?: boolean
-  Installing?: boolean
-  Queued?: boolean
-  Suspended?: boolean
-  Running?: boolean
-  backupLimit?: boolean
-  backupIgnoreList?: boolean
-  databaseLimit?: boolean
-  ownerId?: boolean
-  nodeId?: boolean
-  imageId?: boolean
-  node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
-  owner?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-  image?: boolean | Prisma.ImagesDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["server"]>
 
-export type ServerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  UUID?: boolean
-  name?: boolean
-  description?: boolean
-  createdAt?: boolean
-  Ports?: boolean
-  Memory?: boolean
-  Swap?: boolean
-  Cpu?: boolean
-  Storage?: boolean
-  Variables?: boolean
-  StartCommand?: boolean
-  dockerImage?: boolean
-  allowStartupEdit?: boolean
-  Installing?: boolean
-  Queued?: boolean
-  Suspended?: boolean
-  Running?: boolean
-  backupLimit?: boolean
-  backupIgnoreList?: boolean
-  databaseLimit?: boolean
-  ownerId?: boolean
-  nodeId?: boolean
-  imageId?: boolean
-  node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
-  owner?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-  image?: boolean | Prisma.ImagesDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["server"]>
 
 export type ServerSelectScalar = {
   id?: boolean
@@ -3451,16 +3403,6 @@ export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   allocations?: boolean | Prisma.Server$allocationsArgs<ExtArgs>
   serverMounts?: boolean | Prisma.Server$serverMountsArgs<ExtArgs>
   _count?: boolean | Prisma.ServerCountOutputTypeDefaultArgs<ExtArgs>
-}
-export type ServerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
-  owner?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-  image?: boolean | Prisma.ImagesDefaultArgs<ExtArgs>
-}
-export type ServerIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
-  owner?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-  image?: boolean | Prisma.ImagesDefaultArgs<ExtArgs>
 }
 
 export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3622,30 +3564,6 @@ export interface ServerDelegate<ExtArgs extends runtime.Types.Extensions.Interna
   createMany<T extends ServerCreateManyArgs>(args?: Prisma.SelectSubset<T, ServerCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many Servers and returns the data saved in the database.
-   * @param {ServerCreateManyAndReturnArgs} args - Arguments to create many Servers.
-   * @example
-   * // Create many Servers
-   * const server = await prisma.server.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many Servers and only return the `id`
-   * const serverWithIdOnly = await prisma.server.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends ServerCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ServerCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a Server.
    * @param {ServerDeleteArgs} args - Arguments to delete one Server.
    * @example
@@ -3708,36 +3626,6 @@ export interface ServerDelegate<ExtArgs extends runtime.Types.Extensions.Interna
    * 
    */
   updateMany<T extends ServerUpdateManyArgs>(args: Prisma.SelectSubset<T, ServerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more Servers and returns the data updated in the database.
-   * @param {ServerUpdateManyAndReturnArgs} args - Arguments to update many Servers.
-   * @example
-   * // Update many Servers
-   * const server = await prisma.server.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more Servers and only return the `id`
-   * const serverWithIdOnly = await prisma.server.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends ServerUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ServerUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Server.
@@ -4197,28 +4085,7 @@ export type ServerCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * The data used to create many Servers.
    */
   data: Prisma.ServerCreateManyInput | Prisma.ServerCreateManyInput[]
-}
-
-/**
- * Server createManyAndReturn
- */
-export type ServerCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Server
-   */
-  select?: Prisma.ServerSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the Server
-   */
-  omit?: Prisma.ServerOmit<ExtArgs> | null
-  /**
-   * The data used to create many Servers.
-   */
-  data: Prisma.ServerCreateManyInput | Prisma.ServerCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ServerIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -4263,36 +4130,6 @@ export type ServerUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Limit how many Servers to update.
    */
   limit?: number
-}
-
-/**
- * Server updateManyAndReturn
- */
-export type ServerUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Server
-   */
-  select?: Prisma.ServerSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the Server
-   */
-  omit?: Prisma.ServerOmit<ExtArgs> | null
-  /**
-   * The data used to update Servers.
-   */
-  data: Prisma.XOR<Prisma.ServerUpdateManyMutationInput, Prisma.ServerUncheckedUpdateManyInput>
-  /**
-   * Filter which Servers to update
-   */
-  where?: Prisma.ServerWhereInput
-  /**
-   * Limit how many Servers to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ServerIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

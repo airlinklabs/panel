@@ -803,7 +803,7 @@ const adminModule: Module = {
 
         const nodeWithStatus = await Promise.race([
           checkNodeStatus(node),
-          new Promise<typeof node>((resolve) => setTimeout(() => { node.status = 'Unknown'; resolve(node); }, 4000)),
+          new Promise<typeof node & { status: string }>((resolve) => setTimeout(() => { resolve({ ...node, status: 'Unknown' }); }, 4000)),
         ]);
 
         const settings = await prisma.settings.findUnique({

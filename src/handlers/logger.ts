@@ -1,11 +1,12 @@
 
 import { createConsola, ConsolaInstance } from 'consola';
+import cluster from 'cluster';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
 const logsDir = path.join(process.cwd(), 'logs');
-if (!fs.existsSync(logsDir)) {
+if (cluster.isPrimary && !fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
@@ -43,21 +44,26 @@ const consola = createConsola({
 
 type LogContext = Record<string, unknown>;
 
+/** Wire format sent from workers → primary via IPC. */
+interface LogPayload {
+  __log: boolean;
+  level: string;
+  message: string;
+  context?: string;
+  isError?: boolean;
+}
+
 const REDACTED = '***REDACTED***';
 
-// Keys whose values are treated as secrets in any serialized object/log output.
 const SENSITIVE_KEYS =
   /("(?:password|passwd|secret|token|api[_ -]?key|client[_ -]?secret|access[_ -]?key|access[_ -]?token|auth(?:orization)?|authorization|refresh[_ -]?token|session[_ -]?id|cookie)"\s*[:=]\s*)(?:"([^"]*)"|'([^']*)'|([^\s,;]+))/gi;
 
-// Unquoted key form produced by util.inspect, e.g. `password: 'hunter2'`.
 const SENSITIVE_KEYS_UNQUOTED =
   /(\b(?:password|passwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?key|access[_-]?token|authorization|refresh[_-]?token|session[_-]?id)\b\s*:\s*)(?:"([^"]*)"|'([^']*)'|([^\s,;{}]+))/gi;
 
-// Header-style values such as `Authorization: Bearer <jwt>`.
 const SENSITIVE_HEADERS =
   /((?:authorization|set-cookie|cookie|proxy-authorization)\s*[:=]\s*)(?:bearer\s+)?[^\s,;]+/gi;
 
-// Query-string secrets such as `?token=...` or `&api_key=...`.
 const SENSITIVE_QUERY = /([?&](?:token|key|secret|api_key|access_token|password|auth)=)[^&\s]+/gi;
 
 const redact = (input: string): string => {
@@ -89,13 +95,45 @@ const serializeContext = (context?: unknown): string => {
   return ` ${serializeValue(context)}`;
 };
 
+// ── File writing (primary only) ──────────────────────────────────────────────
 const writeToLogFile = (level: string, message: string): void => {
+  if (cluster.isWorker) {
+    // Workers send log data to the primary via IPC — no direct file writes.
+    try {
+      process.send?.({ __log: true, level, message } satisfies LogPayload);
+    } catch {
+      // IPC channel may be closed during shutdown.
+    }
+    return;
+  }
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${level}: ${redact(message)}\n`;
   fs.appendFile(path.join(logsDir, 'combined.log'), logMessage, (err) => {
     if (err) consola.error('Failed to write to combined log file:', err);
   });
 };
+
+const writeToErrorFile = (fileMessage: string): void => {
+  if (cluster.isWorker) return; // primary handles file writes
+  const timestamp = new Date().toISOString();
+  fs.appendFile(path.join(logsDir, 'error.log'), `[${timestamp}] ERROR: ${fileMessage}\n`, (err) => {
+    if (err) consola.error('Failed to write to error log file:', err);
+  });
+};
+
+// ── Primary process: receive logs from workers ───────────────────────────────
+if (cluster.isPrimary) {
+  cluster.on('message', (worker, payload: LogPayload) => {
+    if (!payload || !payload.__log) return;
+    const timestamp = new Date().toISOString();
+    const logLine = `[${timestamp}] [W${worker.id}] ${payload.level}: ${payload.message}\n`;
+
+    fs.appendFile(path.join(logsDir, 'combined.log'), logLine, () => {});
+    if (payload.isError) {
+      fs.appendFile(path.join(logsDir, 'error.log'), `[${timestamp}] [W${worker.id}] ERROR: ${payload.message}\n`, () => {});
+    }
+  });
+}
 
 const getTimestamp = (): string => {
   const now = new Date();
@@ -106,10 +144,13 @@ const getTimestamp = (): string => {
   ].join(':');
 };
 
+const workerTag = cluster.isWorker ? ` [W${cluster.worker?.id}]` : '';
+
 const formatLogMessage = (badge: string, message: string, maxWidth = 120): string => {
   const timestamp = `${colors.dim}${getTimestamp()}${colors.reset}`;
-  const padding = ' '.repeat(Math.max(0, maxWidth - (badge.length + message.length + timestamp.length)));
-  return `${badge} ${message}${padding}${timestamp}`;
+  const tag = `${colors.dim}${workerTag}${colors.reset}`;
+  const padding = ' '.repeat(Math.max(0, maxWidth - (badge.length + message.length + tag.length + timestamp.length)));
+  return `${badge} ${message}${tag}${padding}${timestamp}`;
 };
 
 const logger = {
@@ -124,10 +165,7 @@ const logger = {
       consola.error(formatLogMessage(badge, `${safeMessage}${serializeContext(error)}`));
     }
 
-    const timestamp = new Date().toISOString();
-    fs.appendFile(path.join(logsDir, 'error.log'), `[${timestamp}] ERROR: ${fileMessage}\n`, (err) => {
-      if (err) consola.error('Failed to write to error log file:', err);
-    });
+    writeToErrorFile(fileMessage);
     writeToLogFile('ERROR', fileMessage);
   },
 

@@ -239,6 +239,7 @@ export type PasswordResetOrderByWithRelationInput = {
   used?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UsersOrderByWithRelationInput
+  _relevance?: Prisma.PasswordResetOrderByRelevanceInput
 }
 
 export type PasswordResetWhereUniqueInput = Prisma.AtLeast<{
@@ -349,6 +350,12 @@ export type PasswordResetOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type PasswordResetOrderByRelevanceInput = {
+  fields: Prisma.PasswordResetOrderByRelevanceFieldEnum | Prisma.PasswordResetOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
+}
+
 export type PasswordResetCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -450,6 +457,7 @@ export type PasswordResetCreateOrConnectWithoutUserInput = {
 
 export type PasswordResetCreateManyUserInputEnvelope = {
   data: Prisma.PasswordResetCreateManyUserInput | Prisma.PasswordResetCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type PasswordResetUpsertWithWhereUniqueWithoutUserInput = {
@@ -523,25 +531,7 @@ export type PasswordResetSelect<ExtArgs extends runtime.Types.Extensions.Interna
   user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["passwordReset"]>
 
-export type PasswordResetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  userId?: boolean
-  token?: boolean
-  expiresAt?: boolean
-  used?: boolean
-  createdAt?: boolean
-  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["passwordReset"]>
 
-export type PasswordResetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  userId?: boolean
-  token?: boolean
-  expiresAt?: boolean
-  used?: boolean
-  createdAt?: boolean
-  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["passwordReset"]>
 
 export type PasswordResetSelectScalar = {
   id?: boolean
@@ -554,12 +544,6 @@ export type PasswordResetSelectScalar = {
 
 export type PasswordResetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "token" | "expiresAt" | "used" | "createdAt", ExtArgs["result"]["passwordReset"]>
 export type PasswordResetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-}
-export type PasswordResetIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-}
-export type PasswordResetIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
 }
 
@@ -693,30 +677,6 @@ export interface PasswordResetDelegate<ExtArgs extends runtime.Types.Extensions.
   createMany<T extends PasswordResetCreateManyArgs>(args?: Prisma.SelectSubset<T, PasswordResetCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many PasswordResets and returns the data saved in the database.
-   * @param {PasswordResetCreateManyAndReturnArgs} args - Arguments to create many PasswordResets.
-   * @example
-   * // Create many PasswordResets
-   * const passwordReset = await prisma.passwordReset.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many PasswordResets and only return the `id`
-   * const passwordResetWithIdOnly = await prisma.passwordReset.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends PasswordResetCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, PasswordResetCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a PasswordReset.
    * @param {PasswordResetDeleteArgs} args - Arguments to delete one PasswordReset.
    * @example
@@ -779,36 +739,6 @@ export interface PasswordResetDelegate<ExtArgs extends runtime.Types.Extensions.
    * 
    */
   updateMany<T extends PasswordResetUpdateManyArgs>(args: Prisma.SelectSubset<T, PasswordResetUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more PasswordResets and returns the data updated in the database.
-   * @param {PasswordResetUpdateManyAndReturnArgs} args - Arguments to update many PasswordResets.
-   * @example
-   * // Update many PasswordResets
-   * const passwordReset = await prisma.passwordReset.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more PasswordResets and only return the `id`
-   * const passwordResetWithIdOnly = await prisma.passwordReset.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends PasswordResetUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, PasswordResetUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one PasswordReset.
@@ -1239,28 +1169,7 @@ export type PasswordResetCreateManyArgs<ExtArgs extends runtime.Types.Extensions
    * The data used to create many PasswordResets.
    */
   data: Prisma.PasswordResetCreateManyInput | Prisma.PasswordResetCreateManyInput[]
-}
-
-/**
- * PasswordReset createManyAndReturn
- */
-export type PasswordResetCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the PasswordReset
-   */
-  select?: Prisma.PasswordResetSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the PasswordReset
-   */
-  omit?: Prisma.PasswordResetOmit<ExtArgs> | null
-  /**
-   * The data used to create many PasswordResets.
-   */
-  data: Prisma.PasswordResetCreateManyInput | Prisma.PasswordResetCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PasswordResetIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1305,36 +1214,6 @@ export type PasswordResetUpdateManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many PasswordResets to update.
    */
   limit?: number
-}
-
-/**
- * PasswordReset updateManyAndReturn
- */
-export type PasswordResetUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the PasswordReset
-   */
-  select?: Prisma.PasswordResetSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the PasswordReset
-   */
-  omit?: Prisma.PasswordResetOmit<ExtArgs> | null
-  /**
-   * The data used to update PasswordResets.
-   */
-  data: Prisma.XOR<Prisma.PasswordResetUpdateManyMutationInput, Prisma.PasswordResetUncheckedUpdateManyInput>
-  /**
-   * Filter which PasswordResets to update
-   */
-  where?: Prisma.PasswordResetWhereInput
-  /**
-   * Limit how many PasswordResets to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PasswordResetIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

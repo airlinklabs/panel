@@ -1,7 +1,7 @@
 import prisma from '../db';
 import logger from './logger';
 import { assertNodeCapacity } from './utils/server/resourceCheck';
-import { startServerContainer } from '../modules/user/server/shared';
+import { ServerStartFailure, startServerContainer } from '../modules/user/server/shared';
 import { emitRealtime, serverEvent } from './realtime/events';
 
 // ── Runtime start queue ───────────────────────────────────────────────────────
@@ -178,7 +178,7 @@ async function capacityAllows(serverId: string, nodeId: number): Promise<boolean
   }
 }
 
-async function attemptStart(serverId: string): Promise<'started' | 'gone' | 'failed'> {
+async function attemptStart(serverId: string): Promise<'started' | 'gone' | 'failed' | 'permanent-failure'> {
   const server = await prisma.server.findUnique({
     where: { UUID: serverId },
     include: { node: true, image: true },
@@ -195,6 +195,9 @@ async function attemptStart(serverId: string): Promise<'started' | 'gone' | 'fai
     return 'started';
   } catch (error) {
     logger.error(`Queued start failed for server ${serverId}:`, error);
+    if (error instanceof ServerStartFailure && !error.retryable) {
+      return 'permanent-failure';
+    }
     return 'failed';
   }
 }
@@ -231,9 +234,12 @@ async function processNode(nodeId: number): Promise<void> {
       }
 
       const outcome = await attemptStart(head.serverId);
-      if (outcome === 'started' || outcome === 'gone') {
+      if (outcome === 'started' || outcome === 'gone' || outcome === 'permanent-failure') {
         removeEntry(list, head.serverId);
         broadcastNodeQueue(nodeId);
+        if (outcome === 'permanent-failure') {
+          logger.warn(`Dropped queued start for ${head.serverId}: its daemon start error cannot succeed on retry.`);
+        }
         continue;
       }
 

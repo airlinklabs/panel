@@ -54,6 +54,8 @@ declare global {
       };
       // Features array for feature-gating
       features?: string[];
+      // Set by htmx middleware — true when the request has HX-Request header
+      htmx?: boolean;
     }
 
     interface Response {

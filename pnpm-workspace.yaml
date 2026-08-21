@@ -9,12 +9,10 @@ overrides:
 allowBuilds:
   '@parcel/watcher': true
   '@prisma/engines': true
-  better-sqlite3: true
   esbuild: true
   prisma: true
 
 minimumReleaseAgeExclude:
-  - '@prisma/adapter-better-sqlite3@7.9.1'
   - '@prisma/client-runtime-utils@7.9.1'
   - '@prisma/client@7.9.1'
   - '@prisma/config@7.9.1'

@@ -250,6 +250,7 @@ export type ServerDatabaseOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   server?: Prisma.ServerOrderByWithRelationInput
   host?: Prisma.DatabaseHostOrderByWithRelationInput
+  _relevance?: Prisma.ServerDatabaseOrderByRelevanceInput
 }
 
 export type ServerDatabaseWhereUniqueInput = Prisma.AtLeast<{
@@ -368,6 +369,12 @@ export type ServerDatabaseListRelationFilter = {
 
 export type ServerDatabaseOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ServerDatabaseOrderByRelevanceInput = {
+  fields: Prisma.ServerDatabaseOrderByRelevanceFieldEnum | Prisma.ServerDatabaseOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type ServerDatabaseCountOrderByAggregateInput = {
@@ -518,6 +525,7 @@ export type ServerDatabaseCreateOrConnectWithoutServerInput = {
 
 export type ServerDatabaseCreateManyServerInputEnvelope = {
   data: Prisma.ServerDatabaseCreateManyServerInput | Prisma.ServerDatabaseCreateManyServerInput[]
+  skipDuplicates?: boolean
 }
 
 export type ServerDatabaseUpsertWithWhereUniqueWithoutServerInput = {
@@ -573,6 +581,7 @@ export type ServerDatabaseCreateOrConnectWithoutHostInput = {
 
 export type ServerDatabaseCreateManyHostInputEnvelope = {
   data: Prisma.ServerDatabaseCreateManyHostInput | Prisma.ServerDatabaseCreateManyHostInput[]
+  skipDuplicates?: boolean
 }
 
 export type ServerDatabaseUpsertWithWhereUniqueWithoutHostInput = {
@@ -675,29 +684,7 @@ export type ServerDatabaseSelect<ExtArgs extends runtime.Types.Extensions.Intern
   host?: boolean | Prisma.DatabaseHostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["serverDatabase"]>
 
-export type ServerDatabaseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  serverId?: boolean
-  hostId?: boolean
-  databaseName?: boolean
-  databaseUser?: boolean
-  databasePassword?: boolean
-  createdAt?: boolean
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  host?: boolean | Prisma.DatabaseHostDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["serverDatabase"]>
 
-export type ServerDatabaseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  serverId?: boolean
-  hostId?: boolean
-  databaseName?: boolean
-  databaseUser?: boolean
-  databasePassword?: boolean
-  createdAt?: boolean
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  host?: boolean | Prisma.DatabaseHostDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["serverDatabase"]>
 
 export type ServerDatabaseSelectScalar = {
   id?: boolean
@@ -711,14 +698,6 @@ export type ServerDatabaseSelectScalar = {
 
 export type ServerDatabaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "serverId" | "hostId" | "databaseName" | "databaseUser" | "databasePassword" | "createdAt", ExtArgs["result"]["serverDatabase"]>
 export type ServerDatabaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  host?: boolean | Prisma.DatabaseHostDefaultArgs<ExtArgs>
-}
-export type ServerDatabaseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  host?: boolean | Prisma.DatabaseHostDefaultArgs<ExtArgs>
-}
-export type ServerDatabaseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
   host?: boolean | Prisma.DatabaseHostDefaultArgs<ExtArgs>
 }
@@ -855,30 +834,6 @@ export interface ServerDatabaseDelegate<ExtArgs extends runtime.Types.Extensions
   createMany<T extends ServerDatabaseCreateManyArgs>(args?: Prisma.SelectSubset<T, ServerDatabaseCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many ServerDatabases and returns the data saved in the database.
-   * @param {ServerDatabaseCreateManyAndReturnArgs} args - Arguments to create many ServerDatabases.
-   * @example
-   * // Create many ServerDatabases
-   * const serverDatabase = await prisma.serverDatabase.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many ServerDatabases and only return the `id`
-   * const serverDatabaseWithIdOnly = await prisma.serverDatabase.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends ServerDatabaseCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ServerDatabaseCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerDatabasePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a ServerDatabase.
    * @param {ServerDatabaseDeleteArgs} args - Arguments to delete one ServerDatabase.
    * @example
@@ -941,36 +896,6 @@ export interface ServerDatabaseDelegate<ExtArgs extends runtime.Types.Extensions
    * 
    */
   updateMany<T extends ServerDatabaseUpdateManyArgs>(args: Prisma.SelectSubset<T, ServerDatabaseUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more ServerDatabases and returns the data updated in the database.
-   * @param {ServerDatabaseUpdateManyAndReturnArgs} args - Arguments to update many ServerDatabases.
-   * @example
-   * // Update many ServerDatabases
-   * const serverDatabase = await prisma.serverDatabase.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more ServerDatabases and only return the `id`
-   * const serverDatabaseWithIdOnly = await prisma.serverDatabase.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends ServerDatabaseUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ServerDatabaseUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerDatabasePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ServerDatabase.
@@ -1403,28 +1328,7 @@ export type ServerDatabaseCreateManyArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many ServerDatabases.
    */
   data: Prisma.ServerDatabaseCreateManyInput | Prisma.ServerDatabaseCreateManyInput[]
-}
-
-/**
- * ServerDatabase createManyAndReturn
- */
-export type ServerDatabaseCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ServerDatabase
-   */
-  select?: Prisma.ServerDatabaseSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ServerDatabase
-   */
-  omit?: Prisma.ServerDatabaseOmit<ExtArgs> | null
-  /**
-   * The data used to create many ServerDatabases.
-   */
-  data: Prisma.ServerDatabaseCreateManyInput | Prisma.ServerDatabaseCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ServerDatabaseIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1469,36 +1373,6 @@ export type ServerDatabaseUpdateManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many ServerDatabases to update.
    */
   limit?: number
-}
-
-/**
- * ServerDatabase updateManyAndReturn
- */
-export type ServerDatabaseUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ServerDatabase
-   */
-  select?: Prisma.ServerDatabaseSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ServerDatabase
-   */
-  omit?: Prisma.ServerDatabaseOmit<ExtArgs> | null
-  /**
-   * The data used to update ServerDatabases.
-   */
-  data: Prisma.XOR<Prisma.ServerDatabaseUpdateManyMutationInput, Prisma.ServerDatabaseUncheckedUpdateManyInput>
-  /**
-   * Filter which ServerDatabases to update
-   */
-  where?: Prisma.ServerDatabaseWhereInput
-  /**
-   * Limit how many ServerDatabases to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ServerDatabaseIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

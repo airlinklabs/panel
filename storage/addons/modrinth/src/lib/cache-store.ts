@@ -83,7 +83,7 @@ export class SQLiteCacheStore implements CacheStore {
     try {
       const rows = await this.prisma.$queryRaw`
         SELECT data FROM ${this.tableName}
-        WHERE cacheKey = ${key} AND expiresAt > datetime('now')
+        WHERE cacheKey = ${key} AND expiresAt > NOW()
         LIMIT 1
       `;
       if (Array.isArray(rows) && rows.length > 0 && rows[0]?.data) {

@@ -10,7 +10,6 @@ const CSRF_TOKEN_SIZE = 32;
 // supported behind a local/reverse-proxy setup, while HTTPS remains secure.
 // `loadEnv()` runs after static imports in app.ts, so this must remain a pure
 // environment read rather than calling getConfig() at module evaluation time.
-const csrfCookieSecure = (process.env.URL || '').startsWith('https://');
 
 function firstHeaderValue(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -44,29 +43,39 @@ function ensureCsrfSessionId(req: Request): string {
   return session.csrfSessionId;
 }
 
-const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
-  // SESSION_SECRET must be set. The startup check in envLoader.ts ensures this.
-  // If somehow missing at runtime, fail hard rather than using an insecure default.
-  getSecret: () => {
-    const secret = process.env.SESSION_SECRET;
-    if (!secret) {throw new Error('SESSION_SECRET is required but not set');}
-    return secret;
-  },
-  getSessionIdentifier: (req: Request) => ensureCsrfSessionId(req),
-  cookieName:
-    csrfCookieSecure
-      ? '__Host-psifi.x-csrf-token'
-      : 'psifi.x-csrf-token',
-  cookieOptions: {
-    sameSite: 'lax',
-    secure: csrfCookieSecure,
-    httpOnly: true,
-  },
-  size: CSRF_TOKEN_SIZE,
-  getCsrfTokenFromRequest: getRequestCsrfToken,
-});
+type CsrfUtilities = ReturnType<typeof doubleCsrf>;
+let csrfUtilities: CsrfUtilities | undefined;
 
-export const csrfProtection = doubleCsrfProtection;
+/**
+ * `loadEnv()` is called by app.ts after its imports evaluate. Build csrf-csrf
+ * lazily so URL is available before choosing the Secure cookie attribute.
+ */
+function getCsrfUtilities(): CsrfUtilities {
+  if (csrfUtilities) {return csrfUtilities;}
+
+  const secure = (process.env.URL || '').startsWith('https://');
+  csrfUtilities = doubleCsrf({
+    getSecret: () => {
+      const secret = process.env.SESSION_SECRET;
+      if (!secret) {throw new Error('SESSION_SECRET is required but not set');}
+      return secret;
+    },
+    getSessionIdentifier: (req: Request) => ensureCsrfSessionId(req),
+    cookieName: secure ? '__Host-psifi.x-csrf-token' : 'psifi.x-csrf-token',
+    cookieOptions: {
+      sameSite: 'lax',
+      secure,
+      httpOnly: true,
+    },
+    size: CSRF_TOKEN_SIZE,
+    getCsrfTokenFromRequest: getRequestCsrfToken,
+  });
+  return csrfUtilities;
+}
+
+export const csrfProtection = (req: Request, res: Response, next: NextFunction): void => {
+  getCsrfUtilities().doubleCsrfProtection(req, res, next);
+};
 
 export const handleCsrfError = (err: unknown, req: Request, res: Response, next: NextFunction) => {
   const csrfError = err as { code?: string };
@@ -102,7 +111,7 @@ export const handleCsrfError = (err: unknown, req: Request, res: Response, next:
 export const addCsrfTokenToLocals = (req: Request, res: Response, next: NextFunction) => {
   try {
     ensureCsrfSessionId(req);
-    res.locals.csrfToken = generateCsrfToken(req, res);
+    res.locals.csrfToken = getCsrfUtilities().generateCsrfToken(req, res);
   } catch (error: unknown) {
     logger.warn('Failed to generate CSRF token', { error });
   }

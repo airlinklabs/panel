@@ -12,8 +12,6 @@
  *   features: ['auto-complete'],
  * }
  */
-import '/vendor/xterm/xterm.css';
-
 let Terminal, FitAddon, WebLinksAddon, Chart;
 async function loadDeps() {
   if (Terminal) return;
@@ -25,6 +23,9 @@ async function loadDeps() {
   WebLinksAddon = self.WebLinksAddon;
   await import('/vendor/chartjs/chart.umd.js');
   Chart = self.Chart || self.chart;
+  if (!Terminal || !FitAddon || !WebLinksAddon || !Chart) {
+    throw new Error('Required console libraries did not load.');
+  }
 }
 
 function themeVar(name, fallback) {
@@ -87,6 +88,10 @@ function formatRam(bytes, decimals = 1) {
 export async function mount(root, config) {
   await loadDeps();
 
+  if (!root || !root.querySelector('#terminal')) {
+    throw new Error('Server console root is incomplete.');
+  }
+
   const termTheme = { foreground: '#c5c9d1', background: '#141414', selectionBackground: '#5DA5D580', cursor: '#c5c9d1', cursorAccent: '#141414' };
   function applyTermTheme() {
     const isDark = document.documentElement.classList.contains('dark');
@@ -134,6 +139,9 @@ export async function mount(root, config) {
     term.refresh(0, term.rows - 1);
     if (mobileTerm) { mobileTerm.options.theme = { ...termTheme }; mobileTerm.refresh(0, mobileTerm.rows - 1); }
   }
+  // theme-init.js owns this public hook. Keep the legacy alias while older
+  // server templates are still being migrated.
+  window.setTerminalTheme = setTerminalTheme;
   window._manageTermTheme = setTerminalTheme;
 
   const controllers = new Set();
@@ -458,6 +466,39 @@ export async function mount(root, config) {
   if (input) { listen(input, 'keypress', e => { if (e.key === 'Enter') sendCommand(); }); listen(input, 'keydown', handleKeyUp); }
   const loadBtn = root.querySelector('#loadHistoryBtn');
   if (loadBtn) listen(loadBtn, 'click', () => { if (!serverOnline) loadRecentLogs(true); });
+  async function copyServerAddress(sourceSelector, copyIconSelector, checkIconSelector) {
+    const address = root.querySelector(sourceSelector)?.textContent?.trim();
+    if (!address) return;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(address);
+      } else {
+        const input = document.createElement('textarea');
+        input.value = address;
+        input.setAttribute('readonly', '');
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.appendChild(input);
+        input.select();
+        const copied = document.execCommand('copy');
+        input.remove();
+        if (!copied) throw new Error('Copy is unavailable.');
+      }
+      root.querySelector(copyIconSelector)?.classList.add('hidden');
+      root.querySelector(checkIconSelector)?.classList.remove('hidden');
+      window.showToast?.('Server address copied.', 'success');
+      setTimeout(() => {
+        root.querySelector(copyIconSelector)?.classList.remove('hidden');
+        root.querySelector(checkIconSelector)?.classList.add('hidden');
+      }, 1600);
+    } catch {
+      window.showToast?.('Could not copy the server address.', 'error');
+    }
+  }
+  const copyIpBtn = root.querySelector('#copy-ip-btn');
+  if (copyIpBtn) listen(copyIpBtn, 'click', () => copyServerAddress('#server-ip-text', '#copy-icon', '#check-icon'));
+  const mobileCopyIpBtn = root.querySelector('#mobile-copy-ip-btn');
+  if (mobileCopyIpBtn) listen(mobileCopyIpBtn, 'click', () => copyServerAddress('#mobile-server-ip-text', '#mobile-copy-icon', '#mobile-check-icon'));
   const cancelBtn = root.querySelector('#cancelQueueBtn');
   if (cancelBtn) listen(cancelBtn, 'click', async () => {
     cancelBtn.disabled = true; cancelBtn.textContent = 'Cancelling...';
@@ -515,7 +556,8 @@ export async function mount(root, config) {
     listeners.length = 0;
     term.dispose();
     mobileTerm?.dispose();
-    window._manageTermTheme = null;
+    if (window.setTerminalTheme === setTerminalTheme) window.setTerminalTheme = null;
+    if (window._manageTermTheme === setTerminalTheme) window._manageTermTheme = null;
   }
 
   return { teardown };

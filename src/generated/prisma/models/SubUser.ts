@@ -232,6 +232,7 @@ export type SubUserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   server?: Prisma.ServerOrderByWithRelationInput
   user?: Prisma.UsersOrderByWithRelationInput
+  _relevance?: Prisma.SubUserOrderByRelevanceInput
 }
 
 export type SubUserWhereUniqueInput = Prisma.AtLeast<{
@@ -331,6 +332,12 @@ export type SubUserListRelationFilter = {
 
 export type SubUserOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type SubUserOrderByRelevanceInput = {
+  fields: Prisma.SubUserOrderByRelevanceFieldEnum | Prisma.SubUserOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type SubUserServerIdUserIdCompoundUniqueInput = {
@@ -476,6 +483,7 @@ export type SubUserCreateOrConnectWithoutUserInput = {
 
 export type SubUserCreateManyUserInputEnvelope = {
   data: Prisma.SubUserCreateManyUserInput | Prisma.SubUserCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type SubUserUpsertWithWhereUniqueWithoutUserInput = {
@@ -525,6 +533,7 @@ export type SubUserCreateOrConnectWithoutServerInput = {
 
 export type SubUserCreateManyServerInputEnvelope = {
   data: Prisma.SubUserCreateManyServerInput | Prisma.SubUserCreateManyServerInput[]
+  skipDuplicates?: boolean
 }
 
 export type SubUserUpsertWithWhereUniqueWithoutServerInput = {
@@ -609,25 +618,7 @@ export type SubUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["subUser"]>
 
-export type SubUserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  serverId?: boolean
-  userId?: boolean
-  permissions?: boolean
-  createdAt?: boolean
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["subUser"]>
 
-export type SubUserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  serverId?: boolean
-  userId?: boolean
-  permissions?: boolean
-  createdAt?: boolean
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["subUser"]>
 
 export type SubUserSelectScalar = {
   id?: boolean
@@ -639,14 +630,6 @@ export type SubUserSelectScalar = {
 
 export type SubUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "serverId" | "userId" | "permissions" | "createdAt", ExtArgs["result"]["subUser"]>
 export type SubUserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-}
-export type SubUserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
-}
-export type SubUserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
 }
@@ -781,30 +764,6 @@ export interface SubUserDelegate<ExtArgs extends runtime.Types.Extensions.Intern
   createMany<T extends SubUserCreateManyArgs>(args?: Prisma.SelectSubset<T, SubUserCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many SubUsers and returns the data saved in the database.
-   * @param {SubUserCreateManyAndReturnArgs} args - Arguments to create many SubUsers.
-   * @example
-   * // Create many SubUsers
-   * const subUser = await prisma.subUser.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many SubUsers and only return the `id`
-   * const subUserWithIdOnly = await prisma.subUser.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends SubUserCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, SubUserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubUserPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a SubUser.
    * @param {SubUserDeleteArgs} args - Arguments to delete one SubUser.
    * @example
@@ -867,36 +826,6 @@ export interface SubUserDelegate<ExtArgs extends runtime.Types.Extensions.Intern
    * 
    */
   updateMany<T extends SubUserUpdateManyArgs>(args: Prisma.SelectSubset<T, SubUserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more SubUsers and returns the data updated in the database.
-   * @param {SubUserUpdateManyAndReturnArgs} args - Arguments to update many SubUsers.
-   * @example
-   * // Update many SubUsers
-   * const subUser = await prisma.subUser.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more SubUsers and only return the `id`
-   * const subUserWithIdOnly = await prisma.subUser.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends SubUserUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, SubUserUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubUserPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one SubUser.
@@ -1327,28 +1256,7 @@ export type SubUserCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * The data used to create many SubUsers.
    */
   data: Prisma.SubUserCreateManyInput | Prisma.SubUserCreateManyInput[]
-}
-
-/**
- * SubUser createManyAndReturn
- */
-export type SubUserCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SubUser
-   */
-  select?: Prisma.SubUserSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the SubUser
-   */
-  omit?: Prisma.SubUserOmit<ExtArgs> | null
-  /**
-   * The data used to create many SubUsers.
-   */
-  data: Prisma.SubUserCreateManyInput | Prisma.SubUserCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SubUserIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1393,36 +1301,6 @@ export type SubUserUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Limit how many SubUsers to update.
    */
   limit?: number
-}
-
-/**
- * SubUser updateManyAndReturn
- */
-export type SubUserUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SubUser
-   */
-  select?: Prisma.SubUserSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the SubUser
-   */
-  omit?: Prisma.SubUserOmit<ExtArgs> | null
-  /**
-   * The data used to update SubUsers.
-   */
-  data: Prisma.XOR<Prisma.SubUserUpdateManyMutationInput, Prisma.SubUserUncheckedUpdateManyInput>
-  /**
-   * Filter which SubUsers to update
-   */
-  where?: Prisma.SubUserWhereInput
-  /**
-   * Limit how many SubUsers to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SubUserIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

@@ -1,3 +1,5 @@
+import cluster from 'cluster';
+import os from 'os';
 import type { Request, Response, NextFunction } from 'express';
 import express from 'express';
 import prisma from './db';
@@ -12,7 +14,7 @@ import cookieParser from 'cookie-parser';
 import expressWs from 'express-ws';
 import compression from 'compression';
 import { translationMiddleware } from './handlers/utils/core/translation';
-import PrismaSessionStore from './handlers/sessionStore';
+import { getSessionStore } from './handlers/sessionStore';
 import { settingsLoader } from './handlers/settingsLoader';
 import { loadAddons, setAppInstance } from './handlers/addonHandler';
 import {
@@ -44,13 +46,58 @@ import {
 import { getConfig } from './config';
 import { installRenderResolver } from './handlers/renderResolver';
 import { validationErrorBoundary } from './utils/validation';
+import { refreshSecurityCache, getSecurityCache } from './handlers/securityCache';
+
+// Module-level app instance. Populated by runWorker() in worker processes.
+// In the primary process (cluster mode), this stays undefined — the primary
+// only forks workers and never serves HTTP, so the export is unused.
+let app: ReturnType<typeof express>;
+
+// ── Cluster mode ─────────────────────────────────────────────────────────────
+// The primary process forks one worker per CPU core. Workers share the same
+// port via the OS kernel (SO_REUSEPORT / SO_REUSEADDR). Each worker runs the
+// full Express stack independently. If a worker crashes, the primary forks a
+// replacement. SIGINT/SIGTERM on the primary gracefully shuts down all workers.
+if (cluster.isPrimary) {
+  const numCPUs = os.cpus().length;
+  logger.info(`Primary ${process.pid} forking ${numCPUs} worker(s)…`);
+
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code, signal) => {
+    logger.warn(`Worker ${worker.process.pid} died (code=${code}, signal=${signal}). Restarting…`);
+    cluster.fork();
+  });
+
+  const shutdown = (sig: string) => {
+    logger.info(`Primary received ${sig}, shutting down all workers…`);
+    const workers = cluster.workers;
+    if (workers) {
+      for (const id in workers) {
+        workers[id]?.process.kill(sig as NodeJS.Signals);
+      }
+    }
+    // Give workers time to drain, then force exit.
+    setTimeout(() => process.exit(0), 10_000).unref();
+  };
+
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+} else {
+  // ── Worker process — full Express application ────────────────────────────
+  runWorker();
+}
+
+function runWorker() {
 
 loadEnv();
 
 // Set max listeners
 process.setMaxListeners(20);
 
-const app = express();
+app = express();
 
 // Validated configuration. In production, a missing/weak SESSION_SECRET makes
 // getConfig() throw, which aborts startup with a clear message instead of
@@ -159,6 +206,9 @@ app.use(
 const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
+// Cache compiled EJS templates in memory. In production this is already the
+// default, but setting it explicitly ensures it's on regardless of NODE_ENV.
+app.set('view cache', true);
 
 // The global ejs.renderFile monkey-patch used to live here, falling back to
 // addon views for any missing template. It has been replaced by the explicit
@@ -169,6 +219,12 @@ const addonViewsDir = path.join(__dirname, '../../storage/addons');
 
 // Load compression
 app.use(compression());
+
+// htmx detection — sets req.htmx for all downstream handlers
+app.use((req: any, _res, next) => {
+  req.htmx = req.headers['hx-request'] === 'true';
+  next();
+});
 
 // =============================================================================
 // Security middleware
@@ -309,8 +365,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // hpp removed: Express 5 handles parameter pollution natively
 
-import { refreshSecurityCache, getSecurityCache } from './handlers/securityCache';
-
 // Initial load + refresh every 30 seconds
 refreshSecurityCache();
 setInterval(refreshSecurityCache, 30_000);
@@ -336,7 +390,7 @@ app.use(
   }),
 );
 
-// Load session with Prisma store
+// Load session with Redis store
 // Only mark cookies as secure when the server is actually serving over HTTPS.
 // Setting secure:true on a plain HTTP server causes browsers to silently drop
 // all session cookies, breaking login on local network setups.
@@ -351,7 +405,7 @@ app.use(
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
-    store: new PrismaSessionStore(),
+    store: getSessionStore(),
     cookie: {
       secure: useSecureCookie,
       httpOnly: true,
@@ -503,4 +557,6 @@ app.use(errorPageHandler);
   }
 })();
 
-export default app;
+} // end runWorker()
+
+export default app!;
