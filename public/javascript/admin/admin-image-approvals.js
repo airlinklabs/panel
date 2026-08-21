@@ -2,7 +2,7 @@
   const pd = document.getElementById('page-data')?.dataset;
   let pendingRejectId = null;
 
-  window.ALMount(function() {
+  function init() {
     const rejectModal = document.getElementById('rejectModal');
     const openReject = (id, name) => {
       pendingRejectId = id;
@@ -45,23 +45,30 @@
 
     document.querySelectorAll('[data-approve-image]').forEach((btn) => {
       btn.addEventListener('click', async () => {
-        if (!confirm(pd.approveConfirm)) return;
-        const id = btn.dataset.approveImage;
-        const card = btn.closest('.pending-card');
-        try {
-          const response = await fetch('/admin/images/approve/' + id, { method: 'POST' });
-          const data = await response.json();
-          if (data.error) {
-            showToast(data.error, 'error');
-          } else {
-            showToast(data.message || pd.approved, 'success');
-            removePendingCard(id, card);
-            if (window.renderImageTable) renderImageTable();
+        window.modal.confirm({
+          title: pd.approveConfirm,
+          body: pd.approveConfirm,
+          danger: false,
+          confirmLabel: 'Approve',
+          onConfirm: async () => {
+            const id = btn.dataset.approveImage;
+            const card = btn.closest('.pending-card');
+            try {
+              const response = await fetch('/admin/images/approve/' + id, { method: 'POST' });
+              const data = await response.json();
+              if (data.error) {
+                showToast(data.error, 'error');
+              } else {
+                showToast(data.message || pd.approved, 'success');
+                removePendingCard(id, card);
+                if (window.renderImageTable) renderImageTable();
+              }
+            } catch (error) {
+              console.error('Failed to approve image:', error);
+              showToast(pd.error, 'error');
+            }
           }
-        } catch (error) {
-          console.error('Failed to approve image:', error);
-          showToast(pd.error, 'error');
-        }
+        });
       });
     });
 
@@ -96,5 +103,11 @@
         showToast(pd.error, 'error');
       }
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

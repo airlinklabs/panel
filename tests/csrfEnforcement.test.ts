@@ -4,13 +4,14 @@ import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import { AddressInfo } from 'net';
+import type { Request } from 'express';
 import { isCsrfExempt } from '../src/handlers/utils/security/csrfRouting';
 
 // Imported after env is configured so the middleware uses development cookie
 // settings (secure:false) regardless of import order elsewhere.
 process.env.NODE_ENV = 'development';
 process.env.SESSION_SECRET = 'test-secret-test-secret-test-secret-test-secret';
-const { csrfProtection, addCsrfTokenToLocals, handleCsrfError } =
+const { csrfProtection, addCsrfTokenToLocals, handleCsrfError, getRequestCsrfToken } =
   await import('../src/handlers/utils/security/csrfProtection');
 
 function buildApp(): express.Express {
@@ -65,6 +66,11 @@ afterAll(async () => {
 });
 
 describe('request-level CSRF enforcement', () => {
+  it('accepts the HTMX header and the progressively enhanced form field', () => {
+    expect(getRequestCsrfToken({ headers: { 'x-csrf-token': 'from-header' }, body: { _csrf: 'from-form' } } as Request)).toBe('from-header');
+    expect(getRequestCsrfToken({ headers: {}, body: { _csrf: 'from-form' } } as Request)).toBe('from-form');
+  });
+
   it('returns 403 for a tokenless POST to a session-authenticated api route', async () => {
     const res = await fetch(`${baseUrl}/api/folders`, {
       method: 'POST',

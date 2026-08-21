@@ -129,6 +129,32 @@ app.use(
   express.static(path.join(__dirname, '../node_modules', 'chart.js/dist')),
 );
 
+// HTMX — self-hosted, versioned, CSP-compatible
+app.use(
+  '/vendor/htmx',
+  express.static(path.join(__dirname, '../public/javascript/vendor'), {
+    maxAge: '1y',
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      }
+    },
+  }),
+);
+
+// Alpine.js — self-hosted, versioned, CSP-compatible
+app.use(
+  '/vendor/alpine',
+  express.static(path.join(__dirname, '../public/javascript/vendor'), {
+    maxAge: '1y',
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      }
+    },
+  }),
+);
+
 // Load views
 const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);
@@ -329,7 +355,7 @@ app.use(
     cookie: {
       secure: useSecureCookie,
       httpOnly: true,
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),
@@ -441,8 +467,8 @@ app.use(errorPageHandler);
       startPlayerStatsCollection();
       startScheduler();
       reenqueueQueuedInstalls();
-      // Clone/pull egg repos on startup; auto-refreshes every 2 days
       initEggCatalogue().catch(err => logger.warn(`Store catalogue init failed: ${err?.message || err}`));
+      import('./handlers/realtime/nodeStatsWs').then(m => m.attachNodeStatsWs(server));
     });
 
     let shuttingDown = false;

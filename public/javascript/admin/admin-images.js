@@ -189,7 +189,7 @@ function confirmImageUpload() {
 
 document.getElementById('uploadBtn').addEventListener('click', openUploadImageModal);
 
-window.ALMount(function() {
+function initUploadZone() {
   const dropZone = document.getElementById('imageDropZone');
   const fileInput = document.getElementById('imageFileInput');
   const uploadButton = document.getElementById('imageUploadButton');
@@ -248,6 +248,12 @@ if (importUrlSubmit) {
       btn.disabled = false; btn.classList.remove('opacity-60');
     }
   });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initUploadZone);
+} else {
+  initUploadZone();
 }
 
 document.getElementById('uploadModeFile').addEventListener('click', () => setUploadMode('file'));

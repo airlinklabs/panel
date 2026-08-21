@@ -139,8 +139,16 @@
       });
       panels.forEach(function (p) {
         var on = p.getAttribute('data-tab-panel') === name;
-        if (on) p.removeAttribute('hidden');
-        else p.setAttribute('hidden', '');
+        if (on) {
+          p.removeAttribute('hidden');
+          if (p.classList) {
+            p.classList.remove('tab-panel');
+            void p.offsetHeight;
+            p.classList.add('tab-panel');
+          }
+        } else {
+          p.setAttribute('hidden', '');
+        }
       });
       if (hashMode) {
         if (source === 'user') setHash(name, 'push');

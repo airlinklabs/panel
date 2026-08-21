@@ -98,6 +98,15 @@ describe('config: getConfig', () => {
     expect(cfg.name).toBe('AirLink');
   });
 
+  it('keeps HTTP deployments usable even in production mode', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.SESSION_SECRET = 'z'.repeat(64);
+    process.env.URL = 'http://127.0.0.1:3000';
+
+    expect(getConfig().isProduction).toBe(true);
+    expect(getConfig().isHttps).toBe(false);
+  });
+
   it('fails hard in production with no secret', () => {
     process.env.NODE_ENV = 'production';
     delete process.env.SESSION_SECRET;

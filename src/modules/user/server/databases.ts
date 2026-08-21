@@ -73,6 +73,17 @@ export function registerDatabaseRoutes(router: Router): void {
           where: { server: { ownerId: server.ownerId } },
         });
 
+        if (req.htmx) {
+          res.vary('HX-Request');
+          return res.render('fragments/user/server/db-list', {
+            req,
+            server,
+            databases,
+            hosts,
+            userDbLimit,
+          });
+        }
+
         res.render('user/server/databases', {
           user,
           req,
@@ -171,6 +182,30 @@ router.post(
           emitRealtime(serverEvent('database.created', String(server.UUID), {
             state: { id: db.id, name: db.databaseName, hostId: host.id },
           }));
+
+          if (req.htmx) {
+            const databases = await prisma.serverDatabase.findMany({
+              where: { serverId: server.UUID },
+              include: { host: true },
+              orderBy: { createdAt: 'desc' },
+            });
+            const hosts = await prisma.databaseHost.findMany({
+              where: { OR: [{ nodeId: null }, { nodeId: server.nodeId ?? -1 }] },
+              orderBy: { id: 'asc' },
+            });
+            const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
+            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const userDbLimit = owner?.maxDatabases ?? settings?.defaultMaxDatabases ?? 0;
+            res.vary('HX-Request');
+            return res.render('fragments/user/server/db-list', {
+              req,
+              server,
+              databases,
+              hosts,
+              userDbLimit,
+            });
+          }
+
           return res.json({ success: true, database: db });
         } catch (error) {
           logger.error('Failed to provision database:', error);
@@ -224,6 +259,30 @@ router.post(
           emitRealtime(serverEvent('database.deleted', String(server.UUID), {
             state: { id: db.id, name: db.databaseName },
           }));
+
+          if (req.htmx) {
+            const databases = await prisma.serverDatabase.findMany({
+              where: { serverId: server.UUID },
+              include: { host: true },
+              orderBy: { createdAt: 'desc' },
+            });
+            const hosts = await prisma.databaseHost.findMany({
+              where: { OR: [{ nodeId: null }, { nodeId: server.nodeId ?? -1 }] },
+              orderBy: { id: 'asc' },
+            });
+            const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
+            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const userDbLimit = owner?.maxDatabases ?? settings?.defaultMaxDatabases ?? 0;
+            res.vary('HX-Request');
+            return res.render('fragments/user/server/db-list', {
+              req,
+              server,
+              databases,
+              hosts,
+              userDbLimit,
+            });
+          }
+
           return res.json({ success: true });
         } catch (error) {
           logger.error('Failed to deprovision database:', error);
@@ -279,6 +338,30 @@ router.post(
           emitRealtime(serverEvent('database.updated', String(server.UUID), {
             state: { id: db.id, name: db.databaseName },
           }));
+
+          if (req.htmx) {
+            const databases = await prisma.serverDatabase.findMany({
+              where: { serverId: server.UUID },
+              include: { host: true },
+              orderBy: { createdAt: 'desc' },
+            });
+            const hosts = await prisma.databaseHost.findMany({
+              where: { OR: [{ nodeId: null }, { nodeId: server.nodeId ?? -1 }] },
+              orderBy: { id: 'asc' },
+            });
+            const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
+            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const userDbLimit = owner?.maxDatabases ?? settings?.defaultMaxDatabases ?? 0;
+            res.vary('HX-Request');
+            return res.render('fragments/user/server/db-list', {
+              req,
+              server,
+              databases,
+              hosts,
+              userDbLimit,
+            });
+          }
+
           return res.json({ success: true, password: newPassword });
         } catch (error) {
           logger.error('Failed to rotate database password:', error);

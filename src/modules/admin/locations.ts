@@ -5,6 +5,14 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 
+async function buildLocationsViewModel() {
+  const locations = await prisma.location.findMany({
+    include: { _count: { select: { nodes: true } } },
+    orderBy: { id: 'asc' },
+  });
+  return { locations };
+}
+
 const locationsModule: Module = {
   info: {
     name: 'Admin Locations Module',
@@ -33,6 +41,13 @@ const locationsModule: Module = {
         try {
           const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
           if (!user) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(403).render('fragments/shared/error-banner', {
+                targetId: 'admin-locations',
+                message: 'Unauthorized access.',
+                hint: null,
+              });
+            }
             res.status(403).json({ message: 'Unauthorized access.' });
             return;
           }
@@ -42,16 +57,37 @@ const locationsModule: Module = {
             typeof req.body.shortCode === 'string' ? req.body.shortCode.trim().toLowerCase() : '';
 
           if (name.length < 2 || name.length > 50) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/shared/error-banner', {
+                targetId: 'admin-locations',
+                message: 'Name must be between 2 and 50 characters.',
+                hint: null,
+              });
+            }
             res.status(400).json({ message: 'Name must be between 2 and 50 characters.' });
             return;
           }
           if (!/^[a-z0-9-]{2,32}$/.test(shortCode)) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/shared/error-banner', {
+                targetId: 'admin-locations',
+                message: 'Short code must be 2-32 chars: lowercase letters, numbers, dashes.',
+                hint: null,
+              });
+            }
             res.status(400).json({ message: 'Short code must be 2-32 chars: lowercase letters, numbers, dashes.' });
             return;
           }
 
           const existing = await prisma.location.findUnique({ where: { shortCode } });
           if (existing) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/shared/error-banner', {
+                targetId: 'admin-locations',
+                message: 'A location with this short code already exists.',
+                hint: null,
+              });
+            }
             res.status(400).json({ message: 'A location with this short code already exists.' });
             return;
           }
@@ -61,9 +97,21 @@ const locationsModule: Module = {
             include: { _count: { select: { nodes: true } } },
           });
 
+          if (req.get('HX-Request') === 'true') {
+            const vm = await buildLocationsViewModel();
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Location created.' } } }));
+            return res.render('fragments/admin/locations/location-list', vm);
+          }
           res.status(200).json({ message: 'Location created successfully.', location });
         } catch (error: unknown) {
           logger.error('Error creating location:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/shared/error-banner', {
+              targetId: 'admin-locations',
+              message: 'Error creating location.',
+              hint: null,
+            });
+          }
           res.status(500).json({ message: 'Error creating location.' });
         }
       },
@@ -76,12 +124,26 @@ const locationsModule: Module = {
         try {
           const locationId = getParamAsNumber(req.params.id);
           if (isNaN(locationId)) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/shared/error-banner', {
+                targetId: 'admin-locations',
+                message: 'Invalid location ID.',
+                hint: null,
+              });
+            }
             res.status(400).json({ message: 'Invalid location ID.' });
             return;
           }
 
           const nodeCount = await prisma.node.count({ where: { locationId } });
           if (nodeCount > 0) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/shared/error-banner', {
+                targetId: 'admin-locations',
+                message: `Location has ${nodeCount} node(s) assigned. Remove them from the location first.`,
+                hint: null,
+              });
+            }
             res.status(400).json({
               message: `Location has ${nodeCount} node(s) assigned. Remove them from the location first.`,
             });
@@ -89,9 +151,22 @@ const locationsModule: Module = {
           }
 
           await prisma.location.delete({ where: { id: locationId } });
+
+          if (req.get('HX-Request') === 'true') {
+            const vm = await buildLocationsViewModel();
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Location deleted.' } } }));
+            return res.render('fragments/admin/locations/location-list', vm);
+          }
           res.status(200).json({ message: 'Location deleted successfully.' });
         } catch (error: unknown) {
           logger.error('Error deleting location:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/shared/error-banner', {
+              targetId: 'admin-locations',
+              message: 'Error deleting location.',
+              hint: null,
+            });
+          }
           res.status(500).json({ message: 'Error deleting location.' });
         }
       },

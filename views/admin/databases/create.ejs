@@ -16,28 +16,32 @@
           <p class="al-page-desc">A MySQL-compatible server that databases will be provisioned on.</p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button id="saveHostBtn" type="button" class="al-btn-primary"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>Save Host</button>
+          <button type="submit" form="hostForm" class="al-btn-primary"
+            hx-disabled-elt="this"
+            hx-indicator="#save-host-status">
+            <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>Save Host
+          </button>
+          <p id="save-host-status" class="htmx-indicator text-xs" style="color:var(--theme-text-muted)">Saving…</p>
           <a href="/admin/databases" class="al-btn-secondary">Back to Databases</a>
         </div>
       </div>
 
       <div id="hostForm" class="al-page-body space-y-5">
-        <% if (req.query.err == "missing_fields") { %>
-          <%- include('../../components/ui/alert', { type: 'danger', message: 'Missing fields', detail: 'Name, host, username and password are required.' }) %>
-        <% } %>
-        <% if (req.query.err == "create_failed") { %>
-          <%- include('../../components/ui/alert', { type: 'danger', message: 'Creation failed', detail: 'Could not save the database host. Try again.' }) %>
-        <% } %>
-        <form class="space-y-5">
+        <div id="database-host-form-status"></div>
+        <form id="hostForm" class="space-y-5"
+          hx-post="/admin/databases/create"
+          hx-target="#database-host-form-status"
+          hx-swap="innerHTML"
+          hx-disabled-elt="find button[type='submit']">
           <div class="al-card">
             <h2 class="al-card-header">Connection Details</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">
                 <label for="hostName" class="al-label flex items-center gap-1.5">
                   <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.name %>
+                  Name
                 </label>
-                <input id="hostName" class="al-input" placeholder="Primary MySQL host">
+                <input id="hostName" name="name" class="al-input" placeholder="Primary MySQL host" required>
               </div>
 
               <div>
@@ -45,7 +49,7 @@
                   <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Host Address
                 </label>
-                <input id="hostAddress" class="al-input" placeholder="localhost or 10.0.0.5">
+                <input id="hostAddress" name="host" class="al-input" placeholder="localhost or 10.0.0.5" required>
               </div>
 
               <div>
@@ -53,7 +57,7 @@
                   <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Port
                 </label>
-                <input id="hostPort" class="al-input" placeholder="3306" type="number">
+                <input id="hostPort" name="port" class="al-input" placeholder="3306" type="number">
               </div>
 
               <div>
@@ -61,7 +65,7 @@
                   <%- icon('user', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Username
                 </label>
-                <input id="hostUser" class="al-input" placeholder="root" autocomplete="off">
+                <input id="hostUser" name="username" class="al-input" placeholder="root" autocomplete="off" required>
               </div>
 
               <div>
@@ -69,14 +73,14 @@
                   <%- icon('lock', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Password
                 </label>
-                <input id="hostPassword" type="password" class="al-input" placeholder="••••••••" autocomplete="new-password">
+                <input id="hostPassword" name="password" type="password" class="al-input" placeholder="••••••••" autocomplete="new-password" required>
               </div>
               <div>
                 <label for="hostNode" class="al-label flex items-center gap-1.5">
                   <%- icon('network', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Node
                 </label>
-                <select id="hostNode" class="al-input">
+                <select id="hostNode" name="nodeId" class="al-input">
                   <option value="">Any node (unscoped)</option>
                   <% (nodes || []).forEach(n => { %>
                     <option value="<%= n.id %>"><%= n.name %></option>
@@ -91,8 +95,5 @@
     </div>
   </div>
 </main>
-
-
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-databases.js?v=5"></script>
 
 <%- include('../../components/footer') %>

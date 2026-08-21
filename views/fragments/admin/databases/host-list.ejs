@@ -1,0 +1,88 @@
+<!-- Database host list fragment — replaces the host table on create/delete -->
+<div id="admin-databases-list" class="overflow-x-auto rounded-xl border" style="border-color:var(--theme-border);box-shadow:var(--theme-shadow-sm)">
+  <% if (hosts.length === 0) { %>
+    <div class="flex flex-col items-center justify-center py-20 text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
+        <%- icon('database', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
+      </div>
+      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong);">No database hosts yet</h3>
+      <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);">Add a MySQL host to start provisioning databases.</p>
+      <div class="mt-5">
+        <button type="button" class="al-btn-primary"
+          hx-post="/admin/databases/auto-host"
+          hx-target="#admin-databases-list"
+          hx-swap="outerHTML"
+          hx-indicator="#auto-host-status">
+          <%- icon('zap', { size: 4, strokeWidth: 1.5 }) %> Auto-generate host
+        </button>
+        <p id="auto-host-status" class="htmx-indicator text-xs mt-2" style="color:var(--theme-text-muted)">Working…</p>
+      </div>
+    </div>
+  <% } else { %>
+  <table class="al-table">
+    <colgroup>
+      <col style="min-width:160px">
+      <col style="min-width:240px">
+      <col style="min-width:90px">
+      <col style="min-width:140px">
+      <col style="min-width:160px">
+    </colgroup>
+    <thead class="al-table-head">
+      <tr>
+        <th scope="col" class="al-table-th sm:pl-6">Name</th>
+        <th scope="col" class="al-table-th sm:pl-6">Host</th>
+        <th scope="col" class="al-table-th sm:pl-6">Databases</th>
+        <th scope="col" class="al-table-th sm:pl-6">Created</th>
+        <th scope="col" class="al-table-th sm:pl-6">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% hosts.forEach(function(host) { %>
+        <tr class="al-table-tr" data-host-id="<%= host.id %>">
+          <td class="al-table-td sm:pl-6">
+            <div class="font-medium" style="color:var(--theme-text-strong);"><%= host.name %></div>
+          </td>
+          <td class="al-table-td">
+            <div class="flex items-center gap-2">
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
+              <span><%= host.host %>:<%= host.port %></span>
+            </div>
+            <div class="mt-1 ml-2 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset text-neutral-600 dark:text-neutral-300 ring-neutral-600/20">
+              <%= host.username %>
+            </div>
+            <div class="mt-1 ml-2 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset text-neutral-600 dark:text-neutral-300 ring-neutral-600/20">
+              <%- icon('network', { size: 12, class: 'mr-1' }) %>
+              <%= host.node ? host.node.name : 'Any node' %>
+            </div>
+          </td>
+          <td class="al-table-td"><%= host._count.databases %></td>
+          <td class="al-table-td"><%= new Date(host.createdAt).toLocaleDateString() %></td>
+          <td class="al-table-td">
+            <div class="flex gap-3 whitespace-nowrap">
+              <button
+                hx-post="/admin/databases/<%= host.id %>/test"
+                hx-swap="none"
+                hx-indicator="find .htmx-indicator"
+                type="button"
+                class="al-btn-secondary text-xs">
+                <%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %> Test
+              </button>
+              <button
+                hx-delete="/admin/databases/<%= host.id %>"
+                hx-target="#admin-databases-list"
+                hx-swap="outerHTML"
+                hx-confirm="This will permanently remove the database host. This cannot be undone."
+                type="button"
+                class="al-btn-ghost"
+                style="color:var(--theme-danger);"
+                aria-label="Delete host">
+                <%- icon('trash-2', { size: 16 }) %>
+              </button>
+            </div>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <% } %>
+</div>

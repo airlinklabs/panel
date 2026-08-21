@@ -4,8 +4,8 @@
    Usage:
      al.fetch(url, opts)           — fetch + JSON + error toast
      al.refresh(url, renderFn)     — fetch + render into target
-     al.removeRow(tr)              — animate row removal
-     al.addRow(tbody, html)        — animate row insertion
+     al.removeRow(tr)              — animate row removal and reconcile empties
+     al.addRow(tbody, html)        — animate row insertion and remove empties
      al.patchEl(sel, html)         — replace innerHTML with fade
      al.showEmpty(tbody, msg)      — show empty state row
      al.hideEmpty(tbody)           — remove empty state row
@@ -68,7 +68,29 @@
       tr.style.opacity = '0';
       tr.style.transform = 'translateX(20px)';
       setTimeout(function () {
-        if (tr.parentNode) tr.parentNode.removeChild(tr);
+        var parent = tr.parentNode;
+        if (parent) parent.removeChild(tr);
+        // After removing a row, check if the table is now empty and reconcile
+        if (parent) {
+          var table = parent.closest ? parent.closest('table.al-table') : null;
+          if (table && window.alTableScan) {
+            alTableScan(table);
+          }
+          // If tbody has no real rows left, show the empty placeholder
+          if (parent.tagName === 'TBODY' || parent.closest && parent.closest('tbody')) {
+            var tbody = parent.tagName === 'TBODY' ? parent : parent.closest('tbody');
+            var realRows = Array.prototype.slice.call(tbody.querySelectorAll('tr')).filter(function (r) {
+              return !r.hasAttribute('data-al-empty');
+            });
+            if (realRows.length === 0) {
+              var emptyMsg = table ? table.dataset.tableEmpty : null;
+              if (emptyMsg) {
+                var colspan = parseInt(table ? table.dataset.tableEmptyColspan : '', 10) || 6;
+                alShowEmpty(tbody, emptyMsg, colspan);
+              }
+            }
+          }
+        }
         resolve();
       }, DUR_EXIT);
     });
@@ -81,6 +103,11 @@
     temp.innerHTML = html;
     var row = temp.firstElementChild;
     if (!row) return null;
+    // The empty placeholder and a real row are mutually exclusive. Remove it
+    // before insertion so every list changes state atomically.
+    Array.prototype.slice.call(tbody.querySelectorAll('[data-al-empty]')).forEach(function (empty) {
+      empty.remove();
+    });
     row.style.opacity = '0';
     row.style.transform = 'translateY(-8px)';
     tbody.insertBefore(row, tbody.firstChild);
@@ -89,7 +116,9 @@
     row.style.transition = 'opacity ' + DUR_ENTER + 'ms ' + EASE_OUT + ', transform ' + DUR_ENTER + 'ms ' + EASE_OUT;
     row.style.opacity = '1';
     row.style.transform = 'translateY(0)';
-    if (window.alTableScan) alTableScan(row);
+    if (window.alTableScan) {
+      alTableScan(tbody.closest ? (tbody.closest('table.al-table') || tbody) : tbody);
+    }
     return row;
   }
 
@@ -114,7 +143,12 @@
     colspan = colspan || 6;
     var tr = document.createElement('tr');
     tr.setAttribute('data-al-empty', '');
-    tr.innerHTML = '<td colspan="' + colspan + '" class="px-4 py-8 text-center text-sm" style="color:var(--theme-text-muted);">' + (msg || 'Nothing here yet.') + '</td>';
+    var td = document.createElement('td');
+    td.colSpan = colspan;
+    td.className = 'px-4 py-8 text-center text-sm';
+    td.style.color = 'var(--theme-text-muted)';
+    td.textContent = msg || 'Nothing here yet.';
+    tr.appendChild(td);
     tbody.appendChild(tr);
   }
 

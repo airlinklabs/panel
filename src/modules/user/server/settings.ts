@@ -44,6 +44,14 @@ export function registerSettingsRoutes(router: Router): void {
 
         const features = getImageFeatures(server.image);
 
+        if (req.htmx) {
+          res.vary('HX-Request');
+          return res.render('fragments/user/server/settings-form', {
+            req,
+            server,
+          });
+        }
+
         return res.render('user/server/settings', {
           errorMessage,
           features,
@@ -100,6 +108,18 @@ export function registerSettingsRoutes(router: Router): void {
             description: description,
           },
         });
+
+        if (req.htmx) {
+          const updatedServer = await prisma.server.findUnique({
+            where: { UUID: getParamAsString(serverId) },
+            include: { node: true, image: true, owner: true },
+          });
+          res.vary('HX-Request');
+          return res.render('fragments/user/server/settings-form', {
+            req,
+            server: updatedServer,
+          });
+        }
 
         res.status(200).json({ success: true });
       } catch (error) {

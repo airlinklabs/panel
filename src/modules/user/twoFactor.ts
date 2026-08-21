@@ -122,21 +122,60 @@ const twoFactorModule: Module = {
         const pendingSecret = req.session.pendingTotpSecret;
 
         if (!pendingSecret) {
+          if (req.get('HX-Request') === 'true') {
+            return res.status(400).render('fragments/auth/error-banner', {
+              targetId: 'two-factor-setup',
+              message: 'No pending 2FA secret. Start setup again.',
+              hint: null,
+            });
+          }
           return res.status(400).json({ error: 'No pending 2FA secret. Start setup again.' });
         }
 
         const cleanToken = normalizeToken(token);
         if (!cleanToken) {
+          if (req.get('HX-Request') === 'true') {
+            return res.status(400).render('fragments/auth/error-banner', {
+              targetId: 'two-factor-setup',
+              message: 'Enter a valid 6-digit code.',
+              hint: null,
+            });
+          }
           return res.status(400).json({ error: 'Enter a valid 6-digit code.' });
         }
 
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.status(404).json({ error: 'User not found.' });
-          if (user.totpEnabled) return res.status(400).json({ error: 'Two-factor authentication is already enabled.' });
+          if (!user) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(404).render('fragments/auth/error-banner', {
+                targetId: 'two-factor-setup',
+                message: 'User not found.',
+                hint: null,
+              });
+            }
+            return res.status(404).json({ error: 'User not found.' });
+          }
+          if (user.totpEnabled) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/auth/error-banner', {
+                targetId: 'two-factor-setup',
+                message: 'Two-factor authentication is already enabled.',
+                hint: null,
+              });
+            }
+            return res.status(400).json({ error: 'Two-factor authentication is already enabled.' });
+          }
 
           const totp = createTotp(pendingSecret, user.email);
           if (totp.validate({ token: cleanToken, window: 1 }) === null) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/auth/error-banner', {
+                targetId: 'two-factor-setup',
+                message: 'Invalid code. Try again.',
+                hint: null,
+              });
+            }
             return res.status(400).json({ error: 'Invalid code. Try again.' });
           }
 
@@ -152,6 +191,13 @@ const twoFactorModule: Module = {
           });
 
           delete req.session.pendingTotpSecret;
+
+          if (req.get('HX-Request') === 'true') {
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Two-factor authentication enabled.' } } }));
+            return res.render('fragments/user/two-factor-recovery-codes', {
+              recoveryCodes: codes.map(formatRecoveryCode),
+            });
+          }
           res.json({
             success: true,
             message: 'Two-factor authentication enabled.',
@@ -160,6 +206,13 @@ const twoFactorModule: Module = {
           return;
         } catch (error) {
           logger.error('2FA enable error:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/auth/error-banner', {
+              targetId: 'two-factor-setup',
+              message: 'Something went wrong. Try again.',
+              hint: null,
+            });
+          }
           res.status(500).json({ error: 'Internal Server Error' });
           return;
         }
@@ -220,18 +273,39 @@ const twoFactorModule: Module = {
       const pendingUserId = req.session.pendingUserId;
 
       if (!pendingUserId) {
+        if (req.get('HX-Request') === 'true') {
+          return res.status(400).render('fragments/auth/error-banner', {
+            targetId: 'two-factor-verify',
+            message: 'No login in progress. Sign in again.',
+            hint: null,
+          });
+        }
         return res.status(400).json({ error: 'No login in progress. Sign in again.' });
       }
 
       const cleanToken = normalizeToken(token);
       const recoveryCode = normalizeRecoveryCode(token);
       if (!cleanToken && !recoveryCode) {
+        if (req.get('HX-Request') === 'true') {
+          return res.status(400).render('fragments/auth/error-banner', {
+            targetId: 'two-factor-verify',
+            message: 'Enter a valid 6-digit code or recovery code.',
+            hint: null,
+          });
+        }
         return res.status(400).json({ error: 'Enter a valid 6-digit code or recovery code.' });
       }
 
       try {
         const user = await prisma.users.findUnique({ where: { id: pendingUserId } });
         if (!user || !user.totpEnabled || !user.totpSecret) {
+          if (req.get('HX-Request') === 'true') {
+            return res.status(400).render('fragments/auth/error-banner', {
+              targetId: 'two-factor-verify',
+              message: 'No login in progress. Sign in again.',
+              hint: null,
+            });
+          }
           return res.status(400).json({ error: 'No login in progress. Sign in again.' });
         }
 
@@ -240,6 +314,13 @@ const twoFactorModule: Module = {
         const recoveryValid = recoveryCode && (await consumeRecoveryCode(user.id, recoveryCode));
 
         if (!totpValid && !recoveryValid) {
+          if (req.get('HX-Request') === 'true') {
+            return res.status(400).render('fragments/auth/error-banner', {
+              targetId: 'two-factor-verify',
+              message: 'Invalid code. Try again.',
+              hint: null,
+            });
+          }
           return res.status(400).json({ error: 'Invalid code. Try again.' });
         }
 
@@ -263,10 +344,21 @@ const twoFactorModule: Module = {
           },
         });
 
+        if (req.get('HX-Request') === 'true') {
+          res.setHeader('HX-Redirect', '/');
+          return res.status(200).send('');
+        }
         res.json({ success: true, redirect: '/' });
         return;
       } catch (error) {
         logger.error('2FA verify error:', error);
+        if (req.get('HX-Request') === 'true') {
+          return res.status(500).render('fragments/auth/error-banner', {
+            targetId: 'two-factor-verify',
+            message: 'Something went wrong. Try again.',
+            hint: null,
+          });
+        }
         res.status(500).json({ error: 'Internal Server Error' });
         return;
       }

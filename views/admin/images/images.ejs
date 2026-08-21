@@ -41,10 +41,10 @@
       </div>
 
       <div class="al-page-body" data-al-tabs data-tabs-default="installed" data-tabs-hash>
-      <div role="tablist" class="flex items-center border-b" style="border-color:var(--theme-border);">
-        <button type="button" id="tab-btn-installed" data-tab="installed" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-installed" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition bg-neutral-900 text-white dark:bg-white dark:text-black">Installed <span id="tabCountInstalled" class="ml-1 text-xs text-neutral-400"><%= images.length %></span></button>
-        <button type="button" id="tab-btn-approvals" data-tab="approvals" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-approvals" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">Approvals <% if (pending && pending.length > 0) { %><span id="tabCountApprovals" class="ml-1 text-xs font-semibold" style="color:var(--theme-warning);"><%= pending.length %></span><% } %></button>
-        <button type="button" id="tab-btn-store" data-tab="store" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-store" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">Store</button>
+      <div role="tablist" class="flex gap-1 mb-6">
+        <button type="button" id="tab-btn-installed" data-tab="installed" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-installed" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('box', { class: 'size-4', strokeWidth: 1.5 }) %>Installed <span id="tabCountInstalled" class="ml-1 text-xs text-neutral-400"><%= images.length %></span></button>
+        <button type="button" id="tab-btn-approvals" data-tab="approvals" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-approvals" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('clock', { class: 'size-4', strokeWidth: 1.5 }) %>Approvals <% if (pending && pending.length > 0) { %><span id="tabCountApprovals" class="ml-1 text-xs font-semibold" style="color:var(--theme-warning);"><%= pending.length %></span><% } %></button>
+        <button type="button" id="tab-btn-store" data-tab="store" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-store" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Store</button>
       </div>
 
       <div id="tab-panel-installed" role="tabpanel" aria-labelledby="tab-btn-installed" data-tab-panel="installed" class="mt-5">
@@ -57,91 +57,11 @@
         <a href="/admin/images#store" class="mt-4 al-btn-secondary inline-flex items-center gap-1.5"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Browse Store</a>
       </div>
 
-      <div id="installedTableSection" class="<%= images.length === 0 ? 'hidden' : '' %>">
-
-      <div class="mt-5 mb-1">
-        <input id="imageFilterInput" type="text" placeholder="Filter images…" aria-label="Search images" class="al-input w-56">
-      </div>
-
-      <div class="overflow-x-auto shadow-sm rounded-xl mt-3 border" style="border-color:var(--theme-border)">
-        <table class="al-table min-w-full">
-          <colgroup>
-            <col style="min-width:240px">
-            <col style="min-width:160px">
-            <col style="min-width:140px">
-            <col style="min-width:220px">
-          </colgroup>
-          <thead class="al-table-head">
-            <tr>
-              <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
-              <th class="al-table-th px-3 py-3.5 col-hide">Author</th>
-              <th class="al-table-th px-3 py-3.5 col-hide">Created</th>
-              <th class="al-table-th px-3 py-3.5">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y" style="border-color:var(--theme-border)" id="tableBody">
-            <% let imgIdx = 0; images.forEach(function(image) { %>
-            <tr class="al-table-tr transition-colors cursor-pointer img-row"
-                style="--i:<%= imgIdx++ %>"
-                data-search="<%= (image.name + ' ' + (image.author||'')).toLowerCase() %>"
-                onclick="handleRowClick(event, '/admin/images/edit/<%= image.id %>')">
-              <td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3 font-medium" style="color:var(--theme-text-strong)"><%= image.name %></td>
-              <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= image.author || '—' %></td>
-              <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= new Date(image.createdAt).toLocaleDateString() %></td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm">
-                <div class="flex gap-2">
-                  <a href="/admin/images/edit/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5"><%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>Edit</a>
-                  <a href="/admin/images/export/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Export</a>
-                  <button  onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="al-btn-danger" aria-label="Delete image <%= image.name %>">
-                    <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <% }); %>
-          </tbody>
-        </table>
-        <div id="noResults" class="hidden py-10 text-center text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800/20"><%= req.translations.noImagesMatch || 'No images match your search.' %></div>
-      </div>
-      </div>
+      <%- include('../../fragments/admin/images/image-table', { images, settings, req }) %>
       </div>
 
       <div id="tab-panel-approvals" role="tabpanel" aria-labelledby="tab-btn-approvals" data-tab-panel="approvals" hidden>
-        <div class="mt-5 space-y-4" id="pendingApprovalsList">
-          <% if (pending.length === 0) { %>
-          <div class="flex flex-col items-center justify-center py-20 text-center">
-            <div class="w-12 h-12 rounded-full bg-emerald-600/10 flex items-center justify-center mb-4">
-              <%- icon('check', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
-            </div>
-            <p class="text-sm font-medium" style="color:var(--theme-text-strong)">No images waiting for review.</p>
-            <p class="text-sm mt-1" style="color:var(--theme-text-muted)">User submissions will appear here for approval.</p>
-          </div>
-          <% } else { pending.forEach(function(image) { %>
-          <div class="rounded-xl border p-5 pending-card" data-pending-image="<%= image.id %>" style="border-color:var(--theme-border); background:var(--theme-bg-card);">
-            <div class="flex items-start justify-between gap-4">
-              <div class="min-w-0">
-                <div class="flex items-center gap-2">
-                  <h3 class="text-sm font-semibold truncate" style="color:var(--theme-text-strong)"><%= image.name %></h3>
-                  <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset bg-amber-600/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/20">Pending</span>
-                </div>
-                <% if (image.description) { %><p class="text-sm mt-1 line-clamp-2" style="color:var(--theme-text-muted)"><%= image.description %></p><% } %>
-                <% if (image.creator) { %>
-                <p class="text-xs mt-2" style="color:var(--theme-text-muted)">Submitted by <span class="font-medium" style="color:var(--theme-text-strong)"><%= image.creator.username || image.creator.email %></span> &middot; <%= new Date(image.createdAt).toLocaleString() %></p>
-                <% } %>
-                <div class="flex flex-wrap gap-4 mt-3 text-xs" style="color:var(--theme-text-muted)">
-                  <span class="inline-flex items-center gap-1.5"><%- icon('terminal', { class: 'size-3.5', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.startup || '' %></code></span>
-                  <span class="inline-flex items-center gap-1.5"><%- icon('container', { class: 'size-3.5', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.dockerImages || '[]' %></code></span>
-                </div>
-              </div>
-              <div class="flex gap-2 shrink-0">
-                <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost inline-flex items-center gap-1.5 text-xs"><%- icon('external-link', { class: 'size-4', strokeWidth: 1.5 }) %>View</a>
-                <button type="button" class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" data-approve-image="<%= image.id %>"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>Approve</button>
-                <button type="button" class="al-btn-danger inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" data-reject-image="<%= image.id %>"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Reject</button>
-              </div>
-            </div>
-          </div>
-          <% }); } %>
-        </div>
+        <%- include('../../fragments/admin/images/pending-approvals', { pending, settings, req }) %>
       </div>
 
       <div id="tab-panel-store" role="tabpanel" aria-labelledby="tab-btn-store" data-tab-panel="store" data-tab-src="/admin/images/store/panel" hidden></div>
@@ -262,27 +182,7 @@
 
 <script nonce="<%- nonce %>">
   (function() {
-    // al-tabs owns selection (attributes, panel visibility, URL hash); this
-    // only repaints the active-tab button classes.
-    window.alListener(document, 'al:tabs-change', 'images-tabs', function(e) {
-      var k = e.detail && e.detail.name;
-      ['installed', 'approvals', 'store'].forEach(function(key) {
-        var btn = document.getElementById('tab-btn-' + key);
-        if (!btn) return;
-        var isActive = key === k;
-        btn.classList.toggle('bg-neutral-900', isActive);
-        btn.classList.toggle('text-white', isActive);
-        btn.classList.toggle('dark:bg-white', isActive);
-        btn.classList.toggle('dark:text-black', isActive);
-        btn.classList.toggle('text-neutral-400', !isActive);
-        btn.classList.toggle('hover:text-neutral-600', !isActive);
-        btn.classList.toggle('dark:hover:text-neutral-300', !isActive);
-      });
-    });
-
-    // Lazy store tab: al-tabs fetched /admin/images/store/panel and injected
-    // it; now hand the panel to the store controller so it binds and loads.
-    window.alListener(document, 'al:tabs-loaded', 'images-store-load', function(e) {
+    document.addEventListener('al:tabs-loaded', function(e) {
       var detail = e.detail;
       if (detail && detail.name === 'store' && detail.panel && window.AdminImageStore) {
         window.AdminImageStore.mount(detail.panel);

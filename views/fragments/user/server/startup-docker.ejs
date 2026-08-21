@@ -1,0 +1,71 @@
+<!-- Docker image form fragment — replaces #startup-docker-form on save -->
+<div id="startup-docker-form" class="al-card overflow-hidden">
+  <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
+    <div>
+      <h3 class="text-lg font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.dockerImageLabel || 'Docker Image' %></h3>
+      <p class="text-sm" style="color:var(--theme-text-muted)"><%= req.translations.dockerImageDesc || 'Change the Docker image used by your server.' %></p>
+    </div>
+    <div class="flex items-center">
+      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-info-bg);color:var(--theme-info);--tw-ring-color:color-mix(in srgb, var(--theme-info) 25%, transparent);">
+        <%- icon('info', { class: 'mr-1.5 h-3 w-3', style: 'color:var(--theme-info)', strokeWidth: 2 }) %>
+        Requires Restart
+      </span>
+    </div>
+  </div>
+
+  <form hx-post="/server/<%= server.UUID %>/startup/docker-image"
+        hx-target="#startup-docker-form"
+        hx-swap="outerHTML"
+        hx-indicator="#docker-save-indicator"
+        hx-on::after-request="if(event.detail.successful) showToast('Docker image updated successfully! Server will be restarted if it was running.', 'success')"
+        novalidate>
+    <%- include('../../components/csrf') %>
+    <div class="p-5">
+      <div class="mb-4">
+        <label for="dockerImage" class="block text-sm font-medium mb-2" style="color:var(--theme-text-muted)"><%= req.translations.dockerImageLabel || 'Docker Image' %></label>
+        <%
+          let currentDockerImage = '';
+          try {
+            const dockerImageObj = JSON.parse(server.dockerImage);
+            currentDockerImage = Object.keys(dockerImageObj)[0];
+          } catch (e) {
+            currentDockerImage = '';
+          }
+
+          let availableDockerImages = [];
+          try {
+            if (server.image && server.image.dockerImages) {
+              const dockerImagesArray = JSON.parse(server.image.dockerImages);
+              dockerImagesArray.forEach(imageObj => {
+                Object.keys(imageObj).forEach(key => {
+                  availableDockerImages.push(key);
+                });
+              });
+            }
+          } catch (e) {
+            availableDockerImages = [];
+          }
+        %>
+
+        <div class="relative">
+          <select id="dockerImage" name="dockerImage" class="cs-native">
+            <% if (availableDockerImages.length > 0) { %>
+              <% availableDockerImages.forEach(image => { %>
+                <option value="<%= image %>" <%= image === currentDockerImage ? 'selected' : '' %>><%= image %></option>
+              <% }); %>
+            <% } else { %>
+              <option value="" disabled selected><%= req.translations.noDockerImages || 'No Docker images available' %></option>
+            <% } %>
+          </select>
+          <div class="custom-select" data-for="dockerImage"></div>
+        </div>
+        <p class="mt-2 text-xs" style="color:var(--theme-text-muted)"><%= req.translations.dockerImageHint || "Changing the Docker image will restart your server if it's currently running." %></p>
+      </div>
+    </div>
+
+    <div class="px-5 py-4 border-t flex items-center gap-3" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
+      <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm"><%= req.translations.updateDockerImage || 'Update Docker Image' %></button>
+      <span id="docker-save-indicator" class="htmx-indicator text-xs" style="color:var(--theme-text-muted)">Updating...</span>
+    </div>
+  </form>
+</div>

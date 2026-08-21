@@ -8,72 +8,6 @@ function showConfirmModal(title, message, onConfirm) {
   window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Yeah, delete it', onConfirm });
 }
 
-function removeNodeRow(nodeId) {
-  const row = document.querySelector('#nodeTable [data-node-id="' + nodeId + '"]');
-  if (!row) return;
-  al.removeRow(row).then(function () {
-    const tbody = document.querySelector('#nodeTable tbody');
-    if (tbody && !tbody.querySelector('[data-node-id]')) al.showEmpty(tbody, 'No nodes yet.', 4);
-    syncNodeStats();
-  });
-}
-
-function syncNodeStats() {
-  const rows = Array.from(document.querySelectorAll('#nodeTable tbody tr[data-node-id]'));
-  const total = rows.length;
-  let instances = 0;
-  let online = 0;
-  let assigned = 0;
-  rows.forEach(function (r) {
-    instances += parseInt(r.getAttribute('data-instances') || '0', 10) || 0;
-    if (r.getAttribute('data-online') === 'true') online++;
-    if (r.getAttribute('data-location') === 'true') assigned++;
-  });
-  const setVal = function (id, val) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  };
-  setVal('totalNodesTotal', total);
-  setVal('totalNodeInstancesTotal', instances);
-  setVal('onlineNodesTotal', online);
-  setVal('avgNodeInstancesTotal', total > 0 ? (instances / total).toFixed(2) : 0);
-  setVal('nodesAssignedTotal', assigned);
-  setVal('nodesUnassignedTotal', total - assigned);
-}
-
-async function deleteNode(nodeId) {
-  showConfirmModal('Delete node', 'This will permanently remove the node. This cannot be undone.', async () => {
-    try {
-      const response = await fetch(`/admin/node/${nodeId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await response.json();
-      if (response.ok) {
-        showToast('Node deleted.', 'success');
-        removeNodeRow(nodeId);
-      } else if (result.error === 'There are instances on the node') {
-        showConfirmModal('Node has servers', 'There are servers on this node. Delete all servers and remove the node?', async () => {
-          const r2 = await fetch(`/admin/node/${nodeId}?deleteInstance=true`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-          });
-          if (r2.ok) {
-            showToast('Node and servers deleted.', 'success');
-            removeNodeRow(nodeId);
-          } else {
-            showToast('Failed to delete node', 'error');
-          }
-        });
-      } else {
-        showToast(result.message || 'Failed to delete node', 'error');
-      }
-    } catch {
-      showToast('Request failed. Try again?', 'error');
-    }
-  });
-}
-
 document.getElementById('createButton').addEventListener('click', () => {
   location.href = '/admin/nodes/create';
 });
@@ -151,7 +85,7 @@ function copyCommand(copyBtn, command) {
   }
 
   function updateNodeStatus(nodeId, status) {
-    var cell = document.querySelector('#nodeTable [data-node-id="' + nodeId + '"]');
+    var cell = document.querySelector('#admin-nodes-table [data-node-id="' + nodeId + '"]');
     if (!cell) return;
     var dot = cell.querySelector('.al-dot-online, .al-dot-offline, .al-dot-warning');
     if (!dot) return;
@@ -176,7 +110,7 @@ function copyCommand(copyBtn, command) {
     const banner = document.createElement('div');
     banner.className = 'al-alert-danger mb-5';
     banner.innerHTML = offlineBannerHtml();
-    const table = document.getElementById('nodeTable');
+    const table = document.getElementById('admin-nodes-table');
     if (table && table.parentNode) table.parentNode.insertBefore(banner, table);
   }
 
@@ -241,8 +175,5 @@ function copyCommand(copyBtn, command) {
   }
 
   if (window.alRealtime && window.alState) wireNodeStatusRealtime();
-  else window.alListener(window, 'al:realtime-ready', 'admin-nodes-realtime-ready', wireNodeStatusRealtime);
-  window.alListener(document, 'turbo:before-cache', 'admin-nodes-realtime-teardown', function () {
-    stopNodeObservers.splice(0).forEach(function (stop) { stop(); });
-  });
+  else window.addEventListener('al:realtime-ready', wireNodeStatusRealtime);
 })();

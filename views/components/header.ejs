@@ -33,15 +33,24 @@ const wallpaperExcluded = req && req.path && (
     <link rel="stylesheet" href="<%= settings.darkTheme %>" id="dark-theme-css" data-theme-mode="dark">
     <% } %>
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
+    <!-- ── Foundation: session/CSRF support ────────────────────────────── -->
+    <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
     <script nonce="<%- nonce %>" defer src="/js/csrf.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/js/shared/al-icon.js?v=8"></script>
-    <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
+
+    <!-- ── Legacy lifecycle — retained dependencies ──────────────────────── -->
     <script nonce="<%- nonce %>" defer src="/javascript/vendor/query-core.js?v=1"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/vendor/reconnecting-websocket.js?v=1"></script>
-    <script nonce="<%- nonce %>" defer src="/javascript/vendor/stimulus.js?v=1"></script>
-    <script nonce="<%- nonce %>" defer src="/javascript/vendor/turbo.js?v=1"></script>
-    <!-- turbo-shell must load synchronously: inline body/page scripts call ALMount during parse -->
-    <script nonce="<%- nonce %>" src="/javascript/shared/turbo-shell.js?v=2"></script>
+
+    <!-- ── HTMX: self-hosted, CSP-compatible ──────────────────────────── -->
+    <script nonce="<%- nonce %>" defer src="/javascript/vendor/htmx.min.js?v=2.0.4"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/htmx-bootstrap.js?v=1"></script>
+
+    <!-- ── Alpine.js: self-hosted, CSP-compatible ─────────────────────── -->
+    <script nonce="<%- nonce %>" defer src="/javascript/vendor/alpine.min.js?v=3.14.9"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/alpine-bootstrap.js?v=1"></script>
+
+    <!-- ── Shared UI components (still live owners) ───────────────────── -->
     <script nonce="<%- nonce %>" defer src="/javascript/shared/format-switcher.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/animations.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/custom-select.js?v=8"></script>
@@ -54,7 +63,17 @@ const wallpaperExcluded = req && req.path && (
     <script nonce="<%- nonce %>" defer src="/javascript/shared/al-action.js?v=1"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/al-field.js?v=1"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/al-state.js?v=1"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/islands.js?v=1"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/data-layer.js?v=1"></script>
+    <style>
+      @keyframes al-page-loader-sweep {
+        from { transform: translateX(-110%); }
+        to { transform: translateX(365%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #al-page-loader { animation: none !important; transform: translateX(0) !important; }
+      }
+    </style>
     <style>
       * { scrollbar-width: thin; scrollbar-color: var(--theme-border) transparent; }
       ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -77,8 +96,6 @@ const wallpaperExcluded = req && req.path && (
         opacity: 0;
         transform: translateY(14px);
       }
-      /* Turbo Drive's default top progress bar is hidden: the panel draws its own page-loader overlay */
-      turbo-progress-bar { visibility: hidden; }
     </style>
 </head>
 <body style="font-family: 'General Sans';<%= (settings.panelWallpaper && !wallpaperExcluded) ? `--al-wallpaper-image:url('${settings.panelWallpaper}');` : '' %>" class="h-full<%= (settings.panelWallpaper && !wallpaperExcluded) ? ' al-wallpaper' : '' %>">
@@ -89,43 +106,12 @@ const wallpaperExcluded = req && req.path && (
 
 <a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white dark:focus:bg-neutral-950 focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
 
-<!-- Network activity chip is created dynamically by page-loader.js -->
-<script nonce="<%- nonce %>">
-function initializeTheme() {
-    const userPreference = localStorage.getItem('theme');
-    const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    if (userPreference === 'dark' || (!userPreference && systemPreference)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    applyThemeSheets();
-  }
-
-  function applyThemeSheets() {
-    const isDark = document.documentElement.classList.contains('dark');
-    const lightSheet = document.getElementById('light-theme-css');
-    const darkSheet = document.getElementById('dark-theme-css');
-    if (lightSheet) lightSheet.disabled = isDark;
-    if (darkSheet) darkSheet.disabled = !isDark;
-  }
-
-  function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    applyThemeSheets();
-    if (typeof setTerminalTheme === 'function') {
-      setTerminalTheme();
-    }
-    window.dispatchEvent(new CustomEvent('al:themechange'));
-  }
-
-  initializeTheme();
-</script>
+<!-- The indeterminate page loading line is created by page-loader.js. -->
+<!-- Theme initialization: external module replaces inline script -->
+<script nonce="<%- nonce %>" src="/javascript/shared/theme-init.js?v=1"></script>
 <%- include("./bottomNav") %>
 <%- include("./modal") %>
-<script nonce="<%- nonce %>" src="/javascript/shared/toast-store.js?v=1" data-turbo-eval="false"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/toast-store.js?v=1"></script>
 <%- include("./toast") %>
-<script nonce="<%- nonce %>" src="/javascript/shared/escape.js?v=1" data-turbo-eval="false"></script>
-<script nonce="<%- nonce %>" src="/javascript/shared/api.js?v=1" data-turbo-eval="false"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/escape.js?v=1"></script>
+<script nonce="<%- nonce %>" src="/javascript/shared/api.js?v=1"></script>

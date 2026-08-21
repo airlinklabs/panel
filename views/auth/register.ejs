@@ -38,19 +38,22 @@
             <label class="auth-label" for="username">Username</label>
             <input id="username" name="username" type="text" autocomplete="username"
               required spellcheck="false" autocapitalize="none" maxlength="20"
-              class="auth-input" placeholder="johndoe">
+              class="auth-input" placeholder="johndoe" aria-describedby="username-error">
+            <p id="username-error" class="text-xs mt-1 hidden" style="color:var(--theme-danger)" role="alert"></p>
           </div>
           <div>
             <label class="auth-label" for="email">Email</label>
             <input id="email" name="email" type="email" autocomplete="email"
-              required class="auth-input" placeholder="you@example.com">
+              required class="auth-input" placeholder="you@example.com" aria-describedby="email-error">
+            <p id="email-error" class="text-xs mt-1 hidden" style="color:var(--theme-danger)" role="alert"></p>
           </div>
         </div>
         <div>
           <label class="auth-label" for="password">Password</label>
           <div class="pw-wrapper">
             <input id="password" name="password" type="password" autocomplete="new-password"
-              required class="auth-input" placeholder="••••••••" style="padding-right:40px">
+              required class="auth-input" placeholder="••••••••" style="padding-right:40px" aria-describedby="pwHint password-error">
+            <p id="password-error" class="text-xs mt-1 hidden" style="color:var(--theme-danger)" role="alert"></p>
             <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">
               <span id="eyeIcon"><%- icon('eye', { width: 16, height: 16 }) %></span>
             </button>
@@ -111,17 +114,42 @@
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     let ok = true;
-    ['username','email','password'].forEach(function (id) { document.getElementById(id).classList.remove('invalid'); });
-    if (username.length < 3 || !/^[A-Za-z0-9]+$/.test(username)) { document.getElementById('username').classList.add('invalid'); ok = false; }
-    if (!email.includes('@') || !email.includes('.')) { document.getElementById('email').classList.add('invalid'); ok = false; }
-    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) { document.getElementById('password').classList.add('invalid'); ok = false; }
+    ['username','email','password'].forEach(function (id) {
+      document.getElementById(id).classList.remove('invalid');
+      document.getElementById(id).removeAttribute('aria-invalid');
+      var err = document.getElementById(id + '-error');
+      if (err) { err.textContent = ''; err.classList.add('hidden'); }
+    });
+    if (username.length < 3 || !/^[A-Za-z0-9]+$/.test(username)) {
+      document.getElementById('username').classList.add('invalid');
+      document.getElementById('username').setAttribute('aria-invalid', 'true');
+      var e = document.getElementById('username-error'); e.textContent = 'Username must be 3+ alphanumeric characters.'; e.classList.remove('hidden');
+      ok = false;
+    }
+    if (!email.includes('@') || !email.includes('.')) {
+      document.getElementById('email').classList.add('invalid');
+      document.getElementById('email').setAttribute('aria-invalid', 'true');
+      var e = document.getElementById('email-error'); e.textContent = 'Please enter a valid email address.'; e.classList.remove('hidden');
+      ok = false;
+    }
+    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      document.getElementById('password').classList.add('invalid');
+      document.getElementById('password').setAttribute('aria-invalid', 'true');
+      var e = document.getElementById('password-error'); e.textContent = 'Password must be 8+ characters with at least one letter and one number.'; e.classList.remove('hidden');
+      ok = false;
+    }
     if (!ok) { e.preventDefault(); return; }
     document.getElementById('submitBtn').classList.add('loading');
     document.getElementById('submitBtn').disabled = true;
   });
 
   ['username','email','password'].forEach(function (id) {
-    document.getElementById(id).addEventListener('input', function () { this.classList.remove('invalid'); });
+    document.getElementById(id).addEventListener('input', function () {
+      this.classList.remove('invalid');
+      this.removeAttribute('aria-invalid');
+      var err = document.getElementById(id + '-error');
+      if (err) { err.textContent = ''; err.classList.add('hidden'); }
+    });
   });
 })();
 </script>

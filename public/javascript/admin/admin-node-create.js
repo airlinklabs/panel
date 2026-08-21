@@ -196,11 +196,11 @@
     panel.classList.remove('hidden');
 
     const panelUrl = window.location.origin;
-    const cli = 'bun configure --panel ' + panelUrl + ' --key ' + node.key;
+    const cli = 'cd /path/to/airlinkd && bun run configure --panel "' + panelUrl + '" --key "' + node.key + '" && bun run start -- --no-tui';
     const host = node.address;
     document.getElementById('daemonCliCommand').textContent = cli;
 
-    const envLines = 'key=' + node.key + '\nremote=' + host + '\nport=' + (node.port || '3002');
+    const envLines = 'KEY=' + node.key + '\nREMOTE=' + host + '\nPORT=' + (node.port || '3002');
     document.getElementById('envPreview').textContent = envLines;
 
     const copyCli = document.getElementById('copyDaemonCli');
@@ -227,7 +227,7 @@
       try {
         await copyText(cli);
         copyCli.innerHTML = '<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-        copyHint.textContent = 'Copied — run it on the daemon machine.';
+        copyHint.textContent = 'Copied — run it on the daemon machine from the daemon directory.';
       } catch {
         copyHint.textContent = 'Could not copy. Select the command above and copy it manually.';
       }

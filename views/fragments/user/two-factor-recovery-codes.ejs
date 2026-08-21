@@ -1,0 +1,25 @@
+<!-- Recovery codes panel fragment — shown after successful 2FA enable -->
+<div id="two-factor-recovery-codes" class="al-card p-6 max-w-xl mx-auto">
+  <div class="flex items-start gap-3">
+    <div class="shrink-0">
+      <%- icon('key-round', { class: 'w-5 h-5', strokeWidth: 1.5, style: 'color:var(--theme-accent)' }) %>
+    </div>
+    <div>
+      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Save your recovery codes</h2>
+      <p class="text-xs mt-1" style="color:var(--theme-text-muted)">Each code works exactly once. If you lose your authenticator app, use one of these to sign in — then generate new ones. They are only shown now, so store them somewhere safe.</p>
+    </div>
+  </div>
+  <div id="recoveryCodesList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+    <% for (const code of recoveryCodes) { %>
+      <code class="select-all rounded-lg px-3 py-2 text-xs font-mono text-center" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><%= code %></code>
+    <% } %>
+  </div>
+  <div class="flex items-center justify-between mt-5 gap-3">
+    <button type="button" id="copyRecoveryCodes" class="al-btn-ghost text-sm inline-flex items-center gap-1.5"
+      onclick="navigator.clipboard.writeText(document.querySelectorAll('#recoveryCodesList code').forEach(c => c.textContent).join ? Array.from(document.querySelectorAll('#recoveryCodesList code')).map(c => c.textContent).join('\n') : '').then(() => { if (window.showToast) showToast('Recovery codes copied.', 'success'); }).catch(() => { if (window.showToast) showToast('Could not copy recovery codes.', 'error'); })">
+      <%- icon('copy', { size: 14 }) %>
+      Copy all
+    </button>
+    <a href="/account" class="al-btn-primary text-sm px-5">I've saved them</a>
+  </div>
+</div>

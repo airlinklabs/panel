@@ -7,7 +7,7 @@
   var SECONDS_PER_HOUR = 3600;
   var SECONDS_PER_MINUTE = 60;
 
-  window.alListener(document, 'contextmenu', 'dashboard-contextmenu', function (e) { e.preventDefault(); });
+  document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
   var bridge = document.getElementById('dashboard-data');
   var allFolders = JSON.parse(bridge.dataset.folders || '[]');
@@ -414,7 +414,7 @@
     }
   });
 
-  window.alListener(document, 'click', 'dashboard-close-context-menu', function () {
+  document.addEventListener('click', function () {
     document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
   });
 
@@ -494,7 +494,7 @@
     openOverlay(folderPopupOverlay, folderPopupPanel);
   }
 
-  window.alListener(document, 'keydown', 'dashboard-escape', function (e) {
+  document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       document.querySelectorAll('.server-ctx-menu').forEach(function (m) { m.classList.add('hidden'); });
       closeOverlay(folderPopupOverlay, folderPopupPanel);
@@ -623,16 +623,12 @@
       realtimeDisposers.push(st.observe('server:status:' + uuid, function (snap) { onRealtimeStatus(uuid, snap); }));
     });
 
-    // Drop the daemon watchers when navigating away (Turbo SPA navigation
-    // keeps this script's context alive across page loads) so reference
-    // counts fall to zero and the daemon sockets close.
-    window.alListener(document, 'turbo:before-cache', 'dashboard-realtime-teardown', unwatchAll);
-    window.alListener(window, 'pagehide', 'dashboard-realtime-teardown', unwatchAll);
+    window.addEventListener('pagehide', unwatchAll);
     if (rt.status && rt.status() === 'connected') onRealtimeConnect();
   }
 
   if (window.alRealtime) wireRealtime();
-  else window.alListener(window, 'al:realtime-ready', 'dashboard-realtime-ready', wireRealtime);
+  else window.addEventListener('al:realtime-ready', wireRealtime);
 
   /* ── Onboarding modal ─────────────────────── */
   var onboardingModal = document.getElementById('onboardingModal');

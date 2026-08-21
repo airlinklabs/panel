@@ -22,9 +22,9 @@
 
       <div class="al-page-body" data-al-tabs data-tabs-default="nodes" data-tabs-hash>
 
-        <div role="tablist" class="flex items-center border-b" style="border-color:var(--theme-border);">
-          <button id="tab-btn-nodes" type="button" data-tab="nodes" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-nodes" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-white dark:text-black bg-neutral-900 dark:bg-white">Nodes</button>
-          <button id="tab-btn-locations" type="button" data-tab="locations" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-locations" class="px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">Locations</button>
+        <div role="tablist" class="flex gap-1 mb-6">
+          <button id="tab-btn-nodes" type="button" data-tab="nodes" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-nodes" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %>Nodes</button>
+          <button id="tab-btn-locations" type="button" data-tab="locations" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-locations" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) %>Locations</button>
         </div>
 
         <div id="tab-panel-nodes" role="tabpanel" aria-labelledby="tab-btn-nodes" data-tab-panel="nodes">
@@ -77,75 +77,7 @@
         <% } %>
 
         <!-- Table of nodes -->
-        <div class="overflow-x-auto rounded-xl border" id="nodeTable" style="border-color:var(--theme-border);box-shadow:var(--theme-shadow-sm)">
-          <% if (nodes.length === 0) { %>
-            <%- include('../../components/ui/empty-state', {
-              iconName: 'network',
-              title: 'No nodes yet',
-              description: 'Add a node to start hosting servers.',
-              action: '<button id="createButtonEmpty" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
-            }) %>
-          <% } else { %>
-          <table class="al-table" style="table-layout:auto">
-            <colgroup>
-              <col style="min-width:170px">
-              <col style="min-width:180px">
-              <col style="min-width:80px">
-              <col style="min-width:220px">
-            </colgroup>
-            <thead class="al-table-head">
-              <tr>
-                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.name %></th>
-                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.connection %></th>
-                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.instances %></th>
-                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.actions %></th>
-              </tr>
-            </thead>
-            <tbody>
-              <% let nodeIdx = 0; nodes.forEach(function(node) { %>
-                <tr data-node-id="<%= node.id %>" data-instances="<%= node.instances ? node.instances.length : 0 %>" data-online="<%= node.status === 'Online' ? 'true' : '' %>" data-location="<%= node.locationId ? 'true' : '' %>" style="--i:<%= nodeIdx++ %>" class="al-table-tr cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
-                  <td class="al-table-td sm:pl-6">
-                    <div class="flex items-center">
-                      <div class="mr-5">
-                        <% if (node.status == "Online") { %>
-                          <span class="al-dot-online"></span>
-                        <% } else if (node.status == "Offline") { %>
-                          <span class="al-dot-offline group relative">
-                            <% if (node.error) { %>
-                              <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 w-48 text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none z-10" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); color:var(--theme-text);">
-                                <%= node.error %>
-                              </div>
-                            <% } %>
-                          </span>
-                        <% } else { %>
-                          <span class="al-dot-warning"></span>
-                        <% } %>
-                      </div>
-                      <div class="font-medium" style="color:var(--theme-text-strong);"><%= node.name %></div>
-                    </div>
-                  </td>
-                  <td class="al-table-td"><%= node.address %>:<%= node.port %>
-                    <div class="mt-1 ml-2 inline-flex items-center rounded-md
-                    <%= node.versionRelease ? 'bg-emerald-600 text-white ring-emerald-700' : 'bg-neutral-200 text-neutral-700 dark:bg-neutral-300/20 dark:text-neutral-300 ring-neutral-300/40 dark:ring-neutral-400/20' %>
-                    px-2 py-1 text-xs font-medium ring-1 ring-inset">
-                      <%= node.versionRelease || (req.translations.unknown || 'unknown') %>
-                    </div></td>
-                  <td class="al-table-td"><%= node.instances ? node.instances.length : 0 %></td>
-                  <td class="al-table-td">
-                    <div class="flex gap-3 whitespace-nowrap">
-                      <button  onclick="configure('<%= node.id %>')" type="button" class="al-btn-secondary text-xs"><%- icon('settings', { class: 'size-3', strokeWidth: 1.5 }) %>Configure</button>
-                      <a href="./node/<%= node.id %>" class="al-btn-secondary text-xs inline-flex items-center gap-1"><%- icon('pencil', { class: 'size-3', strokeWidth: 1.5 }) %>Edit</a>
-                      <button  onclick="deleteNode('<%= node.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete node">
-                        <%- icon('trash-2', { size: 16 }) %>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
-          <% } %>
-        </div>
+        <%- include('../../fragments/admin/nodes/node-table', { nodes, locations, settings, req }) %>
         </div>
 
         <!-- Locations Tab -->
@@ -191,20 +123,28 @@
           <div class="al-card">
             <h3 class="al-card-header flex items-center gap-2"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Create Location</h3>
             <div class="p-5">
-              <form id="createLocationForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end" onsubmit="event.preventDefault();document.getElementById('createLocationBtn').click();">
+              <div id="admin-locations-status"></div>
+              <form id="createLocationForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end"
+                hx-post="/admin/locations"
+                hx-target="#admin-locations-list"
+                hx-swap="outerHTML"
+                hx-disabled-elt="find button[type='submit']"
+                hx-indicator="#create-location-status">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div>
                   <label class="al-label" for="locName">Name</label>
-                  <input id="locName" type="text" placeholder="US East" class="al-input">
+                  <input id="locName" name="name" type="text" placeholder="US East" class="al-input" required>
                 </div>
                 <div>
                   <label class="al-label" for="locCode">Short code</label>
-                  <input id="locCode" type="text" placeholder="us-east" class="al-input" autocapitalize="off" spellcheck="false">
+                  <input id="locCode" name="shortCode" type="text" placeholder="us-east" class="al-input" autocapitalize="off" spellcheck="false" required>
                 </div>
                 <div class="lg:col-span-2 flex items-end">
-                  <button id="createLocationBtn" type="button" class="al-btn-primary w-full sm:w-auto">
+                  <button type="submit" class="al-btn-primary w-full sm:w-auto">
                     <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
                     Create Location
                   </button>
+                  <p id="create-location-status" class="htmx-indicator text-xs ml-2" style="color:var(--theme-text-muted)">Creating…</p>
                 </div>
               </form>
             </div>
@@ -212,48 +152,8 @@
 
           <div class="al-card">
             <h3 class="al-card-header flex items-center gap-2"><%- icon('map', { class: 'size-4', strokeWidth: 1.5 }) %>All Locations</h3>
-            <div class="p-5" id="locationsList">
-              <% if (locations.length === 0) { %>
-                <div class="text-center py-10">
-                  <div class="mx-auto mb-3 w-12 h-12 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-border) 35%, transparent); color:var(--theme-text-muted);">
-                    <%- icon('map-pin', { class: 'size-6', strokeWidth: 1.5 }) %>
-                  </div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong);">No locations yet</p>
-                  <p class="text-xs mt-1" style="color:var(--theme-text-muted);">Create your first location above to start grouping nodes by region.</p>
-                </div>
-              <% } else { %>
-                <% const byRegion = new Map(); locations.forEach(loc => {
-                     const region = loc.shortCode.split('-')[0] || 'Other';
-                     if (!byRegion.has(region)) byRegion.set(region, []);
-                     byRegion.get(region).push(loc);
-                   });
-                   for (const [region, locs] of byRegion) { %>
-                  <div class="mb-6 last:mb-0" data-region="<%= region %>">
-                    <div class="flex items-center gap-2 mb-3">
-                      <span class="text-[11px] font-semibold uppercase tracking-widest" style="color:var(--theme-text-muted);"><%= region %></span>
-                      <span class="h-px flex-1" style="background:var(--theme-border);"></span>
-                      <span class="text-xs region-count" style="color:var(--theme-text-muted);"><%= locs.length %></span>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <% locs.forEach(loc => { %>
-                        <div class="rounded-xl border p-4 flex items-center justify-between gap-3 transition-shadow hover:shadow-sm" style="border-color:var(--theme-border); background:var(--theme-bg-card);" data-location-id="<%= loc.id %>">
-                          <div class="min-w-0">
-                            <div class="flex items-center gap-2">
-                              <span class="shrink-0 w-2 h-2 rounded-full" style="background:<%= loc._count.nodes > 0 ? 'var(--theme-success)' : 'var(--theme-border)' %>;"></span>
-                              <p class="font-medium text-sm truncate" style="color:var(--theme-text-strong);"><%= loc.name %></p>
-                            </div>
-                            <p class="text-xs mt-1.5 font-mono" style="color:var(--theme-text-muted);"><%= loc.shortCode %></p>
-                            <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= loc._count.nodes %> node(s)</p>
-                          </div>
-                          <button type="button" class="delete-location-btn shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-red-50 dark:hover:bg-red-950/30" data-id="<%= loc.id %>" data-name="<%= loc.name %>" aria-label="Delete location <%= loc.name %>">
-                            <%- icon('trash', { class: 'size-4', strokeWidth: 1.5, style: 'color:var(--theme-danger);' }) %>
-                          </button>
-                        </div>
-                      <% }); %>
-                    </div>
-                  </div>
-                <% } %>
-              <% } %>
+            <div class="p-5">
+              <%- include('../../fragments/admin/locations/location-list', { locations }) %>
             </div>
           </div>
         </div>
@@ -272,152 +172,9 @@
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-nodes.js?v=9"></script>
 <script nonce="<%- nonce %>">
 (function () {
-  const toast = window.showToast || function (m) { console.warn('[locations]', m); };
-
-  function locationRowHtml(loc) {
-    const name = window.escHtml(loc.name);
-    const nodeCount = (loc._count && loc._count.nodes) || 0;
-    return '<div class="rounded-xl border p-4 flex items-center justify-between gap-3 transition-shadow hover:shadow-sm" style="border-color:var(--theme-border); background:var(--theme-bg-card);" data-location-id="' + loc.id + '">' +
-      '<div class="min-w-0">' +
-      '<div class="flex items-center gap-2">' +
-      '<span class="shrink-0 w-2 h-2 rounded-full" style="background:' + (nodeCount > 0 ? 'var(--theme-success)' : 'var(--theme-border)') + ';"></span>' +
-      '<p class="font-medium text-sm truncate" style="color:var(--theme-text-strong);">' + name + '</p>' +
-      '</div>' +
-      '<p class="text-xs mt-1.5 font-mono" style="color:var(--theme-text-muted);">' + window.escHtml(loc.shortCode) + '</p>' +
-      '<p class="text-xs mt-1" style="color:var(--theme-text-muted);">' + nodeCount + ' node(s)</p>' +
-      '</div>' +
-      '<button type="button" class="delete-location-btn shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-red-50 dark:hover:bg-red-950/30" data-id="' + loc.id + '" data-name="' + window.escAttr(loc.name) + '" aria-label="Delete location ' + name + '">' +
-      (window.alIcon ? window.alIcon('trash', 'size-4', { strokeWidth: 1.5, style: 'color:var(--theme-danger);' }) : '') +
-      '</button>' +
-      '</div>';
-  }
-
-  function syncLocationCount() {
-    const el = document.getElementById('totalLocationsCount');
-    if (!el) return;
-    el.textContent = String(document.querySelectorAll('#locationsList [data-location-id]').length);
-  }
-
-  function showEmptyLocations(list) {
-    if (!list || list.querySelector('[data-empty-locations]')) return;
-    const div = document.createElement('div');
-    div.setAttribute('data-empty-locations', '');
-    div.className = 'text-center py-10';
-    div.innerHTML =
-      '<div class="mx-auto mb-3 w-12 h-12 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-border) 35%, transparent); color:var(--theme-text-muted);">' +
-      (window.alIcon ? window.alIcon('map-pin', 'size-6', { strokeWidth: 1.5 }) : '') +
-      '</div>' +
-      '<p class="text-sm font-medium" style="color:var(--theme-text-strong);">No locations yet</p>' +
-      '<p class="text-xs mt-1" style="color:var(--theme-text-muted);">Create your first location above to start grouping nodes by region.</p>';
-    list.appendChild(div);
-  }
-
-  function addLocationRow(loc) {
-    const list = document.getElementById('locationsList');
-    if (!list) return;
-    const empty = list.querySelector('[data-empty-locations]');
-    if (empty) empty.remove();
-    const region = (loc.shortCode || '').split('-')[0] || 'Other';
-    const group = list.querySelector('[data-region="' + region + '"]');
-    if (group) {
-      const grid = group.querySelector('.grid');
-      if (grid && window.al) al.addRow(grid, locationRowHtml(loc));
-      const count = group.querySelector('.region-count');
-      if (count) count.textContent = String(parseInt(count.textContent || '0', 10) + 1);
-    } else {
-      list.insertAdjacentHTML('beforeend',
-        '<div class="mb-6 last:mb-0" data-region="' + region + '">' +
-        '<div class="flex items-center gap-2 mb-3">' +
-        '<span class="text-[11px] font-semibold uppercase tracking-widest" style="color:var(--theme-text-muted);">' + window.escHtml(region) + '</span>' +
-        '<span class="h-px flex-1" style="background:var(--theme-border);"></span>' +
-        '<span class="text-xs region-count" style="color:var(--theme-text-muted);">1</span>' +
-        '</div>' +
-        '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">' + locationRowHtml(loc) + '</div>' +
-        '</div>');
-    }
-    syncLocationCount();
-  }
-
-  function removeLocationRow(id) {
-    const card = document.querySelector('[data-location-id="' + id + '"]');
-    if (!card) return;
-    const group = card.closest('[data-region]');
-    const list = document.getElementById('locationsList');
-    al.removeRow(card).then(function () {
-      if (group) {
-        const remaining = group.querySelectorAll('[data-location-id]').length;
-        if (remaining === 0) al.removeRow(group);
-        else {
-          const count = group.querySelector('.region-count');
-          if (count) count.textContent = String(remaining);
-        }
-      }
-      syncLocationCount();
-      if (list && !list.querySelector('[data-location-id]')) showEmptyLocations(list);
-    });
-  }
-
-  document.getElementById('createLocationBtn').addEventListener('click', async () => {
-    const name = document.getElementById('locName').value.trim();
-    const shortCode = document.getElementById('locCode').value.trim().toLowerCase();
-    if (!name || !shortCode) { toast('Name and short code are required.', 'error'); return; }
-
-    const r = await fetch('/admin/locations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
-      body: JSON.stringify({ name, shortCode }),
-    });
-    const d = await r.json();
-    if (r.ok) {
-      toast('Location created.', 'success');
-      addLocationRow(d.location);
-    } else {
-      toast(d.message || 'Failed to create location.', 'error');
-    }
-  });
-
-  document.getElementById('locationsList').addEventListener('click', (e) => {
-    const btn = e.target.closest('.delete-location-btn');
-    if (!btn) return;
-    (async () => {
-      await new Promise(resolve => {
-        window.modal.confirm({
-          title: 'Delete location',
-          body: 'Delete "' + btn.dataset.name + '"? Servers in it will lose their grouping.',
-          danger: true,
-          confirmLabel: 'Delete',
-          onConfirm: resolve,
-        });
-      });
-      const r = await fetch('/admin/location/' + btn.dataset.id, { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
-      const d = await r.json();
-      if (r.ok) {
-        toast('Location deleted.', 'success');
-        removeLocationRow(btn.dataset.id);
-      } else {
-        toast(d.message || 'Failed to delete location.', 'error');
-      }
-    })();
-  });
-})();
-</script>
-<script nonce="<%- nonce %>">
-(function () {
-  const btnNodes = document.getElementById('tab-btn-nodes');
-  const btnLocs = document.getElementById('tab-btn-locations');
-  if (!btnNodes || !btnLocs) return;
-
-  const ACTIVE = 'px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-white dark:text-black bg-neutral-900 dark:bg-white';
-  const INACTIVE = 'px-3 py-2 mr-4 text-sm font-medium rounded-lg transition text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300';
-
-  // al-tabs owns selection (attributes, panel visibility and the URL hash);
-  // this only repaints the button classes and preserves the locations scroll.
-  window.alListener(document, 'al:tabs-change', 'nodes-tabs', function (e) {
-    const isLoc = e.detail && e.detail.name === 'locations';
-    btnNodes.className = isLoc ? INACTIVE : ACTIVE;
-    btnLocs.className = isLoc ? ACTIVE : INACTIVE;
-    if (isLoc) {
-      const locEl = document.getElementById('locations');
+  document.addEventListener('al:tabs-change', function (e) {
+    if (e.detail && e.detail.name === 'locations') {
+      var locEl = document.getElementById('locations');
       if (locEl) locEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });

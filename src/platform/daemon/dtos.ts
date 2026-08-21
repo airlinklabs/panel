@@ -28,11 +28,13 @@ export type ContainerStatus = z.infer<typeof containerStatusSchema>;
 
 // ── GET / (node root) ──────────────────────────────────────────────────────
 // { versionFamily?, versionRelease?, status?, remote? }
+// NOTE: daemon sends versionFamily as a number and remote as a string hostname.
+// The schema must accept both to avoid parse failures.
 export const daemonInfoSchema = z.object({
-  versionFamily: z.string().optional(),
+  versionFamily: z.union([z.string(), z.number()]).optional(),
   versionRelease: z.string().optional(),
   status: z.string().optional(),
-  remote: z.boolean().optional(),
+  remote: z.union([z.boolean(), z.string()]).optional(),
 });
 
 export type DaemonInfo = z.infer<typeof daemonInfoSchema>;

@@ -1,7 +1,7 @@
 (function() {
   const pd = document.getElementById('page-data').dataset;
 
-  window.ALMount(function() {
+  function init() {
     const form = document.getElementById('editUserForm');
     const isAdminToggle = document.getElementById('isAdmin');
     const adminStatusLabel = document.getElementById('adminStatusLabel');
@@ -10,30 +10,34 @@
       const transferBtn = document.getElementById('transferOwnerBtn');
       if (transferBtn) {
         transferBtn.addEventListener('click', async function() {
-          if (!confirm(pd.transferOwnerConfirm)) return;
-          const loader = showLoadingPopup(pd.transferringOwnership, '');
-          try {
-            const response = await fetch('/admin/users/transfer-owner/' + pd.userId + '/', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-            });
-            const responseData = await response.json();
-            loader.close();
-            if (responseData.error) {
-              showToast(responseData.error, 'error');
-            } else {
-              showToast(responseData.message || pd.transferringOwnership, 'success');
-              setTimeout(() => {
-                window.location.href = '/admin/users';
-              }, 1000);
+          window.modal.confirm({
+            title: pd.transferOwnerConfirm,
+            body: pd.transferOwnerConfirm,
+            danger: true,
+            confirmLabel: 'Transfer',
+            onConfirm: async () => {
+              const loader = showLoadingPopup(pd.transferringOwnership, '');
+              try {
+                const response = await fetch('/admin/users/transfer-owner/' + pd.userId + '/', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                });
+                const responseData = await response.json();
+                loader.close();
+                if (responseData.error) {
+                  showToast(responseData.error, 'error');
+                } else {
+                  showToast(responseData.message || pd.transferringOwnership, 'success');
+                  setTimeout(() => { window.location.href = '/admin/users'; }, 1000);
+                }
+              } catch (error) {
+                loader.close();
+                console.error('Failed to transfer ownership:', error);
+                showToast(pd.errorUpdatingUser, 'error');
+              }
             }
-          } catch (error) {
-            loader.close();
-            console.error('Failed to transfer ownership:', error);
-            showToast(pd.errorUpdatingUser, 'error');
-          }
+          });
         });
-      }
     }
 
     isAdminToggle.addEventListener('change', function() {
@@ -113,5 +117,11 @@
         showToast(pd.errorUpdatingUser, 'error');
       }
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

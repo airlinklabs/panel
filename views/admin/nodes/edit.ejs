@@ -216,7 +216,7 @@
 <div id="page-data" style="display:none"
   data-node-id="<%= node.id %>"
   data-allocated-ports="<%- node.allocatedPorts || '[]' %>"
-  data-used-ports="<%- JSON.stringify(usedPortsList) %>"
+  data-used-ports="<%= JSON.stringify(usedPortsList) %>"
 ></div>
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-node-edit.js?v=5"></script>

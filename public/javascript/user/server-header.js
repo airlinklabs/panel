@@ -166,12 +166,9 @@
       }
     }
 
-    // Turbo navigation does not fire pagehide. Release on its cache boundary
-    // too, otherwise each visited server leaves daemon watchers behind.
-    window.alListener(document, 'turbo:before-cache', 'server-header-realtime-teardown', teardownRealtime);
-    window.alListener(window, 'pagehide', 'server-header-realtime-teardown', teardownRealtime);
+    window.addEventListener('pagehide', teardownRealtime);
   }
 
   if (window.alRealtime) wireRealtime();
-  else window.alListener(window, 'al:realtime-ready', 'server-header-realtime-ready', wireRealtime);
+  else window.addEventListener('al:realtime-ready', wireRealtime);
 })();

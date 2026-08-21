@@ -1,0 +1,122 @@
+<!-- Database list fragment — replaces #server-db-list on create/delete/rotate -->
+<div id="server-db-list">
+  <% if (hosts.length === 0) { %>
+    <div class="al-alert-danger">
+      <%- icon('database', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
+      <div class="flex-1">
+        <p class="font-medium"><%= req.translations.noDbHostsConfigured || 'No database hosts configured' %></p>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= req.translations.noDbHostsConfiguredDesc || 'An administrator must add a database host before you can create databases.' %></p>
+      </div>
+    </div>
+  <% } else if (databases.length === 0) { %>
+    <div class="al-card rounded-xl p-10 text-center">
+      <div class="flex justify-center">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-bg-secondary);">
+          <%- icon('database', { class: 'size-6', strokeWidth: 1.5, style: 'color:var(--theme-text-muted)' }) %>
+        </div>
+      </div>
+      <h2 class="mt-4 text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.noDatabasesYet || 'No databases yet' %></h2>
+      <p class="mt-1 text-sm max-w-sm mx-auto" style="color:var(--theme-text-muted)"><%= req.translations.noDatabasesYetDesc || 'Create a database to use with your server.' %></p>
+      <button type="button" onclick="openAddDatabaseModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <%= req.translations.createDatabase || 'Create Database' %>
+      </button>
+    </div>
+  <% } else { %>
+    <div class="al-card rounded-lg shadow overflow-hidden p-0">
+      <div class="al-card-header">
+        <div>
+          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Databases</h2>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" data-db-count><%= databases.length %>/<%= typeof userDbLimit !== 'undefined' && userDbLimit > 0 ? userDbLimit : '∞' %> databases</p>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="al-table min-w-[900px]">
+          <thead class="al-table-head">
+            <tr>
+              <th scope="col" class="al-table-th px-6 py-3 uppercase w-48">Name</th>
+              <th scope="col" class="al-table-th px-6 py-3 uppercase w-44">Host</th>
+              <th scope="col" class="al-table-th px-6 py-3 uppercase">Connection string</th>
+              <th scope="col" class="al-table-th px-6 py-3 uppercase w-40">Username</th>
+              <th scope="col" class="al-table-th px-6 py-3 uppercase w-44">Password</th>
+              <th scope="col" class="al-table-th px-6 py-3 uppercase text-right w-36">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y" style="border-color:var(--theme-border)">
+            <% databases.forEach((db) => { %>
+              <tr class="al-table-tr transition-colors" data-db-id="<%= db.id %>" data-db-name="<%= db.databaseName %>">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono text-sm font-medium truncate max-w-[10rem]" style="color:var(--theme-text-strong)" title="<%= db.databaseName %>"><%= db.databaseName %></span>
+                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">MySQL</span>
+                  </div>
+                  <div class="text-[11px] mt-1 flex items-center gap-1.5" style="color:var(--theme-text-muted)">
+                    <%- icon('calendar', { class: 'size-3 shrink-0' }) %>
+                    <%= req.translations.createdLabel || 'Created:' %> <%= new Date(db.createdAt).toLocaleDateString() %> <%= new Date(db.createdAt).toLocaleTimeString() %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= db.host.name %></div>
+                  <div class="text-[11px] font-mono mt-0.5" style="color:var(--theme-text-muted)"><%= db.host.host %>:<%= db.host.port %></div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style="background:var(--theme-bg-secondary)">
+                    <span data-role="dsn" class="flex-1 min-w-0 truncate font-mono text-[11px]" style="color:var(--theme-text-strong)">mysql://<%= db.databaseUser %>:<%= db.databasePassword %>@<%= db.host.host %>:<%= db.host.port %>/<%= db.databaseName %></span>
+                    <button type="button" data-action="copy-dsn" class="shrink-0" style="background:transparent;border:none;padding:0.5rem;color:var(--theme-text-muted);cursor:pointer;border-radius:0.5rem" aria-label="<%= req.translations.copyConnectionString || 'Copy connection string' %>">
+                      <%- icon('copy', { size: 13 }) %>
+                    </button>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style="background:var(--theme-bg-secondary)">
+                    <span data-role="user" class="flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)"><%= db.databaseUser %></span>
+                    <button type="button" data-action="copy-user" class="shrink-0" style="background:transparent;border:none;padding:0.5rem;color:var(--theme-text-muted);cursor:pointer;border-radius:0.5rem" aria-label="<%= req.translations.copyUsername || 'Copy username' %>">
+                      <%- icon('copy', { size: 13 }) %>
+                    </button>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style="background:var(--theme-bg-secondary)">
+                    <span data-role="pass" class="hidden flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)"><%= db.databasePassword %></span>
+                    <span data-role="pass-mask" class="flex-1 min-w-0 truncate font-mono text-xs" style="color:var(--theme-text-strong)">••••••••••••••••</span>
+                    <button type="button" data-action="toggle-pass" class="shrink-0" style="background:transparent;border:none;padding:0.5rem;color:var(--theme-text-muted);cursor:pointer;border-radius:0.5rem" aria-label="<%= req.translations.showPassword || 'Show password' %>">
+                      <%- icon('eye', { class: 'h-4 w-4', strokeWidth: 1.5 }) %>
+                    </button>
+                    <button type="button" data-action="copy-pass" class="shrink-0" style="background:transparent;border:none;padding:0.5rem;color:var(--theme-text-muted);cursor:pointer;border-radius:0.5rem" aria-label="<%= req.translations.copyPassword || 'Copy password' %>">
+                      <%- icon('copy', { size: 13 }) %>
+                    </button>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <button
+                      hx-post="/server/<%= server.UUID %>/databases/<%= db.id %>/rotate-password"
+                      hx-target="#server-db-list"
+                      hx-swap="outerHTML"
+                      hx-confirm="Generate a new password for this database user? Existing connections will be dropped."
+                      type="button"
+                      class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                      style="color:var(--theme-accent);background:var(--theme-accent-subtle)">
+                      <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 2 }) %>
+                      <%= req.translations.rotatePassword || 'Rotate' %>
+                    </button>
+                    <button
+                      hx-delete="/server/<%= server.UUID %>/databases/<%= db.id %>"
+                      hx-target="#server-db-list"
+                      hx-swap="outerHTML"
+                      hx-confirm="This will permanently delete the database and its user from the host. This cannot be undone. (<%= db.databaseName %>)"
+                      type="button"
+                      style="background:transparent;border:none;padding:0.5rem;color:var(--theme-danger);cursor:pointer;border-radius:0.5rem"
+                      aria-label="<%= req.translations.deleteDatabaseAria || 'Delete database' %>">
+                      <%- icon('trash-2', { size: 14 }) %>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+</div>

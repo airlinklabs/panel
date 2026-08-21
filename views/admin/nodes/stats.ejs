@@ -1,69 +1,116 @@
-<%- include('../../components/header', { title: 'Dashboard' }) %>
+<%- include('../../components/header', { title: 'Node Stats' }) %>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
-    <!-- Sidebar -->
     <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/sidebar') %>
     </div>
-<%- include('../../components/template') %>
+    <%- include('../../components/template') %>
 
-    <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Nodes', href: '/admin/nodes' },
-        { label: 'Stats' }
+        { label: node.name }
       ] }) %>
+
       <div class="al-page-header">
-        <h1 class="al-page-title"><%= req.translations.adminNodesTitle %></h1>
-        <p class="al-page-desc"><%= req.translations.adminNodesText %></p>
+        <div class="flex items-center gap-3">
+          <h1 class="al-page-title"><%= node.name %></h1>
+          <% if (node.status === 'Online') { %>
+            <span class="al-dot-online"></span>
+          <% } else { %>
+            <span class="al-dot-offline"></span>
+          <% } %>
+        </div>
+        <p class="al-page-desc"><%= node.address %>:<%= node.port %><% if (node.versionRelease) { %> &middot; <%= node.versionRelease %><% } %></p>
       </div>
-      <div class="mt-4 sm:flex-none">
+
+      <div class="flex flex-wrap gap-2 mb-6">
         <button onclick="location.href='/admin/nodes'" type="button" class="al-btn-secondary">
-          <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %>
-          Back
+          <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %> Back
         </button>
       </div>
 
-      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
-        <div class="al-card p-5">
-            <h2 class="al-section-title mb-2">Status</h2>
-            <%
-            const lastStat = stats.totalStats && stats.totalStats.length ? stats.totalStats.at(-1) : null;
-            const isOnline = lastStat && (new Date() - new Date(lastStat.timestamp)) <= 10 * 1000;
-            %>
-            <p class="text-4xl font-normal" style="color:<%= isOnline ? 'var(--theme-success)' : 'var(--theme-danger)' %>">
-                <%= isOnline ? 'Online' : 'Offline' %>
-            </p>
-            <p class="al-page-desc mt-2">
-                Last Update: <%= lastStat ? new Date(lastStat.timestamp).toLocaleTimeString() : 'N/A' %>
-            </p>
+      <!-- Resource gauges -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 m-8">
+        <div class="al-card p-4 text-center">
+          <p class="al-section-title mb-1">RAM</p>
+          <p id="host-ram" class="text-2xl font-semibold" style="color:var(--theme-text-strong)">--</p>
+          <p id="host-ram-detail" class="text-xs mt-1" style="color:var(--theme-text-muted)">--</p>
         </div>
-
-        <div class="al-card p-5">
-        <h2 class="al-section-title mb-2">Uptime</h2>
-        <p class="text-4xl font-normal" style="color:var(--theme-text-strong)">
-            <%= isOnline ? stats.uptime : 'N/A' %> 
-        </p>
-        <% if (!isOnline) { %>
-            <p class="al-page-desc mt-2">System is offline, uptime unavailable</p>
-        <% } else { %>
-            <p class="al-page-desc mt-2">System has been running since last start</p>
-        <% } %>
+        <div class="al-card p-4 text-center">
+          <p class="al-section-title mb-1">CPU</p>
+          <p id="host-cpu" class="text-2xl font-semibold" style="color:var(--theme-text-strong)">--</p>
+          <p id="host-cpu-detail" class="text-xs mt-1" style="color:var(--theme-text-muted)">--</p>
         </div>
-      
+        <div class="al-card p-4 text-center">
+          <p class="al-section-title mb-1">Disk</p>
+          <p id="host-disk" class="text-2xl font-semibold" style="color:var(--theme-text-strong)">--</p>
+          <p id="host-disk-detail" class="text-xs mt-1" style="color:var(--theme-text-muted)">--</p>
+        </div>
+        <div class="al-card p-4 text-center">
+          <p class="al-section-title mb-1">Uptime</p>
+          <p id="host-uptime" class="text-2xl font-semibold" style="color:var(--theme-text-strong)">--</p>
+          <p class="text-xs mt-1" style="color:var(--theme-text-muted)">since boot</p>
+        </div>
       </div>
 
-      <div id="charts" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+      <!-- Allocation bars -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 m-8">
+        <div class="al-card p-4">
+          <div class="flex justify-between items-center mb-2">
+            <p class="al-section-title">RAM Allocation</p>
+            <p id="alloc-ram-pct" class="text-sm font-medium" style="color:var(--theme-text-muted)">--</p>
+          </div>
+          <div class="w-full h-2 rounded-full" style="background:var(--theme-bg-secondary)">
+            <div id="alloc-ram-bar" class="h-2 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+          <p id="alloc-ram-text" class="text-xs mt-1.5" style="color:var(--theme-text-muted)">--</p>
+        </div>
+        <div class="al-card p-4">
+          <div class="flex justify-between items-center mb-2">
+            <p class="al-section-title">CPU Allocation</p>
+            <p id="alloc-cpu-pct" class="text-sm font-medium" style="color:var(--theme-text-muted)">--</p>
+          </div>
+          <div class="w-full h-2 rounded-full" style="background:var(--theme-bg-secondary)">
+            <div id="alloc-cpu-bar" class="h-2 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+          <p id="alloc-cpu-text" class="text-xs mt-1.5" style="color:var(--theme-text-muted)">--</p>
+        </div>
+        <div class="al-card p-4">
+          <div class="flex justify-between items-center mb-2">
+            <p class="al-section-title">Disk Allocation</p>
+            <p id="alloc-disk-pct" class="text-sm font-medium" style="color:var(--theme-text-muted)">--</p>
+          </div>
+          <div class="w-full h-2 rounded-full" style="background:var(--theme-bg-secondary)">
+            <div id="alloc-disk-bar" class="h-2 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+          <p id="alloc-disk-text" class="text-xs mt-1.5" style="color:var(--theme-text-muted)">--</p>
+        </div>
+      </div>
+
+      <!-- Counts -->
+      <div class="grid grid-cols-2 gap-4 m-8">
+        <div class="al-card p-4 text-center">
+          <p class="al-section-title mb-1">Instances</p>
+          <p id="count-instances" class="text-3xl font-semibold" style="color:var(--theme-text-strong)"><%= typeof instances !== 'undefined' ? instances : '--' %></p>
+        </div>
+        <div class="al-card p-4 text-center">
+          <p class="al-section-title mb-1">Allocations</p>
+          <p id="count-alloc" class="text-3xl font-semibold" style="color:var(--theme-text-strong)"><%= typeof allocationsInUse !== 'undefined' ? allocationsInUse + '/' + allocations : '--' %></p>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
         <div class="al-card p-6">
           <h2 class="al-section-title mb-4">RAM Usage</h2>
-          <canvas id="ramChart" class="w-full h-64"></canvas>
+          <div style="position:relative;height:220px"><canvas id="ramChart"></canvas></div>
         </div>
-
         <div class="al-card p-6">
           <h2 class="al-section-title mb-4">CPU Usage</h2>
-          <canvas id="cpuChart" class="w-full h-64"></canvas>
+          <div style="position:relative;height:220px"><canvas id="cpuChart"></canvas></div>
         </div>
       </div>
 
@@ -71,10 +118,21 @@
   </div>
 </main>
 
+<div id="page-data" style="display:none"
+  data-node-id="<%= node.id %>"
+  data-stats="<%= JSON.stringify(stats.totalStats || []) %>"
+  data-host="<%= JSON.stringify(host || {}) %>"
+  data-ram="<%= node.ram || 0 %>"
+  data-cpu="<%= node.cpu || 0 %>"
+  data-disk="<%= node.disk || 0 %>"
+  data-overalloc-mem="<%= node.overallocateMemory || 0 %>"
+  data-overalloc-disk="<%= node.overallocateDisk || 0 %>"
+  data-overalloc-cpu="<%= node.overallocateCpu || 0 %>"
+  data-instances="<%= typeof instances !== 'undefined' ? instances : 0 %>"
+  data-allocations="<%= typeof allocations !== 'undefined' ? allocations : 0 %>"
+  data-allocations-in-use="<%= typeof allocationsInUse !== 'undefined' ? allocationsInUse : 0 %>"
+></div>
 <script nonce="<%- nonce %>" src="/vendor/chartjs/chart.umd.js"></script>
-
-<div id="page-data" style="display:none" data-stats="<%- JSON.stringify(stats.totalStats || []) %>"></div>
-
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-node-stats.js?v=5"></script>
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-node-stats.js?v=7"></script>
 
 <%- include('../../components/footer') %>

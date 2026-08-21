@@ -205,6 +205,13 @@ const coreModule: Module = {
           });
 
           if (!existing) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(404).render('fragments/shared/error-banner', {
+                targetId: 'admin-apikeys',
+                message: 'API key not found.',
+                hint: null,
+              });
+            }
             res.status(404).json({ error: 'API key not found' });
             return;
           }
@@ -215,9 +222,24 @@ const coreModule: Module = {
 
           await logActivity(req, 'apikey:delete', { metadata: { keyId: id } });
 
+          if (req.get('HX-Request') === 'true') {
+            const apiKeys = await prisma.apiKey.findMany({
+              include: { user: { select: { id: true, username: true, email: true } } },
+            });
+            const settings = await prisma.settings.findFirst();
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'API key deleted.' } } }));
+            return res.render('fragments/admin/apikeys/key-list', { apiKeys, settings, req });
+          }
           res.redirect('/admin/apikeys');
         } catch (error: unknown) {
           logger.error('Error deleting API key:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/shared/error-banner', {
+              targetId: 'admin-apikeys',
+              message: 'Failed to delete API key.',
+              hint: null,
+            });
+          }
           res.status(500).json({ error: 'Failed to delete API key' });
         }
       },
@@ -235,6 +257,13 @@ const coreModule: Module = {
           });
 
           if (!apiKey) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(404).render('fragments/shared/error-banner', {
+                targetId: 'admin-apikeys',
+                message: 'API key not found.',
+                hint: null,
+              });
+            }
             res.status(404).json({ error: 'API key not found' });
             return;
           }
@@ -247,9 +276,24 @@ const coreModule: Module = {
             },
           });
 
+          if (req.get('HX-Request') === 'true') {
+            const apiKeys = await prisma.apiKey.findMany({
+              include: { user: { select: { id: true, username: true, email: true } } },
+            });
+            const settings = await prisma.settings.findFirst();
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: `API key ${apiKey.active ? 'disabled' : 'enabled'}.` } } }));
+            return res.render('fragments/admin/apikeys/key-list', { apiKeys, settings, req });
+          }
           res.redirect('/admin/apikeys');
         } catch (error: unknown) {
           logger.error('Error toggling API key status:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/shared/error-banner', {
+              targetId: 'admin-apikeys',
+              message: 'Failed to toggle API key status.',
+              hint: null,
+            });
+          }
           res.status(500).json({ error: 'Failed to toggle API key status' });
         }
       },
@@ -264,6 +308,13 @@ const coreModule: Module = {
           const { name, description, permissions } = req.body;
 
           if (!name) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/shared/error-banner', {
+                targetId: 'admin-apikeys',
+                message: 'API key name is required.',
+                hint: null,
+              });
+            }
             res.status(400).json({ error: 'API key name is required' });
             return;
           }
@@ -282,9 +333,24 @@ const coreModule: Module = {
             },
           });
 
+          if (req.get('HX-Request') === 'true') {
+            const apiKeys = await prisma.apiKey.findMany({
+              include: { user: { select: { id: true, username: true, email: true } } },
+            });
+            const settings = await prisma.settings.findFirst();
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'API key updated.' } } }));
+            return res.render('fragments/admin/apikeys/key-list', { apiKeys, settings, req });
+          }
           res.redirect('/admin/apikeys');
         } catch (error: unknown) {
           logger.error('Error updating API key:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/shared/error-banner', {
+              targetId: 'admin-apikeys',
+              message: 'Failed to update API key.',
+              hint: null,
+            });
+          }
           res.status(500).json({ error: 'Failed to update API key' });
         }
       },

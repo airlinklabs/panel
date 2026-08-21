@@ -414,12 +414,6 @@
     });
   }
 
-  window.ALMount(function () {
-    markActiveMobile(window.location.pathname);
-  });
-  window.alOnNavigated('bottom-nav', function () {
-    markActiveMobile(window.location.pathname);
-    markActiveSheetItems();
-  });
+  markActiveMobile(window.location.pathname);
 })();
 </script>

@@ -1,0 +1,124 @@
+<!--
+  Fragment: admin-users-list
+  Route: GET /admin/users (HX-Request: true)
+  Target: #admin-users-list
+  Swap: outerHTML
+-->
+<section id="admin-users-list" aria-labelledby="admin-users-list-heading">
+  <h2 id="admin-users-list-heading" class="sr-only">Users</h2>
+
+  <% if (users.length === 0) { %>
+    <div class="al-card p-8 text-center">
+      <%- icon('users', { class: 'mx-auto h-12 w-12 mb-4', style: 'color:var(--theme-text-muted)' }) %>
+      <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-strong);">No users yet</h3>
+      <p class="text-xs mb-4" style="color:var(--theme-text-muted);">Create your first user to get started.</p>
+      <button type="button" class="al-btn-primary"
+              hx-get="/admin/users/create"
+              hx-target="#admin-users-create-form"
+              hx-swap="outerHTML">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> Create user
+      </button>
+    </div>
+  <% } else { %>
+    <!-- Mobile card view -->
+    <div class="lg:hidden space-y-2 mb-6">
+      <% users.forEach(function(u) { %>
+        <div id="admin-user-row-<%= u.id %>" class="al-card flex items-center gap-3" data-user-id="<%= u.id %>" data-admin="<%= u.isAdmin %>">
+          <div class="relative shrink-0">
+            <img loading="lazy" decoding="async" class="w-8 h-8 rounded-lg object-cover" src="<%= u.avatar ? u.avatar : '/avatar/' + encodeURIComponent(u.username) %>" alt="<%= u.username %>">
+            <% if (onlineUsers.has(u.username)) { %>
+              <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
+              </span>
+            <% } else { %>
+              <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
+              </span>
+            <% } %>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= u.username %></p>
+            <p class="text-xs truncate" style="color:var(--theme-text-muted);">
+              <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset <%= u.isAdmin ? 'bg-emerald-600 text-white ring-emerald-700' : 'bg-neutral-200 text-neutral-700 dark:bg-neutral-500/20 dark:text-neutral-300 ring-neutral-300/40 dark:ring-neutral-400/20' %>"><%= u.isAdmin ? 'Admin' : 'User' %></span>
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="/admin/users/view/<%= u.id %>/" class="al-btn-ghost" aria-label="View user"><%- icon('external-link', { size: 16 }) %></a>
+            <a href="/admin/users/edit/<%= u.id %>/" class="al-btn-ghost" aria-label="Edit user"><%- icon('pencil', { size: 16 }) %></a>
+            <button type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user"
+                    hx-delete="/admin/users/delete/<%= u.id %>"
+                    hx-confirm="Are you sure you want to delete this user?"
+                    hx-target="closest [data-user-id]"
+                    hx-swap="outerHTML">
+              <%- icon('trash-2', { size: 16 }) %>
+            </button>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+
+    <!-- Desktop table -->
+    <div class="hidden lg:block overflow-x-auto shadow-sm rounded-xl border" id="admin-users-table" style="border-color:var(--theme-border);">
+      <table class="al-table">
+        <colgroup>
+          <col style="min-width:220px">
+          <col style="min-width:100px">
+          <col style="min-width:80px">
+          <col style="min-width:200px">
+        </colgroup>
+        <thead class="al-table-head">
+          <tr>
+            <th scope="col" class="al-table-th sm:pl-6">Name</th>
+            <th scope="col" class="al-table-th sm:pl-6">Role</th>
+            <th scope="col" class="al-table-th sm:pl-6">Servers</th>
+            <th scope="col" class="al-table-th sm:pl-6">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% let userIdx = 0; users.forEach(function(u) { %>
+            <tr id="admin-user-row-<%= u.id %>" style="--i:<%= userIdx++ %>" class="al-table-tr cursor-pointer" tabindex="0" role="link" data-user-id="<%= u.id %>" data-admin="<%= u.isAdmin %>" onclick="handleRowClick(event, '/admin/users/view/<%= u.id %>/')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleRowClick(event, '/admin/users/view/<%= u.id %>/');}">
+              <td class="al-table-td sm:pl-6">
+                <div class="flex items-center gap-3">
+                  <div class="relative shrink-0">
+                    <img loading="lazy" decoding="async" class="h-8 w-8 rounded-lg object-cover" src="<%= u.avatar ? u.avatar : '/avatar/' + encodeURIComponent(u.username) %>" alt="<%= u.username %>">
+                    <% if (onlineUsers.has(u.username)) { %>
+                      <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
+                      </span>
+                    <% } else { %>
+                      <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
+                      </span>
+                    <% } %>
+                  </div>
+                  <div class="font-medium" style="color:var(--theme-text-strong);"><%= u.username %></div>
+                </div>
+              </td>
+              <td class="al-table-td">
+                <div class="mt-1 ml-2 inline-flex items-center rounded-md
+                <%= u.isAdmin ? 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-700 dark:text-yellow-400 ring-amber-600/20' %>
+                px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                  <%= u.isAdmin ? 'Admin' : 'User' %>
+                </div>
+              </td>
+              <td class="al-table-td"><%= u.servers ? u.servers.length : 0 %></td>
+              <td class="al-table-td">
+                <div class="flex gap-3 whitespace-nowrap">
+                  <a href="/admin/users/view/<%= u.id %>/" class="al-btn-secondary text-xs">View</a>
+                  <a href="/admin/users/edit/<%= u.id %>/" class="al-btn-primary text-xs">Edit</a>
+                  <button type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user"
+                          hx-delete="/admin/users/delete/<%= u.id %>"
+                          hx-confirm="Are you sure you want to delete this user?"
+                          hx-target="closest tr[data-user-id]"
+                          hx-swap="outerHTML">
+                    <%- icon('trash-2', { size: 16 }) %>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
