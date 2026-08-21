@@ -27,29 +27,7 @@
 
       <div class="al-page-body space-y-5 mt-8">
 
-        <div class="al-card p-5">
-          <h2 class="text-lg font-semibold mb-1" style="color:var(--theme-text-strong)"><%= req.translations.serverSettings || 'Server Settings' %></h2>
-          <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
-
-          <form id="serverSettingsForm">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label for="serverName" class="block text-sm font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.serverName || 'Server Name' %></label>
-                <input type="text" id="serverName" name="name" value="<%= server.name %>" class="al-input">
-              </div>
-              <div>
-                <label for="serverDescription" class="block text-sm font-medium mb-1.5" style="color:var(--theme-text-muted)">Description</label>
-                <input type="text" id="serverDescription" name="description" value="<%= server.description || '' %>" class="al-input">
-              </div>
-            </div>
-            <div class="mt-5">
-              <button type="submit" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-2">
-                <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
-                <%= req.translations.saveSettings || 'Save Settings' %>
-              </button>
-            </div>
-          </form>
-        </div>
+        <%- include('../../fragments/user/server/settings-form', { req, server }) %>
 
         <div class="al-card p-5">
           <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.serverInformation || 'Server Information' %></h2>
@@ -143,26 +121,6 @@
 
 <script nonce="<%- nonce %>">
   window.ALMount(function() {
-    const serverSettingsForm = document.getElementById('serverSettingsForm');
-    const reinstallButton = document.getElementById('reinstallButton');
-
-    serverSettingsForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const formData = new FormData(serverSettingsForm);
-      const settings = { name: formData.get('name'), description: formData.get('description') };
-      const loader = showProgressToast ? showProgressToast('Updating Server Settings…') : showLoadingToast('Updating Server Settings...');
-      fetch(`/server/<%= server.UUID %>/settings`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings),
-      })
-      .then(response => response.json())
-      .then(data => {
-        loader.close();
-        if (data.success) { showToast('Server settings saved.', 'success'); }
-        else { showToast('Failed to update server settings: ' + (data.error || 'Unknown error'), 'error'); }
-      })
-      .catch(error => { loader.close(); console.error('Error:', error); showToast('Something went wrong.', 'error'); });
-    });
-
     const deleteServerButton = document.getElementById('deleteServerButton');
     if (deleteServerButton) {
       deleteServerButton.addEventListener('click', () => {
@@ -198,6 +156,7 @@
       });
     }
 
+    const reinstallButton = document.getElementById('reinstallButton');
     reinstallButton.addEventListener('click', () => {
       window.modal.confirm({
         title: '<%= req.translations.confirmReinstallation || "Confirm Reinstallation" %>',

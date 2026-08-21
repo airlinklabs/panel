@@ -1,0 +1,29 @@
+<!-- Server settings form fragment — replaces #server-settings-form on save -->
+<div id="server-settings-form" class="al-card p-5">
+  <h2 class="text-lg font-semibold mb-1" style="color:var(--theme-text-strong)"><%= req.translations.serverSettings || 'Server Settings' %></h2>
+  <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
+
+  <form hx-post="/server/<%= server.UUID %>/settings"
+        hx-target="#server-settings-form"
+        hx-swap="outerHTML"
+        hx-indicator="#settings-save-indicator"
+        hx-on::after-request="if(event.detail.successful) showToast('Server settings saved.', 'success')">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div>
+        <label for="serverName" class="block text-sm font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.serverName || 'Server Name' %></label>
+        <input type="text" id="serverName" name="name" value="<%= server.name %>" class="al-input">
+      </div>
+      <div>
+        <label for="serverDescription" class="block text-sm font-medium mb-1.5" style="color:var(--theme-text-muted)">Description</label>
+        <input type="text" id="serverDescription" name="description" value="<%= server.description || '' %>" class="al-input">
+      </div>
+    </div>
+    <div class="mt-5 flex items-center gap-3">
+      <button type="submit" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-2">
+        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <%= req.translations.saveSettings || 'Save Settings' %>
+      </button>
+      <span id="settings-save-indicator" class="htmx-indicator text-xs" style="color:var(--theme-text-muted)">Saving...</span>
+    </div>
+  </form>
+</div>
