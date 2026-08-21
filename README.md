@@ -1,12 +1,12 @@
 > [!WARNING]
-> **This project is under active development and not yet stable.**
+> **This Project is in BETA and under active development and is not yet stable.**
 > APIs, features, and stored data may change without notice between releases. Not recommended for production use. Proceed with that in mind.
 
 <div align="center">
 
 <img width="1280" height="720" alt="AIRLINK" src="https://github.com/user-attachments/assets/283d1a34-0c8e-4e31-b37b-fbd1be2140aa" />
 
-# Airlink Panel (Katharos)
+# Airlink Panel (Katharos) BETA
 
 **Open-source game server management panel**
 
