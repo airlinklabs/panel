@@ -55,7 +55,9 @@ Documentation: [airlinklabs.xyz/docs/quick-start/](https://airlinklabs.xyz/docs/
 
 <div align="center">
 
-[![Star History Chart](https://api.star-history.com/svg?repos=AirlinkLabs/panel&type=Date)](https://star-history.com/#AirlinkLabs/panel&Date)
+## Star History
+
+[![Star History Chart](https://api.star-history.com/chart?repos=airlinklabs/panel&type=date&legend=top-left&sealed_token=X3cF3RK-oLzJUf6Q7wzQDSE7UV2pt4s9npE8smFZOUpbNJCruOHijNJU-Qh0V6jlMOdbIRJMo-wLnsMs6SMxiyVQHsXYWFIGWBPVct2QUQtkeJhsTni08w)](https://www.star-history.com/?repos=airlinklabs%2Fpanel&type=date&legend=top-left)
 
 </div>
 
