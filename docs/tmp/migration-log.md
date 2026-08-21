@@ -587,3 +587,72 @@ No automated screenshot infrastructure exists. Visual comparison must be done ma
 - Client-side fetch calls (POST /admin/mounts, DELETE /admin/mounts/:id)
 - `window.modal.confirm` usage (now hx-confirm)
 - Hidden modal div with manual open/close (now Alpine.js reactive dialog)
+
+---
+
+## Phase 06 Wave 2 — Admin Databases HTMX Conversion
+
+### Work Completed
+
+1. **Updated databases routes** (`src/modules/admin/databases.ts`):
+   - Added `buildDatabasesViewModel()` shared function
+   - `GET /admin/databases`: serves fragment on HTMX, full page otherwise
+   - `POST /admin/databases/create`: returns `HX-Redirect` on HTMX, error fragment on failure
+   - `DELETE /admin/databases/:id`: returns updated host list fragment + toast
+   - `POST /admin/databases/:id/test`: returns toast via HX-Trigger (no DOM swap)
+   - `POST /admin/databases/auto-host`: returns updated host list fragment + toast on HTMX
+   - `POST /admin/databases/auto-bucket`: returns toast only via HX-Trigger (no DOM swap)
+
+2. **Created host list fragment** (`views/fragments/admin/databases/host-list.ejs`):
+   - Server-rendered table with `id="admin-databases-list"` stable root ID
+   - Test buttons use `hx-post` with `hx-swap="none"` (toast-only feedback)
+   - Delete buttons use `hx-delete` with `hx-confirm` and `hx-target`
+   - Empty state with auto-generate button
+
+3. **Converted databases.ejs**:
+   - Removed `admin-databases.js` script tag (173-line external JS)
+   - Auto-host and auto-bucket cards use `hx-post` with `hx-swap="none"`
+   - Host list rendered via include
+   - Added loading indicators for auto-generate buttons
+
+4. **Converted create.ejs**:
+   - Form uses `hx-post="/admin/databases/create"` with `hx-target`
+   - Save button in header uses `form="hostForm"` attribute
+   - Added loading indicator for save button
+   - Added `name` attributes to all form inputs (were missing — JS read values by ID)
+
+5. **Deleted `public/javascript/admin/admin-databases.js`** (173 lines):
+   - `autoGenerateHost()` — now HTMX
+   - `autoGenerateBucket()` — now HTMX
+   - `testHost()` — now HTMX
+   - `deleteHost()` — now HTMX with hx-confirm
+   - `hostRowHtml()` — no longer needed (server-rendered)
+   - `addHostRow()` / `showHostsEmpty()` — no longer needed (HTMX swaps)
+   - `showConfirmModal()` — no longer needed (hx-confirm)
+
+### Files Changed
+
+| File | Action |
+|------|--------|
+| `src/modules/admin/databases.ts` | Updated (HTMX-aware routes, shared view model) |
+| `views/fragments/admin/databases/host-list.ejs` | Created (host list fragment) |
+| `views/admin/databases/databases.ejs` | Updated (HTMX buttons, removed script tag) |
+| `views/admin/databases/create.ejs` | Updated (HTMX form, added name attrs) |
+| `public/javascript/admin/admin-databases.js` | Deleted (173 lines) |
+| `docs/tmp/migration-log.md` | Updated (this entry) |
+
+### Test Results
+
+| Command | Result |
+|---------|--------|
+| `npx tsc --noEmit` | PASS (0 errors) |
+| `npm test` | PASS — 63 files, 976 tests |
+
+### What Was Removed
+
+- 173-line external `admin-databases.js` file
+- Client-side DOM manipulation (hostRowHtml, addHostRow, showHostsEmpty)
+- Client-side fetch calls (auto-host, auto-bucket, test, delete)
+- `window.modal.confirm` usage (now hx-confirm)
+- `window.api()` calls (now HTMX attributes)
+- `showToast()` calls (now server-rendered via HX-Trigger)
