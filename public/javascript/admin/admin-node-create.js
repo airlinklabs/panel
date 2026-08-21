@@ -196,11 +196,11 @@
     panel.classList.remove('hidden');
 
     const panelUrl = window.location.origin;
-    const cli = 'cd /path/to/airlinkd && bun run configure --panel "' + panelUrl + '" --key "' + node.key + '"';
+    const cli = 'cd /path/to/airlinkd && bun run configure --panel "' + panelUrl + '" --key "' + node.key + '" && bun run start -- --no-tui';
     const host = node.address;
     document.getElementById('daemonCliCommand').textContent = cli;
 
-    const envLines = 'key=' + node.key + '\nremote=' + host + '\nport=' + (node.port || '3002');
+    const envLines = 'KEY=' + node.key + '\nREMOTE=' + host + '\nPORT=' + (node.port || '3002');
     document.getElementById('envPreview').textContent = envLines;
 
     const copyCli = document.getElementById('copyDaemonCli');
