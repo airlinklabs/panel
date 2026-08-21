@@ -17,10 +17,14 @@ import '/vendor/xterm/xterm.css';
 let Terminal, FitAddon, WebLinksAddon, Chart;
 async function loadDeps() {
   if (Terminal) return;
-  [{ Terminal }] = await Promise.all([import('/vendor/xterm/lib/xterm.js')]);
-  [{ FitAddon }] = await Promise.all([import('/vendor/xterm-addon-fit/addon-fit.js')]);
-  [{ WebLinksAddon }] = await Promise.all([import('/vendor/xterm-addon-web-links/addon-web-links.js')]);
-  [{ default: Chart }] = await Promise.all([import('/vendor/chartjs/chart.umd.js')]);
+  await import('/vendor/xterm/lib/xterm.js');
+  Terminal = self.Terminal;
+  await import('/vendor/xterm-addon-fit/addon-fit.js');
+  FitAddon = self.FitAddon;
+  await import('/vendor/xterm-addon-web-links/addon-web-links.js');
+  WebLinksAddon = self.WebLinksAddon;
+  await import('/vendor/chartjs/chart.umd.js');
+  Chart = self.Chart || self.chart;
 }
 
 function themeVar(name, fallback) {
