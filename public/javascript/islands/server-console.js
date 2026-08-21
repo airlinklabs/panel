@@ -346,6 +346,14 @@ export async function mount(root, config) {
   function beginPower(btn, kind, toastMsg) { forceReleasePower(); powerBtn = btn; powerKind = kind; powerToast = toastMsg || null; btn.dataset.origLabel = btn.textContent; btn.textContent = kind === 'start' ? 'Starting…' : kind === 'restart' ? 'Restarting…' : 'Stopping…'; btn.disabled = true; powerTimer = setTimeout(forceReleasePower, 90000); }
   function finishPower(ok, message) { if (!powerBtn) return; const btn = powerBtn, toast = powerToast; powerBtn = null; powerKind = null; powerToast = null; if (powerTimer) { clearTimeout(powerTimer); powerTimer = null; } btn.disabled = false; btn.textContent = btn.dataset.origLabel || btn.textContent; delete btn.dataset.origLabel; setStatusLog(null); hideQueueStatus(); window.showToast?.(ok === false ? (message || 'That operation failed.') : (message || toast || 'Done.'), ok === false ? 'error' : 'success'); }
 
+  function updateStatus(data) {
+    if (!data || !data.data) return;
+    serverOnline = true;
+    updateLoadLogsButton();
+    setStatusText('Online', 'var(--theme-success)');
+    updateStatusChart('success', 0.1, 0.2);
+  }
+
   function surfaceStoppedState(data) {
     if (deliberateStop) { deliberateStop = false; return; }
     let reason = null;

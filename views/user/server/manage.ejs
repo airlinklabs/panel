@@ -91,7 +91,7 @@
     stopServer: req.translations.stopServer || 'Stop Server',
   },
   features: typeof features !== 'undefined' ? features : [],
-}).replace(/"/g, '&quot;') %>">
+}) %>">
 <main class="hidden lg:block h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-full">
     <!-- Sidebar -->
@@ -414,6 +414,8 @@
 
 </div><!-- /manage-root -->
 
+<%- include('../../components/footer') %>
+
 <script nonce="<%- nonce %>">
 function retryDaemonConnection() { window.location.reload(); }
 (async function () {
@@ -423,6 +425,4 @@ function retryDaemonConnection() { window.location.reload(); }
   window._manageCleanup = await mount(root, config);
 })();
 </script>
-
-<%- include('../../components/footer') %>
 
