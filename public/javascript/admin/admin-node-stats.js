@@ -32,13 +32,8 @@
   }
 
   function timeNow() { return new Date().toLocaleTimeString(); }
-
   function el(id) { return document.getElementById(id); }
-
-  function setText(id, text) {
-    var e = el(id);
-    if (e) e.textContent = text;
-  }
+  function setText(id, text) { var e = el(id); if (e) e.textContent = text; }
 
   var ramChart = new Chart(el('ramChart').getContext('2d'), {
     type: 'line',
@@ -109,15 +104,46 @@
     }
   }
 
+  // Initial render from server-side data
+  var initHost = {};
+  var initStats = [];
+  try { initHost = JSON.parse(pd.dataset.host || '{}'); } catch(_) {}
+  try { initStats = JSON.parse(pd.dataset.stats || '[]'); } catch(_) {}
+
+  if (initStats.length || Object.keys(initHost).length) {
+    handleData({
+      host: initHost,
+      stats: { totalStats: initStats, uptime: '--' },
+      current: initStats.length ? initStats[initStats.length - 1] : null,
+      instances: parseInt(pd.dataset.instances) || 0,
+      allocations: parseInt(pd.dataset.allocations) || 0,
+      allocationsInUse: parseInt(pd.dataset.allocationsInUse) || 0
+    });
+  }
+
+  // WebSocket for live updates
   function connect() {
     var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     var ws = new WebSocket(proto + '//' + location.host + '/ws/node/' + nodeId + '/stats');
+    var gotFirstMessage = false;
 
     ws.onmessage = function(evt) {
-      try { handleData(JSON.parse(evt.data)); } catch (_) {}
+      try {
+        var data = JSON.parse(evt.data);
+        // Skip auth responses and other non-nodestats messages
+        if (data.event === 'nodestats' && data.data) {
+          handleData(data.data);
+          gotFirstMessage = true;
+        }
+      } catch(_) {}
+    };
+
+    ws.onopen = function() {
+      setText('ws-status', 'Connected');
     };
 
     ws.onclose = function() {
+      setText('ws-status', 'Reconnecting...');
       setTimeout(connect, 3000);
     };
 

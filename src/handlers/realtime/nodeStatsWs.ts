@@ -18,7 +18,6 @@ export function attachNodeStatsWs(server: Server): void {
       return;
     }
 
-    // Authenticate the browser — must have a valid session cookie
     const cookie = req.headers.cookie ?? '';
     const sidMatch = cookie.match(/connect\.sid=([^;]+)/);
     if (!sidMatch) {
@@ -43,33 +42,51 @@ export function attachNodeStatsWs(server: Server): void {
     }
 
     const scheme = await daemonScheme();
-    const daemonUrl = `${scheme}://${node.address}:${node.port}`;
+    const wsUrl = `${scheme === 'https' ? 'wss' : 'ws'}://${node.address}:${node.port}/nodestats`;
 
     let daemonWs: WebSocket;
     try {
-      daemonWs = new WebSocket(`${daemonUrl.replace('http', 'ws')}/nodestats`);
-    } catch {
+      daemonWs = new WebSocket(wsUrl);
+    } catch (err) {
+      logger.warn(`nodestats ws connect failed for node ${nodeId}`, err);
       ws.close(1011, 'could not connect to daemon');
       return;
     }
 
+    let authed = false;
+
     daemonWs.on('open', () => {
-      // Authenticate with daemon using raw key
       daemonWs.send(JSON.stringify({ event: 'auth', args: [node.key] }));
     });
 
     daemonWs.on('message', (data) => {
+      const msg = typeof data === 'string' ? data : data.toString();
+
+      if (!authed) {
+        try {
+          const parsed = JSON.parse(msg);
+          if (parsed.error) {
+            logger.warn(`nodestats ws auth failed for node ${nodeId}: ${parsed.error}`);
+            ws.close(1008, 'daemon auth failed');
+            daemonWs.close();
+            return;
+          }
+        } catch {}
+        authed = true;
+      }
+
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send(typeof data === 'string' ? data : data.toString());
+        ws.send(msg);
       }
     });
 
     daemonWs.on('error', (err) => {
-      logger.warn(`nodestats ws error for node ${nodeId}`, err);
+      logger.warn(`nodestats ws error for node ${nodeId}: ${err.message}`);
       if (ws.readyState === WebSocket.OPEN) ws.close(1011, 'daemon connection error');
     });
 
-    daemonWs.on('close', () => {
+    daemonWs.on('close', (code, reason) => {
+      logger.info(`nodestats ws closed for node ${nodeId}: ${code} ${reason}`);
       if (ws.readyState === WebSocket.OPEN) ws.close(1000, 'daemon disconnected');
     });
 

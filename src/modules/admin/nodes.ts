@@ -810,37 +810,13 @@ const adminModule: Module = {
           where: { id: 1 },
         });
 
-        let stats: Record<string, unknown>;
+        const daemonReq = (path: string) =>
+          daemonRequest({
+            nodeAddress: node.address, nodePort: node.port, nodeKey: node.key,
+            method: 'GET', path, timeout: 3000,
+          }).then(r => (r.data ?? {}) as Record<string, unknown>).catch(() => ({}));
 
-        try {
-          const response = await daemonRequest({
-            nodeAddress: node.address,
-            nodePort: node.port,
-            nodeKey: node.key,
-            method: 'GET',
-            path: '/stats',
-            timeout: 5000,
-          });
-
-          stats = (response.data ?? {}) as Record<string, unknown>;
-        } catch {
-          stats = {};
-        }
-
-        let hostInfo: Record<string, unknown> = {};
-        try {
-          const hostRes = await daemonRequest({
-            nodeAddress: node.address,
-            nodePort: node.port,
-            nodeKey: node.key,
-            method: 'GET',
-            path: '/host',
-            timeout: 5000,
-          });
-          hostInfo = (hostRes.data ?? {}) as Record<string, unknown>;
-        } catch {
-          hostInfo = {};
-        }
+        const [stats, hostInfo] = await Promise.all([daemonReq('/stats'), daemonReq('/host')]);
 
         res.render('admin/nodes/stats', { node: nodeWithStatus, user, req, settings, stats, host: hostInfo });
       }
