@@ -359,11 +359,25 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(403).render('fragments/shared/error-banner', {
+                targetId: 'admin-nodes',
+                message: 'Unauthorized access.',
+                hint: null,
+              });
+            }
             return res.redirect('/login');
           }
 
           const nodeId = getParamAsNumber(req.params.id);
           if (isNaN(nodeId)) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/shared/error-banner', {
+                targetId: 'admin-nodes',
+                message: 'Invalid node ID.',
+                hint: null,
+              });
+            }
             res.status(400).json({ message: 'Invalid node ID.' });
             return;
           }
@@ -375,6 +389,13 @@ const adminModule: Module = {
               select: { id: true },
             });
             if (!nodeExists) {
+              if (req.get('HX-Request') === 'true') {
+                return res.status(404).render('fragments/shared/error-banner', {
+                  targetId: 'admin-nodes',
+                  message: 'Node not found.',
+                  hint: null,
+                });
+              }
               res.status(404).json({ message: 'Node not found.' });
               return;
             }
@@ -384,6 +405,13 @@ const adminModule: Module = {
             });
 
             if (serverCount > 0 && !deleteInstances) {
+              if (req.get('HX-Request') === 'true') {
+                return res.status(400).render('fragments/shared/error-banner', {
+                  targetId: 'admin-nodes',
+                  message: `Node has ${serverCount} server(s). Delete servers first or use delete with instances.`,
+                  hint: null,
+                });
+              }
               res.status(400).json({
                 message: `Node has ${serverCount} server(s) associated. Set ?deleteInstance=true to delete them as well, or delete the servers first.`,
               });
@@ -427,6 +455,16 @@ const adminModule: Module = {
               state: { id: nodeId },
             });
 
+            if (req.get('HX-Request') === 'true') {
+              const nodes = await listNodes(res);
+              const locations = await prisma.location.findMany({
+                include: { _count: { select: { nodes: true } } },
+                orderBy: { name: 'asc' },
+              });
+              const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+              res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: deleteInstances ? 'Node and servers deleted.' : 'Node deleted.' } } }));
+              return res.render('fragments/admin/nodes/node-table', { nodes, locations, settings, req });
+            }
             res.status(200).json({
               message: deleteInstances
                 ? 'Node and associated instances deleted successfully.'
@@ -434,6 +472,13 @@ const adminModule: Module = {
             });
           } catch (error: unknown) {
             logger.error('Error when deleting the node:', error);
+            if (req.get('HX-Request') === 'true') {
+              return res.status(500).render('fragments/shared/error-banner', {
+                targetId: 'admin-nodes',
+                message: 'Error deleting node.',
+                hint: null,
+              });
+            }
             res.status(500).json({ message: 'Error when deleting the node.' });
           }
         } catch (error: unknown) {
