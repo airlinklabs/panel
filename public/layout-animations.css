@@ -155,27 +155,28 @@
 }
 
 /* ── Page-content children — layout shift transitions ─────────────────────
-   When a warning banner or section appears/disappears, sibling elements
-   below it need to shift position smoothly. This transition lets the
-   JS FLIP in layout-animations.js animate them.
+   Disabled: the MutationObserver FLIP in layout-animations.js handles
+   smooth shifts when elements appear/disappear. The CSS transition
+   caused a second pulse on initial page load.
 */
-
+/*
 #page-content > *,
 #server-page-body > * {
   transition:
     transform 0.36s cubic-bezier(0.16, 1, 0.3, 1),
     opacity   0.36s cubic-bezier(0.16, 1, 0.3, 1);
 }
+*/
 
 /* ── Server & folder card load-in ─────────────────────────────────────────
-   Cards animate in on page load with a stagger driven by CSS custom
-   properties set inline. Each card gets --i: N where N is its index.
-*/
+   Disabled: causes double-pulse flicker on page load. */
+/*
 .server-card,
 .folder-card {
   animation: card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 50ms);
 }
+*/
 
 @keyframes card-enter {
   from { opacity: 0; transform: translateY(8px); }
@@ -183,6 +184,9 @@
 }
 
 /* ── All table rows load-in ──────────────────────────────────────────────*/
+/* Disabled: causes double-pulse flicker on page load.
+   Re-enable per-view with inline style or a scoped class if needed. */
+/*
 .img-row,
 .addon-row,
 .file-row,
@@ -200,6 +204,7 @@ tbody tr {
   animation: row-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 30ms);
 }
+*/
 
 @keyframes row-enter {
   from { opacity: 0; transform: translateX(-4px); }
@@ -207,10 +212,13 @@ tbody tr {
 }
 
 /* ── All grid items load-in ─────────────────────────────────────────────*/
+/* Disabled: causes double-pulse flicker on page load. */
+/*
 .grid-item-animate {
   animation: card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 40ms);
 }
+*/
 
 /* ── Skeleton shimmer ───────────────────────────────────────────────────*/
 @keyframes skeleton-shimmer {
@@ -248,10 +256,13 @@ tbody tr {
 .skeleton-row      { height: 48px; width: 100%; margin-bottom: 4px; }
 
 /* ── Stats cards load-in ──────────────────────────────────────────────────*/
+/* Disabled: causes double-pulse flicker on page load. */
+/*
 .stats-card {
   animation: card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 60ms);
 }
+*/
 
 /* ── Never animate these ──────────────────────────────────────────────────*/
 
