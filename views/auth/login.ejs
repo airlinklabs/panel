@@ -19,7 +19,7 @@
     </div>
 
     <% if (req.query.err) { %>
-    <div class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)">
+    <div id="login-error" class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)" role="alert" aria-live="assertive">
       <p class="text-sm font-medium" style="color:var(--theme-danger)">
         <% if (req.query.err === 'missing_credentials') { %>Missing username or password.
         <% } else if (['invalid_credentials','incorrect_password','user_not_found'].includes(req.query.err)) { %>Incorrect username or password.
@@ -39,13 +39,13 @@
           <label class="auth-label" for="identifier">Username or email</label>
           <input id="identifier" name="identifier" type="text" autocomplete="username"
             required spellcheck="false" autocapitalize="none"
-            class="auth-input" placeholder="you@example.com">
+            class="auth-input" placeholder="you@example.com"<% if (req.query.err) { %> aria-describedby="login-error" aria-invalid="true"<% } %>>
         </div>
         <div>
           <label class="auth-label" for="password">Password</label>
           <div class="pw-wrapper">
             <input id="password" name="password" type="password" autocomplete="current-password"
-              required class="auth-input" placeholder="••••••••" style="padding-right:40px">
+              required class="auth-input" placeholder="••••••••" style="padding-right:40px"<% if (req.query.err) { %> aria-describedby="login-error" aria-invalid="true"<% } %>>
             <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">
               <span id="eyeIcon"><%- icon('eye', { width: 16, height: 16 }) %></span>
             </button>
