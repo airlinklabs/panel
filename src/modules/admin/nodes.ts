@@ -838,16 +838,30 @@ const adminModule: Module = {
             return;
           }
 
-          const response = await daemonRequest({
-            nodeAddress: node.address,
-            nodePort: node.port,
-            nodeKey: node.key,
-            method: 'GET',
-            path: '/stats',
-            timeout: 5000,
-          });
+          const [statsRes, hostRes] = await Promise.all([
+            daemonRequest({ nodeAddress: node.address, nodePort: node.port, nodeKey: node.key, method: 'GET', path: '/stats', timeout: 5000 }).catch(() => null),
+            daemonRequest({ nodeAddress: node.address, nodePort: node.port, nodeKey: node.key, method: 'GET', path: '/host', timeout: 5000 }).catch(() => null),
+          ]);
 
-          res.json(response.data ?? {});
+          const instances = await prisma.server.count({ where: { nodeId: node.id } });
+          const allocations = await prisma.allocation.count({ where: { nodeId: node.id } });
+          const allocationsInUse = await prisma.allocation.count({ where: { nodeId: node.id, serverId: { not: null } } });
+
+          res.json({
+            stats: statsRes?.data ?? {},
+            host: hostRes?.data ?? {},
+            node: {
+              ram: node.ram,
+              cpu: node.cpu,
+              disk: node.disk,
+              overallocateMemory: node.overallocateMemory,
+              overallocateDisk: node.overallocateDisk,
+              overallocateCpu: node.overallocateCpu,
+            },
+            instances,
+            allocations,
+            allocationsInUse,
+          });
         } catch {
           res.status(502).json({ error: 'Unable to fetch stats from daemon.' });
         }
