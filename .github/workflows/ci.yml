@@ -29,10 +29,11 @@ jobs:
       - name: Run Semgrep
         run: |
           if [ -f .semgrep.yml ]; then
-            semgrep ci --config .semgrep.yml --error --verbose
+            semgrep ci --config .semgrep.yml --verbose
           else
-            semgrep ci --config auto --error --verbose
+            semgrep ci --config auto --verbose
           fi
+        # semgrep ci exits non-zero on findings by default; --error is not a valid flag
 
   dependency-review:
     name: Dependency Review
@@ -56,7 +57,9 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
+      # --ignore-scripts skips postinstall (prisma generate), which requires
+      # DATABASE_URL — audit doesn't need generated types at all
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm audit --audit-level=high
 
   # ── Quality ─────────────────────────────────────────────────────────────────
@@ -72,7 +75,8 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
+      # --ignore-scripts skips postinstall; ESLint doesn't need Prisma types
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       # --fix is for local dev only; CI must only check, never mutate files
       - run: pnpm exec eslint src
 
@@ -89,9 +93,9 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
-      # generate runs all three tsconfigs (main, prisma, tui) via postinstall,
-      # but we call it explicitly here in case postinstall is skipped
+      # --ignore-scripts so postinstall doesn't race with our explicit generate below
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      # Now DATABASE_URL is set, so prisma generate can resolve it
       - run: pnpm exec prisma generate
       # pnpm run typecheck covers tsconfig, tsconfig.prisma.json, tsconfig.tui.json
       - run: pnpm run typecheck
@@ -109,9 +113,10 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
-      # migrate:deploy applies pending migrations and regenerates the client —
-      # required so Vitest has a real, up-to-date schema to run against
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      # migrate:deploy applies pending migrations AND regenerates the client —
+      # required so Vitest has a real, up-to-date schema to run against.
+      # DATABASE_URL is set above, so this won't fail like postinstall did.
       - run: pnpm run migrate:deploy
       - run: pnpm test
 
@@ -126,7 +131,8 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
+      # --ignore-scripts: vendor check is pure Node, needs no Prisma types
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       # Fails if the committed vendor bundle is out of sync with sources
       - run: pnpm run verify:vendor
 
@@ -146,10 +152,11 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
-      # migrate:deploy so the generated client matches the DB schema used at runtime
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      # migrate:deploy: applies migrations and regenerates the Prisma client
+      # with DATABASE_URL in scope — this is what postinstall was trying to do
       - run: pnpm run migrate:deploy
-      # build = tsc (main) + tsc (prisma tsconfig) + tailwindcss via pnpm exec
+      # build = tsc (main) + tsc (prisma tsconfig) + tailwindcss
       - run: pnpm run build
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
