@@ -1,5 +1,5 @@
 <!-- Mount create form — loaded into #admin-mounts-dialog via hx-get -->
-<div x-data="{ open: true }" x-init="$nextTick(() => { if (open) $el.querySelector('dialog')?.showModal() })" @al:close-mount-modal.window="open = false">
+<div x-data="{ open: true }" x-init="$nextTick(() => { if (open) $el.querySelector('dialog')?.showModal() })" @al:close-mount-modal.window="open = false; $el.querySelector('dialog')?.close()">
   <dialog class="al-dialog" x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
     <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
       <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)">New mount</h3>

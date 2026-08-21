@@ -222,6 +222,7 @@
     register('ALDialog', 'scan');
     register('ALField', 'enhance', function () { return doc ? doc.body : null; });
     register('ALStateView', 'scan');
+    sync();
   }
 
   if (doc && doc.readyState !== 'loading') {

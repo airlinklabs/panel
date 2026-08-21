@@ -37,7 +37,7 @@ async function countAdmins(): Promise<number> {
 // Used by both full-page and fragment responses.
 
 interface AdminUsersViewModel {
-  user: { id: number; isAdmin: boolean; role: string };
+  user: { id: number; username: string | null; avatar: string | null; description: string | null; isAdmin: boolean; role: string };
   settings: { title: string } | null;
   users: Array<{
     id: number;
@@ -64,7 +64,7 @@ export async function buildAdminUsersViewModel(actorId: number): Promise<AdminUs
   const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
   return {
-    user: { id: user.id, isAdmin: user.isAdmin, role: user.role },
+    user: { id: user.id, username: user.username, avatar: user.avatar, description: user.description, isAdmin: user.isAdmin, role: user.role },
     settings,
     users,
     onlineUsers,

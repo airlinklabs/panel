@@ -97,7 +97,7 @@ const adminModule: Module = {
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildMountsViewModel();
-            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Mount created.' }, closeMountModal: true } }));
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Mount created.' }, 'close-mount-modal': true } }));
             return res.render('fragments/admin/mounts/mount-list', vm);
           }
           return res.status(200).json({ success: true });
