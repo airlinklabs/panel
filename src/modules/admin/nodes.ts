@@ -801,6 +801,8 @@ const adminModule: Module = {
           return;
         }
 
+        const nodeWithStatus = await checkNodeStatus(node);
+
         const settings = await prisma.settings.findUnique({
           where: { id: 1 },
         });
@@ -820,7 +822,7 @@ const adminModule: Module = {
         } catch {
           stats = { error: 'Unable to fetch stats from the node.' };
         }
-        res.render('admin/nodes/stats', { node, user, req, settings, stats });
+        res.render('admin/nodes/stats', { node: nodeWithStatus, user, req, settings, stats });
       }
     );
 

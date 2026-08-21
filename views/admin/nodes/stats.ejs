@@ -32,10 +32,16 @@
             <%
             const lastStat = stats.totalStats && stats.totalStats.length ? stats.totalStats.at(-1) : null;
             const isOnline = lastStat && (new Date() - new Date(lastStat.timestamp)) <= 10 * 1000;
+            const nodeVersion = node.versionRelease || null;
             %>
             <p class="text-4xl font-normal" style="color:<%= isOnline ? 'var(--theme-success)' : 'var(--theme-danger)' %>">
                 <%= isOnline ? 'Online' : 'Offline' %>
             </p>
+            <% if (nodeVersion) { %>
+            <div class="mt-2 inline-flex items-center rounded-md bg-emerald-600 text-white ring-emerald-700 px-2.5 py-1 text-xs font-medium ring-1 ring-inset">
+                <%= nodeVersion %>
+            </div>
+            <% } %>
             <p class="al-page-desc mt-2">
                 Last Update: <%= lastStat ? new Date(lastStat.timestamp).toLocaleTimeString() : 'N/A' %>
             </p>
