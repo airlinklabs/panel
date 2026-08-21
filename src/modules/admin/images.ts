@@ -411,12 +411,26 @@ const adminModule: Module = {
 
           const serverCount = await prisma.server.count({ where: { imageId: id } });
           if (serverCount > 0) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(400).render('fragments/shared/error-banner', {
+                targetId: 'admin-images',
+                message: 'This image is in use by one or more servers.',
+                hint: null,
+              });
+            }
             res.status(400).send('This image is in use by one or more servers.');
             return;
           }
 
           const image = await prisma.images.findUnique({ where: { id }, select: { name: true } });
           if (!image) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(404).render('fragments/shared/error-banner', {
+                targetId: 'admin-images',
+                message: 'Image not found.',
+                hint: null,
+              });
+            }
             res.status(404).send('Image not found.');
             return;
           }
@@ -424,9 +438,23 @@ const adminModule: Module = {
           await prisma.images.delete({ where: { id } });
           logger.info(`Deleted image: ${image.name} (ID: ${id})`);
           await logActivity(req, 'image:delete', { metadata: { imageId: id, name: image.name } });
+
+          if (req.get('HX-Request') === 'true') {
+            const images = await prisma.images.findMany();
+            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Image deleted.' } } }));
+            return res.render('fragments/admin/images/image-table', { images, settings, req });
+          }
           res.status(200).send('Image deleted successfully.');
         } catch (error: unknown) {
           logger.error('Error deleting image:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/shared/error-banner', {
+              targetId: 'admin-images',
+              message: 'Failed to delete image.',
+              hint: null,
+            });
+          }
           res.status(500).send('Failed to delete image.');
         }
       },
@@ -566,6 +594,13 @@ const adminModule: Module = {
           const id = Number(req.params.id);
           const image = await prisma.images.findUnique({ where: { id } });
           if (!image) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(404).render('fragments/shared/error-banner', {
+                targetId: 'admin-images',
+                message: 'Image not found.',
+                hint: null,
+              });
+            }
             res.status(404).json({ error: 'Image not found.' });
             return;
           }
@@ -577,9 +612,38 @@ const adminModule: Module = {
           await logActivity(req, 'image:approve', {
             metadata: { imageId: image.id, name: image.name },
           });
+
+          if (req.get('HX-Request') === 'true') {
+            const pending = await prisma.images.findMany({
+              where: { status: 'pending' },
+              orderBy: { createdAt: 'asc' },
+            });
+            const creatorIds = [...new Set(pending.map((i) => i.createdById).filter((id): id is number => id != null))];
+            const creators = creatorIds.length > 0
+              ? await prisma.users.findMany({
+                  where: { id: { in: creatorIds } },
+                  select: { id: true, username: true, email: true },
+                })
+              : [];
+            const creatorMap = new Map(creators.map((c) => [c.id, c]));
+            const pendingWithCreators = pending.map((i) => ({
+              ...i,
+              creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
+            }));
+            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: `Approved "${image.name}".` } } }));
+            return res.render('fragments/admin/images/pending-approvals', { pending: pendingWithCreators, settings, req });
+          }
           res.json({ success: true, message: `Approved "${image.name}".` });
         } catch (error: unknown) {
           logger.error('Error approving image:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/shared/error-banner', {
+              targetId: 'admin-images',
+              message: 'Failed to approve image.',
+              hint: null,
+            });
+          }
           res.status(500).json({ error: 'Failed to approve image.' });
         }
       },
@@ -594,6 +658,13 @@ const adminModule: Module = {
           const reason = String(req.body?.reason ?? '').trim().slice(0, 500);
           const image = await prisma.images.findUnique({ where: { id } });
           if (!image) {
+            if (req.get('HX-Request') === 'true') {
+              return res.status(404).render('fragments/shared/error-banner', {
+                targetId: 'admin-images',
+                message: 'Image not found.',
+                hint: null,
+              });
+            }
             res.status(404).json({ error: 'Image not found.' });
             return;
           }
@@ -605,9 +676,38 @@ const adminModule: Module = {
           await logActivity(req, 'image:reject', {
             metadata: { imageId: image.id, name: image.name },
           });
+
+          if (req.get('HX-Request') === 'true') {
+            const pending = await prisma.images.findMany({
+              where: { status: 'pending' },
+              orderBy: { createdAt: 'asc' },
+            });
+            const creatorIds = [...new Set(pending.map((i) => i.createdById).filter((id): id is number => id != null))];
+            const creators = creatorIds.length > 0
+              ? await prisma.users.findMany({
+                  where: { id: { in: creatorIds } },
+                  select: { id: true, username: true, email: true },
+                })
+              : [];
+            const creatorMap = new Map(creators.map((c) => [c.id, c]));
+            const pendingWithCreators = pending.map((i) => ({
+              ...i,
+              creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
+            }));
+            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: `Rejected "${image.name}".` } } }));
+            return res.render('fragments/admin/images/pending-approvals', { pending: pendingWithCreators, settings, req });
+          }
           res.json({ success: true, message: `Rejected "${image.name}".` });
         } catch (error: unknown) {
           logger.error('Error rejecting image:', error);
+          if (req.get('HX-Request') === 'true') {
+            return res.status(500).render('fragments/shared/error-banner', {
+              targetId: 'admin-images',
+              message: 'Failed to reject image.',
+              hint: null,
+            });
+          }
           res.status(500).json({ error: 'Failed to reject image.' });
         }
       },

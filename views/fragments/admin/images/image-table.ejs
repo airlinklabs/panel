@@ -1,0 +1,54 @@
+<!-- Image table fragment — replaces #installedTableSection on delete -->
+<div id="installedTableSection" class="<%= images.length === 0 ? 'hidden' : '' %>">
+  <div class="mt-5 mb-1">
+    <input id="imageFilterInput" type="text" placeholder="Filter images…" aria-label="Search images" class="al-input w-56">
+  </div>
+  <div class="overflow-x-auto shadow-sm rounded-xl mt-3 border" style="border-color:var(--theme-border)">
+    <table class="al-table min-w-full">
+      <colgroup>
+        <col style="min-width:240px">
+        <col style="min-width:160px">
+        <col style="min-width:140px">
+        <col style="min-width:220px">
+      </colgroup>
+      <thead class="al-table-head">
+        <tr>
+          <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
+          <th class="al-table-th px-3 py-3.5 col-hide">Author</th>
+          <th class="al-table-th px-3 py-3.5 col-hide">Created</th>
+          <th class="al-table-th px-3 py-3.5">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y" style="border-color:var(--theme-border)" id="tableBody">
+        <% let imgIdx = 0; images.forEach(function(image) { %>
+        <tr class="al-table-tr transition-colors cursor-pointer img-row"
+            style="--i:<%= imgIdx++ %>"
+            data-search="<%= (image.name + ' ' + (image.author||'')).toLowerCase() %>"
+            onclick="handleRowClick(event, '/admin/images/edit/<%= image.id %>')">
+          <td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3 font-medium" style="color:var(--theme-text-strong)"><%= image.name %></td>
+          <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= image.author || '—' %></td>
+          <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= new Date(image.createdAt).toLocaleDateString() %></td>
+          <td class="whitespace-nowrap px-3 py-4 text-sm">
+            <div class="flex gap-2">
+              <a href="/admin/images/edit/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5"><%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>Edit</a>
+              <a href="/admin/images/export/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Export</a>
+              <button
+                hx-delete="/admin/images/delete/<%= image.id %>"
+                hx-target="#installedTableSection"
+                hx-swap="outerHTML"
+                hx-confirm="Delete &quot;<%= image.name %>&quot;? This cannot be undone."
+                onclick="event.stopPropagation()"
+                type="button"
+                class="al-btn-danger"
+                aria-label="Delete image <%= image.name %>">
+                <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <div id="noResults" class="hidden py-10 text-center text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800/20"><%= req.translations.noImagesMatch || 'No images match your search.' %></div>
+  </div>
+</div>
