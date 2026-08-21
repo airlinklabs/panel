@@ -52,7 +52,7 @@
         <div class="al-card p-4 text-center">
           <p class="al-section-title mb-1">Uptime</p>
           <p id="host-uptime" class="text-2xl font-semibold" style="color:var(--theme-text-strong)">--</p>
-          <p class="text-xs mt-1" style="color:var(--theme-text-muted)">since start</p>
+          <p class="text-xs mt-1" style="color:var(--theme-text-muted)">since boot</p>
         </div>
       </div>
 
@@ -64,7 +64,7 @@
             <p id="alloc-ram-pct" class="text-sm font-medium" style="color:var(--theme-text-muted)">--</p>
           </div>
           <div class="w-full h-2 rounded-full" style="background:var(--theme-bg-secondary)">
-            <div id="alloc-ram-bar" class="h-2 rounded-full transition-all duration-500" style="background:var(--theme-accent);width:0%"></div>
+            <div id="alloc-ram-bar" class="h-2 rounded-full transition-all duration-500" style="width:0%"></div>
           </div>
           <p id="alloc-ram-text" class="text-xs mt-1.5" style="color:var(--theme-text-muted)">--</p>
         </div>
@@ -74,7 +74,7 @@
             <p id="alloc-cpu-pct" class="text-sm font-medium" style="color:var(--theme-text-muted)">--</p>
           </div>
           <div class="w-full h-2 rounded-full" style="background:var(--theme-bg-secondary)">
-            <div id="alloc-cpu-bar" class="h-2 rounded-full transition-all duration-500" style="background:var(--theme-accent);width:0%"></div>
+            <div id="alloc-cpu-bar" class="h-2 rounded-full transition-all duration-500" style="width:0%"></div>
           </div>
           <p id="alloc-cpu-text" class="text-xs mt-1.5" style="color:var(--theme-text-muted)">--</p>
         </div>
@@ -84,7 +84,7 @@
             <p id="alloc-disk-pct" class="text-sm font-medium" style="color:var(--theme-text-muted)">--</p>
           </div>
           <div class="w-full h-2 rounded-full" style="background:var(--theme-bg-secondary)">
-            <div id="alloc-disk-bar" class="h-2 rounded-full transition-all duration-500" style="background:var(--theme-accent);width:0%"></div>
+            <div id="alloc-disk-bar" class="h-2 rounded-full transition-all duration-500" style="width:0%"></div>
           </div>
           <p id="alloc-disk-text" class="text-xs mt-1.5" style="color:var(--theme-text-muted)">--</p>
         </div>
@@ -118,7 +118,6 @@
   </div>
 </main>
 
-<script nonce="<%- nonce %>" src="/vendor/chartjs/chart.umd.js"></script>
 <div id="page-data" style="display:none"
   data-node-id="<%= node.id %>"
   data-stats="<%= JSON.stringify(stats.totalStats || []) %>"
@@ -133,6 +132,7 @@
   data-allocations="<%= typeof allocations !== 'undefined' ? allocations : 0 %>"
   data-allocations-in-use="<%= typeof allocationsInUse !== 'undefined' ? allocationsInUse : 0 %>"
 ></div>
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-node-stats.js?v=6"></script>
+<script nonce="<%- nonce %>" src="/vendor/chartjs/chart.umd.js"></script>
+<script nonce="<%- nonce %>" src="/javascript/admin/admin-node-stats.js?v=7"></script>
 
 <%- include('../../components/footer') %>

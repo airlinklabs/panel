@@ -1,10 +1,12 @@
 (function() {
+  var isDark = function() { return document.documentElement.classList.contains('dark'); };
   var rootStyle = getComputedStyle(document.documentElement);
   var TICK = rootStyle.getPropertyValue('--theme-text').trim() || '#fff';
   var GRID = 'rgba(255,255,255,0.08)';
   var ACCENT = rootStyle.getPropertyValue('--theme-accent').trim() || '#3b82f6';
   var SUCCESS = rootStyle.getPropertyValue('--theme-success').trim() || '#22c55e';
   var DANGER = rootStyle.getPropertyValue('--theme-danger').trim() || '#ef4444';
+  var BAR_COLOR = rootStyle.getPropertyValue('--theme-text-strong').trim() || '#fafafa';
 
   var pd = document.getElementById('page-data');
   var nodeId = pd.dataset.nodeId;
@@ -35,18 +37,33 @@
   function el(id) { return document.getElementById(id); }
   function setText(id, text) { var e = el(id); if (e) e.textContent = text; }
 
-  var ramChart = new Chart(el('ramChart').getContext('2d'), {
+  var textColor = function() { return isDark() ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)'; };
+  var gridColor = function() { return isDark() ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'; };
+
+  var ramChart = new Chart(el('ramChart'), {
     type: 'line',
     data: { labels: [], datasets: [{ label: 'RAM (MB)', data: [], borderColor: ACCENT, backgroundColor: ACCENT + '33', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0 }] },
-    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 250 }, plugins: { legend: { display: false } },
-      scales: { x: { ticks: { color: TICK, maxTicksLimit: 8, maxRotation: 0 }, grid: { color: GRID } }, y: { beginAtZero: true, ticks: { color: TICK }, grid: { color: GRID }, title: { display: true, text: 'MB', color: TICK } } } }
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: textColor(), maxTicksLimit: 8, maxRotation: 0 }, grid: { color: gridColor() } },
+        y: { beginAtZero: true, ticks: { color: textColor() }, grid: { color: gridColor() }, title: { display: true, text: 'MB', color: textColor() } }
+      }
+    }
   });
 
-  var cpuChart = new Chart(el('cpuChart').getContext('2d'), {
+  var cpuChart = new Chart(el('cpuChart'), {
     type: 'line',
     data: { labels: [], datasets: [{ label: 'CPU (%)', data: [], borderColor: '#f97316', backgroundColor: '#f9731633', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0 }] },
-    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 250 }, plugins: { legend: { display: false } },
-      scales: { x: { ticks: { color: TICK, maxTicksLimit: 8, maxRotation: 0 }, grid: { color: GRID } }, y: { beginAtZero: true, suggestedMax: 100, ticks: { color: TICK }, grid: { color: GRID }, title: { display: true, text: '%', color: TICK } } } }
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: textColor(), maxTicksLimit: 8, maxRotation: 0 }, grid: { color: gridColor() } },
+        y: { beginAtZero: true, suggestedMax: 100, ticks: { color: textColor() }, grid: { color: gridColor() }, title: { display: true, text: '%', color: textColor() } }
+      }
+    }
   });
 
   function pushChart(chart, value) {
@@ -56,10 +73,22 @@
     chart.update('none');
   }
 
+  function fmtUptime(s) {
+    if (typeof s === 'string') return s;
+    var d = Math.floor(s / 86400);
+    var h = Math.floor((s % 86400) / 3600);
+    var m = Math.floor((s % 3600) / 60);
+    var parts = [];
+    if (d) parts.push(d + 'd');
+    if (h) parts.push(h + 'h');
+    if (m || !parts.length) parts.push(m + 'm');
+    return parts.join(' ');
+  }
+
   function handleData(d) {
     var h = d.host || {};
     var ts = (d.stats || {}).totalStats || [];
-    var uptime = (d.stats || {}).uptime;
+    var uptime = (d.stats || {}).uptime || (h.uptime ? fmtUptime(h.uptime) : '--');
     var latest = d.current || (ts.length ? ts[ts.length - 1] : null);
 
     if (h.ram) {
@@ -125,25 +154,17 @@
   function connect() {
     var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     var ws = new WebSocket(proto + '//' + location.host + '/ws/node/' + nodeId + '/stats');
-    var gotFirstMessage = false;
 
     ws.onmessage = function(evt) {
       try {
         var data = JSON.parse(evt.data);
-        // Skip auth responses and other non-nodestats messages
         if (data.event === 'nodestats' && data.data) {
           handleData(data.data);
-          gotFirstMessage = true;
         }
       } catch(_) {}
     };
 
-    ws.onopen = function() {
-      setText('ws-status', 'Connected');
-    };
-
     ws.onclose = function() {
-      setText('ws-status', 'Reconnecting...');
       setTimeout(connect, 3000);
     };
 
