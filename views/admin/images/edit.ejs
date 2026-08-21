@@ -207,7 +207,7 @@
           };
           // al-tabs owns selection here; we only re-point the Save/Reset
           // buttons at the newly active tab's handlers.
-          window.alListener(document, 'al:tabs-change', 'image-edit-tabs', function(e) {
+          document.addEventListener('al:tabs-change', function(e) {
             const name = e.detail && e.detail.name;
             if (name) rebind(name);
           });

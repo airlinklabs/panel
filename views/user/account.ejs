@@ -400,7 +400,6 @@
 <% } %>
 
 <script nonce="<%- nonce %>">
-window.ALMount(() => {
   const { showToast } = createToastSystem();
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
   let submitting = false;
@@ -699,7 +698,6 @@ window.ALMount(() => {
       }, 'image/png');
     });
   }
-});
 </script>
 
 <% if (allowed) { %>
@@ -880,8 +878,7 @@ function loader() {
     if (table) table.classList.toggle('hidden', !hasRows);
   }
 
-  window.ALMount(function() {
-    document.querySelectorAll('[data-delete-image]').forEach(function(btn) {
+  document.querySelectorAll('[data-delete-image]').forEach(function(btn) {
       btn.addEventListener('click', async function() {
         const id = btn.dataset.deleteImage;
         const msg = 'Delete this image?';
@@ -904,7 +901,6 @@ function loader() {
         }
       });
     });
-  });
 })();
 </script>
 <% } %>

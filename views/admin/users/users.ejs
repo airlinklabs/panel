@@ -158,14 +158,12 @@
 ></div>
 
 <script nonce="<%- nonce %>">
-  window.ALMount(function() {
-    const emptyBtn = document.getElementById('createButtonEmpty');
-    if (emptyBtn) {
-      emptyBtn.addEventListener('click', function() {
-        window.location.href = '/admin/users/create';
-      });
-    }
-  });
+  const emptyBtn = document.getElementById('createButtonEmpty');
+  if (emptyBtn) {
+    emptyBtn.addEventListener('click', function() {
+      window.location.href = '/admin/users/create';
+    });
+  }
 </script>
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-users-users.js?v=5"></script>
 

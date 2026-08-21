@@ -460,8 +460,7 @@ window.generateRandomName = generateRandomName;
 </script>
 
 <script nonce="<%- nonce %>">
-  window.ALMount(function() {
-    const form = document.getElementById('editServerForm');
+  const form = document.getElementById('editServerForm');
     const allowStartupEditToggle = document.getElementById('allowStartupEdit');
     const allowStartupEditLabel  = document.getElementById('allowStartupEditLabel');
     const suspendServerToggle    = document.getElementById('suspendServer');
@@ -664,7 +663,6 @@ window.generateRandomName = generateRandomName;
         showToast('Failed to update server: ' + error.message, 'error');
       }
     });
-  });
 </script>
 
 <script nonce="<%- nonce %>">

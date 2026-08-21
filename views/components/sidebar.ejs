@@ -467,30 +467,14 @@
     observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
   }
 
-  window.ALMount(function () {
-    if (document.getElementById('pc-sidebar')) {
-      document.getElementById('pc-sidebar').style.display = '';
-      markSpecialLinks(window.location.pathname);
-      markActiveNav(window.location.pathname);
-      showActiveNavInView();
-      wireSidebarViewToggle();
-      initSidebarCollapse();
-      showSidebarView(window.location.pathname.startsWith('/server/') ? 'server' : 'main');
-    }
-  });
-  window.alOnNavigated('sidebar-template', function () {
+  if (document.getElementById('pc-sidebar')) {
+    document.getElementById('pc-sidebar').style.display = '';
     markSpecialLinks(window.location.pathname);
     markActiveNav(window.location.pathname);
     showActiveNavInView();
-    if (document.getElementById('sidebar-server-view')) {
-      if (window.location.pathname.startsWith('/server/')) {
-        showSidebarView('server');
-      } else {
-        showSidebarView('main');
-        const toggles = document.querySelectorAll('.sidebar-view-toggle');
-        for (let t = 0; t < toggles.length; t++) toggles[t].style.display = 'none';
-      }
-    }
-  });
+    wireSidebarViewToggle();
+    initSidebarCollapse();
+    showSidebarView(window.location.pathname.startsWith('/server/') ? 'server' : 'main');
+  }
 })();
 </script>

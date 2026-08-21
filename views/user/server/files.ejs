@@ -476,7 +476,6 @@ function escJS(val) {
     }
   }
 
-  window.ALMount(() => {
   if (typeof window.showImageViewer !== 'function' && typeof window.imageViewerSystem === 'function') {
       const { showImageViewer, closeImageViewer, downloadViewedImage } = window.imageViewerSystem();
       window.showImageViewer = showImageViewer;
@@ -484,9 +483,6 @@ function escJS(val) {
       window.downloadViewedImage = downloadViewedImage;
     }
 
-    // Image rows read their details from data-* attributes instead of inline
-    // JS string literals, so a filename containing a quote can never break out
-    // of an onclick attribute (stored-XSS safe).
     document.querySelectorAll('a[data-click="viewer"]').forEach((el) => {
       el.addEventListener('click', (event) => {
         event.preventDefault();
@@ -496,7 +492,6 @@ function escJS(val) {
         }
       });
     });
-  });
 
   const fileListPath = '<%= currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
 
@@ -1133,10 +1128,7 @@ function openCreateFileModal() {
     }
   }
 
-  // Initialize file upload functionality when the DOM is loaded
-  window.ALMount(function() {
-
-    // Get DOM elements
+  // Get DOM elements
     const dropZone = document.getElementById('dropZone');
     const uploadButton = document.getElementById('uploadButton');
 
@@ -1178,7 +1170,6 @@ function openCreateFileModal() {
 
     // Initialize by clearing any previously selected file
     removeSelectedFile();
-  });
 
   // ── New Folder ─────────────────────────────────────────────────────────────
   function openCreateFolderModal() {
@@ -1385,7 +1376,7 @@ function openCreateFileModal() {
   });
 
   // ── Keyboard shortcuts ───────────────────────────────────────────────────
-  window.alListener(document, 'keydown', 'files-shortcuts', (e) => {
+  document.addEventListener('keydown', (e) => {
     // Ctrl/Cmd+A — select all
     if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !e.target.closest('input, textarea')) {
       e.preventDefault();

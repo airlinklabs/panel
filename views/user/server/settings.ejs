@@ -120,8 +120,7 @@
 <%- include('../../components/footer') %>
 
 <script nonce="<%- nonce %>">
-  window.ALMount(function() {
-    const deleteServerButton = document.getElementById('deleteServerButton');
+  const deleteServerButton = document.getElementById('deleteServerButton');
     if (deleteServerButton) {
       deleteServerButton.addEventListener('click', () => {
         window.modal.confirm({
@@ -198,5 +197,4 @@
         });
       });
     }
-  });
 </script>

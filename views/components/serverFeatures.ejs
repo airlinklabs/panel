@@ -3,25 +3,21 @@
 
 <% if (typeof features !== 'undefined' && features && features.includes('eula')) { %>
 <script nonce="<%- nonce %>">
-  window.ALMount(function() {
-    window.modal.confirm({
-      title: "Accept Minecraft's EULA",
-      body: "By clicking Accept you agree to the Mojang End User License Agreement (EULA). The server will not start until you accept.",
-      danger: false,
-      confirmLabel: 'Accept EULA',
-      onConfirm: () => {
-        fetch('/server/<%= req.params.id %>/feature/eula', { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
-          .then(() => {
-            // EULA accepted — the start flow is unblocked in place; no reload.
-          })
-          .catch(error => {
-            console.error('There was an error!', error);
-            if (typeof showToast === 'function') {
-              showToast('Could not accept the EULA. Please try again.', 'error');
-            }
-          });
-      }
-    });
+  window.modal.confirm({
+    title: "Accept Minecraft's EULA",
+    body: "By clicking Accept you agree to the Mojang End User License Agreement (EULA). The server will not start until you accept.",
+    danger: false,
+    confirmLabel: 'Accept EULA',
+    onConfirm: () => {
+      fetch('/server/<%= req.params.id %>/feature/eula', { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
+        .then(() => {})
+        .catch(error => {
+          console.error('There was an error!', error);
+          if (typeof showToast === 'function') {
+            showToast('Could not accept the EULA. Please try again.', 'error');
+          }
+        });
+    }
   });
 </script>
 <% } %>

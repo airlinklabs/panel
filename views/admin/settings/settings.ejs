@@ -623,7 +623,7 @@
           };
           // al-tabs owns selection (and the URL hash); we only re-point the
           // Save/Reset buttons at the newly active tab's handlers.
-          window.alListener(document, 'al:tabs-change', 'settings-tabs', function(e) {
+          document.addEventListener('al:tabs-change', function(e) {
             const name = e.detail && e.detail.name;
             if (name) rebind(name);
           });

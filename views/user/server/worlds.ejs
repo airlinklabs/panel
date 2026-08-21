@@ -131,21 +131,18 @@
 <%- include('../../components/footer') %>
 
 <script nonce="<%- nonce %>">
-  window.ALMount(function() {
-    const noWorldsMessage = document.getElementById('noWorldsMessage');
-    const serverTable = document.getElementById('serverTable');
+  const noWorldsMessage = document.getElementById('noWorldsMessage');
+  const serverTable = document.getElementById('serverTable');
 
-    // Show appropriate content based on worlds availability
-    setTimeout(() => {
-      if (<%= worlds.length %> > 0) {
-        document.getElementById('serverTableRow') && document.getElementById('serverTableRow').classList.add('open');
-        document.getElementById('noWorldsMessageRow') && document.getElementById('noWorldsMessageRow').classList.remove('open');
-      } else {
-        document.getElementById('serverTableRow') && document.getElementById('serverTableRow').classList.remove('open');
-        document.getElementById('noWorldsMessageRow') && document.getElementById('noWorldsMessageRow').classList.add('open');
-      }
-    }, 500);
-  });
+  setTimeout(() => {
+    if (<%= worlds.length %> > 0) {
+      document.getElementById('serverTableRow') && document.getElementById('serverTableRow').classList.add('open');
+      document.getElementById('noWorldsMessageRow') && document.getElementById('noWorldsMessageRow').classList.remove('open');
+    } else {
+      document.getElementById('serverTableRow') && document.getElementById('serverTableRow').classList.remove('open');
+      document.getElementById('noWorldsMessageRow') && document.getElementById('noWorldsMessageRow').classList.add('open');
+    }
+  }, 500);
 
   function confirmDeleteWorld(worldName) {
     window.modal.confirm({

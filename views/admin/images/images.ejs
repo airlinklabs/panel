@@ -182,9 +182,7 @@
 
 <script nonce="<%- nonce %>">
   (function() {
-    // al-tabs owns selection (attributes, panel visibility, URL hash); this
-    // only repaints the active-tab button classes.
-    window.alListener(document, 'al:tabs-change', 'images-tabs', function(e) {
+    document.addEventListener('al:tabs-change', function(e) {
       var k = e.detail && e.detail.name;
       ['installed', 'approvals', 'store'].forEach(function(key) {
         var btn = document.getElementById('tab-btn-' + key);
@@ -200,9 +198,7 @@
       });
     });
 
-    // Lazy store tab: al-tabs fetched /admin/images/store/panel and injected
-    // it; now hand the panel to the store controller so it binds and loads.
-    window.alListener(document, 'al:tabs-loaded', 'images-store-load', function(e) {
+    document.addEventListener('al:tabs-loaded', function(e) {
       var detail = e.detail;
       if (detail && detail.name === 'store' && detail.panel && window.AdminImageStore) {
         window.AdminImageStore.mount(detail.panel);

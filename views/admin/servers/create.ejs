@@ -229,8 +229,7 @@
 <%- include('../../components/loadingPopup') %>
 
 <script nonce="<%- nonce %>">
-  window.ALMount(() => {
-    const serverImageSelect = document.getElementById('serverImage');
+  const serverImageSelect = document.getElementById('serverImage');
     const dockerImageSelect = document.getElementById('dockerImage');
     const serverNodeSelect = document.getElementById('serverNode');
     const serverPortsInput = document.getElementById('serverPorts');
@@ -444,7 +443,6 @@
 
     serverImageSelect.addEventListener('change', () => { updateDockerImages(); updateVariables(); ensureMinimumPortRows(); syncPortsButton(); });
     serverNodeSelect.addEventListener('change', () => { updatePortsForSelectedNode(); });
-  });
 </script>
 <script nonce="<%- nonce %>">
 (function () {

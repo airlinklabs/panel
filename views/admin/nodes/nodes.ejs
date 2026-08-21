@@ -181,7 +181,7 @@
 
   // al-tabs owns selection (attributes, panel visibility and the URL hash);
   // this only repaints the button classes and preserves the locations scroll.
-  window.alListener(document, 'al:tabs-change', 'nodes-tabs', function (e) {
+  document.addEventListener('al:tabs-change', function (e) {
     const isLoc = e.detail && e.detail.name === 'locations';
     btnNodes.className = isLoc ? INACTIVE : ACTIVE;
     btnLocs.className = isLoc ? ACTIVE : INACTIVE;
