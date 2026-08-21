@@ -47,16 +47,6 @@
     try { sessionStorage.setItem(NAV_FLAG, '1'); } catch { /* sessionStorage unavailable */ }
   }
 
-  // ── Turbo Drive interop ────────────────────────────────────────────────────
-
-  const USING_TURBO = !!(window.Turbo);
-
-  function willTurboHandle(el) {
-    if (!USING_TURBO) return false;
-    const t = el.getAttribute && el.getAttribute('data-turbo');
-    return t !== 'false';
-  }
-
   // ── Network activity chip ────────────────────────────────────────────────
   // Reference-counted: multiple concurrent fetches each call requestActivity();
   // only when all have called releaseActivity() does the chip hide.
@@ -336,19 +326,6 @@
     }
   }
 
-  var _turboVisits = 0;
-  document.addEventListener('turbo:load', function () {
-    initDesktopHighlight(_turboVisits > 0);
-    initMobileHighlight();
-    if (_turboVisits > 0) {
-      revealAfterNav();
-      _turboVisits = 0;
-    }
-  });
-  document.addEventListener('turbo:before-visit', function () {
-    _turboVisits++;
-  });
-
   document.addEventListener('DOMContentLoaded', function () {
     initDesktopHighlight(_fromNav);
     initMobileHighlight();
@@ -396,7 +373,7 @@
       a.classList.remove(...MOBILE_INACTIVE_CLASSES);
       a.classList.add(...MOBILE_ACTIVE_CLASSES);
     }
-    if (!willTurboHandle(a)) markNavigation();
+    markNavigation();
     fadeContentOut();
     requestActivity('Loading');
   }, true);
@@ -461,7 +438,7 @@
 
   document.addEventListener('submit', function (e) {
     const form = e.target && e.target.closest && e.target.closest('form');
-    if (form && !willTurboHandle(form)) markNavigation();
+    if (form) markNavigation();
     fadeContentOut();
     requestActivity('Loading');
   }, true);

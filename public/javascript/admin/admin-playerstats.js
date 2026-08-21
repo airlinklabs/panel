@@ -208,13 +208,6 @@ function wirePlayerStatsRealtime() {
 if (window.alRealtime && window.alState) wirePlayerStatsRealtime();
 else window.alListener(window, 'al:realtime-ready', 'admin-playerstats-realtime-ready', wirePlayerStatsRealtime);
 
-window.alListener(document, 'turbo:before-cache', 'admin-playerstats-realtime-teardown', function () {
-  if (unsubscribeRealtime) {
-    unsubscribeRealtime();
-    unsubscribeRealtime = null;
-  }
-});
-
 async function triggerDataCollection() {
   try {
     const response = await fetch('/api/admin/playerstats/collect', {

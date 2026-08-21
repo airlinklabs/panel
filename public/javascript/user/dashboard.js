@@ -623,10 +623,6 @@
       realtimeDisposers.push(st.observe('server:status:' + uuid, function (snap) { onRealtimeStatus(uuid, snap); }));
     });
 
-    // Drop the daemon watchers when navigating away (Turbo SPA navigation
-    // keeps this script's context alive across page loads) so reference
-    // counts fall to zero and the daemon sockets close.
-    window.alListener(document, 'turbo:before-cache', 'dashboard-realtime-teardown', unwatchAll);
     window.alListener(window, 'pagehide', 'dashboard-realtime-teardown', unwatchAll);
     if (rt.status && rt.status() === 'connected') onRealtimeConnect();
   }

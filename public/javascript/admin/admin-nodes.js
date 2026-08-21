@@ -176,7 +176,4 @@ function copyCommand(copyBtn, command) {
 
   if (window.alRealtime && window.alState) wireNodeStatusRealtime();
   else window.alListener(window, 'al:realtime-ready', 'admin-nodes-realtime-ready', wireNodeStatusRealtime);
-  window.alListener(document, 'turbo:before-cache', 'admin-nodes-realtime-teardown', function () {
-    stopNodeObservers.splice(0).forEach(function (stop) { stop(); });
-  });
 })();
