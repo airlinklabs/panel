@@ -4,7 +4,12 @@
   var CHART_TICK_COLOR = _rootStyle.getPropertyValue('--theme-text').trim() || '#FFFFFF';
   var CHART_GRID_COLOR = 'rgba(255, 255, 255, 0.1)';
 
-  const stats = JSON.parse(document.getElementById('page-data').dataset.stats || '[]');
+  const pageData = document.getElementById('page-data');
+  const nodeId = pageData.dataset.nodeId;
+  const POLL_INTERVAL_MS = 3000;
+  const MAX_POINTS = 30;
+
+  const stats = JSON.parse(pageData.dataset.stats || '[]');
 
   function parseRam(ramString) {
     return parseFloat(ramString.replace(' MB', ''));
@@ -14,8 +19,12 @@
     return parseFloat(cpuString.replace('%', ''));
   }
 
-  const ramTimestamps = stats.length ? stats.map(stat => new Date(stat.timestamp).toLocaleTimeString()) : ['0:00', '0:00', '0:00'];
-  const ramData = stats.length ? stats.map(stat => parseRam(stat.Ram)) : [0, 0, 0];
+  function timeNow() {
+    return new Date().toLocaleTimeString();
+  }
+
+  const ramTimestamps = stats.length ? stats.map(stat => new Date(stat.timestamp).toLocaleTimeString()) : [];
+  const ramData = stats.length ? stats.map(stat => parseRam(stat.Ram)) : [];
   const ramMax = stats.length ? Math.max(...ramData, parseRam(stats[0].RamMax)) : 1;
 
   const ctxRam = document.getElementById('ramChart').getContext('2d');
@@ -37,23 +46,22 @@
     options: {
       responsive: false,
       maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: CHART_TICK_COLOR } }
-      },
+      animation: { duration: 300 },
+      plugins: { legend: { labels: { color: CHART_TICK_COLOR } } },
       scales: {
-        x: { ticks: { color: CHART_TICK_COLOR }, grid: { color: CHART_GRID_COLOR } },
+        x: { ticks: { color: CHART_TICK_COLOR, maxTicksLimit: 10 }, grid: { color: CHART_GRID_COLOR } },
         y: { suggestedMax: ramMax, beginAtZero: true, ticks: { color: CHART_TICK_COLOR }, grid: { color: CHART_GRID_COLOR } }
       }
     }
   });
 
-  const cpuData = stats.length ? stats.map(stat => parseCpu(stat.Cores)) : [0, 0, 0];
+  const cpuData = stats.length ? stats.map(stat => parseCpu(stat.Cores)) : [];
 
   const ctxCpu = document.getElementById('cpuChart').getContext('2d');
   const cpuChart = new Chart(ctxCpu, {
     type: 'line',
     data: {
-      labels: ramTimestamps,
+      labels: ramTimestamps.slice(),
       datasets: [{
         label: 'CPU Usage (%)',
         data: cpuData,
@@ -68,13 +76,48 @@
     options: {
       responsive: false,
       maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: CHART_TICK_COLOR } }
-      },
+      animation: { duration: 300 },
+      plugins: { legend: { labels: { color: CHART_TICK_COLOR } } },
       scales: {
-        x: { ticks: { color: CHART_TICK_COLOR }, grid: { color: CHART_GRID_COLOR } },
+        x: { ticks: { color: CHART_TICK_COLOR, maxTicksLimit: 10 }, grid: { color: CHART_GRID_COLOR } },
         y: { suggestedMax: CPU_MAX, beginAtZero: true, ticks: { color: CHART_TICK_COLOR }, grid: { color: CHART_GRID_COLOR } }
       }
     }
   });
+
+  function pushData(chart, labelsArr, dataArr, label, value, maxPoints) {
+    labelsArr.push(label);
+    dataArr.push(value);
+    if (labelsArr.length > maxPoints) {
+      labelsArr.shift();
+      dataArr.shift();
+    }
+    chart.update('none');
+  }
+
+  async function pollStats() {
+    try {
+      const res = await fetch('/admin/node/' + nodeId + '/stats/live');
+      if (!res.ok) return;
+      const data = await res.json();
+      const totalStats = data.totalStats || [];
+      if (!totalStats.length) return;
+
+      const latest = totalStats.at(-1);
+      const ts = timeNow();
+      const ram = parseRam(latest.Ram);
+      const cpu = parseCpu(latest.Cores);
+
+      pushData(ramChart, ramChart.data.labels, ramChart.data.datasets[0].data, ts, ram, MAX_POINTS);
+      pushData(cpuChart, cpuChart.data.labels, cpuChart.data.datasets[0].data, ts, cpu, MAX_POINTS);
+
+      var statusEl = document.getElementById('live-status');
+      if (statusEl) statusEl.textContent = 'Live';
+    } catch (_) {
+      var statusEl = document.getElementById('live-status');
+      if (statusEl) statusEl.textContent = 'Offline';
+    }
+  }
+
+  setInterval(pollStats, POLL_INTERVAL_MS);
 })();

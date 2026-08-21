@@ -826,6 +826,34 @@ const adminModule: Module = {
       }
     );
 
+    router.get(
+      '/admin/node/:id/stats/live',
+      isAuthenticated(true, 'airlink.admin.nodes.view'),
+      async (req: Request, res: Response) => {
+        try {
+          const nodeId = getParamAsNumber(req.params.id);
+          const node = await prisma.node.findUnique({ where: { id: nodeId } });
+          if (!node) {
+            res.status(404).json({ error: 'Node not found.' });
+            return;
+          }
+
+          const response = await daemonRequest({
+            nodeAddress: node.address,
+            nodePort: node.port,
+            nodeKey: node.key,
+            method: 'GET',
+            path: '/stats',
+            timeout: 5000,
+          });
+
+          res.json(response.data ?? {});
+        } catch {
+          res.status(502).json({ error: 'Unable to fetch stats from daemon.' });
+        }
+      }
+    );
+
     return router;
   },
 };
