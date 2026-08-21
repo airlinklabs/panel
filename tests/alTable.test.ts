@@ -44,6 +44,7 @@ class FakeEl {
     this.listeners = {};
     this._text = '';
     this._innerHTML = '';
+    this.style = {};
     this._classListSet = new Set();
     if (attrs.class) String(attrs.class).split(/\s+/).filter(Boolean).forEach((c) => this._classListSet.add(c));
   }
@@ -77,6 +78,9 @@ class FakeEl {
     const i = this.children.indexOf(el);
     if (i >= 0) this.children.splice(i, 1);
     return el;
+  }
+  remove() {
+    if (this.parentNode) this.parentNode.removeChild(this);
   }
   querySelector(sel) { return this.querySelectorAll(sel)[0] || null; }
   querySelectorAll(sel) {
@@ -170,8 +174,22 @@ describe('al-table responsive fallback', () => {
     window.alTableScan(container);
     const emptyRow = tbody.querySelector('[data-al-empty]');
     expect(emptyRow).toBeTruthy();
-    expect(emptyRow.innerHTML).toContain('No images yet');
-    expect(emptyRow.innerHTML).toContain('colspan="4"');
+    const cell = emptyRow.querySelector('td');
+    expect(cell.textContent).toBe('No images yet');
+    expect(cell.colSpan).toBe(4);
+  });
+
+  it('removes the placeholder when a real row is present after a refresh', () => {
+    const { tbody, container } = makeTable({ rows: 0, attrs: { 'data-table-empty': 'No images yet' } });
+    window.alTableScan(container);
+    expect(tbody.querySelector('[data-al-empty]')).toBeTruthy();
+
+    const row = new FakeEl('tr');
+    row.appendChild(new FakeEl('td'));
+    tbody.appendChild(row);
+    window.alTableScan(container);
+
+    expect(tbody.querySelector('[data-al-empty]')).toBeNull();
   });
 
   it('leaves an empty table alone when data-table-empty is absent', () => {

@@ -15,8 +15,16 @@
   if (window.__htmxBootstrap) return;
   window.__htmxBootstrap = true;
 
+  // Fragments are server-rendered markup, never script delivery vehicles.
+  // Page-owned external modules mount through Islands after settlement.
+  if (window.htmx && window.htmx.config) {
+    window.htmx.config.allowScriptTags = false;
+  }
+
   // ── CSRF token injection ─────────────────────────────────────────────
-  // Listen on both document and body to ensure coverage across HTMX versions
+  // Supply the token via both the request header (XHR path) and a hidden
+  // form field (progressive-enhancement path). For hx-post forms, the
+  // hidden field must be in the actual form, not just event.detail.parameters.
   function injectCsrfToken(event) {
     var meta = document.querySelector('meta[name="csrf-token"]');
     if (!meta) return;
@@ -26,8 +34,19 @@
     var method = (event.detail.verb || 'get').toUpperCase();
     if (method === 'GET') return;
 
+    // Header — primary path for XHR
     if (!event.detail.headers) event.detail.headers = {};
-    event.detail.headers['CSRF-Token'] = token;
+    event.detail.headers['X-CSRF-Token'] = token;
+
+    // For form-encoded requests, inject a hidden _csrf field into the form
+    var elt = event.detail.elt;
+    if (elt && elt.tagName === 'FORM' && !elt.querySelector('input[name="_csrf"]')) {
+      var hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.name = '_csrf';
+      hidden.value = token;
+      elt.appendChild(hidden);
+    }
   }
   document.addEventListener('htmx:configRequest', injectCsrfToken);
 
@@ -140,5 +159,15 @@
       target.focus();
       return;
     }
+  });
+
+  // HTMX requests are partial updates, so they need activity feedback without
+  // triggering the hard-navigation fade owned by page-loader.js.
+  document.addEventListener('htmx:beforeRequest', function () {
+    if (window.ALPageActivity) window.ALPageActivity.start();
+  });
+
+  document.addEventListener('htmx:afterRequest', function () {
+    if (window.ALPageActivity) window.ALPageActivity.stop();
   });
 })();

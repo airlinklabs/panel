@@ -66,6 +66,15 @@ const wallpaperExcluded = req && req.path && (
     <script nonce="<%- nonce %>" defer src="/javascript/shared/islands.js?v=1"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/data-layer.js?v=1"></script>
     <style>
+      @keyframes al-page-loader-sweep {
+        from { transform: translateX(-110%); }
+        to { transform: translateX(365%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #al-page-loader { animation: none !important; transform: translateX(0) !important; }
+      }
+    </style>
+    <style>
       * { scrollbar-width: thin; scrollbar-color: var(--theme-border) transparent; }
       ::-webkit-scrollbar { width: 8px; height: 8px; }
       ::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 4px; }
@@ -97,7 +106,7 @@ const wallpaperExcluded = req && req.path && (
 
 <a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white dark:focus:bg-neutral-950 focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
 
-<!-- Network activity chip is created dynamically by page-loader.js -->
+<!-- The indeterminate page loading line is created by page-loader.js. -->
 <!-- Theme initialization: external module replaces inline script -->
 <script nonce="<%- nonce %>" src="/javascript/shared/theme-init.js?v=1"></script>
 <%- include("./bottomNav") %>

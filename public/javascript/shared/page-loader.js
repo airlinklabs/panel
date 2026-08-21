@@ -47,86 +47,65 @@
     try { sessionStorage.setItem(NAV_FLAG, '1'); } catch { /* sessionStorage unavailable */ }
   }
 
-  // ── Network activity chip ────────────────────────────────────────────────
-  // Reference-counted: multiple concurrent fetches each call requestActivity();
-  // only when all have called releaseActivity() does the chip hide.
+  // ── Top loading line ─────────────────────────────────────────────────────
+  // Reference-counted so a completed request never hides another request's
+  // feedback. The line is indeterminate; it never pretends to know progress.
 
-  let chipEl = null;
-  let chipSpinner = null;
-  let chipLabel = null;
-  let chipHideTimer = null;
+  let loaderEl = null;
+  let loaderHideTimer = null;
   let activeCount = 0;
 
-  function applyChipTheme() {
-    if (!chipEl) return;
+  function applyLoaderTheme() {
+    if (!loaderEl) return;
     const rs = getComputedStyle(document.documentElement);
-    const bg = rs.getPropertyValue('--theme-bg-card').trim() || '#fff';
-    const border = rs.getPropertyValue('--theme-border').trim() || '#e5e5e5';
-    const muted = rs.getPropertyValue('--theme-text-muted').trim() || '#737373';
-    chipEl.style.background = bg;
-    chipEl.style.border = '1px solid ' + border;
-    chipEl.style.color = muted;
-    chipEl.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-    if (chipSpinner) {
-      chipSpinner.style.borderColor = border;
-      chipSpinner.style.borderTopColor = muted;
-    }
+    loaderEl.style.background = rs.getPropertyValue('--theme-accent').trim() || '#0a0a0a';
   }
 
-  function ensureChip() {
-    if (chipEl && chipEl.isConnected) return chipEl;
-    chipEl = document.createElement('div');
-    chipEl.id = 'al-activity-chip';
-    chipEl.setAttribute('role', 'status');
-    chipEl.setAttribute('aria-live', 'polite');
-    chipEl.setAttribute('aria-label', 'Page loading');
-    chipEl.style.cssText = [
-      'position:fixed', 'top:12px', 'right:16px', 'z-index:10000',
-      'display:flex', 'align-items:center', 'gap:6px',
-      'padding:6px 12px', 'border-radius:999px',
-      'font-size:12px', 'font-weight:500',
-      'font-family:General Sans,sans-serif',
-      'opacity:0', 'transform:translateY(-4px)',
-      'transition:opacity 180ms ease,transform 180ms ease',
-      'pointer-events:none',
+  function ensureLoader() {
+    if (loaderEl && loaderEl.isConnected) return loaderEl;
+    loaderEl = document.createElement('div');
+    loaderEl.id = 'al-page-loader';
+    loaderEl.setAttribute('role', 'progressbar');
+    loaderEl.setAttribute('aria-label', 'Loading page');
+    loaderEl.setAttribute('aria-valuetext', 'Loading');
+    loaderEl.style.cssText = [
+      'position:fixed', 'inset:0 auto auto 0', 'z-index:10000',
+      'width:38%', 'height:2px', 'opacity:0', 'pointer-events:none',
+      'transform:translateX(-110%)',
+      'transition:opacity 120ms ease',
     ].join(';');
-    chipSpinner = document.createElement('span');
-    chipSpinner.style.cssText = 'width:12px;height:12px;border-radius:50%;animation:al-spin 0.6s linear infinite;';
-    chipEl.appendChild(chipSpinner);
-    chipLabel = document.createElement('span');
-    chipLabel.textContent = '';
-    chipEl.appendChild(chipLabel);
-    applyChipTheme();
-    document.body.appendChild(chipEl);
-    return chipEl;
+    applyLoaderTheme();
+    document.body.appendChild(loaderEl);
+    return loaderEl;
   }
 
-  function requestActivity(msg) {
+  function requestActivity() {
     activeCount++;
-    if (chipHideTimer) { clearTimeout(chipHideTimer); chipHideTimer = null; }
-    const chip = ensureChip();
-    applyChipTheme();
-    if (chipLabel) chipLabel.textContent = msg || 'Loading';
-    requestAnimationFrame(function () {
-      chip.style.opacity = '1';
-      chip.style.transform = 'translateY(0)';
-    });
+    if (loaderHideTimer) { clearTimeout(loaderHideTimer); loaderHideTimer = null; }
+    const loader = ensureLoader();
+    applyLoaderTheme();
+    loader.style.animation = 'none';
+    loader.style.opacity = '1';
+    void loader.offsetWidth;
+    loader.style.animation = 'al-page-loader-sweep 1.1s cubic-bezier(0.16, 1, 0.3, 1) infinite';
   }
 
   function releaseActivity() {
     activeCount = Math.max(0, activeCount - 1);
     if (activeCount > 0) return;
-    if (chipHideTimer) clearTimeout(chipHideTimer);
-    chipHideTimer = setTimeout(function () {
-      if (!chipEl || activeCount > 0) return;
-      chipEl.style.opacity = '0';
-      chipEl.style.transform = 'translateY(-4px)';
+    if (loaderHideTimer) clearTimeout(loaderHideTimer);
+    loaderHideTimer = setTimeout(function () {
+      if (!loaderEl || activeCount > 0) return;
+      loaderEl.style.opacity = '0';
+      loaderEl.style.animation = 'none';
     }, 200);
   }
 
   window.addEventListener('al:themechange', function () {
-    applyChipTheme();
+    applyLoaderTheme();
   });
+
+  window.ALPageActivity = { start: requestActivity, stop: releaseActivity };
 
   // ── Content fade ─────────────────────────────────────────────────────────
 
@@ -358,7 +337,7 @@
     }
     markNavigation();
     fadeContentOut();
-    requestActivity('Loading');
+    requestActivity();
   }, true);
 
   window.addEventListener('al:themechange', function () {
@@ -421,9 +400,10 @@
 
   document.addEventListener('submit', function (e) {
     const form = e.target && e.target.closest && e.target.closest('form');
-    if (form) markNavigation();
+    if (!form || form.matches('[hx-get], [hx-post], [hx-put], [hx-patch], [hx-delete]')) return;
+    markNavigation();
     fadeContentOut();
-    requestActivity('Loading');
+    requestActivity();
   }, true);
 
 })();

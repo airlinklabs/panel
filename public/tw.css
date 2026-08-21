@@ -822,3 +822,13 @@ input[type="button"]:disabled {
   }
   .al-table-card tbody tr[data-tasks-row] > td::before { content: none; }
 }
+
+/* ── Top loading line animation ─────────────────────────────── */
+@keyframes al-page-loader-sweep {
+  0%   { transform: translateX(-110%); }
+  50%  { transform: translateX(10%); }
+  100% { transform: translateX(110%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #al-page-loader { animation: none !important; opacity: 0.6 !important; width: 100% !important; }
+}
