@@ -13,6 +13,49 @@ declare global {
 
 const DAEMON_AUTH_USERNAME = 'Airlink';
 
+/** A daemon start failure with an explicit retry contract for the runtime queue. */
+export class ServerStartFailure extends Error {
+  readonly retryable: boolean;
+  readonly code: 'DAEMON_PORT_CONFLICT' | 'DAEMON_START_FAILED';
+
+  constructor(
+    message: string,
+    options: {
+      code: 'DAEMON_PORT_CONFLICT' | 'DAEMON_START_FAILED';
+      retryable: boolean;
+      cause: unknown;
+    },
+  ) {
+    super(message, { cause: options.cause });
+    this.name = 'ServerStartFailure';
+    this.code = options.code;
+    this.retryable = options.retryable;
+  }
+}
+
+/**
+ * Converts a daemon start response into the user-safe error and retry policy
+ * shared by direct starts and queued starts. A host-port bind conflict cannot
+ * succeed on retry: an administrator must release or reassign that port.
+ */
+export function classifyDaemonStartFailure(rawDetail: string): ServerStartFailure {
+  const portConflict = rawDetail.match(
+    /Bind for (?:\[[^\]]+\]|[^:\s]+):(\d+) failed: port is already allocated/i,
+  );
+  if (portConflict) {
+    return new ServerStartFailure(
+      `The server cannot start because port ${portConflict[1]} is already in use on this node. Contact an administrator to assign another port.`,
+      { code: 'DAEMON_PORT_CONFLICT', retryable: false, cause: `daemon: ${rawDetail}` },
+    );
+  }
+
+  return new ServerStartFailure('The daemon could not start the server.', {
+    code: 'DAEMON_START_FAILED',
+    retryable: true,
+    cause: `daemon: ${rawDetail}`,
+  });
+}
+
 export interface ErrorMessage {
   message?: string;
 }
@@ -334,14 +377,15 @@ export async function startServerContainer(
         ? (startResponse.data as { error?: string; detail?: string })
         : {};
     const rawDetail = `${body.error ?? 'request failed'}${body.detail ? ' — ' + body.detail : ''}`;
+    const failure = classifyDaemonStartFailure(rawDetail);
     emitRealtime(
       serverEvent('server.power.start.failed', serverId, {
-        error: { message: 'The daemon could not start the server.', code: 'DAEMON_START_FAILED' },
+        error: { message: failure.message, code: failure.code },
         state: { detail: rawDetail },
       }),
     );
-    // Safe client message; raw daemon detail stays in the log via `cause`.
-    throw new Error('The daemon could not start the server.', { cause: `daemon: ${rawDetail}` });
+    // The raw daemon detail remains in the log through Error.cause.
+    throw failure;
   }
 
   // The container is up — the server now holds a reservation on its node.

@@ -525,7 +525,7 @@ async function main() {
     if (shortMode) return;
     const healthy = s.users !== null;
     const lines: { text: string; fg: string }[] = [
-      { text: `${healthy ? "●" : "○"} SQLite · ${healthy ? "healthy" : "unavailable"}`, fg: healthy ? GREEN : RED },
+      { text: `${healthy ? "●" : "○"} MySQL · ${healthy ? "healthy" : "unavailable"}`, fg: healthy ? GREEN : RED },
     ];
     if (healthy) {
       lines.push({ text: `Size ${fmtBytes(s.dbBytes ?? 0)} · users ${s.users} · sessions ${s.sessions}`, fg: SECONDARY });

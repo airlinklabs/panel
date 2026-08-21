@@ -10,7 +10,6 @@
  */
 export type * from './models/Users'
 export type * from './models/PasswordReset'
-export type * from './models/Session'
 export type * from './models/Server'
 export type * from './models/Mount'
 export type * from './models/ServerMount'

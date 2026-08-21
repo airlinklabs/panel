@@ -245,6 +245,7 @@ export type AllocationOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   node?: Prisma.NodeOrderByWithRelationInput
   server?: Prisma.ServerOrderByWithRelationInput
+  _relevance?: Prisma.AllocationOrderByRelevanceInput
 }
 
 export type AllocationWhereUniqueInput = Prisma.AtLeast<{
@@ -354,6 +355,12 @@ export type AllocationListRelationFilter = {
 
 export type AllocationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type AllocationOrderByRelevanceInput = {
+  fields: Prisma.AllocationOrderByRelevanceFieldEnum | Prisma.AllocationOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type AllocationNodeIdIpPortCompoundUniqueInput = {
@@ -507,6 +514,7 @@ export type AllocationCreateOrConnectWithoutServerInput = {
 
 export type AllocationCreateManyServerInputEnvelope = {
   data: Prisma.AllocationCreateManyServerInput | Prisma.AllocationCreateManyServerInput[]
+  skipDuplicates?: boolean
 }
 
 export type AllocationUpsertWithWhereUniqueWithoutServerInput = {
@@ -559,6 +567,7 @@ export type AllocationCreateOrConnectWithoutNodeInput = {
 
 export type AllocationCreateManyNodeInputEnvelope = {
   data: Prisma.AllocationCreateManyNodeInput | Prisma.AllocationCreateManyNodeInput[]
+  skipDuplicates?: boolean
 }
 
 export type AllocationUpsertWithWhereUniqueWithoutNodeInput = {
@@ -652,27 +661,7 @@ export type AllocationSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   server?: boolean | Prisma.Allocation$serverArgs<ExtArgs>
 }, ExtArgs["result"]["allocation"]>
 
-export type AllocationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  nodeId?: boolean
-  ip?: boolean
-  port?: boolean
-  serverId?: boolean
-  createdAt?: boolean
-  node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
-  server?: boolean | Prisma.Allocation$serverArgs<ExtArgs>
-}, ExtArgs["result"]["allocation"]>
 
-export type AllocationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  nodeId?: boolean
-  ip?: boolean
-  port?: boolean
-  serverId?: boolean
-  createdAt?: boolean
-  node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
-  server?: boolean | Prisma.Allocation$serverArgs<ExtArgs>
-}, ExtArgs["result"]["allocation"]>
 
 export type AllocationSelectScalar = {
   id?: boolean
@@ -685,14 +674,6 @@ export type AllocationSelectScalar = {
 
 export type AllocationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nodeId" | "ip" | "port" | "serverId" | "createdAt", ExtArgs["result"]["allocation"]>
 export type AllocationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
-  server?: boolean | Prisma.Allocation$serverArgs<ExtArgs>
-}
-export type AllocationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
-  server?: boolean | Prisma.Allocation$serverArgs<ExtArgs>
-}
-export type AllocationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   node?: boolean | Prisma.NodeDefaultArgs<ExtArgs>
   server?: boolean | Prisma.Allocation$serverArgs<ExtArgs>
 }
@@ -828,30 +809,6 @@ export interface AllocationDelegate<ExtArgs extends runtime.Types.Extensions.Int
   createMany<T extends AllocationCreateManyArgs>(args?: Prisma.SelectSubset<T, AllocationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many Allocations and returns the data saved in the database.
-   * @param {AllocationCreateManyAndReturnArgs} args - Arguments to create many Allocations.
-   * @example
-   * // Create many Allocations
-   * const allocation = await prisma.allocation.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many Allocations and only return the `id`
-   * const allocationWithIdOnly = await prisma.allocation.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends AllocationCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AllocationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AllocationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a Allocation.
    * @param {AllocationDeleteArgs} args - Arguments to delete one Allocation.
    * @example
@@ -914,36 +871,6 @@ export interface AllocationDelegate<ExtArgs extends runtime.Types.Extensions.Int
    * 
    */
   updateMany<T extends AllocationUpdateManyArgs>(args: Prisma.SelectSubset<T, AllocationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more Allocations and returns the data updated in the database.
-   * @param {AllocationUpdateManyAndReturnArgs} args - Arguments to update many Allocations.
-   * @example
-   * // Update many Allocations
-   * const allocation = await prisma.allocation.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more Allocations and only return the `id`
-   * const allocationWithIdOnly = await prisma.allocation.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends AllocationUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AllocationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AllocationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Allocation.
@@ -1375,28 +1302,7 @@ export type AllocationCreateManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * The data used to create many Allocations.
    */
   data: Prisma.AllocationCreateManyInput | Prisma.AllocationCreateManyInput[]
-}
-
-/**
- * Allocation createManyAndReturn
- */
-export type AllocationCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Allocation
-   */
-  select?: Prisma.AllocationSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the Allocation
-   */
-  omit?: Prisma.AllocationOmit<ExtArgs> | null
-  /**
-   * The data used to create many Allocations.
-   */
-  data: Prisma.AllocationCreateManyInput | Prisma.AllocationCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AllocationIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1441,36 +1347,6 @@ export type AllocationUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many Allocations to update.
    */
   limit?: number
-}
-
-/**
- * Allocation updateManyAndReturn
- */
-export type AllocationUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Allocation
-   */
-  select?: Prisma.AllocationSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the Allocation
-   */
-  omit?: Prisma.AllocationOmit<ExtArgs> | null
-  /**
-   * The data used to update Allocations.
-   */
-  data: Prisma.XOR<Prisma.AllocationUpdateManyMutationInput, Prisma.AllocationUncheckedUpdateManyInput>
-  /**
-   * Filter which Allocations to update
-   */
-  where?: Prisma.AllocationWhereInput
-  /**
-   * Limit how many Allocations to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AllocationIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

@@ -17,6 +17,8 @@ import * as path from 'path';
 const islandsPath = path.resolve(__dirname, '../public/javascript/shared/islands.js');
 const htmxBootstrapPath = path.resolve(__dirname, '../public/javascript/shared/htmx-bootstrap.js');
 const headerPath = path.resolve(__dirname, '../views/components/header.ejs');
+const manageViewPath = path.resolve(__dirname, '../views/user/server/manage.ejs');
+const consoleIslandPath = path.resolve(__dirname, '../public/javascript/islands/server-console.js');
 
 function loadIslands(mockWindow) {
   // Clear module cache
@@ -274,5 +276,31 @@ describe('header.ejs script loading order', () => {
     const dataLayerIdx = code.indexOf('data-layer.js');
     expect(islandsIdx).toBeGreaterThan(-1);
     expect(dataLayerIdx).toBeGreaterThan(islandsIdx);
+  });
+});
+
+describe('server console island wiring', () => {
+  const manage = fs.readFileSync(manageViewPath, 'utf8');
+  const island = fs.readFileSync(consoleIslandPath, 'utf8');
+
+  it('loads xterm styling as a stylesheet instead of an invalid JavaScript module', () => {
+    expect(manage).toContain("extraStyles: ['/vendor/xterm/xterm.css']");
+    expect(island).not.toContain("import '/vendor/xterm/xterm.css'");
+  });
+
+  it('surfaces a mount failure instead of leaving a dead console page', () => {
+    expect(manage).toContain('Failed to initialize the server console.');
+    expect(manage).toContain('Console unavailable');
+  });
+
+  it('owns the copy-server-address button inside the console island', () => {
+    expect(island).toContain("root.querySelector('#copy-ip-btn')");
+    expect(island).toContain("root.querySelector('#mobile-copy-ip-btn')");
+    expect(manage).not.toContain('onclick="copyServerIP()"');
+    expect(manage).not.toContain('onclick="copyMobileServerIP()"');
+  });
+
+  it('uses the terminal theme hook expected by shared theme controls', () => {
+    expect(island).toContain('window.setTerminalTheme = setTerminalTheme');
   });
 });

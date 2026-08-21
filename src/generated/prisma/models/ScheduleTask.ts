@@ -247,6 +247,7 @@ export type ScheduleTaskOrderByWithRelationInput = {
   payload?: Prisma.SortOrder
   timeOffset?: Prisma.SortOrder
   schedule?: Prisma.ScheduleOrderByWithRelationInput
+  _relevance?: Prisma.ScheduleTaskOrderByRelevanceInput
 }
 
 export type ScheduleTaskWhereUniqueInput = Prisma.AtLeast<{
@@ -357,6 +358,12 @@ export type ScheduleTaskOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type ScheduleTaskOrderByRelevanceInput = {
+  fields: Prisma.ScheduleTaskOrderByRelevanceFieldEnum | Prisma.ScheduleTaskOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
+}
+
 export type ScheduleTaskCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   scheduleId?: Prisma.SortOrder
@@ -462,6 +469,7 @@ export type ScheduleTaskCreateOrConnectWithoutScheduleInput = {
 
 export type ScheduleTaskCreateManyScheduleInputEnvelope = {
   data: Prisma.ScheduleTaskCreateManyScheduleInput | Prisma.ScheduleTaskCreateManyScheduleInput[]
+  skipDuplicates?: boolean
 }
 
 export type ScheduleTaskUpsertWithWhereUniqueWithoutScheduleInput = {
@@ -535,25 +543,7 @@ export type ScheduleTaskSelect<ExtArgs extends runtime.Types.Extensions.Internal
   schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scheduleTask"]>
 
-export type ScheduleTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  scheduleId?: boolean
-  order?: boolean
-  action?: boolean
-  payload?: boolean
-  timeOffset?: boolean
-  schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["scheduleTask"]>
 
-export type ScheduleTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  scheduleId?: boolean
-  order?: boolean
-  action?: boolean
-  payload?: boolean
-  timeOffset?: boolean
-  schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["scheduleTask"]>
 
 export type ScheduleTaskSelectScalar = {
   id?: boolean
@@ -566,12 +556,6 @@ export type ScheduleTaskSelectScalar = {
 
 export type ScheduleTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "scheduleId" | "order" | "action" | "payload" | "timeOffset", ExtArgs["result"]["scheduleTask"]>
 export type ScheduleTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
-}
-export type ScheduleTaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
-}
-export type ScheduleTaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   schedule?: boolean | Prisma.ScheduleDefaultArgs<ExtArgs>
 }
 
@@ -705,30 +689,6 @@ export interface ScheduleTaskDelegate<ExtArgs extends runtime.Types.Extensions.I
   createMany<T extends ScheduleTaskCreateManyArgs>(args?: Prisma.SelectSubset<T, ScheduleTaskCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many ScheduleTasks and returns the data saved in the database.
-   * @param {ScheduleTaskCreateManyAndReturnArgs} args - Arguments to create many ScheduleTasks.
-   * @example
-   * // Create many ScheduleTasks
-   * const scheduleTask = await prisma.scheduleTask.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many ScheduleTasks and only return the `id`
-   * const scheduleTaskWithIdOnly = await prisma.scheduleTask.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends ScheduleTaskCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ScheduleTaskCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a ScheduleTask.
    * @param {ScheduleTaskDeleteArgs} args - Arguments to delete one ScheduleTask.
    * @example
@@ -791,36 +751,6 @@ export interface ScheduleTaskDelegate<ExtArgs extends runtime.Types.Extensions.I
    * 
    */
   updateMany<T extends ScheduleTaskUpdateManyArgs>(args: Prisma.SelectSubset<T, ScheduleTaskUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more ScheduleTasks and returns the data updated in the database.
-   * @param {ScheduleTaskUpdateManyAndReturnArgs} args - Arguments to update many ScheduleTasks.
-   * @example
-   * // Update many ScheduleTasks
-   * const scheduleTask = await prisma.scheduleTask.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more ScheduleTasks and only return the `id`
-   * const scheduleTaskWithIdOnly = await prisma.scheduleTask.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends ScheduleTaskUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ScheduleTaskUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ScheduleTask.
@@ -1251,28 +1181,7 @@ export type ScheduleTaskCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many ScheduleTasks.
    */
   data: Prisma.ScheduleTaskCreateManyInput | Prisma.ScheduleTaskCreateManyInput[]
-}
-
-/**
- * ScheduleTask createManyAndReturn
- */
-export type ScheduleTaskCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ScheduleTask
-   */
-  select?: Prisma.ScheduleTaskSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ScheduleTask
-   */
-  omit?: Prisma.ScheduleTaskOmit<ExtArgs> | null
-  /**
-   * The data used to create many ScheduleTasks.
-   */
-  data: Prisma.ScheduleTaskCreateManyInput | Prisma.ScheduleTaskCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ScheduleTaskIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1317,36 +1226,6 @@ export type ScheduleTaskUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many ScheduleTasks to update.
    */
   limit?: number
-}
-
-/**
- * ScheduleTask updateManyAndReturn
- */
-export type ScheduleTaskUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ScheduleTask
-   */
-  select?: Prisma.ScheduleTaskSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ScheduleTask
-   */
-  omit?: Prisma.ScheduleTaskOmit<ExtArgs> | null
-  /**
-   * The data used to update ScheduleTasks.
-   */
-  data: Prisma.XOR<Prisma.ScheduleTaskUpdateManyMutationInput, Prisma.ScheduleTaskUncheckedUpdateManyInput>
-  /**
-   * Filter which ScheduleTasks to update
-   */
-  where?: Prisma.ScheduleTaskWhereInput
-  /**
-   * Limit how many ScheduleTasks to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ScheduleTaskIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

@@ -257,6 +257,7 @@ export type SftpCredentialOrderByWithRelationInput = {
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   server?: Prisma.ServerOrderByWithRelationInput
+  _relevance?: Prisma.SftpCredentialOrderByRelevanceInput
 }
 
 export type SftpCredentialWhereUniqueInput = Prisma.AtLeast<{
@@ -380,6 +381,12 @@ export type SftpCredentialUncheckedUpdateManyInput = {
 export type SftpCredentialNullableScalarRelationFilter = {
   is?: Prisma.SftpCredentialWhereInput | null
   isNot?: Prisma.SftpCredentialWhereInput | null
+}
+
+export type SftpCredentialOrderByRelevanceInput = {
+  fields: Prisma.SftpCredentialOrderByRelevanceFieldEnum | Prisma.SftpCredentialOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type SftpCredentialCountOrderByAggregateInput = {
@@ -525,29 +532,7 @@ export type SftpCredentialSelect<ExtArgs extends runtime.Types.Extensions.Intern
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sftpCredential"]>
 
-export type SftpCredentialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  serverId?: boolean
-  username?: boolean
-  password?: boolean
-  host?: boolean
-  port?: boolean
-  expiresAt?: boolean
-  createdAt?: boolean
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["sftpCredential"]>
 
-export type SftpCredentialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  serverId?: boolean
-  username?: boolean
-  password?: boolean
-  host?: boolean
-  port?: boolean
-  expiresAt?: boolean
-  createdAt?: boolean
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["sftpCredential"]>
 
 export type SftpCredentialSelectScalar = {
   id?: boolean
@@ -562,12 +547,6 @@ export type SftpCredentialSelectScalar = {
 
 export type SftpCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "serverId" | "username" | "password" | "host" | "port" | "expiresAt" | "createdAt", ExtArgs["result"]["sftpCredential"]>
 export type SftpCredentialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-}
-export type SftpCredentialIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-}
-export type SftpCredentialIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
 }
 
@@ -703,30 +682,6 @@ export interface SftpCredentialDelegate<ExtArgs extends runtime.Types.Extensions
   createMany<T extends SftpCredentialCreateManyArgs>(args?: Prisma.SelectSubset<T, SftpCredentialCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many SftpCredentials and returns the data saved in the database.
-   * @param {SftpCredentialCreateManyAndReturnArgs} args - Arguments to create many SftpCredentials.
-   * @example
-   * // Create many SftpCredentials
-   * const sftpCredential = await prisma.sftpCredential.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many SftpCredentials and only return the `id`
-   * const sftpCredentialWithIdOnly = await prisma.sftpCredential.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends SftpCredentialCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, SftpCredentialCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SftpCredentialPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a SftpCredential.
    * @param {SftpCredentialDeleteArgs} args - Arguments to delete one SftpCredential.
    * @example
@@ -789,36 +744,6 @@ export interface SftpCredentialDelegate<ExtArgs extends runtime.Types.Extensions
    * 
    */
   updateMany<T extends SftpCredentialUpdateManyArgs>(args: Prisma.SelectSubset<T, SftpCredentialUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more SftpCredentials and returns the data updated in the database.
-   * @param {SftpCredentialUpdateManyAndReturnArgs} args - Arguments to update many SftpCredentials.
-   * @example
-   * // Update many SftpCredentials
-   * const sftpCredential = await prisma.sftpCredential.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more SftpCredentials and only return the `id`
-   * const sftpCredentialWithIdOnly = await prisma.sftpCredential.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends SftpCredentialUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, SftpCredentialUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SftpCredentialPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one SftpCredential.
@@ -1251,28 +1176,7 @@ export type SftpCredentialCreateManyArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many SftpCredentials.
    */
   data: Prisma.SftpCredentialCreateManyInput | Prisma.SftpCredentialCreateManyInput[]
-}
-
-/**
- * SftpCredential createManyAndReturn
- */
-export type SftpCredentialCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SftpCredential
-   */
-  select?: Prisma.SftpCredentialSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the SftpCredential
-   */
-  omit?: Prisma.SftpCredentialOmit<ExtArgs> | null
-  /**
-   * The data used to create many SftpCredentials.
-   */
-  data: Prisma.SftpCredentialCreateManyInput | Prisma.SftpCredentialCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SftpCredentialIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1317,36 +1221,6 @@ export type SftpCredentialUpdateManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many SftpCredentials to update.
    */
   limit?: number
-}
-
-/**
- * SftpCredential updateManyAndReturn
- */
-export type SftpCredentialUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SftpCredential
-   */
-  select?: Prisma.SftpCredentialSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the SftpCredential
-   */
-  omit?: Prisma.SftpCredentialOmit<ExtArgs> | null
-  /**
-   * The data used to update SftpCredentials.
-   */
-  data: Prisma.XOR<Prisma.SftpCredentialUpdateManyMutationInput, Prisma.SftpCredentialUncheckedUpdateManyInput>
-  /**
-   * Filter which SftpCredentials to update
-   */
-  where?: Prisma.SftpCredentialWhereInput
-  /**
-   * Limit how many SftpCredentials to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SftpCredentialIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

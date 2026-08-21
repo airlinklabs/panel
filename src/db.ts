@@ -1,8 +1,7 @@
 import { PrismaClient } from './generated/prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import fs from 'fs';
 import path from 'path';
-import Database from 'better-sqlite3';
 import logger from './handlers/logger';
 
 // Load .env early so DATABASE_URL is available when the adapter is created.
@@ -22,42 +21,11 @@ try {
   // .env may not exist in all environments
 }
 
-// Resolve DATABASE_URL to an absolute path so Prisma CLI and the runtime adapter
-// always use the same SQLite file. Without this, `prisma db push` and the runtime
-// can resolve `file:./storage/dev.db` to different directories.
-function resolveDbUrl(raw: string): string {
-  if (!raw.startsWith('file:')) return raw;
-  const relPath = raw.slice('file:'.length);
-  const absPath = path.resolve(process.cwd(), relPath);
-  // Ensure the parent directory exists (e.g. storage/)
-  const dir = path.dirname(absPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  return `file:${absPath}`;
-}
+const databaseUrl = process.env.DATABASE_URL || 'mysql://root:@127.0.0.1:3306/airlink';
 
-const rawUrl = process.env.DATABASE_URL || 'file:./storage/dev.db';
-const resolvedUrl = resolveDbUrl(rawUrl);
-
-// Configure the SQLite file once so every future connection inherits it:
-// WAL journal mode (pairs with the busy timeout so concurrent reads/writes
-// don't throw SQLITE_BUSY) and NORMAL synchronous for a good durability vs.
-// latency trade-off. journal_mode persists in the DB file itself.
-try {
-  const dbPath = resolvedUrl.slice('file:'.length);
-  const setup = new Database(dbPath, { fileMustExist: false });
-  setup.pragma('journal_mode = WAL');
-  setup.pragma('synchronous = NORMAL');
-  setup.close();
-} catch (error) {
-    // Defer to the adapter if the file isn't reachable yet.
-    logger.warn('Could not initialise SQLite journal mode.', {
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-
-const adapter = new PrismaBetterSqlite3({ url: resolvedUrl, timeout: 5000 });
+// PrismaMariaDb accepts either a connection URL string or a PoolConfig object.
+// Pass the URL directly — the adapter creates its own connection pool internally.
+const adapter = new PrismaMariaDb(databaseUrl);
 const prisma = new PrismaClient({ adapter });
 
 export default prisma;

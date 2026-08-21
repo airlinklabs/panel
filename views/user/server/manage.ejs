@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Console' }) %>
+<%- include('../../components/header', { title: 'Console', extraStyles: ['/vendor/xterm/xterm.css'] }) %>
 <%- include('../../components/serverFeatures') %>
 
 <style>
@@ -207,7 +207,7 @@
                         <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %>:</h2>
                         <p id="server-ip-text" class="mt-1 text-sm font-medium font-mono tracking-tight break-all" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></p>
                     </div>
-                    <button type="button" id="copy-ip-btn" onclick="copyServerIP()" title="Copy" class="shrink-0 mt-1 rounded-lg p-1.5 transition-colors" style="background:var(--theme-bg-secondary)">
+                    <button type="button" id="copy-ip-btn" title="Copy server address" class="shrink-0 mt-1 rounded-lg p-1.5 transition-colors" style="background:var(--theme-bg-secondary)">
                         <span id="copy-icon"><%- icon('copy', { class: 'h-3.5 w-3.5', style: 'color:var(--theme-text-muted)' }) %></span>
                         <span id="check-icon" class="hidden"><%- icon('check', { class: 'h-3.5 w-3.5 text-emerald-500', strokeWidth: 2.5 }) %></span>
                     </button>
@@ -351,7 +351,7 @@
         <%- icon('globe', { class: 'h-4 w-4 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
         <span class="text-[10px] font-medium shrink-0" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %>:</span>
         <span class="text-xs font-medium font-mono truncate flex-1" id="mobile-server-ip-text" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></span>
-        <button type="button" id="mobile-copy-ip-btn" onclick="copyMobileServerIP()" class="shrink-0 rounded-md p-1 transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">
+        <button type="button" id="mobile-copy-ip-btn" title="Copy server address" class="shrink-0 rounded-md p-1 transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">
           <%- icon('copy', { id: 'mobile-copy-icon', class: 'h-3.5 w-3.5', style: 'color:var(--theme-text-muted)', strokeWidth: 2 }) %>
           <%- icon('check', { id: 'mobile-check-icon', class: 'h-3.5 w-3.5 text-emerald-500 hidden', strokeWidth: 2.5 }) %>
         </button>
@@ -420,9 +420,22 @@
 function retryDaemonConnection() { window.location.reload(); }
 (async function () {
   const root = document.getElementById('manage-root');
-  const config = JSON.parse(root.dataset.config);
-  const { mount } = await import('/javascript/islands/server-console.js');
-  window._manageCleanup = await mount(root, config);
+  if (!root) return;
+  try {
+    const config = JSON.parse(root.dataset.config || '{}');
+    const { mount } = await import('/javascript/islands/server-console.js');
+    const controller = await mount(root, config);
+    window._manageCleanup = controller && controller.teardown;
+  } catch (error) {
+    console.error('Failed to initialize the server console.', error);
+    const status = root.querySelector('#status');
+    if (status) status.textContent = 'Console unavailable';
+    const message = root.querySelector('#status-msg');
+    if (message) {
+      message.textContent = 'Refresh the page to retry. If this continues, check the browser console.';
+      message.classList.remove('opacity-0', 'translate-y-1', 'pointer-events-none');
+    }
+    if (window.showToast) window.showToast('Console could not load. Refresh the page to retry.', 'error');
+  }
 })();
 </script>
-

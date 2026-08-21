@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
 }
 
 model Users {
@@ -53,15 +53,6 @@ model PasswordReset {
   user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-}
-
-model Session {
-  id         String   @id @default(cuid())
-  session_id String   @unique
-  data       String
-  expires    DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
 }
 
 model Server {

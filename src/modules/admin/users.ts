@@ -13,6 +13,7 @@ import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import { registerPermission, type Permission } from '../../handlers/permissions';
 import { isRoleInput as isRole, type UserRole, roleFields } from '../../handlers/utils/auth/roles';
 import { emitRealtime, userEvent } from '../../handlers/realtime/events';
+import { getSessionStore } from '../../handlers/sessionStore';
 
 const BCRYPT_SALT_ROUNDS = 12;
 
@@ -375,9 +376,7 @@ router.get(
             return;
           }
 
-          await prisma.session.deleteMany({
-            where: { data: { contains: `"id":${targetId}` } },
-          });
+          await getSessionStore().destroyUserSessions(targetId);
 
           await prisma.loginHistory.deleteMany({ where: { userId: targetId } });
 

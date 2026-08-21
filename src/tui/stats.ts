@@ -1,25 +1,67 @@
-import { Database } from "bun:sqlite";
+import mysql from "mysql2/promise";
+import Redis from "ioredis";
 import { existsSync, readFileSync, readdirSync, statfsSync, statSync, openSync, readSync, closeSync } from "node:fs";
 import crypto from "node:crypto";
 
 const TUI_DIR = __dirname;
-const DB_PATH = process.env.AIRLINK_DB_PATH ?? `${TUI_DIR}/../../../storage/dev.db`;
 const LOG_DIR = process.env.AIRLINK_LOG_DIR ?? `${TUI_DIR}/../../logs`;
 export const PANEL_URL = process.env.AIRLINK_PANEL_URL ?? "http://127.0.0.1:3000";
 
-let db: Database | null | undefined;
-function openDb(): Database | null {
-  if (db === undefined) {
-    db = null;
-    if (existsSync(DB_PATH)) {
-      try {
-        db = new Database(DB_PATH, { readonly: true });
-      } catch {
-        db = null;
-      }
+function parseMySQLUrl(url: string) {
+  try {
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname || "127.0.0.1",
+      port: Number(parsed.port) || 3306,
+      user: parsed.username || "root",
+      password: parsed.password || "",
+      database: parsed.pathname.slice(1) || "airlink",
+    };
+  } catch {
+    return { host: "127.0.0.1", port: 3306, user: "root", password: "", database: "airlink" };
+  }
+}
+
+const dbConfig = parseMySQLUrl(process.env.DATABASE_URL ?? "mysql://root:@127.0.0.1:3306/airlink");
+
+let pool: mysql.Pool | null = null;
+function getPool(): mysql.Pool | null {
+  if (!pool) {
+    try {
+      pool = mysql.createPool({
+        host: dbConfig.host,
+        port: dbConfig.port,
+        user: dbConfig.user,
+        password: dbConfig.password,
+        database: dbConfig.database,
+        waitForConnections: true,
+        connectionLimit: 2,
+        queueLimit: 0,
+      });
+    } catch {
+      return null;
     }
   }
-  return db;
+  return pool;
+}
+
+const REDIS_URL = process.env.REDIS_URL ?? "redis://127.0.0.1:6379";
+const SESSION_PREFIX = "airlink:sess:";
+
+let redisClient: Redis | null = null;
+function getRedis(): Redis | null {
+  if (!redisClient) {
+    try {
+      redisClient = new Redis(REDIS_URL, {
+        maxRetriesPerRequest: 1,
+        retryStrategy: (times: number) => (times > 3 ? null : Math.min(times * 200, 1000)),
+        lazyConnect: false,
+      });
+    } catch {
+      return null;
+    }
+  }
+  return redisClient;
 }
 
 export interface Stats {
@@ -164,11 +206,11 @@ export function panelPid(): { pid: number | null; uptimeSec: number | null } {
 }
 
 function countErrors24h(): number {
-  const path = `${LOG_DIR}/combined.log`;
-  if (!existsSync(path)) return 0;
-  const size = statSync(path).size;
+  const logPath = `${LOG_DIR}/combined.log`;
+  if (!existsSync(logPath)) return 0;
+  const size = statSync(logPath).size;
   const chunk = size > 524288 ? 524288 : size;
-  const fd = openSync(path, "r");
+  const fd = openSync(logPath, "r");
   let text = "";
   try {
     const buf = Buffer.alloc(chunk);
@@ -206,7 +248,7 @@ async function daemonStatus(): Promise<{
   nodeKeyPrefix: string | null;
   lastDaemonCheckAtMs: number | null;
 }> {
-  const database = openDb();
+  const p = getPool();
   const empty = {
     online: false,
     name: null,
@@ -219,12 +261,11 @@ async function daemonStatus(): Promise<{
     nodeKeyPrefix: null,
     lastDaemonCheckAtMs: null,
   } as const;
-  if (!database) return { ...empty };
+  if (!p) return { ...empty };
   let node: NodeRow | undefined;
   try {
-    const row = database.query("SELECT name, address, port, key FROM Node LIMIT 1").get() as
-      | { name: unknown; address: unknown; port: unknown; key: unknown }
-      | undefined;
+    const [rows] = await p.query("SELECT name, address, `port`, `key` FROM `Node` LIMIT 1") as any[];
+    const row = rows?.[0];
     if (!row) return { ...empty };
     node = {
       name: String(row.name ?? ""),
@@ -240,9 +281,8 @@ async function daemonStatus(): Promise<{
   const rttPromise = node.address ? measureRtt(`http://${node.address}:${node.port}/healthz`, 1500) : Promise.resolve(null);
   let server: { name: unknown; UUID: unknown } | undefined;
   try {
-    server = database.query("SELECT name, UUID FROM Server LIMIT 1").get() as
-      | { name: unknown; UUID: unknown }
-      | undefined;
+    const [rows] = await p.query("SELECT name, `UUID` FROM `Server` LIMIT 1") as any[];
+    server = rows?.[0];
   } catch {
     /* no servers table */
   }
@@ -322,7 +362,7 @@ async function daemonStatus(): Promise<{
 }
 
 export async function collectStats(): Promise<Stats> {
-  const database = openDb();
+  const p = getPool();
   const now = Date.now();
   const cpuNow = readCpu();
   let cpu: number | null = null;
@@ -349,18 +389,40 @@ export async function collectStats(): Promise<Stats> {
   let sessions: number | null = null;
   let logins24h: number | null = null;
   let dbBytes: number | null = null;
-  if (database) {
+  if (p) {
     try {
-      users = (database.query("SELECT COUNT(*) AS c FROM Users").get() as any).c;
-      sessions = (database.query("SELECT COUNT(*) AS c FROM Session WHERE expires > datetime('now')").get() as any).c;
-      logins24h = (database.query("SELECT COUNT(*) AS c FROM LoginHistory WHERE timestamp > datetime('now', '-1 day')").get() as any).c;
+      const [rows] = await p.query("SELECT COUNT(*) AS c FROM `Users`") as any[];
+      users = rows?.[0]?.c ?? null;
+      const [lRows] = await p.query("SELECT COUNT(*) AS c FROM `LoginHistory` WHERE `timestamp` > DATE_SUB(NOW(), INTERVAL 1 DAY)") as any[];
+      logins24h = lRows?.[0]?.c ?? null;
     } catch {
       /* tables may not exist yet */
     }
     try {
-      dbBytes = statSync(DB_PATH).size;
+      const [rows] = await p.query(
+        "SELECT ROUND(data_length + index_length) AS size FROM information_schema.TABLES WHERE table_schema = ? AND table_name = ?",
+        [dbConfig.database, "Users"]
+      ) as any[];
+      dbBytes = rows?.[0]?.size ?? null;
     } catch {
-      /* DB vanished */
+      /* could not determine size */
+    }
+  }
+
+  // Session count comes from Redis (sessions live in Redis, not MySQL).
+  const r = getRedis();
+  if (r) {
+    try {
+      let cursor = "0";
+      let count = 0;
+      do {
+        const [nextCursor, keys] = await r.scan(cursor, "MATCH", `${SESSION_PREFIX}*`, "COUNT", 200) as [string, string[]];
+        cursor = nextCursor;
+        count += keys.length;
+      } while (cursor !== "0");
+      sessions = count;
+    } catch {
+      sessions = null;
     }
   }
 

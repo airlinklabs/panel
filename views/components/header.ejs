@@ -33,6 +33,11 @@ const wallpaperExcluded = req && req.path && (
     <link rel="stylesheet" href="<%= settings.darkTheme %>" id="dark-theme-css" data-theme-mode="dark">
     <% } %>
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
+    <% if (Array.isArray(typeof extraStyles !== 'undefined' ? extraStyles : undefined)) { %>
+      <% for (const stylesheet of extraStyles) { %>
+    <link rel="stylesheet" href="<%= stylesheet %>">
+      <% } %>
+    <% } %>
     <!-- ── Foundation: session/CSRF support ────────────────────────────── -->
     <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
     <script nonce="<%- nonce %>" defer src="/js/csrf.js?v=8"></script>

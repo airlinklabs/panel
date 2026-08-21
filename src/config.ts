@@ -25,6 +25,7 @@ export interface PanelConfig {
   name: string;
   sessionSecret: string;
   databaseUrl: string;
+  redisUrl: string;
 }
 
 /** Minimum secret length we accept. Panel-generated secrets are 64 hex chars. */
@@ -94,6 +95,7 @@ export function getConfig(): PanelConfig {
     port: parsePort(process.env.PORT),
     name: process.env.NAME || 'AirLink',
     sessionSecret: resolveSessionSecret(process.env.SESSION_SECRET, isProduction),
-    databaseUrl: process.env.DATABASE_URL || 'file:./storage/dev.db',
+    databaseUrl: process.env.DATABASE_URL || 'mysql://root:@127.0.0.1:3306/airlink',
+    redisUrl: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
   };
 }

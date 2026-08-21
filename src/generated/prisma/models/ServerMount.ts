@@ -201,6 +201,7 @@ export type ServerMountOrderByWithRelationInput = {
   mountId?: Prisma.SortOrder
   server?: Prisma.ServerOrderByWithRelationInput
   mount?: Prisma.MountOrderByWithRelationInput
+  _relevance?: Prisma.ServerMountOrderByRelevanceInput
 }
 
 export type ServerMountWhereUniqueInput = Prisma.AtLeast<{
@@ -274,6 +275,12 @@ export type ServerMountListRelationFilter = {
 
 export type ServerMountOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ServerMountOrderByRelevanceInput = {
+  fields: Prisma.ServerMountOrderByRelevanceFieldEnum | Prisma.ServerMountOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type ServerMountServerIdMountIdCompoundUniqueInput = {
@@ -403,6 +410,7 @@ export type ServerMountCreateOrConnectWithoutServerInput = {
 
 export type ServerMountCreateManyServerInputEnvelope = {
   data: Prisma.ServerMountCreateManyServerInput | Prisma.ServerMountCreateManyServerInput[]
+  skipDuplicates?: boolean
 }
 
 export type ServerMountUpsertWithWhereUniqueWithoutServerInput = {
@@ -444,6 +452,7 @@ export type ServerMountCreateOrConnectWithoutMountInput = {
 
 export type ServerMountCreateManyMountInputEnvelope = {
   data: Prisma.ServerMountCreateManyMountInput | Prisma.ServerMountCreateManyMountInput[]
+  skipDuplicates?: boolean
 }
 
 export type ServerMountUpsertWithWhereUniqueWithoutMountInput = {
@@ -503,19 +512,7 @@ export type ServerMountSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   mount?: boolean | Prisma.MountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["serverMount"]>
 
-export type ServerMountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  serverId?: boolean
-  mountId?: boolean
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  mount?: boolean | Prisma.MountDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["serverMount"]>
 
-export type ServerMountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  serverId?: boolean
-  mountId?: boolean
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  mount?: boolean | Prisma.MountDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["serverMount"]>
 
 export type ServerMountSelectScalar = {
   serverId?: boolean
@@ -524,14 +521,6 @@ export type ServerMountSelectScalar = {
 
 export type ServerMountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"serverId" | "mountId", ExtArgs["result"]["serverMount"]>
 export type ServerMountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  mount?: boolean | Prisma.MountDefaultArgs<ExtArgs>
-}
-export type ServerMountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
-  mount?: boolean | Prisma.MountDefaultArgs<ExtArgs>
-}
-export type ServerMountIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
   mount?: boolean | Prisma.MountDefaultArgs<ExtArgs>
 }
@@ -663,30 +652,6 @@ export interface ServerMountDelegate<ExtArgs extends runtime.Types.Extensions.In
   createMany<T extends ServerMountCreateManyArgs>(args?: Prisma.SelectSubset<T, ServerMountCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many ServerMounts and returns the data saved in the database.
-   * @param {ServerMountCreateManyAndReturnArgs} args - Arguments to create many ServerMounts.
-   * @example
-   * // Create many ServerMounts
-   * const serverMount = await prisma.serverMount.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many ServerMounts and only return the `serverId`
-   * const serverMountWithServerIdOnly = await prisma.serverMount.createManyAndReturn({
-   *   select: { serverId: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends ServerMountCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ServerMountCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerMountPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a ServerMount.
    * @param {ServerMountDeleteArgs} args - Arguments to delete one ServerMount.
    * @example
@@ -749,36 +714,6 @@ export interface ServerMountDelegate<ExtArgs extends runtime.Types.Extensions.In
    * 
    */
   updateMany<T extends ServerMountUpdateManyArgs>(args: Prisma.SelectSubset<T, ServerMountUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more ServerMounts and returns the data updated in the database.
-   * @param {ServerMountUpdateManyAndReturnArgs} args - Arguments to update many ServerMounts.
-   * @example
-   * // Update many ServerMounts
-   * const serverMount = await prisma.serverMount.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more ServerMounts and only return the `serverId`
-   * const serverMountWithServerIdOnly = await prisma.serverMount.updateManyAndReturn({
-   *   select: { serverId: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends ServerMountUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ServerMountUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerMountPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ServerMount.
@@ -1206,28 +1141,7 @@ export type ServerMountCreateManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * The data used to create many ServerMounts.
    */
   data: Prisma.ServerMountCreateManyInput | Prisma.ServerMountCreateManyInput[]
-}
-
-/**
- * ServerMount createManyAndReturn
- */
-export type ServerMountCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ServerMount
-   */
-  select?: Prisma.ServerMountSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ServerMount
-   */
-  omit?: Prisma.ServerMountOmit<ExtArgs> | null
-  /**
-   * The data used to create many ServerMounts.
-   */
-  data: Prisma.ServerMountCreateManyInput | Prisma.ServerMountCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ServerMountIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1272,36 +1186,6 @@ export type ServerMountUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many ServerMounts to update.
    */
   limit?: number
-}
-
-/**
- * ServerMount updateManyAndReturn
- */
-export type ServerMountUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ServerMount
-   */
-  select?: Prisma.ServerMountSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ServerMount
-   */
-  omit?: Prisma.ServerMountOmit<ExtArgs> | null
-  /**
-   * The data used to update ServerMounts.
-   */
-  data: Prisma.XOR<Prisma.ServerMountUpdateManyMutationInput, Prisma.ServerMountUncheckedUpdateManyInput>
-  /**
-   * Filter which ServerMounts to update
-   */
-  where?: Prisma.ServerMountWhereInput
-  /**
-   * Limit how many ServerMounts to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ServerMountIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

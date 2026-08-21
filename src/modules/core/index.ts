@@ -3,8 +3,9 @@ import { Module } from '../../handlers/moduleInit';
 import logger from '../../handlers/logger';
 import os from 'os';
 import prisma from '../../db';
-import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
+import { checkNodeStatus, checkNodeStatusUncached } from '../../handlers/utils/node/nodeStatus';
 import { isAuthenticated, requireApiAuth } from '../../handlers/utils/auth/authUtil';
+import { cache } from '../../handlers/cache';
 
 const coreModule: Module = {
   info: {
@@ -87,7 +88,7 @@ const coreModule: Module = {
 
         const testNode = { address: address.trim(), port, key };
 
-        const nodeWithStatus = await checkNodeStatus(testNode);
+        const nodeWithStatus = await checkNodeStatusUncached(testNode);
 
         if (nodeWithStatus.status === 'Offline') {
           res.status(400).json({ 
@@ -124,6 +125,12 @@ const coreModule: Module = {
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) return res.status(401).json({ results: [] });
+
+        // Cache search results per user+query for 30 seconds to avoid
+        // repeated DB hits from the search-as-you-type frontend.
+        const cacheKey = `search:${userId}:${qRaw}`;
+        const cached = await cache.get<{ type: string; label: string; sub: string; url: string; score: number }[]>(cacheKey);
+        if (cached) return res.json({ results: cached });
 
         type SearchItem = { type: string; label: string; sub: string; url: string; score: number };
 
@@ -277,6 +284,8 @@ const coreModule: Module = {
         }
 
         results.sort((a, b) => b.score - a.score);
+        // Store in Redis for 30 seconds.
+        await cache.set(cacheKey, results, 30);
         return res.json({ results });
       } catch (err) {
         logger.error('Search error:', err);
