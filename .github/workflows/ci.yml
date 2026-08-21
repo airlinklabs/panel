@@ -51,11 +51,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
@@ -69,15 +67,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint
+      # --fix is for local dev only; CI must only check, never mutate files
+      - run: pnpm exec eslint src
 
   typecheck:
     name: Typecheck
@@ -87,15 +84,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      # generate runs all three tsconfigs (main, prisma, tui) via postinstall,
+      # but we call it explicitly here in case postinstall is skipped
       - run: pnpm exec prisma generate
+      # pnpm run typecheck covers tsconfig, tsconfig.prisma.json, tsconfig.tui.json
       - run: pnpm run typecheck
 
   test:
@@ -106,42 +104,57 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec prisma generate
+      # migrate:deploy applies pending migrations and regenerates the client —
+      # required so Vitest has a real, up-to-date schema to run against
+      - run: pnpm run migrate:deploy
       - run: pnpm test
+
+  verify-vendor:
+    name: Verify Vendor Bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      # Fails if the committed vendor bundle is out of sync with sources
+      - run: pnpm run verify:vendor
 
   # ── Build ───────────────────────────────────────────────────────────────────
 
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [semgrep, lint, typecheck, test, audit]
+    needs: [semgrep, lint, typecheck, test, audit, verify-vendor]
     env:
       DATABASE_URL: "file:./dev.db"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec prisma generate
+      # migrate:deploy so the generated client matches the DB schema used at runtime
+      - run: pnpm run migrate:deploy
+      # build = tsc (main) + tsc (prisma tsconfig) + tailwindcss via pnpm exec
       - run: pnpm run build
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ github.sha }}
-          path: dist/         # adjust to your actual output dir
+          path: dist/
           retention-days: 7
           if-no-files-found: error
