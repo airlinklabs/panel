@@ -264,6 +264,17 @@ export function registerStartupRoutes(router: Router): void {
         logger.info(
           `Successfully updated startup command for server ${serverId}`,
         );
+        if (req.htmx) {
+          const updatedServer = await prisma.server.findUnique({
+            where: { UUID: getParamAsString(serverId) },
+            include: { node: true, image: true, owner: true },
+          });
+          res.vary('HX-Request');
+          return res.render('fragments/user/server/startup-command', {
+            req,
+            server: updatedServer,
+          });
+        }
         const acceptsJson = req.headers.accept?.includes('application/json');
         if (acceptsJson) {
           res.status(200).json({ success: true });
@@ -415,6 +426,18 @@ export function registerStartupRoutes(router: Router): void {
         logger.info(
           `Successfully updated Docker image for server ${serverId}`,
         );
+
+        if (req.htmx) {
+          const updatedServer = await prisma.server.findUnique({
+            where: { UUID: getParamAsString(serverId) },
+            include: { node: true, image: true, owner: true },
+          });
+          res.vary('HX-Request');
+          return res.render('fragments/user/server/startup-docker', {
+            req,
+            server: updatedServer,
+          });
+        }
 
         const acceptsJson = req.headers.accept?.includes('application/json');
         if (acceptsJson) {
@@ -613,6 +636,26 @@ export function registerStartupRoutes(router: Router): void {
         }
 
         logger.info(`Successfully updated variables for server ${serverId}`);
+
+        if (req.htmx) {
+          const updatedServer = await prisma.server.findUnique({
+            where: { UUID: getParamAsString(serverId) },
+            include: { node: true, image: true, owner: true },
+          });
+          let updatedVariables: ServerVariable[] = [];
+          if (updatedServer?.Variables) {
+            try {
+              const parsed: unknown = JSON.parse(updatedServer.Variables);
+              if (Array.isArray(parsed)) updatedVariables = parsed;
+            } catch {}
+          }
+          res.vary('HX-Request');
+          return res.render('fragments/user/server/startup-variables', {
+            req,
+            server: updatedServer,
+            serverVariables: updatedVariables,
+          });
+        }
 
         const acceptsJson = req.headers.accept?.includes('application/json');
         if (acceptsJson) {

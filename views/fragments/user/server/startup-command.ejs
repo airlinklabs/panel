@@ -1,0 +1,57 @@
+<!-- Startup command form fragment — replaces #startup-command-form on save -->
+<div id="startup-command-form" class="al-card overflow-hidden mb-6">
+  <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
+    <div>
+      <h2 class="text-lg font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.startupCommand || 'Startup Command' %></h2>
+      <p class="text-sm" style="color:var(--theme-text-muted)"><%= req.translations.startupCommandDesc || 'Customize the command used to start your server.' %></p>
+    </div>
+    <%
+      let isStartupEditAllowed = false;
+      try {
+        isStartupEditAllowed = server.allowStartupEdit === true;
+      } catch (e) {
+        isStartupEditAllowed = false;
+      }
+      if (!isStartupEditAllowed) {
+    %>
+      <div class="flex items-center">
+        <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-danger-bg);color:var(--theme-danger);--tw-ring-color:color-mix(in srgb, var(--theme-danger) 25%, transparent);">
+          <%- icon('circle-x', { class: 'mr-1.5 h-3 w-3', style: 'color:var(--theme-danger)', strokeWidth: 2 }) %>
+          Editing Disabled
+        </span>
+      </div>
+    <% } else { %>
+      <div class="flex items-center">
+        <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent);">
+          <%- icon('circle-check', { class: 'mr-1.5 h-3 w-3', style: 'color:var(--theme-success)', strokeWidth: 2 }) %>
+          Editing Enabled
+        </span>
+      </div>
+    <% } %>
+  </div>
+
+  <form hx-post="/server/<%= server.UUID %>/startup/command"
+        hx-target="#startup-command-form"
+        hx-swap="outerHTML"
+        hx-indicator="#cmd-save-indicator"
+        hx-on::after-request="if(event.detail.successful) showToast('Startup command saved successfully!', 'success')"
+        novalidate>
+    <%- include('../../components/csrf') %>
+    <div class="p-5">
+      <div class="mb-4">
+        <label for="startCommand" class="block text-sm font-medium mb-2" style="color:var(--theme-text-muted)"><%= req.translations.startupCommand || 'Startup Command' %></label>
+        <textarea id="startCommand" name="startCommand" rows="3" class="al-input <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'readonly' : '' %> aria-label="<%= req.translations.startupCommand || 'Startup Command' %>"><%= server.StartCommand %></textarea>
+        <% if (!isStartupEditAllowed) { %>
+          <p class="mt-2 text-xs" style="color:var(--theme-danger);"><%= req.translations.startupCommandDisabled || 'Startup command editing is disabled for this server. Contact an administrator to enable this feature.' %></p>
+        <% } else { %>
+          <p class="mt-2 text-xs" style="color:var(--theme-text-muted)"><%= req.translations.startupCommandHint || 'Use $ALVKT(VARIABLE_NAME) to reference environment variables.' %></p>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="px-5 py-4 border-t flex items-center gap-3" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
+      <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
+      <span id="cmd-save-indicator" class="htmx-indicator text-xs" style="color:var(--theme-text-muted)">Saving...</span>
+    </div>
+  </form>
+</div>

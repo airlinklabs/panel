@@ -1,0 +1,52 @@
+<!-- Variables form fragment — replaces #startup-variables-form on save -->
+<div id="startup-variables-form" class="al-card p-6 shadow-lg mt-8">
+  <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.serverVariables || 'Server Variables' %></h2>
+  <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
+
+  <form hx-post="/server/<%= server.UUID %>/startup/variables"
+        hx-target="#startup-variables-form"
+        hx-swap="outerHTML"
+        hx-encoding="multipart/form-data"
+        hx-indicator="#vars-save-indicator"
+        hx-on::after-request="if(event.detail.successful) showToast('Variables saved successfully!', 'success')"
+        novalidate>
+    <%- include('../../components/csrf') %>
+    <div id="variablesContainer" class="space-y-4">
+      <% if (serverVariables && serverVariables.length > 0) { %>
+        <% serverVariables.forEach((variable, index) => { %>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg border" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
+            <div>
+              <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-muted)" for="var_<%= variable.env %>"><%= variable.name %></label>
+              <p class="text-xs" style="color:var(--theme-text-muted)">Environment: <%= variable.env %></p>
+            </div>
+            <div class="md:col-span-2">
+              <% if (variable.type === 'boolean') { %>
+                <label class="relative inline-flex items-center cursor-pointer" for="toggle_<%= variable.env %>">
+                  <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %>>
+                  <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+                  <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-muted)" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'Enabled' : 'Disabled' %></span>
+                </label>
+                <script nonce="<%- nonce %>">
+                  document.getElementById('toggle_<%= variable.env %>').addEventListener('change', function() {
+                    document.getElementById('label_<%= variable.env %>').textContent = this.checked ? 'Enabled' : 'Disabled';
+                  });
+                </script>
+              <% } else if (variable.type === 'number') { %>
+                <input type="number" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="al-input" aria-label="<%= variable.name %>">
+              <% } else { %>
+                <input type="text" name="var_<%= variable.env %>" id="var_<%= variable.env %>" value="<%= variable.value %>" class="al-input" aria-label="<%= variable.name %>">
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p style="color:var(--theme-text-muted)"><%= req.translations.noVariables || 'No variables available for this server.' %></p>
+      <% } %>
+    </div>
+
+    <div class="mt-6 flex items-center gap-3">
+      <button type="submit" class="al-btn-primary"><%= req.translations.saveVariables || 'Save Variables' %></button>
+      <span id="vars-save-indicator" class="htmx-indicator text-xs" style="color:var(--theme-text-muted)">Saving...</span>
+    </div>
+  </form>
+</div>
