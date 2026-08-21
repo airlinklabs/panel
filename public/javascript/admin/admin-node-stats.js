@@ -4,7 +4,6 @@
   var TICK = rootStyle.getPropertyValue('--theme-text').trim() || '#fff';
   var GRID = 'rgba(255,255,255,0.08)';
   var ACCENT = rootStyle.getPropertyValue('--theme-accent').trim() || '#3b82f6';
-  var SUCCESS = rootStyle.getPropertyValue('--theme-success').trim() || '#22c55e';
   var DANGER = rootStyle.getPropertyValue('--theme-danger').trim() || '#ef4444';
   var BAR_COLOR = rootStyle.getPropertyValue('--theme-text-strong').trim() || '#fafafa';
 
@@ -21,7 +20,7 @@
     return (b / 1024).toFixed(0) + ' KB';
   }
   function fmtMB(mb) { return mb >= 1024 ? (mb / 1024).toFixed(1) + ' GB' : mb.toFixed(0) + ' MB'; }
-  function pctColor(p) { return p >= 90 ? DANGER : p >= 70 ? '#f59e0b' : SUCCESS; }
+  function pctColor(p) { return p >= 90 ? DANGER : BAR_COLOR; }
 
   function setBar(id, pct, text) {
     var bar = document.getElementById(id + '-bar');

@@ -414,9 +414,8 @@
 
 </div><!-- /manage-root -->
 
-<%- include('../../components/footer') %>
-
 <script nonce="<%- nonce %>">
+function retryDaemonConnection() { window.location.reload(); }
 (async function () {
   const root = document.getElementById('manage-root');
   const config = JSON.parse(root.dataset.config);
@@ -424,4 +423,6 @@
   window._manageCleanup = await mount(root, config);
 })();
 </script>
+
+<%- include('../../components/footer') %>
 
