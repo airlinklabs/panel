@@ -801,7 +801,10 @@ const adminModule: Module = {
           return;
         }
 
-        const nodeWithStatus = await checkNodeStatus(node);
+        const nodeWithStatus = await Promise.race([
+          checkNodeStatus(node),
+          new Promise<typeof node>((resolve) => setTimeout(() => { node.status = 'Unknown'; resolve(node); }, 4000)),
+        ]);
 
         const settings = await prisma.settings.findUnique({
           where: { id: 1 },
@@ -816,13 +819,30 @@ const adminModule: Module = {
             nodeKey: node.key,
             method: 'GET',
             path: '/stats',
+            timeout: 5000,
           });
 
           stats = (response.data ?? {}) as Record<string, unknown>;
         } catch {
-          stats = { error: 'Unable to fetch stats from the node.' };
+          stats = {};
         }
-        res.render('admin/nodes/stats', { node: nodeWithStatus, user, req, settings, stats });
+
+        let hostInfo: Record<string, unknown> = {};
+        try {
+          const hostRes = await daemonRequest({
+            nodeAddress: node.address,
+            nodePort: node.port,
+            nodeKey: node.key,
+            method: 'GET',
+            path: '/host',
+            timeout: 5000,
+          });
+          hostInfo = (hostRes.data ?? {}) as Record<string, unknown>;
+        } catch {
+          hostInfo = {};
+        }
+
+        res.render('admin/nodes/stats', { node: nodeWithStatus, user, req, settings, stats, host: hostInfo });
       }
     );
 

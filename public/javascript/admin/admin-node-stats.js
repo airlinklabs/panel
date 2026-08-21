@@ -35,6 +35,7 @@
   function timeNow() { return new Date().toLocaleTimeString(); }
 
   var initStats = JSON.parse(pd.dataset.stats || '[]');
+  var initHost = JSON.parse(pd.dataset.host || '{}');
   var ramL = initStats.map(function(s) { return new Date(s.timestamp).toLocaleTimeString(); });
   var ramD = initStats.map(function(s) { return parseFloat(s.Ram.replace(' MB', '')); });
   var cpuL = ramL.slice();
@@ -108,7 +109,15 @@
     }
   }
 
-  if (initStats.length) updateCards({ stats: { totalStats: initStats, uptime: '--' }, host: {}, instances: pd.dataset.instances, allocations: pd.dataset.allocations, allocationsInUse: pd.dataset.allocationsInUse });
+  if (initStats.length || Object.keys(initHost).length) {
+    updateCards({
+      stats: { totalStats: initStats, uptime: '--' },
+      host: initHost,
+      instances: parseInt(pd.dataset.instances) || 0,
+      allocations: parseInt(pd.dataset.allocations) || 0,
+      allocationsInUse: parseInt(pd.dataset.allocationsInUse) || 0
+    });
+  }
 
   setInterval(function() {
     fetch('/admin/node/' + nodeId + '/stats/live').then(function(r) { return r.ok ? r.json() : null; }).then(function(d) { if (d) updateCards(d); }).catch(function() {});
