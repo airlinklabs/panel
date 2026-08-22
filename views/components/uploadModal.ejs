@@ -1,16 +1,13 @@
 <!-- Reusable upload modal with drag-and-drop support.
-     Include this partial, then call openUploadModal({ title, accept, onFile })
-     from your page script.
+     Included via footer.ejs on every page.
+     Call openUploadModal({ title, accept, onFile }) from your page script.
 
      Usage:
-       <%- include('../../components/uploadModal') %>
-       <script>
-         openUploadModal({
-           title: 'Upload file',
-           accept: '.json,image/*',
-           onFile: async (file) => { ... }
-         });
-       </script>
+       openUploadModal({
+         title: 'Upload file',
+         accept: '.json,image/*',
+         onFile: async (file) => { ... }
+       });
 -->
 <div id="uploadModalOverlay" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center opacity-0 pointer-events-none">
   <div class="absolute inset-0" onclick="closeUploadModal()"></div>
