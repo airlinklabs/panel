@@ -510,9 +510,11 @@ const adminModule: Module = {
           res
             .status(200)
             .json(
-              'configure -- -- --panel "' +
+              'configure --panel "' +
                 process.env.URL +
-                '" --key "$(cat /path/to/daemon/.env | grep ^key= | cut -d= -f2)"',
+                '" --key "' +
+                node.key +
+                '"',
             );
           return;
         } catch (error: unknown) {
