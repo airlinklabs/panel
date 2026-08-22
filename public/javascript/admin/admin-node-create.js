@@ -275,16 +275,19 @@
     }
   });
 
-  renderAllocatedPorts();
-
-  // Hash route: #created — show the setup panel for the newly created node
-  if (window.location.hash === '#created') {
-    const stored = sessionStorage.getItem('airlink:newNode');
-    if (stored) {
-      sessionStorage.removeItem('airlink:newNode');
-      try {
-        showSetupPanel(JSON.parse(stored));
-      } catch {}
+  function checkHashRoute() {
+    if (window.location.hash === '#created') {
+      const stored = sessionStorage.getItem('airlink:newNode');
+      if (stored) {
+        sessionStorage.removeItem('airlink:newNode');
+        try {
+          showSetupPanel(JSON.parse(stored));
+        } catch {}
+      }
     }
   }
+
+  renderAllocatedPorts();
+  checkHashRoute();
+  window.addEventListener('hashchange', checkHashRoute);
 })();
