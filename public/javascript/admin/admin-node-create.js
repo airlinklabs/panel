@@ -174,8 +174,8 @@
         loader.updateProgress(100, 'Node created!');
         setTimeout(() => {
           loader.close();
-          showToast('Node created.', 'success');
-          showSetupPanel(data.node);
+          sessionStorage.setItem('airlink:newNode', JSON.stringify(data.node));
+          window.location.hash = '#created';
         }, 500);
       } else {
         loader.close();
@@ -196,12 +196,8 @@
     panel.classList.remove('hidden');
 
     const panelUrl = window.location.origin;
-    const cli = 'cd /path/to/airlinkd && bun run configure --panel "' + panelUrl + '" --key "' + node.key + '" && bun run start -- --no-tui';
-    const host = node.address;
+    const cli = 'configure --panel "' + panelUrl + '" --key "' + node.key + '"';
     document.getElementById('daemonCliCommand').textContent = cli;
-
-    const envLines = 'KEY=' + node.key + '\nREMOTE=' + host + '\nPORT=' + (node.port || '3002');
-    document.getElementById('envPreview').textContent = envLines;
 
     const copyCli = document.getElementById('copyDaemonCli');
     const copyHint = document.getElementById('copyDaemonCliHint');
@@ -227,18 +223,11 @@
       try {
         await copyText(cli);
         copyCli.innerHTML = '<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-        copyHint.textContent = 'Copied — run it on the daemon machine from the daemon directory.';
+        copyHint.textContent = 'Copied!';
       } catch {
         copyHint.textContent = 'Could not copy. Select the command above and copy it manually.';
       }
       setTimeout(() => { copyCli.innerHTML = label; copyHint.textContent = 'Paste into a terminal on the machine where the daemon runs.'; }, COPY_RESET_DELAY_MS);
-    });
-
-    document.getElementById('envPreviewToggle').addEventListener('click', function () {
-      const preview = document.getElementById('envPreview');
-      const chev = this.querySelector('svg');
-      preview.classList.toggle('hidden');
-      chev.style.transform = preview.classList.contains('hidden') ? '' : 'rotate(180deg)';
     });
 
     document.getElementById('verifyDaemonBtn').addEventListener('click', async () => {
@@ -287,4 +276,15 @@
   });
 
   renderAllocatedPorts();
+
+  // Hash route: #created — show the setup panel for the newly created node
+  if (window.location.hash === '#created') {
+    const stored = sessionStorage.getItem('airlink:newNode');
+    if (stored) {
+      sessionStorage.removeItem('airlink:newNode');
+      try {
+        showSetupPanel(JSON.parse(stored));
+      } catch {}
+    }
+  }
 })();

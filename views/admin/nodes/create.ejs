@@ -188,42 +188,34 @@
       </div>
 
       <div id="nodeSetupPanel" class="hidden">
-        <div class="al-card overflow-hidden">
-          <div class="flex items-center gap-3 px-5 sm:px-6 py-4 border-b" style="border-color:var(--theme-border); background:color-mix(in srgb, var(--theme-accent) 8%, transparent);">
-            <div class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-accent) 14%, transparent); color:var(--theme-accent);">
-              <%- icon('radio-tower', { class: 'size-5' }) %>
+        <div class="max-w-xl mx-auto">
+          <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background:color-mix(in srgb, var(--theme-success) 12%, transparent); color:var(--theme-success);">
+              <%- icon('check-circle', { class: 'size-8', strokeWidth: 1.5 }) %>
             </div>
-            <div class="min-w-0">
-              <h2 class="text-base font-semibold" style="color:var(--theme-text-strong);">Node created — one step left</h2>
-              <p class="text-sm mt-0.5" style="color:var(--theme-text-muted);">Run one command on the daemon machine to connect it to this panel.</p>
-            </div>
+            <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong);">Node created — one step left</h2>
+            <p class="text-sm mt-2 max-w-md mx-auto" style="color:var(--theme-text-muted);">Run this command on the machine where the daemon will run. It connects the daemon to this panel.</p>
           </div>
 
-          <div class="p-5 sm:p-6 space-y-6">
-            <div>
-              <p class="al-label mb-2 flex items-center gap-1.5"><%- icon('terminal', { width: 14, height: 14, class: 'shrink-0' }) %>Run on the daemon machine</p>
-              <div class="relative">
-                <div id="daemonCliCommand" class="rounded-xl border p-3.5 pr-12 text-[13px] font-mono whitespace-nowrap overflow-x-auto cursor-text" style="background:var(--theme-bg-input); border-color:var(--theme-border); color:var(--theme-text-strong);" tabindex="0" aria-label="Daemon connect command"></div>
-                <button id="copyDaemonCli" type="button" class="absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-lg transition-colors" style="color:var(--theme-text-muted);" aria-label="Copy command"><%- icon('copy', { class: 'size-4', strokeWidth: 1.5 }) %></button>
-              </div>
-              <p id="copyDaemonCliHint" class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"></p>
+          <div class="rounded-2xl border p-5" style="border-color:var(--theme-border); background:var(--theme-bg-secondary);">
+            <p class="text-xs font-medium mb-3 flex items-center gap-1.5" style="color:var(--theme-text-muted);">
+              <%- icon('terminal', { width: 13, height: 13, class: 'shrink-0' }) %>
+              Run on the daemon machine
+            </p>
+            <div class="relative">
+              <div id="daemonCliCommand" class="rounded-xl border p-4 pr-12 text-[13px] font-mono whitespace-nowrap overflow-x-auto cursor-text select-all" style="background:var(--theme-bg-input); border-color:var(--theme-border); color:var(--theme-text-strong);" tabindex="0" aria-label="Daemon connect command"></div>
+              <button id="copyDaemonCli" type="button" class="absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-lg transition-colors hover:scale-105" style="color:var(--theme-text-muted);" aria-label="Copy command"><%- icon('copy', { class: 'size-4', strokeWidth: 1.5 }) %></button>
             </div>
-
-            <div>
-              <button id="envPreviewToggle" type="button" class="inline-flex items-center gap-1.5 text-xs font-medium" style="color:var(--theme-text-muted);">
-                <%- icon('chevron-down', { class: 'size-3.5 transition-transform', strokeWidth: 2 }) %>
-                Show what it writes
-              </button>
-              <div id="envPreview" class="hidden mt-2 rounded-xl border p-3.5 text-xs font-mono whitespace-pre overflow-x-auto" style="background:var(--theme-bg-secondary); border-color:var(--theme-border); color:var(--theme-text);"></div>
-              <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">The command saves these values to the daemon's <code class="text-[11px]">.env</code> file. Keep the key secret — it is the only thing that proves a daemon belongs to this panel.</p>
-            </div>
-
-            <div class="flex flex-wrap gap-2 pt-1">
-              <button id="verifyDaemonBtn" type="button" class="al-btn-primary"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>I've done this — verify connection</button>
-              <a href="/admin/nodes" class="al-btn-secondary">Back to Nodes</a>
-            </div>
-            <p id="daemonVerifyResult" class="hidden text-sm font-medium"></p>
+            <p id="copyDaemonCliHint" class="mt-2 text-xs" style="color:var(--theme-text-muted);"></p>
           </div>
+
+          <div class="flex flex-col sm:flex-row gap-3 mt-6">
+            <button id="verifyDaemonBtn" type="button" class="al-btn-primary flex-1 justify-center">
+              <%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %> I've done this — verify connection
+            </button>
+            <a href="/admin/nodes" class="al-btn-secondary flex-1 justify-center">Back to Nodes</a>
+          </div>
+          <p id="daemonVerifyResult" class="hidden mt-4 text-sm font-medium text-center"></p>
         </div>
       </div>
     </div>
