@@ -59,8 +59,6 @@ Documentation: [airlinklabs.xyz/docs/quick-start/](https://airlinklabs.xyz/docs/
 
 <div align="center">
 
-## Star History
-
 [![Star History Chart](https://api.star-history.com/chart?repos=airlinklabs/panel&type=date&legend=top-left&sealed_token=X3cF3RK-oLzJUf6Q7wzQDSE7UV2pt4s9npE8smFZOUpbNJCruOHijNJU-Qh0V6jlMOdbIRJMo-wLnsMs6SMxiyVQHsXYWFIGWBPVct2QUQtkeJhsTni08w)](https://www.star-history.com/?repos=airlinklabs%2Fpanel&type=date&legend=top-left)
 
 </div>
@@ -207,18 +205,6 @@ Copy `example.env` to `.env` and fill in the required values:
 ---
 
 ## Architecture
-
-### Cluster Mode
-
-The panel runs in Node.js cluster mode. The primary process forks one worker per CPU core. Each worker runs a full Express stack. The OS kernel load-balances incoming connections across workers.
-
-- **Workers**: Handle HTTP/WebSocket requests
-- **Primary**: Manages worker lifecycle, restarts crashed workers, consolidates logs
-- **Graceful shutdown**: SIGINT/SIGTERM propagates to all workers
-
-### Unified Logging
-
-All workers send log data to the primary process via IPC. The primary writes a single interleaved `logs/combined.log` and `logs/error.log` with worker tags (`[W1]`, `[W2]`, etc.). Console output remains per-worker for `docker logs` / terminal visibility.
 
 ### Redis Usage
 
