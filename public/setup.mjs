@@ -3,40 +3,39 @@
 /**
  * Airlink Panel — first-run setup script.
  *
- * Checks that Redis and MariaDB are installed and running, ensures the
- * database exists, generates a secure SESSION_SECRET, writes .env, and
- * runs prisma generate + db push + build.
+ * Installs Redis + MariaDB if missing, creates the airlink database and a
+ * dedicated MySQL user, generates .env, and builds the project.
  *
  * Usage:
  *   node public/setup.mjs            # interactive (prompts before destructive actions)
  *   node public/setup.mjs --yes      # non-interactive, accepts all defaults
  */
 
-import { execSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
+import { existsSync, writeFileSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { createInterface } from 'node:readline';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-const BOLD  = '\x1b[1m';
-const RED   = '\x1b[31m';
-const GREEN = '\x1b[32m';
+const BOLD   = '\x1b[1m';
+const RED    = '\x1b[31m';
+const GREEN  = '\x1b[32m';
 const YELLOW = '\x1b[33m';
-const CYAN  = '\x1b[36m';
-const RESET = '\x1b[0m';
+const CYAN   = '\x1b[36m';
+const RESET  = '\x1b[0m';
 
-const ok   = (msg) => console.log(`${GREEN}✓${RESET} ${msg}`);
-const warn = (msg) => console.log(`${YELLOW}⚠${RESET} ${msg}`);
-const fail = (msg) => console.log(`${RED}✗${RESET} ${msg}`);
-const info = (msg) => console.log(`${CYAN}→${RESET} ${msg}`);
+const ok     = (msg) => console.log(`${GREEN}✓${RESET} ${msg}`);
+const warn   = (msg) => console.log(`${YELLOW}⚠${RESET} ${msg}`);
+const fail   = (msg) => console.log(`${RED}✗${RESET} ${msg}`);
+const info   = (msg) => console.log(`${CYAN}→${RESET} ${msg}`);
 const header = (msg) => console.log(`\n${BOLD}${msg}${RESET}\n`);
 
 const isNonInteractive = process.argv.includes('--yes') || process.argv.includes('-y');
 
 function run(cmd, opts = {}) {
   try {
-    return execSync(cmd, { stdio: 'pipe', timeout: 30_000, ...opts }).toString().trim();
+    return execSync(cmd, { stdio: 'pipe', timeout: 60_000, ...opts }).toString().trim();
   } catch {
     return null;
   }
@@ -60,6 +59,10 @@ function ask(question) {
       resolve(answer === '' || answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
     });
   });
+}
+
+function generatePassword() {
+  return randomBytes(24).toString('base64url');
 }
 
 // ── Pre-flight checks ───────────────────────────────────────────────────────
@@ -90,7 +93,7 @@ function ensureRedis() {
   const bin = run('which redis-server');
   if (!bin) {
     warn('redis-server not found');
-    info('Attempting to install…');
+    info('Installing redis-server…');
     const install = run('sudo apt-get update && sudo apt-get install -y redis-server');
     if (install === null) {
       fail('Could not install redis-server. Please install manually:');
@@ -131,7 +134,7 @@ function ensureMariaDB() {
   const bin = run('which mariadbd') || run('which mysqld');
   if (!bin) {
     warn('MariaDB not found');
-    info('Attempting to install…');
+    info('Installing mariadb-server…');
     const install = run('sudo apt-get update && sudo apt-get install -y mariadb-server');
     if (install === null) {
       fail('Could not install mariadb-server. Please install manually:');
@@ -162,21 +165,63 @@ function ensureMariaDB() {
     fail('Cannot connect to MariaDB as root. If you set a password, set MYSQL_PASSWORD in .env.');
     process.exit(1);
   }
+}
 
-  // Ensure database exists
-  const dbExists = run('mariadb -u root -N -e "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'airlink\'" 2>/dev/null');
+// ── Database + user ──────────────────────────────────────────────────────────
+
+function setupDatabase() {
+  header('Database');
+
+  const dbUser = 'airlink';
+  const dbPass = generatePassword();
+  const dbName = 'airlink';
+
+  // Create database if missing
+  const dbExists = run(`mariadb -u root -N -e "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${dbName}'" 2>/dev/null`);
   if (!dbExists) {
-    info('Creating database "airlink"…');
-    run('mariadb -u root -e "CREATE DATABASE airlink"');
-    ok('database "airlink" created');
+    info(`Creating database "${dbName}"…`);
+    run(`mariadb -u root -e "CREATE DATABASE \`${dbName}\`"`);
+    ok(`database "${dbName}" created`);
   } else {
-    ok('database "airlink" exists');
+    ok(`database "${dbName}" exists`);
   }
+
+  // Create user if missing, then grant privileges
+  const userExists = run(`mariadb -u root -N -e "SELECT user FROM mysql.user WHERE user = '${dbUser}'" 2>/dev/null`);
+  if (!userExists) {
+    info(`Creating MySQL user "${dbUser}"…`);
+    run(`mariadb -u root -e "CREATE USER '${dbUser}'@'127.0.0.1' IDENTIFIED BY '${dbPass}'"`);
+    run(`mariadb -u root -e "CREATE USER '${dbUser}'@'localhost' IDENTIFIED BY '${dbPass}'"`);
+    run(`mariadb -u root -e "GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'127.0.0.1'"`);
+    run(`mariadb -u root -e "GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'localhost'"`);
+    run('mariadb -u root -e "FLUSH PRIVILEGES"');
+    ok(`user "${dbUser}" created with full access to "${dbName}"`);
+  } else {
+    // User exists — reset password so we control it
+    info(`User "${dbUser}" exists — resetting password…`);
+    run(`mariadb -u root -e "ALTER USER '${dbUser}'@'127.0.0.1' IDENTIFIED BY '${dbPass}'"`);
+    run(`mariadb -u root -e "ALTER USER '${dbUser}'@'localhost' IDENTIFIED BY '${dbPass}'"`);
+    run(`mariadb -u root -e "GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'127.0.0.1'"`);
+    run(`mariadb -u root -e "GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'localhost'"`);
+    run('mariadb -u root -e "FLUSH PRIVILEGES"');
+    ok(`user "${dbUser}" privileges confirmed`);
+  }
+
+  // Verify the new user can connect
+  const testConn = run(`mariadb -u ${dbUser} -p${dbPass} -N -e "SELECT 1" 2>/dev/null`);
+  if (testConn === '1') {
+    ok(`user "${dbUser}" → connected`);
+  } else {
+    fail(`Could not connect as "${dbUser}". Check MariaDB config.`);
+    process.exit(1);
+  }
+
+  return { dbUser, dbPass, dbName };
 }
 
 // ── .env ─────────────────────────────────────────────────────────────────────
 
-function generateEnv() {
+function generateEnv(creds) {
   header('Environment');
 
   if (existsSync('.env')) {
@@ -190,7 +235,7 @@ function generateEnv() {
     'URL="http://localhost:3000"',
     'PORT=3000',
     'NAME="Airlink"',
-    'DATABASE_URL="mysql://root:@127.0.0.1:3306/airlink"',
+    `DATABASE_URL="mysql://${creds.dbUser}:${creds.dbPass}@127.0.0.1:3306/${creds.dbName}"`,
     'REDIS_URL="redis://127.0.0.1:6379"',
     'NODE_ENV="development"',
     `SESSION_SECRET="${sessionSecret}"`,
@@ -198,8 +243,8 @@ function generateEnv() {
     '# Database credentials (used by "Auto-generate database host")',
     'MYSQL_HOST="127.0.0.1"',
     'MYSQL_PORT="3306"',
-    'MYSQL_USER="root"',
-    'MYSQL_PASSWORD=""',
+    `MYSQL_USER="${creds.dbUser}"`,
+    `MYSQL_PASSWORD="${creds.dbPass}"`,
     '',
   ];
 
@@ -231,9 +276,6 @@ function runBuild() {
   ok('pnpm install');
 
   info('Building TypeScript…');
-  // Use --noEmit false equivalent via tsc directly — ignore pre-existing errors
-  // by only checking our changed files. Or just run the full build and swallow
-  // non-critical errors.
   const tsc = run('npx tsc 2>&1');
   if (tsc === null) {
     warn('tsc reported errors (likely pre-existing) — continuing');
@@ -265,14 +307,26 @@ async function main() {
   checkPnpm();
   ensureRedis();
   ensureMariaDB();
-  generateEnv();
+  const creds = setupDatabase();
+  generateEnv(creds);
   runPrisma();
   runBuild();
 
   header('════════════════════════════════════════');
   ok('Setup complete!');
-  info('Start the panel with: pnpm run start');
   header('════════════════════════════════════════');
+
+  console.log(`${BOLD}MySQL credentials:${RESET}`);
+  console.log(`  Host:     127.0.0.1`);
+  console.log(`  Port:     3306`);
+  console.log(`  Database: ${creds.dbName}`);
+  console.log(`  User:     ${creds.dbUser}`);
+  console.log(`  Password: ${creds.dbPass}`);
+  console.log();
+  console.log(`${BOLD}DATABASE_URL (already in .env):${RESET}`);
+  console.log(`  mysql://${creds.dbUser}:${creds.dbPass}@127.0.0.1:3306/${creds.dbName}`);
+  console.log();
+  console.log(`${CYAN}Start the panel with: pnpm run start${RESET}`);
   console.log();
 }
 
