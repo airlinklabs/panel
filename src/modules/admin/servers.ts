@@ -285,8 +285,8 @@ const adminModule: Module = {
             state: {},
           });
 
-          // Update allowStartupEdit field using raw SQL
-          await prisma.$executeRaw`UPDATE "Server" SET "allowStartupEdit" = ${allowStartupEdit === 'true'} WHERE "id" = ${serverId}`;
+          // Update allowStartupEdit field
+          await prisma.server.update({ where: { id: serverId }, data: { allowStartupEdit: allowStartupEdit === 'true' } });
 
           // Reconcile port claims: if the node changed, release old claims, then
           // claim the server's new ports (idempotent when nothing changed).
@@ -583,7 +583,7 @@ const adminModule: Module = {
                 },
               });
 
-              await prisma.$executeRaw`UPDATE "Server" SET "allowStartupEdit" = ${allowStartupEdit === 'true'} WHERE "id" = ${created.id}`;
+              await prisma.server.update({ where: { id: created.id }, data: { allowStartupEdit: allowStartupEdit === 'true' } });
               await claimNodePorts(parseInt(nodeId), submittedExternal, created.UUID).catch((err: unknown) => {
                 logger.warn(`Failed to claim ports for server ${created.UUID}: ${err instanceof Error ? err.message : err}`);
               });
