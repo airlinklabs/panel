@@ -41,7 +41,7 @@ function normalizeImageData(raw: Record<string, unknown>) {
     startup_done: String(raw.startup_done ?? ''),
     config_files: String(raw.config_files ?? ''),
     meta: JSON.stringify(raw.meta ?? {}),
-    dockerImages: JSON.stringify(dockerImagesArray),
+    dockerImages: JSON.stringify(dockerImagesArray).slice(0, 191),
     info: JSON.stringify(raw.info ?? {}),
     scripts: JSON.stringify(raw.scripts ?? {}),
     variables: JSON.stringify(raw.variables ?? []),
