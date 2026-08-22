@@ -44,17 +44,33 @@
                   class="al-input">
               </div>
               <div>
-                <label for="logo-input" class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Logo</label>
-                <input type="file" id="logo-input" name="logo" accept="image/*"
-                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Logo</label>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="openUploadModal({ title: 'Upload logo', accept: 'image/*', onFile: function(f) { document.getElementById('logo-input')._selectedFile = f; document.getElementById('logo-label-name').textContent = f.name; document.getElementById('logo-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                  </button>
+                  <span id="logo-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
+                  <button type="button" id="logo-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" onclick="document.getElementById('logo-input')._selectedFile=null;document.getElementById('logo-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                    <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
+                  </button>
+                </div>
+                <input type="file" id="logo-input" name="logo" accept="image/*" class="hidden">
                 <% if (settings.logo) { %>
                 <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 mt-2 object-contain">
                 <% } %>
               </div>
               <div>
-                <label for="favicon-input" class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Favicon</label>
-                <input type="file" id="favicon-input" name="favicon" accept=".ico,.png,.jpg,.jpeg"
-                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Favicon</label>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="openUploadModal({ title: 'Upload favicon', accept: '.ico,.png,.jpg,.jpeg', onFile: function(f) { document.getElementById('favicon-input')._selectedFile = f; document.getElementById('favicon-label-name').textContent = f.name; document.getElementById('favicon-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                  </button>
+                  <span id="favicon-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
+                  <button type="button" id="favicon-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" onclick="document.getElementById('favicon-input')._selectedFile=null;document.getElementById('favicon-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                    <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
+                  </button>
+                </div>
+                <input type="file" id="favicon-input" name="favicon" accept=".ico,.png,.jpg,.jpeg" class="hidden">
                 <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
               </div>
             </div>
@@ -129,9 +145,17 @@
                 <a href="/admin/settings/example-theme" class="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Download example</a>
               </div>
               <p class="text-xs text-neutral-500 mb-3">A .zip containing info.json, light.css, dark.css.</p>
-              <label for="theme-file-input" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload theme file</label>
-              <input type="file" id="theme-file-input" name="themeFile" accept=".zip"
-                class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+              <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload theme file</label>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="openUploadModal({ title: 'Upload theme', accept: '.zip', onFile: function(f) { document.getElementById('theme-file-input')._selectedFile = f; document.getElementById('theme-label-name').textContent = f.name; document.getElementById('theme-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                  <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                </button>
+                <span id="theme-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
+                <button type="button" id="theme-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" onclick="document.getElementById('theme-file-input')._selectedFile=null;document.getElementById('theme-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                  <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
+                </button>
+              </div>
+              <input type="file" id="theme-file-input" name="themeFile" accept=".zip" class="hidden">
             </div>
           </div>
 
@@ -145,9 +169,17 @@
                 <% if (settings.loginWallpaper) { %>
                 <img src="<%= settings.loginWallpaper %>" alt="Login page wallpaper preview" class="h-20 w-full object-cover rounded-xl border border-neutral-200 dark:border-white/5 mb-3">
                 <% } %>
-                <label for="login-wallpaper-file" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
-                <input type="file" id="login-wallpaper-file" name="loginWallpaperFile" accept="image/*"
-                  class="al-input mb-2 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
+                <div class="flex items-center gap-2 mb-2">
+                  <button type="button" onclick="openUploadModal({ title: 'Upload login wallpaper', accept: 'image/*', onFile: function(f) { document.getElementById('login-wallpaper-file')._selectedFile = f; document.getElementById('login-wp-label-name').textContent = f.name; document.getElementById('login-wp-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                  </button>
+                  <span id="login-wp-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
+                  <button type="button" id="login-wp-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" onclick="document.getElementById('login-wallpaper-file')._selectedFile=null;document.getElementById('login-wp-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                    <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
+                  </button>
+                </div>
+                <input type="file" id="login-wallpaper-file" name="loginWallpaperFile" accept="image/*" class="hidden">
                 <label for="login-wallpaper-url" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" id="login-wallpaper-url" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
@@ -158,9 +190,17 @@
                 <% if (settings.registerWallpaper) { %>
                 <img src="<%= settings.registerWallpaper %>" alt="Register page wallpaper preview" class="h-20 w-full object-cover rounded-xl border border-neutral-200 dark:border-white/5 mb-3">
                 <% } %>
-                <label for="register-wallpaper-file" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
-                <input type="file" id="register-wallpaper-file" name="registerWallpaperFile" accept="image/*"
-                  class="al-input mb-2 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
+                <div class="flex items-center gap-2 mb-2">
+                  <button type="button" onclick="openUploadModal({ title: 'Upload register wallpaper', accept: 'image/*', onFile: function(f) { document.getElementById('register-wallpaper-file')._selectedFile = f; document.getElementById('register-wp-label-name').textContent = f.name; document.getElementById('register-wp-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                  </button>
+                  <span id="register-wp-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
+                  <button type="button" id="register-wp-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" onclick="document.getElementById('register-wallpaper-file')._selectedFile=null;document.getElementById('register-wp-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                    <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
+                  </button>
+                </div>
+                <input type="file" id="register-wallpaper-file" name="registerWallpaperFile" accept="image/*" class="hidden">
                 <label for="register-wallpaper-url" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" id="register-wallpaper-url" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
@@ -177,9 +217,17 @@
               <% if (settings.panelWallpaper) { %>
               <img src="<%= settings.panelWallpaper %>" alt="Panel wallpaper preview" class="h-20 w-full object-cover rounded-xl border border-neutral-200 dark:border-white/5 mb-3">
               <% } %>
-              <label for="panel-wallpaper-file" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
-              <input type="file" id="panel-wallpaper-file" name="panelWallpaperFile" accept="image/*"
-                class="al-input mb-2 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+              <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
+              <div class="flex items-center gap-2 mb-2">
+                <button type="button" onclick="openUploadModal({ title: 'Upload panel wallpaper', accept: 'image/*', onFile: function(f) { document.getElementById('panel-wallpaper-file')._selectedFile = f; document.getElementById('panel-wp-label-name').textContent = f.name; document.getElementById('panel-wp-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                  <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                </button>
+                <span id="panel-wp-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
+                <button type="button" id="panel-wp-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" onclick="document.getElementById('panel-wallpaper-file')._selectedFile=null;document.getElementById('panel-wp-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                  <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
+                </button>
+              </div>
+              <input type="file" id="panel-wallpaper-file" name="panelWallpaperFile" accept="image/*" class="hidden">
               <label for="panel-wallpaper-url" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
               <input type="text" id="panel-wallpaper-url" name="panelWallpaperUrl" placeholder="https://…"
                 value="<%= (settings.panelWallpaper && settings.panelWallpaper.startsWith('http')) ? settings.panelWallpaper : '' %>"

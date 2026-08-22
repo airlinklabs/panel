@@ -1,3 +1,4 @@
+import { getSettings } from '../../settingsCache';
 import crypto from 'crypto';
 import { createReadStream, createWriteStream, promises as fsp } from 'fs';
 import os from 'os';
@@ -6,6 +7,7 @@ import { Readable } from 'stream';
 import { URL } from 'url';
 import prisma from '../../../db';
 import { httpGet, httpPost, httpPut, httpPatch, httpDelete, type HttpResponse } from '../../../utils/http';
+export type { HttpResponse } from '../../../utils/http';
 
 const SIGNATURE_WINDOW_S = 30;
 const NONCE_BYTE_LENGTH = 16;
@@ -77,7 +79,7 @@ const SCHEME_CACHE_TTL_MS = 60_000;
 
 async function refreshSchemeCache(): Promise<void> {
   try {
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
+    const s = await getSettings();
     cachedScheme = s?.enforceDaemonHttps ? 'https' : 'http';
   } catch {
     // Leave whatever we had before — don't crash on DB error.
@@ -307,4 +309,3 @@ export async function daemonRequest<T = unknown>(options: DaemonRequestOptions):
 }
 
 export { SIGNATURE_WINDOW_S };
-export type { HttpResponse };

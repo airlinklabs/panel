@@ -1,3 +1,4 @@
+import { getSettings } from './settingsCache';
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../db';
 import logger from './logger';
@@ -94,7 +95,7 @@ function getErrorView(_req: Request): string {
 async function getErrorRenderData(req: Request, statusCode: number, detail?: string) {
   const userId = req.session?.user?.id;
   const [settings, user] = await Promise.all([
-    prisma.settings.findUnique({ where: { id: 1 } }).catch(() => null),
+    await getSettings().catch(() => null),
     userId ? prisma.users.findUnique({ where: { id: userId } }).catch(() => null) : Promise.resolve(null),
   ]);
   const info = ERROR_INFO[statusCode] || {

@@ -338,7 +338,7 @@
 
 <!-- Image submission popup -->
 <% if (allowed) { %>
-<dialog id="imModal" class="rounded-2xl max-w-lg w-full shadow-xl max-h-[88vh] p-0 backdrop:bg-black/50" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+<dialog id="imModal" class="al-dialog rounded-2xl max-w-lg w-full shadow-xl max-h-[88vh] p-0" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
   <div class="flex flex-col max-h-[88vh]">
     <div class="al-sheet-header" style="border-color:var(--theme-border)">
       <div>
@@ -533,18 +533,21 @@
     }, 500);
   });
 
-  // Avatar
-  const avatarInput = document.getElementById('avatar-input');
+  // Avatar — open upload modal, then crop
   const avatarPreview = document.getElementById('avatar-preview');
-  avatarInput?.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-      const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
-      if (file.size > MAX_AVATAR_SIZE) { showToast('Image must be under 2 MB', 'error'); return; }
-    const reader = new FileReader();
-    reader.onload = evt => openCropPopup(evt.target.result, csrfToken);
-    reader.readAsDataURL(file);
-    avatarInput.value = '';
+  document.querySelector('label[for="avatar-input"]')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openUploadModal({
+      title: 'Upload profile photo',
+      accept: 'image/*',
+      onFile: async (file) => {
+        const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+        if (file.size > MAX_AVATAR_SIZE) { showToast('Image must be under 2 MB', 'error'); return; }
+        const reader = new FileReader();
+        reader.onload = evt => openCropPopup(evt.target.result, csrfToken);
+        reader.readAsDataURL(file);
+      }
+    });
   });
 
   document.getElementById('remove-avatar-btn')?.addEventListener('click', async () => {

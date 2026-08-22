@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -106,7 +107,7 @@ const activityModule: Module = {
             }),
           ]);
 
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
 
           res.render('admin/activity/activity', {
             user,

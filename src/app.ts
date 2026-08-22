@@ -1,5 +1,4 @@
-import cluster from 'cluster';
-import os from 'os';
+import { getSettings } from './handlers/settingsCache';
 import type { Request, Response, NextFunction } from 'express';
 import express from 'express';
 import prisma from './db';
@@ -48,49 +47,8 @@ import { installRenderResolver } from './handlers/renderResolver';
 import { validationErrorBoundary } from './utils/validation';
 import { refreshSecurityCache, getSecurityCache } from './handlers/securityCache';
 
-// Module-level app instance. Populated by runWorker() in worker processes.
-// In the primary process (cluster mode), this stays undefined — the primary
-// only forks workers and never serves HTTP, so the export is unused.
+// Module-level app instance.
 let app: ReturnType<typeof express>;
-
-// ── Cluster mode ─────────────────────────────────────────────────────────────
-// The primary process forks one worker per CPU core. Workers share the same
-// port via the OS kernel (SO_REUSEPORT / SO_REUSEADDR). Each worker runs the
-// full Express stack independently. If a worker crashes, the primary forks a
-// replacement. SIGINT/SIGTERM on the primary gracefully shuts down all workers.
-if (cluster.isPrimary) {
-  const numCPUs = os.cpus().length;
-  logger.info(`Primary ${process.pid} forking ${numCPUs} worker(s)…`);
-
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
-
-  cluster.on('exit', (worker, code, signal) => {
-    logger.warn(`Worker ${worker.process.pid} died (code=${code}, signal=${signal}). Restarting…`);
-    cluster.fork();
-  });
-
-  const shutdown = (sig: string) => {
-    logger.info(`Primary received ${sig}, shutting down all workers…`);
-    const workers = cluster.workers;
-    if (workers) {
-      for (const id in workers) {
-        workers[id]?.process.kill(sig as NodeJS.Signals);
-      }
-    }
-    // Give workers time to drain, then force exit.
-    setTimeout(() => process.exit(0), 10_000).unref();
-  };
-
-  process.on('SIGINT', () => shutdown('SIGINT'));
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-} else {
-  // ── Worker process — full Express application ────────────────────────────
-  runWorker();
-}
-
-function runWorker() {
 
 loadEnv();
 
@@ -121,7 +79,7 @@ const airlinkCodename = config.meta.codename;
 // We set this before any middleware so the correct client IP flows through.
 (async () => {
   try {
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
+    const s = await await getSettings();
     if (s?.behindReverseProxy) {
       app.set('trust proxy', 1);
     }
@@ -556,7 +514,5 @@ app.use(errorPageHandler);
     logger.error('Failed to load modules or database:', err);
   }
 })();
-
-} // end runWorker()
 
 export default app!;

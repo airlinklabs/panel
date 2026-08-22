@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
@@ -160,7 +161,7 @@ const coreModule: Module = {
 
     router.get('/api', async (req: Request, res: Response) => {
       try {
-        const settings = await prisma.settings.findFirst();
+        const settings = await await getSettings();
         res.render('api/documentation', {
           req,
           user: req.session.user,
@@ -922,7 +923,7 @@ const coreModule: Module = {
       apiValidator('airlink.api.settings.read'),
       async (_req: Request, res: Response) => {
         try {
-          const settings = await prisma.settings.findFirst();
+          const settings = await await getSettings();
 
           if (!settings) {
             res.status(404).json({ error: 'Settings not found' });
@@ -945,7 +946,7 @@ const coreModule: Module = {
         try {
           const { title, description, logo, favicon, theme, language } = req.body;
 
-          const currentSettings = await prisma.settings.findFirst();
+          const currentSettings = await await getSettings();
 
           if (!currentSettings) {
             res.status(404).json({ error: 'Settings not found' });
@@ -1038,7 +1039,7 @@ const coreModule: Module = {
             return;
           }
 
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           const isCloudBackupEnabled = settings?.airlinkCloudBackupEnabled && settings?.airlinkCloudApiKey;
 
           const backupCount = await prisma.backup.count({ where: { serverId } });
@@ -1188,7 +1189,7 @@ const coreModule: Module = {
           let backupPath = backup.filePath;
 
           if (backup.airlinkCloudId) {
-            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const settings = await await getSettings();
             if (!settings?.airlinkCloudApiKey) {
               res.status(500).json({ error: 'Airlink Cloud API key not configured' });
               return;
@@ -1314,7 +1315,7 @@ const coreModule: Module = {
           }
 
           if (backup.airlinkCloudId) {
-            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const settings = await await getSettings();
             if (settings?.airlinkCloudApiKey) {
               const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
               await cloudClient.deleteFile(backup.airlinkCloudId).catch((e) => logger.warn(`Failed to delete backup from Airlink Cloud: ${e}`));
@@ -1419,7 +1420,7 @@ const coreModule: Module = {
           }
 
           const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           const userMaxDatabases =
             owner?.maxDatabases !== null && owner?.maxDatabases !== undefined
               ? (owner.maxDatabases ?? 0)

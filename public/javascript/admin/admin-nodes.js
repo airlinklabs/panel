@@ -31,7 +31,7 @@ function showPopup(command) {
     <div class="flex justify-center items-center mb-6">
       ${alIcon('badge-check', 'text-emerald-500', { width: 64, height: 64 })}
     </div>
-    <p class="mb-4 text-neutral-600 dark:text-neutral-300 text-center">To auto-configure your node, run the following command:</p>
+    <p class="mb-4 text-neutral-600 dark:text-neutral-300 text-center">Run this command on the daemon machine to connect it to this panel:</p>
     <pre class="bg-neutral-100 dark:bg-neutral-900 p-3 rounded-xl mb-4 overflow-x-auto"><code id="commandCode" class="text-emerald-500">${command}</code></pre>
     <div class="flex justify-end">
       <button id="copyBtn" class="bg-emerald-600 text-white px-4 py-2 rounded-xl mr-2 hover:bg-emerald-700 transition-colors">Copy</button>
@@ -40,7 +40,7 @@ function showPopup(command) {
   `;
 
   window.modal.show({
-    title: 'Token Created',
+    title: 'Node Configured',
     bodyNode: popup,
     panelClass: 'max-w-xl',
   });

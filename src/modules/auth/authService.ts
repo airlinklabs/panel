@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import bcrypt from 'bcryptjs';
 import prisma from '../../db';
 import { Router, Request, Response } from 'express';
@@ -25,7 +26,7 @@ const authRateLimit = rateLimit({
 
 async function getSecuritySettings() {
   try {
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
+    const s = await await getSettings();
     return {
       maxAttempts:    s?.loginMaxAttempts    ?? 5,
       lockoutMinutes: s?.loginLockoutMinutes ?? 15,
@@ -160,7 +161,7 @@ const authServiceModule: Module = {
         const isFirstUser = userCount === 0;
 
         if (!isFirstUser) {
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           if (!settings?.allowRegistration) {
             return res.redirect('/login?err=registration_disabled');
           }

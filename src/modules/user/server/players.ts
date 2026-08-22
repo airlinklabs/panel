@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
@@ -175,14 +176,14 @@ export function registerPlayersRoutes(router: Router): void {
             players: [],
             server,
             req,
-            settings: await prisma.settings.findUnique({ where: { id: 1 } }),
+            settings: await await getSettings(),
           });
         }
 
         const { players, serverInfo, serverIsOnline, hadFetchError } =
           await fetchPlayerData(server, primaryPort);
 
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
         const hasError = hadFetchError && !serverIsOnline;
         const serverStatus = await getServerStatus(getServerStatusInput(server));
 

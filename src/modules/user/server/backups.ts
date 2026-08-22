@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
@@ -75,9 +76,7 @@ export function registerBackupRoutes(router: Router): void {
           orderBy: { createdAt: 'desc' },
         });
 
-        const settings = await prisma.settings.findUnique({
-          where: { id: 1 },
-        });
+        const settings = await await getSettings();
 
         res.render('user/server/backups', {
           user,
@@ -131,7 +130,7 @@ export function registerBackupRoutes(router: Router): void {
           return;
         }
 
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
         const isCloudBackupEnabled = settings?.airlinkCloudBackupEnabled && settings?.airlinkCloudApiKey;
 
         const backupCount = await prisma.backup.count({ where: { serverId: getParamAsString(serverId) } });
@@ -395,7 +394,7 @@ export function registerBackupRoutes(router: Router): void {
         let backupPath = backup.filePath;
 
         if (backup.airlinkCloudId) {
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           if (!settings?.airlinkCloudApiKey) {
             res.status(500).json({ error: 'Airlink Cloud API key not configured' });
             return;
@@ -564,7 +563,7 @@ export function registerBackupRoutes(router: Router): void {
         }
 
         if (backup.airlinkCloudId) {
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           if (!settings?.airlinkCloudApiKey) {
             res.status(500).json({ error: 'Airlink Cloud API key not configured' });
             return;
@@ -675,7 +674,7 @@ export function registerBackupRoutes(router: Router): void {
         }
 
         if (backup.airlinkCloudId) {
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           if (settings?.airlinkCloudApiKey) {
             const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
             await cloudClient.deleteFile(backup.airlinkCloudId).catch(e => logger.warn(`Failed to delete backup from Airlink Cloud: ${e}`));

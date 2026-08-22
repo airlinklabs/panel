@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -17,7 +18,7 @@ const authModule: Module = {
     const router = Router();
 
     router.get('/login', async (req: Request, res: Response) => {
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const settings = await await getSettings();
 
       const userCount = await prisma.users.count();
       const isFirstUser = userCount === 0;
@@ -31,7 +32,7 @@ const authModule: Module = {
     });
 
     router.get('/register', async (req: Request, res: Response) => {
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const settings = await await getSettings();
       const userCount = await prisma.users.count();
       const isFirstUser = userCount === 0;
 

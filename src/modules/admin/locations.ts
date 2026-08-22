@@ -4,6 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { getParamAsNumber } from '../../utils/typeHelpers';
+import { invalidateLocationCache } from '../../handlers/nodesCache';
 
 async function buildLocationsViewModel() {
   const locations = await prisma.location.findMany({
@@ -96,6 +97,7 @@ const locationsModule: Module = {
             data: { name, shortCode },
             include: { _count: { select: { nodes: true } } },
           });
+          await invalidateLocationCache();
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildLocationsViewModel();
@@ -151,6 +153,7 @@ const locationsModule: Module = {
           }
 
           await prisma.location.delete({ where: { id: locationId } });
+          await invalidateLocationCache();
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildLocationsViewModel();
@@ -168,6 +171,95 @@ const locationsModule: Module = {
             });
           }
           res.status(500).json({ message: 'Error deleting location.' });
+        }
+      },
+    );
+
+    router.put(
+      '/admin/location/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const locationId = getParamAsNumber(req.params.id);
+          if (isNaN(locationId)) {
+            return res.status(400).json({ message: 'Invalid location ID.' });
+          }
+
+          const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+          const shortCode =
+            typeof req.body.shortCode === 'string' ? req.body.shortCode.trim().toLowerCase() : '';
+
+          if (name.length < 2 || name.length > 50) {
+            return res.status(400).json({ message: 'Name must be between 2 and 50 characters.' });
+          }
+          if (!/^[a-z0-9-]{2,32}$/.test(shortCode)) {
+            return res.status(400).json({ message: 'Short code must be 2-32 chars: lowercase letters, numbers, dashes.' });
+          }
+
+          const existing = await prisma.location.findFirst({
+            where: { shortCode, id: { not: locationId } },
+          });
+          if (existing) {
+            return res.status(400).json({ message: 'A location with this short code already exists.' });
+          }
+
+          const location = await prisma.location.update({
+            where: { id: locationId },
+            data: { name, shortCode },
+            include: { _count: { select: { nodes: true } } },
+          });
+          await invalidateLocationCache();
+
+          if (req.get('HX-Request') === 'true') {
+            const vm = await buildLocationsViewModel();
+            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Location updated.' } } }));
+            return res.render('fragments/admin/locations/location-list', vm);
+          }
+          res.status(200).json({ message: 'Location updated.', location });
+        } catch (error: unknown) {
+          logger.error('Error updating location:', error);
+          res.status(500).json({ message: 'Error updating location.' });
+        }
+      },
+    );
+
+    router.get(
+      '/admin/location/:id/nodes',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const locationId = getParamAsNumber(req.params.id);
+          if (isNaN(locationId)) {
+            return res.status(400).render('fragments/shared/error-banner', {
+              targetId: 'admin-locations',
+              message: 'Invalid location ID.',
+              hint: null,
+            });
+          }
+
+          const location = await prisma.location.findUnique({ where: { id: locationId } });
+          if (!location) {
+            return res.status(404).render('fragments/shared/error-banner', {
+              targetId: 'admin-locations',
+              message: 'Location not found.',
+              hint: null,
+            });
+          }
+
+          const locationNodes = await prisma.node.findMany({
+            where: { locationId },
+            include: { servers: { select: { id: true } } },
+            orderBy: { name: 'asc' },
+          });
+
+          res.render('fragments/admin/locations/location-nodes', { location, nodes: locationNodes });
+        } catch (error: unknown) {
+          logger.error('Error fetching location nodes:', error);
+          res.status(500).render('fragments/shared/error-banner', {
+            targetId: 'admin-locations',
+            message: 'Error fetching nodes.',
+            hint: null,
+          });
         }
       },
     );

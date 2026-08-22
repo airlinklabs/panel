@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -109,7 +110,7 @@ const radarModule: Module = {
       isAuthenticated(true),
       async (_req: Request, res: Response) => {
         try {
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           res.json({ enabled: !!settings?.virusTotalApiKey });
         } catch {
           res.json({ enabled: false });
@@ -122,7 +123,7 @@ const radarModule: Module = {
       '/admin/radar/virustotal',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
         const apiKey = settings?.virusTotalApiKey;
 
         if (!apiKey) {
@@ -295,7 +296,7 @@ const radarModule: Module = {
       '/admin/radar/vtscan/:serverId',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
         const apiKey = settings?.virusTotalApiKey;
 
         if (!apiKey) {

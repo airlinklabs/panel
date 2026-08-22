@@ -1,3 +1,5 @@
+import { getSettings } from '../../handlers/settingsCache';
+import { invalidateImageCache } from '../../handlers/imagesCache';
 import type { Request, Response } from 'express';
 import { Router } from 'express';
 import prisma from '../../db';
@@ -90,7 +92,7 @@ const adminModule: Module = {
             creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
           }));
 
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           res.render('admin/images/images', {
             user,
             req,
@@ -133,11 +135,13 @@ const adminModule: Module = {
           const existing = await prisma.images.findFirst({ where: { name: data.name } });
           if (existing) {
             await prisma.images.update({ where: { id: existing.id }, data });
+          await invalidateImageCache();
             await logActivity(req, 'image:update', { metadata: { imageId: existing.id, name: data.name } });
             res.status(200).json({ success: true, message: 'Image updated successfully', id: existing.id });
           } else {
             const created = await prisma.images.create({ data });
             await logActivity(req, 'image:create', { metadata: { imageId: created.id, name: data.name } });
+            await invalidateImageCache();
             res.status(200).json({ success: true, message: 'Image created successfully', id: created.id });
           }
         } catch (error: unknown) {
@@ -171,12 +175,14 @@ const adminModule: Module = {
 
           if (existing) {
             await prisma.images.update({ where: { id: existing.id }, data });
+          await invalidateImageCache();
             logger.info(`Updated image: ${data.name}`);
             await logActivity(req, 'image:update', { metadata: { imageId: existing.id, name: data.name } });
             res.status(200).json({ success: true, message: 'Image updated successfully', id: existing.id });
           } else {
             const created = await prisma.images.create({ data });
             logger.info(`Created image: ${data.name}`);
+            await invalidateImageCache();
             await logActivity(req, 'image:create', { metadata: { imageId: created.id, name: data.name } });
             res.status(200).json({ success: true, message: 'Image created successfully', id: created.id });
           }
@@ -218,6 +224,7 @@ const adminModule: Module = {
 
           const image = await prisma.images.create({ data });
           logger.info(`Created image: ${name}`);
+            await invalidateImageCache();
           await logActivity(req, 'image:create', { metadata: { imageId: image.id, name } });
           res.redirect(`/admin/images/edit/${image.id}?success=true`);
         } catch (error: unknown) {
@@ -239,7 +246,7 @@ const adminModule: Module = {
           const image = await prisma.images.findUnique({ where: { id: Number(req.params.id) } });
           if (!image) {return res.redirect('/admin/images?error=Image+not+found');}
 
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
 
           let dockerImages: Record<string, string> = {};
           try {
@@ -437,11 +444,12 @@ const adminModule: Module = {
 
           await prisma.images.delete({ where: { id } });
           logger.info(`Deleted image: ${image.name} (ID: ${id})`);
+          await invalidateImageCache();
           await logActivity(req, 'image:delete', { metadata: { imageId: id, name: image.name } });
 
           if (req.get('HX-Request') === 'true') {
             const images = await prisma.images.findMany();
-            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const settings = await await getSettings();
             res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Image deleted.' } } }));
             return res.render('fragments/admin/images/image-table', { images, settings, req });
           }
@@ -551,6 +559,7 @@ const adminModule: Module = {
 
           const image = await prisma.images.create({ data: normalized });
           logger.info(`Installed image from store: ${image.name} (ID: ${image.id})`);
+          await invalidateImageCache();
           await logActivity(req, 'image:create', { metadata: { imageId: image.id, name: image.name } });
           res.status(200).json({ message: `"${image.name}" installed successfully.`, id: image.id });
         } catch (error: unknown) {
@@ -630,7 +639,7 @@ const adminModule: Module = {
               ...i,
               creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
             }));
-            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const settings = await await getSettings();
             res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: `Approved "${image.name}".` } } }));
             return res.render('fragments/admin/images/pending-approvals', { pending: pendingWithCreators, settings, req });
           }
@@ -694,7 +703,7 @@ const adminModule: Module = {
               ...i,
               creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
             }));
-            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const settings = await await getSettings();
             res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: `Rejected "${image.name}".` } } }));
             return res.render('fragments/admin/images/pending-approvals', { pending: pendingWithCreators, settings, req });
           }
@@ -716,5 +725,6 @@ const adminModule: Module = {
     return router;
   },
 };
+
 
 export default adminModule;

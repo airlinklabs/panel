@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -18,7 +19,7 @@ function sha256(value: string): string {
 
 async function shouldHashKeys(): Promise<boolean> {
   try {
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
+    const s = await await getSettings();
     return s?.hashApiKeys === true;
   } catch {
     return false;
@@ -49,7 +50,7 @@ const coreModule: Module = {
       isAuthenticated(true, 'airlink.admin.api.docs.view'),
       async (req: Request, res: Response) => {
         try {
-          const settings = await prisma.settings.findFirst();
+          const settings = await await getSettings();
           const apiKeys = await prisma.apiKey.findMany({
             include: {
               user: {
@@ -97,7 +98,7 @@ const coreModule: Module = {
             },
           });
 
-          const settings = await prisma.settings.findFirst();
+          const settings = await await getSettings();
 
           const allPermissions = [
             { name: 'Servers - Read', value: 'airlink.api.servers.read' },
@@ -226,7 +227,7 @@ const coreModule: Module = {
             const apiKeys = await prisma.apiKey.findMany({
               include: { user: { select: { id: true, username: true, email: true } } },
             });
-            const settings = await prisma.settings.findFirst();
+            const settings = await await getSettings();
             res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'API key deleted.' } } }));
             return res.render('fragments/admin/apikeys/key-list', { apiKeys, settings, req });
           }
@@ -280,7 +281,7 @@ const coreModule: Module = {
             const apiKeys = await prisma.apiKey.findMany({
               include: { user: { select: { id: true, username: true, email: true } } },
             });
-            const settings = await prisma.settings.findFirst();
+            const settings = await await getSettings();
             res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: `API key ${apiKey.active ? 'disabled' : 'enabled'}.` } } }));
             return res.render('fragments/admin/apikeys/key-list', { apiKeys, settings, req });
           }
@@ -337,7 +338,7 @@ const coreModule: Module = {
             const apiKeys = await prisma.apiKey.findMany({
               include: { user: { select: { id: true, username: true, email: true } } },
             });
-            const settings = await prisma.settings.findFirst();
+            const settings = await await getSettings();
             res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'API key updated.' } } }));
             return res.render('fragments/admin/apikeys/key-list', { apiKeys, settings, req });
           }

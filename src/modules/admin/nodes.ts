@@ -1,3 +1,5 @@
+import { getSettings } from '../../handlers/settingsCache';
+import { invalidateNodeCache, invalidateLocationCache } from '../../handlers/nodesCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -132,9 +134,7 @@ const adminModule: Module = {
             orderBy: { name: 'asc' },
           });
 
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await getSettings();
 
           res.render('admin/nodes/nodes', {
             user,
@@ -163,9 +163,7 @@ const adminModule: Module = {
 
           const nodes = await listNodes(res);
 
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await getSettings();
           const locations = await prisma.location.findMany();
           res.render('admin/nodes/create', { user, req, settings, nodes, locations });
         } catch (error: unknown) {
@@ -197,7 +195,7 @@ const adminModule: Module = {
 
         // Fall back to the global defaults (set in admin settings) when the form
         // leaves overallocation empty or the field isn't sent.
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
         const defOvMem = settings?.defaultOverallocateMemory ?? 0;
         const defOvDisk = settings?.defaultOverallocateDisk ?? 0;
         const defOvCpu = settings?.defaultOverallocateCpu ?? 0;
@@ -331,6 +329,7 @@ const adminModule: Module = {
             },
           });
 
+          await invalidateNodeCache();
           await syncNodeAllocations(node.id, parsedPorts).catch(() => {});
 
           await logActivity(req, 'node:create', { metadata: { nodeId: node.id, name } });
@@ -446,6 +445,7 @@ const adminModule: Module = {
             }
 
             await prisma.node.delete({ where: { id: nodeId } });
+            await invalidateNodeCache();
 
             await logActivity(req, 'node:delete', { metadata: { nodeId } });
             emitRealtime({
@@ -461,7 +461,7 @@ const adminModule: Module = {
                 include: { _count: { select: { nodes: true } } },
                 orderBy: { name: 'asc' },
               });
-              const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+              const settings = await await getSettings();
               res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: deleteInstances ? 'Node and servers deleted.' : 'Node deleted.' } } }));
               return res.render('fragments/admin/nodes/node-table', { nodes, locations, settings, req });
             }
@@ -510,9 +510,11 @@ const adminModule: Module = {
           res
             .status(200)
             .json(
-              'configure -- -- --panel "' +
+              'configure --panel "' +
                 process.env.URL +
-                '" --key "$(cat /path/to/daemon/.env | grep ^key= | cut -d= -f2)"',
+                '" --key "' +
+                node.key +
+                '"',
             );
           return;
         } catch (error: unknown) {
@@ -593,9 +595,7 @@ const adminModule: Module = {
             return;
           }
 
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await getSettings();
           const locations = await prisma.location.findMany();
 
           res.render('admin/nodes/edit', { node, user, req, settings, locations });
@@ -736,6 +736,7 @@ const adminModule: Module = {
             },
           });
 
+          await invalidateNodeCache();
           await syncNodeAllocations(nodeId, parsedPorts).catch(() => {});
 
           await logActivity(req, 'node:update', { metadata: { nodeId, name } });
@@ -773,6 +774,7 @@ const adminModule: Module = {
             where: { id: nodeId },
             data: { maintenanceMode },
           });
+          await invalidateNodeCache();
           res.status(200).json({ message: 'Node maintenance mode updated.', node: updated });
           return;
         } catch (error: unknown) {
@@ -806,9 +808,7 @@ const adminModule: Module = {
           new Promise<typeof node & { status: string }>((resolve) => setTimeout(() => { resolve({ ...node, status: 'Unknown' }); }, 4000)),
         ]);
 
-        const settings = await prisma.settings.findUnique({
-          where: { id: 1 },
-        });
+        const settings = await getSettings();
 
         const daemonReq = (path: string) =>
           daemonRequest({

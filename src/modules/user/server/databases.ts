@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
@@ -63,7 +64,7 @@ export function registerDatabaseRoutes(router: Router): void {
           }),
         ]);
 
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
         const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
         const userDbLimit =
           owner?.maxDatabases !== null && owner?.maxDatabases !== undefined
@@ -151,7 +152,7 @@ router.post(
 
         // User-level hard cap — the server owner's total across all their servers.
         const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
         const userMaxDatabases =
           owner?.maxDatabases !== null && owner?.maxDatabases !== undefined
             ? (owner.maxDatabases ?? 0)
@@ -194,7 +195,7 @@ router.post(
               orderBy: { id: 'asc' },
             });
             const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
-            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const settings = await await getSettings();
             const userDbLimit = owner?.maxDatabases ?? settings?.defaultMaxDatabases ?? 0;
             res.vary('HX-Request');
             return res.render('fragments/user/server/db-list', {
@@ -271,7 +272,7 @@ router.post(
               orderBy: { id: 'asc' },
             });
             const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
-            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const settings = await await getSettings();
             const userDbLimit = owner?.maxDatabases ?? settings?.defaultMaxDatabases ?? 0;
             res.vary('HX-Request');
             return res.render('fragments/user/server/db-list', {
@@ -350,7 +351,7 @@ router.post(
               orderBy: { id: 'asc' },
             });
             const owner = await prisma.users.findUnique({ where: { id: server.ownerId } });
-            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const settings = await await getSettings();
             const userDbLimit = owner?.maxDatabases ?? settings?.defaultMaxDatabases ?? 0;
             res.vary('HX-Request');
             return res.render('fragments/user/server/db-list', {

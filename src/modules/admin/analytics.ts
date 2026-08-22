@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -29,7 +30,7 @@ const analyticsModule: Module = {
           const userId = req.session?.user?.id;
           const [user, settings] = await Promise.all([
             prisma.users.findUnique({ where: { id: userId } }),
-            prisma.settings.findUnique({ where: { id: 1 } }),
+            await getSettings(),
           ]);
           if (!user) return res.redirect('/login');
           res.render('admin/analytics/analytics', { user, req, settings, title: 'Analytics' });

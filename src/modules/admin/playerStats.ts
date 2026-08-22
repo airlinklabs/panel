@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -31,7 +32,7 @@ const adminModule: Module = {
       isAuthenticated(true, 'airlink.admin.playerstats.view'),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
 
         try {
           const userId = req.session?.user?.id;

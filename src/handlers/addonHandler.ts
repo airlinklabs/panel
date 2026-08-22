@@ -944,15 +944,15 @@ async function applyAddonMigrations(slug: string, manifest: AddonManifestV2) {
   logger.info(`Applying ${manifest.migrations.length} migrations for addon ${manifest.name}`);
 
   try {
-    await prisma.$executeRaw`
+    await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS AddonMigration (
-        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-        addonSlug TEXT NOT NULL,
-        migrationName TEXT NOT NULL,
+        id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+        addonSlug VARCHAR(191) NOT NULL,
+        migrationName VARCHAR(191) NOT NULL,
         appliedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(addonSlug, migrationName)
-      )
-    `;
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
 
     const appliedMigrations = await prisma.$queryRaw<{ migrationName: string }[]>`
       SELECT migrationName FROM AddonMigration WHERE addonSlug = ${slug}
@@ -974,10 +974,10 @@ async function applyAddonMigrations(slug: string, manifest: AddonManifestV2) {
       try {
         await prisma.$transaction(async (tx) => {
           await tx.$executeRawUnsafe(migration.sql);
-          await tx.$executeRaw`
-            INSERT INTO AddonMigration (addonSlug, migrationName)
-            VALUES (${slug}, ${migration.name})
-          `;
+          await tx.$executeRawUnsafe(
+            'INSERT INTO AddonMigration (addonSlug, migrationName) VALUES (?, ?)',
+            slug, migration.name
+          );
         });
         logger.info(`Applied migration ${migration.name} for addon ${manifest.name}`);
       } catch (error: any) {
@@ -1068,7 +1068,7 @@ export async function uninstallAddon(slug: string, app: Express | any) {
       }
 
       await prisma.addonSetting.deleteMany({ where: { addonSlug: slug } });
-      await prisma.$executeRaw`DELETE FROM AddonMigration WHERE addonSlug = ${slug}`;
+      await prisma.$executeRawUnsafe('DELETE FROM AddonMigration WHERE addonSlug = ?', slug);
       await prisma.addon.delete({ where: { slug } });
     }
 

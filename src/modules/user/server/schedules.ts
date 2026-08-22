@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import CronParser from 'cron-parser';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
@@ -84,7 +85,7 @@ export function registerScheduleRoutes(router: Router): void {
           })),
         }));
 
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
 
         res.render('user/server/schedules', {
           user,

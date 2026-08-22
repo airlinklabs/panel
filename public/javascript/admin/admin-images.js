@@ -219,7 +219,7 @@ function initUploadZone() {
   if (uploadButton) {
     uploadButton.addEventListener('click', confirmImageUpload);
   }
-});
+}
 
 const importUrlSubmit = document.getElementById('importUrlSubmit');
 if (importUrlSubmit) {

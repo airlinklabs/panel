@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
@@ -25,7 +26,7 @@ export function registerFileDetailRoutes(router: Router): void {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
       const filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const settings = await await getSettings();
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {

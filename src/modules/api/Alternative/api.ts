@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
@@ -276,7 +277,7 @@ const coreModule: Module = {
           const isFirstUser = userCount === 0;
 
           if (!isFirstUser) {
-            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            const settings = await await getSettings();
             if (!settings || !settings.allowRegistration) {
               res.status(403).json({ error: 'Registration is disabled' });
               return;

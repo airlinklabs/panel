@@ -1,9 +1,10 @@
+import { getSettings } from './settingsCache';
 import logger from './logger';
 import prisma from '../db';
 
 export const settingsLoader = async () => {
   try {
-    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+    const settings = await await getSettings();
 
     if (!settings) {
       await prisma.settings.create({

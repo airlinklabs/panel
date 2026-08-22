@@ -15,7 +15,7 @@ model Users {
   isAdmin           Boolean   @default(false)
   description       String?   @default("No About Me")
   avatar            String?
-  permissions       String?   @default("[]")
+  permissions       String?   @default("[]") @db.Text
   serverLimit       Int?      @default(0)
   maxMemory         Int?      @default(0)
   maxCpu            Int?      @default(0)
@@ -29,7 +29,7 @@ role          String            @default("user")
   lockedUntil       DateTime?
   totpSecret        String?
   totpEnabled       Boolean   @default(false)
-  totpRecoveryCodes String?
+  totpRecoveryCodes String?   @db.Text
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -61,12 +61,12 @@ model Server {
   name             String
   description      String?
   createdAt        DateTime            @default(now())
-  Ports            String
+  Ports            String              @db.Text
   Memory           Int
   Swap             Int                 @default(0)
   Cpu              Int
   Storage          Int
-  Variables        String?
+  Variables        String?             @db.Text
   StartCommand     String?
   dockerImage      String?
   sftpCredential   SftpCredential?
@@ -76,7 +76,7 @@ model Server {
   Suspended        Boolean             @default(false)
   Running          Boolean             @default(false)
   backupLimit      Int                 @default(5)
-  backupIgnoreList String              @default("")
+  backupIgnoreList String              @default("") @db.Text
   databaseLimit    Int                 @default(0)
   ownerId          Int
   nodeId           Int
@@ -161,7 +161,7 @@ model ScheduleTask {
   scheduleId Int
   order      Int      @default(0)
   action     String
-  payload    String
+  payload    String   @db.Text
   timeOffset Int      @default(0)
   schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
 }
@@ -174,16 +174,16 @@ model Images {
   author           String?
   authorName       String?
   createdAt        DateTime @default(now())
-  meta             String?
-  dockerImages     String?
-  startup          String?
-  stop             String?
-  startup_done     String?
-  config_files     String?
-  info             String?
-  scripts          String?
-  variables        String?
-  portRequirements String   @default("[]")
+  meta             String? @db.Text
+  dockerImages     String? @db.Text
+  startup          String? @db.Text
+  stop             String? @db.Text
+  startup_done     String? @db.Text
+  config_files     String? @db.Text
+  info             String? @db.Text
+  scripts          String? @db.Text
+  variables        String? @db.Text
+  portRequirements String   @default("[]") @db.Text
   status           String   @default("approved")
   createdById      Int?
   rejectionReason  String?
@@ -220,7 +220,7 @@ model Node {
   port               Int            @default(3001)
   key                String
   createdAt          DateTime       @default(now())
-  allocatedPorts     String?        @default("[]")
+  allocatedPorts     String?        @default("[]") @db.Text
   sftpPort           Int            @default(3003)
   maintenanceMode    Boolean        @default(false)
   location           Location?      @relation(fields: [locationId], references: [id])
@@ -256,7 +256,7 @@ model settings {
   virusTotalApiKey          String?
   rateLimitEnabled          Boolean  @default(true)
   rateLimitRpm              Int      @default(100)
-  bannedIps                 String   @default("[]")
+  bannedIps                 String   @default("[]") @db.Text
   allowUserCreateServer     Boolean  @default(false)
   allowUserDeleteServer     Boolean  @default(false)
   defaultServerLimit        Int      @default(0)
@@ -298,7 +298,7 @@ model settings {
   allowPrivilegedMaxDatabases Int    @default(10)
   allowUserCreateImages     Boolean  @default(false)
   onboardingEnabled         Boolean  @default(true)
-  onboardingSteps           String   @default("[]")
+  onboardingSteps           String   @default("[]") @db.Text
 }
 
 model ServerFolder {
@@ -325,7 +325,7 @@ model ApiKey {
   name        String
   key         String   @unique
   description String?
-  permissions String   @default("[]")
+  permissions String   @default("[]") @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   active      Boolean  @default(true)
@@ -370,7 +370,7 @@ model AddonSetting {
   id        Int      @id @default(autoincrement())
   addonSlug String
   key       String
-  value     String
+  value     String   @db.Text
   updatedAt DateTime @updatedAt
 
   @@unique([addonSlug, key])
@@ -409,7 +409,7 @@ model SubUser {
   id          Int      @id @default(autoincrement())
   serverId    String
   userId      Int
-  permissions String   @default("[]")
+  permissions String   @default("[]") @db.Text
   createdAt   DateTime @default(now())
   server      Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
   user        Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -423,7 +423,7 @@ model ActivityLog {
   actorId   Int?
   serverId  String?
   event     String
-  metadata  String?
+  metadata  String?  @db.Text
   ip        String?
   createdAt DateTime @default(now())
   actor     Users?   @relation(fields: [actorId], references: [id], onDelete: SetNull)
