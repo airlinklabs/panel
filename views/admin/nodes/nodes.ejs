@@ -178,6 +178,85 @@
       if (locEl) locEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
+
+  var csrfToken = '<%= csrfToken %>';
+
+  window.openLocationEdit = function(id, name, shortCode) {
+    var body = document.createElement('div');
+    body.innerHTML =
+      '<form id="editLocationForm" class="flex flex-col gap-4">' +
+        '<div>' +
+          '<label class="al-label" for="editLocName">Name</label>' +
+          '<input id="editLocName" name="name" type="text" value="' + name.replace(/"/g, '&quot;') + '" class="al-input" required>' +
+        '</div>' +
+        '<div>' +
+          '<label class="al-label" for="editLocCode">Short code</label>' +
+          '<input id="editLocCode" name="shortCode" type="text" value="' + shortCode.replace(/"/g, '&quot;') + '" class="al-input" autocapitalize="off" spellcheck="false" required>' +
+        '</div>' +
+        '<div class="flex justify-end gap-2 pt-1">' +
+          '<button type="button" onclick="window.modal.close()" class="al-btn-secondary px-4 py-2 text-sm font-medium">Cancel</button>' +
+          '<button type="submit" class="al-btn-primary px-4 py-2 text-sm font-medium">Save</button>' +
+        '</div>' +
+      '</form>';
+
+    window.modal.show({
+      title: 'Edit Location',
+      bodyNode: body,
+      panelClass: 'max-w-md',
+    });
+
+    body.querySelector('form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var nameVal = body.querySelector('#editLocName').value.trim();
+      var codeVal = body.querySelector('#editLocCode').value.trim().toLowerCase();
+      try {
+        var res = await fetch('/admin/location/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+          body: JSON.stringify({ name: nameVal, shortCode: codeVal }),
+        });
+        var data = await res.json();
+        if (res.ok) {
+          showToast('Location updated.', 'success');
+          window.modal.close();
+          htmx.ajax('GET', '/admin/nodes', { target: '#tab-panel-locations', swap: 'innerHTML' });
+        } else {
+          showToast(data.message || 'Update failed.', 'error');
+        }
+      } catch(err) {
+        showToast('Update failed.', 'error');
+      }
+    });
+  };
+
+  window.openLocationNodes = function(id, name) {
+    var overlay = document.createElement('div');
+    overlay.className = 'al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center p-4';
+    overlay.innerHTML =
+      '<div class="al-sheet-panel rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);">' +
+        '<div class="al-sheet-header" style="border-color:var(--theme-border)">' +
+          '<div><p class="text-sm font-semibold" style="color:var(--theme-text-strong);">Nodes in ' + name.replace(/</g, '&lt;') + '</p></div>' +
+          '<button type="button" data-close-location-nodes class="w-9 h-9 flex items-center justify-center rounded-lg hover:opacity-75 transition" style="color:var(--theme-text-muted);">' +
+            '<%- icon("x", { class: "w-4 h-4", strokeWidth: 2 }) %>' +
+          '</button>' +
+        '</div>' +
+        '<div class="flex-1 min-h-0 overflow-y-auto px-5 py-4" id="location-nodes-body">' +
+          '<div class="flex items-center justify-center py-10"><div class="htmx-indicator size-6 border-2 rounded-full" style="border-color:var(--theme-border);border-top-color:var(--theme-accent);"></div></div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    Animate.openModal(overlay, overlay.querySelector('.al-sheet-panel'));
+
+    var close = function() { Animate.closeModal(overlay, overlay.querySelector('.al-sheet-panel'), function() { overlay.remove(); }); };
+    overlay.querySelector('[data-close-location-nodes]').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+
+    fetch('/admin/location/' + id + '/nodes')
+      .then(function(r) { return r.text(); })
+      .then(function(html) {
+        document.getElementById('location-nodes-body').innerHTML = html;
+      });
+  };
 })();
 </script>
 

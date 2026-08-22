@@ -32,16 +32,34 @@
                 <p class="text-xs mt-1.5 font-mono" style="color:var(--theme-text-muted);"><%= loc.shortCode %></p>
                 <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= (loc._count && loc._count.nodes) || 0 %> node(s)</p>
               </div>
-              <button
-                hx-delete="/admin/location/<%= loc.id %>"
-                hx-target="#admin-locations-list"
-                hx-swap="outerHTML"
-                hx-confirm="Delete &quot;<%= loc.name %>&quot;? Servers in it will lose their grouping."
-                type="button"
-                class="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
-                aria-label="Delete location <%= loc.name %>">
-                <%- icon('trash', { class: 'size-4', strokeWidth: 1.5, style: 'color:var(--theme-danger);' }) %>
-              </button>
+              <div class="flex items-center gap-1 shrink-0">
+                <button
+                  onclick="openLocationNodes(<%= loc.id %>, '<%= loc.name.replace(/'/g, "\\'") %>')"
+                  type="button"
+                  class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
+                  style="color:var(--theme-text-muted);"
+                  aria-label="View nodes in <%= loc.name %>">
+                  <%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>
+                </button>
+                <button
+                  onclick="openLocationEdit(<%= loc.id %>, '<%= loc.name.replace(/'/g, "\\'") %>', '<%= loc.shortCode %>')"
+                  type="button"
+                  class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
+                  style="color:var(--theme-text-muted);"
+                  aria-label="Edit <%= loc.name %>">
+                  <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>
+                </button>
+                <button
+                  hx-delete="/admin/location/<%= loc.id %>"
+                  hx-target="#admin-locations-list"
+                  hx-swap="outerHTML"
+                  hx-confirm="Delete &quot;<%= loc.name %>&quot;? Servers in it will lose their grouping."
+                  type="button"
+                  class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
+                  aria-label="Delete location <%= loc.name %>">
+                  <%- icon('trash', { class: 'size-4', strokeWidth: 1.5, style: 'color:var(--theme-danger);' }) %>
+                </button>
+              </div>
             </div>
           <% }) %>
         </div>

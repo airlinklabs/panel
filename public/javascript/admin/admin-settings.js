@@ -189,6 +189,12 @@ const DEFAULT_UPLOAD_LIMIT = 100;
     if (!formAppearance) return;
     const btn = document.getElementById('tab-save-btn');
     const fd = new FormData(formAppearance);
+    ['logo-input', 'favicon-input', 'theme-file-input', 'login-wallpaper-file', 'register-wallpaper-file', 'panel-wallpaper-file'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el._selectedFile) {
+        fd.set(el.name, el._selectedFile);
+      }
+    });
     post('/admin/settings', fd, btn).then(function(ok) {
       if (ok) {
         applyThemeFromForm();

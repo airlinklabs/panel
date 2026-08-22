@@ -1,0 +1,42 @@
+<!-- Location nodes fragment — shows nodes attached to a location -->
+<div id="location-nodes-panel">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-2">
+      <button type="button" onclick="document.getElementById('location-nodes-panel').closest('.al-sheet-panel')?.querySelector('[data-close-location-nodes]')?.click()"
+        class="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-75 transition" style="color:var(--theme-text-muted);">
+        <%- icon('arrow-left', { class: 'size-4', strokeWidth: 2 }) %>
+      </button>
+      <div>
+        <p class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= location.name %></p>
+        <p class="text-xs" style="color:var(--theme-text-muted);"><%= location.shortCode %> &middot; <%= nodes.length %> node(s)</p>
+      </div>
+    </div>
+  </div>
+
+  <% if (nodes.length === 0) { %>
+    <div class="text-center py-10 rounded-xl" style="background:var(--theme-bg-secondary);">
+      <div class="mx-auto mb-3 w-12 h-12 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-border) 35%, transparent); color:var(--theme-text-muted);">
+        <%- icon('server', { class: 'size-6', strokeWidth: 1.5 }) %>
+      </div>
+      <p class="text-sm font-medium" style="color:var(--theme-text-strong);">No nodes here yet</p>
+      <p class="text-xs mt-1" style="color:var(--theme-text-muted);">Assign nodes to this location from the node editor.</p>
+    </div>
+  <% } else { %>
+    <div class="space-y-2">
+      <% nodes.forEach(function(node) { %>
+        <a href="/admin/nodes/edit/<%= node.id %>" class="flex items-center gap-3 p-3 rounded-xl border transition hover:opacity-80" style="border-color:var(--theme-border); background:var(--theme-bg-card);">
+          <span class="shrink-0 w-2 h-2 rounded-full" style="background:<%= node.status === 'online' ? 'var(--theme-success)' : node.status === 'starting' ? 'var(--theme-warning)' : 'var(--theme-text-muted)' %>;"></span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= node.name %></p>
+            <p class="text-xs font-mono truncate" style="color:var(--theme-text-muted);"><%= node.ip %>:<%= node.port %></p>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <span class="text-xs px-2 py-0.5 rounded-lg" style="background:<%= node.status === 'online' ? 'color-mix(in srgb, var(--theme-success) 12%, transparent)' : node.status === 'starting' ? 'color-mix(in srgb, var(--theme-warning) 12%, transparent)' : 'color-mix(in srgb, var(--theme-text-muted) 12%, transparent)' %>; color:<%= node.status === 'online' ? 'var(--theme-success)' : node.status === 'starting' ? 'var(--theme-warning)' : 'var(--theme-text-muted)' %>;"><%= node.status || 'offline' %></span>
+            <span class="text-xs" style="color:var(--theme-text-muted);"><%= node.servers.length %> server(s)</span>
+          </div>
+          <%- icon('chevron-right', { class: 'size-4 shrink-0', strokeWidth: 1.5, style: 'color:var(--theme-text-muted)' }) %>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>

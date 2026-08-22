@@ -345,53 +345,7 @@ function escJS(val) {
     </div>
   </div>
 
-  <!-- Upload file -->
-  <div id="uploadFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
-    <div id="uploadFileModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-      <div class="flex justify-between items-center px-6 py-4 border-b">
-        <div>
-          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Upload File</h2>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Select a file to upload to the current directory.</p>
-        </div>
-        <button type="button" onclick="closeUploadFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
-          <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
-        </button>
-      </div>
-      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-        <div class="mb-4">
-          <div class="mb-4">
-            <label for="fileInput" class="w-full px-3 py-6 border-2 border-dashed rounded-xl focus:outline-none focus:ring-2 transition text-center cursor-pointer block" style="border-color:var(--theme-border); color:var(--theme-text-strong);" id="dropZone">
-              <%- icon('upload', { class: 'w-10 h-10 mx-auto mb-2', fill: 'currentColor', strokeWidth: 1 }) %>
-              <p style="color:var(--theme-text-muted)">Drag & drop a file here or click to browse</p>
-            </label>
-            <input type="file" id="fileInput" class="hidden" onchange="handleFileInputChange(event)">
-          </div>
-          <div id="filePreview" class="hidden">
-            <div class="flex items-center p-3 rounded-xl" style="background:var(--theme-bg-secondary);">
-              <%- icon('file-text', { class: 'w-6 h-6 mr-3', style: 'color:var(--theme-text-muted)' }) %>
-              <div class="flex-1 truncate">
-                <p id="selectedFileName" class="font-medium truncate" style="color:var(--theme-text-strong)"></p>
-                <p id="selectedFileSize" class="text-sm" style="color:var(--theme-text-muted)"></p>
-              </div>
-              <button type="button" onclick="removeSelectedFile()" class="ml-2" aria-label="Remove selected file" style="color:var(--theme-text-muted)">
-                <%- icon('x', { class: 'w-5 h-5' }) %>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="flex gap-2 px-6 py-4 border-t justify-end">
-        <button type="button" onclick="closeUploadFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-          <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Cancel
-        </button>
-        <button type="button" id="uploadButton" class="al-btn-primary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5" disabled>
-          <%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %>
-          Upload
-        </button>
-      </div>
-    </div>
-  </div>
+  <!-- Upload file — uses shared upload modal from footer -->
 
   <!-- Pull file from URL -->
   <div id="pullFileModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none ">
@@ -870,138 +824,27 @@ function openCreateFileModal() {
     }
   }
 
-  // File Upload Functions
-  let selectedFile = null;
-
+  // File Upload Functions — uses shared upload modal from footer
   function openUploadFileModal() {
-    const modal = document.getElementById('uploadFileModal');
-    if (!modal) {
-      console.error('Upload modal not found');
-      return;
-    }
-
-    modal.classList.remove('opacity-0', 'pointer-events-none');
-    const panel = document.getElementById('uploadFileModalPanel');
-    Animate.openModal(modal, panel);
-
-    // Reset the file selection
-    removeSelectedFile();
-
-    // Reset the file input
-    const fileInput = document.getElementById('fileInput');
-    if (fileInput) {
-      fileInput.value = '';
-    }
+    openUploadModal({
+      title: 'Upload file',
+      onFile: confirmFileUpload,
+    });
   }
 
   function closeUploadFileModal() {
-    const modal = document.getElementById('uploadFileModal');
-    if (!modal) {
-      console.error('Upload modal not found');
-      return;
-    }
-
-    const panel = document.getElementById('uploadFileModalPanel');
-    const done = function () {
-      modal.classList.add('opacity-0', 'pointer-events-none');
-    };
-    Animate.closeModal(modal, panel, done);
+    closeUploadModal();
   }
 
-  function removeSelectedFile() {
-    selectedFile = null;
-
-    const filePreview = document.getElementById('filePreview');
-    const dropZone = document.getElementById('dropZone');
-    const uploadButton = document.getElementById('uploadButton');
-
-    if (filePreview) {
-      filePreview.classList.add('hidden');
-    }
-
-    if (dropZone) {
-      dropZone.classList.remove('hidden');
-    }
-
-    if (uploadButton) {
-      uploadButton.disabled = true;
-    }
-  }
-
-  function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-
-    return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  function handleFileSelection(file) {
-    if (!file) {
-      console.error('No file provided to handleFileSelection');
-      return;
-    }
-
-    // Make sure file is a valid File object
+  async function confirmFileUpload(file) {
     if (!(file instanceof File)) {
-      console.error('Invalid file object:', file);
       showToast('Invalid file selected', 'error');
       return;
     }
 
-    selectedFile = file;
-
-    const fileNameElement = document.getElementById('selectedFileName');
-    const fileSizeElement = document.getElementById('selectedFileSize');
-    const filePreviewElement = document.getElementById('filePreview');
-    const dropZoneElement = document.getElementById('dropZone');
-    const uploadButtonElement = document.getElementById('uploadButton');
-
-    if (fileNameElement) {
-      fileNameElement.textContent = file.name;
-    }
-
-    if (fileSizeElement) {
-      fileSizeElement.textContent = formatFileSize(file.size);
-    }
-
-    if (filePreviewElement) {
-      filePreviewElement.classList.remove('hidden');
-    }
-
-    if (dropZoneElement) {
-      dropZoneElement.classList.add('hidden');
-    }
-
-    if (uploadButtonElement) {
-      uploadButtonElement.disabled = false;
-    }
-  }
-
-  async function confirmFileUpload() {
-
-    if (!selectedFile) {
-      showToast('Select a file to upload', 'error');
-      return;
-    }
-
-    if (!(selectedFile instanceof File)) {
-      console.error('Selected file is not a valid File object:', selectedFile);
-      showToast('Invalid file selected', 'error');
-      return;
-    }
-
-    // Store file info before closing modal
-    const file = selectedFile;
     const fileName = file.name;
     const fileSize = file.size;
 
-    closeUploadFileModal();
-    // Persisted progress toast — same status-area experience as backup
-    // creation. The XHR itself is page-scoped, so a full page navigation still
-    // aborts the transfer, but while it is running the upload is visible and
-    // tracked from the shared toast system rather than a blocking modal.
     let uploadToast = window.showProgressToast ? window.showProgressToast(`Uploading ${fileName}…`, {
       group: 'upload:<%= server.UUID %>',
       autoCompleteAt100: false,
@@ -1118,58 +961,6 @@ function openCreateFileModal() {
     }
   }
 
-
-  // Direct handler for file input change
-  function handleFileInputChange(event) {
-    if (event.target && event.target.files && event.target.files.length > 0) {
-      const file = event.target.files[0];
-      handleFileSelection(file);
-    } else {
-    }
-  }
-
-  // Get DOM elements
-    const dropZone = document.getElementById('dropZone');
-    const uploadButton = document.getElementById('uploadButton');
-
-    if (!dropZone) {
-      console.error('Drop zone element not found in the DOM');
-      return;
-    }
-
-    dropZone.addEventListener('dragover', function(event) {
-      event.preventDefault();
-      dropZone.style.background = 'var(--theme-bg-hover)';
-      dropZone.style.borderColor = 'var(--theme-accent)';
-    });
-
-    dropZone.addEventListener('dragleave', function(event) {
-      event.preventDefault();
-      dropZone.style.background = '';
-      dropZone.style.borderColor = 'var(--theme-border)';
-    });
-
-    dropZone.addEventListener('drop', function(event) {
-      event.preventDefault();
-      dropZone.classList.remove('bg-neutral-50', 'border-neutral-400');
-
-      if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-        const file = event.dataTransfer.files[0];
-        handleFileSelection(file);
-      } else {
-      }
-    });
-
-    // Add direct click handler for upload button
-    if (uploadButton) {
-      uploadButton.addEventListener('click', function(event) {
-        event.preventDefault();
-        confirmFileUpload();
-      });
-    }
-
-    // Initialize by clearing any previously selected file
-    removeSelectedFile();
 
   // ── New Folder ─────────────────────────────────────────────────────────────
   function openCreateFolderModal() {
@@ -1616,8 +1407,7 @@ function openCreateFileModal() {
   window.confirmCreateFile = confirmCreateFile;
   window.handleFileNameKeyPress = handleFileNameKeyPress;
   window.closeUploadFileModal = closeUploadFileModal;
-  window.handleFileInputChange = handleFileInputChange;
-  window.removeSelectedFile = removeSelectedFile;
+  window.openUploadFileModal = openUploadFileModal;
   window.closePullFileModal = closePullFileModal;
   window.closeRenameModal = closeRenameModal;
   window.confirmRename = confirmRename;
