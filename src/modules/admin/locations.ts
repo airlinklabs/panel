@@ -4,6 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { getParamAsNumber } from '../../utils/typeHelpers';
+import { invalidateLocationCache } from '../../handlers/nodesCache';
 
 async function buildLocationsViewModel() {
   const locations = await prisma.location.findMany({
@@ -96,6 +97,7 @@ const locationsModule: Module = {
             data: { name, shortCode },
             include: { _count: { select: { nodes: true } } },
           });
+          await invalidateLocationCache();
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildLocationsViewModel();
@@ -151,6 +153,7 @@ const locationsModule: Module = {
           }
 
           await prisma.location.delete({ where: { id: locationId } });
+          await invalidateLocationCache();
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildLocationsViewModel();
@@ -205,6 +208,7 @@ const locationsModule: Module = {
             data: { name, shortCode },
             include: { _count: { select: { nodes: true } } },
           });
+          await invalidateLocationCache();
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildLocationsViewModel();

@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
@@ -81,7 +82,7 @@ const twoFactorModule: Module = {
       isAuthenticated(),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
 
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
@@ -258,7 +259,7 @@ const twoFactorModule: Module = {
     // ── GET /2fa ────────────────────────────────────────────────────────────
     // Shown after a successful password login when the account has 2FA enabled.
     router.get('/2fa', async (req: Request, res: Response) => {
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const settings = await await getSettings();
 
       if (!req.session.pendingUserId) {
         return res.redirect('/login');

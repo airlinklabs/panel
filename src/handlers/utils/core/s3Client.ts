@@ -1,3 +1,4 @@
+import { getSettings } from '../../settingsCache';
 import { S3Client, CreateBucketCommand, DeleteObjectCommand, ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { createReadStream } from 'node:fs';
@@ -6,7 +7,7 @@ import prisma from '../../../db';
 export const S3_KEY_PREFIX = 's3:';
 
 export async function getS3Config() {
-  const s = await prisma.settings.findUnique({ where: { id: 1 } });
+  const s = await await getSettings();
   if (!s?.s3Enabled || !s.s3Bucket || !s.s3AccessKey || !s.s3SecretKey) {
     throw new Error('S3 not configured');
   }

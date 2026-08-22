@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import type { Request, Response } from 'express';
 import type { Prisma, Users, settings as PanelSettings } from '../../../generated/prisma/client';
 import prisma from '../../../db';
@@ -126,7 +127,7 @@ export async function loadServerPageContext(req: Request): Promise<ServerPageCon
   const serverId = String(req.params?.id);
 
   const [settings, user] = await Promise.all([
-    prisma.settings.findUnique({ where: { id: 1 } }),
+    await getSettings(),
     prisma.users.findUnique({ where: { id: userId } }),
   ]);
 

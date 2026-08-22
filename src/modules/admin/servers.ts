@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -73,9 +74,7 @@ const adminModule: Module = {
               owner: true,
             },
           });
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await await getSettings();
 
           res.render('admin/servers/servers', { user, req, settings, servers });
         } catch (error: unknown) {
@@ -121,9 +120,7 @@ const adminModule: Module = {
           const users = await prisma.users.findMany();
           const nodes = await prisma.node.findMany();
           const images = await prisma.images.findMany();
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await await getSettings();
           const mounts = await prisma.mount.findMany();
           const serverMounts = await prisma.serverMount.findMany({
             where: { serverId: server.UUID },
@@ -371,9 +368,7 @@ const adminModule: Module = {
           const users = await prisma.users.findMany();
           const nodes = await prisma.node.findMany();
           const images = await prisma.images.findMany();
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await await getSettings();
 
           res.render('admin/servers/create', {
             user,

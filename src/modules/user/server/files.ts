@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import type { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
@@ -36,7 +37,7 @@ export function registerFilesRoutes(router: Router): void {
       path = typeof path === 'string' ? path : String(path);
       path = path.replace(/\/+/g, '/');
 
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const settings = await await getSettings();
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
@@ -705,7 +706,7 @@ export function registerFilesRoutes(router: Router): void {
     isAuthenticatedForServer('id'),
     requireSubUserPermission('files'),
     async (req: Request, res: Response, next) => {
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const settings = await await getSettings();
       const limitMb = settings?.uploadLimit ?? 100;
       const upload = multer({
         storage: multer.memoryStorage(),

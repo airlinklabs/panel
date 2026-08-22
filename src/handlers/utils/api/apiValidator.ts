@@ -1,3 +1,4 @@
+import { getSettings } from '../../settingsCache';
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../../../db';
 import logger from '../../logger';
@@ -14,7 +15,7 @@ function sha256(value: string): string {
 
 async function hashingEnabled(): Promise<boolean> {
   try {
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
+    const s = await await getSettings();
     return s?.hashApiKeys === true;
   } catch {
     return false;
@@ -80,5 +81,3 @@ export const apiValidator = (requiredPermission?: string) => {
     }
   };
 };
-
-export default apiValidator;

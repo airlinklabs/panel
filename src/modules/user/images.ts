@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import type { Request, Response } from 'express';
 import { Router } from 'express';
 import prisma from '../../db';
@@ -50,7 +51,7 @@ function normalizeImageData(raw: Record<string, unknown>) {
 
 async function canSubmitImages(user: { id: number; isAdmin: boolean }): Promise<boolean> {
   if (user.isAdmin) return true;
-  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+  const settings = await await getSettings();
   return settings?.allowUserCreateImages === true;
 }
 

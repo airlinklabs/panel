@@ -1,3 +1,4 @@
+import { getSettings } from './handlers/settingsCache';
 import type { Request, Response, NextFunction } from 'express';
 import express from 'express';
 import prisma from './db';
@@ -78,7 +79,7 @@ const airlinkCodename = config.meta.codename;
 // We set this before any middleware so the correct client IP flows through.
 (async () => {
   try {
-    const s = await prisma.settings.findUnique({ where: { id: 1 } });
+    const s = await await getSettings();
     if (s?.behindReverseProxy) {
       app.set('trust proxy', 1);
     }

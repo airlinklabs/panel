@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -62,9 +63,7 @@ const adminModule: Module = {
           const nodeCount = await prisma.node.count();
           const instanceCount = await prisma.server.count();
           const imageCount = await prisma.images.count();
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await await getSettings();
 
           let airlinkCodename = String(res.locals.airlinkCodename || '');
           let vcodeBg: string | null = null;

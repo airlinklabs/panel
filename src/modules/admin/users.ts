@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -62,7 +63,7 @@ export async function buildAdminUsersViewModel(actorId: number): Promise<AdminUs
     include: { servers: true },
   });
 
-  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+  const settings = await await getSettings();
 
   return {
     user: { id: user.id, username: user.username, avatar: user.avatar, description: user.description, isAdmin: user.isAdmin, role: user.role },
@@ -120,9 +121,7 @@ const adminModule: Module = {
           if (!user) {
             return res.redirect('/login');
           }
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await getSettings();
 
           res.render('admin/users/create', { user, req, settings });
         } catch (error: unknown) {
@@ -240,9 +239,7 @@ router.get(
           if (!dataUser) {
             return res.redirect('/admin/users');
           }
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await getSettings();
 
           res.render('admin/users/edit', {
             user,
@@ -279,9 +276,7 @@ router.get(
             return res.redirect('/admin/users');
           }
 
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await getSettings();
 
           res.render('admin/users/user', {
             user,

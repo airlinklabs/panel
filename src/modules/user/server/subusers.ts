@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, PERMISSION_GROUPS, SUBUSER_PERMISSIONS } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
@@ -100,7 +101,7 @@ export function registerSubUserRoutes(router: Router): void {
             include: { user: { select: { id: true, username: true, email: true, avatar: true } } },
             orderBy: { createdAt: 'asc' },
           }),
-          prisma.settings.findUnique({ where: { id: 1 } }),
+          await getSettings(),
         ]);
 
         const subUsersWithPerms = subUsers.map((subUser) => ({

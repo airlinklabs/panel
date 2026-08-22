@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import type { Request, Response } from 'express';
 import { Router } from 'express';
 import type { Module } from '../../handlers/moduleInit';
@@ -58,7 +59,7 @@ const accountModule: Module = {
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings = await await getSettings();
         try {
           const [user, loginHistory, nodes, images] = await Promise.all([
             prisma.users.findUnique({ where: { id: userId } }),
@@ -544,7 +545,7 @@ const accountModule: Module = {
           const userId = req.session?.user?.id;
           const [user, settings] = await Promise.all([
             prisma.users.findUnique({ where: { id: userId } }),
-            prisma.settings.findUnique({ where: { id: 1 } }),
+            await getSettings(),
           ]);
           if (!user) {return res.redirect('/login');}
           const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'));

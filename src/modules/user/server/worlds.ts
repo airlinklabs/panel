@@ -1,3 +1,4 @@
+import { getSettings } from '../../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
@@ -21,7 +22,7 @@ export function registerWorldsRoutes(router: Router): void {
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const settings = await await getSettings();
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {

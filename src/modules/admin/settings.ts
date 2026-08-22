@@ -1,3 +1,4 @@
+import { getSettings, invalidateSettingsCache } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -172,6 +173,7 @@ async function saveSettings(data: Record<string, unknown>) {
       ...data,
     },
   });
+  await invalidateSettingsCache();
 }
 
 const adminModule: Module = {
@@ -197,7 +199,7 @@ const adminModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) return res.redirect('/login');
 
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
 
           const builtinThemesDir = path.join(process.cwd(), 'public', 'themes');
           const builtinThemes = fs.readdirSync(builtinThemesDir)
@@ -484,7 +486,7 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
-          const smtp = await prisma.settings.findUnique({ where: { id: 1 } });
+          const smtp = await await getSettings();
           if (!smtp?.smtpHost) {
             return res.status(400).json({ success: false, error: 'SMTP is not configured yet.' });
           }
@@ -557,7 +559,7 @@ const adminModule: Module = {
           const { ip } = req.body;
           if (!ip || typeof ip !== 'string' || !/^[\d.:a-fA-F]+$/.test(ip))
             return res.status(400).json({ success: false, error: 'Invalid IP address.' });
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           let banned: string[] = [];
           try { banned = JSON.parse(settings?.bannedIps || '[]'); } catch { banned = []; }
           if (!banned.includes(ip)) {
@@ -582,7 +584,7 @@ const adminModule: Module = {
           const { ip } = req.body;
           if (!ip || typeof ip !== 'string')
             return res.status(400).json({ success: false, error: 'IP is required.' });
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           let banned: string[] = [];
           try { banned = JSON.parse(settings?.bannedIps || '[]'); } catch { banned = []; }
           await saveSettings({ bannedIps: JSON.stringify(banned.filter(b => b !== ip)) });

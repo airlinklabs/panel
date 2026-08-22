@@ -1,3 +1,4 @@
+import { getSettings } from '../../settingsCache';
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../../../db';
 import { renderErrorPage } from '../../errorPages';
@@ -23,7 +24,7 @@ export const isAuthenticated =
         }
 
         if (!user.totpEnabled) {
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await await getSettings();
           if (settings?.require2faForAdmins) {
             return res.redirect('/account/2fa/setup?required=1');
           }

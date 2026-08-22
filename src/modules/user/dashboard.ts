@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -222,7 +223,7 @@ const dashboardModule: Module = {
       try {
         const [user, settings] = await Promise.all([
           prisma.users.findUnique({ where: { id: userId } }),
-          prisma.settings.findUnique({ where: { id: 1 } }),
+          await getSettings(),
         ]);
         if (!user) {
           errorMessage.message = 'User not found.';
@@ -288,7 +289,7 @@ const dashboardModule: Module = {
             include: { members: true },
             orderBy: { createdAt: 'asc' },
           });
-          const settings2 = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings2 = await await getSettings();
           const userServerLimit = user.serverLimit !== null && user.serverLimit !== undefined
             ? user.serverLimit
             : (settings2?.defaultServerLimit ?? 0);
@@ -366,7 +367,7 @@ const dashboardModule: Module = {
           orderBy: { createdAt: 'asc' },
         });
 
-        const settings2 = await prisma.settings.findUnique({ where: { id: 1 } });
+        const settings2 = await await getSettings();
         const userServerLimit = user.serverLimit !== null && user.serverLimit !== undefined
           ? user.serverLimit
           : (settings2?.defaultServerLimit ?? 0);

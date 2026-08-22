@@ -1,3 +1,4 @@
+import { getSettings } from '../../handlers/settingsCache';
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -52,7 +53,7 @@ const passwordResetModule: Module = {
 
     // ── GET /forgot-password ────────────────────────────────────────────────
     router.get('/forgot-password', async (req: Request, res: Response) => {
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const settings = await await getSettings();
       res.render('auth/forgot-password', { req, settings });
     });
 
@@ -97,7 +98,7 @@ const passwordResetModule: Module = {
     // ── GET /reset-password ─────────────────────────────────────────────────
     router.get('/reset-password', async (req: Request, res: Response) => {
       const { token } = req.query as { token?: string };
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const settings = await await getSettings();
 
       let validToken = false;
       if (token) {
