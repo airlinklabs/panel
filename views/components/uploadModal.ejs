@@ -1,0 +1,174 @@
+<!-- Reusable upload modal with drag-and-drop support.
+     Include this partial, then call openUploadModal({ title, accept, onFile })
+     from your page script.
+
+     Usage:
+       <%- include('../../components/uploadModal') %>
+       <script>
+         openUploadModal({
+           title: 'Upload file',
+           accept: '.json,image/*',
+           onFile: async (file) => { ... }
+         });
+       </script>
+-->
+<div id="uploadModalOverlay" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center opacity-0 pointer-events-none">
+  <div class="absolute inset-0" onclick="closeUploadModal()"></div>
+  <div id="uploadModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full shadow-xl max-h-[85vh] flex flex-col will-change-transform" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+    <div class="al-sheet-header" style="border-color:var(--theme-border);">
+      <p id="uploadModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);">Upload file</p>
+      <button type="button" onclick="closeUploadModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
+      <div id="uploadModalDropZone" class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-colors" style="border-color:var(--theme-border); color:var(--theme-text-muted);">
+        <%- icon('upload', { class: 'w-10 h-10 mb-3', strokeWidth: 1.5 }) %>
+        <p class="text-sm font-medium" style="color:var(--theme-text-strong);">Drag & drop a file here</p>
+        <p class="text-xs mt-1" style="color:var(--theme-text-muted);">or click to browse</p>
+        <p id="uploadModalAcceptHint" class="text-xs mt-2" style="color:var(--theme-text-muted);"></p>
+      </div>
+      <input type="file" id="uploadModalInput" class="hidden">
+      <div id="uploadModalPreview" class="hidden mt-4">
+        <div class="flex items-center gap-3 p-3 rounded-xl" style="background:var(--theme-bg-secondary);">
+          <div class="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-accent) 12%, transparent); color:var(--theme-accent);">
+            <%- icon('file', { class: 'size-5', strokeWidth: 1.5 }) %>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p id="uploadModalFileName" class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"></p>
+            <p id="uploadModalFileSize" class="text-xs" style="color:var(--theme-text-muted);"></p>
+          </div>
+          <button type="button" onclick="clearUploadModalSelection()" class="shrink-0 p-1.5 rounded-lg transition-colors" style="color:var(--theme-text-muted);" aria-label="Remove file">
+            <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
+      <button type="button" onclick="closeUploadModal()" class="al-btn-secondary inline-flex items-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
+      <button type="button" id="uploadModalConfirmBtn" class="al-btn-primary inline-flex items-center gap-1.5" disabled><%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %>Upload</button>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  if (window.openUploadModal) return;
+
+  var overlay = document.getElementById('uploadModalOverlay');
+  var panel = document.getElementById('uploadModalPanel');
+  var dropZone = document.getElementById('uploadModalDropZone');
+  var fileInput = document.getElementById('uploadModalInput');
+  var preview = document.getElementById('uploadModalPreview');
+  var fileName = document.getElementById('uploadModalFileName');
+  var fileSize = document.getElementById('uploadModalFileSize');
+  var confirmBtn = document.getElementById('uploadModalConfirmBtn');
+  var titleEl = document.getElementById('uploadModalTitle');
+  var acceptHint = document.getElementById('uploadModalAcceptHint');
+
+  var currentFile = null;
+  var currentOnFile = null;
+
+  function fmtBytes(n) {
+    if (n >= 1048576) return (n / 1048576).toFixed(1) + ' MB';
+    if (n >= 1024) return (n / 1024).toFixed(0) + ' KB';
+    return n + ' B';
+  }
+
+  function selectFile(file) {
+    currentFile = file;
+    fileName.textContent = file.name;
+    fileSize.textContent = fmtBytes(file.size);
+    preview.classList.remove('hidden');
+    dropZone.classList.add('hidden');
+    confirmBtn.disabled = false;
+  }
+
+  function clearUploadModalSelection() {
+    currentFile = null;
+    fileInput.value = '';
+    preview.classList.add('hidden');
+    dropZone.classList.remove('hidden');
+    confirmBtn.disabled = true;
+  }
+  window.clearUploadModalSelection = clearUploadModalSelection;
+
+  function openUploadModal(opts) {
+    titleEl.textContent = opts.title || 'Upload file';
+    acceptHint.textContent = opts.accept ? 'Accepted: ' + opts.accept : '';
+    fileInput.accept = opts.accept || '';
+    currentOnFile = opts.onFile || null;
+    clearUploadModalSelection();
+
+    if (window.Animate) {
+      overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      overlay.classList.add('flex');
+      Animate.openModal(overlay, panel);
+    } else {
+      overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      overlay.classList.add('flex', 'open');
+      panel.classList.add('open');
+    }
+    document.body.style.overflow = 'hidden';
+  }
+  window.openUploadModal = openUploadModal;
+
+  function closeUploadModal() {
+    function done() {
+      overlay.classList.add('hidden', 'opacity-0', 'pointer-events-none');
+      overlay.classList.remove('flex', 'open');
+      panel.classList.remove('open', 'closing');
+      document.body.style.overflow = '';
+      currentOnFile = null;
+    }
+    if (window.Animate) Animate.closeModal(overlay, panel, done);
+    else done();
+  }
+  window.closeUploadModal = closeUploadModal;
+
+  // Click to browse
+  dropZone.addEventListener('click', function() { fileInput.click(); });
+  fileInput.addEventListener('change', function() {
+    if (fileInput.files.length > 0) selectFile(fileInput.files[0]);
+  });
+
+  // Drag and drop
+  dropZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.style.borderColor = 'var(--theme-accent)';
+    dropZone.style.background = 'color-mix(in srgb, var(--theme-accent) 6%, transparent)';
+  });
+  dropZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.style.borderColor = '';
+    dropZone.style.background = '';
+  });
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.style.borderColor = '';
+    dropZone.style.background = '';
+    if (e.dataTransfer.files.length > 0) selectFile(e.dataTransfer.files[0]);
+  });
+
+  // Confirm
+  confirmBtn.addEventListener('click', async function() {
+    if (!currentFile || !currentOnFile) return;
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Uploading...';
+    try {
+      await currentOnFile(currentFile);
+      closeUploadModal();
+    } catch (err) {
+      console.error('Upload failed:', err);
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Upload';
+    }
+  });
+
+  // Escape
+  overlay.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeUploadModal();
+  });
+})();
+</script>

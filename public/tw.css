@@ -658,7 +658,7 @@ input[type="button"]:disabled {
    can toggle it. */
 @layer components {
 .al-sheet-overlay {
-  @apply fixed inset-0 z-50 flex items-center justify-center;
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4;
   background: rgba(0, 0, 0, 0.5);
 }
 
