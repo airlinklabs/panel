@@ -12,7 +12,7 @@
     "setup": "node public/setup.mjs",
     "setup:full": "node public/setup.mjs && pnpm run start",
     "start": "node --env-file=.env dist/app.js",
-    "dev": "prisma migrate deploy && prisma generate && (trap 'kill 0' EXIT; tailwindcss -i ./public/tw.css -o ./public/styles.css --watch & nodemon)",
+    "dev": "prisma generate && prisma db push && (trap 'kill 0' EXIT; tailwindcss -i ./public/tw.css -o ./public/styles.css --watch & nodemon)",
     "build": "tsc && tsc -p tsconfig.prisma.json && tailwindcss -i ./public/tw.css -o ./public/styles.css",
     "build:vendor": "node scripts/build-vendor.mjs",
     "verify:vendor": "node scripts/build-vendor.mjs --check",

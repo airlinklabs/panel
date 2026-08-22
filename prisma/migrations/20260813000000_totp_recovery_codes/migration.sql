@@ -1,2 +1,0 @@
--- Column already exists from 20260809100711_new (Users table rebuild).
--- This migration is intentionally a no-op to avoid "duplicate column" errors.

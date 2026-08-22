@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Server" ADD COLUMN "Swap" INTEGER NOT NULL DEFAULT 0;
