@@ -174,16 +174,16 @@ model Images {
   author           String?
   authorName       String?
   createdAt        DateTime @default(now())
-  meta             String?
+  meta             String? @db.Text
   dockerImages     String? @db.Text
-  startup          String?
-  stop             String?
-  startup_done     String?
-  config_files     String?
-  info             String?
-  scripts          String?
-  variables        String?
-  portRequirements String   @default("[]")
+  startup          String? @db.Text
+  stop             String? @db.Text
+  startup_done     String? @db.Text
+  config_files     String? @db.Text
+  info             String? @db.Text
+  scripts          String? @db.Text
+  variables        String? @db.Text
+  portRequirements String   @default("[]") @db.Text
   status           String   @default("approved")
   createdById      Int?
   rejectionReason  String?

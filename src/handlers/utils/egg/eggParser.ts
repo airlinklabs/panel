@@ -160,7 +160,7 @@ export function normalizeEggForDb(egg: ParsedEgg): NormalizedImageData {
     startup_done: egg.startupDone,
     config_files: egg.configFiles,
     meta: JSON.stringify({ ...egg.rawMeta, source: 'pterodactyl' }),
-    dockerImages: JSON.stringify(dockerImagesArray).slice(0, 191),
+    dockerImages: JSON.stringify(dockerImagesArray),
     info: JSON.stringify(info),
     scripts: JSON.stringify(scripts),
     variables: JSON.stringify(egg.variables),
