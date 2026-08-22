@@ -175,7 +175,7 @@ model Images {
   authorName       String?
   createdAt        DateTime @default(now())
   meta             String?
-  dockerImages     String?
+  dockerImages     String? @db.Text
   startup          String?
   stop             String?
   startup_done     String?
