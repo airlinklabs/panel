@@ -9,7 +9,7 @@
          onFile: async (file) => { ... }
        });
 -->
-<div id="uploadModalOverlay" class="al-sheet-overlay fixed inset-0 z-50 hidden items-center justify-center opacity-0 pointer-events-none">
+<div id="uploadModalOverlay" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
   <div class="absolute inset-0" onclick="closeUploadModal()"></div>
   <div id="uploadModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full shadow-xl max-h-[85vh] flex flex-col will-change-transform" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="al-sheet-header" style="border-color:var(--theme-border);">
@@ -95,29 +95,18 @@
     currentOnFile = opts.onFile || null;
     clearUploadModalSelection();
 
-    if (window.Animate) {
-      overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
-      overlay.classList.add('flex');
-      Animate.openModal(overlay, panel);
-    } else {
-      overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
-      overlay.classList.add('flex', 'open');
-      panel.classList.add('open');
-    }
+    overlay.classList.remove('opacity-0', 'pointer-events-none');
+    Animate.openModal(overlay, panel);
     document.body.style.overflow = 'hidden';
   }
   window.openUploadModal = openUploadModal;
 
   function closeUploadModal() {
-    function done() {
-      overlay.classList.add('hidden', 'opacity-0', 'pointer-events-none');
-      overlay.classList.remove('flex', 'open');
-      panel.classList.remove('open', 'closing');
+    Animate.closeModal(overlay, panel, function() {
+      overlay.classList.add('opacity-0', 'pointer-events-none');
       document.body.style.overflow = '';
       currentOnFile = null;
-    }
-    if (window.Animate) Animate.closeModal(overlay, panel, done);
-    else done();
+    });
   }
   window.closeUploadModal = closeUploadModal;
 
