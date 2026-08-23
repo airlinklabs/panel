@@ -674,7 +674,12 @@
       }
     });
 
-    finishBtn.addEventListener('click', setCompleted);
+    finishBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      fetch('/onboarding/skip', { method: 'POST' })
+        .then(function () { onboardingModal.remove(); })
+        .catch(function () { onboardingModal.remove(); });
+    });
     skipBtn.addEventListener('click', function () {
       fetch('/onboarding/skip', { method: 'POST' })
         .then(function () { onboardingModal.remove(); })
