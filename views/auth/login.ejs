@@ -119,7 +119,7 @@
     }
   }
   document.getElementById('rememberLabel').addEventListener('click', function (e) {
-    if (e.target === cbInput) return;
+    e.preventDefault();
     cbInput.checked = !cbInput.checked;
     renderCb();
   });

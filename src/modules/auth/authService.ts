@@ -57,7 +57,7 @@ const authServiceModule: Module = {
         return res.redirect('/login?err=invalid_credentials');
       }
 
-      const { identifier, password } = parsed.data;
+      const { identifier, password, 'remember-me': rememberMe } = parsed.data;
 
       try {
         const { maxAttempts, lockoutMinutes } = await getSecuritySettings();
@@ -104,6 +104,14 @@ const authServiceModule: Module = {
         await new Promise<void>((resolve, reject) =>
           req.session.regenerate(err => (err ? reject(err) : resolve()))
         );
+
+        // Set session duration based on "Remember me" checkbox.
+        // Checked: 30 days. Unchecked: 24 hours.
+        if (rememberMe) {
+          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+        } else {
+          req.session.cookie.maxAge = 24 * 60 * 60 * 1000;
+        }
 
         // Two-factor authentication step: hold the login in a pending state
         // until the user verifies their TOTP code on /2fa.

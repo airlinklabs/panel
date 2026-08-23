@@ -20,6 +20,7 @@ const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 export const loginSchema = z.object({
   identifier: z.string({ error: 'missing' }).min(1, { error: 'missing' }),
   password: z.string({ error: 'missing' }).min(1, { error: 'missing' }),
+  'remember-me': z.string().optional().default(''),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
