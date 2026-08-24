@@ -29,7 +29,7 @@
       <div class="al-page-body">
         <% if (!allowed) { %>
         <div class="flex flex-col items-center justify-center py-24 text-center">
-          <div class="w-12 h-12 rounded-full bg-neutral-400/10 flex items-center justify-center mb-4">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4" style="background:color-mix(in srgb, var(--theme-text-muted) 10%, transparent)">
             <%- icon('ban', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
           </div>
           <p class="text-sm font-medium" style="color:var(--theme-text-strong)">
@@ -41,7 +41,7 @@
         </div>
         <% } else { %>
         <div id="myImagesEmpty" class="flex flex-col items-center justify-center py-24 text-center <%= images.length === 0 ? '' : 'hidden' %>">
-          <div class="w-12 h-12 rounded-full bg-neutral-400/10 flex items-center justify-center mb-4">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4" style="background:color-mix(in srgb, var(--theme-text-muted) 10%, transparent)">
             <%- icon('image', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
           </div>
           <p class="text-sm font-medium" style="color:var(--theme-text-strong)">

@@ -223,7 +223,7 @@
                 <%= req.translations.noSubmittedImagesText || 'Submit an egg JSON and it will appear here with review status.' %>
               </p>
             </div>
-            <div id="myImagesTable" class="overflow-x-auto rounded-xl border <%= (!images || images.length === 0) ? 'hidden' : '' %>" style="border-color:var(--theme-border)">
+            <div id="myImagesTable" class="overflow-x-auto shadow-sm rounded-xl border <%= (!images || images.length === 0) ? 'hidden' : '' %>" style="border-color:var(--theme-border)">
               <table class="al-table min-w-full">
                 <thead class="al-table-head">
                   <tr>
@@ -286,7 +286,7 @@
         <!-- Login history -->
         <div class="al-card p-5">
           <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= req.translations.loginHistory || 'Login history' %></p>
-          <div class="overflow-x-auto rounded-xl border" style="border-color:var(--theme-border)">
+          <div class="overflow-x-auto shadow-sm rounded-xl border" style="border-color:var(--theme-border)">
             <table class="al-table min-w-full text-sm">
               <colgroup>
                 <col style="min-width:200px">
@@ -351,11 +351,11 @@
       <!-- Manual form -->
       <form id="imManualForm" class="flex flex-col gap-4">
         <div class="grid grid-cols-2 gap-3">
-          <div class="col-span-2"><label class="al-label">Name <span class="text-red-500">*</span></label><input class="al-input" type="text" name="name" required placeholder="e.g. My Custom Game"></div>
+          <div class="col-span-2"><label class="al-label">Name <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="name" required placeholder="e.g. My Custom Game"></div>
           <div><label class="al-label">Author</label><input class="al-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
           <div><label class="al-label">Author Name</label><input class="al-input" type="text" name="authorName" placeholder="Your Name"></div>
-          <div class="col-span-2"><label class="al-label">Startup Command <span class="text-red-500">*</span></label><input class="al-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
-          <div class="col-span-2"><label class="al-label">Docker images (JSON array) <span class="text-red-500">*</span></label><input class="al-input" type="text" name="dockerImages" required placeholder='[{"game":"ghcr.io/you/image:latest"}]' style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+          <div class="col-span-2"><label class="al-label">Startup Command <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+          <div class="col-span-2"><label class="al-label">Docker images (JSON array) <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="dockerImages" required placeholder='[{"game":"ghcr.io/you/image:latest"}]' style="font-family:ui-monospace,monospace;font-size:12px;"></div>
           <div class="col-span-2"><label class="al-label">Description</label><textarea class="al-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
           <div class="col-span-2"><label class="al-label">Variables <span class="font-normal" style="color:var(--theme-text-muted)">(JSON array, optional)</span></label><textarea class="al-input" name="variables" rows="4" placeholder="[]" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;">[]</textarea></div>
         </div>

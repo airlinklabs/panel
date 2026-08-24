@@ -32,7 +32,7 @@
                 <label for="serverName" class="al-label"><%= req.translations.name %>:</label>
                 <div class="flex items-center gap-2">
                   <input id="serverName" name="name" value="<%= server.name %>" class="al-input flex-1">
-                  <button type="button" onclick="generateRandomName()" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-neutral-200 dark:hover:bg-neutral-600" style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
+                  <button type="button" onclick="generateRandomName()" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-[var(--theme-bg-hover)]" style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
                     <%- icon('dices', { size: 15 }) %>
                   </button>
                 </div>
@@ -244,8 +244,8 @@
                         <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
                       </div>
                       <div>
-                        <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
-                        <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
+                        <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Startup Command Permissions</h3>
+                        <p class="text-xs" style="color:var(--theme-text-muted)">When enabled, users can modify the startup command for this server.</p>
                       </div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
@@ -275,8 +275,8 @@
                     <% } %>
                   </span>
                   <div>
-                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Status: <span id="serverStatusText" style="<%= server.Suspended ? 'color:var(--theme-danger)' : 'color:var(--theme-success)' %>"><%= server.Suspended ? 'Suspended' : 'Active' %></span></p>
-                    <p class="text-xs text-neutral-500">Server ID: <%= server.UUID %></p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text)">Status: <span id="serverStatusText" style="<%= server.Suspended ? 'color:var(--theme-danger)' : 'color:var(--theme-success)' %>"><%= server.Suspended ? 'Suspended' : 'Active' %></span></p>
+                    <p class="text-xs" style="color:var(--theme-text-muted)">Server ID: <%= server.UUID %></p>
                   </div>
                 </div>
 
@@ -284,17 +284,17 @@
                   <div class="flex flex-col md:flex-row md:items-center justify-between">
                     <div class="flex items-center mb-2 md:mb-0">
                       <div class="flex-shrink-0 mr-3">
-                        <%- icon('triangle-alert', { size: 24, class: 'text-yellow-500' }) %>
+                        <%- icon('triangle-alert', { size: 24, style: 'color:var(--theme-warning)' }) %>
                       </div>
                       <div>
-                        <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Server Suspension</h3>
-                        <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, the server will be suspended and stopped. Users will not be able to start the server while it's suspended.</p>
+                        <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Server Suspension</h3>
+                        <p class="text-xs" style="color:var(--theme-text-muted)">When enabled, the server will be suspended and stopped. Users will not be able to start the server while it's suspended.</p>
                       </div>
                     </div>
                     <label for="suspendServer" class="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" name="Suspended" id="suspendServer" aria-label="Server suspension" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                      <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="suspendServerLabel"><%= server.Suspended ? 'Suspended' : 'Active' %></span>
+                      <span class="ms-3 text-sm font-medium" style="color:var(--theme-text)" id="suspendServerLabel"><%= server.Suspended ? 'Suspended' : 'Active' %></span>
                     </label>
                   </div>
                 </div>
@@ -307,8 +307,8 @@
                     <%- icon('calendar', { size: 20, class: 'shrink-0' }) %>
                   </span>
                   <div>
-                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Created</p>
-                    <p class="text-xs text-neutral-500"><%= new Date(server.createdAt).toLocaleString() %></p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text)">Created</p>
+                    <p class="text-xs" style="color:var(--theme-text-muted)"><%= new Date(server.createdAt).toLocaleString() %></p>
                   </div>
                 </div>
               </div>
@@ -320,12 +320,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <div class="flex items-center gap-3 mb-4">
-                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-purple-100 text-purple-500 dark:bg-purple-500/15 dark:text-purple-400">
+                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full" style="background:color-mix(in srgb, var(--theme-accent) 12%, transparent); color:var(--theme-accent)">
                     <%- icon('arrow-right-left', { size: 20, class: 'shrink-0' }) %>
                   </span>
                   <div>
-                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Transfer Server</p>
-                    <p class="text-xs text-neutral-500">Move this server to a different node</p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text)">Transfer Server</p>
+                    <p class="text-xs" style="color:var(--theme-text-muted)">Move this server to a different node</p>
                   </div>
                 </div>
                 <button type="button" id="transferServerBtn" class="al-btn-secondary w-full" <%= server.Installing ? 'disabled' : '' %>>
@@ -333,16 +333,16 @@
                   Transfer to another node
                 </button>
                 <% if (server.Installing) { %>
-                  <p class="text-xs text-amber-500 mt-2">Server is currently installing and cannot be transferred.</p>
+                  <p class="text-xs mt-2" style="color:var(--theme-warning)">Server is currently installing and cannot be transferred.</p>
                 <% } %>
               </div>
               <div>
                 <div id="transferStatus" class="hidden rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
                   <div class="flex items-center gap-2">
-                    <div class="animate-spin rounded-full h-4 w-4 border-2 border-purple-500 border-t-transparent"></div>
+                    <div class="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style="border-color:var(--theme-accent); border-top-color:transparent"></div>
                     <span id="transferStatusText" class="text-sm font-medium">Transfer in progress...</span>
                   </div>
-                  <p id="transferStatusDetail" class="text-xs text-neutral-500 mt-2"></p>
+                  <p id="transferStatusDetail" class="text-xs mt-2" style="color:var(--theme-text-muted)"></p>
                 </div>
               </div>
             </div>
@@ -396,7 +396,7 @@
               Ports:
             </label>
             <div id="transferPortsContainer" class="space-y-2">
-              <p class="text-xs text-neutral-500">Select a node first to see available ports.</p>
+              <p class="text-xs" style="color:var(--theme-text-muted)">Select a node first to see available ports.</p>
             </div>
             <button type="button" id="addTransferPortBtn" class="al-btn-secondary mt-2 w-full hidden">
               <%- icon('plus', { size: 14, class: 'shrink-0' }) %>

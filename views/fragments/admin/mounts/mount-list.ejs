@@ -40,13 +40,13 @@
               <div class="font-medium" style="color:var(--theme-text-strong);"><%= m.name %></div>
             </td>
             <td class="al-table-td">
-              <code class="inline-block max-w-full truncate rounded-md bg-neutral-100 px-2 py-1 font-mono text-xs dark:bg-neutral-800" style="color:var(--theme-text);" title="<%= m.source %>"><%= m.source %></code>
+              <code class="inline-block max-w-full truncate rounded-md px-2 py-1 font-mono text-xs" style="background:var(--theme-bg-secondary);color:var(--theme-text);" title="<%= m.source %>"><%= m.source %></code>
             </td>
             <td class="al-table-td">
-              <code class="inline-block max-w-full truncate rounded-md bg-neutral-100 px-2 py-1 font-mono text-xs dark:bg-neutral-800" style="color:var(--theme-text);" title="<%= m.target %>"><%= m.target %></code>
+              <code class="inline-block max-w-full truncate rounded-md px-2 py-1 font-mono text-xs" style="background:var(--theme-bg-secondary);color:var(--theme-text);" title="<%= m.target %>"><%= m.target %></code>
             </td>
             <td class="al-table-td">
-              <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <%= m.readOnly ? 'bg-amber-600/10 text-amber-700 dark:text-yellow-400 ring-amber-600/20' : 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20' %>">
+              <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" <%= m.readOnly ? 'style="background:var(--theme-warning-bg);color:var(--theme-warning)"' : 'style="background:var(--theme-success-bg);color:var(--theme-success)"' %>>
                 <%= m.readOnly ? 'Read-only' : 'Read-write' %>
               </span>
             </td>

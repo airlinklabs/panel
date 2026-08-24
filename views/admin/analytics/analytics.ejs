@@ -75,7 +75,7 @@
             <!-- Heaviest servers -->
             <div class="al-card overflow-hidden">
               <h2 class="al-card-header">Highest allocated servers</h2>
-              <div class="divide-y divide-neutral-100 dark:divide-white/5" id="sv-heavy"></div>
+              <div class="divide-y divide-[var(--theme-border)]" id="sv-heavy"></div>
             </div>
 
           </div>
@@ -140,15 +140,15 @@
           <div class="al-card overflow-hidden">
             <h2 class="al-card-header">Recent logins</h2>
             <div class="overflow-x-auto">
-              <table class="min-w-full text-sm divide-y divide-neutral-100 dark:divide-white/5">
-                <thead class="bg-neutral-100/60 dark:bg-white/[0.02]">
+              <table class="min-w-full text-sm divide-y divide-[var(--theme-border)]">
+                <thead style="background:var(--theme-bg-secondary)">
                   <tr>
-                    <th class="px-5 py-3 text-left text-xs font-medium text-neutral-500">User ID</th>
-                    <th class="px-5 py-3 text-left text-xs font-medium text-neutral-500">IP Address</th>
-                    <th class="px-5 py-3 text-left text-xs font-medium text-neutral-500">Time</th>
+                    <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">User ID</th>
+                    <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">IP Address</th>
+                    <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Time</th>
                   </tr>
                 </thead>
-                <tbody id="ac-logins-table" class="divide-y divide-neutral-100 dark:divide-white/5"></tbody>
+                <tbody id="ac-logins-table" class="divide-y divide-[var(--theme-border)]"></tbody>
               </table>
             </div>
           </div>

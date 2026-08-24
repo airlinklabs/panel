@@ -67,13 +67,15 @@
           <div>
             <label for="name" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyName || 'Name' %></label>
             <input type="text" name="name" id="name" required
-              class="block w-full rounded-xl px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition"
+              class="block w-full rounded-xl px-3 py-2 text-sm border transition focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-accent)]"
+              style="background:var(--theme-bg-input);border-color:var(--theme-border);color:var(--theme-text-strong);"
               placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
           </div>
           <div>
             <label for="description" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyDescriptionLabel || 'Description' %> <span style="color:var(--theme-text-placeholder);" class="font-normal">(optional)</span></label>
             <input type="text" name="description" id="description"
-              class="block w-full rounded-xl px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition"
+              class="block w-full rounded-xl px-3 py-2 text-sm border transition focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-accent)]"
+              style="background:var(--theme-bg-input);border-color:var(--theme-border);color:var(--theme-text-strong);"
               placeholder="What is this key used for?">
           </div>
         </div>
@@ -82,32 +84,38 @@
           <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);">Presets</p>
           <div class="flex flex-wrap gap-2">
             <button type="button" data-preset="full-admin"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5">
+              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
+              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
               <%- icon('shield', { class: 'size-3', strokeWidth: 1.5 }) %>
               Full Admin
             </button>
             <button type="button" data-preset="read-only"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5">
+              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
+              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
               <%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %>
               Read-Only
             </button>
             <button type="button" data-preset="server-manager"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5">
+              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
+              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
               <%- icon('server', { class: 'size-3', strokeWidth: 1.5 }) %>
               Server Manager
             </button>
             <button type="button" data-preset="user-manager"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5">
+              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
+              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
               <%- icon('user', { class: 'size-3', strokeWidth: 1.5 }) %>
               User Manager
             </button>
             <button type="button" data-preset="node-monitor"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5">
+              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
+              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
               <%- icon('monitor', { class: 'size-3', strokeWidth: 1.5 }) %>
               Node Monitor
             </button>
             <button type="button" data-preset="none"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5">
+              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
+              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
               <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
               Clear All
             </button>
@@ -118,9 +126,10 @@
           <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);">Permissions</p>
           <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
             <% ['servers', 'users', 'nodes', 'settings'].forEach(category => { %>
-              <div class="rounded-xl border border-neutral-200 dark:border-neutral-700/60 overflow-hidden">
+              <div class="rounded-xl border overflow-hidden" style="border-color:var(--theme-border);">
                 <button type="button"
-                  class="category-toggle w-full flex items-center justify-between px-4 py-2.5 text-left bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700/60 transition-colors duration-150"
+                  class="category-toggle w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors duration-150 hover:bg-[var(--theme-bg-hover)]"
+                  style="background:var(--theme-bg-secondary);"
                   aria-expanded="false"
                   onclick="toggleCategory(this)">
                   <div class="flex items-center gap-2">
@@ -133,20 +142,21 @@
                     <% } else { %>
                       <%- icon('key', { size: 16, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                     <% } %>
-                    <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize"><%= category %></span>
+                    <span class="text-xs font-medium capitalize" style="color:var(--theme-text);"><%= category %></span>
                     <span class="category-count text-[10px]" style="color:var(--theme-text-muted)" data-category="<%= category %>">0 selected</span>
                   </div>
                   <%- icon('chevron-down', { size: 14, class: 'category-chevron transition-transform duration-200 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                 </button>
-                <div class="category-panel hidden bg-white dark:bg-neutral-900">
-                  <div class="px-4 py-3 border-t border-neutral-200 dark:border-neutral-700/60">
+                <div class="category-panel hidden" style="background:var(--theme-bg-card);">
+                  <div class="px-4 py-3 border-t" style="border-color:var(--theme-border);">
                   <div class="grid grid-cols-2 gap-2">
                     <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
-                      <label class="permission-label flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+                      <label class="permission-label flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all duration-150 hover:border-[var(--theme-border)] has-[:checked]:border-[var(--theme-accent)] has-[:checked]:bg-[var(--theme-accent-subtle)]"
+                        style="border-color:var(--theme-border);background:var(--theme-bg-secondary);">
                         <input type="checkbox" name="permissions" value="<%= permission.value %>"
                           class="permission-checkbox h-3.5 w-3.5 rounded shrink-0" data-category="<%= category %>"
                           onchange="updateCategoryCount('<%= category %>')">
-                        <span class="permission-label-text text-xs text-neutral-600 dark:text-neutral-300"><%= permission.name.split(' - ')[1] || permission.name %></span>
+                        <span class="permission-label-text text-xs" style="color:var(--theme-text-muted);"><%= permission.name.split(' - ')[1] || permission.name %></span>
                       </label>
                     <% }); %>
                   </div>
@@ -159,12 +169,14 @@
 
         <div class="flex gap-2 py-4 border-t justify-end" style="border-color:var(--theme-border);">
           <button type="button" onclick="hideCreateModal()"
-            class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition active:scale-95 inline-flex items-center gap-2">
+            class="px-4 py-2 text-xs font-medium rounded-xl border transition active:scale-95 inline-flex items-center gap-2 hover:bg-[var(--theme-bg-hover)]"
+            style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
             <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
             Cancel
           </button>
           <button type="submit"
-            class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition active:scale-95 inline-flex items-center gap-2">
+            class="px-4 py-2 text-xs font-medium rounded-xl transition active:scale-95 inline-flex items-center gap-2 hover:bg-[var(--theme-bg-hover)]"
+            style="background:var(--theme-primary);color:var(--theme-accent-text);">
             <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
             Create API key
           </button>
@@ -200,38 +212,41 @@
           <div>
             <label class="block text-xs font-medium mb-1" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyName || 'Name' %></label>
             <input type="text" name="name" id="edit-name" required
-              class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700/50 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition"
+              class="w-full rounded-xl border text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-accent)] transition"
+              style="border-color:var(--theme-border);background:var(--theme-bg-secondary);color:var(--theme-text-strong);"
               placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
           </div>
           <div>
             <label class="block text-xs font-medium mb-1" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyDescriptionLabel || 'Description' %></label>
             <input type="text" name="description" id="edit-description"
-              class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700/50 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition"
+              class="w-full rounded-xl border text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-accent)] transition"
+              style="border-color:var(--theme-border);background:var(--theme-bg-secondary);color:var(--theme-text-strong);"
               placeholder="<%= req.translations.apiKeyDescriptionPlaceholder || 'Used for server management' %>">
           </div>
         </div>
 
         <!-- Quick select -->
         <div class="flex gap-2">
-          <button type="button" id="editSelectAllBtn" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition inline-flex items-center gap-1.5"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %> Select all</button>
-          <button type="button" id="editSelectNoneBtn" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition inline-flex items-center gap-1.5"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> Clear all</button>
-          <button type="button" id="editSelectReadOnlyBtn" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition inline-flex items-center gap-1.5"><%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %> Read only</button>
+          <button type="button" id="editSelectAllBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %> Select all</button>
+          <button type="button" id="editSelectNoneBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> Clear all</button>
+          <button type="button" id="editSelectReadOnlyBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %> Read only</button>
         </div>
 
         <!-- Permissions grid -->
         <div class="space-y-3">
           <% ['servers', 'users', 'nodes', 'settings'].forEach(cat => { %>
-          <div class="rounded-xl border border-neutral-200 dark:border-neutral-700/50 overflow-hidden">
-            <div class="flex items-center justify-between px-4 py-2.5 bg-neutral-50 dark:bg-neutral-800/60">
+          <div class="rounded-xl border overflow-hidden" style="border-color:var(--theme-border);">
+            <div class="flex items-center justify-between px-4 py-2.5" style="background:var(--theme-bg-secondary);">
               <p class="text-xs font-semibold capitalize" style="color:var(--theme-text-muted);"><%= cat %></p>
-              <button type="button" class="edit-select-category text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition" data-category="<%= cat %>">Select all</button>
+              <button type="button" class="edit-select-category text-xs transition hover:text-[var(--theme-text)]" style="color:var(--theme-text-muted);" data-category="<%= cat %>">Select all</button>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 px-4 py-3">
               <% allPermissions.filter(p => p.value.includes(cat)).forEach(permission => { %>
               <label class="flex items-center gap-2 cursor-pointer group">
                 <input id="edit-permission-<%= permission.value %>" name="permissions" value="<%= permission.value %>" type="checkbox"
-                  class="h-3.5 w-3.5 rounded border-neutral-300 dark:border-neutral-600 text-neutral-700 focus:ring-neutral-500 edit-permission-checkbox" data-category="<%= cat %>">
-                <span class="text-xs text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white transition"><%= permission.name %></span>
+                  class="h-3.5 w-3.5 rounded focus:ring-[var(--theme-border-accent)] edit-permission-checkbox" data-category="<%= cat %>"
+                  style="border-color:var(--theme-border);color:var(--theme-text);">
+                <span class="text-xs transition group-hover:text-[var(--theme-text-strong)]" style="color:var(--theme-text);"><%= permission.name %></span>
               </label>
               <% }); %>
             </div>
@@ -243,8 +258,8 @@
 
       <!-- Footer -->
       <div class="flex gap-2 px-6 py-4 border-t justify-end shrink-0" style="border-color:var(--theme-border);">
-        <button type="button" onclick="hideEditModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition inline-flex items-center gap-2"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> Cancel</button>
-        <button type="submit" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 transition inline-flex items-center gap-2"><%- icon('save', { class: 'size-3', strokeWidth: 1.5 }) %> Save changes</button>
+        <button type="button" onclick="hideEditModal()" class="px-4 py-2 text-xs font-medium rounded-xl transition inline-flex items-center gap-2 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);color:var(--theme-text);"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> Cancel</button>
+        <button type="submit" class="px-4 py-2 text-xs font-medium rounded-xl transition inline-flex items-center gap-2 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-primary);color:var(--theme-accent-text);"><%- icon('save', { class: 'size-3', strokeWidth: 1.5 }) %> Save changes</button>
       </div>
     </form>
   </div>
@@ -353,15 +368,13 @@
       const label = cb.closest('.permission-label');
       const text = label.querySelector('.permission-label-text');
       if (cb.checked) {
-        label.classList.add('border-neutral-900', 'dark:border-white/30', 'bg-neutral-900', 'dark:bg-white/10');
-        label.classList.remove('border-neutral-100', 'dark:border-neutral-700/40', 'bg-neutral-50', 'dark:bg-neutral-800/50');
-        text.classList.add('text-white', 'dark:text-white');
-        text.classList.remove('text-neutral-600', 'dark:text-neutral-300');
+        label.style.borderColor = 'var(--theme-accent)';
+        label.style.background = 'var(--theme-accent-subtle)';
+        text.style.color = 'var(--theme-text-strong)';
       } else {
-        label.classList.remove('border-neutral-900', 'dark:border-white/30', 'bg-neutral-900', 'dark:bg-white/10');
-        label.classList.add('border-neutral-100', 'dark:border-neutral-700/40', 'bg-neutral-50', 'dark:bg-neutral-800/50');
-        text.classList.remove('text-white', 'dark:text-white');
-        text.classList.add('text-neutral-600', 'dark:text-neutral-300');
+        label.style.borderColor = 'var(--theme-border)';
+        label.style.background = 'var(--theme-bg-secondary)';
+        text.style.color = 'var(--theme-text-muted)';
       }
     });
   }
@@ -402,11 +415,13 @@
       ['servers', 'users', 'nodes', 'settings'].forEach(cat => updateCategoryCount(cat));
 
       document.querySelectorAll('#createApiKeyModal .preset-btn').forEach(b => {
-        b.classList.remove('bg-neutral-900', 'dark:bg-white', 'text-white', 'dark:text-neutral-900', 'border-neutral-900', 'dark:border-white');
-        b.classList.add('bg-white', 'dark:bg-neutral-800', 'text-neutral-700', 'dark:text-neutral-300', 'border-neutral-200', 'dark:border-neutral-700');
+        b.style.background = 'var(--theme-bg-card)';
+        b.style.color = 'var(--theme-text)';
+        b.style.borderColor = 'var(--theme-border)';
       });
-      this.classList.remove('bg-white', 'dark:bg-neutral-800', 'text-neutral-700', 'dark:text-neutral-300', 'border-neutral-200', 'dark:border-neutral-700');
-      this.classList.add('bg-neutral-900', 'dark:bg-white', 'text-white', 'dark:text-neutral-900', 'border-neutral-900', 'dark:border-white');
+      this.style.background = 'var(--theme-primary)';
+      this.style.color = 'var(--theme-accent-text)';
+      this.style.borderColor = 'var(--theme-primary)';
     });
   });
 

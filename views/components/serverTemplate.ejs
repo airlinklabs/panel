@@ -17,45 +17,15 @@
             item,
             url: (item.url || '#').replace(':uuid', server.UUID).replace(':id', server.id),
           }));
-        const GROUP_ORDER = ['run', 'data', 'manage', 'settings'];
-        const groupLabel = (g) => {
-          const t = (typeof req !== 'undefined' && req && req.translations) || {};
-          if (g === 'run') return t.navGroupRun || 'Run';
-          if (g === 'data') return t.navGroupData || 'Data';
-          if (g === 'manage') return t.navGroupManage || 'Manage';
-          if (g === 'settings') return t.navGroupSettings || 'Settings';
-          return null;
-        };
-        const grouped = GROUP_ORDER
-          .map(g => ({ g, entries: navEntries.filter(e => (e.item.group || 'manage') === g) }))
-          .filter(grp => grp.entries.length > 0);
-        const activeEntry = navEntries.find(entry => isCurrentItem(entry.url));
-        const activeGroup = activeEntry ? (activeEntry.item.group || 'manage') : GROUP_ORDER[0];
        %>
-       <!-- Mobile server nav — groups as tabs, members shown under the active tab -->
+       <!-- Mobile server nav — flat list -->
        <div class="block sm:hidden mt-3">
-         <% if (grouped.length > 1) { %>
-         <div class="flex gap-1 overflow-x-auto pb-2" role="tablist" aria-label="Server sections">
-           <% grouped.forEach(grp => { %>
-           <button type="button" role="tab" aria-selected="<%= grp.g === activeGroup ? 'true' : 'false' %>"
-             data-nav-group-tab="<%= grp.g %>"
-             class="nav-group-tab flex items-center gap-1.5 py-1.5 px-3 text-sm rounded-xl border transition whitespace-nowrap"
-             style="color:var(--theme-text-muted); border-color:transparent;">
-             <%= groupLabel(grp.g) %>
-           </button>
-           <% }); %>
-         </div>
-         <% } %>
          <div class="flex flex-wrap gap-1">
-           <% grouped.forEach(grp => { %>
-           <div data-nav-group="<%= grp.g %>" class="<%= grp.g === activeGroup ? '' : 'hidden' %> flex flex-wrap gap-1">
-             <% grp.entries.forEach(entry => { %>
-             <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
-               <%- entry.item.icon %>
-               <%= entry.item.label %>
-             </a>
-             <% }); %>
-           </div>
+           <% navEntries.forEach(entry => { %>
+           <a href="<%= entry.url %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" <%= isCurrentItem(entry.url) ? 'data-active="true"' : '' %>>
+             <%- entry.item.icon %>
+             <%= entry.item.label %>
+           </a>
            <% }); %>
          </div>
        </div>
@@ -71,9 +41,6 @@
     background: color-mix(in srgb, var(--theme-accent) 10%, transparent);
     color: var(--theme-accent);
     font-weight: 500;
-  }
-  .nav-group-tab[data-active-group="true"] {
-    background: color-mix(in srgb, var(--theme-accent) 10%, transparent);
   }
  </style>
 
@@ -161,32 +128,5 @@
        syncActiveLink();
      }
 
-      // Mobile group tabs — show the active group's items, keep the current
-      // path's group selected on load.
-      const tabButtons = root.querySelectorAll('[data-nav-group-tab]');
-      const groups = root.querySelectorAll('[data-nav-group]');
-
-      function selectGroup(name) {
-        groups.forEach(function(group) {
-          group.classList.toggle('hidden', group.getAttribute('data-nav-group') !== name);
-        });
-        tabButtons.forEach(function(btn) {
-          const on = btn.getAttribute('data-nav-group-tab') === name;
-          btn.setAttribute('aria-selected', on ? 'true' : 'false');
-          if (on) {
-            btn.style.color = 'var(--theme-accent)';
-            btn.style.borderColor = 'var(--theme-accent)';
-          } else {
-            btn.style.color = 'var(--theme-text-muted)';
-            btn.style.borderColor = 'transparent';
-          }
-        });
-      }
-
-      tabButtons.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          selectGroup(btn.getAttribute('data-nav-group-tab'));
-        });
-      });
    })();
   </script>

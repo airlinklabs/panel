@@ -59,7 +59,8 @@
               <img src="https://github.com/<%= lead.login %>.png?size=80"
                    alt="<%= lead.login %>"
                    loading="lazy"
-                   class="h-12 w-12 rounded-xl border border-neutral-200 dark:border-white/10 object-cover shrink-0"
+                   class="h-12 w-12 rounded-xl object-cover shrink-0"
+                   style="border-color:var(--theme-border)"
                    onerror="this.src='https://github.com/ghost.png'">
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-semibold truncate" style="color:var(--theme-text-strong);"><%= lead.login %></p>
@@ -85,7 +86,7 @@
           </div>
           <div id="contributors-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             <div class="col-span-full flex items-center gap-2 py-2">
-              <div class="h-4 w-4 border-2 border-neutral-300 dark:border-neutral-600 border-t-neutral-600 dark:border-t-neutral-300 rounded-full animate-spin"></div>
+              <div class="h-4 w-4 border-2 rounded-full animate-spin" style="border-color:var(--theme-border);border-top-color:var(--theme-text)"></div>
               <span class="text-sm" style="color:var(--theme-text-muted);">Loading contributors…</span>
             </div>
           </div>

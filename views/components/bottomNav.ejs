@@ -177,7 +177,6 @@
           <span class="text-[13px]"><%= mT.navBack || 'Back' %></span>
         </button>
         <% mGrouped.forEach(grp => { %>
-        <p class="px-3.5 py-1 text-[11px] font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);"><%= mGroupLabel(grp.g) %></p>
           <% grp.entries.forEach(entry => { %>
           <a href="<%= entry.url %>" role="menuitem" class="server-anim-in sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:<%= mAnimIdx++ %>" data-sheet-match-url="<%= entry.url %>">
             <%- entry.item.icon %>
@@ -224,7 +223,6 @@
       <% const admGroups = adminSidebarGroups || []; %>
       <% if (admGroups.length > 0) { %>
         <% admGroups.forEach(function(group) { %>
-        <p class="px-3.5 py-1 text-[11px] font-medium uppercase tracking-wide<%= group !== admGroups[0] ? ' mt-2' : '' %>" style="color:var(--theme-text-muted);"><%= group.label %></p>
         <% group.items.forEach(function(item) { %>
         <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:<%= admSheetIdx++ %>">
           <%- item.icon %>

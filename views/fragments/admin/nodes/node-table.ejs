@@ -1,5 +1,5 @@
 <!-- Node table fragment — replaces #nodeTable on delete -->
-<div id="admin-nodes-table" class="overflow-x-auto rounded-xl border" style="border-color:var(--theme-border);box-shadow:var(--theme-shadow-sm)">
+<div id="admin-nodes-table" class="overflow-x-auto shadow-sm rounded-xl border" style="border-color:var(--theme-border);">
   <% if (nodes.length === 0) { %>
     <%- include('../../../components/ui/empty-state', {
       iconName: 'network',
@@ -48,25 +48,32 @@
           </td>
           <td class="al-table-td"><%= node.address %>:<%= node.port %>
             <div class="mt-1 ml-2 inline-flex items-center rounded-md
-            <%= node.versionRelease ? 'bg-emerald-600 text-white ring-emerald-700' : 'bg-neutral-200 text-neutral-700 dark:bg-neutral-300/20 dark:text-neutral-300 ring-neutral-300/40 dark:ring-neutral-400/20' %>
-            px-2 py-1 text-xs font-medium ring-1 ring-inset">
+            <%= node.versionRelease ? '' : '' %>
+            px-2 py-1 text-xs font-medium ring-1 ring-inset"
+              style="<%= node.versionRelease ? 'background:var(--theme-success-bg);color:var(--theme-success);box-shadow:inset 0 0 0 1px var(--theme-success)' : 'background:var(--theme-badge-neutral-bg);color:var(--theme-badge-neutral-text);box-shadow:inset 0 0 0 1px var(--theme-border)' %>">
               <%= node.versionRelease || (req.translations.unknown || 'unknown') %>
             </div></td>
           <td class="al-table-td"><%= node.instances ? node.instances.length : 0 %></td>
           <td class="al-table-td">
-            <div class="flex gap-3 whitespace-nowrap">
-              <button onclick="configure('<%= node.id %>')" type="button" class="al-btn-secondary text-xs"><%- icon('settings', { class: 'size-3', strokeWidth: 1.5 }) %>Configure</button>
-              <a href="./node/<%= node.id %>" class="al-btn-secondary text-xs inline-flex items-center gap-1"><%- icon('pencil', { class: 'size-3', strokeWidth: 1.5 }) %>Edit</a>
+            <div class="flex items-center gap-1.5">
+              <button onclick="configure('<%= node.id %>')" type="button" title="Configure" aria-label="Configure node"
+                class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                <%- icon('settings', { size: 16, class: 'shrink-0' }) %>
+              </button>
+              <a href="./node/<%= node.id %>" onclick="event.stopPropagation()" title="Edit" aria-label="Edit node"
+                class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
+              </a>
               <button
                 hx-delete="/admin/node/<%= node.id %>"
                 hx-target="#admin-nodes-table"
                 hx-swap="outerHTML"
                 hx-confirm="This will permanently remove the node. This cannot be undone."
                 type="button"
-                class="al-btn-ghost"
-                style="color:var(--theme-danger);"
-                aria-label="Delete node">
-                <%- icon('trash-2', { size: 16 }) %>
+                title="Delete" aria-label="Delete node"
+                class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                style="color:var(--theme-danger);">
+                <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
               </button>
             </div>
           </td>

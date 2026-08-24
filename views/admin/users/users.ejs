@@ -77,11 +77,11 @@
               <p class="text-xs truncate" style="color:var(--theme-text-muted);"><span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset"
                 style="<%= user.isAdmin ? 'background:var(--theme-accent);color:var(--theme-accent-text)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>"><%= user.isAdmin ? (req.translations.admin || 'Admin') : (req.translations.user || 'User') %></span></p>
             </div>
-            <div class="flex items-center gap-2">
-              <a href="/admin/users/view/<%= user.id %>/" class="al-btn-ghost" aria-label="View user"><%- icon('external-link', { size: 16 }) %></a>
-              <a href="/admin/users/edit/<%= user.id %>/" class="al-btn-ghost" aria-label="Edit user"><%- icon('pencil', { size: 16 }) %></a>
-              <button  onclick="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user">
-                <%- icon('trash-2', { size: 16 }) %>
+            <div class="flex items-center gap-1">
+              <a href="/admin/users/view/<%= user.id %>/" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="View user"><%- icon('external-link', { size: 16, class: 'shrink-0' }) %></a>
+              <a href="/admin/users/edit/<%= user.id %>/" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Edit user"><%- icon('pencil', { size: 16, class: 'shrink-0' }) %></a>
+              <button onclick="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);" aria-label="Delete user">
+                <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
               </button>
             </div>
           </div>
@@ -128,16 +128,23 @@
                   <td class="al-table-td">
                     <div class="mt-1 ml-2 inline-flex items-center rounded-md
                     px-2 py-1 text-xs font-medium ring-1 ring-inset"
-                    style="<%= user.isAdmin ? 'background:var(--theme-success-bg);color:var(--theme-success)' : 'background:var(--theme-warning-bg);color:var(--theme-warning)' %>">
+                    style="<%= user.isAdmin ? 'background:var(--theme-success-bg);color:var(--theme-success)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>">
                       <%= user.isAdmin ? 'Admin' : 'User' %>
                     </div></td>
                   <td class="al-table-td"><%= user.servers ? user.servers.length : 0 %></td>
                   <td class="al-table-td">
-                    <div class="flex gap-3 whitespace-nowrap">
-                      <a href="/admin/users/view/<%= user.id %>/" class="al-btn-secondary text-xs">View</a>
-                      <a href="/admin/users/edit/<%= user.id %>/" class="al-btn-primary text-xs">Edit</a>
-                      <button  onclick="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user">
-                        <%- icon('trash-2', { size: 16 }) %>
+                    <div class="flex items-center gap-1.5">
+                      <a href="/admin/users/view/<%= user.id %>/" onclick="event.stopPropagation()" title="View" aria-label="View user"
+                        class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                        <%- icon('external-link', { size: 16, class: 'shrink-0' }) %>
+                      </a>
+                      <a href="/admin/users/edit/<%= user.id %>/" onclick="event.stopPropagation()" title="Edit" aria-label="Edit user"
+                        class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                        <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
+                      </a>
+                      <button onclick="event.stopPropagation(); deleteUser('<%= user.id %>')" type="button" title="Delete" aria-label="Delete user"
+                        class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);">
+                        <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                       </button>
                     </div>
                   </td>

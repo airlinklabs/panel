@@ -14,31 +14,31 @@
       ] }) %>
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-          <h1 class="text-xl font-semibold tracking-tight text-neutral-800 dark:text-white">API Documentation</h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500">Learn how to use the AirLink API</p>
+          <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">API Documentation</h1>
+          <p class="mt-1 tracking-tight text-sm" style="color:var(--theme-text-muted)">Learn how to use the AirLink API</p>
         </div>
       </div>
       <div class="px-8 mt-5">
         <div class="rounded-xl p-6" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
           <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-              <h1 class="text-base font-semibold leading-6 text-neutral-800 dark:text-white">Getting Started</h1>
-              <p class="mt-2 text-sm text-neutral-500">To use the API, you need an API key with the appropriate permissions.</p>
+              <h1 class="text-base font-semibold leading-6" style="color:var(--theme-text-strong)">Getting Started</h1>
+              <p class="mt-2 text-sm" style="color:var(--theme-text-muted)">To use the API, you need an API key with the appropriate permissions.</p>
             </div>
           </div>
           <div class="mt-4">
-            <p class="text-sm text-neutral-600 dark:text-neutral-300">API keys can be created in the <a href="/admin/apikeys" class="text-blue-600 dark:text-blue-400 hover:underline">API Keys</a> section of the admin panel.</p>
-            <p class="text-sm text-neutral-600 dark:text-neutral-300 mt-2">All API requests must include an <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">Authorization</code> header with a Bearer token:</p>
+            <p class="text-sm" style="color:var(--theme-text-muted)">API keys can be created in the <a href="/admin/apikeys" class="hover:underline" style="color:var(--theme-accent)">API Keys</a> section of the admin panel.</p>
+            <p class="text-sm mt-2" style="color:var(--theme-text-muted)">All API requests must include an <code class="px-1 py-0.5 rounded" style="background:var(--theme-bg-secondary)">Authorization</code> header with a Bearer token:</p>
             <pre class="mt-2 p-3 rounded-md overflow-x-auto" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><code>Authorization: Bearer YOUR_API_KEY</code></pre>
           </div>
 
           <div class="mt-8">
-            <h2 class="text-lg font-semibold leading-6 text-neutral-800 dark:text-white">Available Endpoints</h2>
+            <h2 class="text-lg font-semibold leading-6" style="color:var(--theme-text-strong)">Available Endpoints</h2>
 
             <div class="mt-4 space-y-8">
               <% apiEndpoints.forEach(category => { %>
                 <div>
-                  <h3 class="text-md font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700 pb-2 mb-4"><%= category.category %> Endpoints</h3>
+                  <h3 class="text-md font-medium border-b pb-2 mb-4" style="color:var(--theme-text-strong);border-color:var(--theme-border)"><%= category.category %> Endpoints</h3>
                   <div class="space-y-6">
                     <% category.endpoints.forEach(endpoint => { %>
                       <div class="rounded-md overflow-hidden" style="border:1px solid var(--theme-border)">
@@ -54,19 +54,19 @@
                               style="background:var(--theme-danger-bg);color:var(--theme-danger);--tw-ring-color:var(--theme-danger)"
                             <% } %>"><%= endpoint.method %></span>
                           <code class="text-sm font-mono"><%= endpoint.path %></code>
-                          <span class="ml-auto text-xs text-neutral-500">Permission: <%= endpoint.permission %></span>
+                          <span class="ml-auto text-xs" style="color:var(--theme-text-muted)">Permission: <%= endpoint.permission %></span>
                         </div>
                         <div class="px-4 py-3">
-                          <p class="text-sm text-neutral-600 dark:text-neutral-300"><%= endpoint.description %></p>
+                          <p class="text-sm" style="color:var(--theme-text-muted)"><%= endpoint.description %></p>
                           <% if (endpoint.requestExample) { %>
                             <div class="mt-3">
-                              <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Request Body:</p>
+                              <p class="text-xs font-medium" style="color:var(--theme-text)">Request Body:</p>
                               <pre class="mt-1 p-2 rounded-md overflow-x-auto text-xs" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><code><%= endpoint.requestExample %></code></pre>
                             </div>
                           <% } %>
                           <% if (endpoint.responseExample) { %>
                             <div class="mt-3">
-                              <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Response:</p>
+                              <p class="text-xs font-medium" style="color:var(--theme-text)">Response:</p>
                               <pre class="mt-1 p-2 rounded-md overflow-x-auto text-xs" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><code><%= endpoint.responseExample %></code></pre>
                             </div>
                           <% } %>
@@ -80,15 +80,15 @@
           </div>
 
           <div class="mt-8">
-            <h2 class="text-lg font-semibold leading-6 text-neutral-800 dark:text-white">Response Format</h2>
-            <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">All successful responses return a JSON object with a <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">data</code> property containing the requested information.</p>
+            <h2 class="text-lg font-semibold leading-6" style="color:var(--theme-text-strong)">Response Format</h2>
+            <p class="mt-2 text-sm" style="color:var(--theme-text-muted)">All successful responses return a JSON object with a <code class="px-1 py-0.5 rounded" style="background:var(--theme-bg-secondary)">data</code> property containing the requested information.</p>
             <pre class="mt-2 p-3 rounded-md overflow-x-auto" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><code>{
   "data": {
     // Response data here
   }
 }</code></pre>
 
-            <p class="mt-4 text-sm text-neutral-600 dark:text-neutral-300">Error responses include an <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">error</code> property with a description of the error.</p>
+            <p class="mt-4 text-sm" style="color:var(--theme-text-muted)">Error responses include an <code class="px-1 py-0.5 rounded" style="background:var(--theme-bg-secondary)">error</code> property with a description of the error.</p>
             <pre class="mt-2 p-3 rounded-md overflow-x-auto" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><code>{
   "error": "Error message"
 }</code></pre>

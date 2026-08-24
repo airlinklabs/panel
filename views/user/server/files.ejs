@@ -58,7 +58,7 @@ function escJS(val) {
 }
 %>
 
-<main class="h-screen m-auto text-neutral-800 dark:text-white">
+<main class="h-screen m-auto" style="color:var(--theme-text)">
   <div class="flex h-full">
     <!-- Sidebar -->
     <div class="hidden lg:block w-60 h-full">
@@ -161,7 +161,7 @@ function escJS(val) {
           <div class="al-file-panel overflow-x-auto rounded-xl" style="border:1px solid var(--theme-border);">
             <div class="px-3 py-2.5 flex items-center overflow-hidden">
               <nav class="flex items-center gap-0 text-xs min-w-0 overflow-hidden">
-                <a class="hover:text-neutral-600 dark:hover:text-neutral-300 transition shrink-0" href="./files" style="color:var(--theme-text-muted)">/home/container/</a><span style="color:var(--theme-text-muted)"></span>
+                <a class="hover:text-[var(--theme-text)] transition shrink-0" href="./files" style="color:var(--theme-text-muted)">/home/container/</a><span style="color:var(--theme-text-muted)"></span>
                 <%
                     if (req.query.path) {
                         const parts = req.query.path.split('/');
@@ -172,7 +172,7 @@ function escJS(val) {
 
                             if (index < parts.length - 1) {
                                 %>
-                                <a href="./files?path=<%= currentPath %>" class="hover:text-neutral-700 dark:hover:text-neutral-200 transition" style="color:var(--theme-text-muted)"><%= part %></a><span class="mx-0.5" style="color:var(--theme-text-muted)">/</span>
+                                <a href="./files?path=<%= currentPath %>" class="hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)"><%= part %></a><span class="mx-0.5" style="color:var(--theme-text-muted)">/</span>
                                 <%
                                 currentPath += '/';
                             } else {
@@ -986,13 +986,13 @@ function openCreateFileModal() {
     const file = parts[parts.length - 1];
     previewEl.textContent = '';
     const span1 = document.createElement('span');
-    span1.className = 'text-neutral-400';
+    span1.style.color = 'var(--theme-text-muted)';
     span1.textContent = 'Will create: ';
     const span2 = document.createElement('span');
-    span2.className = 'text-blue-500 dark:text-blue-400';
+    span2.style.color = 'var(--theme-accent)';
     span2.textContent = folders + '/';
     const span3 = document.createElement('span');
-    span3.className = 'text-neutral-700 dark:text-neutral-300';
+    span3.style.color = 'var(--theme-text)';
     span3.textContent = file || '...';
     previewEl.appendChild(span1);
     previewEl.appendChild(span2);

@@ -156,10 +156,6 @@
                         </a>
                       </li>
                       <% srvGrouped.forEach(grp=> { %>
-                        <p class="pl-7 text-[11px] font-medium pt-3 pb-1 uppercase tracking-wide"
-                          style="color:var(--theme-text-muted);"><span>
-                            <%= srvGroupLabel(grp.g) %>
-                          </span></p>
                         <% grp.entries.forEach(entry=> { %>
                           <li class="nav-item server-anim-in" style="--i:<%= srvAnimIdx++ %>">
                             <a href="<%= entry.url %>"
@@ -349,12 +345,12 @@
         if (onAccount) {
           account.style.background = pillBg;
           account.style.color = pillFg;
-          account.style.fontWeight = '700';
+          account.style.borderRadius = '0.75rem';
           if (userText) userText.parentElement.style.color = pillFg;
         } else {
           account.style.background = '';
           account.style.color = '';
-          account.style.fontWeight = '';
+          account.style.borderRadius = '';
           if (userText) userText.parentElement.style.color = '';
         }
       }
@@ -372,7 +368,6 @@
           if (logoImg) logoImg.style.background = pillFg;
           if (logoTitle) {
             logoTitle.style.color = pillFg;
-            logoTitle.style.fontWeight = '700';
           }
         } else {
           if (logoBlock) {
@@ -383,7 +378,6 @@
           if (logoImg) logoImg.style.background = '';
           if (logoTitle) {
             logoTitle.style.color = '';
-            logoTitle.style.fontWeight = '';
           }
         }
       }

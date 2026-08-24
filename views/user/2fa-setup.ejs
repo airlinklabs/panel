@@ -14,7 +14,7 @@
 
       <div class="al-page-header mb-5">
         <% if (required) { %>
-          <div class="mb-4 rounded-lg border border-amber-600/40 bg-amber-600/10 px-4 py-3 text-sm" style="color:var(--theme-text-strong)">
+          <div class="mb-4 rounded-lg border px-4 py-3 text-sm" style="border-color:color-mix(in srgb, var(--theme-warning) 40%, transparent);background:color-mix(in srgb, var(--theme-warning) 10%, transparent)" style="color:var(--theme-text-strong)">
             <strong>Two-factor authentication is required</strong> to access the admin panel. Enable it now to continue.
           </div>
         <% } %>
@@ -44,7 +44,7 @@
           </ol>
 
           <div class="flex flex-col items-center mb-7">
-            <div class="rounded-2xl border p-1.5" style="border-color:var(--theme-border);background:#fff">
+            <div class="rounded-2xl border p-1.5" style="border-color:var(--theme-border);background:var(--theme-bg-card)">
               <img src="<%= qrDataUrl %>" alt="QR code" class="h-48 w-48" width="220" height="220">
             </div>
             <p class="text-sm mt-4 mb-2" style="color:var(--theme-text-muted)">Can't scan? Enter this key manually in your authenticator app:</p>

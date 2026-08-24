@@ -106,7 +106,7 @@
               <% let srvIdx = 0; servers.forEach(function(server) { %>
               <tr style="--i:<%= srvIdx++ %>" class="al-table-tr cursor-pointer server-row" data-id="<%= server.id %>" data-uuid="<%= server.UUID %>">
                 <td class="al-table-td w-10">
-                  <input type="checkbox" class="server-checkbox rounded border-neutral-300 dark:border-neutral-600 text-neutral-800 dark:bg-neutral-700 cursor-pointer"
+                  <input type="checkbox" class="server-checkbox rounded cursor-pointer" style="border-color:var(--theme-border-input);color:var(--theme-text-strong);background:var(--theme-bg-secondary)"
                     value="<%= server.id %>" data-uuid="<%= server.UUID %>" data-edit-id="<%= server.id %>" data-name="<%= server.name %>">
                 </td>
                 <td class="al-table-td">

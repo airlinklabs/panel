@@ -22,20 +22,20 @@
       </div>
 
       <div class="al-page-body">
-        <div class="bg-white dark:bg-neutral-800/50 rounded-xl p-6 shadow-lg border border-neutral-200 dark:border-neutral-700/30">
+        <div class="rounded-xl p-6 shadow-lg border" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
           <form id="imageEditForm" class="flex flex-col gap-4">
             <div class="grid grid-cols-2 gap-3">
-              <div class="col-span-2"><label class="al-label">Name <span class="text-red-500">*</span></label><input class="al-input" type="text" name="name" required value="<%= image.name || '' %>"></div>
+              <div class="col-span-2"><label class="al-label">Name <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="name" required value="<%= image.name || '' %>"></div>
               <div><label class="al-label"><%= req.translations.author || 'Author' %></label><input class="al-input" type="text" name="author" value="<%= image.author || '' %>"></div>
               <div><label class="al-label"><%= req.translations.authorName || 'Author Name' %></label><input class="al-input" type="text" name="authorName" value="<%= image.authorName || '' %>"></div>
-              <div class="col-span-2"><label class="al-label"><%= req.translations.startupCommand || 'Startup Command' %> <span class="text-red-500">*</span></label><input class="al-input" type="text" name="startup" required value="<%= image.startup || '' %>" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
-              <div class="col-span-2"><label class="al-label"><%= req.translations.dockerImages || 'Docker images (JSON array)' %> <span class="text-red-500">*</span></label><input class="al-input" type="text" name="dockerImages" required value="<%= image.dockerImages || '[]' %>" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+              <div class="col-span-2"><label class="al-label"><%= req.translations.startupCommand || 'Startup Command' %> <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="startup" required value="<%= image.startup || '' %>" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+              <div class="col-span-2"><label class="al-label"><%= req.translations.dockerImages || 'Docker images (JSON array)' %> <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="dockerImages" required value="<%= image.dockerImages || '[]' %>" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
               <div class="col-span-2"><label class="al-label"><%= req.translations.description || 'Description' %></label><textarea class="al-input" name="description" rows="2" style="resize:none;"><%= image.description || '' %></textarea></div>
               <div class="col-span-2"><label class="al-label"><%= req.translations.variables || 'Variables' %> <span class="font-normal" style="color:var(--theme-text-muted)">(JSON array, optional)</span></label><textarea class="al-input" name="variables" rows="4" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;"><%= image.variables || '[]' %></textarea></div>
             </div>
             <div class="flex gap-2 pt-1">
-              <a href="/my-images" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</a>
-              <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.resubmitForReview || 'Save & resubmit' %></button>
+              <a href="/my-images" class="flex-1 py-2 rounded-xl border text-sm font-medium hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text)"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</a>
+              <button type="submit" class="flex-1 py-2 rounded-xl border hover:bg-[var(--theme-bg-hover)] text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.resubmitForReview || 'Save & resubmit' %></button>
             </div>
           </form>
         </div>

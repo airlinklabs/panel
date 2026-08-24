@@ -173,11 +173,11 @@
           </div>
           <div class="al-card">
             <h2 class="al-card-header">Maintenance Mode</h2>
-            <div class="bg-neutral-400/10 dark:bg-neutral-600/20 p-4 rounded-xl border border-neutral-800/10 dark:border-white/5">
+            <div class="p-4 rounded-xl border" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
               <div class="flex items-center justify-between gap-4">
                 <div>
-                  <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Put node into maintenance mode</h3>
-                  <p class="text-xs text-neutral-500 mt-1">While enabled, no new servers may be created on this node and existing servers cannot be started or restarted.</p>
+                  <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Put node into maintenance mode</h3>
+                  <p class="text-xs mt-1" style="color:var(--theme-text-muted)">While enabled, no new servers may be created on this node and existing servers cannot be started or restarted.</p>
                 </div>
                 <label for="nodeMaintenanceMode" class="relative inline-flex items-center cursor-pointer shrink-0">
                   <input id="nodeMaintenanceMode" type="checkbox" class="sr-only peer" <%= node.maintenanceMode ? 'checked' : '' %> aria-label="Put node into maintenance mode">
