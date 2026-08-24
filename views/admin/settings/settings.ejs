@@ -81,13 +81,21 @@
             <p class="text-xs text-neutral-500 px-5 pt-2 pb-0">Select a theme for the panel. All users will see this theme.</p>
             <div class="p-4">
               <div class="space-y-2">
-                <% const themeVal = settings.theme || 'default'; %>
-                <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= themeVal === 'default' ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= themeVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
-                  <input type="radio" name="theme" value="default" class="sr-only" <%= themeVal === 'default' ? 'checked' : '' %>>
-                  <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= themeVal === 'default' ? 'al-radio-ring-active' : '' %>" style="<%= themeVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
-                    <% if (themeVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
+                <% const themeVal = settings.theme || 'dark'; %>
+                <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= themeVal === 'light' ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= themeVal !== 'light' ? 'border-color:var(--theme-border)' : '' %>">
+                  <input type="radio" name="theme" value="light" class="sr-only" <%= themeVal === 'light' ? 'checked' : '' %>>
+                  <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= themeVal === 'light' ? 'al-radio-ring-active' : '' %>" style="<%= themeVal !== 'light' ? 'border-color:var(--theme-border)' : '' %>">
+                    <% if (themeVal === 'light') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                   </span>
-                  <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
+                  <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Light Mode</span>
+                  <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= themeVal === 'dark' ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= themeVal !== 'dark' ? 'border-color:var(--theme-border)' : '' %>">
+                  <input type="radio" name="theme" value="dark" class="sr-only" <%= themeVal === 'dark' ? 'checked' : '' %>>
+                  <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= themeVal === 'dark' ? 'al-radio-ring-active' : '' %>" style="<%= themeVal !== 'dark' ? 'border-color:var(--theme-border)' : '' %>">
+                    <% if (themeVal === 'dark') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
+                  </span>
+                  <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Dark Mode</span>
                   <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
                 </label>
                 <% allThemes.filter(t => t.name !== 'default' && t.name !== 'default-light' && t.name !== 'default-dark').forEach(function(theme) { %>

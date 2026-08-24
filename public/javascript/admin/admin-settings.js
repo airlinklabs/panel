@@ -33,7 +33,7 @@ function post(url, body) {
 
 function applyThemeCss(value) {
   var link = document.getElementById('theme-css');
-  if (value && value !== 'default') {
+  if (value && value !== 'default' && value !== 'light' && value !== 'dark') {
     if (!link) {
       link = document.createElement('link');
       link.rel = 'stylesheet';
@@ -49,10 +49,14 @@ function applyThemeCss(value) {
 function applyThemeFromForm() {
   if (!formAppearance) return;
   var checked = formAppearance.querySelector('input[name="theme"]:checked');
-  var value = checked ? checked.value : 'default';
+  var value = checked ? checked.value : 'dark';
   applyThemeCss(value);
-  // Always keep dark class — all themes use html.dark selectors
-  document.documentElement.classList.add('dark');
+  // Toggle dark class: add for dark/custom themes, remove for light
+  if (value === 'light') {
+    document.documentElement.classList.remove('dark');
+  } else {
+    document.documentElement.classList.add('dark');
+  }
   if (window.applyThemeSheets) window.applyThemeSheets();
 }
 

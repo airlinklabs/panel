@@ -75,7 +75,7 @@
                         %>
                         <li class="nav-item sidebar-view-item" style="--i:<%= i + 1 %>">
                           <a href="<%= item.url %>"
-                            class="nav-link mt-0.5 px-3.5 mx-1.5 group flex gap-x-2.5 py-[5px] rounded-xl text-[13px] leading-5 font-normal transition-all duration-200"
+                            class="nav-link mt-0.5 px-3.5 mx-3.5 group flex gap-x-2.5 py-[5px] rounded-xl text-[13px] leading-5 font-normal transition-all duration-200"
                             style="color:var(--theme-nav-text);" <% if (item.matchPrefix) { %> data-match-prefix="<%=
                               item.matchPrefix %>"<% } %>
                                 <% if (isCurrentPath) { %> aria-current="page"<% } %>>
