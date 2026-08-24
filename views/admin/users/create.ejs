@@ -6,7 +6,7 @@
       <%- include('../../components/sidebar') %>
     </div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Users', href: '/admin/users' },
@@ -45,10 +45,10 @@
                 </label>
                 <input id="userUsername" type="text" class="al-input" placeholder="username">
                 <div id="username-criteria" class="mt-2 space-y-1">
-                  <p id="crit-username-length" class="text-xs text-neutral-400">
+                  <p id="crit-username-length" class="text-xs" style="color:var(--theme-text-muted)">
                     <span class="crit-icon">—</span> 3–20 characters
                   </p>
-                  <p id="crit-username-chars" class="text-xs text-neutral-400">
+                  <p id="crit-username-chars" class="text-xs" style="color:var(--theme-text-muted)">
                     <span class="crit-icon">—</span> Letters and numbers only
                   </p>
                 </div>
@@ -73,13 +73,13 @@
                 </label>
                 <input id="userPassword" type="password" class="al-input" placeholder="********">
                 <div id="password-criteria" class="mt-2 space-y-1">
-                  <p id="crit-length" class="text-xs text-neutral-400">
+                  <p id="crit-length" class="text-xs" style="color:var(--theme-text-muted)">
                     <span class="crit-icon">—</span> At least 8 characters
                   </p>
-                  <p id="crit-letter" class="text-xs text-neutral-400">
+                  <p id="crit-letter" class="text-xs" style="color:var(--theme-text-muted)">
                     <span class="crit-icon">—</span> At least one letter
                   </p>
-                  <p id="crit-number" class="text-xs text-neutral-400">
+                  <p id="crit-number" class="text-xs" style="color:var(--theme-text-muted)">
                     <span class="crit-icon">—</span> At least one number
                   </p>
                 </div>
@@ -99,7 +99,7 @@
                       <h3 class="text-sm font-medium text-neutral-800 dark:text-white">
                         <%= req.translations.role || 'Role' %>
                       </h3>
-                      <p class="text-xs text-neutral-400 mt-1">
+                      <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
                         <%= req.translations.roleDescription || 'Privileged and admin roles get expanded limits and powers.' %>
                       </p>
                     </div>
@@ -119,7 +119,7 @@
                       <h3 class="text-sm font-medium text-neutral-800 dark:text-white">
                         <%= req.translations.adminStatus || 'Administrator Status' %>
                       </h3>
-                      <p class="text-xs text-neutral-400 mt-1">
+                      <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
                         <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
                       </p>
                     </div>
@@ -155,7 +155,7 @@
                 </div>
               </div>
               <div>
-                <label for="maxCpu" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="text-neutral-400 font-normal text-xs">(%)</span></label>
+                <label for="maxCpu" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="font-normal text-xs" style="color:var(--theme-text-muted)">(%)</span></label>
                 <input type="number" id="maxCpu" name="maxCpu" min="10" max="10000" placeholder="Use global default" class="al-input">
               </div>
               <div>

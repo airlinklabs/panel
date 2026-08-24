@@ -82,9 +82,9 @@ export function icon(name: string, opts: IconOptions = {}): string {
     'aria-hidden':      'true',
   };
 
-  if (opts.class)  svgAttrs['class'] = opts.class;
-  if (opts.id)     svgAttrs['id']    = opts.id;
-  if (opts.style)  svgAttrs['style'] = opts.style;
+  if (opts.class)  {svgAttrs['class'] = opts.class;}
+  if (opts.id)     {svgAttrs['id']    = opts.id;}
+  if (opts.style)  {svgAttrs['style'] = opts.style;}
   if (opts.label) {
     svgAttrs['role']       = 'img';
     svgAttrs['aria-label'] = opts.label;

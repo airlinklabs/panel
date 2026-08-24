@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import logger from '../../handlers/logger';
 import os from 'os';
 import prisma from '../../db';
@@ -117,35 +118,35 @@ const coreModule: Module = {
 
     router.get('/api/search', requireApiAuth, async (req: Request, res: Response) => {
       const userId = req.session.user?.id;
-      if (!userId) return res.status(401).json({ results: [] });
+      if (!userId) {return res.status(401).json({ results: [] });}
 
       const qRaw = String(req.query.q || '').trim().toLowerCase();
-      if (!qRaw) return res.json({ results: [] });
+      if (!qRaw) {return res.json({ results: [] });}
 
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) return res.status(401).json({ results: [] });
+        if (!user) {return res.status(401).json({ results: [] });}
 
         // Cache search results per user+query for 30 seconds to avoid
         // repeated DB hits from the search-as-you-type frontend.
         const cacheKey = `search:${userId}:${qRaw}`;
         const cached = await cache.get<{ type: string; label: string; sub: string; url: string; score: number }[]>(cacheKey);
-        if (cached) return res.json({ results: cached });
+        if (cached) {return res.json({ results: cached });}
 
-        type SearchItem = { type: string; label: string; sub: string; url: string; score: number };
+        interface SearchItem { type: string; label: string; sub: string; url: string; score: number }
 
         const normalize = (s: string): string =>
           s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
         const qNorm = normalize(qRaw);
         const tokens = qNorm.split(' ').filter(Boolean);
-        if (tokens.length === 0) return res.json({ results: [] });
+        if (tokens.length === 0) {return res.json({ results: [] });}
 
         const levenshtein = (a: string, b: string): number => {
           const m = a.length;
           const n = b.length;
-          if (!m) return n;
-          if (!n) return m;
+          if (!m) {return n;}
+          if (!n) {return m;}
           let prev: number[] = Array.from({ length: n + 1 }, (_, j) => j);
           let curr: number[] = new Array(n + 1).fill(0);
           for (let i = 1; i <= m; i++) {
@@ -164,7 +165,7 @@ const coreModule: Module = {
         };
 
         const fuzzyOk = (token: string, hay: string): boolean => {
-          if (token.length < 4) return false;
+          if (token.length < 4) {return false;}
           return hay
             .split(/\s+/)
             .some((w) => Math.abs(w.length - token.length) <= 1 && levenshtein(w, token) <= 1);
@@ -175,12 +176,12 @@ const coreModule: Module = {
           for (const raw of fields) {
             const f = normalize(raw);
             let s = 0;
-            if (f === qNorm) s = 100;
-            else if (f.startsWith(qNorm)) s = 80;
-            else if (f.includes(qNorm)) s = 60;
-            else if (tokens.length > 1 && tokens.every((t) => f.includes(t))) s = 45;
-            else if (tokens.some((t) => f.includes(t))) s = 30;
-            else if (tokens.some((t) => fuzzyOk(t, f))) s = 15;
+            if (f === qNorm) {s = 100;}
+            else if (f.startsWith(qNorm)) {s = 80;}
+            else if (f.includes(qNorm)) {s = 60;}
+            else if (tokens.length > 1 && tokens.every((t) => f.includes(t))) {s = 45;}
+            else if (tokens.some((t) => f.includes(t))) {s = 30;}
+            else if (tokens.some((t) => fuzzyOk(t, f))) {s = 15;}
             best = Math.max(best, s);
           }
           return best;

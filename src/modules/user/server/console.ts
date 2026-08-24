@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import type { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkEulaStatus } from '../../../handlers/features';
@@ -490,7 +490,7 @@ export function registerConsoleRoutes(router: Router): void {
                 stopCmd: server.image?.stop || 'stop',
               },
             });
-            logger.info('Container stopped successfully: ' + serverId);
+            logger.info(`Container stopped successfully: ${  serverId}`);
             await prisma.server.update({ where: { UUID: String(serverId) }, data: { Running: false } }).catch(() => {});
             runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
             await logActivity(req, 'server:stop', { serverId: String(serverId) });
@@ -501,7 +501,7 @@ export function registerConsoleRoutes(router: Router): void {
               stopErr?.status === 404
             ) {
               logger.info(
-                'Container already stopped or not found: ' + serverId,
+                `Container already stopped or not found: ${  serverId}`,
               );
 
               await prisma.server.update({ where: { UUID: String(serverId) }, data: { Running: false } }).catch(() => {});
@@ -569,7 +569,7 @@ export function registerConsoleRoutes(router: Router): void {
             throw error;
           }
 
-          logger.info('Container restart queued successfully: ' + serverId);
+          logger.info(`Container restart queued successfully: ${  serverId}`);
           await logActivity(req, 'server:restart', { serverId: String(serverId) });
           res.status(200).json({ success: true, message: 'Server restarted successfully' });
           return;
@@ -679,7 +679,7 @@ export function registerConsoleRoutes(router: Router): void {
           userId: user.id,
           priority: user.isAdmin === true || server.ownerId === user.id || user.role === 'privileged',
         });
-        logger.info('Container restart queued successfully: ' + serverId);
+        logger.info(`Container restart queued successfully: ${  serverId}`);
 
         if (q.queued) {
           res.status(202).json({
@@ -864,7 +864,7 @@ export function registerConsoleRoutes(router: Router): void {
                   body: {
                     id: serverToReinstall.UUID,
                     image: reinstallDockerImage,
-                    env: env,
+                    env,
                     preserveData,
                     scripts: scripts.install.map(
                       (script: {

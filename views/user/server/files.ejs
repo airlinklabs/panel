@@ -67,14 +67,14 @@ function escJS(val) {
 <%- include('../../components/template') %>
 
     <!-- Content -->
-    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-16 pb-12 lg:pb-12">
+    <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Dashboard', href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
         { label: 'Files' }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
-      <div class="px-4 sm:px-8 pt-4 pb-2 sm:pb-6">
+      <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div class="flex-1 min-w-0">
             <%- include('../../components/serverHeader') %>
@@ -136,7 +136,7 @@ function escJS(val) {
       <!-- File Table or Daemon Offline Message -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
         <!-- Daemon Offline Message -->
-        <div class="px-4 sm:px-8 mt-8">
+        <div class="px-6 sm:px-8 mt-8">
           <div class="al-card rounded-xl p-8 text-center">
             <div class="flex justify-center mb-6">
               <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-bg-secondary);">
@@ -157,7 +157,7 @@ function escJS(val) {
         </div>
       <% } else { %>
         <!-- File Table -->
-        <div class="px-4 sm:px-8 mt-8">
+        <div class="px-6 sm:px-8 mt-8">
           <div class="al-file-panel overflow-x-auto rounded-xl" style="border:1px solid var(--theme-border);">
             <div class="px-3 py-2.5 flex items-center overflow-hidden">
               <nav class="flex items-center gap-0 text-xs min-w-0 overflow-hidden">

@@ -1,10 +1,11 @@
 import { getSettings } from '../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'node:crypto';
-import { Module } from '../../handlers/moduleInit';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import logger from '../../handlers/logger';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
@@ -22,13 +23,13 @@ function createTotp(secretBase32: string, label: string): OTPAuth.TOTP {
 }
 
 function normalizeToken(token: unknown): string | null {
-  if (typeof token !== 'string') return null;
+  if (typeof token !== 'string') {return null;}
   const clean = token.replace(/[\s-]/g, '');
   return /^\d{6}$/.test(clean) ? clean : null;
 }
 
 function normalizeRecoveryCode(token: unknown): string | null {
-  if (typeof token !== 'string') return null;
+  if (typeof token !== 'string') {return null;}
   const clean = token.replace(/[\s-]/g, '').toUpperCase();
   return /^[A-F0-9]{12}$/.test(clean) ? clean : null;
 }
@@ -47,12 +48,12 @@ function generateRecoveryCodes(count = RECOVERY_CODE_COUNT): string[] {
 
 async function consumeRecoveryCode(userId: number, code: string): Promise<boolean> {
   const user = await prisma.users.findUnique({ where: { id: userId } });
-  if (!user?.totpRecoveryCodes) return false;
+  if (!user?.totpRecoveryCodes) {return false;}
 
   const stored = JSON.parse(user.totpRecoveryCodes) as string[];
   const hashed = hashRecoveryCode(code);
   const idx = stored.indexOf(hashed);
-  if (idx === -1) return false;
+  if (idx === -1) {return false;}
 
   stored.splice(idx, 1);
   await prisma.users.update({
@@ -86,9 +87,9 @@ const twoFactorModule: Module = {
 
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {return res.redirect('/login');}
 
-          if (user.totpEnabled) return res.redirect('/account');
+          if (user.totpEnabled) {return res.redirect('/account');}
 
           const secret = new OTPAuth.Secret({ size: 20 });
           const secretBase32 = secret.base32;
@@ -234,7 +235,7 @@ const twoFactorModule: Module = {
 
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.status(404).json({ error: 'User not found.' });
+          if (!user) {return res.status(404).json({ error: 'User not found.' });}
 
           const passwordMatch = await bcrypt.compare(password, user.password);
           if (!passwordMatch) {

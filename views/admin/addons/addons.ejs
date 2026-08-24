@@ -9,7 +9,7 @@
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
 
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
@@ -28,8 +28,8 @@
 
       <div class="al-page-body">
       <div class="flex">
-        <span class="px-3 py-2 mr-4 text-sm font-medium text-white dark:text-black bg-neutral-900 dark:bg-white rounded-lg">Installed <span class="ml-1 text-xs text-neutral-400"><%= addons ? addons.length : 0 %></span></span>
-        <a href="/admin/addons/store" class="px-3 py-2 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition">Store</a>
+        <span class="px-3 py-2 mr-4 text-sm font-medium text-white dark:text-black bg-neutral-900 dark:bg-white rounded-lg">Installed <span class="ml-1 text-xs" style="color:var(--theme-text-muted)"><%= addons ? addons.length : 0 %></span></span>
+        <a href="/admin/addons/store" class="px-3 py-2 text-sm font-medium" style="color:var(--theme-text-muted)">Store</a>
       </div>
 
       <% if (!addonTableExists) { %>
@@ -98,7 +98,7 @@
             <% }); %>
           </tbody>
         </table>
-        <div id="addonNoResults" class="hidden py-10 text-center text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800/20">No addons match your search.</div>
+        <div id="addonNoResults" class="hidden py-10 text-center text-sm bg-white dark:bg-neutral-800/20" style="color:var(--theme-text-muted)">No addons match your search.</div>
       </div>
       <% } else { %>
       <div class="flex flex-col items-center justify-center py-24 text-center">

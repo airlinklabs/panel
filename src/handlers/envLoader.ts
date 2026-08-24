@@ -18,9 +18,9 @@ export function parseEnv(content: string): Record<string, string> {
   const result: Record<string, string> = {};
   for (const line of content.split('\n')) {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
+    if (!trimmed || trimmed.startsWith('#')) {continue;}
     const eqIndex = trimmed.indexOf('=');
-    if (eqIndex === -1) continue;
+    if (eqIndex === -1) {continue;}
     const key = trimmed.slice(0, eqIndex).trim();
     const value = trimmed.slice(eqIndex + 1).trim().replace(/^["']|["']$/g, '');
     if (key) {
@@ -68,7 +68,7 @@ export function loadEnv() {
     const exampleData = fs.readFileSync(EXAMPLE_ENV_PATH, 'utf8');
     for (const line of exampleData.split('\n')) {
       const eqIndex = line.indexOf('=');
-      if (eqIndex === -1) continue;
+      if (eqIndex === -1) {continue;}
       const key = line.slice(0, eqIndex).trim();
       if (key && !process.env[key]) {
         logger.warn(`[env] optional env var ${key} is not set (see example.env)`);

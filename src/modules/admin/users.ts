@@ -1,6 +1,7 @@
 import { getSettings } from '../../handlers/settingsCache';
-import { Router, Request, Response, NextFunction } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { onlineUsers } from '../user/wsUsers';
@@ -41,15 +42,15 @@ async function countAdmins(): Promise<number> {
 interface AdminUsersViewModel {
   user: { id: number; username: string | null; avatar: string | null; description: string | null; isAdmin: boolean; role: string };
   settings: { title: string } | null;
-  users: Array<{
+  users: {
     id: number;
     username: string | null;
     email: string;
     avatar: string | null;
     isAdmin: boolean;
     role: string;
-    servers: Array<{ id: number }>;
-  }>;
+    servers: { id: number }[];
+  }[];
   onlineUsers: Set<string>;
 }
 
@@ -219,7 +220,7 @@ const adminModule: Module = {
       },
     );
 
-router.get(
+    router.get(
       '/admin/users/edit/:id/',
       isAuthenticated(true, 'airlink.admin.users.edit'),
       async (req: Request, res: Response) => {
@@ -255,7 +256,7 @@ router.get(
       },
     );
 
-router.get(
+    router.get(
       '/admin/users/view/:id/',
       isAuthenticated(true, 'airlink.admin.users.view'),
       async (req: Request, res: Response) => {
@@ -485,9 +486,9 @@ router.get(
           // Prepare update data
           const updateData: Record<string, unknown> = {};
 
-          if (email) updateData.email = email;
-          if (username) updateData.username = username;
-          if (description) updateData.description = description;
+          if (email) {updateData.email = email;}
+          if (username) {updateData.username = username;}
+          if (description) {updateData.description = description;}
 
           // Role handling: the owner cannot be renamed, demoted, or
           // restricted by anyone — ownership only moves through the explicit

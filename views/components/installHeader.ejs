@@ -1,27 +1,27 @@
 <% if (typeof installed !== 'undefined') { %>
 <% if (installed.failed) { %>
-<div class="mx-4 sm:mx-8 mt-8 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-start gap-3" role="alert">
+<div class="al-alert-danger mx-4 sm:mx-8 mt-8" role="alert">
   <div class="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--theme-danger-bg);">
-    <%- icon('x', { class: 'h-4 w-4 text-red-500 dark:text-red-400', strokeWidth: 2 }) %>
+    <%- icon('x', { class: 'h-4 w-4', style: 'color:var(--theme-danger)', strokeWidth: 2 }) %>
   </div>
   <div class="flex-1 min-w-0">
-    <p class="text-sm font-medium text-neutral-800 dark:text-neutral-200">Installation failed</p>
-    <p id="installFailReason" class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 break-words"><%= installed.error || 'Check the server logs or contact an administrator.' %></p>
+    <p class="text-sm font-medium" style="color:var(--theme-danger)">Installation failed</p>
+    <p id="installFailReason" class="text-xs mt-0.5 break-words" style="color:var(--theme-text-muted)"><%= installed.error || 'Check the server logs or contact an administrator.' %></p>
   </div>
 </div>
 <% } else if (!installed.installed && !installed.error) { %>
-<div id="installBanner" class="mx-4 sm:mx-8 mt-8 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
-  <div id="installIconWrap" class="h-8 w-8 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0">
-    <%- icon('loader-circle', { id: 'installSpinner', class: 'h-4 w-4 text-neutral-500 dark:text-neutral-400 animate-spin', strokeWidth: 2 }) %>
+<div id="installBanner" class="al-alert-info mx-4 sm:mx-8 mt-8">
+  <div id="installIconWrap" class="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--theme-info-bg)">
+    <%- icon('loader-circle', { id: 'installSpinner', class: 'h-4 w-4 animate-spin', style: 'color:var(--theme-info)', strokeWidth: 2 }) %>
   </div>
   <div class="flex-1 min-w-0">
     <div class="flex items-center gap-2">
-      <p class="text-sm font-medium text-neutral-800 dark:text-neutral-200 shrink-0">Installing server</p>
-      <span class="text-neutral-300 dark:text-neutral-400">·</span>
-      <p id="installStateText" class="text-xs text-neutral-500 dark:text-neutral-400 truncate" aria-live="polite">Waiting for daemon…</p>
+      <p class="text-sm font-medium shrink-0" style="color:var(--theme-info)">Installing server</p>
+      <span style="color:var(--theme-text-muted)">·</span>
+      <p id="installStateText" class="text-xs truncate" style="color:var(--theme-text-muted)" aria-live="polite">Waiting for daemon…</p>
     </div>
   </div>
-  <button id="installRetryBtn" class="hidden shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 active:scale-95" style="background:var(--theme-accent);color:var(--theme-accent-foreground);">
+  <button id="installRetryBtn" class="hidden shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 active:scale-95" style="background:var(--theme-accent);color:var(--theme-accent-text);">
     Retry install
   </button>
 </div>
@@ -57,7 +57,7 @@
 
   function setIcon(kind) {
     if (!spinnerEl) return;
-    spinnerEl.classList.remove('animate-spin', 'text-neutral-500');
+    spinnerEl.classList.remove('animate-spin');
     spinnerEl.setAttribute('stroke', 'currentColor');
     spinnerEl.setAttribute('stroke-width', '2');
     const paths = {
@@ -65,10 +65,10 @@
       fail: '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>'
     };
     spinnerEl.innerHTML = paths[kind];
-    spinnerEl.classList.add(kind === 'done' ? 'text-emerald-500' : 'text-red-500');
     if (iconWrap) {
       iconWrap.style.background = kind === 'done' ? 'var(--theme-success-bg)' : 'var(--theme-danger-bg)';
       iconWrap.className = 'h-8 w-8 rounded-lg flex items-center justify-center shrink-0';
+      spinnerEl.style.color = kind === 'done' ? 'var(--theme-success)' : 'var(--theme-danger)';
     }
   }
 
@@ -77,8 +77,9 @@
       spinnerEl.innerHTML = originalSpinnerHtml;
       spinnerEl.setAttribute('stroke', 'currentColor');
       spinnerEl.setAttribute('stroke-width', '2');
-      spinnerEl.classList.add('animate-spin', 'text-neutral-500');
+      spinnerEl.classList.add('animate-spin');
       spinnerEl.classList.remove('text-emerald-500', 'text-red-500');
+      spinnerEl.style.color = '';
     }
     if (iconWrap) {
       iconWrap.className = originalIconWrapClass;

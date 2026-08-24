@@ -23,9 +23,7 @@ const NONCE_BYTE_LENGTH = 16;
 //   4. Result is "pathname?sorted-encoded-params" or just "pathname" if empty.
 // ---------------------------------------------------------------------------
 
-export interface CanonicalParams {
-  [key: string]: string | number | boolean | undefined;
-}
+export type CanonicalParams = Record<string, string | number | boolean | undefined>;
 
 function percentEncode(s: string): string {
   // RFC 3986 unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
@@ -47,13 +45,13 @@ export function buildCanonicalTarget(
   pathname: string,
   params?: Record<string, string | number | boolean | undefined>,
 ): string {
-  if (!params) return pathname;
+  if (!params) {return pathname;}
 
   const entries: [string, string][] = [];
   const seen = new Set<string>();
 
   for (const [key, value] of Object.entries(params)) {
-    if (value === undefined) continue;
+    if (value === undefined) {continue;}
     const encodedKey = percentEncode(key);
     const encodedVal = percentEncode(String(value));
 
@@ -64,7 +62,7 @@ export function buildCanonicalTarget(
     entries.push([encodedKey, encodedVal]);
   }
 
-  if (entries.length === 0) return pathname;
+  if (entries.length === 0) {return pathname;}
 
   // Sort by encoded key, then by encoded value for deterministic signing.
   entries.sort((a, b) => a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]));

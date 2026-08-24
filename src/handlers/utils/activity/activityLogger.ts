@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import type { Request } from 'express';
 import prisma from '../../../db';
 import logger from '../../logger';
 
@@ -103,7 +103,7 @@ export function activityRateLimitKey(req: Request): string {
 
 export function getClientIp(req: Request): string | undefined {
   const fwd = req.headers['x-forwarded-for'];
-  if (typeof fwd === 'string' && fwd.length > 0) return fwd.split(',')[0]?.trim();
+  if (typeof fwd === 'string' && fwd.length > 0) {return fwd.split(',')[0]?.trim();}
   return req.socket?.remoteAddress;
 }
 

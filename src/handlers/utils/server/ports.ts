@@ -28,7 +28,7 @@ export function isValidPort(port: number): boolean {
 export function parseImagePortRequirements(raw: string | null | undefined): ImagePortRequirement[] {
   try {
     const parsed = JSON.parse(raw || '[]');
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) {return [];}
     return parsed
       .map((port, index) => ({
         name: String(port?.name || `Port ${index + 1}`),
@@ -47,7 +47,7 @@ function isServerPortRecord(value: unknown): value is ServerPortRecord {
 export function parseServerPorts(raw: string | null | undefined): ServerPortAssignment[] {
   try {
     const parsed = JSON.parse(raw || '[]');
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) {return [];}
     return parsed
       .filter(isServerPortRecord)
       .map((port, index) => {
@@ -127,15 +127,15 @@ export function validatePortAssignments(
   usedPorts: number[],
   minimumCount: number,
 ): string | null {
-  if (ports.length < minimumCount) return `At least ${minimumCount} port(s) are required.`;
+  if (ports.length < minimumCount) {return `At least ${minimumCount} port(s) are required.`;}
   const seen = new Set<number>();
   for (const port of ports) {
-    if (!port.name.trim()) return 'Each port needs a name.';
-    if (!isValidPort(port.internalPort)) return `Internal port ${port.internalPort} is invalid.`;
-    if (!isValidPort(port.externalPort)) return `External port ${port.externalPort} is invalid.`;
-    if (!allocatedPorts.includes(port.externalPort)) return `Port ${port.externalPort} is not allocated to the selected node.`;
-    if (usedPorts.includes(port.externalPort)) return `Port ${port.externalPort} is already in use.`;
-    if (seen.has(port.externalPort)) return `Port ${port.externalPort} was selected more than once.`;
+    if (!port.name.trim()) {return 'Each port needs a name.';}
+    if (!isValidPort(port.internalPort)) {return `Internal port ${port.internalPort} is invalid.`;}
+    if (!isValidPort(port.externalPort)) {return `External port ${port.externalPort} is invalid.`;}
+    if (!allocatedPorts.includes(port.externalPort)) {return `Port ${port.externalPort} is not allocated to the selected node.`;}
+    if (usedPorts.includes(port.externalPort)) {return `Port ${port.externalPort} is already in use.`;}
+    if (seen.has(port.externalPort)) {return `Port ${port.externalPort} was selected more than once.`;}
     seen.add(port.externalPort);
   }
   return null;

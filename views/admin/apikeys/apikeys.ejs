@@ -23,7 +23,7 @@
       <%- include('../../components/sidebar') %>
     </div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'API Keys' }
@@ -125,18 +125,18 @@
                   onclick="toggleCategory(this)">
                   <div class="flex items-center gap-2">
                     <% if (category === 'servers') { %>
-                      <%- icon('server', { size: 16, class: 'text-neutral-500 dark:text-neutral-400 shrink-0' }) %>
+                      <%- icon('server', { size: 16, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                     <% } else if (category === 'users') { %>
-                      <%- icon('user', { size: 16, class: 'text-neutral-500 dark:text-neutral-400 shrink-0' }) %>
+                      <%- icon('user', { size: 16, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                     <% } else if (category === 'nodes') { %>
-                      <%- icon('hard-drive', { size: 16, class: 'text-neutral-500 dark:text-neutral-400 shrink-0' }) %>
+                      <%- icon('hard-drive', { size: 16, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                     <% } else { %>
-                      <%- icon('key', { size: 16, class: 'text-neutral-500 dark:text-neutral-400 shrink-0' }) %>
+                      <%- icon('key', { size: 16, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                     <% } %>
                     <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize"><%= category %></span>
-                    <span class="category-count text-[10px] text-neutral-400 dark:text-neutral-400" data-category="<%= category %>">0 selected</span>
+                    <span class="category-count text-[10px]" style="color:var(--theme-text-muted)" data-category="<%= category %>">0 selected</span>
                   </div>
-                  <%- icon('chevron-down', { size: 14, class: 'category-chevron text-neutral-400 transition-transform duration-200 shrink-0' }) %>
+                  <%- icon('chevron-down', { size: 14, class: 'category-chevron transition-transform duration-200 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                 </button>
                 <div class="category-panel hidden bg-white dark:bg-neutral-900">
                   <div class="px-4 py-3 border-t border-neutral-200 dark:border-neutral-700/60">

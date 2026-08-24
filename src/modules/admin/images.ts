@@ -82,9 +82,9 @@ const adminModule: Module = {
           const creatorIds = [...new Set(pending.map((i) => i.createdById).filter((id): id is number => id != null))];
           const creators = creatorIds.length > 0
             ? await prisma.users.findMany({
-                where: { id: { in: creatorIds } },
-                select: { id: true, username: true, email: true },
-              })
+              where: { id: { in: creatorIds } },
+              select: { id: true, username: true, email: true },
+            })
             : [];
           const creatorMap = new Map(creators.map((c) => [c.id, c]));
           const pendingWithCreators = pending.map((i) => ({
@@ -135,7 +135,7 @@ const adminModule: Module = {
           const existing = await prisma.images.findFirst({ where: { name: data.name } });
           if (existing) {
             await prisma.images.update({ where: { id: existing.id }, data });
-          await invalidateImageCache();
+            await invalidateImageCache();
             await logActivity(req, 'image:update', { metadata: { imageId: existing.id, name: data.name } });
             res.status(200).json({ success: true, message: 'Image updated successfully', id: existing.id });
           } else {
@@ -175,7 +175,7 @@ const adminModule: Module = {
 
           if (existing) {
             await prisma.images.update({ where: { id: existing.id }, data });
-          await invalidateImageCache();
+            await invalidateImageCache();
             logger.info(`Updated image: ${data.name}`);
             await logActivity(req, 'image:update', { metadata: { imageId: existing.id, name: data.name } });
             res.status(200).json({ success: true, message: 'Image updated successfully', id: existing.id });
@@ -224,7 +224,7 @@ const adminModule: Module = {
 
           const image = await prisma.images.create({ data });
           logger.info(`Created image: ${name}`);
-            await invalidateImageCache();
+          await invalidateImageCache();
           await logActivity(req, 'image:create', { metadata: { imageId: image.id, name } });
           res.redirect(`/admin/images/edit/${image.id}?success=true`);
         } catch (error: unknown) {
@@ -630,9 +630,9 @@ const adminModule: Module = {
             const creatorIds = [...new Set(pending.map((i) => i.createdById).filter((id): id is number => id != null))];
             const creators = creatorIds.length > 0
               ? await prisma.users.findMany({
-                  where: { id: { in: creatorIds } },
-                  select: { id: true, username: true, email: true },
-                })
+                where: { id: { in: creatorIds } },
+                select: { id: true, username: true, email: true },
+              })
               : [];
             const creatorMap = new Map(creators.map((c) => [c.id, c]));
             const pendingWithCreators = pending.map((i) => ({
@@ -694,9 +694,9 @@ const adminModule: Module = {
             const creatorIds = [...new Set(pending.map((i) => i.createdById).filter((id): id is number => id != null))];
             const creators = creatorIds.length > 0
               ? await prisma.users.findMany({
-                  where: { id: { in: creatorIds } },
-                  select: { id: true, username: true, email: true },
-                })
+                where: { id: { in: creatorIds } },
+                select: { id: true, username: true, email: true },
+              })
               : [];
             const creatorMap = new Map(creators.map((c) => [c.id, c]));
             const pendingWithCreators = pending.map((i) => ({

@@ -10,7 +10,7 @@ try {
   const data = fs.readFileSync(envPath, 'utf8');
   for (const line of data.split('\n')) {
     const eqIndex = line.indexOf('=');
-    if (eqIndex === -1) continue;
+    if (eqIndex === -1) {continue;}
     const key = line.slice(0, eqIndex).trim();
     const value = line.slice(eqIndex + 1).trim().replace(/^["']|["']$/g, '');
     if (key && !process.env[key]) {

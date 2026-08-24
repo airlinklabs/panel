@@ -17,6 +17,9 @@ const wallpaperExcluded = req && req.path && (
     <meta name="csrf-token" content="<%= csrfToken %>">
     <% } %>
     <title><%= settings.title %> - <%= title %></title>
+    <script nonce="<%- nonce %>">
+      (function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark');})();
+    </script>
     <link rel="stylesheet" href="/styles.css?v=8">
     <link rel="stylesheet" href="/layout-animations.css?v=8">
     <link rel="stylesheet" href="/styles/motion.css?v=8">
@@ -91,9 +94,9 @@ const wallpaperExcluded = req && req.path && (
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
       }
-      /* Mobile top bar spacing */
+      /* Mobile bottom bar spacing */
       @media (max-width: 1023px) {
-        #page-content, #server-page-body { padding-top: 56px; padding-bottom: 64px; }
+        #page-content, #server-page-body { padding-bottom: 64px; }
       }
       /* Pre-hide animatable content before JS runs so there's no flash-then-hide jitter */
       .js-loading #page-content > *:not(.mobile-top-bar):not(.mobile-bottom-nav):not(.mobile-more-sheet):not([style*="position: fixed"]),

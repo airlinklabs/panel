@@ -29,25 +29,25 @@
   }
 
   .auth-input {
-    width: 100%; padding: 10px 14px; border-radius: 10px;
+    width: 100%; padding: 10px 14px; border-radius: 12px;
     border: 1px solid var(--theme-border-input); background: var(--theme-bg-input);
-    font-size: 14px; color: var(--theme-text); outline: none;
+    font-size: 14px; color: var(--theme-text-strong); outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
     box-sizing: border-box; font-family: inherit;
   }
   .auth-input:focus {
-    border-color: var(--theme-accent); box-shadow: 0 0 0 3px var(--theme-accent-subtle);
+    border-color: var(--theme-border-accent); box-shadow: 0 0 0 3px var(--theme-accent-subtle);
   }
   .auth-input::placeholder { color: var(--theme-text-placeholder); }
   .auth-input.invalid { border-color: var(--theme-danger) !important; }
 
-  .auth-label { display: block; font-size: 13px; font-weight: 500; color: var(--theme-text-muted); margin-bottom: 6px; }
+  .auth-label { display: block; font-size: 12px; font-weight: 500; color: var(--theme-text-muted); margin-bottom: 6px; }
 
   .auth-submit {
-    width: 100%; padding: 11px; border-radius: 10px;
+    width: 100%; padding: 10px 14px; border-radius: 12px;
     background: var(--theme-btn-primary-bg); color: var(--theme-btn-primary-text);
     font-size: 14px; font-weight: 500;
-    border: none; cursor: pointer; transition: background 0.15s;
+    border: 1px solid var(--theme-btn-border, var(--theme-border)); cursor: pointer; transition: background 0.15s;
     font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
   }
   .auth-submit:hover:not(:disabled) { background: var(--theme-btn-primary-hover); }

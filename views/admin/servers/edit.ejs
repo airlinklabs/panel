@@ -6,7 +6,7 @@
       <%- include('../../components/sidebar') %>
     </div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Servers', href: '/admin/servers' },
@@ -115,7 +115,7 @@
                     data-display="serverMemoryDisplay" data-hidden="serverMemory"
                     data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
-                <p class="text-xs text-neutral-400">Min 128 MB</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)">Min 128 MB</p>
               </div>
 
               <div>
@@ -132,7 +132,7 @@
                     data-display="serverSwapDisplay" data-hidden="serverSwap"
                     data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
-                <p class="text-xs text-neutral-400">0 = no swap, -1 = unlimited</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)">0 = no swap, -1 = unlimited</p>
               </div>
 
               <div>
@@ -148,7 +148,7 @@
                     data-display="serverCPUDisplay" data-hidden="serverCPU"
                     data-units="100:Cores,1:%" data-default-unit="Cores">Cores</button>
                 </div>
-                <p class="text-xs text-neutral-400">1 core = 100%</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)">1 core = 100%</p>
               </div>
 
               <div>
@@ -165,7 +165,7 @@
                     data-display="serverStorageDisplay" data-hidden="serverStorage"
                     data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
-                <p class="text-xs text-neutral-400">Min 128 MB</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)">Min 128 MB</p>
               </div>
               <div>
                 <label class="al-label">
@@ -173,7 +173,7 @@
                   Database limit:
                 </label>
                 <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= server.databaseLimit ?? 5 %>" class="al-input mt-2 mb-1">
-                <p class="text-xs text-neutral-400">0 = unlimited databases</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)">0 = unlimited databases</p>
               </div>
             </div>
           </div>
@@ -187,7 +187,7 @@
                   Backup limit:
                 </label>
                 <input id="serverBackupLimit" name="backupLimit" type="number" min="0" value="<%= server.backupLimit ?? 5 %>" class="al-input mt-2">
-                <p class="text-xs text-neutral-400">0 = unlimited backups</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)">0 = unlimited backups</p>
               </div>
               <div>
                 <label for="backupIgnoreList" class="al-label">
@@ -206,7 +206,7 @@
                     } catch { return server.backupIgnoreList || ''; }
                   })()
                 %></textarea>
-                <p class="text-xs text-neutral-400">One glob pattern per line (e.g. <code>cache/</code>, <code>*.log</code>).</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)">One glob pattern per line (e.g. <code>cache/</code>, <code>*.log</code>).</p>
               </div>
             </div>
           </div>
@@ -266,7 +266,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <div class="flex items-center gap-3 mb-4">
-                  <span id="serverStatusCircle" class="inline-flex items-center justify-center h-8 w-8 rounded-full <%= server.Suspended ? 'bg-red-100 text-red-500 dark:bg-red-500/15 dark:text-red-400' : 'bg-green-100 text-green-500 dark:bg-green-500/15 dark:text-green-400' %>">
+                  <span id="serverStatusCircle" class="inline-flex items-center justify-center h-8 w-8 rounded-full"
+                    style="<%= server.Suspended ? 'background:var(--theme-danger-bg);color:var(--theme-danger)' : 'background:var(--theme-success-bg);color:var(--theme-success)' %>">
                     <% if (server.Suspended) { %>
                       <%- icon('x-circle', { size: 20, class: 'shrink-0' }) %>
                     <% } else { %>
@@ -274,7 +275,7 @@
                     <% } %>
                   </span>
                   <div>
-                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Status: <span id="serverStatusText" class="<%= server.Suspended ? 'text-red-500' : 'text-green-500' %>"><%= server.Suspended ? 'Suspended' : 'Active' %></span></p>
+                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Status: <span id="serverStatusText" style="<%= server.Suspended ? 'color:var(--theme-danger)' : 'color:var(--theme-success)' %>"><%= server.Suspended ? 'Suspended' : 'Active' %></span></p>
                     <p class="text-xs text-neutral-500">Server ID: <%= server.UUID %></p>
                   </div>
                 </div>
@@ -301,7 +302,8 @@
 
               <div>
                 <div class="flex items-center gap-3 mb-4">
-                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-500 dark:bg-blue-500/15 dark:text-blue-400">
+                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full"
+                    style="background:var(--theme-info-bg);color:var(--theme-info)">
                     <%- icon('calendar', { size: 20, class: 'shrink-0' }) %>
                   </span>
                   <div>
@@ -599,11 +601,13 @@ window.generateRandomName = generateRandomName;
         const statusText = document.getElementById('serverStatusText');
         if (statusText) {
           statusText.textContent = action === 'suspend' ? 'Suspended' : 'Active';
-          statusText.className = action === 'suspend' ? 'text-red-500' : 'text-green-500';
+          statusText.style.color = action === 'suspend' ? 'var(--theme-danger)' : 'var(--theme-success)';
         }
         const statusCircle = document.getElementById('serverStatusCircle');
         if (statusCircle) {
-          statusCircle.className = 'inline-flex items-center justify-center h-8 w-8 rounded-full ' + (action === 'suspend' ? 'bg-red-100 text-red-500 dark:bg-red-500/15 dark:text-red-400' : 'bg-green-100 text-green-500 dark:bg-green-500/15 dark:text-green-400');
+          statusCircle.className = 'inline-flex items-center justify-center h-8 w-8 rounded-full';
+          statusCircle.style.background = action === 'suspend' ? 'var(--theme-danger-bg)' : 'var(--theme-success-bg)';
+          statusCircle.style.color = action === 'suspend' ? 'var(--theme-danger)' : 'var(--theme-success)';
           statusCircle.innerHTML = window.alIcon ? (action === 'suspend' ? window.alIcon('x-circle', 'size-5 shrink-0') : window.alIcon('check-circle', 'size-5 shrink-0')) : '';
         }
       } catch (err) {

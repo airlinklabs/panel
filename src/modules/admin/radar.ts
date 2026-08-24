@@ -1,6 +1,7 @@
 import { getSettings } from '../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
@@ -21,23 +22,23 @@ const vtRateLimit = {
     const now = Math.floor(Date.now() / 1000);
     const minute = Math.floor(now / 60);
     if (minute !== this.minuteWindow) { this.minuteWindow = minute; this.minuteCount = 0; }
-    if (this.minuteCount >= 4) return false;
+    if (this.minuteCount >= 4) {return false;}
     this.minuteCount++;
     return true;
   },
   allowDaily(): boolean {
     const day = Math.floor(Date.now() / 86400000);
     if (day !== this.dayWindow) { this.dayWindow = day; this.dayCount = 0; }
-    if (this.dayCount >= 500) return false;
+    if (this.dayCount >= 500) {return false;}
     this.dayCount++;
     return true;
   },
 };
 
 function deriveSeverity(matchCount: number): string {
-  if (matchCount >= 10) return 'critical';
-  if (matchCount >= 3) return 'high';
-  if (matchCount >= 1) return 'medium';
+  if (matchCount >= 10) {return 'critical';}
+  if (matchCount >= 3) {return 'high';}
+  if (matchCount >= 1) {return 'medium';}
   return 'low';
 }
 
@@ -257,10 +258,10 @@ const radarModule: Module = {
             const patternMap: Record<string, string> = {};
             for (const p of script.patterns) {
               const key = (p.description || '').toLowerCase();
-              if (p.severity) patternMap[key] = p.severity;
+              if (p.severity) {patternMap[key] = p.severity;}
             }
 
-            scanDataObj.results = (scanDataObj.results as Array<Record<string, unknown>>).map((result) => {
+            scanDataObj.results = (scanDataObj.results as Record<string, unknown>[]).map((result) => {
               const desc = String(((result.pattern as Record<string, unknown>)?.description) || '');
               const key = desc.toLowerCase();
               return {

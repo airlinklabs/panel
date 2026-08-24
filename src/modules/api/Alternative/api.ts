@@ -1,6 +1,7 @@
 import { getSettings } from '../../../handlers/settingsCache';
-import { Router, Request, Response, NextFunction } from 'express';
-import { Module } from '../../../handlers/moduleInit';
+import type { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import { queueer } from '../../../handlers/queueer';
@@ -105,10 +106,10 @@ const coreModule: Module = {
                 root_admin: user.isAdmin,
               },
               relationships: {
-                servers: [] as Array<{
+                servers: [] as {
                   object: string;
                   attributes: { id: number; name: string; node: typeof serverData[number]['node'] };
-                }>,
+                }[],
               },
             };
 
@@ -341,11 +342,11 @@ const coreModule: Module = {
 
           const updatedData: Record<string, string | undefined> = {};
 
-          if (username) updatedData.username = username;
-          if (email) updatedData.email = email;
-          if (first_name) updatedData.first_name = first_name;
-          if (last_name) updatedData.last_name = last_name;
-          if (password) updatedData.password = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+          if (username) {updatedData.username = username;}
+          if (email) {updatedData.email = email;}
+          if (first_name) {updatedData.first_name = first_name;}
+          if (last_name) {updatedData.last_name = last_name;}
+          if (password) {updatedData.password = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);}
 
           const updatedUser = await prisma.users.update({
             where: { id: userId },
@@ -570,7 +571,7 @@ const coreModule: Module = {
         const dockerImage = req.body.docker_image;
 
         const servers = await prisma.server.findMany({
-          where: { nodeId: nodeId },
+          where: { nodeId },
         });
 
         const allPossiblePorts = Array.from(
@@ -632,7 +633,7 @@ const coreModule: Module = {
 
           const imagesDocker = JSON.parse(dockerImages);
 
-          type ImageDocker = { [key: string]: string };
+          type ImageDocker = Record<string, string>;
 
           const imageDocker: ImageDocker | undefined = imagesDocker.find(
             (image: ImageDocker) => Object.values(image).includes(dockerImage),
@@ -666,7 +667,7 @@ const coreModule: Module = {
               name,
               description,
               ownerId: userId,
-              nodeId: nodeId,
+              nodeId,
               imageId: parseInt(imageId),
               Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
               Memory: parseInt(Memory) || DEFAULT_MEMORY_MB,
@@ -726,7 +727,7 @@ const coreModule: Module = {
 
               const env = ServerEnv.reduce(
                 (
-                  acc: { [key: string]: string },
+                  acc: Record<string, string>,
                   curr: { env: string; value: string },
                 ) => {
                   acc[curr.env] = curr.value;
@@ -753,7 +754,7 @@ const coreModule: Module = {
 
                 const requestBody = {
                   id: server.UUID,
-                  env: env,
+                  env,
                   scripts: scripts.install.map(
                     (script: { url: string; fileName: string }) => ({
                       url: script.url,

@@ -30,7 +30,7 @@
   <div class="flex h-screen">
     <div class="hidden lg:block w-60 h-full shrink-0"><%- include('../components/sidebar') %></div>
 <%- include('../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
         { label: 'Credits' }
       ] }) %>
@@ -43,7 +43,7 @@
         <p class="text-sm" style="color:var(--theme-text-muted);">The people who build and maintain Airlink.</p>
       </div>
 
-      <div class="px-4 sm:px-8 space-y-8 max-w-5xl">
+      <div class="px-6 sm:px-8 space-y-8 max-w-5xl">
 
         <!-- Project leads — horizontal row on desktop -->
         <section>

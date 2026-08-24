@@ -1,5 +1,5 @@
 import { getSettings } from '../../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
+import type { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
@@ -24,7 +24,7 @@ export function registerPlayersRoutes(router: Router): void {
   // address at the EXTERNAL (primary) port — not the internal port. Match the
   // server-start contract by using the external primary port.
   async function fetchPlayerData(server: PlayerServer, primaryPort: number) {
-    let players: Array<{ name: string; uuid: string }> = [];
+    let players: { name: string; uuid: string }[] = [];
     let serverInfo = {
       maxPlayers: 0,
       onlinePlayers: 0,

@@ -6,7 +6,7 @@ const searchInput   = document.getElementById('searchInput');
 const searchResults = document.getElementById('searchResults');
 const navLinks      = document.querySelectorAll('.nav-link');
 
-if (!searchButton || !searchOverlay || !searchInput || !searchResults) {
+if (!searchOverlay || !searchInput || !searchResults) {
   // Search UI not present on this page
 } else {
 
@@ -371,11 +371,9 @@ function openSearch(fromKeyboard) {
   searchOverlay.classList.add('flex');
 
   const panel = searchPanel.getBoundingClientRect();
-  let ox, oy;
-  if (fromKeyboard) {
-    ox = panel.width / 2;
-    oy = panel.height / 2;
-  } else {
+  let ox = panel.width / 2;
+  let oy = panel.height / 2;
+  if (!fromKeyboard && searchButton) {
     const btn = searchButton.getBoundingClientRect();
     ox = btn.left + btn.width / 2 - panel.left;
     oy = btn.top + btn.height / 2 - panel.top;
@@ -384,7 +382,7 @@ function openSearch(fromKeyboard) {
 
   searchPanel.classList.add('al-dropdown');
   requestAnimationFrame(function () { searchPanel.classList.add('open'); });
-  searchButton.setAttribute('aria-expanded', 'true');
+  if (searchButton) searchButton.setAttribute('aria-expanded', 'true');
 
   if (!searchInput.value.trim()) showRecommendations();
   requestAnimationFrame(function() { searchInput.focus(); });
@@ -393,7 +391,7 @@ function openSearch(fromKeyboard) {
 function closeSearch() {
   if (searchOverlay.classList.contains('hidden') || panelClosing) return;
   panelClosing = true;
-  searchButton.setAttribute('aria-expanded', 'false');
+  if (searchButton) searchButton.setAttribute('aria-expanded', 'false');
   searchInput.setAttribute('aria-expanded', 'false');
   searchInput.setAttribute('aria-activedescendant', '');
   const done = function() {
@@ -408,9 +406,11 @@ function closeSearch() {
   else setTimeout(done, CLOSE_ANIMATION_MS);
 }
 
-searchButton.addEventListener('click', function() {
-  openSearch(false);
-});
+if (searchButton) {
+  searchButton.addEventListener('click', function() {
+    openSearch(false);
+  });
+}
 
 searchOverlay.addEventListener('click', function(e) {
   if (e.target === searchOverlay) closeSearch();

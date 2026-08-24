@@ -1,5 +1,5 @@
 import { getSettings } from '../../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
+import type { Router, Request, Response } from 'express';
 import CronParser from 'cron-parser';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
@@ -41,10 +41,10 @@ async function loadServerForUser(serverId: string, userId: number, req: Request)
     where: { UUID: getParamAsString(serverId) },
     include: serverPageInclude,
   });
-  if (!server) return null;
-  if (server.ownerId === userId || (req.session?.user?.isAdmin ?? false)) return server;
+  if (!server) {return null;}
+  if (server.ownerId === userId || (req.session?.user?.isAdmin ?? false)) {return server;}
   const subUser = req.subUser;
-  if (subUser) return server;
+  if (subUser) {return server;}
   return null;
 }
 

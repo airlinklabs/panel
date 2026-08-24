@@ -113,7 +113,7 @@ export function subscribeToRealtime(handler: (event: RealtimeEventEnvelope) => v
 
 /** Events newer than `sinceSeq` (inclusive), oldest first. */
 export function realtimeEventsSince(sinceSeq: number): RealtimeEventEnvelope[] {
-  if (!Number.isFinite(sinceSeq) || sinceSeq <= 0) return history.slice();
+  if (!Number.isFinite(sinceSeq) || sinceSeq <= 0) {return history.slice();}
   return history.filter((e) => e.seq >= sinceSeq);
 }
 
@@ -152,7 +152,7 @@ export function emitRealtime(input: RealtimeEventInput): RealtimeEventEnvelope |
   envelope.seq = ++sequence;
 
   history.push(envelope);
-  if (history.length > HISTORY_LIMIT) history.shift();
+  if (history.length > HISTORY_LIMIT) {history.shift();}
 
   for (const handler of subscribers) {
     try {

@@ -27,7 +27,7 @@ const onboardingModule: Module = {
             where: { id: userId },
             data: { onboardingCompleted: true, onboardingSkipped: false },
           });
-          if (req.session.user) req.session.user.onboardingCompleted = true;
+          if (req.session.user) {req.session.user.onboardingCompleted = true;}
           res.json({ success: true });
         } catch {
           res.status(500).json({ error: 'Failed to save onboarding state.' });
@@ -45,7 +45,7 @@ const onboardingModule: Module = {
             where: { id: userId },
             data: { onboardingSkipped: true },
           });
-          if (req.session.user) req.session.user.onboardingSkipped = true;
+          if (req.session.user) {req.session.user.onboardingSkipped = true;}
           res.json({ success: true });
         } catch {
           res.status(500).json({ error: 'Failed to save onboarding state.' });

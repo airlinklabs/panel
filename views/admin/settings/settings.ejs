@@ -5,7 +5,7 @@
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
 <%- include('../../components/template') %>
 
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Settings' }
@@ -71,7 +71,7 @@
                   </button>
                 </div>
                 <input type="file" id="favicon-input" name="favicon" accept=".ico,.png,.jpg,.jpeg" class="hidden">
-                <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted)">PNG or JPG auto-converted to .ico</p>
               </div>
             </div>
           </div>
@@ -102,7 +102,7 @@
                     </span>
                     <div class="flex-1 min-w-0">
                       <span class="text-sm text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g,' ') %></span>
-                      <% if (theme.author) { %><span class="text-xs text-neutral-400">by <%= theme.author %></span><% } %>
+                      <% if (theme.author) { %><span class="text-xs" style="color:var(--theme-text-muted)">by <%= theme.author %></span><% } %>
                     </div>
                     <span class="text-xs shrink-0" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                   </label>
@@ -131,7 +131,7 @@
                     </span>
                     <div class="flex-1 min-w-0">
                       <span class="text-sm text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g,' ') %></span>
-                      <% if (theme.author) { %><span class="text-xs text-neutral-400">by <%= theme.author %></span><% } %>
+                      <% if (theme.author) { %><span class="text-xs" style="color:var(--theme-text-muted)">by <%= theme.author %></span><% } %>
                     </div>
                     <span class="text-xs shrink-0" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                   </label>
@@ -298,11 +298,11 @@
           <div class="al-card">
             <h2 class="al-card-header">File uploads</h2>
             <div class="p-4">
-              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
+              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="font-normal" style="color:var(--theme-text-muted)">(MB)</span></label>
               <div class="relative max-w-xs">
                 <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
                   class="al-input pr-12">
-                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style="color:var(--theme-text-muted)">MB</span>
               </div>
               <p class="mt-1.5 text-xs text-neutral-500">Maximum file size users can upload via the file manager.</p>
             </div>
@@ -331,7 +331,7 @@
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max CPU <span class="text-neutral-400 font-normal">(%)</span></label>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max CPU <span class="font-normal" style="color:var(--theme-text-muted)">(%)</span></label>
                 <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="50" max="10000"
                   class="al-input">
               </div>
@@ -445,7 +445,7 @@
                   class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Lockout duration <span class="text-neutral-400 font-normal">(minutes)</span></label>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Lockout duration <span class="font-normal" style="color:var(--theme-text-muted)">(minutes)</span></label>
                 <input type="number" id="loginLockoutMinutes" value="<%= settings.loginLockoutMinutes ?? 15 %>" min="1" max="1440"
                   class="al-input">
               </div>
@@ -628,17 +628,17 @@
           <div class="al-card">
             <h2 class="al-card-header">IP banning</h2>
             <div class="p-4">
-              <label for="banIpInput" class="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2 block">IP Address</label>
+              <label for="banIpInput" class="text-xs font-medium mb-2 block" style="color:var(--theme-text-muted)">IP Address</label>
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1" aria-describedby="banIpHint"
                   class="al-input flex-1 max-w-xs">
                 <button type="button" id="banIpBtn" class="al-btn-danger"><%- icon('ban', { class: 'size-4', strokeWidth: 1.5 }) %>Ban IP</button>
               </div>
-              <p id="banIpHint" class="text-xs text-neutral-400 mb-4">Enter the IP address you want to ban from accessing the panel.</p>
+              <p id="banIpHint" class="text-xs mb-4" style="color:var(--theme-text-muted)">Enter the IP address you want to ban from accessing the panel.</p>
               <div id="bannedIpList" class="space-y-2">
                 <% let banned = []; try { banned = JSON.parse(settings.bannedIps || '[]'); } catch (e) { /* ignore malformed JSON */ } %>
                 <% if (banned.length === 0) { %>
-                <p class="text-sm text-neutral-400">No banned IPs.</p>
+                <p class="text-sm" style="color:var(--theme-text-muted)">No banned IPs.</p>
                 <% } else { %>
                 <% banned.forEach(function(ip) { %>
                 <div class="flex items-center justify-between rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-4 py-2.5">

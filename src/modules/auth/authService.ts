@@ -1,8 +1,9 @@
 import { getSettings } from '../../handlers/settingsCache';
 import bcrypt from 'bcryptjs';
 import prisma from '../../db';
-import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import logger from '../../handlers/logger';
 import rateLimit from 'express-rate-limit';
 import { getClientIp } from '../../utils/ip';
@@ -67,7 +68,7 @@ const authServiceModule: Module = {
         });
 
         // Always run bcrypt to prevent timing-based user enumeration.
-        const hash            = user?.password ?? '$2b$10$' + 'x'.repeat(53);
+        const hash            = user?.password ?? `$2b$10$${  'x'.repeat(53)}`;
         const isPasswordValid = await bcrypt.compare(password, hash);
 
         // Check lockout (only meaningful if the user exists).
@@ -178,7 +179,7 @@ const authServiceModule: Module = {
         const existing = await prisma.users.findFirst({
           where: { OR: [{ email }, { username }] },
         });
-        if (existing) return res.redirect('/register?err=user_already_exists');
+        if (existing) {return res.redirect('/register?err=user_already_exists');}
 
         await prisma.users.create({
           data: {

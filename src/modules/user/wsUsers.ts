@@ -1,14 +1,15 @@
-import { Router, Request } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
-import { WebSocket } from 'ws';
+import type { WebSocket } from 'ws';
 import logger from '../../handlers/logger';
 
 // Presence is tracked per connection, not per username: a user with several
 // open tabs/sockets stays online until the LAST connection closes. The set of
 // socket ids per username is updated immediately on connect/close, so there is
 // no stale 1-second window and no timeout bookkeeping.
-export const onlineUsers: Set<string> = new Set();
+export const onlineUsers = new Set<string>();
 export const onlineConnections = new Map<string, Set<string>>();
 
 function connectionKey(): string {
@@ -28,7 +29,7 @@ const wsUsersModule: Module = {
 
   router: (applyWs?: (router: Router) => void) => {
     const router = Router();
-    if (applyWs) applyWs(router);
+    if (applyWs) {applyWs(router);}
 
     router.ws('/online-check', async (ws: WebSocket, req: Request) => {
       const userId = req.session?.user?.id;
@@ -59,7 +60,7 @@ const wsUsersModule: Module = {
 
         ws.on('close', () => {
           const conns = onlineConnections.get(username);
-          if (!conns) return;
+          if (!conns) {return;}
           conns.delete(connectionId);
           if (conns.size === 0) {
             onlineConnections.delete(username);

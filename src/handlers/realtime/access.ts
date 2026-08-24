@@ -51,7 +51,7 @@ export async function getUserServerIds(
   userId: number,
   isAdmin: boolean,
 ): Promise<Set<string> | 'all'> {
-  if (isAdmin) return 'all';
+  if (isAdmin) {return 'all';}
 
   const cached = membershipCache.get(userId);
   if (cached && Date.now() - cached.fetchedAt < SERVER_SET_TTL_MS) {
@@ -94,7 +94,7 @@ export async function canObserve(
   },
 ): Promise<boolean> {
   if (scope.serverId) {
-    if (serverIds === 'all') return true;
+    if (serverIds === 'all') {return true;}
     return serverIds.has(scope.serverId);
   }
   if (scope.userId !== undefined) {

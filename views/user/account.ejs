@@ -1,18 +1,6 @@
 <%- include('../components/header', { title: req.translations.userAccountTitle || 'Account' }) %>
 
 <style>
-  .field-label { font-size: 11px; font-weight: 500; color: var(--theme-text-muted, #737373); display: block; margin-bottom: 5px; }
-  .field-input {
-    width: 100%; border-radius: 9px; border: 1px solid var(--theme-border, #e5e5e5);
-    background: var(--theme-bg-input, #fafafa); padding: 8px 12px;
-    font-size: 13px; color: var(--theme-text-strong, #171717); outline: none;
-    transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
-  }
-  html.dark .field-input { background: var(--theme-bg-hover, rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.1)); color: var(--theme-text, #e5e5e5); }
-  .field-input:focus { border-color: var(--theme-border, #a3a3a3); }
-  html.dark .field-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.25)); }
-  .field-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
-  html.dark .field-input::placeholder { color: var(--theme-text-muted, #525252); }
 </style>
 
 <main class="min-h-screen">
@@ -21,7 +9,7 @@
       <%- include('../components/sidebar') %>
     </div>
 <%- include('../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
         { label: 'Account' }
       ] }) %>
@@ -50,7 +38,7 @@
             <p class="al-page-desc"><%= req.translations.userAccountText || 'Manage your profile and preferences.' %></p>
           </div>
           <a href="/credits"
-            class="flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium shadow-sm transition shrink-0 hover:opacity-85" style="border-color:var(--theme-border);background:var(--theme-btn-secondary-bg);color:var(--theme-btn-secondary-text);">
+            class="al-btn-secondary text-xs">
             <%- icon('circle-alert', { class: 'w-3.5 h-3.5' }) %>
             Credits
           </a>
@@ -98,7 +86,7 @@
               </label>
               <div class="flex items-center gap-2">
                 <div class="relative flex-1">
-                  <input id="currentPassword" type="password" name="currentPassword" placeholder="<%= req.translations.currentPassword || 'Current password' %>" class="al-input pr-10" data-al-field-input autocomplete="current-password">
+                  <input id="currentPassword" type="password" name="currentPassword" placeholder="<%= req.translations.currentPassword || 'Current password' %>" class="al-input pr-10" data-al-al-input autocomplete="current-password">
                   <button type="button" data-al-field-toggle aria-label="Show password" aria-pressed="false" class="al-btn-ghost absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
                     <%- icon('eye', { class: 'w-4 h-4' }) %>
                   </button>
@@ -114,7 +102,7 @@
                 <%- icon('lock', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.newPassword || 'New password' %>
               </label>
               <div class="relative">
-                <input id="newPassword" type="password" name="newPassword" placeholder="<%= req.translations.newPassword || 'New password' %>" disabled class="al-input pr-10 disabled:opacity-50" data-al-field-input autocomplete="new-password">
+                <input id="newPassword" type="password" name="newPassword" placeholder="<%= req.translations.newPassword || 'New password' %>" disabled class="al-input pr-10 disabled:opacity-50" data-al-al-input autocomplete="new-password">
                 <button type="button" data-al-field-toggle aria-label="Show password" aria-pressed="false" class="al-btn-ghost absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
                   <%- icon('eye', { class: 'w-4 h-4' }) %>
                 </button>
@@ -161,7 +149,8 @@
               <a href="/account/2fa/setup" class="al-btn-primary text-sm inline-flex">Set up 2FA</a>
               <% } else { %>
               <div class="flex items-center gap-2 mb-3">
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-500">
+                <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+                  style="background:var(--theme-success-bg);color:var(--theme-success)">
                   <%- icon('check', { class: 'w-3 h-3' }) %> Enabled
                 </span>
               </div>
@@ -256,15 +245,18 @@
                     <td class="al-table-td whitespace-nowrap px-3 py-3"><%= new Date(image.createdAt).toLocaleDateString() %></td>
                     <td class="al-table-td whitespace-nowrap px-3 py-3">
                       <% if (image.status === 'approved') { %>
-                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-emerald-600/10 text-emerald-600 ring-emerald-600/20 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-emerald-400/20">
+                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                        style="background:var(--theme-success-bg);color:var(--theme-success)">
                         <%= req.translations.approved || 'Approved' %>
                       </span>
                       <% } else if (image.status === 'rejected') { %>
-                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-red-600/10 text-red-600 ring-red-600/20 dark:bg-red-400/10 dark:text-red-400 dark:ring-red-400/20">
+                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                        style="background:var(--theme-danger-bg);color:var(--theme-danger)">
                         <%= req.translations.rejected || 'Rejected' %>
                       </span>
                       <% } else { %>
-                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-amber-600/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/20">
+                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                        style="background:var(--theme-warning-bg);color:var(--theme-warning)">
                         <%= req.translations.pendingApproval || 'Pending review' %>
                       </span>
                       <% } %>
@@ -359,38 +351,38 @@
       <!-- Manual form -->
       <form id="imManualForm" class="flex flex-col gap-4">
         <div class="grid grid-cols-2 gap-3">
-          <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required placeholder="e.g. My Custom Game"></div>
-          <div><label class="field-label">Author</label><input class="field-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
-          <div><label class="field-label">Author Name</label><input class="field-input" type="text" name="authorName" placeholder="Your Name"></div>
-          <div class="col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
-          <div class="col-span-2"><label class="field-label">Docker images (JSON array) <span class="text-red-500">*</span></label><input class="field-input" type="text" name="dockerImages" required placeholder='[{"game":"ghcr.io/you/image:latest"}]' style="font-family:ui-monospace,monospace;font-size:12px;"></div>
-          <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
-          <div class="col-span-2"><label class="field-label">Variables <span class="font-normal" style="color:var(--theme-text-muted)">(JSON array, optional)</span></label><textarea class="field-input" name="variables" rows="4" placeholder="[]" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;">[]</textarea></div>
+          <div class="col-span-2"><label class="al-label">Name <span class="text-red-500">*</span></label><input class="al-input" type="text" name="name" required placeholder="e.g. My Custom Game"></div>
+          <div><label class="al-label">Author</label><input class="al-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
+          <div><label class="al-label">Author Name</label><input class="al-input" type="text" name="authorName" placeholder="Your Name"></div>
+          <div class="col-span-2"><label class="al-label">Startup Command <span class="text-red-500">*</span></label><input class="al-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+          <div class="col-span-2"><label class="al-label">Docker images (JSON array) <span class="text-red-500">*</span></label><input class="al-input" type="text" name="dockerImages" required placeholder='[{"game":"ghcr.io/you/image:latest"}]' style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+          <div class="col-span-2"><label class="al-label">Description</label><textarea class="al-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
+          <div class="col-span-2"><label class="al-label">Variables <span class="font-normal" style="color:var(--theme-text-muted)">(JSON array, optional)</span></label><textarea class="al-input" name="variables" rows="4" placeholder="[]" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;">[]</textarea></div>
         </div>
         <div class="flex gap-2 pt-1">
-          <button type="button" id="imManualCancel" class="flex-1 py-2 rounded-xl border text-sm font-medium transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
-          <button type="submit" class="flex-1 py-2 rounded-xl border text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg);color:var(--theme-text-strong);"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
+          <button type="button" id="imManualCancel" class="al-btn-secondary flex-1 py-2 inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
+          <button type="submit" class="al-btn-primary flex-1 py-2 inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
         </div>
       </form>
 
       <!-- JSON paste -->
       <div id="imJsonSection" class="hidden">
-        <label class="field-label" for="imJsonInput">Egg JSON</label>
-        <textarea id="imJsonInput" class="field-input" rows="12" placeholder='{ "name": "...", "startup": "...", "docker_images": { "game": "ghcr.io/example/image:latest" } }' style="resize:none;font-family:ui-monospace,monospace;font-size:12px;"></textarea>
+        <label class="al-label" for="imJsonInput">Egg JSON</label>
+        <textarea id="imJsonInput" class="al-input" rows="12" placeholder='{ "name": "...", "startup": "...", "docker_images": { "game": "ghcr.io/example/image:latest" } }' style="resize:none;font-family:ui-monospace,monospace;font-size:12px;"></textarea>
         <div class="flex gap-2 pt-4">
-          <button type="button" id="imJsonCancel" class="flex-1 py-2 rounded-xl border text-sm font-medium transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text-muted);">Cancel</button>
-          <button type="button" id="imSubmitJsonBtn" class="flex-1 py-2 rounded-xl border text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg);color:var(--theme-text-strong);"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
+          <button type="button" id="imJsonCancel" class="al-btn-secondary flex-1 py-2 inline-flex items-center justify-center gap-1.5">Cancel</button>
+          <button type="button" id="imSubmitJsonBtn" class="al-btn-primary flex-1 py-2 inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %>Submit for review</button>
         </div>
       </div>
 
       <!-- URL import -->
       <div id="imUrlSection" class="hidden">
-        <label class="field-label" for="imUrlInput">Image URL</label>
-        <input id="imUrlInput" type="url" class="field-input" placeholder="https://raw.githubusercontent.com/…/egg.json">
+        <label class="al-label" for="imUrlInput">Image URL</label>
+        <input id="imUrlInput" type="url" class="al-input" placeholder="https://raw.githubusercontent.com/…/egg.json">
         <p class="mt-2 text-xs" style="color:var(--theme-text-muted)">Fetch a Pterodactyl egg JSON from a raw URL and submit it for review.</p>
         <div class="flex gap-2 pt-4">
-          <button type="button" id="imUrlCancel" class="flex-1 py-2 rounded-xl border text-sm font-medium transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text-muted);">Cancel</button>
-          <button type="button" id="imSubmitUrlBtn" class="flex-1 py-2 rounded-xl border text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg);color:var(--theme-text-strong);"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Fetch &amp; Submit</button>
+          <button type="button" id="imUrlCancel" class="al-btn-secondary flex-1 py-2 inline-flex items-center justify-center gap-1.5">Cancel</button>
+          <button type="button" id="imSubmitUrlBtn" class="al-btn-primary flex-1 py-2 inline-flex items-center justify-center gap-1.5"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Fetch &amp; Submit</button>
         </div>
       </div>
     </div>
@@ -611,8 +603,8 @@
           </div>
         </div>
         <div class="flex gap-3 px-5 py-4 border-t" style="border-color:var(--theme-border);">
-          <button type="button" id="crop-cancel-btn" class="flex-1 rounded-xl border py-2.5 text-sm font-medium transition hover:opacity-85" style="border-color:var(--theme-btn-secondary-border);background:var(--theme-btn-secondary-bg);color:var(--theme-btn-secondary-text);">Cancel</button>
-          <button type="button" id="crop-save" class="flex-1 rounded-xl py-2.5 text-sm font-medium transition hover:opacity-85" style="background:var(--theme-btn-primary-bg);color:var(--theme-btn-primary-text);">Save photo</button>
+          <button type="button" id="crop-cancel-btn" class="al-btn-secondary flex-1 py-2.5">Cancel</button>
+          <button type="button" id="crop-save" class="al-btn-primary flex-1 py-2.5">Save photo</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);

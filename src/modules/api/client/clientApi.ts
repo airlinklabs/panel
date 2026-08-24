@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
@@ -47,12 +48,12 @@ async function resolveServerForUser(serverId: string, userId: number) {
     where: { UUID: serverId },
     include: { node: true },
   });
-  if (!server) return null;
-  if (server.ownerId === userId) return server;
+  if (!server) {return null;}
+  if (server.ownerId === userId) {return server;}
   const subUser = await prisma.subUser.findFirst({
     where: { serverId: server.UUID, userId },
   });
-  if (!subUser) return null;
+  if (!subUser) {return null;}
   return server;
 }
 
@@ -84,7 +85,7 @@ const clientApiModule: Module = {
     router.get('/api/client/servers', async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const servers = await prisma.server.findMany({
           where: { ownerId: userId },
@@ -112,11 +113,11 @@ const clientApiModule: Module = {
     router.get('/api/client/servers/:id', async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const data = {
           UUID: server.UUID,
@@ -143,15 +144,15 @@ const clientApiModule: Module = {
     router.post('/api/client/servers/:id/power', parseBody(powerBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const { action } = req.validatedBody as PowerBody;
 
-        if (server.Suspended) return jsonError(res, 'Server is suspended', 403);
+        if (server.Suspended) {return jsonError(res, 'Server is suspended', 403);}
 
         if (action === 'start') {
           const apiUser = await prisma.users.findUnique({
@@ -214,11 +215,11 @@ const clientApiModule: Module = {
     router.get('/api/client/servers/:id/files', async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const dir = (req.query.dir as string) || '/';
 
@@ -242,14 +243,14 @@ const clientApiModule: Module = {
     router.get('/api/client/servers/:id/files/content', async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const file = req.query.file as string;
-        if (!file) return jsonError(res, 'file query parameter is required');
+        if (!file) {return jsonError(res, 'file query parameter is required');}
 
         const response = await daemonRequest({
           nodeAddress: server.node.address,
@@ -271,11 +272,11 @@ const clientApiModule: Module = {
     router.post('/api/client/servers/:id/files/content', parseBody(writeFileBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const { file, content } = req.validatedBody as WriteFileBody;
 
@@ -304,11 +305,11 @@ const clientApiModule: Module = {
     router.delete('/api/client/servers/:id/files', parseBody(deleteFileBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const { file } = req.validatedBody as DeleteFileBody;
 
@@ -337,11 +338,11 @@ const clientApiModule: Module = {
     router.post('/api/client/servers/:id/files/rename', parseBody(renameFileBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const { file, newname } = req.validatedBody as RenameFileBody;
 
@@ -374,11 +375,11 @@ const clientApiModule: Module = {
     router.get('/api/client/servers/:id/backups', async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const backups = await prisma.backup.findMany({
           where: { serverId: server.UUID },
@@ -413,11 +414,11 @@ const clientApiModule: Module = {
     router.post('/api/client/servers/:id/backups', parseBody(createBackupBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const existingBackups = await prisma.backup.count({ where: { serverId: server.UUID } });
         if (existingBackups >= server.backupLimit) {
@@ -469,18 +470,18 @@ const clientApiModule: Module = {
     router.delete('/api/client/servers/:id/backups/:backupId', async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const backupUUID = getParamAsString(req.params.backupId);
         const backup = await prisma.backup.findFirst({
           where: { UUID: backupUUID, serverId: server.UUID },
         });
-        if (!backup) return jsonError(res, 'Backup not found', 404);
-        if (backup.locked) return jsonError(res, 'Backup is locked', 400);
+        if (!backup) {return jsonError(res, 'Backup not found', 404);}
+        if (backup.locked) {return jsonError(res, 'Backup is locked', 400);}
 
         await daemonRequest({
           nodeAddress: server.node.address,
@@ -513,11 +514,11 @@ const clientApiModule: Module = {
     router.get('/api/client/servers/:id/schedules', async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const schedules = await prisma.schedule.findMany({
           where: { serverId: server.UUID },
@@ -548,11 +549,11 @@ const clientApiModule: Module = {
     router.post('/api/client/servers/:id/schedules', parseBody(createScheduleBodySchema), async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const { name, cron, action, payload } = req.validatedBody as CreateScheduleBody;
 
@@ -589,19 +590,19 @@ const clientApiModule: Module = {
     router.delete('/api/client/servers/:id/schedules/:scheduleId', async (req: Request, res: Response) => {
       try {
         const userId = getApiKeyUserId(req);
-        if (!userId) return jsonError(res, 'API key must be associated with a user', 403);
+        if (!userId) {return jsonError(res, 'API key must be associated with a user', 403);}
 
         const serverId = getParamAsString(req.params.id);
         const server = await resolveServerForUser(serverId, userId);
-        if (!server) return jsonError(res, 'Server not found', 404);
+        if (!server) {return jsonError(res, 'Server not found', 404);}
 
         const scheduleId = parseInt(getParamAsString(req.params.scheduleId), 10);
-        if (isNaN(scheduleId)) return jsonError(res, 'Invalid schedule ID');
+        if (isNaN(scheduleId)) {return jsonError(res, 'Invalid schedule ID');}
 
         const schedule = await prisma.schedule.findFirst({
           where: { id: scheduleId, serverId: server.UUID },
         });
-        if (!schedule) return jsonError(res, 'Schedule not found', 404);
+        if (!schedule) {return jsonError(res, 'Schedule not found', 404);}
 
         await prisma.schedule.delete({ where: { id: scheduleId } });
 

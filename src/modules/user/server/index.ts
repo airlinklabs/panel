@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Module } from '../../../handlers/moduleInit';
+import type { Module } from '../../../handlers/moduleInit';
 import { registerConsoleRoutes } from './console';
 import { registerFilesRoutes } from './files';
 import { registerFileDetailRoutes } from './fileDetail';

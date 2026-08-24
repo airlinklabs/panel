@@ -111,10 +111,21 @@
       }
     }
 
-    function pruneNow(list, now) {
-      now = now || Date.now();
-      return list.filter(function (r) { return !isExpired(r, now); });
-    }
+  function pruneNow(list, now) {
+    now = now || Date.now();
+    return list.filter(function (r) { return !isExpired(r, now); });
+  }
+
+  function dedupByGroup(list) {
+    var seen = {};
+    return list.filter(function (r) {
+      if (!r || !r.group) return true;
+      if (r.finished) return true;
+      if (seen[r.group]) return false;
+      seen[r.group] = true;
+      return true;
+    });
+  }
 
     return {
       KEY: KEY,
@@ -122,7 +133,7 @@
         return read();
       },
       save: function (list) {
-        return write(maxByAge(pruneNow(list)));
+        return write(maxByAge(pruneNow(dedupByGroup(list))));
       },
       upsert: function (record) {
         var list = read();

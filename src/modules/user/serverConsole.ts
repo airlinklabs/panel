@@ -4,8 +4,9 @@
 // daemon -> panel proxy -> browser WebSocket -> xterm.js. Do not convert Buffer
 // to string in the proxy path — TUI escape sequences are binary data.
 
-import { Router, Request } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { WebSocket } from 'ws';
 import { isAuthenticatedForServerWS, subUserHasPermission } from '../../handlers/utils/auth/serverAuthUtil';
@@ -48,15 +49,15 @@ function sendSocketError(socket: WebSocket, message: string): void {
 }
 
 function normalizeWsMessage(data: WsMessage): ProxiedMessage {
-  if (typeof data === 'string') return data;
-  if (Buffer.isBuffer(data)) return data;
-  if (Array.isArray(data)) return Buffer.concat(data);
+  if (typeof data === 'string') {return data;}
+  if (Buffer.isBuffer(data)) {return data;}
+  if (Array.isArray(data)) {return Buffer.concat(data);}
   return Buffer.from(data);
 }
 
 function extractConsoleCommand(data: WsMessage): string | null {
   const raw = normalizeWsMessage(data).toString('utf8').trim();
-  if (!raw) return null;
+  if (!raw) {return null;}
 
   try {
     const payload = JSON.parse(raw) as {
@@ -84,7 +85,7 @@ function extractConsoleCommand(data: WsMessage): string | null {
     for (const candidate of candidates) {
       if (typeof candidate === 'string') {
         const command = candidate.replace(/\r\n?/g, '\n').trim();
-        if (command) return command;
+        if (command) {return command;}
       }
     }
   } catch {
@@ -145,13 +146,13 @@ async function proxyConsole(
     let clientClosed = false;
 
     // Determine which daemon WS routes this connection needs.
-    const daemonRoutes: Array<'container' | 'containerstatus' | 'containerevents'> = [];
-    if (daemonPath.toString().includes('/container/')) daemonRoutes.push('container');
-    if (daemonPath.toString().includes('/containerstatus')) daemonRoutes.push('containerstatus');
-    if (daemonPath.toString().includes('/containerevents')) daemonRoutes.push('containerevents');
+    const daemonRoutes: ('container' | 'containerstatus' | 'containerevents')[] = [];
+    if (daemonPath.toString().includes('/container/')) {daemonRoutes.push('container');}
+    if (daemonPath.toString().includes('/containerstatus')) {daemonRoutes.push('containerstatus');}
+    if (daemonPath.toString().includes('/containerevents')) {daemonRoutes.push('containerevents');}
     // Fallback: if we can't determine the route from the function, grant all
     // routes that this panel module uses. The daemon will reject mismatches.
-    if (daemonRoutes.length === 0) daemonRoutes.push('container', 'containerstatus', 'containerevents');
+    if (daemonRoutes.length === 0) {daemonRoutes.push('container', 'containerstatus', 'containerevents');}
 
     // Mint a short-lived capability token instead of sending the raw node key.
     // The daemon verifies this token's signature, expiry, and route match.
@@ -165,12 +166,12 @@ async function proxyConsole(
     function flushPendingClientMessages(): void {
       while (pendingClientMessages.length > 0 && isOpen(socket)) {
         const message = pendingClientMessages.shift();
-        if (message) socket.send(message);
+        if (message) {socket.send(message);}
       }
     }
 
     async function forwardToDaemon(data: WsMessage): Promise<void> {
-      if (mode === 'readonly') return;
+      if (mode === 'readonly') {return;}
 
       const command = extractConsoleCommand(data);
       if (command) {
@@ -223,7 +224,7 @@ async function proxyConsole(
 
     socket.onclose = () => {
       pendingClientMessages.length = 0;
-      if (!clientClosed && isOpen(ws)) ws.close();
+      if (!clientClosed && isOpen(ws)) {ws.close();}
     };
 
     ws.on('message', forwardToDaemon);
@@ -252,7 +253,7 @@ const wsServerConsoleModule: Module = {
 
   router: (applyWs?: (router: Router) => void) => {
     const router = Router();
-    if (applyWs) applyWs(router);
+    if (applyWs) {applyWs(router);}
 
     router.ws(
       '/console/:id',

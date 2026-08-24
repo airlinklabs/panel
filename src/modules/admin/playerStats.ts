@@ -1,6 +1,7 @@
 import { getSettings } from '../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
@@ -12,7 +13,7 @@ import { getPrimaryExternalPort } from '../../handlers/utils/server/ports';
 
 registerPermission('airlink.admin.playerstats.view');
 
-type ErrorMessage = { message?: string };
+interface ErrorMessage { message?: string }
 
 const adminModule: Module = {
   info: {

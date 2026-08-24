@@ -50,7 +50,7 @@ function normalizeImageData(raw: Record<string, unknown>) {
 }
 
 async function canSubmitImages(user: { id: number; isAdmin: boolean }): Promise<boolean> {
-  if (user.isAdmin) return true;
+  if (user.isAdmin) {return true;}
   const settings = await await getSettings();
   return settings?.allowUserCreateImages === true;
 }

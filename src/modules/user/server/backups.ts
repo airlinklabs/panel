@@ -1,5 +1,5 @@
 import { getSettings } from '../../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
+import type { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
@@ -311,7 +311,7 @@ export function registerBackupRoutes(router: Router): void {
             .json({ error: 'Failed to create backup on daemon' });
         }
       } catch (error: unknown) {
-        if (jobKey) finishJob('backup', jobKey, false, 'Backup creation failed.', 'Backup creation failed.');
+        if (jobKey) {finishJob('backup', jobKey, false, 'Backup creation failed.', 'Backup creation failed.');}
         emitRealtime(serverEvent('backup.failed', getParamAsString(serverId), {
           operationId: getParamAsString(serverId),
           error: { message: safeClientMessage(error, 'Failed to create backup') },
@@ -432,7 +432,7 @@ export function registerBackupRoutes(router: Router): void {
           try {
             const s3Key = backup.filePath.slice(S3_KEY_PREFIX.length);
             const stream = await getS3ObjectStream(s3Key);
-            if (!stream) throw new Error('S3 object not found');
+            if (!stream) {throw new Error('S3 object not found');}
 
             const uploadResponse = await daemonRequest<{ success: boolean; filePath?: string }>({
               method: 'POST',
@@ -468,7 +468,7 @@ export function registerBackupRoutes(router: Router): void {
           nodeKey: server.node.key,
           body: {
             id: getParamAsString(serverId),
-            backupPath: backupPath,
+            backupPath,
             checksum: backup.checksum ?? undefined,
           },
           timeout: 300000,
@@ -481,7 +481,7 @@ export function registerBackupRoutes(router: Router): void {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
-            body: { backupPath: backupPath },
+            body: { backupPath },
           }).catch(e => logger.warn(`Failed to delete temporary restore file: ${e}`));
         } else if (isS3Backup(backup.filePath)) {
           daemonRequest({
@@ -490,7 +490,7 @@ export function registerBackupRoutes(router: Router): void {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
-            body: { backupPath: backupPath },
+            body: { backupPath },
           }).catch(e => logger.warn(`Failed to delete temporary restore file: ${e}`));
         }
 

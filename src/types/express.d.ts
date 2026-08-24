@@ -60,9 +60,9 @@ declare global {
 
     interface Response {
       // Admin sidebar groups for navigation
-      adminSidebarGroups?: Array<{
+      adminSidebarGroups?: {
         label: string;
-        items: Array<{
+        items: {
           url: string;
           label: string;
           icon: string;
@@ -71,8 +71,8 @@ declare global {
           ownerOnly?: boolean;
           feature?: string;
           group?: string;
-        }>;
-      }>;
+        }[];
+      }[];
     }
   }
 }

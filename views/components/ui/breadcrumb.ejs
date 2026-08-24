@@ -10,9 +10,9 @@
               <span class="shrink-0" style="color:var(--theme-text-placeholder);font-size:10px;">/</span>
             <% } %>
             <% if (item.href && index < items.length - 1) { %>
-              <a href="<%= item.href %>" class="transition truncate text-neutral-500 dark:text-neutral-400" style="color:var(--theme-text-muted);"><%= item.label %></a>
+              <a href="<%= item.href %>" class="transition truncate" style="color:var(--theme-text-muted);"><%= item.label %></a>
             <% } else { %>
-              <span class="truncate text-neutral-500 dark:text-neutral-400" style="color:var(--theme-text-muted);font-weight:500;"><%= item.label %></span>
+              <span class="truncate" style="color:var(--theme-text-muted);font-weight:500;"><%= item.label %></span>
             <% } %>
           </li>
         <% }); %>

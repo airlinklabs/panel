@@ -16,7 +16,7 @@ export async function withNodePortLock<T>(nodeId: number, task: () => Promise<T>
     return await task();
   } finally {
     release();
-    if (portMutexes.get(nodeId) === tail) portMutexes.delete(nodeId);
+    if (portMutexes.get(nodeId) === tail) {portMutexes.delete(nodeId);}
   }
 }
 
@@ -24,7 +24,7 @@ export async function withNodePortLock<T>(nodeId: number, task: () => Promise<T>
 export function parseLegacyPool(raw: string | null | undefined): number[] {
   try {
     const parsed = JSON.parse(raw || '[]');
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) {return [];}
     return parsed.filter((p): p is number => typeof p === 'number');
   } catch {
     return [];
@@ -74,7 +74,7 @@ export async function syncNodeAllocations(
 // at execution time are claimed, so two concurrent writers can't overlap.
 export async function claimNodePorts(nodeId: number, ports: number[], serverId: string): Promise<number> {
   const exists = await prisma.server.findUnique({ where: { UUID: serverId }, select: { id: true } });
-  if (!exists) return 0;
+  if (!exists) {return 0;}
 
   let claimed = 0;
   for (const port of ports) {
@@ -96,7 +96,7 @@ export async function releaseServerAllocations(serverId: string): Promise<void> 
 }
 
 export async function releaseNodePorts(nodeId: number, ports: number[]): Promise<void> {
-  if (ports.length === 0) return;
+  if (ports.length === 0) {return;}
   await prisma.allocation.updateMany({
     where: { nodeId, port: { in: ports }, serverId: { not: null } },
     data: { serverId: null },

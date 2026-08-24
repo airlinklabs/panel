@@ -33,7 +33,7 @@ export const loadModules = async (
   });
 
   const boxWidth = 55;
-  const border = chalk.gray('+' + '-'.repeat(boxWidth) + '+');
+  const border = chalk.gray(`+${  '-'.repeat(boxWidth)  }+`);
   const padLine = (text: string) => {
     const padding = ' '.repeat(Math.max(0, boxWidth - text.length));
     return chalk.greenBright('|') + chalk.whiteBright(text) + chalk.whiteBright(padding) + chalk.greenBright('|');

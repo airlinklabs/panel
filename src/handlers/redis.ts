@@ -12,12 +12,12 @@ let client: Redis | null = null;
  * store will fall through gracefully.
  */
 export function getRedisClient(): Redis {
-  if (client) return client;
+  if (client) {return client;}
 
   client = new Redis(REDIS_URL, {
     maxRetriesPerRequest: 3,
     retryStrategy(times: number) {
-      if (times > 10) return null;
+      if (times > 10) {return null;}
       return Math.min(times * 200, 5000);
     },
     lazyConnect: false,
@@ -42,7 +42,7 @@ export function createSessionRedisClient(): Redis {
   return new Redis(REDIS_URL, {
     maxRetriesPerRequest: 3,
     retryStrategy(times: number) {
-      if (times > 10) return null;
+      if (times > 10) {return null;}
       return Math.min(times * 200, 5000);
     },
     lazyConnect: false,

@@ -7,6 +7,6 @@ const icons   = { danger: 'triangle-alert', warning: 'triangle-alert', success: 
   <%- icon(icons[type] || icons.info, { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
   <div>
     <p class="font-medium"><%= locals.message || '' %></p>
-    <% if (locals.detail) { %><p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5"><%= locals.detail %></p><% } %>
+    <% if (locals.detail) { %><p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= locals.detail %></p><% } %>
   </div>
 </div>

@@ -6,7 +6,7 @@
       <%- include('../../components/sidebar') %>
     </div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Images', href: '/admin/images' },
@@ -74,19 +74,19 @@
                 <label for="field-startup" class="al-label mb-1.5">Startup Command</label>
                 <input type="text" id="field-startup" value="<%= image.startup || '' %>" placeholder="e.g. java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs text-neutral-400">Use <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">{{VARIABLE_NAME}}</code> to reference egg variables.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Use <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">{{VARIABLE_NAME}}</code> to reference egg variables.</p>
               </div>
               <div>
                 <label for="field-stop" class="al-label mb-1.5">Stop Command</label>
                 <input type="text" id="field-stop" value="<%= image.stop || 'stop' %>" placeholder="stop"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs text-neutral-400">Command sent to the container to stop it gracefully.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Command sent to the container to stop it gracefully.</p>
               </div>
               <div>
                 <label for="field-startup-done" class="al-label mb-1.5">Startup Done Signal</label>
                 <input type="text" id="field-startup-done" value="<%= image.startup_done || '' %>" placeholder="e.g. For help, type"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs text-neutral-400">String in the server output that means the server finished starting.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">String in the server output that means the server finished starting.</p>
               </div>
             </div>
           </div>
@@ -141,19 +141,19 @@
                 <label for="field-install-container" class="al-label mb-1.5">Container Image</label>
                 <input type="text" id="field-install-container" placeholder="e.g. eclipse-temurin:21-jdk-jammy"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs text-neutral-400">Docker image the install script runs inside.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Docker image the install script runs inside.</p>
               </div>
               <div>
                 <label for="field-install-entrypoint" class="al-label mb-1.5">Entrypoint</label>
                 <input type="text" id="field-install-entrypoint" placeholder="bash"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs text-neutral-400">Shell that executes the script (usually <code class="font-mono">bash</code>).</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Shell that executes the script (usually <code class="font-mono">bash</code>).</p>
               </div>
               <div class="sm:col-span-2">
                 <label for="field-install-script" class="al-label mb-1.5">Script</label>
                 <textarea id="field-install-script" rows="16" placeholder="#!/bin/bash&#10;# Install script runs inside the container&#10;apt update && apt install -y curl"
                   class="al-input font-mono resize-y"></textarea>
-                <p class="mt-1.5 text-xs text-neutral-400">Files are placed in <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">/mnt/server</code> inside the install container. The script runs as root.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Files are placed in <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">/mnt/server</code> inside the install container. The script runs as root.</p>
               </div>
             </div>
           </div>

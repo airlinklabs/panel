@@ -1,10 +1,12 @@
 import { getSettings } from '../../handlers/settingsCache';
 import { invalidateNodeCache, invalidateLocationCache } from '../../handlers/nodesCache';
-import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import { registerPermission, Permission } from '../../handlers/permissions';
+import type { Permission } from '../../handlers/permissions';
+import { registerPermission } from '../../handlers/permissions';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
 import { getParamAsNumber } from '../../utils/typeHelpers';
@@ -30,7 +32,7 @@ registerPermission('airlink.admin.nodes.create' as Permission);
 registerPermission('airlink.admin.nodes.update' as Permission);
 registerPermission('airlink.admin.nodes.delete' as Permission);
 
-type NodeWithInstances = {
+interface NodeWithInstances {
   id: number;
   name: string;
   ram: number;
@@ -291,7 +293,7 @@ const adminModule: Module = {
         } catch (error: unknown) {
           const message = error instanceof Error ? error.message : 'Unknown error';
           res.status(400).json({
-            message: 'Invalid allocated ports format: ' + message,
+            message: `Invalid allocated ports format: ${  message}`,
           });
           return;
         }
@@ -400,7 +402,7 @@ const adminModule: Module = {
             }
 
             const serverCount = await prisma.server.count({
-              where: { nodeId: nodeId },
+              where: { nodeId },
             });
 
             if (serverCount > 0 && !deleteInstances) {
@@ -440,7 +442,7 @@ const adminModule: Module = {
               }
 
               await prisma.server.deleteMany({
-                where: { nodeId: nodeId },
+                where: { nodeId },
               });
             }
 
@@ -510,11 +512,11 @@ const adminModule: Module = {
           res
             .status(200)
             .json(
-              'configure --panel "' +
-                process.env.URL +
-                '" --key "' +
-                node.key +
-                '"',
+              `configure --panel "${ 
+                process.env.URL 
+              }" --key "${ 
+                node.key 
+              }"`,
             );
           return;
         } catch (error: unknown) {
@@ -714,7 +716,7 @@ const adminModule: Module = {
           } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'Unknown error';
             res.status(400).json({
-              message: 'Invalid allocated ports format: ' + message,
+              message: `Invalid allocated ports format: ${  message}`,
             });
             return;
           }

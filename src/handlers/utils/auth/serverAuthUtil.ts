@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { WebSocket } from 'ws';
+import type { Request, Response, NextFunction } from 'express';
+import type { WebSocket } from 'ws';
 
 import logger from '../../logger';
 import prisma from '../../../db';
@@ -69,7 +69,7 @@ export const PERMISSION_GROUPS: { title: string; perms: SubUserPermission[] }[] 
 ];
 
 export function parseSubUserPermissions(raw: string | null | undefined): string[] {
-  if (!raw) return [];
+  if (!raw) {return [];}
   try {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed.filter((p): p is string => typeof p === 'string') : [];
@@ -83,9 +83,9 @@ export function subUserHasPermission(subUser: { permissions: string | null | und
   const parent = permission.includes('.') ? permission.slice(0, permission.lastIndexOf('.')) : null;
 
   for (const p of perms) {
-    if (p === permission) return true;
-    if (p.endsWith('.*') && (permission === p.slice(0, -2) || permission.startsWith(p.slice(0, -1)))) return true;
-    if (parent && p === parent) return true;
+    if (p === permission) {return true;}
+    if (p.endsWith('.*') && (permission === p.slice(0, -2) || permission.startsWith(p.slice(0, -1)))) {return true;}
+    if (parent && p === parent) {return true;}
   }
   return false;
 }
@@ -97,7 +97,7 @@ async function findSubUser(serverId: string, userId: number) {
 }
 
 export const isAuthenticatedForServer =
-  (serverIdParam: string = 'id') =>
+  (serverIdParam = 'id') =>
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const userId = req.session?.user?.id;
 
@@ -154,7 +154,7 @@ export const isAuthenticatedForServer =
     };
 
 export const isAuthenticatedForServerWS =
-  (serverIdParam: string = 'id') =>
+  (serverIdParam = 'id') =>
     async (ws: WebSocket, req: Request, next: NextFunction): Promise<void> => {
       const userId = req.session?.user?.id;
 

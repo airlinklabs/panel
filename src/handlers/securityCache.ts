@@ -14,7 +14,7 @@ const securityCache = {
 export async function refreshSecurityCache() {
   try {
     const s = await await getSettings();
-    if (!s) return;
+    if (!s) {return;}
     try { securityCache.bannedIps = JSON.parse(s.bannedIps || '[]'); } catch { securityCache.bannedIps = []; }
     securityCache.rateLimitEnabled = s.rateLimitEnabled;
     securityCache.rateLimitRpm = s.rateLimitRpm || 500;

@@ -1,6 +1,6 @@
 import { Router, type Request } from 'express';
 import { randomUUID } from 'node:crypto';
-import { WebSocket } from 'ws';
+import type { WebSocket } from 'ws';
 import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import logger from '../../handlers/logger';
@@ -77,8 +77,8 @@ async function getNode(serverId: string): Promise<{ address: string; port: numbe
 }
 
 function sessionCanSee(session: RealtimeSession | undefined, serverId: string): boolean {
-  if (!session) return false;
-  if (session.serverIds === 'all') return true;
+  if (!session) {return false;}
+  if (session.serverIds === 'all') {return true;}
   return session.serverIds.has(serverId);
 }
 
@@ -88,10 +88,10 @@ async function beginWatch(session: RealtimeSession, serverId: string): Promise<v
     handles = new Map();
     sessionWatches.set(session.id, handles);
   }
-  if (handles.has(serverId)) return;
+  if (handles.has(serverId)) {return;}
 
   const node = await getNode(serverId);
-  if (!node) return;
+  if (!node) {return;}
   const handle = watchServerStatus(serverId, node);
   handles.set(serverId, handle);
 }
@@ -99,7 +99,7 @@ async function beginWatch(session: RealtimeSession, serverId: string): Promise<v
 async function endWatch(session: RealtimeSession, serverId: string): Promise<void> {
   const handles = sessionWatches.get(session.id);
   const handle = handles?.get(serverId);
-  if (!handle) return;
+  if (!handle) {return;}
   try {
     handle.release();
   } catch {
@@ -114,10 +114,10 @@ async function beginEventWatch(session: RealtimeSession, serverId: string): Prom
     handles = new Map();
     sessionEventWatches.set(session.id, handles);
   }
-  if (handles.has(serverId)) return;
+  if (handles.has(serverId)) {return;}
 
   const node = await getNode(serverId);
-  if (!node) return;
+  if (!node) {return;}
   const handle = watchServerEvents(serverId, node);
   handles.set(serverId, handle);
 }
@@ -125,7 +125,7 @@ async function beginEventWatch(session: RealtimeSession, serverId: string): Prom
 async function endEventWatch(session: RealtimeSession, serverId: string): Promise<void> {
   const handles = sessionEventWatches.get(session.id);
   const handle = handles?.get(serverId);
-  if (!handle) return;
+  if (!handle) {return;}
   try {
     handle.release();
   } catch {
@@ -151,7 +151,7 @@ const realtimeModule: Module = {
 
   router: (applyWs?: (router: Router) => void) => {
     const router = Router();
-    if (applyWs) applyWs(router);
+    if (applyWs) {applyWs(router);}
 
     router.ws('/ws/realtime', async (rawWs: WebSocket, req: Request) => {
       const ws = rawWs as RealtimeWS;
@@ -211,7 +211,7 @@ const realtimeModule: Module = {
         } catch {
           return;
         }
-        if (!msg || typeof msg !== 'object' || typeof msg.type !== 'string') return;
+        if (!msg || typeof msg !== 'object' || typeof msg.type !== 'string') {return;}
 
         if (msg.type === 'pong') {
           const pending = ws.__pongTimer;
@@ -233,7 +233,7 @@ const realtimeModule: Module = {
 
         const session = realtimeSessions.get(sessionId);
         if (msg.type === 'watch' && typeof msg.serverId === 'string') {
-          if (!session || !sessionCanSee(session, msg.serverId)) return;
+          if (!session || !sessionCanSee(session, msg.serverId)) {return;}
           beginWatch(session, msg.serverId).catch((err) =>
             logger.warn(`realtime watch failed for ${msg.serverId}:`, { error: String(err) }),
           );
@@ -241,12 +241,12 @@ const realtimeModule: Module = {
         }
 
         if (msg.type === 'unwatch' && typeof msg.serverId === 'string') {
-          if (session) endWatch(session, msg.serverId).catch(() => undefined);
+          if (session) {endWatch(session, msg.serverId).catch(() => undefined);}
           return;
         }
 
         if (msg.type === 'watchEvents' && typeof msg.serverId === 'string') {
-          if (!session || !sessionCanSee(session, msg.serverId)) return;
+          if (!session || !sessionCanSee(session, msg.serverId)) {return;}
           beginEventWatch(session, msg.serverId).catch((err) =>
             logger.warn(`realtime watchEvents failed for ${msg.serverId}:`, { error: String(err) }),
           );
@@ -254,7 +254,7 @@ const realtimeModule: Module = {
         }
 
         if (msg.type === 'unwatchEvents' && typeof msg.serverId === 'string') {
-          if (session) endEventWatch(session, msg.serverId).catch(() => undefined);
+          if (session) {endEventWatch(session, msg.serverId).catch(() => undefined);}
           return;
         }
 
@@ -263,7 +263,7 @@ const realtimeModule: Module = {
           // a single message glues the session to all reachable servers.
           try {
             const servers = await prisma.server.findMany({ select: { UUID: true } });
-            for (const s of servers) await beginWatch(session, s.UUID);
+            for (const s of servers) {await beginWatch(session, s.UUID);}
           } catch (error) {
             logger.warn('realtime watchAll failed:', { error: String(error) });
           }
@@ -273,7 +273,7 @@ const realtimeModule: Module = {
       ws.on('close', () => {
         clearInterval(heartbeat);
         const pending = ws.__pongTimer;
-        if (pending) clearTimeout(pending);
+        if (pending) {clearTimeout(pending);}
         releaseSessionWatches(sessionId);
         dropRealtimeSession(sessionId);
       });
@@ -281,7 +281,7 @@ const realtimeModule: Module = {
       ws.on('error', () => {
         clearInterval(heartbeat);
         const pending = ws.__pongTimer;
-        if (pending) clearTimeout(pending);
+        if (pending) {clearTimeout(pending);}
         releaseSessionWatches(sessionId);
         dropRealtimeSession(sessionId);
       });

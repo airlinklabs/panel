@@ -1,17 +1,13 @@
 <!-- Mobile top bar -->
-<div class="mobile-top-bar fixed top-0 left-0 right-0 z-40 lg:hidden h-14 flex items-center justify-between px-4 border-b" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
-  <a href="/" class="flex items-center gap-2.5 min-w-0">
-    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 w-8 rounded-lg shrink-0" style="background:var(--theme-logo-bg);">
-    <h1 class="font-medium text-sm truncate" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></h1>
+<div class="mobile-top-bar fixed top-0 left-0 right-0 z-40 lg:hidden h-12 flex items-center justify-between px-3.5 border-b" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
+  <a href="/" class="flex items-center gap-2 min-w-0">
+    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-7 w-7 rounded-lg shrink-0" style="background:var(--theme-logo-bg);">
+    <h1 class="font-medium text-[13px] truncate" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></h1>
   </a>
-  <div class="flex items-center gap-2">
-    <button type="button" id="mobile-theme-toggle" class="p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 active:scale-95" style="color:var(--theme-text-muted);" aria-label="Toggle theme">
-      <%- icon('sun', { class: 'w-4 h-4 dark:hidden' }) %>
-      <%- icon('moon', { class: 'w-4 h-4 hidden dark:block' }) %>
-    </button>
+  <div class="flex items-center gap-1.5">
     <% if (user != null) { %>
-    <a href="/account" class="p-1 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-text-muted);">
-      <img loading="lazy" decoding="async" class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="User avatar">
+    <a href="/account" class="p-1 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center" style="color:var(--theme-text-muted);">
+      <img loading="lazy" decoding="async" class="w-5.5 h-5.5 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="User avatar">
     </a>
     <% } %>
   </div>
@@ -19,7 +15,7 @@
 
 <!-- Mobile bottom navigation -->
 <nav id="mobile-bottom-nav" class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t" aria-label="Mobile navigation" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
-  <div class="flex items-stretch h-[60px] px-2">
+  <div class="flex items-stretch h-[52px] px-1.5">
     <%
     const bottomNavItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
     const navToShow = (bottomNavItems || []).slice(0, 4);
@@ -30,15 +26,15 @@
     %>
 
     <% navToShow.forEach(function(item) { %>
-    <a href="<%= item.url %>" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1.5 text-xs transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" data-match-prefix="<%= item.matchPrefix || '' %>">
+    <a href="<%= item.url %>" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1 text-[11px] transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" data-match-prefix="<%= item.matchPrefix || '' %>">
       <%- item.icon %>
-      <span class="truncate max-w-[4rem]"><%= item.label %></span>
+      <span class="truncate max-w-[3.5rem]"><%= item.label %></span>
     </a>
     <% }); %>
 
     <!-- More button (for remaining items) -->
-    <button type="button" id="mobile-more-btn" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1.5 text-xs transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" aria-label="More navigation options" aria-expanded="false" aria-controls="mobile-more-sheet">
-      <%- icon('more-horizontal', { class: 'w-5 h-5' }) %>
+    <button type="button" id="mobile-more-btn" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1 text-[11px] transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" aria-label="More navigation options" aria-expanded="false" aria-controls="mobile-more-sheet">
+      <%- icon('more-horizontal', { class: 'w-4 h-4' }) %>
       <span>More</span>
     </button>
   </div>
@@ -176,16 +172,16 @@
           mSheetHasServerView = true;
       %>
       <div id="mobile-more-server-view" class="mobile-sheet-view showing">
-        <button type="button" id="mobile-sheet-back-btn" role="menuitem" class="sheet-item sheet-view-toggle flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
-          <%- icon('arrow-left', { class: 'w-5 h-5' }) %>
-          <span class="text-sm"><%= mT.navBack || 'Back' %></span>
+        <button type="button" id="mobile-sheet-back-btn" role="menuitem" class="sheet-item sheet-view-toggle flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px;">
+          <%- icon('arrow-left', { class: 'w-4 h-4' }) %>
+          <span class="text-[13px]"><%= mT.navBack || 'Back' %></span>
         </button>
         <% mGrouped.forEach(grp => { %>
-        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);"><%= mGroupLabel(grp.g) %></p>
+        <p class="px-3.5 py-1 text-[11px] font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);"><%= mGroupLabel(grp.g) %></p>
           <% grp.entries.forEach(entry => { %>
-          <a href="<%= entry.url %>" role="menuitem" class="server-anim-in sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= mAnimIdx++ %>" data-sheet-match-url="<%= entry.url %>">
+          <a href="<%= entry.url %>" role="menuitem" class="server-anim-in sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:<%= mAnimIdx++ %>" data-sheet-match-url="<%= entry.url %>">
             <%- entry.item.icon %>
-            <span class="text-sm"><%= entry.item.label %></span>
+            <span class="text-[13px]"><%= entry.item.label %></span>
           </a>
           <% }); %>
         <% }); %>
@@ -194,32 +190,32 @@
 
       <div id="mobile-more-main" class="mobile-sheet-view<%= mSheetHasServerView ? ' hidden' : '' %>">
       <% if (mSheetHasServerView) { %>
-      <button type="button" id="mobile-sheet-goback-btn" role="menuitem" class="sheet-item sheet-view-toggle flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
-        <%- icon('arrow-left', { class: 'w-5 h-5' }) %>
-        <span class="text-sm"><%= mT.navGoBack || 'Go Back' %></span>
+      <button type="button" id="mobile-sheet-goback-btn" role="menuitem" class="sheet-item sheet-view-toggle flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px;">
+        <%- icon('arrow-left', { class: 'w-4 h-4' }) %>
+        <span class="text-[13px]"><%= mT.navGoBack || 'Go Back' %></span>
       </button>
       <% } %>
       <% (bottomNavItems || []).slice(4).forEach(function(item, i) { %>
-      <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= i + 1 %>" data-match-prefix="<%= item.matchPrefix || '' %>">
+      <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:<%= i + 1 %>" data-match-prefix="<%= item.matchPrefix || '' %>">
         <%- item.icon %>
-        <span class="text-sm"><%= item.label %></span>
+        <span class="text-[13px]"><%= item.label %></span>
       </a>
       <% }); %>
 
       <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
         <% if (user != null) { %>
-        <a href="/account" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:20">
-          <img loading="lazy" decoding="async" class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="">
-          <span class="text-sm">Account</span>
+        <a href="/account" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:20">
+          <img loading="lazy" decoding="async" class="w-5 h-5 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="">
+          <span class="text-[13px]">Account</span>
         </a>
-        <a href="/logout" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:21">
-          <%- icon('log-out', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Logout</span>
+        <a href="/logout" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:21">
+          <%- icon('log-out', { class: 'w-4 h-4' }) %>
+          <span class="text-[13px]">Logout</span>
         </a>
         <% } else { %>
-        <a href="/login" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:20">
-          <%- icon('log-in', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Login</span>
+        <a href="/login" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:20">
+          <%- icon('log-in', { class: 'w-4 h-4' }) %>
+          <span class="text-[13px]">Login</span>
         </a>
         <% } %>
       <% if (isAdminUser) { %>
@@ -228,11 +224,11 @@
       <% const admGroups = adminSidebarGroups || []; %>
       <% if (admGroups.length > 0) { %>
         <% admGroups.forEach(function(group) { %>
-        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide<%= group !== admGroups[0] ? ' mt-2' : '' %>" style="color:var(--theme-text-muted);"><%= group.label %></p>
+        <p class="px-3.5 py-1 text-[11px] font-medium uppercase tracking-wide<%= group !== admGroups[0] ? ' mt-2' : '' %>" style="color:var(--theme-text-muted);"><%= group.label %></p>
         <% group.items.forEach(function(item) { %>
-        <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 44px; --i:<%= admSheetIdx++ %>">
+        <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:<%= admSheetIdx++ %>">
           <%- item.icon %>
-          <span class="text-sm"><%= item.label %></span>
+          <span class="text-[13px]"><%= item.label %></span>
         </a>
         <% }); %>
         <% }); %>
