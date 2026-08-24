@@ -13,8 +13,7 @@ const DEFAULT_SETTINGS = {
   title: 'Airlink',
   favicon: '/favicon.ico',
   logo: '/assets/logo.png',
-  lightTheme: 'default',
-  darkTheme: 'default',
+  theme: 'default',
 };
 
 const ERROR_INFO: Record<number, ErrorPageInfo> = {

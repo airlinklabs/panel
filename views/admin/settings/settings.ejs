@@ -16,8 +16,7 @@
           <p class="al-page-desc">Manage your panel configuration.</p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button type="button" id="tab-save-btn" class="al-btn-primary">Save</button>
-          <button type="button" id="tab-reset-btn" class="al-btn-secondary"><%- icon('rotate-ccw', { class: 'size-4', strokeWidth: 1.5 }) %>Reset</button>
+          <span id="autosave-indicator" class="text-xs font-medium transition-opacity duration-300 opacity-0" style="color:var(--theme-success);">Saved</span>
         </div>
       </div>
 
@@ -78,65 +77,33 @@
 
           <!-- Themes -->
           <div class="al-card">
-            <h2 class="al-card-header">Themes</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
-              <div>
-                <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Light mode</p>
-                <p class="text-xs text-neutral-500 mb-3">Applied when the panel is in light mode.</p>
-                <div class="space-y-2">
-                  <% const lightVal = settings.lightTheme || 'default'; %>
-                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === 'default' ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= lightVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
-                    <input type="radio" name="lightTheme" value="default" class="sr-only" <%= lightVal === 'default' ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === 'default' ? 'al-radio-ring-active' : '' %>" style="<%= lightVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
-                      <% if (lightVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
-                    </span>
-                    <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
-                    <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
-                  </label>
-                  <% allThemes.filter(t => t.name !== 'default').forEach(function(theme) { %>
-                  <% const ltv = theme.lightPath || theme.path; %>
-                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === ltv ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= lightVal !== ltv ? 'border-color:var(--theme-border)' : '' %>">
-                    <input type="radio" name="lightTheme" value="<%= ltv %>" class="sr-only" <%= lightVal === ltv ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === ltv ? 'al-radio-ring-active' : '' %>" style="<%= lightVal !== ltv ? 'border-color:var(--theme-border)' : '' %>">
-                      <% if (lightVal === ltv) { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                      <span class="text-sm text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g,' ') %></span>
-                      <% if (theme.author) { %><span class="text-xs" style="color:var(--theme-text-muted)">by <%= theme.author %></span><% } %>
-                    </div>
-                    <span class="text-xs shrink-0" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= theme.builtin ? 'built-in' : 'custom' %></span>
-                  </label>
-                  <% }); %>
-                </div>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Dark mode</p>
-                <p class="text-xs text-neutral-500 mb-3">Applied when the panel is in dark mode.</p>
-                <div class="space-y-2">
-                  <% const darkVal = settings.darkTheme || 'default'; %>
-                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === 'default' ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= darkVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
-                    <input type="radio" name="darkTheme" value="default" class="sr-only" <%= darkVal === 'default' ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === 'default' ? 'al-radio-ring-active' : '' %>" style="<%= darkVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
-                      <% if (darkVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
-                    </span>
-                    <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
-                    <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
-                  </label>
-                  <% allThemes.filter(t => t.name !== 'default').forEach(function(theme) { %>
-                  <% const dtv = theme.darkPath || theme.path; %>
-                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === dtv ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= darkVal !== dtv ? 'border-color:var(--theme-border)' : '' %>">
-                    <input type="radio" name="darkTheme" value="<%= dtv %>" class="sr-only" <%= darkVal === dtv ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === dtv ? 'al-radio-ring-active' : '' %>" style="<%= darkVal !== dtv ? 'border-color:var(--theme-border)' : '' %>">
-                      <% if (darkVal === dtv) { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                      <span class="text-sm text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g,' ') %></span>
-                      <% if (theme.author) { %><span class="text-xs" style="color:var(--theme-text-muted)">by <%= theme.author %></span><% } %>
-                    </div>
-                    <span class="text-xs shrink-0" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= theme.builtin ? 'built-in' : 'custom' %></span>
-                  </label>
-                  <% }); %>
-                </div>
+            <h2 class="al-card-header">Theme</h2>
+            <p class="text-xs text-neutral-500 px-5 pt-2 pb-0">Select a theme for the panel. All users will see this theme.</p>
+            <div class="p-4">
+              <div class="space-y-2">
+                <% const themeVal = settings.theme || 'default'; %>
+                <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= themeVal === 'default' ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= themeVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
+                  <input type="radio" name="theme" value="default" class="sr-only" <%= themeVal === 'default' ? 'checked' : '' %>>
+                  <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= themeVal === 'default' ? 'al-radio-ring-active' : '' %>" style="<%= themeVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
+                    <% if (themeVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
+                  </span>
+                  <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
+                  <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
+                </label>
+                <% allThemes.filter(t => t.name !== 'default' && t.name !== 'default-light' && t.name !== 'default-dark').forEach(function(theme) { %>
+                <% const tv = theme.path || theme.lightPath; %>
+                <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= themeVal === tv ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= themeVal !== tv ? 'border-color:var(--theme-border)' : '' %>">
+                  <input type="radio" name="theme" value="<%= tv %>" class="sr-only" <%= themeVal === tv ? 'checked' : '' %>>
+                  <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= themeVal === tv ? 'al-radio-ring-active' : '' %>" style="<%= themeVal !== tv ? 'border-color:var(--theme-border)' : '' %>">
+                    <% if (themeVal === tv) { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
+                  </span>
+                  <div class="flex-1 min-w-0">
+                    <span class="text-sm text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g,' ') %></span>
+                    <% if (theme.author) { %><span class="text-xs" style="color:var(--theme-text-muted)">by <%= theme.author %></span><% } %>
+                  </div>
+                  <span class="text-xs shrink-0" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+                </label>
+                <% }); %>
               </div>
             </div>
             <div class="p-5" style="border-top:1px solid var(--theme-border)">
@@ -652,33 +619,6 @@
 
         </div>
 
-        <script nonce="<%- nonce %>">
-        (function(){
-          const saveBtn = document.getElementById('tab-save-btn');
-          const resetBtn = document.getElementById('tab-reset-btn');
-          function rebind(id) {
-            if (window.tabHandlers && saveBtn) {
-              saveBtn.onclick = window.tabHandlers[id] || null;
-              saveBtn.textContent = (window.tabLabels && window.tabLabels[id]) || 'Save';
-            }
-            if (window.tabResetHandlers && resetBtn) {
-              resetBtn.onclick = window.tabResetHandlers[id] || null;
-            }
-          }
-          window._rebindTabHandlers = function() {
-            const active = document.querySelector('.tab-btn[aria-selected="true"]');
-            if (active) rebind(active.dataset.tab);
-          };
-          // al-tabs owns selection (and the URL hash); we only re-point the
-          // Save/Reset buttons at the newly active tab's handlers.
-          document.addEventListener('al:tabs-change', function(e) {
-            const name = e.detail && e.detail.name;
-            if (name) rebind(name);
-          });
-          window._rebindTabHandlers();
-        })();
-        </script>
-
       </div>
     </div>
   </div>
@@ -686,31 +626,5 @@
 
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-settings.js?v=6"></script>
-
-<script nonce="<%- nonce %>">
-(function() {
-  let hasUnsavedChanges = false;
-
-  document.querySelectorAll('input, select, textarea').forEach(function(el) {
-    el.addEventListener('change', function() {
-      hasUnsavedChanges = true;
-    });
-  });
-
-  window.addEventListener('beforeunload', function(e) {
-    if (hasUnsavedChanges) {
-      e.preventDefault();
-      e.returnValue = '';
-    }
-  });
-
-  const forms = document.querySelectorAll('form');
-  forms.forEach(function(form) {
-    form.addEventListener('submit', function() {
-      hasUnsavedChanges = false;
-    });
-  });
-})();
-</script>
 
 <%- include('../../components/footer') %>

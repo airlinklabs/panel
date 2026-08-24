@@ -144,15 +144,14 @@ function loadUserThemes(): UserTheme[] {
 // then applies the partial update. This means every save is safe even on a
 // fresh DB, and never overwrites fields it didn't intend to touch.
 async function saveSettings(data: Record<string, unknown>) {
-  return prisma.settings.upsert({
+  await prisma.settings.upsert({
     where:  { id: 1 },
     update: data,
     create: {
       title:    'AirLink',
       logo:     '../assets/logo.png',
       favicon:  '../assets/favicon.ico',
-      lightTheme: 'default',
-      darkTheme:  'default',
+      theme:    'default',
       language:   'en',
       allowRegistration:     false,
       uploadLimit:           100,
@@ -272,8 +271,7 @@ const adminModule: Module = {
           if (typeof raw.allowRegistration !== 'undefined') {
             data.allowRegistration = raw.allowRegistration === 'true' || raw.allowRegistration === true;
           }
-          if (typeof raw.lightTheme === 'string') {data.lightTheme = raw.lightTheme;}
-          if (typeof raw.darkTheme  === 'string') {data.darkTheme  = raw.darkTheme;}
+          if (typeof raw.theme === 'string') {data.theme = raw.theme;}
           if (raw.uploadLimit) {data.uploadLimit = parseInt(raw.uploadLimit, 10) || 100;}
           if (typeof raw.virusTotalApiKey === 'string') {
             data.virusTotalApiKey = raw.virusTotalApiKey.trim() || null;
@@ -608,8 +606,7 @@ const adminModule: Module = {
             title:             'Airlink',
             logo:              '../assets/logo.png',
             favicon:           '../assets/favicon.ico',
-            lightTheme:        'default',
-            darkTheme:         'default',
+            theme:             'default',
             language:          'en',
             allowRegistration: false,
             loginWallpaper:    null,

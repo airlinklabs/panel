@@ -14,17 +14,16 @@
     <% } %>
     <title><%= settings.title %> - <%= title %></title>
     <script nonce="<%- nonce %>">
-      (function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark');})();
+      (function(){
+        document.documentElement.classList.add('dark');
+      })();
     </script>
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <link rel="stylesheet" href="/themes/default-light.css">
     <link rel="stylesheet" href="/themes/default-dark.css">
-    <% if (settings.lightTheme && settings.lightTheme !== 'default') { %>
-    <link rel="stylesheet" href="<%= settings.lightTheme %>" id="light-theme-css" data-theme-mode="light">
-    <% } %>
-    <% if (settings.darkTheme && settings.darkTheme !== 'default') { %>
-    <link rel="stylesheet" href="<%= settings.darkTheme %>" id="dark-theme-css" data-theme-mode="dark">
+    <% if (settings.theme && settings.theme !== 'default') { %>
+    <link rel="stylesheet" href="<%= settings.theme %>" id="theme-css">
     <% } %>
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
     <link rel="stylesheet" href="/styles.css?v=5">

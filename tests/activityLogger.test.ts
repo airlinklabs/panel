@@ -124,8 +124,7 @@ describe('admin activity module', () => {
       title: 'Airlink',
       logo: '/assets/logo.png',
       favicon: '/favicon.ico',
-      lightTheme: 'default',
-      darkTheme: 'default',
+      theme: 'default',
       panelWallpaper: null,
     });
     app = buildApp();
