@@ -4,7 +4,7 @@
  * Tonal surfaces, strong shape system, clean elevation
  */
 
-:root {
+html.dark {
   /* --- Page backgrounds (M3 Surface hierarchy) --- */
   --theme-bg:               oklch(13% 0.01 260);
   --theme-bg-secondary:     oklch(16% 0.01 260);

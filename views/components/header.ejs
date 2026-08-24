@@ -19,7 +19,8 @@ const wallpaperExcluded = req && req.path && (
     <title><%= settings.title %> - <%= title %></title>
     <script nonce="<%- nonce %>">
       (function(){
-        <% if (settings.theme !== 'light') { %>
+        <% const isLightTheme = settings.theme === 'light' || (settings.theme && settings.theme.includes('light')); %>
+        <% if (!isLightTheme) { %>
         document.documentElement.classList.add('dark');
         <% } %>
       })();

@@ -52,7 +52,8 @@ function applyThemeFromForm() {
   var value = checked ? checked.value : 'dark';
   applyThemeCss(value);
   // Toggle dark class: add for dark/custom themes, remove for light
-  if (value === 'light') {
+  var isLightTheme = value === 'light' || (value && value.indexOf('light') !== -1);
+  if (isLightTheme) {
     document.documentElement.classList.remove('dark');
   } else {
     document.documentElement.classList.add('dark');

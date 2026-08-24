@@ -21,7 +21,7 @@
  *   green   #859900
  */
 
-:root {
+html:not(.dark) {
   /* --- Page backgrounds --- */
   --theme-bg:               #fdf6e3;
   --theme-bg-secondary:     #eee8d5;
