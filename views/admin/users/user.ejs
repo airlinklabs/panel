@@ -6,7 +6,7 @@
       <%- include('../../components/sidebar') %>
     </div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Users', href: '/admin/users' },
@@ -26,52 +26,53 @@
       </div>
       <div class="al-page-body">
          <!-- User details will be displayed here -->
-         <div class="bg-white dark:bg-neutral-800/50 rounded-xl p-6 shadow-lg border border-neutral-200 dark:border-neutral-700/30">
-           <div class="flex items-center gap-4 mb-6 pb-6 border-b border-neutral-200 dark:border-neutral-700/30">
-             <img class="h-16 w-16 rounded-xl object-cover shrink-0 border border-neutral-200 dark:border-neutral-700/30" src="<%= dataUser.avatar ? dataUser.avatar : '/avatar/' + encodeURIComponent(dataUser.username) %>" alt="<%= dataUser.username %>">
+         <div class="rounded-xl p-6 shadow-lg border" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
+           <div class="flex items-center gap-4 mb-6 pb-6 border-b" style="border-color:var(--theme-border)">
+             <img class="h-16 w-16 rounded-xl object-cover shrink-0 border" style="border-color:var(--theme-border)" src="<%= dataUser.avatar ? dataUser.avatar : '/avatar/' + encodeURIComponent(dataUser.username) %>" alt="<%= dataUser.username %>">
              <div>
-               <p class="text-base font-semibold text-neutral-800 dark:text-white"><%= dataUser.username %></p>
-               <p class="text-sm text-neutral-500 dark:text-neutral-400"><%= dataUser.email %></p>
+                <p class="text-base font-semibold" style="color:var(--theme-text-strong)"><%= dataUser.username %></p>
+                <p class="text-sm" style="color:var(--theme-text-muted)"><%= dataUser.email %></p>
              </div>
            </div>
            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
              <div>
-               <h2 class="text-lg font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700/30 pb-2 mb-4">
+               <h2 class="text-lg font-medium border-b pb-2 mb-4" style="color:var(--theme-text-strong);border-color:var(--theme-border)">
                  <%= req.translations.userInformation || 'User Information' %>
                </h2>
                <div class="space-y-4">
                  <div>
-                   <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.username || 'Username' %></p>
-                   <p class="mt-1 text-base font-medium text-neutral-800 dark:text-white"><%= dataUser.username %></p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.username || 'Username' %></p>
+                    <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.username %></p>
                  </div>
                  <div>
-                   <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.email || 'Email' %></p>
-                   <p class="mt-1 text-base font-medium text-neutral-800 dark:text-white"><%= dataUser.email %></p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.email || 'Email' %></p>
+                    <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.email %></p>
                  </div>
                  <div>
-                   <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.role || 'Role' %></p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.role || 'Role' %></p>
                    <p class="mt-1">
                      <% const roleLabel = dataUser.role || (dataUser.isAdmin ? 'admin' : 'user'); %>
                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
-                       <%= ['owner','admin'].includes(roleLabel) ? 'bg-emerald-600/10 text-emerald-600 ring-emerald-600/20 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-emerald-400/20' : roleLabel === 'privileged' ? 'bg-sky-600/10 text-sky-600 ring-sky-600/20 dark:bg-sky-400/10 dark:text-sky-400 dark:ring-sky-400/20' : 'bg-amber-600/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/20' %>">
+                       <%= ['owner','admin'].includes(roleLabel) ? '' : roleLabel === 'privileged' ? '' : '' %>"
+                       style="<%= ['owner','admin'].includes(roleLabel) ? 'background:var(--theme-success-bg);color:var(--theme-success)' : roleLabel === 'privileged' ? 'background:var(--theme-info-bg);color:var(--theme-info)' : 'background:var(--theme-warning-bg);color:var(--theme-warning)' %>">
                        <%= roleLabel.charAt(0).toUpperCase() + roleLabel.slice(1) %>
                      </span>
                    </p>
                  </div>
                  <div>
-                   <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.description || 'Description' %></p>
-                   <p class="mt-1 text-base font-medium text-neutral-800 dark:text-white"><%= dataUser.description || 'No description provided' %></p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.description || 'Description' %></p>
+                    <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.description || 'No description provided' %></p>
                  </div>
                </div>
              </div>
              <div>
-               <h2 class="text-lg font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700/30 pb-2 mb-4">
+               <h2 class="text-lg font-medium border-b pb-2 mb-4" style="color:var(--theme-text-strong);border-color:var(--theme-border)">
                  <%= req.translations.serverInformation || 'Server Information' %>
                </h2>
                <div class="space-y-4">
                  <div>
-                   <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.totalServers || 'Total Servers' %></p>
-                   <p class="mt-1 text-base font-medium text-neutral-800 dark:text-white"><%= dataUser.servers ? dataUser.servers.length : 0 %></p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.totalServers || 'Total Servers' %></p>
+                    <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.servers ? dataUser.servers.length : 0 %></p>
                  </div>
                </div>
              </div>

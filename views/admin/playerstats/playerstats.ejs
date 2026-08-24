@@ -8,7 +8,7 @@
     </div>
 <%- include('../../components/template') %>
     <!-- Content -->
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Player Statistics' }
@@ -42,90 +42,90 @@
             <!-- Total Players Card -->
             <div class="rounded-xl px-4 py-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
                <div class="flex items-center justify-between">
-                 <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Total Players</dt>
+                 <dt class="truncate text-sm font-medium" style="color:var(--theme-text-muted)">Total Players</dt>
                    <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)">
-                    <%- icon('users', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
+                    <%- icon('users', { size: 20, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                   </div>
                </div>
-               <dd id="totalPlayers" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
+               <dd id="totalPlayers" class="mt-3 text-3xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">
                 0
                </dd>
-               <p class="mt-1 text-sm text-neutral-400">Players across all servers</p>
+               <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Players across all servers</p>
             </div>
 
             <!-- Max Capacity Card -->
             <div class="rounded-xl px-4 py-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
                <div class="flex items-center justify-between">
-                 <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Max Capacity</dt>
+                 <dt class="truncate text-sm font-medium" style="color:var(--theme-text-muted)">Max Capacity</dt>
                    <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)">
-                    <%- icon('database', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
+                    <%- icon('database', { size: 20, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                   </div>
                </div>
-               <dd id="maxCapacity" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
+               <dd id="maxCapacity" class="mt-3 text-3xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">
                 0
                </dd>
-               <p class="mt-1 text-sm text-neutral-400">Total player capacity</p>
+               <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Total player capacity</p>
             </div>
 
             <!-- Online Servers Card -->
             <div class="rounded-xl px-4 py-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
                <div class="flex items-center justify-between">
-                 <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Online Servers</dt>
+                 <dt class="truncate text-sm font-medium" style="color:var(--theme-text-muted)">Online Servers</dt>
                    <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)">
-                    <%- icon('server', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
+                    <%- icon('server', { size: 20, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                   </div>
                </div>
-               <dd id="onlineServers" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
+               <dd id="onlineServers" class="mt-3 text-3xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">
                 0
                </dd>
-               <p class="mt-1 text-sm text-neutral-400">Servers currently online</p>
+               <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Servers currently online</p>
             </div>
 
             <!-- Utilization Card -->
             <div class="rounded-xl px-4 py-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
                <div class="flex items-center justify-between">
-                 <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Utilization</dt>
+                 <dt class="truncate text-sm font-medium" style="color:var(--theme-text-muted)">Utilization</dt>
                    <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)">
-                    <%- icon('activity', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
+                    <%- icon('activity', { size: 20, class: 'shrink-0', style: 'color:var(--theme-text-muted)' }) %>
                   </div>
                </div>
-               <dd id="utilization" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
+               <dd id="utilization" class="mt-3 text-3xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">
                 0%
                </dd>
-               <p class="mt-1 text-sm text-neutral-400">Player capacity utilization</p>
+               <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Player capacity utilization</p>
             </div>
          </dl>
 
          <!-- Player Graph -->
           <div class="rounded-xl mt-8 p-6" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm)">
             <div class="flex justify-between items-center mb-4">
-              <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Player Count History</h2>
-              <div class="text-xs text-neutral-400">Data collected every 5 minutes (last 48 hours)</div>
+              <h2 class="text-lg font-semibold" style="color:var(--theme-text-strong)">Player Count History</h2>
+              <div class="text-xs" style="color:var(--theme-text-muted)">Data collected every 5 minutes (last 48 hours)</div>
             </div>
             <div class="h-60">
               <canvas id="playerChart" class="w-full h-full"></canvas>
             </div>
-            <div class="mt-2 text-xs text-neutral-400 text-center">
+            <div class="mt-2 text-xs text-center" style="color:var(--theme-text-muted)">
               <p><%= req.translations.refreshDataCollection || 'Double-click the Refresh button to manually trigger data collection' %></p>
             </div>
          </div>
 
          <!-- Server Table -->
           <div class="rounded-xl mt-8 p-6" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm)">
-            <h2 class="text-lg font-semibold text-neutral-800 dark:text-white mb-4">Server Player Counts</h2>
+            <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)">Server Player Counts</h2>
             <div class="overflow-x-auto">
               <table class="min-w-full" style="border-collapse:separate">
                 <thead>
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Server</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Players</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Version</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--theme-text-muted)">Server</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--theme-text-muted)">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--theme-text-muted)">Players</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--theme-text-muted)">Version</th>
                   </tr>
                 </thead>
-                <tbody id="serverTableBody" class="divide-y divide-neutral-100 dark:divide-neutral-700/20 bg-white dark:bg-transparent">
+                <tbody id="serverTableBody" class="divide-y divide-[var(--theme-border)]" style="background:var(--theme-bg-card)">
                   <tr>
-                    <td colspan="4" class="px-6 py-4 text-center text-neutral-400">Loading server data...</td>
+                    <td colspan="4" class="px-6 py-4 text-center" style="color:var(--theme-text-muted)">Loading server data...</td>
                   </tr>
                 </tbody>
               </table>

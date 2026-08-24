@@ -152,7 +152,7 @@ async function request<T = unknown>(
             try {
               while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {break;}
                 this.push(Buffer.from(value));
               }
               this.push(null);
@@ -190,7 +190,7 @@ async function request<T = unknown>(
     }
     throw error;
   } finally {
-    if (timeoutId) clearTimeout(timeoutId);
+    if (timeoutId) {clearTimeout(timeoutId);}
   }
 }
 

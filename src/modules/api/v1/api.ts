@@ -1,6 +1,7 @@
 import { getSettings } from '../../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
-import { Module } from '../../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
@@ -354,11 +355,11 @@ const coreModule: Module = {
           }
 
           const data: Record<string, unknown> = {};
-          if (email !== undefined) data.email = email;
-          if (username !== undefined) data.username = username;
-          if (isAdmin !== undefined) data.isAdmin = isAdmin;
-          if (description !== undefined) data.description = description;
-          if (password !== undefined) data.password = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+          if (email !== undefined) {data.email = email;}
+          if (username !== undefined) {data.username = username;}
+          if (isAdmin !== undefined) {data.isAdmin = isAdmin;}
+          if (description !== undefined) {data.description = description;}
+          if (password !== undefined) {data.password = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);}
 
           const user = await prisma.users.update({
             where: { id: userId },
@@ -566,16 +567,16 @@ const coreModule: Module = {
           }
 
           const data: Record<string, unknown> = {};
-          if (name !== undefined) data.name = name;
-          if (description !== undefined) data.description = description;
-          if (Ports !== undefined) data.Ports = Ports;
-          if (Memory !== undefined) data.Memory = Memory;
-          if (Swap !== undefined) data.Swap = Swap;
-          if (Cpu !== undefined) data.Cpu = Cpu;
-          if (Storage !== undefined) data.Storage = Storage;
-          if (Variables !== undefined) data.Variables = Variables;
-          if (StartCommand !== undefined) data.StartCommand = StartCommand;
-          if (dockerImage !== undefined) data.dockerImage = dockerImage;
+          if (name !== undefined) {data.name = name;}
+          if (description !== undefined) {data.description = description;}
+          if (Ports !== undefined) {data.Ports = Ports;}
+          if (Memory !== undefined) {data.Memory = Memory;}
+          if (Swap !== undefined) {data.Swap = Swap;}
+          if (Cpu !== undefined) {data.Cpu = Cpu;}
+          if (Storage !== undefined) {data.Storage = Storage;}
+          if (Variables !== undefined) {data.Variables = Variables;}
+          if (StartCommand !== undefined) {data.StartCommand = StartCommand;}
+          if (dockerImage !== undefined) {data.dockerImage = dockerImage;}
 
           const server = await prisma.server.update({
             where: { UUID: serverId },
@@ -851,14 +852,14 @@ const coreModule: Module = {
           }
 
           const data: Record<string, unknown> = {};
-          if (name !== undefined) data.name = name;
-          if (address !== undefined) data.address = address;
-          if (port !== undefined) data.port = port;
-          if (ram !== undefined) data.ram = ram;
-          if (cpu !== undefined) data.cpu = cpu;
-          if (disk !== undefined) data.disk = disk;
-          if (key !== undefined) data.key = key;
-          if (sftpPort !== undefined) data.sftpPort = sftpPort;
+          if (name !== undefined) {data.name = name;}
+          if (address !== undefined) {data.address = address;}
+          if (port !== undefined) {data.port = port;}
+          if (ram !== undefined) {data.ram = ram;}
+          if (cpu !== undefined) {data.cpu = cpu;}
+          if (disk !== undefined) {data.disk = disk;}
+          if (key !== undefined) {data.key = key;}
+          if (sftpPort !== undefined) {data.sftpPort = sftpPort;}
 
           const node = await prisma.node.update({
             where: { id: nodeId },
@@ -1220,7 +1221,7 @@ const coreModule: Module = {
           } else if (isS3Backup(backup.filePath)) {
             try {
               const stream = await getS3ObjectStream(backup.filePath.slice(S3_KEY_PREFIX.length));
-              if (!stream) throw new Error('S3 object not found');
+              if (!stream) {throw new Error('S3 object not found');}
               const uploadResponse = await daemonRequest<{ success: boolean; filePath?: string }>({
                 method: 'POST',
                 path: '/container/backup/upload',
@@ -1406,7 +1407,7 @@ const coreModule: Module = {
             return;
           }
           if (host.nodeId !== null && host.nodeId !== server.nodeId) {
-            res.status(403).json({ error: "This database host is not available for this server's node." });
+            res.status(403).json({ error: 'This database host is not available for this server\'s node.' });
             return;
           }
 
@@ -1527,7 +1528,7 @@ const coreModule: Module = {
               let permissions: string[] = [];
               try {
                 const parsed = JSON.parse(s.permissions);
-                if (Array.isArray(parsed)) permissions = parsed;
+                if (Array.isArray(parsed)) {permissions = parsed;}
               } catch {
                 // ignore malformed permission payloads
               }
@@ -1697,7 +1698,7 @@ const coreModule: Module = {
           let variables: unknown[] = [];
           try {
             const parsed = JSON.parse(server.Variables || '[]');
-            if (Array.isArray(parsed)) variables = parsed;
+            if (Array.isArray(parsed)) {variables = parsed;}
           } catch {
             // ignore malformed variables
           }
@@ -1792,7 +1793,7 @@ const coreModule: Module = {
               defs = [];
             }
             const defByEnv = new Map(defs.map((d) => [d.env, d]));
-            for (const v of variables as Array<Record<string, unknown>>) {
+            for (const v of variables as Record<string, unknown>[]) {
               const def = defByEnv.get(String(v.env));
               const rulesSource = def ? { ...def, name: def.env, env: def.env, ...(v as object) } : v;
               const err = validateVariableRules(rulesSource as unknown as import('../../user/server/shared').ServerVariable, String(v.value ?? ''));
@@ -2340,19 +2341,19 @@ const coreModule: Module = {
           const { name, description, author, authorName, startup, stop, startup_done, config_files, dockerImages, variables, info, scripts, portRequirements } = req.body as Record<string, unknown>;
 
           const data: Record<string, unknown> = {};
-          if (name !== undefined) data.name = name;
-          if (description !== undefined) data.description = description;
-          if (author !== undefined) data.author = author;
-          if (authorName !== undefined) data.authorName = authorName;
-          if (startup !== undefined) data.startup = startup;
-          if (stop !== undefined) data.stop = stop;
-          if (startup_done !== undefined) data.startup_done = startup_done;
-          if (config_files !== undefined) data.config_files = config_files;
-          if (dockerImages !== undefined) data.dockerImages = JSON.stringify(dockerImages);
-          if (variables !== undefined) data.variables = JSON.stringify(variables);
-          if (info !== undefined) data.info = JSON.stringify(info);
-          if (scripts !== undefined) data.scripts = JSON.stringify(scripts);
-          if (portRequirements !== undefined) data.portRequirements = JSON.stringify(portRequirements);
+          if (name !== undefined) {data.name = name;}
+          if (description !== undefined) {data.description = description;}
+          if (author !== undefined) {data.author = author;}
+          if (authorName !== undefined) {data.authorName = authorName;}
+          if (startup !== undefined) {data.startup = startup;}
+          if (stop !== undefined) {data.stop = stop;}
+          if (startup_done !== undefined) {data.startup_done = startup_done;}
+          if (config_files !== undefined) {data.config_files = config_files;}
+          if (dockerImages !== undefined) {data.dockerImages = JSON.stringify(dockerImages);}
+          if (variables !== undefined) {data.variables = JSON.stringify(variables);}
+          if (info !== undefined) {data.info = JSON.stringify(info);}
+          if (scripts !== undefined) {data.scripts = JSON.stringify(scripts);}
+          if (portRequirements !== undefined) {data.portRequirements = JSON.stringify(portRequirements);}
 
           const image = await prisma.images.update({
             where: { id: imageId },

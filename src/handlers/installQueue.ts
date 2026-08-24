@@ -46,10 +46,10 @@ export async function processQueuedServerInstalls(): Promise<void> {
       continue;
     }
 
-      const env = serverEnv.reduce<Record<string, string | number>>((acc, curr) => {
-        acc[curr.env] = curr.value;
-        return acc;
-      }, {});
+    const env = serverEnv.reduce<Record<string, string | number>>((acc, curr) => {
+      acc[curr.env] = curr.value;
+      return acc;
+    }, {});
 
     if (!server.image?.scripts) {
       emitRealtime(serverEvent('server.install.failed', server.UUID, {

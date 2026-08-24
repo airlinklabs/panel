@@ -6,7 +6,7 @@
       <%- include('../components/sidebar') %>
     </div>
 <%- include('../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
         { label: req.translations.myImages || 'My Images' }
       ] }) %>
@@ -29,7 +29,7 @@
       <div class="al-page-body">
         <% if (!allowed) { %>
         <div class="flex flex-col items-center justify-center py-24 text-center">
-          <div class="w-12 h-12 rounded-full bg-neutral-400/10 flex items-center justify-center mb-4">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4" style="background:color-mix(in srgb, var(--theme-text-muted) 10%, transparent)">
             <%- icon('ban', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
           </div>
           <p class="text-sm font-medium" style="color:var(--theme-text-strong)">
@@ -41,7 +41,7 @@
         </div>
         <% } else { %>
         <div id="myImagesEmpty" class="flex flex-col items-center justify-center py-24 text-center <%= images.length === 0 ? '' : 'hidden' %>">
-          <div class="w-12 h-12 rounded-full bg-neutral-400/10 flex items-center justify-center mb-4">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4" style="background:color-mix(in srgb, var(--theme-text-muted) 10%, transparent)">
             <%- icon('image', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
           </div>
           <p class="text-sm font-medium" style="color:var(--theme-text-strong)">
@@ -77,15 +77,18 @@
                 <td class="al-table-td whitespace-nowrap px-3 py-4"><%= new Date(image.createdAt).toLocaleDateString() %></td>
                 <td class="al-table-td whitespace-nowrap px-3 py-4">
                   <% if (image.status === 'approved') { %>
-                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-emerald-600/10 text-emerald-600 ring-emerald-600/20 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-emerald-400/20">
+                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                    style="background:var(--theme-success-bg);color:var(--theme-success)">
                     <%= req.translations.approved || 'Approved' %>
                   </span>
                   <% } else if (image.status === 'rejected') { %>
-                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-red-600/10 text-red-600 ring-red-600/20 dark:bg-red-400/10 dark:text-red-400 dark:ring-red-400/20">
+                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                    style="background:var(--theme-danger-bg);color:var(--theme-danger)">
                     <%= req.translations.rejected || 'Rejected' %>
                   </span>
                   <% } else { %>
-                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-amber-600/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/20">
+                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                    style="background:var(--theme-warning-bg);color:var(--theme-warning)">
                     <%= req.translations.pendingApproval || 'Pending review' %>
                   </span>
                   <% } %>

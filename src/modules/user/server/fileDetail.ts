@@ -1,5 +1,5 @@
 import { getSettings } from '../../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
+import type { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
@@ -156,7 +156,7 @@ export function registerFileDetailRoutes(router: Router): void {
           body: {
             id: server.UUID,
             path: filePath,
-            content: content,
+            content,
           },
         });
 

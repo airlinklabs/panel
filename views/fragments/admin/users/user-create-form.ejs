@@ -21,7 +21,7 @@
       <h2 class="al-card-header">User Information</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <label for="userEmail" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+          <label for="userEmail" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
             <%- icon('mail', { size: 14, class: 'shrink-0' }) %>
             Email:
           </label>
@@ -32,12 +32,12 @@
                  aria-describedby="<%= typeof errors !== 'undefined' && errors?.email ? 'email-error' : undefined %>"
                  required>
           <% if (typeof errors !== 'undefined' && errors?.email) { %>
-            <p id="email-error" class="text-xs text-red-500 mt-1" role="alert"><%= errors.email %></p>
+            <p id="email-error" class="text-xs mt-1" role="alert" style="color:var(--theme-danger)"><%= errors.email %></p>
           <% } %>
         </div>
 
         <div>
-          <label for="userUsername" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+          <label for="userUsername" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
             <%- icon('user', { size: 14, class: 'shrink-0' }) %>
             Username:
           </label>
@@ -48,12 +48,12 @@
                  aria-describedby="<%= typeof errors !== 'undefined' && errors?.username ? 'username-error' : undefined %>"
                  required>
           <% if (typeof errors !== 'undefined' && errors?.username) { %>
-            <p id="username-error" class="text-xs text-red-500 mt-1" role="alert"><%= errors.username %></p>
+            <p id="username-error" class="text-xs mt-1" role="alert" style="color:var(--theme-danger)"><%= errors.username %></p>
           <% } %>
         </div>
 
         <div class="md:col-span-2">
-          <label for="userDescription" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
+          <label for="userDescription" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
             Description
           </label>
           <textarea id="userDescription" name="description" rows="3" class="al-input" placeholder="Optional description"><%= typeof form !== 'undefined' ? form.description || '' : '' %></textarea>
@@ -65,7 +65,7 @@
       <h2 class="al-card-header">Security</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <label for="userPassword" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+          <label for="userPassword" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
             <%- icon('lock', { size: 14, class: 'shrink-0' }) %>
             Password:
           </label>
@@ -75,23 +75,23 @@
                  aria-describedby="<%= typeof errors !== 'undefined' && errors?.password ? 'password-error' : undefined %>"
                  required>
           <% if (typeof errors !== 'undefined' && errors?.password) { %>
-            <p id="password-error" class="text-xs text-red-500 mt-1" role="alert"><%= errors.password %></p>
+            <p id="password-error" class="text-xs mt-1" role="alert" style="color:var(--theme-danger)"><%= errors.password %></p>
           <% } %>
         </div>
 
         <div>
-          <label for="userConfirmPassword" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
+          <label for="userConfirmPassword" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
             Confirm Password
           </label>
           <input id="userConfirmPassword" type="password" class="al-input" placeholder="********">
         </div>
 
         <div class="md:col-span-2">
-          <div class="bg-neutral-400/10 dark:bg-neutral-600/20 p-4 rounded-xl border border-neutral-800/10 dark:border-white/5 w-full">
+          <div class="p-4 rounded-xl border w-full" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Role</h3>
-                <p class="text-xs text-neutral-400 mt-1">Privileged and admin roles get expanded limits and powers.</p>
+                <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Role</h3>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted)">Privileged and admin roles get expanded limits and powers.</p>
               </div>
               <select id="userRole" name="role" class="al-input w-44">
                 <option value="user">Normal user</option>
@@ -103,16 +103,16 @@
         </div>
 
         <div class="md:col-span-2">
-          <div class="bg-neutral-400/10 dark:bg-neutral-600/20 p-4 rounded-xl border border-neutral-800/10 dark:border-white/5 w-full">
+          <div class="p-4 rounded-xl border w-full" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Administrator Status</h3>
-                <p class="text-xs text-neutral-400 mt-1">Administrators have full access to manage all aspects of the system.</p>
+                <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Administrator Status</h3>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted)">Administrators have full access to manage all aspects of the system.</p>
               </div>
               <label for="userIsAdminSwitch" class="relative inline-flex items-center cursor-pointer shrink-0">
                 <input type="checkbox" id="userIsAdminSwitch" name="isAdmin" value="true" aria-label="Administrator status" class="sr-only peer">
                 <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                <span class="ms-3 text-sm font-medium text-neutral-700 dark:text-white" id="adminStatusLabel">Disabled</span>
+                <span class="ms-3 text-sm font-medium" id="adminStatusLabel" style="color:var(--theme-text-strong)">Disabled</span>
               </label>
             </div>
           </div>
@@ -125,23 +125,23 @@
       <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Leave blank to use the global defaults set in Admin → Settings → Servers.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <label for="serverLimit" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
+          <label for="serverLimit" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
           <input type="number" id="serverLimit" name="serverLimit" min="0" max="100" placeholder="Use global default" class="al-input">
         </div>
         <div>
-          <label for="maxMemory" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory (MB)</label>
+          <label for="maxMemory" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory (MB)</label>
           <input type="number" id="maxMemory" name="maxMemory" min="128" max="65536" placeholder="Use global default" class="al-input">
         </div>
         <div>
-          <label for="maxCpu" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU (%)</label>
+          <label for="maxCpu" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU (%)</label>
           <input type="number" id="maxCpu" name="maxCpu" min="10" max="10000" placeholder="Use global default" class="al-input">
         </div>
         <div>
-          <label for="maxStorage" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage (MB)</label>
+          <label for="maxStorage" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage (MB)</label>
           <input type="number" id="maxStorage" name="maxStorage" min="1" max="10000" placeholder="Use global default" class="al-input">
         </div>
         <div>
-          <label for="maxDatabases" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
+          <label for="maxDatabases" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
           <input type="number" id="maxDatabases" name="maxDatabases" min="0" max="100000" placeholder="Use global default" class="al-input">
         </div>
       </div>

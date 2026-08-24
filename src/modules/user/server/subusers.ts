@@ -1,5 +1,5 @@
 import { getSettings } from '../../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
+import type { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, PERMISSION_GROUPS, SUBUSER_PERMISSIONS } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { getParamAsString } from '../../../utils/typeHelpers';

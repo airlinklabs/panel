@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../handlers/utils/auth/serverAuthUtil';
 import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
@@ -233,7 +234,7 @@ const sftpModule: Module = {
             return;
           }
 
-          const response = await daemonRequest<{ events: Array<Record<string, unknown>> }>({
+          const response = await daemonRequest<{ events: Record<string, unknown>[] }>({
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -260,7 +261,7 @@ const sftpModule: Module = {
               mkdir: 'file:create',
             };
             const auditEvent = mapToAuditEvent[kind];
-            if (!auditEvent) continue;
+            if (!auditEvent) {continue;}
 
             await logActivity(req, auditEvent as never, {
               serverId,

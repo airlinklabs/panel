@@ -1,6 +1,7 @@
 import { getSettings } from '../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
@@ -52,7 +53,7 @@ function errCodeToReason(code?: string): string {
 }
 
 function checkNodeHealth(node: { id: number; address: string; port: number; key: string }): Promise<CachedNodeHealth> {
-  if (nodeHealthFetches.has(node.id)) return nodeHealthFetches.get(node.id)!;
+  if (nodeHealthFetches.has(node.id)) {return nodeHealthFetches.get(node.id)!;}
   const fetch = (async () => {
     const checkedAt = Date.now();
     try {
@@ -83,7 +84,7 @@ function fetchServerSnapshot(
   node: { address: string; port: number; key: string },
   uuid: string,
 ): Promise<CachedServerSnapshot> {
-  if (serverSnapshotFetches.has(uuid)) return serverSnapshotFetches.get(uuid)!;
+  if (serverSnapshotFetches.has(uuid)) {return serverSnapshotFetches.get(uuid)!;}
   const fetch = (async () => {
     const fetchedAt = Date.now();
     const snapshot: CachedServerSnapshot = {
@@ -178,7 +179,7 @@ function getNodeHealth(
   revalidate: boolean,
 ): CachedNodeHealth | Promise<CachedNodeHealth> {
   const cached = nodeHealthCache.get(node.id);
-  if (cached && Date.now() - cached.checkedAt < NODE_TTL) return cached;
+  if (cached && Date.now() - cached.checkedAt < NODE_TTL) {return cached;}
   if (cached) {
     if (revalidate) {
       checkNodeHealth(node).catch((err) => logger.warn('Background node health revalidation failed:', err));
@@ -194,7 +195,7 @@ function getServerSnapshot(
   revalidate: boolean,
 ): CachedServerSnapshot | Promise<CachedServerSnapshot> {
   const cached = serverSnapshotCache.get(server.UUID);
-  if (cached && Date.now() - cached.fetchedAt < SERVER_TTL) return cached;
+  if (cached && Date.now() - cached.fetchedAt < SERVER_TTL) {return cached;}
   if (cached) {
     if (revalidate) {
       fetchServerSnapshot(node, server.UUID).catch((err) => logger.warn('Background server snapshot revalidation failed:', err));
@@ -258,7 +259,7 @@ const dashboardModule: Module = {
             .map((su) => ({ ...su.server, shared: true })),
         ];
 
-        let page: number = 1;
+        let page = 1;
 
         if (typeof req.query.page === 'string') {
           page = parseInt(req.query.page, 10);
@@ -279,7 +280,7 @@ const dashboardModule: Module = {
           if (!nodeStatuses[server.node.id]) {
             const health = await getNodeHealth(server.node, true);
             nodeStatuses[server.node.id] = health;
-            if (!health.online) anyNodeOffline = true;
+            if (!health.online) {anyNodeOffline = true;}
           }
         }
 

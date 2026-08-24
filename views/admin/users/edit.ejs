@@ -6,7 +6,7 @@
       <%- include('../../components/sidebar') %>
     </div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Users', href: '/admin/users' },
@@ -27,16 +27,16 @@
         <form id="editUserForm" class="space-y-5">
           <div class="al-card">
             <h2 class="al-card-header"><%= req.translations.userInformation || 'User Information' %></h2>
-            <div class="flex items-center gap-4 mb-5 pb-5 border-b border-neutral-200 dark:border-white/5">
-              <img class="h-12 w-12 rounded-xl object-cover shrink-0 border border-neutral-200 dark:border-neutral-700/30" src="<%= dataUser.avatar ? dataUser.avatar : '/avatar/' + encodeURIComponent(dataUser.username) %>" alt="<%= dataUser.username %>">
+            <div class="flex items-center gap-4 mb-5 pb-5 border-b" style="border-color:var(--theme-border)">
+              <img class="h-12 w-12 rounded-xl object-cover shrink-0 border" style="border-color:var(--theme-border)" src="<%= dataUser.avatar ? dataUser.avatar : '/avatar/' + encodeURIComponent(dataUser.username) %>" alt="<%= dataUser.username %>">
               <div>
-                <p class="text-sm font-semibold text-neutral-800 dark:text-white"><%= dataUser.username %></p>
-                <p class="text-xs text-neutral-500 dark:text-neutral-400"><%= dataUser.email %></p>
+                <p class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= dataUser.username %></p>
+                <p class="text-xs" style="color:var(--theme-text-muted)"><%= dataUser.email %></p>
               </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label for="username" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                <label for="username" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%- icon('user', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.username || 'Username' %>
                 </label>
@@ -51,7 +51,7 @@
               </div>
 
               <div>
-                <label for="email" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                <label for="email" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%- icon('mail', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.email || 'Email' %>
                 </label>
@@ -66,7 +66,7 @@
               </div>
 
               <div class="md:col-span-2">
-                <label for="description" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                <label for="description" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%= req.translations.description || 'Description' %>
                 </label>
                 <textarea
@@ -83,9 +83,9 @@
             <h2 class="al-card-header"><%= req.translations.security || 'Security' %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label for="password" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                <label for="password" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%- icon('lock', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.newPassword || 'New Password' %> <span class="text-neutral-400 text-xs">(<%= req.translations.leaveBlankToKeep || 'Leave blank to keep current password' %>)</span>
+                  <%= req.translations.newPassword || 'New Password' %> <span class="text-xs" style="color:var(--theme-text-muted)">(<%= req.translations.leaveBlankToKeep || 'Leave blank to keep current password' %>)</span>
                 </label>
                 <input
                   type="password"
@@ -96,7 +96,7 @@
               </div>
 
               <div>
-                <label for="confirmPassword" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                <label for="confirmPassword" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%= req.translations.confirmPassword || 'Confirm Password' %>
                 </label>
                 <input
@@ -108,14 +108,14 @@
               </div>
 
               <div class="md:col-span-2">
-                <div class="bg-neutral-400/10 dark:bg-neutral-600/20 p-4 rounded-xl border border-neutral-800/10 dark:border-white/5 w-full">
+                <div class="p-4 rounded-xl border w-full" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">
+                      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">
                         <%= req.translations.role || 'Role' %>
                       </h3>
-                      <p class="text-xs text-neutral-400 mt-1">
-                        <%= req.translations.roleDescription || 'Owner and admin roles are signaled by isAdmin below. Privileged normally haven't admin powers but get expanded settings.' %>
+                      <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
+                        <%= req.translations.roleDescription || 'Owner and admin roles are signaled by isAdmin below. Privileged normally have not admin powers but get expanded settings.' %>
                       </p>
                     </div>
                     <select id="role" name="role" class="al-input w-44">
@@ -130,20 +130,20 @@
               </div>
 
               <div class="md:col-span-2">
-                <div class="bg-neutral-400/10 dark:bg-neutral-600/20 p-4 rounded-xl border border-neutral-800/10 dark:border-white/5 w-full">
+                <div class="p-4 rounded-xl border w-full" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">
+                      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">
                         <%= req.translations.adminStatus || 'Administrator Status' %>
                       </h3>
-                      <p class="text-xs text-neutral-400 mt-1">
+                      <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
                         <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
                       </p>
                     </div>
                     <label for="isAdmin" class="relative inline-flex items-center cursor-pointer shrink-0">
                       <input type="checkbox" id="isAdmin" name="isAdmin" class="sr-only peer" <%= dataUser.isAdmin ? 'checked' : '' %>>
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                      <span class="ms-3 text-sm font-medium text-neutral-700 dark:text-white" id="adminStatusLabel"><%= dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
+                      <span class="ms-3 text-sm font-medium" id="adminStatusLabel" style="color:var(--theme-text-strong)"><%= dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
                     </label>
                   </div>
                 </div>
@@ -156,15 +156,15 @@
             <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Leave blank to use the global defaults set in Admin &rarr; Settings &rarr; Servers.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
                 <input type="number" id="serverLimit" name="serverLimit" min="0" max="100"
                   value="<%= dataUser.serverLimit !== null && dataUser.serverLimit !== undefined ? dataUser.serverLimit : '' %>"
                   placeholder="Use global default"
                   class="al-input">
-                <p class="mt-1 text-xs text-neutral-500">Max servers this user can create. 0 = cannot create.</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Max servers this user can create. 0 = cannot create.</p>
               </div>
               <div>
-                <label for="maxMemoryDisplay" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory</label>
+                <label for="maxMemoryDisplay" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory</label>
                 <input type="hidden" id="maxMemory" name="maxMemory"
                   value="<%= dataUser.maxMemory !== null && dataUser.maxMemory !== undefined ? dataUser.maxMemory : '' %>">
                 <div class="flex items-stretch gap-0">
@@ -176,14 +176,14 @@
                 </div>
               </div>
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="text-neutral-400 font-normal text-xs">(%)</span></label>
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="font-normal text-xs" style="color:var(--theme-text-muted)">(%)</span></label>
                 <input type="number" id="maxCpu" name="maxCpu" min="10" max="10000"
                   value="<%= dataUser.maxCpu !== null && dataUser.maxCpu !== undefined ? dataUser.maxCpu : '' %>"
                   placeholder="Use global default"
                   class="al-input">
               </div>
               <div>
-                <label for="maxStorageDisplay" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage</label>
+                <label for="maxStorageDisplay" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage</label>
                 <input type="hidden" id="maxStorage" name="maxStorage"
                   value="<%= dataUser.maxStorage !== null && dataUser.maxStorage !== undefined ? dataUser.maxStorage : '' %>">
                 <div class="flex items-stretch gap-0">
@@ -195,12 +195,12 @@
                 </div>
               </div>
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
                 <input type="number" id="maxDatabases" name="maxDatabases" min="0" max="100000"
                   value="<%= dataUser.maxDatabases !== null && dataUser.maxDatabases !== undefined ? dataUser.maxDatabases : '' %>"
                   placeholder="Use global default"
                   class="al-input">
-                <p class="mt-1 text-xs text-neutral-500">Total databases across all servers. 0 = unlimited.</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Total databases across all servers. 0 = unlimited.</p>
               </div>
             </div>
           </div>
@@ -214,7 +214,7 @@
                 <%- icon('shield-alert', { size: 16 }) %>
                 Transfer ownership to <%= dataUser.username %>
               </button>
-              <span class="text-xs text-neutral-500">This cannot be undone without transferring back.</span>
+              <span class="text-xs" style="color:var(--theme-text-muted)">This cannot be undone without transferring back.</span>
             </div>
           </div>
           <% } %>

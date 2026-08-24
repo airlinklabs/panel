@@ -2,26 +2,13 @@
 
 <style>
   ::-webkit-scrollbar { display: none; }
-  .field-label { font-size: 11px; font-weight: 500; color: var(--theme-text-muted, #737373); display: block; margin-bottom: 5px; }
-  html.dark .field-label { color: var(--theme-text, #a3a3a3); }
-  .field-input {
-    width: 100%; border-radius: 9px; border: 1px solid var(--theme-border, #e5e5e5);
-    background: var(--theme-bg-input, #fafafa); padding: 8px 12px;
-    font-size: 13px; color: var(--theme-text-strong, #171717); outline: none;
-    transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
-  }
-  html.dark .field-input { background: var(--theme-bg-hover, rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.1)); color: var(--theme-text, #e5e5e5); }
-  .field-input:focus { border-color: var(--theme-border, #a3a3a3); }
-  html.dark .field-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.25)); }
-  .field-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
-  html.dark .field-input::placeholder { color: var(--theme-text-muted, #525252); }
 </style>
 
 <main class="min-h-screen m-auto">
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
 
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
@@ -42,7 +29,7 @@
 
       <div class="al-page-body" data-al-tabs data-tabs-default="installed" data-tabs-hash>
       <div role="tablist" class="flex gap-1 mb-6">
-        <button type="button" id="tab-btn-installed" data-tab="installed" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-installed" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('box', { class: 'size-4', strokeWidth: 1.5 }) %>Installed <span id="tabCountInstalled" class="ml-1 text-xs text-neutral-400"><%= images.length %></span></button>
+        <button type="button" id="tab-btn-installed" data-tab="installed" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-installed" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('box', { class: 'size-4', strokeWidth: 1.5 }) %>Installed <span id="tabCountInstalled" class="ml-1 text-xs" style="color:var(--theme-text-muted)"><%= images.length %></span></button>
         <button type="button" id="tab-btn-approvals" data-tab="approvals" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-approvals" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('clock', { class: 'size-4', strokeWidth: 1.5 }) %>Approvals <% if (pending && pending.length > 0) { %><span id="tabCountApprovals" class="ml-1 text-xs font-semibold" style="color:var(--theme-warning);"><%= pending.length %></span><% } %></button>
         <button type="button" id="tab-btn-store" data-tab="store" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-store" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Store</button>
       </div>
@@ -53,7 +40,7 @@
         </div>
 
       <div id="installedEmptyState" class="flex flex-col items-center justify-center py-24 text-center <%= images.length === 0 ? '' : 'hidden' %>">
-        <p class="text-sm text-neutral-500">No images installed yet.</p>
+        <p class="text-sm" style="color:var(--theme-text-muted)">No images installed yet.</p>
         <a href="/admin/images#store" class="mt-4 al-btn-secondary inline-flex items-center gap-1.5"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Browse Store</a>
       </div>
 
@@ -83,7 +70,7 @@
       </button>
     </div>
     <div class="px-6 py-4">
-      <label class="field-label" for="rejectReason">Reason <span class="text-neutral-400 font-normal">(shown to the user)</span></label>
+      <label class="al-label" for="rejectReason">Reason <span class="font-normal" style="color:var(--theme-text-muted)">(shown to the user)</span></label>
       <textarea id="rejectReason" class="al-input w-full" rows="3" placeholder="e.g. Missing startup exit detection or required docker image."></textarea>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
@@ -116,8 +103,8 @@
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
       <div class="flex gap-1 p-1 rounded-xl mb-4" style="background:var(--theme-bg-secondary)">
-        <button type="button" id="uploadModeFile" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400" style="color:var(--theme-text-strong); background:var(--theme-bg-card);">Upload file</button>
-        <button type="button" id="uploadModeUrl" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400" style="color:var(--theme-text-muted);">Import from URL</button>
+        <button type="button" id="uploadModeFile" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)]" style="color:var(--theme-text-strong); background:var(--theme-bg-card);">Upload file</button>
+        <button type="button" id="uploadModeUrl" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)]" style="color:var(--theme-text-muted);">Import from URL</button>
       </div>
       <div id="uploadFileSection">
         <div class="mb-4">
@@ -141,7 +128,7 @@
       </div>
       </div>
       <div id="importUrlSection" class="hidden">
-        <label class="field-label" for="importUrlInput">Image URL</label>
+        <label class="al-label" for="importUrlInput">Image URL</label>
         <input id="importUrlInput" type="url" placeholder="https://raw.githubusercontent.com/…/egg.json" class="al-input w-full">
         <p class="mt-2 text-xs" style="color:var(--theme-text-muted)">Fetch a Pterodactyl egg JSON from a raw URL and install it as an image.</p>
       </div>
@@ -166,16 +153,16 @@
 <!-- Create content — hosted inside the shared window.modal shell -->
 <div id="createContent" style="display:none;">
   <form action="/admin/images/create" method="POST" class="flex flex-col gap-4">
-    <div class="grid grid-cols-2 gap-3">
-      <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required placeholder="e.g. Minecraft Java"></div>
-      <div><label class="field-label">Author</label><input class="field-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
-      <div><label class="field-label">Author Name</label><input class="field-input" type="text" name="authorName" placeholder="Your Name"></div>
-      <div class="col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
-      <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
+      <div class="grid grid-cols-2 gap-3">
+      <div class="col-span-2"><label class="al-label">Name <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="name" required placeholder="e.g. Minecraft Java"></div>
+      <div><label class="al-label">Author</label><input class="al-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
+      <div><label class="al-label">Author Name</label><input class="al-input" type="text" name="authorName" placeholder="Your Name"></div>
+      <div class="col-span-2"><label class="al-label">Startup Command <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+      <div class="col-span-2"><label class="al-label">Description</label><textarea class="al-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
     </div>
     <div class="flex gap-2 pt-1">
-      <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
-      <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.createAndEdit || 'Create & Edit' %></button>
+      <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border text-sm font-medium hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text)"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
+      <button type="submit" class="flex-1 py-2 rounded-xl border text-sm font-medium shadow-lg hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text-strong)"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.createAndEdit || 'Create & Edit' %></button>
     </div>
   </form>
 </div>

@@ -1,5 +1,5 @@
 import { getSettings } from '../../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
+import type { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { getParamAsString } from '../../../utils/typeHelpers';
@@ -20,10 +20,10 @@ async function loadServerForUser(serverId: string, userId: number, req: Request)
     where: { UUID: getParamAsString(serverId) },
     include: serverPageInclude,
   });
-  if (!server) return null;
-  if (server.ownerId === userId || (req.session?.user?.isAdmin ?? false)) return server;
+  if (!server) {return null;}
+  if (server.ownerId === userId || (req.session?.user?.isAdmin ?? false)) {return server;}
   const subUser = req.subUser;
-  if (subUser) return server;
+  if (subUser) {return server;}
   return null;
 }
 
@@ -105,10 +105,10 @@ export function registerDatabaseRoutes(router: Router): void {
   );
 
   // ── POST /server/:id/databases ──────────────────────────────────────────
-router.post(
-  '/server/:id/databases',
-  isAuthenticatedForServer('id'),
-  requireSubUserPermission('database.create'),
+  router.post(
+    '/server/:id/databases',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('database.create'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;

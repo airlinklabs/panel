@@ -43,7 +43,7 @@ async function daemonWsUrl(node: { address: string; port: number | string }): Pr
 }
 
 function openSocket(state: WatcherState, serverId: string): void {
-  if (state.connecting || (state.socket && state.socket.readyState === WebSocket.OPEN)) return;
+  if (state.connecting || (state.socket && state.socket.readyState === WebSocket.OPEN)) {return;}
 
   state.connecting = true;
   daemonWsUrl(state.node).then((base) => {
@@ -64,7 +64,7 @@ function openSocket(state: WatcherState, serverId: string): void {
     }, 10_000);
 
     socket.on('open', () => {
-      if (!isCurrent()) return;
+      if (!isCurrent()) {return;}
       state.authed = false;
       state.reconnectAttempts = 0;
       socket.send(JSON.stringify({ event: 'auth', args: [state.node.key] }));
@@ -78,7 +78,7 @@ function openSocket(state: WatcherState, serverId: string): void {
       } catch {
         return;
       }
-      if (!msg || typeof msg !== 'object') return;
+      if (!msg || typeof msg !== 'object') {return;}
 
       if (msg.event === 'lifecycle' && msg.data && typeof msg.data === 'object') {
         const data = msg.data as { type?: string; message?: string };
@@ -95,14 +95,14 @@ function openSocket(state: WatcherState, serverId: string): void {
     });
 
     socket.on('error', () => {
-      if (!isCurrent()) return;
+      if (!isCurrent()) {return;}
       clearTimeout(authTimer);
       state.socket = null;
       scheduleReconnect(state, serverId);
     });
 
     socket.on('close', () => {
-      if (!isCurrent()) return;
+      if (!isCurrent()) {return;}
       clearTimeout(authTimer);
       state.socket = null;
       scheduleReconnect(state, serverId);
@@ -116,7 +116,7 @@ function openSocket(state: WatcherState, serverId: string): void {
 
 function scheduleReconnect(state: WatcherState, serverId: string): void {
   state.connecting = false;
-  if (state.refs <= 0) return;
+  if (state.refs <= 0) {return;}
 
   if (state.reconnectAttempts >= MAX_RETRY_ATTEMPTS) {
     logger.warn(`Event watcher gave up reconnecting to daemon for ${serverId}`);
@@ -126,20 +126,20 @@ function scheduleReconnect(state: WatcherState, serverId: string): void {
   const delay = Math.min(MAX_RETRY_MS, BASE_RETRY_MS * 2 ** state.reconnectAttempts);
   state.reconnectAttempts += 1;
 
-  if (state.reconnectTimer) clearTimeout(state.reconnectTimer);
+  if (state.reconnectTimer) {clearTimeout(state.reconnectTimer);}
   state.reconnectTimer = setTimeout(() => {
     state.reconnectTimer = null;
-    if (state.refs > 0) openSocket(state, serverId);
+    if (state.refs > 0) {openSocket(state, serverId);}
   }, delay);
 }
 
 function cleanup(serverId: string): void {
   const state = watchers.get(serverId);
-  if (!state) return;
-  if (state.refs > 0) return;
+  if (!state) {return;}
+  if (state.refs > 0) {return;}
 
   watchers.delete(serverId);
-  if (state.reconnectTimer) clearTimeout(state.reconnectTimer);
+  if (state.reconnectTimer) {clearTimeout(state.reconnectTimer);}
   if (state.socket) {
     try {
       state.socket.close(1000, 'no watchers');
@@ -181,7 +181,7 @@ export function watchServerEvents(
   return {
     release() {
       state = watchers.get(serverId);
-      if (!state) return;
+      if (!state) {return;}
       state.refs = Math.max(0, state.refs - 1);
       cleanup(serverId);
     },

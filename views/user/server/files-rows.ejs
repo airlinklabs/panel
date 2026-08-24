@@ -53,7 +53,7 @@ function escAttr(val) {
           return `${size.toFixed(2)} ${sizes[unitIndex]}`;
         })();
       %>
-      <a href="<%= fileHref %>" class="flex items-center gap-2.5 text-sm font-medium hover:text-neutral-600 dark:hover:text-white transition-colors" style="color:var(--theme-text-strong)" data-filename="<%= file.name %>" data-path="<%= filePath %>" data-size="<%= fileSize %>" data-uuid="<%= server.UUID %>" <% if (isImage) { %>data-click="viewer"<% } %>>
+      <a href="<%= fileHref %>" class="flex items-center gap-2.5 text-sm font-medium hover:text-[var(--theme-text)] transition-colors" style="color:var(--theme-text-strong)" data-filename="<%= file.name %>" data-path="<%= filePath %>" data-size="<%= fileSize %>" data-uuid="<%= server.UUID %>" <% if (isImage) { %>data-click="viewer"<% } %>>
         <span class="al-file-icon shrink-0" style="color:var(--theme-text-muted)">
           <%- getFileIcon(file.type === 'directory' ? 'Folder' : file.category || 'No Category') %>
         </span>

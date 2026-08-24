@@ -15,11 +15,11 @@
     <div class="hidden lg:block w-60 h-full"><%- include('../components/sidebar') %></div>
 <%- include('../components/template') %>
 
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
         { label: 'Dashboard' }
       ] }) %>
-      <div class="px-4 sm:px-8 pt-6 pb-8">
+      <div class="al-page-body pt-4">
 
         <!-- Header -->
         <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -183,7 +183,7 @@
                 <% } %>
               </div>
             </a>
-            <button type="button" class="server-actions-btn absolute top-2 right-2 w-9 h-9 flex items-center justify-center rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:group-focus-visible:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 z-10" style="color:var(--theme-text-muted);" aria-label="Server actions" data-uuid="<%= server.UUID %>">
+            <button type="button" class="server-actions-btn absolute top-2 right-2 w-9 h-9 flex items-center justify-center rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:group-focus-visible:opacity-100 hover:bg-[var(--theme-bg-hover)] z-10" style="color:var(--theme-text-muted);" aria-label="Server actions" data-uuid="<%= server.UUID %>">
               <%- icon('more-horizontal', { class: 'w-4 h-4' }) %>
             </button>
             <!-- Context menu -->

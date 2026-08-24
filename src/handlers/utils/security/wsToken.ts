@@ -5,7 +5,7 @@ const VERSION = 1;
 
 function secret(): string {
   const s = process.env.SESSION_SECRET;
-  if (!s) throw new Error('SESSION_SECRET environment variable is required');
+  if (!s) {throw new Error('SESSION_SECRET environment variable is required');}
   return s;
 }
 
@@ -38,16 +38,16 @@ export interface WsTokenPayload {
 }
 
 export function verifyWsToken(token: string | null | undefined): WsTokenPayload | null {
-  if (!token || typeof token !== 'string') return null;
+  if (!token || typeof token !== 'string') {return null;}
   const parts = token.split('.');
-  if (parts.length !== 2) return null;
+  if (parts.length !== 2) {return null;}
 
   const [payload, sig] = [parts[0]!, parts[1]!];
   const expected = crypto.createHmac('sha256', secret()).update(payload).digest('base64url');
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
-  if (a.length !== b.length) return null;
-  if (!crypto.timingSafeEqual(a, b)) return null;
+  if (a.length !== b.length) {return null;}
+  if (!crypto.timingSafeEqual(a, b)) {return null;}
 
   try {
     const decoded = JSON.parse(b64urlDecode(payload).toString('utf8')) as {

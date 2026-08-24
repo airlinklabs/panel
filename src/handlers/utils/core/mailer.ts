@@ -8,7 +8,7 @@ const DEFAULT_SMTP_FROM = 'noreply@airlink';
 
 export async function getTransporter() {
   const s = await await getSettings();
-  if (!s?.smtpHost) throw new Error('SMTP not configured');
+  if (!s?.smtpHost) {throw new Error('SMTP not configured');}
   return nodemailer.createTransport({
     host: s.smtpHost,
     port: s.smtpPort ?? DEFAULT_SMTP_PORT,
@@ -102,9 +102,9 @@ export async function sendPasswordReset(input: {
     title: 'Password reset',
     panelName: input.panelName,
     body: [
-      `A password reset was requested for your account. This link expires in 1 hour.`,
+      'A password reset was requested for your account. This link expires in 1 hour.',
       `<a href="${esc(input.resetUrl)}" style="display:inline-block;background:#171717;color:#ffffff;text-decoration:none;padding:11px 22px;border-radius:10px;font-weight:600">Reset password</a>`,
-      `If you did not request this, you can safely ignore this email.`,
+      'If you did not request this, you can safely ignore this email.',
     ],
   }));
 }

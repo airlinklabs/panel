@@ -2,16 +2,6 @@
 
 <style>
   ::-webkit-scrollbar { display: none; }
-  .field-label { font-size: 11px; font-weight: 500; color: var(--theme-text-muted, #737373); display: block; margin-bottom: 5px; }
-  .field-input {
-    width: 100%; border-radius: 9px; border: 1px solid var(--theme-border, #e5e5e5);
-    background: var(--theme-bg-input, #fafafa); padding: 8px 12px;
-    font-size: 13px; color: var(--theme-text-strong, #171717); outline: none;
-    transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
-  }
-  html.dark .field-input { background: var(--theme-bg-hover, rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.1)); color: var(--theme-text, #e5e5e5); }
-  .field-input:focus { border-color: var(--theme-border, #a3a3a3); }
-  html.dark .field-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.25)); }
 </style>
 
 <main class="min-h-screen">
@@ -20,7 +10,7 @@
       <%- include('../components/sidebar') %>
     </div>
 <%- include('../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
         { label: req.translations.myImages || 'My Images', href: '/my-images' },
         { label: req.translations.editImage || 'Edit Image' }
@@ -32,20 +22,20 @@
       </div>
 
       <div class="al-page-body">
-        <div class="bg-white dark:bg-neutral-800/50 rounded-xl p-6 shadow-lg border border-neutral-200 dark:border-neutral-700/30">
+        <div class="rounded-xl p-6 shadow-lg border" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
           <form id="imageEditForm" class="flex flex-col gap-4">
             <div class="grid grid-cols-2 gap-3">
-              <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required value="<%= image.name || '' %>"></div>
-              <div><label class="field-label"><%= req.translations.author || 'Author' %></label><input class="field-input" type="text" name="author" value="<%= image.author || '' %>"></div>
-              <div><label class="field-label"><%= req.translations.authorName || 'Author Name' %></label><input class="field-input" type="text" name="authorName" value="<%= image.authorName || '' %>"></div>
-              <div class="col-span-2"><label class="field-label"><%= req.translations.startupCommand || 'Startup Command' %> <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required value="<%= image.startup || '' %>" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
-              <div class="col-span-2"><label class="field-label"><%= req.translations.dockerImages || 'Docker images (JSON array)' %> <span class="text-red-500">*</span></label><input class="field-input" type="text" name="dockerImages" required value="<%= image.dockerImages || '[]' %>" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
-              <div class="col-span-2"><label class="field-label"><%= req.translations.description || 'Description' %></label><textarea class="field-input" name="description" rows="2" style="resize:none;"><%= image.description || '' %></textarea></div>
-              <div class="col-span-2"><label class="field-label"><%= req.translations.variables || 'Variables' %> <span class="text-neutral-400 font-normal">(JSON array, optional)</span></label><textarea class="field-input" name="variables" rows="4" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;"><%= image.variables || '[]' %></textarea></div>
+              <div class="col-span-2"><label class="al-label">Name <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="name" required value="<%= image.name || '' %>"></div>
+              <div><label class="al-label"><%= req.translations.author || 'Author' %></label><input class="al-input" type="text" name="author" value="<%= image.author || '' %>"></div>
+              <div><label class="al-label"><%= req.translations.authorName || 'Author Name' %></label><input class="al-input" type="text" name="authorName" value="<%= image.authorName || '' %>"></div>
+              <div class="col-span-2"><label class="al-label"><%= req.translations.startupCommand || 'Startup Command' %> <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="startup" required value="<%= image.startup || '' %>" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+              <div class="col-span-2"><label class="al-label"><%= req.translations.dockerImages || 'Docker images (JSON array)' %> <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="dockerImages" required value="<%= image.dockerImages || '[]' %>" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+              <div class="col-span-2"><label class="al-label"><%= req.translations.description || 'Description' %></label><textarea class="al-input" name="description" rows="2" style="resize:none;"><%= image.description || '' %></textarea></div>
+              <div class="col-span-2"><label class="al-label"><%= req.translations.variables || 'Variables' %> <span class="font-normal" style="color:var(--theme-text-muted)">(JSON array, optional)</span></label><textarea class="al-input" name="variables" rows="4" style="resize:none;font-family:ui-monospace,monospace;font-size:12px;"><%= image.variables || '[]' %></textarea></div>
             </div>
             <div class="flex gap-2 pt-1">
-              <a href="/my-images" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition inline-flex items-center justify-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</a>
-              <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-white text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.resubmitForReview || 'Save & resubmit' %></button>
+              <a href="/my-images" class="flex-1 py-2 rounded-xl border text-sm font-medium hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text)"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</a>
+              <button type="submit" class="flex-1 py-2 rounded-xl border hover:bg-[var(--theme-bg-hover)] text-sm font-medium shadow-lg transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)"><%- icon('send', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.resubmitForReview || 'Save & resubmit' %></button>
             </div>
           </form>
         </div>

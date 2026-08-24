@@ -34,11 +34,11 @@ export function sanitizePath(baseDir: string, userPath: string): string | null {
  * Use this for quick checks before forwarding paths to the daemon.
  */
 export function isPathSafe(userPath: string): boolean {
-  if (typeof userPath !== 'string') return false;
-  if (userPath.includes('\0')) return false;
-  if (userPath.includes('..')) return false;
+  if (typeof userPath !== 'string') {return false;}
+  if (userPath.includes('\0')) {return false;}
+  if (userPath.includes('..')) {return false;}
   // Reject absolute paths
-  if (path.isAbsolute(userPath)) return false;
+  if (path.isAbsolute(userPath)) {return false;}
   return true;
 }
 

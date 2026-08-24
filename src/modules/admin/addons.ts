@@ -1,14 +1,16 @@
 import { getSettings } from '../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { Module } from '../../handlers/moduleInit';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { getAllAddons, toggleAddonStatus, reloadAddons, loadAddons, uninstallAddon } from '../../handlers/addonHandler';
 import { commandRegistry } from '../../handlers/addonCommands';
-import { registerPermission, Permission } from '../../handlers/permissions';
+import type { Permission } from '../../handlers/permissions';
+import { registerPermission } from '../../handlers/permissions';
 import { parseAddonManifest } from '../../handlers/addonManifest';
 import { getParamAsString } from '../../utils/typeHelpers';
 import { containPath } from '../../utils/pathSecurity';
@@ -42,7 +44,7 @@ const addonsModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {return res.redirect('/login');}
 
           const addons = await getAllAddons();
           const settings = await await getSettings();
@@ -60,7 +62,7 @@ const addonsModule: Module = {
             const packageJsonPath = path.join(addonDir, 'package.json');
             const result = parseAddonManifest(packageJsonPath, addon.slug);
             const hasDisabledPh = fs.existsSync(path.join(addonDir, 'disabled.ph'));
-            if (!result.success) return { ...addon, manifest: null, hasDisabledPh };
+            if (!result.success) {return { ...addon, manifest: null, hasDisabledPh };}
             return { ...addon, manifest: result.manifest, hasDisabledPh };
           });
 
@@ -93,7 +95,7 @@ const addonsModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {return res.redirect('/login');}
 
           const settings = await await getSettings();
           const addons = await getAllAddons();
@@ -130,7 +132,7 @@ const addonsModule: Module = {
         try {
           const slug = getParamAsString(req.params.slug);
           const addon = await prisma.addon.findUnique({ where: { slug } });
-          if (!addon) return res.status(404).json({ success: false, message: 'Addon not found' });
+          if (!addon) {return res.status(404).json({ success: false, message: 'Addon not found' });}
 
           const addonsDir = path.join(__dirname, '../../../storage/addons');
           const addonDir = path.join(addonsDir, slug);
@@ -144,7 +146,7 @@ const addonsModule: Module = {
 
           const allSettings = await prisma.addonSetting.findMany({ where: { addonSlug: slug } });
           const settingsMap: Record<string, string> = {};
-          for (const s of allSettings) settingsMap[s.key] = s.value;
+          for (const s of allSettings) {settingsMap[s.key] = s.value;}
 
           return res.json({
             success: true,
@@ -205,7 +207,7 @@ const addonsModule: Module = {
         try {
           const slug = getParamAsString(req.params.slug);
           const addon = await prisma.addon.findUnique({ where: { slug } });
-          if (!addon) return res.status(404).json({ success: false, message: 'Addon not found' });
+          if (!addon) {return res.status(404).json({ success: false, message: 'Addon not found' });}
 
           const addonsDir = path.join(__dirname, '../../../storage/addons');
           const addonDir = path.join(addonsDir, slug);
@@ -228,7 +230,7 @@ const addonsModule: Module = {
                 value = value === 'true' || value === true ? 'true' : 'false';
               } else if (field.type === 'number') {
                 const num = Number(value);
-                if (isNaN(num)) continue;
+                if (isNaN(num)) {continue;}
                 value = String(num);
               } else {
                 value = String(value);

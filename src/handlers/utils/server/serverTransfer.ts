@@ -78,8 +78,8 @@ async function waitForInstall(daemon: { address: string; port: number; key: stri
         timeout: 10_000,
       });
       const st = res.data?.status;
-      if (st === 'installed' || st === 'exited' || st === 'running') return;
-      if (st === 'failed') throw new Error('Install failed on destination daemon');
+      if (st === 'installed' || st === 'exited' || st === 'running') {return;}
+      if (st === 'failed') {throw new Error('Install failed on destination daemon');}
     } catch {
       // daemon might not know the container yet — keep polling
     }
@@ -98,13 +98,13 @@ export async function startTransfer(
     where: { id: serverId },
     include: { node: true, image: true },
   });
-  if (!server) throw new Error('Server not found');
-  if (server.Installing) throw new Error('Server is currently installing');
-  if (server.Suspended) throw new Error('Suspended servers cannot be transferred');
-  if (server.nodeId === targetNodeId) throw new Error('Server is already on this node');
+  if (!server) {throw new Error('Server not found');}
+  if (server.Installing) {throw new Error('Server is currently installing');}
+  if (server.Suspended) {throw new Error('Suspended servers cannot be transferred');}
+  if (server.nodeId === targetNodeId) {throw new Error('Server is already on this node');}
 
   const targetNode = await prisma.node.findUnique({ where: { id: targetNodeId } });
-  if (!targetNode) throw new Error('Target node not found');
+  if (!targetNode) {throw new Error('Target node not found');}
 
   // Validate target ports are available
   const pool = await getNodePortPool(targetNodeId);
@@ -112,7 +112,7 @@ export async function startTransfer(
   const image = server.image;
   const minPorts = image ? parseImagePortRequirements(image.portRequirements).length : 0;
   const portError = validatePortAssignments(targetPorts, pool, getUsedExternalPorts(otherServers), minPorts);
-  if (portError) throw new Error(portError);
+  if (portError) {throw new Error(portError);}
 
   // Check capacity on target
   await assertNodeCapacity(targetNode, server.Memory, server.Cpu, server.Storage, server.UUID);
@@ -320,7 +320,7 @@ async function runTransfer(
             id: server.UUID,
             image: dockerImageValue,
             env,
-            scripts: (scripts.install as Array<{ url?: string; onStart?: string; ALVKT?: string; fileName?: string }>).map((s) => ({
+            scripts: (scripts.install as { url?: string; onStart?: string; ALVKT?: string; fileName?: string }[]).map((s) => ({
               url: s.url,
               onStartup: s.onStart,
               ALVKT: s.ALVKT,

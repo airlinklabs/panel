@@ -4,12 +4,12 @@
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
 <%- include('../../components/template') %>
-  <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+  <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
     <div class="px-8 lg:px-12 pt-6 pb-12 max-w-6xl">
       <div class="flex items-center justify-between mb-7">
         <div>
-          <h1 class="text-xl font-semibold tracking-tight text-neutral-900 dark:text-white">Activity Log</h1>
-          <p class="text-sm text-neutral-500 mt-0.5"><%= total %> action(s) recorded.</p>
+          <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">Activity Log</h1>
+          <p class="text-sm mt-0.5" style="color:var(--theme-text-muted)"><%= total %> action(s) recorded.</p>
         </div>
       </div>
 
@@ -72,7 +72,7 @@
         <h2 class="al-card-header">Recent Activity</h2>
         <div class="p-5">
           <% if (logs.length === 0) { %>
-            <p class="text-sm text-neutral-500">No activity matching the current filters.</p>
+            <p class="text-sm" style="color:var(--theme-text-muted)">No activity matching the current filters.</p>
           <% } else { %>
             <% const groups = []; %>
             <% logs.forEach(log => {

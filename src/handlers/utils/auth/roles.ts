@@ -23,7 +23,7 @@ export function isOwner(user: Pick<UsersModel, 'role'>): boolean {
 }
 
 export function isAdminRole(user: Pick<UsersModel, 'role' | 'isAdmin'> | null | undefined): boolean {
-  if (!user) return false;
+  if (!user) {return false;}
   return user.isAdmin === true || getUserRole(user) === 'owner' || getUserRole(user) === 'admin';
 }
 

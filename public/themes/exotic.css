@@ -1,0 +1,398 @@
+/* ────────────────────────────────────────────────────────────────────
+   Exotic Theme — glassy sidebar, clean gradients, modern dark UI
+   ──────────────────────────────────────────────────────────────────── */
+
+html.dark {
+  /* ── Page surfaces ─────────────────────────────────────────────── */
+  --theme-bg:                  #0a0a12;
+  --theme-bg-secondary:        #10101c;
+  --theme-bg-card:             rgba(18, 18, 32, 0.75);
+  --theme-bg-hover:            rgba(255, 255, 255, 0.04);
+  --theme-bg-input:            rgba(255, 255, 255, 0.06);
+  --theme-bg-active-nav:       rgba(139, 92, 246, 0.12);
+
+  /* ── Borders ───────────────────────────────────────────────────── */
+  --theme-border:              rgba(255, 255, 255, 0.08);
+  --theme-toggle-bg:           rgba(255, 255, 255, 0.25);
+  --theme-border-subtle:       rgba(255, 255, 255, 0.05);
+  --theme-border-input:        rgba(255, 255, 255, 0.10);
+  --theme-border-accent:       rgba(139, 92, 246, 0.40);
+  --theme-border-strong:       rgba(139, 92, 246, 0.30);
+  --theme-btn-border:          rgba(255, 255, 255, 0.10);
+  --theme-danger-border:       rgba(248, 113, 113, 0.25);
+
+  /* ── Text ──────────────────────────────────────────────────────── */
+  --theme-text:                #c4c4d4;
+  --theme-text-strong:         #f0f0ff;
+  --theme-text-muted:          #6e6e8a;
+  --theme-text-placeholder:    #5a5a72;
+  --theme-text-link:           #e0e0ff;
+
+  /* ── Accent — violet-to-cyan gradient feel ─────────────────────── */
+  --theme-accent:              #8b5cf6;
+  --theme-accent-text:         #ffffff;
+  --theme-text-on-accent:     #ffffff;
+  --theme-accent-subtle:       rgba(139, 92, 246, 0.12);
+  --theme-accent-foreground:   #ffffff;
+  --theme-primary:             #8b5cf6;
+
+  /* ── Nav chrome — glassy sidebar ───────────────────────────────── */
+  --theme-nav-bg:              rgba(14, 14, 28, 0.65);
+  --theme-nav-border:          rgba(255, 255, 255, 0.06);
+  --theme-nav-text:            #7a7a96;
+  --theme-nav-text-active:     #e0e0ff;
+  --theme-nav-icon:            #5e5e7a;
+  --theme-nav-icon-active:     #c4b5fd;
+
+  /* ── Status ────────────────────────────────────────────────────── */
+  --theme-success:             #34d399;
+  --theme-success-bg:          rgba(52, 211, 153, 0.10);
+  --theme-warning:             #fbbf24;
+  --theme-warning-bg:          rgba(251, 191, 36, 0.10);
+  --theme-danger:              #f87171;
+  --theme-danger-bg:           rgba(248, 113, 113, 0.10);
+  --theme-info:                #818cf8;
+  --theme-info-bg:             rgba(129, 140, 248, 0.10);
+  --theme-badge-neutral-text:  #7a7a96;
+  --theme-badge-neutral-bg:    rgba(255, 255, 255, 0.06);
+  --theme-text-faint:          #5a5a72;
+
+  /* ── Table ─────────────────────────────────────────────────────── */
+  --theme-table-header-bg:     rgba(255, 255, 255, 0.03);
+  --theme-table-row-hover:     rgba(139, 92, 246, 0.05);
+  --theme-table-divide:        rgba(255, 255, 255, 0.05);
+
+  /* ── Buttons ───────────────────────────────────────────────────── */
+  --theme-btn-primary-bg:      linear-gradient(135deg, #8b5cf6, #6d28d9);
+  --theme-btn-primary-text:    #ffffff;
+  --theme-btn-primary-hover:   linear-gradient(135deg, #7c3aed, #5b21b6);
+  --theme-btn-secondary-bg:    rgba(255, 255, 255, 0.05);
+  --theme-btn-secondary-border:rgba(255, 255, 255, 0.10);
+  --theme-btn-secondary-text:  #c4c4d4;
+  --theme-btn-secondary-hover: rgba(255, 255, 255, 0.08);
+  --theme-btn-danger-bg:       #dc2626;
+  --theme-btn-danger-text:     #ffffff;
+  --theme-btn-danger-hover:    #b91c1c;
+  --theme-btn-success-bg:      #059669;
+  --theme-btn-success-text:    #ffffff;
+  --theme-btn-success-hover:   #047857;
+
+  /* ── Skeleton ──────────────────────────────────────────────────── */
+  --theme-skeleton-base:       rgba(255, 255, 255, 0.05);
+  --theme-skeleton-shine:      rgba(255, 255, 255, 0.08);
+
+  /* ── Code / Terminal ───────────────────────────────────────────── */
+  --theme-code-bg:             #0d0d1a;
+  --theme-code-text:           #a5a5c0;
+  --theme-code-border:         rgba(255, 255, 255, 0.06);
+
+  /* ── Logo bg ───────────────────────────────────────────────────── */
+  --theme-logo-bg:             linear-gradient(135deg, rgba(139,92,246,0.2), rgba(34,211,238,0.15));
+
+  /* ── Shadows ───────────────────────────────────────────────────── */
+  --theme-shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.4);
+  --theme-shadow:              0 2px 6px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.04);
+  --theme-shadow-md:           0 4px 12px rgba(0, 0, 0, 0.4), 0 0 30px rgba(139, 92, 246, 0.06);
+  --theme-shadow-lg:           0 10px 24px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.08);
+  --theme-shadow-xl:           0 20px 40px rgba(0, 0, 0, 0.6), 0 0 60px rgba(139, 92, 246, 0.10);
+
+  /* ── Border radius ─────────────────────────────────────────────── */
+  --theme-radius-input:        0.75rem;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Glassy sidebar & nav chrome
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark #pc-sidebar,
+html.dark #pc-sidebar2 {
+  background: rgba(14, 14, 28, 0.55) !important;
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+html.dark #pc-sidebar .nav-link {
+  color: var(--theme-nav-text) !important;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+html.dark #pc-sidebar .nav-link:hover {
+  color: var(--theme-nav-text-active) !important;
+  background: rgba(139, 92, 246, 0.08);
+}
+
+html.dark #pc-sidebar .nav-link.active {
+  color: var(--theme-nav-text-active) !important;
+}
+
+html.dark #pc-sidebar #active-background {
+  background: rgba(139, 92, 246, 0.12) !important;
+  border: 1px solid rgba(139, 92, 246, 0.15) !important;
+  border-radius: 0.75rem;
+}
+
+html.dark #pc-sidebar .nav-link svg {
+  color: var(--theme-nav-icon) !important;
+  transition: color 0.2s ease;
+}
+
+html.dark #pc-sidebar .nav-link.active svg,
+html.dark #pc-sidebar .nav-link:hover svg {
+  color: var(--theme-nav-icon-active) !important;
+}
+
+/* Sidebar account link */
+html.dark #pc-sidebar .sidebar-special-link {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Sidebar logout */
+html.dark #pc-sidebar #sidebar-logout-link {
+  color: var(--theme-danger) !important;
+}
+
+/* Sidebar logo area */
+html.dark #sidebar-logo-block {
+  border-bottom-color: rgba(255, 255, 255, 0.04);
+}
+
+/* Sidebar group labels */
+html.dark #pc-sidebar p.pl-7 {
+  color: var(--theme-text-muted) !important;
+}
+
+/* Collapsed sidebar */
+html.dark #pc-sidebar.collapsed {
+  background: rgba(14, 14, 28, 0.7) !important;
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Mobile nav — glassy
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark .mobile-top-bar {
+  background: rgba(14, 14, 28, 0.6) !important;
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+html.dark .mobile-bottom-nav {
+  background: rgba(14, 14, 28, 0.6) !important;
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+html.dark .mobile-nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+html.dark .mobile-nav-link.active-mobile {
+  color: var(--theme-nav-text-active) !important;
+}
+
+/* Mobile sheet (more menu) */
+html.dark .mobile-more-sheet {
+  background: rgba(14, 14, 28, 0.75) !important;
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Cards — frosted glass
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark .al-card {
+  background: rgba(18, 18, 32, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+html.dark .al-card:hover {
+  border-color: rgba(139, 92, 246, 0.12);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Inputs — subtle glow on focus
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark .al-input {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+html.dark .al-input:focus {
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Buttons — gradient primary, glassy secondary
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark .al-btn-primary {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+  transition: all 0.2s ease;
+}
+
+html.dark .al-btn-primary:hover {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
+  transform: translateY(-1px);
+}
+
+html.dark .al-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(139, 92, 246, 0.2);
+}
+
+html.dark .al-btn-secondary {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+  color: var(--theme-text) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+html.dark .al-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+html.dark .al-btn-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Stat cards — gradient accents
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark .stat-card {
+  background: rgba(18, 18, 32, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Tables — subtle glass rows
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark table {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+html.dark table th {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--theme-text-muted);
+}
+
+html.dark table tr:hover td {
+  background: rgba(139, 92, 246, 0.04);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Toggles — accent tint
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark .al-toggle-track {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+html.dark .al-toggle-track:has(.al-toggle-dot) {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  border-color: transparent;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Tabs — accent underline
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark .tab-btn[aria-selected="true"] {
+  color: var(--theme-text-strong);
+  box-shadow: inset 0 -2px 0 var(--theme-accent);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Breadcrumbs & misc
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark code {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+}
+
+html.dark .al-alert-info {
+  background: rgba(129, 140, 248, 0.08);
+  border-color: rgba(129, 140, 248, 0.2);
+}
+
+html.dark .al-alert-danger {
+  background: rgba(248, 113, 113, 0.08);
+  border-color: rgba(248, 113, 113, 0.2);
+}
+
+html.dark .al-alert-success {
+  background: rgba(52, 211, 153, 0.08);
+  border-color: rgba(52, 211, 153, 0.2);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Auth pages
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark .auth-card {
+  background: rgba(18, 18, 32, 0.65);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Scrollbar
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.2);
+  border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.35);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Selection highlight
+   ══════════════════════════════════════════════════════════════════════ */
+
+html.dark ::selection {
+  background: rgba(139, 92, 246, 0.3);
+  color: #ffffff;
+}

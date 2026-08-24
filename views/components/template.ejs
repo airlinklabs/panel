@@ -1,31 +1,4 @@
-<div id="colcont" class="pb-16 lg:pb-0 transition-all duration-200">
-  <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b px-4 sm:gap-x-6 sm:px-4 lg:px-4" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
-      <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-        <!-- Search button -->
-        <div class="flex items-center shrink-0 lg:-ml-2">
-          <button id="searchButton" type="button"
-            class="flex items-center gap-2.5 h-10 px-3.5 rounded-xl cursor-pointer transition-all duration-200 hover:opacity-80 active:scale-95"
-            style="border:1px solid var(--theme-border-input); background:var(--theme-bg-secondary);"
-            aria-label="<%= req.translations.navSearch || 'Search' %>" aria-haspopup="dialog" aria-expanded="false">
-            <%- icon('search', { class: 'h-5 w-5', style: 'color:var(--theme-text-muted)' }) %>
-            <span class="hidden sm:block text-sm" style="color:var(--theme-text-muted);"><%= req.translations.navSearch || 'Search' %></span>
-            <span aria-hidden="true" class="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-md"
-              style="color:var(--theme-text-muted); background:var(--theme-bg-card); border:1px solid var(--theme-border);">CTRL K</span>
-          </button>
-        </div>
-
-      <!-- Admin breadcrumbs (desktop) -->
-      <div id="topbar-breadcrumbs" class="hidden lg:flex items-center justify-center min-w-0 flex-1 text-[11px]" style="color:var(--theme-text-muted);"></div>
-
-      <!-- Theme toggle switch -->
-      <div class="flex items-center shrink-0 ml-2">
-        <div id="theme-toggle-topbar" class="theme-toggle-switch" role="button" tabindex="0" aria-label="Toggle theme" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();if(typeof toggleTheme==='function')toggleTheme();}">
-          <div class="theme-toggle-knob"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+<div id="colcont" class="transition-all duration-200">
   <!-- Search popup -->
   <div id="searchOverlay" class="al-sheet-overlay fixed inset-0 z-50 hidden items-start justify-center p-4"
     role="dialog" aria-modal="true" aria-label="<%= req.translations.navSearch || 'Search' %>"
@@ -61,46 +34,4 @@
 @keyframes search-pop-out { from { opacity:1; transform:scale(1); } to { opacity:0; transform:scale(0.92); } }
 .search-pop-in  { animation: search-pop-in 0.18s cubic-bezier(0.16,1,0.3,1) both; }
 .search-pop-out { animation: search-pop-out 0.12s ease-in both; }
-.theme-toggle-switch {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 70px;
-  height: 30px;
-  padding: 4px 10px;
-  border-radius: 50px;
-  cursor: pointer;
-  background: var(--theme-text);
-  border: 1px solid var(--theme-text);
-  flex-shrink: 0;
-  transition: background 0.25s ease, border-color 0.25s ease;
-}
-.dark .theme-toggle-switch {
-  background: var(--theme-bg);
-  border-color: var(--theme-bg);
-}
-.theme-toggle-knob {
-  position: absolute;
-  z-index: 1;
-  top: 5px;
-  left: 3px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--theme-bg);
-  transition: transform 0.22s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), background 0.25s ease;
-}
-.dark .theme-toggle-knob {
-  transform: translateX(33px);
-  background: var(--theme-text);
-}
 </style>
-<script nonce="<%- nonce %>">
-(function() {
-  const btn = document.getElementById('theme-toggle-topbar');
-  btn.addEventListener('click', function() {
-    if (typeof toggleTheme === 'function') toggleTheme();
-  });
-})();
-</script>

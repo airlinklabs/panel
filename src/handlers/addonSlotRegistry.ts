@@ -74,7 +74,7 @@ class SlotRegistry {
 
   unregister(slotId: SlotId, addonSlug: string): void {
     const existing = this.slots.get(slotId);
-    if (!existing) return;
+    if (!existing) {return;}
 
     const filtered = existing.filter(c => c.addonSlug !== addonSlug);
     if (filtered.length === 0) {
@@ -86,13 +86,13 @@ class SlotRegistry {
 
   async renderSlot(slotId: SlotId, locals: Record<string, unknown>): Promise<string> {
     const contributions = this.slots.get(slotId);
-    if (!contributions || contributions.length === 0) return '';
+    if (!contributions || contributions.length === 0) {return '';}
 
     const parts: string[] = [];
     for (const contrib of contributions) {
       try {
         const html = await contrib.render(locals);
-        if (html) parts.push(html);
+        if (html) {parts.push(html);}
       } catch (err: any) {
         logger.error(`Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`, err.message);
       }
@@ -102,7 +102,7 @@ class SlotRegistry {
 
   renderSlotSync(slotId: SlotId, locals: Record<string, unknown>): string {
     const contributions = this.slots.get(slotId);
-    if (!contributions || contributions.length === 0) return '';
+    if (!contributions || contributions.length === 0) {return '';}
 
     const parts: string[] = [];
     for (const contrib of contributions) {
@@ -120,7 +120,7 @@ class SlotRegistry {
 
   clearAddonSlots(addonSlug: string): void {
     const slotIds = this.addonSlotRegistry.get(addonSlug);
-    if (!slotIds) return;
+    if (!slotIds) {return;}
 
     for (const slotId of slotIds) {
       this.unregister(slotId, addonSlug);

@@ -9,7 +9,7 @@ import { assertNodeCapacity } from '../../../handlers/utils/server/resourceCheck
 import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
 
 declare global {
-  var serverStoppingStates: { [key: string]: boolean };
+  var serverStoppingStates: Record<string, boolean>;
 }
 
 const DAEMON_AUTH_USERNAME = 'Airlink';
@@ -202,7 +202,7 @@ export function getServerStatusInput(server: Pick<ServerPageServer, 'UUID' | 'no
 }
 
 export function getImageFeatures(image: { info?: string | null } | null | undefined): string[] {
-  if (!image) return [];
+  if (!image) {return [];}
   try {
     const info = typeof image.info === 'string' ? JSON.parse(image.info) : image.info;
     return Array.isArray(info?.features) ? info.features : [];
@@ -212,14 +212,14 @@ export function getImageFeatures(image: { info?: string | null } | null | undefi
 }
 
 export function buildEnvVariables(variables: string | null | ServerVariable[]): Record<string, string> {
-  if (!variables) return {};
+  if (!variables) {return {};}
   try {
     const parsed: unknown = Array.isArray(variables) ? variables : JSON.parse(variables);
-    if (!Array.isArray(parsed)) return {};
+    if (!Array.isArray(parsed)) {return {};}
     const env: Record<string, string> = {};
     for (const v of parsed) {
       const key = v.env_variable || v.env;
-      if (!key) continue;
+      if (!key) {continue;}
       const raw = v.value !== undefined ? v.value : (v.default_value ?? '');
       env[key] = String(raw);
     }
@@ -377,7 +377,7 @@ export async function startServerContainer(
       typeof startResponse.data === 'object' && startResponse.data !== null
         ? (startResponse.data as { error?: string; detail?: string })
         : {};
-    const rawDetail = `${body.error ?? 'request failed'}${body.detail ? ' — ' + body.detail : ''}`;
+    const rawDetail = `${body.error ?? 'request failed'}${body.detail ? ` — ${  body.detail}` : ''}`;
     const failure = classifyDaemonStartFailure(rawDetail);
     emitRealtime(
       serverEvent('server.power.start.failed', serverId, {
@@ -402,7 +402,7 @@ async function resolveServerMounts(
       where: { serverId },
       include: { mount: true },
     });
-  if (serverMounts.length === 0) return undefined;
+  if (serverMounts.length === 0) {return undefined;}
   return serverMounts.map((sm) => ({
     source: sm.mount.source,
     target: sm.mount.target,

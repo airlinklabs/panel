@@ -8,7 +8,7 @@
     </div>
 <%- include('../../components/template') %>
     <!-- Content -->
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Nodes' }
@@ -67,7 +67,7 @@
             <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
             <div class="flex-1">
               <p class="font-medium">Connection Error</p>
-              <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p>
+              <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">One or more nodes are offline. Some information may be unavailable.</p>
             </div>
             <button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
               <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>

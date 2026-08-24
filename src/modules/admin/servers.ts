@@ -1,9 +1,11 @@
 import { getSettings } from '../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import { registerPermission, Permission } from '../../handlers/permissions';
+import type { Permission } from '../../handlers/permissions';
+import { registerPermission } from '../../handlers/permissions';
 import logger from '../../handlers/logger';
 import { queueer } from '../../handlers/queueer';
 import { getParamAsNumber, getParamAsString } from '../../utils/typeHelpers';
@@ -484,11 +486,11 @@ const adminModule: Module = {
             parseInt(Storage) || 20480,
           );
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Error validating port allocation';
-            logger.error('Error validating server resources:', error);
-            res.status(400).json({ error: message });
-            return;
-          }
+          const message = error instanceof Error ? error.message : 'Error validating port allocation';
+          logger.error('Error validating server resources:', error);
+          res.status(400).json({ error: message });
+          return;
+        }
 
         const Port = serializeServerPorts(ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`));
 
@@ -510,7 +512,7 @@ const adminModule: Module = {
             return;
           }
 
-          type ImageDocker = { [key: string]: string };
+          type ImageDocker = Record<string, string>;
 
           const imagesDocker: ImageDocker[] = JSON.parse(dockerImagesRaw);
           const imageDocker: ImageDocker | undefined = imagesDocker.find(
@@ -562,7 +564,7 @@ const adminModule: Module = {
                 getUsedExternalPorts(liveServers),
                 minPorts,
               );
-              if (recheck) throw new Error(recheck);
+              if (recheck) {throw new Error(recheck);}
 
               const created = await prisma.server.create({
                 data: {
@@ -619,17 +621,17 @@ const adminModule: Module = {
                 continue;
               }
 
-let ServerEnv: Array<{ env: string; value: unknown }>;
-                try {
-                  const parsed: unknown[] = JSON.parse(server.Variables);
+              let ServerEnv: { env: string; value: unknown }[];
+              try {
+                const parsed: unknown[] = JSON.parse(server.Variables);
 
-                  // Normalize variable shape — Pterodactyl uses env_variable, legacy uses env
-                  ServerEnv = (parsed as Record<string, unknown>[]).map((v) => ({
-                    env: String(v.env_variable ?? v.env ?? ''),
-                    value: v.value ?? v.default_value ?? '',
-                  }));
+                // Normalize variable shape — Pterodactyl uses env_variable, legacy uses env
+                ServerEnv = (parsed as Record<string, unknown>[]).map((v) => ({
+                  env: String(v.env_variable ?? v.env ?? ''),
+                  value: v.value ?? v.default_value ?? '',
+                }));
 
-                  let serverPort = String(parseServerPorts(Port)[0]?.externalPort ?? '');
+                let serverPort = String(parseServerPorts(Port)[0]?.externalPort ?? '');
                 const primaryExternalPort = getPrimaryExternalPort(server.Ports);
                 if (primaryExternalPort) {
                   serverPort = String(primaryExternalPort);
@@ -726,7 +728,7 @@ let ServerEnv: Array<{ env: string; value: unknown }>;
                         id: server.UUID,
                         image: dockerImageValue,
                         env,
-                        scripts: (scripts.install as Array<Record<string, unknown>>).map((s) => ({
+                        scripts: (scripts.install as Record<string, unknown>[]).map((s) => ({
                           url: s.url,
                           onStartup: s.onStart,
                           ALVKT: s.ALVKT,

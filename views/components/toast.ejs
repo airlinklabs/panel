@@ -41,6 +41,7 @@
     const remainingMs = (r, n) => (window.ALToastStore ? remainingMs(r, n) : 0);
 
     const active = new Map();
+    const pendingGroups = new Set();
     const jobPolls = new Map();
     const hydrated = new Set();
     let saveTimer = null;
@@ -117,11 +118,27 @@
       const rec = isPreset ? Object.assign({}, opts._record) : createRecord(message, type, opts);
       if (isPreset && typeof opts.duration === 'number') rec.duration = opts.duration;
 
-      if (rec.group && !isPreset) {
+      // Group dedup — works for both fresh and hydrated records
+      if (rec.group) {
+        if (pendingGroups.has(rec.group)) return noopHandle();
         let existing = null;
         active.forEach(function (entry) {
           if (!existing && entry.record && entry.record.group === rec.group && !entry.record.finished) {
             existing = entry;
+          }
+        });
+        if (existing && existing.handle) return existing.handle;
+        pendingGroups.add(rec.group);
+      }
+
+      // Auto-dedup active (loading/progress) toasts: at most one per normalized message
+      if (rec.mode === 'active' && !rec.group) {
+        const norm = (rec.message || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+        let existing = null;
+        active.forEach(function (entry) {
+          if (!existing && entry.record && entry.record.mode === 'active' && !entry.record.finished) {
+            const eNorm = (entry.record.message || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+            if (eNorm === norm) existing = entry;
           }
         });
         if (existing && existing.handle) return existing.handle;
@@ -203,6 +220,7 @@
         if (dismissTimer) clearTimeout(dismissTimer);
         stopJobFor(rec.id);
         active.delete(rec.id);
+        if (rec.group) pendingGroups.delete(rec.group);
         scheduleSave();
         el.style.transition = 'transform 180ms cubic-bezier(0.4,0,1,1), opacity 180ms cubic-bezier(0.4,0,1,1)';
         el.style.transform = 'translateX(calc(100% + 1rem))';
@@ -292,6 +310,12 @@
 
       if (!isActive && !rec.finished) {
         scheduleDismiss(typeof rec.duration === 'number' ? rec.duration : 5000);
+      }
+
+      // Hard safety net: active (loading/progress) toasts auto-dismiss
+      // after 10s max even if their job never completes or stalls.
+      if (isActive && !rec.finished) {
+        scheduleDismiss(10000);
       }
 
       if (rec.finished === true) {

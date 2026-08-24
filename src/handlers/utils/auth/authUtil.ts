@@ -1,5 +1,5 @@
 import { getSettings } from '../../settingsCache';
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import prisma from '../../../db';
 import { renderErrorPage } from '../../errorPages';
 
@@ -42,7 +42,7 @@ export const isAuthenticated =
         }
 
         const hasPermission = userPermissions.some((perm: string) => {
-          if (perm === requiredPermission) return true;
+          if (perm === requiredPermission) {return true;}
           if (perm.endsWith('.*')) {
             const base = perm.slice(0, -2);
             return requiredPermission.startsWith(`${base}.`);

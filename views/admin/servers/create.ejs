@@ -1,476 +1,502 @@
 <%- include('../../components/header', { title: 'Dashboard' }) %>
 
-<main class="min-h-screen">
-  <div class="flex min-h-screen">
-    <div class="hidden lg:block w-60 shrink-0">
-      <%- include('../../components/sidebar') %>
-    </div>
-<%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
-      <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Servers', href: '/admin/servers' },
-        { label: 'Create' }
-      ] }) %>
-      <div class="al-page-header flex items-start justify-between gap-4">
-        <div>
-          <h1 class="al-page-title"><%= req.translations.adminCreateServerTitle %></h1>
-          <p class="al-page-desc"><%= req.translations.adminCreateServerText || 'Spin up something new. Naming it is half the fun.' %></p>
-        </div>
-        <div class="flex gap-2 shrink-0 items-center">
-          <button type="submit" form="createServerForm" class="al-btn-primary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.create || 'Create server' %></button>
-          <a href="/admin/servers" class="al-btn-secondary">Back to Servers</a>
-        </div>
+  <main class="min-h-screen">
+    <div class="flex min-h-screen">
+      <div class="hidden lg:block w-60 shrink-0">
+        <%- include('../../components/sidebar') %>
       </div>
-
-      <div class="al-page-body space-y-5">
-        <form id="createServerForm" method="POST" action="/admin/servers/create" class="space-y-5">
-        <div class="al-card">
-            <h2 class="al-card-header">General</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <%- include('../../components/template') %>
+        <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
+          <%- include('../../components/ui/breadcrumb', { items: [ { label: 'Admin' }, { label: 'Servers' ,
+            href: '/admin/servers' }, { label: 'Create' } ] }) %>
+            <div class="al-page-header flex items-start justify-between gap-4">
               <div>
-                <label for="serverName" class="al-label"><%= req.translations.name %>:</label>
-                <div class="flex items-center gap-2">
-                    <input id="serverName" name="name" class="al-input flex-1" placeholder="<%= user.username %>'s server">
-                    <button type="button" onclick="generateRandomName()" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-neutral-200 dark:hover:bg-neutral-600" style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
-                        <%- icon('dices', { size: 15 }) %>
-                    </button>
-                </div>
+                <h1 class="al-page-title">
+                  <%= req.translations.adminCreateServerTitle %>
+                </h1>
+                <p class="al-page-desc">
+                  <%= req.translations.adminCreateServerText || 'Spin up something new. Naming it is half the fun.' %>
+                </p>
               </div>
-              <div>
-                <label for="serverDescription" class="al-label">
-                  <%- icon('file-text', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.description %>:</label>
-                <input id="serverDescription" name="description" class="al-input" placeholder="<%= user.username %>'s server description">
-              </div>
-              <div>
-                <label class="al-label" for="serverUser">
-                  <%- icon('user', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.user %>:</label>
-                <select id="serverUser" name="ownerId" class="hidden">
-                  <% users.forEach(user => { %>
-                    <option value="<%= user.id %>"><%= user.username %></option>
-                  <% }); %>
-                </select>
-                <div class="custom-select mt-2" data-for="serverUser"></div>
-              </div>
-              <div>
-                <label class="al-label" for="serverNode">
-                  <%- icon('server', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.Node %>:
-                </label>
-                <select id="serverNode" name="nodeId" class="hidden">
-                    <% if (nodes.length > 0) { %>
-                      <% nodes.forEach(node => { %>
-                        <option value="<%= node.id %>"><%= node.name %></option>
-                      <% }); %>
-                    <% } else { %>
-                      <option value="" disabled selected>No nodes available</option>
-                    <% } %>
-                  </select>
-                <div class="custom-select mt-2" data-for="serverNode"></div>
+              <div class="flex gap-2 shrink-0 items-center">
+                <button type="submit" form="createServerForm" class="al-btn-primary"><%- icon('plus', { class: 'size-4'
+                    , strokeWidth: 1.5 }) %>
+                    <%= req.translations.create || 'Create server' %></button>
+                <a href="/admin/servers" class="al-btn-secondary">Back to Servers</a>
               </div>
             </div>
-          </div>
 
-          <div class="al-card">
-            <h2 class="al-card-header">Resources</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="al-label">
-                  <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
-                  CPU:
-                </label>
-                <input type="hidden" id="serverCPU" name="Cpu" value="100">
-                <div class="flex items-stretch mt-2 mb-1 gap-0">
-                  <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="1"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="serverCPUDisplay" data-hidden="serverCPU"
-                    data-units="100:Cores,1:%" data-default-unit="Cores">Cores</button>
-                </div>
-                <p class="text-xs text-neutral-400">1 core = 100%</p>
-              </div>
-              <div>
-                <label class="al-label">
-                  <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
-                  Memory:
-                </label>
-                <input type="hidden" id="serverMemory" name="Memory" value="1024">
-                <div class="flex items-stretch mt-2 mb-1 gap-0">
-                  <input id="serverMemoryDisplay" type="number" min="1" value="1024"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="serverMemoryDisplay" data-hidden="serverMemory"
-                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
-                </div>
-                <p class="text-xs text-neutral-400">Min 128 MB</p>
-              </div>
-              <div>
-                <label class="al-label">
-                  <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
-                  Swap:
-                </label>
-                <input type="hidden" id="serverSwap" name="Swap" value="0">
-                <div class="flex items-stretch mt-2 mb-1 gap-0">
-                  <input id="serverSwapDisplay" type="number" min="-1" value="0"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="serverSwapDisplay" data-hidden="serverSwap"
-                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
-                </div>
-                <p class="text-xs text-neutral-400">0 = no swap, -1 = unlimited</p>
-              </div>
-              <div>
-                <label class="al-label">
-                  <%- icon('database', { size: 14, class: 'shrink-0' }) %>
-                  Storage:
-                </label>
-                <input type="hidden" id="serverStorage" name="Storage" value="20480">
-                <div class="flex items-stretch mt-2 mb-1 gap-0">
-                  <input id="serverStorageDisplay" type="number" min="1" value="20"
-                    class="al-input rounded-l-xl flex-1 border-r-0">
-                  <button type="button" class="al-format-switcher" data-format-switcher
-                    data-display="serverStorageDisplay" data-hidden="serverStorage"
-                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
-                </div>
-                <p class="text-xs text-neutral-400">Min 128 MB</p>
-              </div>
-              <div>
-                <label class="al-label">
-                  <%- icon('layers', { size: 14, class: 'shrink-0' }) %>
-                  Database limit:
-                </label>
-                <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="5" class="al-input mt-2 mb-1">
-                <p class="text-xs text-neutral-400">0 = unlimited databases</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="al-card">
-            <h2 class="al-card-header">Startup</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="al-label" for="serverImage">
-                  <%- icon('box', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.Image %>:</label>
-                <select id="serverImage" name="imageId" class="hidden">
-                  <% images.forEach(image => { %>
-                    <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages || "[]" %>' data-variables='<%= image.variables || "[]" %>' data-port-requirements='<%= image.portRequirements || "[]" %>'>
-                      <%= image.name %>
-                    </option>
-                  <% }); %>
-                </select>
-                <div class="custom-select mt-2" data-for="serverImage"></div>
-              </div>
-              <div>
-                <label class="al-label" for="dockerImage">
-                  <%- icon('box', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.DockerImage %>:</label>
-                <select id="dockerImage" name="dockerImage" class="hidden">
-                  <option value="" disabled selected>Select a Docker image</option>
-                </select>
-                <div class="custom-select mt-2" data-for="dockerImage"></div>
-              </div>
-              <div>
-                <label class="al-label">
-                  <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.Ports %>:</label>
-                <input type="hidden" id="serverPorts" name="Ports">
-                <button type="button" id="assignPortsBtn" class="al-btn-secondary mt-2 w-full">
-                  <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-                  Assign ports
-                </button>
-              </div>
-              <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
-                <div class="flex flex-col md:flex-row md:items-center justify-between">
-                  <div class="flex items-center mb-2 md:mb-0">
-                    <div class="flex-shrink-0 mr-3">
-                      <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
+            <div class="al-page-body space-y-5">
+              <form id="createServerForm" method="POST" action="/admin/servers/create" class="space-y-5">
+                <div class="al-card">
+                  <h2 class="al-card-header">General</h2>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label for="serverName" class="al-label">
+                        <%= req.translations.name %>:
+                      </label>
+                      <div class="flex items-center gap-2">
+                        <input id="serverName" name="name" class="al-input flex-1"
+                          placeholder="<%= user.username %>'s server">
+                        <button type="button" onclick="generateRandomName()"
+                          class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-[var(--theme-bg-hover)]"
+                          style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
+                          <%- icon('dices', { size: 15 }) %>
+                        </button>
+                      </div>
                     </div>
                     <div>
-                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
-                      <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
+                      <label for="serverDescription" class="al-label">
+                        <%= req.translations.description %>:
+                      </label>
+                      <input id="serverDescription" name="description" class="al-input"
+                        placeholder="<%= user.username %>'s server description">
+                    </div>
+                    <div>
+                      <label class="al-label" for="serverUser">
+                        <%= req.translations.user %>:
+                      </label>
+                      <select id="serverUser" name="ownerId" class="hidden">
+                        <% users.forEach(user=> { %>
+                          <option value="<%= user.id %>">
+                            <%= user.username %>
+                          </option>
+                          <% }); %>
+                      </select>
+                      <div class="custom-select mt-2" data-for="serverUser"></div>
+                    </div>
+                    <div>
+                      <label class="al-label" for="serverNode">
+                        <%= req.translations.Node %>:
+                      </label>
+                      <select id="serverNode" name="nodeId" class="hidden">
+                        <% if (nodes.length> 0) { %>
+                          <% nodes.forEach(node=> { %>
+                            <option value="<%= node.id %>">
+                              <%= node.name %>
+                            </option>
+                            <% }); %>
+                              <% } else { %>
+                                <option value="" disabled selected>No nodes available</option>
+                                <% } %>
+                      </select>
+                      <div class="custom-select mt-2" data-for="serverNode"></div>
                     </div>
                   </div>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
-                    <div class="al-toggle-track">
-                      <div class="al-toggle-dot"></div>
+                </div>
+
+                <div class="al-card">
+                  <h2 class="al-card-header">Resources</h2>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label class="al-label">
+                        <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
+                          CPU:
+                      </label>
+                      <input type="hidden" id="serverCPU" name="Cpu" value="100">
+                      <div class="flex items-stretch mt-2 mb-1 gap-0">
+                        <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="1"
+                          class="al-input rounded-l-xl flex-1 border-r-0">
+                        <button type="button" class="al-format-switcher" data-format-switcher
+                          data-display="serverCPUDisplay" data-hidden="serverCPU" data-units="100:Cores,1:%"
+                          data-default-unit="Cores">Cores</button>
+                      </div>
+                      <p class="text-xs" style="color:var(--theme-text-muted)">1 core = 100%</p>
                     </div>
-                    <span class="ms-3 al-page-desc text-sm" id="allowStartupEditLabel">Disabled</span>
-                  </label>
+                    <div>
+                      <label class="al-label">
+                        <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
+                          Memory:
+                      </label>
+                      <input type="hidden" id="serverMemory" name="Memory" value="1024">
+                      <div class="flex items-stretch mt-2 mb-1 gap-0">
+                        <input id="serverMemoryDisplay" type="number" min="1" value="1024"
+                          class="al-input rounded-l-xl flex-1 border-r-0">
+                        <button type="button" class="al-format-switcher" data-format-switcher
+                          data-display="serverMemoryDisplay" data-hidden="serverMemory" data-units="1:MB,1024:GB"
+                          data-default-unit="MB">MB</button>
+                      </div>
+                      <p class="text-xs" style="color:var(--theme-text-muted)">Min 128 MB</p>
+                    </div>
+                    <div>
+                      <label class="al-label">
+                        <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
+                          Swap:
+                      </label>
+                      <input type="hidden" id="serverSwap" name="Swap" value="0">
+                      <div class="flex items-stretch mt-2 mb-1 gap-0">
+                        <input id="serverSwapDisplay" type="number" min="-1" value="0"
+                          class="al-input rounded-l-xl flex-1 border-r-0">
+                        <button type="button" class="al-format-switcher" data-format-switcher
+                          data-display="serverSwapDisplay" data-hidden="serverSwap" data-units="1:MB,1024:GB"
+                          data-default-unit="MB">MB</button>
+                      </div>
+                      <p class="text-xs" style="color:var(--theme-text-muted)">0 = no swap, -1 = unlimited</p>
+                    </div>
+                    <div>
+                      <label class="al-label">
+                        <%- icon('database', { size: 14, class: 'shrink-0' }) %>
+                          Storage:
+                      </label>
+                      <input type="hidden" id="serverStorage" name="Storage" value="20480">
+                      <div class="flex items-stretch mt-2 mb-1 gap-0">
+                        <input id="serverStorageDisplay" type="number" min="1" value="20"
+                          class="al-input rounded-l-xl flex-1 border-r-0">
+                        <button type="button" class="al-format-switcher" data-format-switcher
+                          data-display="serverStorageDisplay" data-hidden="serverStorage" data-units="1:MB,1024:GB"
+                          data-default-unit="MB">MB</button>
+                      </div>
+                      <p class="text-xs" style="color:var(--theme-text-muted)">Min 128 MB</p>
+                    </div>
+                    <div>
+                      <label class="al-label">
+                        <%- icon('layers', { size: 14, class: 'shrink-0' }) %>
+                          Database limit:
+                      </label>
+                      <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="5"
+                        class="al-input mt-2 mb-1">
+                      <p class="text-xs" style="color:var(--theme-text-muted)">0 = unlimited databases</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="al-card">
-            <div class="collapsible-row no-anim" id="variablesSectionRow">
-              <div>
-                <div id="variablesSection">
-                  <h2 class="al-card-header flex items-center gap-1.5">
-                    <%- icon('settings', { size: 14, class: 'shrink-0' }) %>
-                    Variables
-                  </h2>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="variablesContainer"></div>
+                <div class="al-card">
+                  <h2 class="al-card-header">Startup</h2>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label class="al-label" for="serverImage">
+                        <%- icon('box', { size: 14, class: 'shrink-0' }) %>
+                          <%= req.translations.Image %>:</label>
+                      <select id="serverImage" name="imageId" class="hidden">
+                        <% images.forEach(image=> { %>
+                          <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages || "[]" %>'
+                            data-variables='<%= image.variables || "[]" %>'
+                            data-port-requirements='<%= image.portRequirements || "[]" %>'>
+                            <%= image.name %>
+                          </option>
+                          <% }); %>
+                      </select>
+                      <div class="custom-select mt-2" data-for="serverImage"></div>
+                    </div>
+                    <div>
+                      <label class="al-label" for="dockerImage">
+                        <%- icon('box', { size: 14, class: 'shrink-0' }) %>
+                          <%= req.translations.DockerImage %>:</label>
+                      <select id="dockerImage" name="dockerImage" class="hidden">
+                        <option value="" disabled selected>Select a Docker image</option>
+                      </select>
+                      <div class="custom-select mt-2" data-for="dockerImage"></div>
+                    </div>
+                    <div>
+                      <label class="al-label">
+                        <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
+                          <%= req.translations.Ports %>:</label>
+                      <input type="hidden" id="serverPorts" name="Ports">
+                      <button type="button" id="assignPortsBtn" class="al-btn-secondary mt-2 w-full">
+                        <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
+                          Assign ports
+                      </button>
+                    </div>
+                    <div
+                      class="rounded-lg p-4 border mt-4" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
+                      <div class="flex flex-col md:flex-row md:items-center justify-between">
+                        <div class="flex items-center mb-2 md:mb-0">
+                          <div class="flex-shrink-0 mr-3">
+                            <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
+                          </div>
+                          <div>
+                            <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Startup Command Permissions
+                            </h3>
+                            <p class="text-xs" style="color:var(--theme-text-muted)">When enabled, users can modify the
+                              startup command for this server.</p>
+                          </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer"
+                            value="true">
+                          <div class="al-toggle-track">
+                            <div class="al-toggle-dot"></div>
+                          </div>
+                          <span class="ms-3 al-page-desc text-sm" id="allowStartupEditLabel">Disabled</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          </form>
-      </div>
+                <div class="al-card">
+                  <div class="collapsible-row no-anim" id="variablesSectionRow">
+                    <div>
+                      <div id="variablesSection">
+                        <h2 class="al-card-header flex items-center gap-1.5">
+                          <%- icon('settings', { size: 14, class: 'shrink-0' }) %>
+                            Variables
+                        </h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="variablesContainer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+        </div>
     </div>
-  </div>
-</main>
+  </main>
 
-<%- include('../../components/portsAllocator') %>
-<%- include('../../components/loadingPopup') %>
+  <%- include('../../components/portsAllocator') %>
+    <%- include('../../components/loadingPopup') %>
 
-<script nonce="<%- nonce %>">
-  const serverImageSelect = document.getElementById('serverImage');
-    const dockerImageSelect = document.getElementById('dockerImage');
-    const serverNodeSelect = document.getElementById('serverNode');
-    const serverPortsInput = document.getElementById('serverPorts');
-    const variablesContainer = document.getElementById('variablesContainer');
-    const form = document.getElementById('createServerForm');
+      <script nonce="<%- nonce %>">
+        const serverImageSelect = document.getElementById('serverImage');
+        const dockerImageSelect = document.getElementById('dockerImage');
+        const serverNodeSelect = document.getElementById('serverNode');
+        const serverPortsInput = document.getElementById('serverPorts');
+        const variablesContainer = document.getElementById('variablesContainer');
+        const form = document.getElementById('createServerForm');
 
-    let nodesData = {};
-    let availablePorts = [];
-    let assignedPorts = [];
+        let nodesData = {};
+        let availablePorts = [];
+        let assignedPorts = [];
 
-    function parseJson(raw, fallback) {
-      if (!raw) return fallback;
-      let value;
-      try { value = JSON.parse(raw); } catch { return fallback; }
-      for (let depth = 0; depth < 2 && typeof value === 'string'; depth++) {
-        try { value = JSON.parse(value); } catch { break; }
-      }
-      return value;
-    }
-
-    async function fetchNodesData() {
-      try {
-        const response = await fetch('/admin/nodes/list');
-        const nodes = await response.json();
-        nodes.forEach(node => {
-          let ports = [];
-          try { if (node.allocatedPorts) ports = JSON.parse(node.allocatedPorts); } catch (e) {
-            console.warn('[servers/create] Failed to parse allocated ports for node', node.id, e);
+        function parseJson(raw, fallback) {
+          if (!raw) return fallback;
+          let value;
+          try { value = JSON.parse(raw); } catch { return fallback; }
+          for (let depth = 0; depth < 2 && typeof value === 'string'; depth++) {
+            try { value = JSON.parse(value); } catch { break; }
           }
-          nodesData[node.id] = { ...node, parsedPorts: ports };
-        });
-        updatePortsForSelectedNode();
-      } catch (error) { console.error('[servers/create] Error fetching nodes:', error); }
-    }
+          return value;
+        }
 
-    function updatePortsForSelectedNode() {
-      const selectedNodeId = serverNodeSelect.value;
-      availablePorts = [];
-      if (!selectedNodeId || !nodesData[selectedNodeId]) { syncPortsButton(); return; }
-      const node = nodesData[selectedNodeId];
-      const nodeAddress = node.address;
-      if (!node.parsedPorts || node.parsedPorts.length === 0) { syncPortsButton(); return; }
-      const usedPorts = new Set();
-      if (node.servers && node.servers.length > 0) {
-        node.servers.forEach(server => {
+        async function fetchNodesData() {
           try {
-            if (server.Ports) {
-              const ports = JSON.parse(server.Ports);
-              ports.forEach(portInfo => {
-                const port = parseInt(portInfo.Port.split(':')[0]);
-                if (!isNaN(port)) usedPorts.add(port);
-              });
-            }
-          } catch (e) {
-            console.warn('[servers/create] Failed to parse used ports for server', server.id, e);
+            const response = await fetch('/admin/nodes/list');
+            const nodes = await response.json();
+            nodes.forEach(node => {
+              let ports = [];
+              try { if (node.allocatedPorts) ports = JSON.parse(node.allocatedPorts); } catch (e) {
+                console.warn('[servers/create] Failed to parse allocated ports for node', node.id, e);
+              }
+              nodesData[node.id] = { ...node, parsedPorts: ports };
+            });
+            updatePortsForSelectedNode();
+          } catch (error) { console.error('[servers/create] Error fetching nodes:', error); }
+        }
+
+        function updatePortsForSelectedNode() {
+          const selectedNodeId = serverNodeSelect.value;
+          availablePorts = [];
+          if (!selectedNodeId || !nodesData[selectedNodeId]) { syncPortsButton(); return; }
+          const node = nodesData[selectedNodeId];
+          const nodeAddress = node.address;
+          if (!node.parsedPorts || node.parsedPorts.length === 0) { syncPortsButton(); return; }
+          const usedPorts = new Set();
+          if (node.servers && node.servers.length > 0) {
+            node.servers.forEach(server => {
+              try {
+                if (server.Ports) {
+                  const ports = JSON.parse(server.Ports);
+                  ports.forEach(portInfo => {
+                    const port = parseInt(portInfo.Port.split(':')[0]);
+                    if (!isNaN(port)) usedPorts.add(port);
+                  });
+                }
+              } catch (e) {
+                console.warn('[servers/create] Failed to parse used ports for server', server.id, e);
+              }
+            });
           }
-        });
-      }
-      availablePorts = node.parsedPorts.filter(port => !usedPorts.has(port)).map(port => ({ port, label: `${nodeAddress}:${port}` }));
-      assignedPorts = assignedPorts.filter(port => availablePorts.some(item => item.port === Number(port.externalPort)));
-      ensureMinimumPortRows();
-      syncPortsButton();
-    }
-
-    function getPortRequirements() {
-      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-      return parseJson(selectedOption?.getAttribute('data-port-requirements'), []);
-    }
-
-    function ensureMinimumPortRows() {
-      const requirements = getPortRequirements();
-      const DEFAULT_PORT = 25565;
-      const min = Math.max(1, requirements.length);
-      while (assignedPorts.length < min) {
-        const req = requirements[assignedPorts.length] || {};
-        assignedPorts.push({
-          name: req.name || `Port ${assignedPorts.length + 1}`,
-          internalPort: req.internalPort || DEFAULT_PORT,
-          externalPort: availablePorts.find(item => !assignedPorts.some(port => port.externalPort === item.port))?.port || '',
-          primary: assignedPorts.length === 0
-        });
-      }
-      serverPortsInput.value = JSON.stringify(assignedPorts);
-    }
-
-    function syncPortsButton() {
-      serverPortsInput.value = JSON.stringify(assignedPorts);
-      document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? `Assign ports (${assignedPorts.length})` : 'Assign ports';
-    }
-
-    function renderPortRows() {
-      if (!window.PortsAllocator) return;
-      PortsAllocator.open({
-        title: 'Assign ports',
-        requirements: getPortRequirements(),
-        assignedPorts: assignedPorts,
-        availablePorts: availablePorts,
-        onSave: function (rows) {
-          assignedPorts = rows;
+          availablePorts = node.parsedPorts.filter(port => !usedPorts.has(port)).map(port => ({ port, label: `${nodeAddress}:${port}` }));
+          assignedPorts = assignedPorts.filter(port => availablePorts.some(item => item.port === Number(port.externalPort)));
+          ensureMinimumPortRows();
           syncPortsButton();
         }
-      });
-    }
 
-    document.getElementById('assignPortsBtn').addEventListener('click', renderPortRows);
-
-    function updateDockerImages() {
-      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-      const dockerImages = parseJson(selectedOption?.getAttribute('data-docker-images'), []);
-      dockerImageSelect.innerHTML = '<option value="" disabled selected>Select a Docker image</option>';
-      dockerImages.forEach(imageObj => {
-          Object.entries(imageObj).forEach(([key, value]) => {
-            const option = document.createElement('option');
-            option.value = key;
-            option.textContent = key;
-            dockerImageSelect.appendChild(option);
-          });
-      });
-    }
-
-    function updateVariables() {
-      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-      const variables = parseJson(selectedOption?.getAttribute('data-variables'), []);
-      variablesContainer.innerHTML = '';
-      if (variables.length === 0) {
-        document.getElementById('variablesSectionRow').classList.remove('open');
-        return;
-      }
-      document.getElementById('variablesSectionRow').classList.add('open');
-      variables.forEach(variable => {
-        const envKey = variable.env_variable || variable.env || '';
-        const fieldType = variable.field_type || variable.type || 'text';
-        const defaultVal = variable.default_value ?? variable.value ?? '';
-        const isRequired = variable.rules ? variable.rules.includes('required') : !!variable.required;
-        const wrapper = document.createElement('div');
-        wrapper.classList.add('flex', 'flex-col', 'gap-1.5');
-        const label = document.createElement('label');
-        label.setAttribute('for', envKey);
-        label.classList.add('text-neutral-700', 'dark:text-neutral-400', 'text-sm', 'tracking-tight');
-        label.textContent = variable.name + (isRequired ? ' *' : '');
-        if (variable.description) {
-          const desc = document.createElement('p');
-          desc.classList.add('text-xs', 'text-neutral-500');
-          desc.textContent = variable.description;
-          wrapper.appendChild(label);
-          wrapper.appendChild(desc);
-        } else { wrapper.appendChild(label); }
-        let input;
-        if (fieldType === 'number') {
-          input = document.createElement('input');
-          input.type = 'number';
-          input.placeholder = defaultVal || `Enter ${variable.name}`;
-        } else {
-          input = document.createElement('input');
-          input.type = 'text';
-          input.placeholder = defaultVal || `Enter ${variable.name}`;
+        function getPortRequirements() {
+          const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+          return parseJson(selectedOption?.getAttribute('data-port-requirements'), []);
         }
-        input.classList.add('rounded-xl', 'focus:ring', 'focus:ring-neutral-800/10', 'focus:border-neutral-800/20', 'text-neutral-800', 'dark:text-white', 'text-sm', 'w-full', 'hover:bg-neutral-200', 'dark:hover:bg-white/5', 'px-4', 'py-2', 'bg-neutral-100', 'dark:bg-neutral-600/20', 'border', 'border-neutral-800/10', 'dark:border-white/5');
-        input.id = envKey;
-        input.name = envKey;
-        input.value = defaultVal;
-        if (isRequired) input.required = true;
-        wrapper.appendChild(input);
-        variablesContainer.appendChild(wrapper);
-      });
-    }
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const variablesArray = [];
-      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-      const variables = parseJson(selectedOption?.getAttribute('data-variables'), []);
-      variables.forEach(variable => {
-        const envKey = variable.env_variable || variable.env || '';
-        const fieldType = variable.field_type || variable.type || 'text';
-        let value = formData.get(envKey);
-        if (fieldType === 'number') value = parseInt(value);
-        if (value !== null) {
-          variablesArray.push({
-            env_variable: envKey, env: envKey, name: variable.name, value: value, field_type: fieldType,
+        function ensureMinimumPortRows() {
+          const requirements = getPortRequirements();
+          const DEFAULT_PORT = 25565;
+          const min = Math.max(1, requirements.length);
+          while (assignedPorts.length < min) {
+            const req = requirements[assignedPorts.length] || {};
+            assignedPorts.push({
+              name: req.name || `Port ${assignedPorts.length + 1}`,
+              internalPort: req.internalPort || DEFAULT_PORT,
+              externalPort: availablePorts.find(item => !assignedPorts.some(port => port.externalPort === item.port))?.port || '',
+              primary: assignedPorts.length === 0
+            });
+          }
+          serverPortsInput.value = JSON.stringify(assignedPorts);
+        }
+
+        function syncPortsButton() {
+          serverPortsInput.value = JSON.stringify(assignedPorts);
+          document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? `Assign ports (${assignedPorts.length})` : 'Assign ports';
+        }
+
+        function renderPortRows() {
+          if (!window.PortsAllocator) return;
+          PortsAllocator.open({
+            title: 'Assign ports',
+            requirements: getPortRequirements(),
+            assignedPorts: assignedPorts,
+            availablePorts: availablePorts,
+            onSave: function (rows) {
+              assignedPorts = rows;
+              syncPortsButton();
+            }
           });
         }
-      });
-      const data = Object.fromEntries(formData);
-      data.variables = variablesArray;
-      data.ports = assignedPorts;
-      const loader = showLoadingPopup('Creating Server', 'Initializing server creation...');
-      loader.updateProgress(20, 'Sending server configuration...');
-      fetch('/admin/servers/create', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }, body: JSON.stringify(data),
-      })
-        .then(response => {
-          if (!response.ok) throw new Error('Server creation failed');
-          return response;
-        })
-        .then(data => {
-          loader.updateProgress(100, 'Server created successfully!');
-          setTimeout(() => { loader.close(); showToast('Server deployed. Go make something cool.', 'success'); setTimeout(() => { window.location.href = '/admin/servers'; }, 1000); }, 500);
-        })
-        .catch(error => { loader.close(); console.error('Error:', error); showToast('Failed to create server: ' + error.message, 'error'); });
-    });
 
-    fetchNodesData();
-    updateDockerImages();
-    updateVariables();
+        document.getElementById('assignPortsBtn').addEventListener('click', renderPortRows);
 
-    const allowStartupEditToggle = document.getElementById('allowStartupEdit');
-    const allowStartupEditLabel  = document.getElementById('allowStartupEditLabel');
-    allowStartupEditToggle.addEventListener('change', function() { allowStartupEditLabel.textContent = this.checked ? 'Enabled' : 'Disabled'; });
+        function updateDockerImages() {
+          const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+          const dockerImages = parseJson(selectedOption?.getAttribute('data-docker-images'), []);
+          dockerImageSelect.innerHTML = '<option value="" disabled selected>Select a Docker image</option>';
+          dockerImages.forEach(imageObj => {
+            Object.entries(imageObj).forEach(([key, value]) => {
+              const option = document.createElement('option');
+              option.value = key;
+              option.textContent = key;
+              dockerImageSelect.appendChild(option);
+            });
+          });
+        }
 
-    serverImageSelect.addEventListener('change', () => { updateDockerImages(); updateVariables(); ensureMinimumPortRows(); syncPortsButton(); });
-    serverNodeSelect.addEventListener('change', () => { updatePortsForSelectedNode(); });
-</script>
-<script nonce="<%- nonce %>">
-(function () {
-const listA = [
-    "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted",
-    "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked",
-    "Luminous", "Vengeful", "Radiant", "Thunderous", "Shadow",
-    "Frost", "Vibrant", "Spectral", "Nether", "Ender", "Caving",
-    "Toxic", "Haunted", "Radiant", "Ghostly"
-];
-const listB = [
-    "Creeper", "Dragon", "Zombie", "Ghoul", "Enderman", "Skeleton",
-    "Wither", "Magma Cube", "Blaze", "Witch", "Slime", "Spider",
-    "Phantom", "Villager", "Pillager", "Vindicator", "Drowned",
-    "Illager", "Ender Dragon", "Husk", "Stray", "Ravager", "Piglin",
-    "Hoglin", "Shulker", "Warden"
-];
-function generateRandomName() {
-    let randomA, randomB;
-    do { randomA = listA[Math.floor(Math.random() * listA.length)]; randomB = listB[Math.floor(Math.random() * listB.length)]; } while (randomA === randomB);
-    document.getElementById("serverName").value = randomA + " " + randomB;
-}
-window.generateRandomName = generateRandomName;
-})();
-</script>
-<style>
-#createServerForm .al-card { overflow: visible; }
-#createServerForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
-</style>
+        function updateVariables() {
+          const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+          const variables = parseJson(selectedOption?.getAttribute('data-variables'), []);
+          variablesContainer.innerHTML = '';
+          if (variables.length === 0) {
+            document.getElementById('variablesSectionRow').classList.remove('open');
+            return;
+          }
+          document.getElementById('variablesSectionRow').classList.add('open');
+          variables.forEach(variable => {
+            const envKey = variable.env_variable || variable.env || '';
+            const fieldType = variable.field_type || variable.type || 'text';
+            const defaultVal = variable.default_value ?? variable.value ?? '';
+            const isRequired = variable.rules ? variable.rules.includes('required') : !!variable.required;
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('flex', 'flex-col', 'gap-1.5');
+            const label = document.createElement('label');
+            label.setAttribute('for', envKey);
+            label.classList.add('text-neutral-700', 'dark:text-neutral-400', 'text-sm', 'tracking-tight');
+            label.textContent = variable.name + (isRequired ? ' *' : '');
+            if (variable.description) {
+              const desc = document.createElement('p');
+              desc.classList.add('text-xs', 'text-neutral-500');
+              desc.textContent = variable.description;
+              wrapper.appendChild(label);
+              wrapper.appendChild(desc);
+            } else { wrapper.appendChild(label); }
+            let input;
+            if (fieldType === 'number') {
+              input = document.createElement('input');
+              input.type = 'number';
+              input.placeholder = defaultVal || `Enter ${variable.name}`;
+            } else {
+              input = document.createElement('input');
+              input.type = 'text';
+              input.placeholder = defaultVal || `Enter ${variable.name}`;
+            }
+            input.classList.add('rounded-xl', 'focus:ring', 'focus:ring-neutral-800/10', 'focus:border-neutral-800/20', 'text-neutral-800', 'dark:text-white', 'text-sm', 'w-full', 'hover:bg-neutral-200', 'dark:hover:bg-white/5', 'px-4', 'py-2', 'bg-neutral-100', 'dark:bg-neutral-600/20', 'border', 'border-neutral-800/10', 'dark:border-white/5');
+            input.id = envKey;
+            input.name = envKey;
+            input.value = defaultVal;
+            if (isRequired) input.required = true;
+            wrapper.appendChild(input);
+            variablesContainer.appendChild(wrapper);
+          });
+        }
 
-<%- include('../../components/footer') %>
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const formData = new FormData(form);
+          const variablesArray = [];
+          const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+          const variables = parseJson(selectedOption?.getAttribute('data-variables'), []);
+          variables.forEach(variable => {
+            const envKey = variable.env_variable || variable.env || '';
+            const fieldType = variable.field_type || variable.type || 'text';
+            let value = formData.get(envKey);
+            if (fieldType === 'number') value = parseInt(value);
+            if (value !== null) {
+              variablesArray.push({
+                env_variable: envKey, env: envKey, name: variable.name, value: value, field_type: fieldType,
+              });
+            }
+          });
+          const data = Object.fromEntries(formData);
+          data.variables = variablesArray;
+          data.ports = assignedPorts;
+          const loader = showLoadingPopup('Creating Server', 'Initializing server creation...');
+          loader.updateProgress(20, 'Sending server configuration...');
+          fetch('/admin/servers/create', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }, body: JSON.stringify(data),
+          })
+            .then(response => {
+              if (!response.ok) throw new Error('Server creation failed');
+              return response;
+            })
+            .then(data => {
+              loader.updateProgress(100, 'Server created successfully!');
+              setTimeout(() => { loader.close(); showToast('Server deployed. Go make something cool.', 'success'); setTimeout(() => { window.location.href = '/admin/servers'; }, 1000); }, 500);
+            })
+            .catch(error => { loader.close(); console.error('Error:', error); showToast('Failed to create server: ' + error.message, 'error'); });
+        });
+
+        fetchNodesData();
+        updateDockerImages();
+        updateVariables();
+
+        const allowStartupEditToggle = document.getElementById('allowStartupEdit');
+        const allowStartupEditLabel = document.getElementById('allowStartupEditLabel');
+        allowStartupEditToggle.addEventListener('change', function () { allowStartupEditLabel.textContent = this.checked ? 'Enabled' : 'Disabled'; });
+
+        serverImageSelect.addEventListener('change', () => { updateDockerImages(); updateVariables(); ensureMinimumPortRows(); syncPortsButton(); });
+        serverNodeSelect.addEventListener('change', () => { updatePortsForSelectedNode(); });
+      </script>
+      <script nonce="<%- nonce %>">
+        (function () {
+          const listA = [
+            "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted",
+            "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked",
+            "Luminous", "Vengeful", "Radiant", "Thunderous", "Shadow",
+            "Frost", "Vibrant", "Spectral", "Nether", "Ender", "Caving",
+            "Toxic", "Haunted", "Radiant", "Ghostly"
+          ];
+          const listB = [
+            "Creeper", "Dragon", "Zombie", "Ghoul", "Enderman", "Skeleton",
+            "Wither", "Magma Cube", "Blaze", "Witch", "Slime", "Spider",
+            "Phantom", "Villager", "Pillager", "Vindicator", "Drowned",
+            "Illager", "Ender Dragon", "Husk", "Stray", "Ravager", "Piglin",
+            "Hoglin", "Shulker", "Warden"
+          ];
+          function generateRandomName() {
+            let randomA, randomB;
+            do { randomA = listA[Math.floor(Math.random() * listA.length)]; randomB = listB[Math.floor(Math.random() * listB.length)]; } while (randomA === randomB);
+            document.getElementById("serverName").value = randomA + " " + randomB;
+          }
+          window.generateRandomName = generateRandomName;
+        })();
+      </script>
+      <style>
+        #createServerForm .al-card {
+          overflow: visible;
+        }
+
+        #createServerForm .al-card-header {
+          border-radius: 12px 12px 0 0;
+          overflow: hidden;
+          margin-bottom: 16px;
+        }
+      </style>
+
+      <%- include('../../components/footer') %>

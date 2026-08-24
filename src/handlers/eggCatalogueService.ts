@@ -77,20 +77,20 @@ async function cloneOrPullRepo(repoUrl: string, targetDir: string): Promise<void
 function extractReadmeSummary(md: string): string {
   const lines = md.split('\n').map(l => l.trim());
   for (const line of lines) {
-    if (!line) continue;
-    if (line.startsWith('#')) continue;
-    if (line.startsWith('![') || line.startsWith('[![')) continue;
-    if (line.startsWith('|')) continue;
-    if (line.startsWith('```') || line.startsWith('~~~')) continue;
-    if (line.startsWith('---') || line.startsWith('===')) continue;
-    if (line.startsWith('<')) continue;
-    if (line.length < 15) continue;
+    if (!line) {continue;}
+    if (line.startsWith('#')) {continue;}
+    if (line.startsWith('![') || line.startsWith('[![')) {continue;}
+    if (line.startsWith('|')) {continue;}
+    if (line.startsWith('```') || line.startsWith('~~~')) {continue;}
+    if (line.startsWith('---') || line.startsWith('===')) {continue;}
+    if (line.startsWith('<')) {continue;}
+    if (line.length < 15) {continue;}
     const clean = line
       .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
       .replace(/[*_`~]/g, '')
       .replace(/<[^>]+>/g, '')
       .trim();
-    if (clean.length >= 15) return clean;
+    if (clean.length >= 15) {return clean;}
   }
   return '';
 }
@@ -102,7 +102,7 @@ function buildCatalogueFromDisk(): StoreImage[] {
 
   for (const repo of REPOS) {
     const repoDir = path.join(EGGS_DIR, repo.dir);
-    if (!fs.existsSync(repoDir)) continue;
+    if (!fs.existsSync(repoDir)) {continue;}
 
     function walk(dir: string) {
       let entries: fs.Dirent[];
@@ -126,12 +126,12 @@ function buildCatalogueFromDisk(): StoreImage[] {
 
       for (const entry of entries) {
         if (entry.isDirectory()) {
-          if (!entry.name.startsWith('.')) walk(path.join(dir, entry.name));
+          if (!entry.name.startsWith('.')) {walk(path.join(dir, entry.name));}
           continue;
         }
 
-        if (!entry.isFile()) continue;
-        if (!entry.name.startsWith('egg-') || !entry.name.endsWith('.json')) continue;
+        if (!entry.isFile()) {continue;}
+        if (!entry.name.startsWith('egg-') || !entry.name.endsWith('.json')) {continue;}
 
         const filePath = path.join(dir, entry.name);
         let raw: Record<string, unknown>;
@@ -141,7 +141,7 @@ function buildCatalogueFromDisk(): StoreImage[] {
           continue;
         }
 
-        if (!raw.name) continue;
+        if (!raw.name) {continue;}
 
         const relDir   = path.relative(repoDir, dir).replace(/\\/g, '/');
         const parts    = relDir.split('/').filter(Boolean);
@@ -168,7 +168,7 @@ function buildCatalogueFromDisk(): StoreImage[] {
     const groupReadmeMap = new Map<string, string>();
     try {
       for (const entry of fs.readdirSync(repoDir, { withFileTypes: true })) {
-        if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+        if (!entry.isDirectory() || entry.name.startsWith('.')) {continue;}
         const groupReadmePath = path.join(repoDir, entry.name, 'README.md');
         if (fs.existsSync(groupReadmePath)) {
           try {
@@ -218,13 +218,13 @@ function rebuildCatalogue(): void {
 }
 
 function scheduleAutoUpdate(): void {
-  if (updateTimer) clearInterval(updateTimer);
+  if (updateTimer) {clearInterval(updateTimer);}
   updateTimer = setInterval(async () => {
     logger.info('Store: auto-updating egg repos');
     await updateRepos();
     rebuildCatalogue();
   }, TWO_DAYS_MS);
-  if (updateTimer.unref) updateTimer.unref();
+  if (updateTimer.unref) {updateTimer.unref();}
 }
 
 // -- Public API ---------------------------------------------------------------

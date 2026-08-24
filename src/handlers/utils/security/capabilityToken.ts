@@ -30,7 +30,7 @@ export interface CapabilityClaims {
   /** Server/container ID the panel wants to attach to. */
   serverId: string;
   /** Permitted daemon WS route(s). */
-  routes: Array<'container' | 'containerstatus' | 'containerevents'>;
+  routes: ('container' | 'containerstatus' | 'containerevents')[];
   /** Issued-at (ms since epoch). */
   iat: number;
   /** Expiry (ms since epoch). */
@@ -43,7 +43,7 @@ export interface MintOptions {
   nodeKey: string;
   nodeId: number;
   serverId: string;
-  routes: Array<'container' | 'containerstatus' | 'containerevents'>;
+  routes: ('container' | 'containerstatus' | 'containerevents')[];
 }
 
 /**

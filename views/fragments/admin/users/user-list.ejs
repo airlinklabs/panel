@@ -39,7 +39,8 @@
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= u.username %></p>
             <p class="text-xs truncate" style="color:var(--theme-text-muted);">
-              <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset <%= u.isAdmin ? 'bg-emerald-600 text-white ring-emerald-700' : 'bg-neutral-200 text-neutral-700 dark:bg-neutral-500/20 dark:text-neutral-300 ring-neutral-300/40 dark:ring-neutral-400/20' %>"><%= u.isAdmin ? 'Admin' : 'User' %></span>
+              <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset"
+                style="<%= u.isAdmin ? 'background:var(--theme-accent);color:var(--theme-accent-text)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>"><%= u.isAdmin ? 'Admin' : 'User' %></span>
             </p>
           </div>
           <div class="flex items-center gap-2">
@@ -96,8 +97,8 @@
               </td>
               <td class="al-table-td">
                 <div class="mt-1 ml-2 inline-flex items-center rounded-md
-                <%= u.isAdmin ? 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-700 dark:text-yellow-400 ring-amber-600/20' %>
-                px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                style="<%= u.isAdmin ? 'background:var(--theme-success-bg);color:var(--theme-success)' : 'background:var(--theme-warning-bg);color:var(--theme-warning)' %>">
                   <%= u.isAdmin ? 'Admin' : 'User' %>
                 </div>
               </td>

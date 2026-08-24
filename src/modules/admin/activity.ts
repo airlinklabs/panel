@@ -1,6 +1,7 @@
 import { getSettings } from '../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
@@ -27,7 +28,7 @@ const activityModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
-          if (!user) return res.redirect('/login');
+          if (!user) {return res.redirect('/login');}
 
           const page = Math.max(parseInt(String(req.query.page ?? '1'), 10) || 1, 1);
           const eventFilter = typeof req.query.event === 'string' ? req.query.event : undefined;
@@ -39,8 +40,8 @@ const activityModule: Module = {
 
           const where: Record<string, unknown> = {};
 
-          if (eventFilter) where.event = eventFilter;
-          if (serverFilter) where.serverId = serverFilter;
+          if (eventFilter) {where.event = eventFilter;}
+          if (serverFilter) {where.serverId = serverFilter;}
           if (categoryFilter && !eventFilter) {
             const events = await prisma.activityLog.findMany({
               where: { event: { not: '' } },

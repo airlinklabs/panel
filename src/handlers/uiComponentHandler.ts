@@ -52,18 +52,27 @@ export class UIComponentStore {
   private sidebarItems: SidebarItem[] = [];
   private serverMenuItems: ServerMenuItem[] = [];
   private serverSections: ServerSection[] = [];
-  private addonItemRegistry = new Map<string, { sidebarIds: string[], menuIds: string[], sectionIds: string[] }>();
+  private addonItemRegistry = new Map<
+    string,
+    { sidebarIds: string[]; menuIds: string[]; sectionIds: string[] }
+  >();
 
   private ensureAddonRegistry(addonSlug: string) {
     if (!this.addonItemRegistry.has(addonSlug)) {
-      this.addonItemRegistry.set(addonSlug, { sidebarIds: [], menuIds: [], sectionIds: [] });
+      this.addonItemRegistry.set(addonSlug, {
+        sidebarIds: [],
+        menuIds: [],
+        sectionIds: [],
+      });
     }
     return this.addonItemRegistry.get(addonSlug)!;
   }
 
   public addSidebarItem(item: SidebarItem, addonSlug?: string): void {
     const resolved: SidebarItem = addonSlug ? { ...item, isAddon: true } : item;
-    const existingIndex = this.sidebarItems.findIndex(i => i.id === resolved.id);
+    const existingIndex = this.sidebarItems.findIndex(
+      (i) => i.id === resolved.id,
+    );
     if (existingIndex !== -1) {
       this.sidebarItems[existingIndex] = resolved;
     } else {
@@ -71,26 +80,27 @@ export class UIComponentStore {
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.sidebarIds.includes(resolved.id)) reg.sidebarIds.push(resolved.id);
+      if (!reg.sidebarIds.includes(resolved.id))
+      {reg.sidebarIds.push(resolved.id);}
     }
   }
 
   public removeSidebarItem(id: string): void {
-    this.sidebarItems = this.sidebarItems.filter(item => item.id !== id);
+    this.sidebarItems = this.sidebarItems.filter((item) => item.id !== id);
   }
 
   public getSidebarItems(section?: string, isAdmin?: boolean): SidebarItem[] {
     let items = this.sidebarItems;
 
     if (section) {
-      items = items.filter(item => item.section === section);
+      items = items.filter((item) => item.section === section);
     }
 
     if (isAdmin !== undefined) {
       if (isAdmin) {
-        items = items.filter(item => item.isAdminItem === true);
+        items = items.filter((item) => item.isAdminItem === true);
       } else {
-        items = items.filter(item => item.isAdminItem !== true);
+        items = items.filter((item) => item.isAdminItem !== true);
       }
     }
 
@@ -100,14 +110,23 @@ export class UIComponentStore {
   public getAddonSidebarIds(): Set<string> {
     const ids = new Set<string>();
     for (const reg of this.addonItemRegistry.values()) {
-      for (const id of reg.sidebarIds) ids.add(id);
+      for (const id of reg.sidebarIds) {ids.add(id);}
     }
     return ids;
   }
 
-  public getAdminSidebarGroups(): Array<{ section: string; label: string; items: SidebarItem[] }> {
+  public getAdminSidebarGroups(): {
+    section: string;
+    label: string;
+    items: SidebarItem[];
+  }[] {
     const items = this.getSidebarItems(undefined, true);
-    const sectionOrder = ['core', 'infrastructure', 'extensions', 'configuration'];
+    const sectionOrder = [
+      'core',
+      'infrastructure',
+      'extensions',
+      'configuration',
+    ];
     const sectionLabels: Record<string, string> = {
       core: 'Core',
       infrastructure: 'Infrastructure',
@@ -117,16 +136,22 @@ export class UIComponentStore {
     const grouped = new Map<string, SidebarItem[]>();
     for (const item of items) {
       const s = item.section || 'core';
-      if (!grouped.has(s)) grouped.set(s, []);
+      if (!grouped.has(s)) {grouped.set(s, []);}
       grouped.get(s)!.push(item);
     }
     return sectionOrder
-      .filter(s => grouped.has(s))
-      .map(s => ({ section: s, label: sectionLabels[s] || s, items: grouped.get(s)! }));
+      .filter((s) => grouped.has(s))
+      .map((s) => ({
+        section: s,
+        label: sectionLabels[s] || s,
+        items: grouped.get(s)!,
+      }));
   }
 
   public addServerMenuItem(item: ServerMenuItem, addonSlug?: string): void {
-    const existingIndex = this.serverMenuItems.findIndex(i => i.id === item.id);
+    const existingIndex = this.serverMenuItems.findIndex(
+      (i) => i.id === item.id,
+    );
     if (existingIndex !== -1) {
       this.serverMenuItems[existingIndex] = item;
     } else {
@@ -134,30 +159,37 @@ export class UIComponentStore {
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.menuIds.includes(item.id)) reg.menuIds.push(item.id);
+      if (!reg.menuIds.includes(item.id)) {reg.menuIds.push(item.id);}
     }
   }
 
   public removeServerMenuItem(id: string): void {
-    this.serverMenuItems = this.serverMenuItems.filter(item => item.id !== id);
+    this.serverMenuItems = this.serverMenuItems.filter(
+      (item) => item.id !== id,
+    );
   }
 
-  public getServerMenuItems(feature?: string, includeDefaults: boolean = true): ServerMenuItem[] {
+  public getServerMenuItems(
+    feature?: string,
+    includeDefaults = true,
+  ): ServerMenuItem[] {
     let items = this.serverMenuItems;
 
     if (!includeDefaults) {
-      items = items.filter(item => !item.isDefault);
+      items = items.filter((item) => !item.isDefault);
     }
 
     if (feature) {
-      items = items.filter(item => !item.feature || item.feature === feature);
+      items = items.filter((item) => !item.feature || item.feature === feature);
     }
 
     return [...items].sort((a, b) => b.priority - a.priority);
   }
 
   public addServerSection(section: ServerSection, addonSlug?: string): void {
-    const existingIndex = this.serverSections.findIndex(s => s.id === section.id);
+    const existingIndex = this.serverSections.findIndex(
+      (s) => s.id === section.id,
+    );
     if (existingIndex !== -1) {
       this.serverSections[existingIndex] = section;
     } else {
@@ -165,31 +197,36 @@ export class UIComponentStore {
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.sectionIds.includes(section.id)) reg.sectionIds.push(section.id);
+      if (!reg.sectionIds.includes(section.id)) {reg.sectionIds.push(section.id);}
     }
   }
 
   public clearAddonItems(addonSlug: string): void {
     const reg = this.addonItemRegistry.get(addonSlug);
-    if (!reg) return;
-    reg.sidebarIds.forEach(id => this.removeSidebarItem(id));
-    reg.menuIds.forEach(id => this.removeServerMenuItem(id));
-    reg.sectionIds.forEach(id => this.removeServerSection(id));
+    if (!reg) {return;}
+    reg.sidebarIds.forEach((id) => this.removeSidebarItem(id));
+    reg.menuIds.forEach((id) => this.removeServerMenuItem(id));
+    reg.sectionIds.forEach((id) => this.removeServerSection(id));
     this.addonItemRegistry.delete(addonSlug);
   }
 
   public removeServerSection(id: string): void {
-    this.serverSections = this.serverSections.filter(section => section.id !== id);
+    this.serverSections = this.serverSections.filter(
+      (section) => section.id !== id,
+    );
   }
 
   public getServerSections(): ServerSection[] {
     return [...this.serverSections].sort((a, b) => b.priority - a.priority);
   }
 
-  public addServerSectionItem(sectionId: string, item: ServerSectionItem): void {
-    const section = this.serverSections.find(s => s.id === sectionId);
+  public addServerSectionItem(
+    sectionId: string,
+    item: ServerSectionItem,
+  ): void {
+    const section = this.serverSections.find((s) => s.id === sectionId);
     if (section) {
-      const existingIndex = section.items.findIndex(i => i.id === item.id);
+      const existingIndex = section.items.findIndex((i) => i.id === item.id);
       if (existingIndex !== -1) {
         section.items[existingIndex] = item;
       } else {
@@ -201,21 +238,24 @@ export class UIComponentStore {
   }
 
   public removeServerSectionItem(sectionId: string, itemId: string): void {
-    const section = this.serverSections.find(s => s.id === sectionId);
+    const section = this.serverSections.find((s) => s.id === sectionId);
     if (section) {
-      section.items = section.items.filter(item => item.id !== itemId);
+      section.items = section.items.filter((item) => item.id !== itemId);
     }
   }
 
   public getServerSectionItems(sectionId: string): ServerSectionItem[] {
-    const section = this.serverSections.find(s => s.id === sectionId);
+    const section = this.serverSections.find((s) => s.id === sectionId);
     if (section) {
       return [...section.items].sort((a, b) => b.priority - a.priority);
     }
     return [];
   }
 
-  public renderComponent(name: string, locals: Record<string, unknown> = {}): string {
+  public renderComponent(
+    name: string,
+    locals: Record<string, unknown> = {},
+  ): string {
     return `components/ui/${name}`;
   }
 
@@ -234,7 +274,7 @@ export function initializeDefaultUIComponents(): void {
     icon: icon('layout-grid', { class: 'w-5 h-5 mt-0.5' }),
     url: '/',
     priority: 100,
-    matchPrefix: '/server'
+    matchPrefix: '/server',
   });
 
   // ── Admin: Core ─────────────────────────────────────────────────────────
@@ -245,7 +285,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/overview',
     priority: 90,
     isAdminItem: true,
-    section: 'core'
+    section: 'core',
   });
   uiComponentStore.addSidebarItem({
     id: 'admin-servers',
@@ -254,7 +294,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/servers',
     priority: 88,
     isAdminItem: true,
-    section: 'core'
+    section: 'core',
   });
   uiComponentStore.addSidebarItem({
     id: 'admin-users',
@@ -263,7 +303,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/users',
     priority: 86,
     isAdminItem: true,
-    section: 'core'
+    section: 'core',
   });
 
   // ── Admin: Infrastructure ───────────────────────────────────────────────
@@ -274,7 +314,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/nodes',
     priority: 80,
     isAdminItem: true,
-    section: 'infrastructure'
+    section: 'infrastructure',
   });
   uiComponentStore.addSidebarItem({
     id: 'admin-activity',
@@ -283,7 +323,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/activity',
     priority: 78,
     isAdminItem: true,
-    section: 'infrastructure'
+    section: 'infrastructure',
   });
   uiComponentStore.addSidebarItem({
     id: 'admin-images',
@@ -292,7 +332,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/images',
     priority: 76,
     isAdminItem: true,
-    section: 'infrastructure'
+    section: 'infrastructure',
   });
 
   // ── Admin: Extensions ───────────────────────────────────────────────────
@@ -303,7 +343,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/addons',
     priority: 70,
     isAdminItem: true,
-    section: 'extensions'
+    section: 'extensions',
   });
   uiComponentStore.addSidebarItem({
     id: 'admin-apikeys',
@@ -312,7 +352,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/apikeys',
     priority: 68,
     isAdminItem: true,
-    section: 'extensions'
+    section: 'extensions',
   });
 
   // ── Admin: Configuration ────────────────────────────────────────────────
@@ -323,7 +363,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/settings',
     priority: 60,
     isAdminItem: true,
-    section: 'configuration'
+    section: 'configuration',
   });
   uiComponentStore.addSidebarItem({
     id: 'admin-analytics',
@@ -332,7 +372,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/analytics',
     priority: 58,
     isAdminItem: true,
-    section: 'configuration'
+    section: 'configuration',
   });
   uiComponentStore.addSidebarItem({
     id: 'admin-databases',
@@ -341,7 +381,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/databases',
     priority: 56,
     isAdminItem: true,
-    section: 'configuration'
+    section: 'configuration',
   });
   uiComponentStore.addSidebarItem({
     id: 'admin-mounts',
@@ -350,7 +390,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/admin/mounts',
     priority: 54,
     isAdminItem: true,
-    section: 'configuration'
+    section: 'configuration',
   });
 
   // ── Server menu items ──────────────────────────────────────────────────
@@ -361,7 +401,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/server/:uuid',
     priority: 100,
     isDefault: true,
-    group: 'run'
+    group: 'run',
   });
   uiComponentStore.addServerMenuItem({
     id: 'files',
@@ -370,7 +410,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/server/:uuid/files',
     priority: 90,
     isDefault: true,
-    group: 'data'
+    group: 'data',
   });
   uiComponentStore.addServerMenuItem({
     id: 'players',
@@ -380,7 +420,7 @@ export function initializeDefaultUIComponents(): void {
     priority: 80,
     feature: 'players',
     isDefault: true,
-    group: 'run'
+    group: 'run',
   });
   uiComponentStore.addServerMenuItem({
     id: 'schedules',
@@ -389,7 +429,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/server/:uuid/schedules',
     priority: 78,
     isDefault: true,
-    group: 'data'
+    group: 'data',
   });
   uiComponentStore.addServerMenuItem({
     id: 'worlds',
@@ -399,7 +439,7 @@ export function initializeDefaultUIComponents(): void {
     priority: 75,
     feature: 'worlds',
     isDefault: true,
-    group: 'manage'
+    group: 'manage',
   });
   uiComponentStore.addServerMenuItem({
     id: 'startup',
@@ -408,7 +448,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/server/:uuid/startup',
     priority: 70,
     isDefault: true,
-    group: 'manage'
+    group: 'manage',
   });
   uiComponentStore.addServerMenuItem({
     id: 'backups',
@@ -417,7 +457,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/server/:uuid/backups',
     priority: 65,
     isDefault: true,
-    group: 'data'
+    group: 'data',
   });
   uiComponentStore.addServerMenuItem({
     id: 'subusers',
@@ -426,7 +466,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/server/:uuid/subusers',
     priority: 62,
     ownerOnly: true,
-    group: 'manage'
+    group: 'manage',
   });
   uiComponentStore.addServerMenuItem({
     id: 'databases',
@@ -435,7 +475,7 @@ export function initializeDefaultUIComponents(): void {
     url: '/server/:uuid/databases',
     priority: 64,
     isDefault: true,
-    group: 'data'
+    group: 'data',
   });
   uiComponentStore.addServerMenuItem({
     id: 'settings',
@@ -444,21 +484,23 @@ export function initializeDefaultUIComponents(): void {
     url: '/server/:uuid/settings',
     priority: 60,
     isDefault: true,
-    group: 'settings'
+    group: 'settings',
   });
   uiComponentStore.addServerMenuItem({
     id: 'admin',
     label: 'Admin',
-    icon: icon('square-arrow-up-right', { class: 'size-5 mb-0.5 inline-flex mr-1' }),
+    icon: icon('square-arrow-up-right', {
+      class: 'size-5 mb-0.5 inline-flex mr-1',
+    }),
     url: '/admin/servers/edit/:id',
     priority: 55,
     isAdminItem: true,
     isDefault: true,
-    group: 'settings'
+    group: 'settings',
   });
 }
 
 export default {
   uiComponentStore,
-  initializeDefaultUIComponents
+  initializeDefaultUIComponents,
 };

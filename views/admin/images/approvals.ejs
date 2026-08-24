@@ -9,7 +9,7 @@
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
 
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
@@ -46,9 +46,10 @@
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
                   <h3 class="text-sm font-semibold truncate" style="color:var(--theme-text-strong)"><%= image.name %></h3>
-                  <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset bg-amber-600/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/20">
-                    Pending
-                  </span>
+                   <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
+                     style="background:var(--theme-warning-bg);color:var(--theme-warning)">
+                     Pending
+                   </span>
                 </div>
                 <% if (image.description) { %><p class="text-sm mt-1 line-clamp-2" style="color:var(--theme-text-muted)"><%= image.description %></p><% } %>
                 <% if (image.creator) { %>
@@ -96,7 +97,7 @@
       </button>
     </div>
     <div class="px-6 py-4">
-      <label class="field-label" for="rejectReason">Reason <span class="text-neutral-400 font-normal">(shown to the user)</span></label>
+      <label class="field-label" for="rejectReason">Reason <span class="font-normal" style="color:var(--theme-text-muted)">(shown to the user)</span></label>
       <textarea id="rejectReason" class="al-input w-full" rows="3" placeholder="e.g. Missing startup exit detection or required docker image."></textarea>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">

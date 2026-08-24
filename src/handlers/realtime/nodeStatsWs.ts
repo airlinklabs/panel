@@ -10,7 +10,7 @@ export function attachNodeStatsWs(server: Server): void {
   server.on('upgrade', (req, socket, head) => {
     const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
     const match = url.pathname.match(/^\/ws\/node\/(\d+)\/stats$/);
-    if (!match) return;
+    if (!match) {return;}
 
     const nodeId = Number(match[1]);
     if (!nodeId || !Number.isFinite(nodeId)) {
@@ -82,12 +82,12 @@ export function attachNodeStatsWs(server: Server): void {
 
     daemonWs.on('error', (err) => {
       logger.warn(`nodestats ws error for node ${nodeId}: ${err.message}`);
-      if (ws.readyState === WebSocket.OPEN) ws.close(1011, 'daemon connection error');
+      if (ws.readyState === WebSocket.OPEN) {ws.close(1011, 'daemon connection error');}
     });
 
     daemonWs.on('close', (code, reason) => {
       logger.info(`nodestats ws closed for node ${nodeId}: ${code} ${reason}`);
-      if (ws.readyState === WebSocket.OPEN) ws.close(1000, 'daemon disconnected');
+      if (ws.readyState === WebSocket.OPEN) {ws.close(1000, 'daemon disconnected');}
     });
 
     ws.on('close', () => {

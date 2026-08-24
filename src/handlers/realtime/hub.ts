@@ -31,7 +31,7 @@ export const realtimeSessions = new Map<string, RealtimeSession>();
 let busSubscribed = false;
 
 function ensureBusListener(): void {
-  if (busSubscribed) return;
+  if (busSubscribed) {return;}
   busSubscribed = true;
   subscribeToRealtime((event) => {
     // Fire-and-forget: delivery is independent of the bus call stack.
@@ -40,7 +40,7 @@ function ensureBusListener(): void {
 }
 
 async function fanOut(event: RealtimeEventEnvelope): Promise<void> {
-  if (realtimeSessions.size === 0) return;
+  if (realtimeSessions.size === 0) {return;}
   invalidateMembershipForEvents(event.type);
   // Membership-affecting events (server.created/deleted, subuser.*, …) change
   // which servers a user may observe. Sessions cached their serverIds at
@@ -62,9 +62,9 @@ async function fanOut(event: RealtimeEventEnvelope): Promise<void> {
   }
   await Promise.allSettled(
     Array.from(realtimeSessions.values()).map(async (session) => {
-      if (!session.alive) return;
-      if (!shouldReceiveSession(session, event)) return;
-      if (session.ws.readyState !== 1) return;
+      if (!session.alive) {return;}
+      if (!shouldReceiveSession(session, event)) {return;}
+      if (session.ws.readyState !== 1) {return;}
       try {
         session.ws.send(JSON.stringify(event));
       } catch (error) {
@@ -89,7 +89,7 @@ export function shouldReceiveEvent(session: {
 }, event: RealtimeEventEnvelope): boolean {
   const scope = event.scope ?? {};
   if (scope.serverId !== undefined) {
-    if (session.serverIds === 'all') return true;
+    if (session.serverIds === 'all') {return true;}
     return session.serverIds.has(scope.serverId);
   }
   if (scope.userId !== undefined) {
@@ -149,13 +149,13 @@ export async function resynchronizeSession(
   sinceSeq: number | null,
 ): Promise<void> {
   const session = realtimeSessions.get(id);
-  if (!session) return;
+  if (!session) {return;}
   const { cursor, events } = syncEventsForClient(sinceSeq);
   session.lastSeenSeq = cursor;
 
   for (const event of events) {
-    if (!shouldReceiveSession(session, event)) continue;
-    if (session.ws.readyState !== 1) return;
+    if (!shouldReceiveSession(session, event)) {continue;}
+    if (session.ws.readyState !== 1) {return;}
     try {
       session.ws.send(JSON.stringify(event));
     } catch (error) {

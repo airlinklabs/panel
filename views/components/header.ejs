@@ -17,20 +17,24 @@ const wallpaperExcluded = req && req.path && (
     <meta name="csrf-token" content="<%= csrfToken %>">
     <% } %>
     <title><%= settings.title %> - <%= title %></title>
+    <script nonce="<%- nonce %>">
+      (function(){
+        <% if (settings.theme !== 'light') { %>
+        document.documentElement.classList.add('dark');
+        <% } %>
+      })();
+    </script>
     <link rel="stylesheet" href="/styles.css?v=8">
     <link rel="stylesheet" href="/layout-animations.css?v=8">
     <link rel="stylesheet" href="/styles/motion.css?v=8">
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
-    <!-- Default themes — always loaded, always the base layer -->
+    <!-- Default themes — always loaded as base layer -->
     <link rel="stylesheet" href="/themes/default-light.css">
     <link rel="stylesheet" href="/themes/default-dark.css">
-    <!-- Optional override themes (solarized, material, user-defined) -->
-    <% if (settings.lightTheme && settings.lightTheme !== 'default') { %>
-    <link rel="stylesheet" href="<%= settings.lightTheme %>" id="light-theme-css" data-theme-mode="light">
-    <% } %>
-    <% if (settings.darkTheme && settings.darkTheme !== 'default') { %>
-    <link rel="stylesheet" href="<%= settings.darkTheme %>" id="dark-theme-css" data-theme-mode="dark">
+    <!-- Selected theme override -->
+    <% if (settings.theme && settings.theme !== 'default' && settings.theme !== 'light' && settings.theme !== 'dark') { %>
+    <link rel="stylesheet" href="<%= settings.theme %>" id="theme-css">
     <% } %>
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
     <% if (Array.isArray(typeof extraStyles !== 'undefined' ? extraStyles : undefined)) { %>
@@ -91,9 +95,9 @@ const wallpaperExcluded = req && req.path && (
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
       }
-      /* Mobile top bar spacing */
+      /* Mobile bottom bar spacing */
       @media (max-width: 1023px) {
-        #page-content, #server-page-body { padding-top: 56px; padding-bottom: 64px; }
+        #page-content, #server-page-body { padding-bottom: 64px; }
       }
       /* Pre-hide animatable content before JS runs so there's no flash-then-hide jitter */
       .js-loading #page-content > *:not(.mobile-top-bar):not(.mobile-bottom-nav):not(.mobile-more-sheet):not([style*="position: fixed"]),
@@ -109,7 +113,7 @@ const wallpaperExcluded = req && req.path && (
 <div id="al-wallpaper-layer" aria-hidden="true"></div>
 <% } %>
 
-<a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white dark:focus:bg-neutral-950 focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
+<a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--theme-text-strong)] focus:text-[var(--theme-bg)] focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
 
 <!-- The indeterminate page loading line is created by page-loader.js. -->
 <!-- Theme initialization: external module replaces inline script -->

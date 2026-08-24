@@ -1,5 +1,5 @@
 import { getSettings } from '../../../handlers/settingsCache';
-import { Router, Request, Response } from 'express';
+import type { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
@@ -19,7 +19,7 @@ import {
 // Pterodactyl-style validation rules ("required|between:1,32|regex:/^[a-z0-9]+$/i")
 export function validateVariableRules(variable: ServerVariable, value: string): string | null {
   const rawRules = variable.rules || variable.rules_field || variable.rulesField || '';
-  if (typeof rawRules !== 'string' || rawRules.trim() === '') return null;
+  if (typeof rawRules !== 'string' || rawRules.trim() === '') {return null;}
 
   const valueLabel = variable.name || variable.env;
   const rules = rawRules.split('|').map(r => r.trim()).filter(Boolean);
@@ -31,7 +31,7 @@ export function validateVariableRules(variable: ServerVariable, value: string): 
       }
       continue;
     }
-    if (rule === 'string') continue;
+    if (rule === 'string') {continue;}
     if (rule === 'numeric') {
       if (value !== '' && isNaN(Number(value))) {
         return `${valueLabel} must be a number.`;
@@ -253,7 +253,7 @@ export function registerStartupRoutes(router: Router): void {
               startCommand,
             });
             logger.info(
-              'Container restarted with new startup command: ' + serverId,
+              `Container restarted with new startup command: ${  serverId}`,
             );
           }
         } catch (statusError) {
@@ -415,7 +415,7 @@ export function registerStartupRoutes(router: Router): void {
               dockerImage,
             });
             logger.info(
-              'Container restarted with new Docker image: ' + serverId,
+              `Container restarted with new Docker image: ${  serverId}`,
             );
           }
         } catch (statusError) {
@@ -533,7 +533,7 @@ export function registerStartupRoutes(router: Router): void {
 
           return {
             ...variable,
-            value: value,
+            value,
           };
         });
       }
@@ -627,7 +627,7 @@ export function registerStartupRoutes(router: Router): void {
               variables,
             });
             logger.info(
-              'Container restarted with new variables: ' + serverId,
+              `Container restarted with new variables: ${  serverId}`,
             );
           }
         } catch (statusError) {
@@ -647,7 +647,7 @@ export function registerStartupRoutes(router: Router): void {
           if (updatedServer?.Variables) {
             try {
               const parsed: unknown = JSON.parse(updatedServer.Variables);
-              if (Array.isArray(parsed)) updatedVariables = parsed;
+              if (Array.isArray(parsed)) {updatedVariables = parsed;}
             } catch {}
           }
           res.vary('HX-Request');
