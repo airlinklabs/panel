@@ -36,7 +36,7 @@
         hx-indicator="#cmd-save-indicator"
         hx-on::after-request="if(event.detail.successful) showToast('Startup command saved successfully!', 'success')"
         novalidate>
-    <%- include('../../components/csrf') %>
+    <%- include('../../../components/csrf') %>
     <div class="p-5">
       <div class="mb-4">
         <label for="startCommand" class="block text-sm font-medium mb-2" style="color:var(--theme-text-muted)"><%= req.translations.startupCommand || 'Startup Command' %></label>

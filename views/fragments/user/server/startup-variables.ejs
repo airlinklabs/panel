@@ -10,7 +10,7 @@
         hx-indicator="#vars-save-indicator"
         hx-on::after-request="if(event.detail.successful) showToast('Variables saved successfully!', 'success')"
         novalidate>
-    <%- include('../../components/csrf') %>
+    <%- include('../../../components/csrf') %>
     <div id="variablesContainer" class="space-y-4">
       <% if (serverVariables && serverVariables.length > 0) { %>
         <% serverVariables.forEach((variable, index) => { %>

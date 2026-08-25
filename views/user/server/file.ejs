@@ -66,7 +66,64 @@
 
       <div id="server-page-body">
 
-      <div id="file-editor-root" data-config="<%= JSON.stringify({
+<%
+    const fileExtension = (file.extension || '').toString().toLowerCase();
+    const language = fileExtension === 'js' ? 'javascript'
+                       : fileExtension === 'mjs' ? 'javascript'
+                       : fileExtension === 'cjs' ? 'javascript'
+                       : fileExtension === 'jsx' ? 'javascript'
+                       : fileExtension === 'json' ? 'json'
+                       : fileExtension === 'html' ? 'html'
+                       : fileExtension === 'htm' ? 'html'
+                       : fileExtension === 'css' ? 'css'
+                       : fileExtension === 'ts' ? 'typescript'
+                       : fileExtension === 'tsx' ? 'typescript'
+                       : fileExtension === 'md' ? 'markdown'
+                       : fileExtension === 'markdown' ? 'markdown'
+                       : fileExtension === 'txt' ? 'plaintext'
+                       : fileExtension === 'py' ? 'python'
+                       : fileExtension === 'sh' ? 'shell'
+                       : fileExtension === 'bash' ? 'shell'
+                       : fileExtension === 'zsh' ? 'shell'
+                       : fileExtension === 'go' ? 'go'
+                       : fileExtension === 'php' ? 'php'
+                       : fileExtension === 'sql' ? 'sql'
+                       : fileExtension === 'c' ? 'c'
+                       : fileExtension === 'h' ? 'c'
+                       : fileExtension === 'cpp' ? 'cpp'
+                       : fileExtension === 'cs' ? 'csharp'
+                       : fileExtension === 'java' ? 'java'
+                       : fileExtension === 'rb' ? 'ruby'
+                       : fileExtension === 'rs' ? 'rust'
+                       : fileExtension === 'yml' ? 'yaml'
+                       : fileExtension === 'yaml' ? 'yaml'
+                       : fileExtension === 'xml' ? 'xml'
+                       : fileExtension === 'toml' ? 'ini'
+                       : fileExtension === 'ini' ? 'ini'
+                       : fileExtension === 'cfg' ? 'ini'
+                       : fileExtension === 'conf' ? 'ini'
+                       : fileExtension === 'properties' ? 'ini'
+                       : fileExtension === 'env' ? 'plaintext'
+                       : fileExtension === 'dockerfile' ? 'dockerfile'
+                       : fileExtension === 'gradle' ? 'groovy'
+                       : fileExtension === 'kt' ? 'kotlin'
+                       : fileExtension === 'swift' ? 'swift'
+                       : fileExtension === 'lua' ? 'lua'
+                       : fileExtension === 'r' ? 'r'
+                       : fileExtension === 'dart' ? 'dart'
+                       : fileExtension === 'ex' ? 'elixir'
+                       : fileExtension === 'exs' ? 'elixir'
+                       : fileExtension === 'hs' ? 'haskell'
+                       : fileExtension === 'scala' ? 'scala'
+                       : fileExtension === 'vue' ? 'html'
+                       : fileExtension === 'svelte' ? 'html'
+                       : 'plaintext';
+    const _initContent = file.content || '';
+    const fileContentTooLarge = _initContent.length > 1048576;
+    const fileContentInvalidUtf8 = /[\uFFFD]/.test(_initContent);
+    const fileContentSkipped = fileContentTooLarge || fileContentInvalidUtf8;
+%>
+      <div id="file-editor-root" data-config="<%- JSON.stringify({
         serverUUID: server.UUID,
         filePath: file.path || '',
         language: language,
@@ -76,7 +133,7 @@
         skipped: fileContentSkipped,
         fileExtension: fileExtension,
         saveUrl: '/server/' + server.UUID + '/files/' + encodeURIComponent(file.path || ''),
-      }).replace(/"/g, '&quot;') %>">
+      }).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') %>">
 
       <!-- Daemon Offline Warning -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
@@ -171,61 +228,7 @@
 
 
 <script nonce="<%- nonce %>" src="/monaco/vs/loader.js"></script>
-<%
-    const fileExtension = (file.extension || '').toString().toLowerCase();
-    // Monaco language id mapping. Unknown/missing extensions fall back to plaintext.
-    const language = fileExtension === 'js' ? 'javascript'
-                       : fileExtension === 'mjs' ? 'javascript'
-                       : fileExtension === 'cjs' ? 'javascript'
-                       : fileExtension === 'jsx' ? 'javascript'
-                       : fileExtension === 'json' ? 'json'
-                       : fileExtension === 'html' ? 'html'
-                       : fileExtension === 'htm' ? 'html'
-                       : fileExtension === 'css' ? 'css'
-                       : fileExtension === 'ts' ? 'typescript'
-                       : fileExtension === 'tsx' ? 'typescript'
-                       : fileExtension === 'md' ? 'markdown'
-                       : fileExtension === 'markdown' ? 'markdown'
-                       : fileExtension === 'txt' ? 'plaintext'
-                       : fileExtension === 'py' ? 'python'
-                       : fileExtension === 'sh' ? 'shell'
-                       : fileExtension === 'bash' ? 'shell'
-                       : fileExtension === 'zsh' ? 'shell'
-                       : fileExtension === 'go' ? 'go'
-                       : fileExtension === 'php' ? 'php'
-                       : fileExtension === 'sql' ? 'sql'
-                       : fileExtension === 'c' ? 'c'
-                       : fileExtension === 'h' ? 'c'
-                       : fileExtension === 'cpp' ? 'cpp'
-                       : fileExtension === 'cc' ? 'cpp'
-                       : fileExtension === 'hpp' ? 'cpp'
-                       : fileExtension === 'java' ? 'java'
-                       : fileExtension === 'rb' ? 'ruby'
-                       : fileExtension === 'pl' ? 'perl'
-                       : fileExtension === 'yml' ? 'yaml'
-                       : fileExtension === 'yaml' ? 'yaml'
-                       : fileExtension === 'xml' ? 'xml'
-                       : fileExtension === 'ini' ? 'ini'
-                       : fileExtension === 'toml' ? 'ini'
-                       : fileExtension === 'cfg' ? 'ini'
-                       : fileExtension === 'env' ? 'ini'
-                       : fileExtension === 'conf' ? 'ini'
-                       : fileExtension === 'properties' ? 'ini'
-                       : fileExtension === 'dockerfile' ? 'dockerfile'
-                       : fileExtension === 'cs' ? 'csharp'
-                       : fileExtension === 'kt' ? 'kotlin'
-                       : fileExtension === 'rs' ? 'rust'
-                       : fileExtension === 'swift' ? 'swift'
-                       : fileExtension === 'vue' ? 'html'
-                       : fileExtension === 'svelte' ? 'html'
-                       : 'plaintext';
-    // Content guards: refuse to corrupt/embed problematic files.
-    const _fileContent = file.content || '';
-    const fileContentTooLarge = _fileContent.length > 1048576;
-    const fileContentInvalidUtf8 = /[\uFFFD]/.test(_fileContent);
-    const fileContentSkipped = fileContentTooLarge || fileContentInvalidUtf8;
-%>
-<script type="application/json" id="editor-file-data"><%- JSON.stringify({ content: file.content || '', tooLarge: fileContentTooLarge, invalidUtf8: fileContentInvalidUtf8 }).replace(/<\//g, '<\\/') %></script>
+<script type="application/json" id="editor-file-data"><%- JSON.stringify({ content: file.content || '', tooLarge: fileContentTooLarge, invalidUtf8: fileContentInvalidUtf8 }).replace(/<\//g, '<\\/').replace(/&/g, '&amp;').replace(/"/g, '&quot;') %></script>
 <script type="module" nonce="<%- nonce %>">
   import { mount } from '/javascript/islands/file-editor.js';
   const root = document.getElementById('file-editor-root');
