@@ -19,7 +19,7 @@
         hx-indicator="#docker-save-indicator"
         hx-on::after-request="if(event.detail.successful) showToast('Docker image updated successfully! Server will be restarted if it was running.', 'success')"
         novalidate>
-    <%- include('../../components/csrf') %>
+    <%- include('../../../components/csrf') %>
     <div class="p-5">
       <div class="mb-4">
         <label for="dockerImage" class="block text-sm font-medium mb-2" style="color:var(--theme-text-muted)"><%= req.translations.dockerImageLabel || 'Docker Image' %></label>
