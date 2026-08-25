@@ -1,5 +1,5 @@
 > [!WARNING]
-> **This Project is in BETA and under active development and is not yet stable.**
+> **This Project is in BETA and under active development and is not yet stable and is UNUSEABLE.**
 > APIs, features, and stored data may change without notice between releases. Not recommended for production use. Proceed with that in mind.
 
 <div align="center">
