@@ -1,10 +1,10 @@
 {
-  "name": "Airlink",
+  "name": "Airlink Panel BETA",
   "version": "2.5.191",
   "description": "Airlink panel, A simple-to-use game server management panel",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AirlinkLabs/panel"
+    "url": "https://github.com/airlinklabs/panel"
   },
   "author": "AirlinkLabs",
   "license": "MIT",

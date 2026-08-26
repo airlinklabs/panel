@@ -1,336 +1,1039 @@
 #!/usr/bin/env node
 
 /**
- * Airlink Panel — first-run setup script.
+ * setup.mjs - first-run installer for the panel.
  *
- * Installs Redis + MariaDB if missing, creates the airlink database and a
- * dedicated MySQL user, generates .env, and builds the project.
+ * What it does:
+ *   1. Reads project metadata from the nearest package.json (one level up).
+ *   2. Checks Node.js version and package manager availability.
+ *   3. Installs Redis and MariaDB if they're not present, using whatever
+ *      package manager the host OS actually has (apt, dnf, pacman, brew,
+ *      winget, choco, scoop).
+ *   4. Starts both services and verifies they accept connections.
+ *   5. Creates the application database and a dedicated DB user.
+ *   6. Writes a .env file with secure random secrets.
+ *   7. Runs Prisma generate + db push, then compiles TypeScript and CSS.
  *
- * Usage:
- *   node public/setup.mjs            # interactive (prompts before destructive actions)
- *   node public/setup.mjs --yes      # non-interactive, accepts all defaults
+ * Flags:
+ *   --yes / -y        Skip all "are you sure?" prompts.
+ *   --skip-services   Skip Redis + MariaDB install/start (useful when
+ *                     you're providing your own DB, e.g. Docker Compose).
+ *   --skip-build      Skip the pnpm install + tsc + tailwind step.
+ *   --db-host HOST    Override the MariaDB host (default: 127.0.0.1).
+ *   --db-port PORT    Override the MariaDB port (default: 3306).
+ *   --db-name NAME    Override the database name (default: airlink).
+ *   --db-user USER    Override the DB username (default: airlink).
+ *   --redis-url URL   Override the Redis connection URL.
+ *   --help / -h       Show this message and exit.
+ *
+ * Usage examples:
+ *   node public/setup.mjs
+ *   node public/setup.mjs --yes
+ *   node public/setup.mjs --skip-services --db-host=db.internal
  */
 
-import { execSync } from 'node:child_process';
-import { existsSync, writeFileSync } from 'node:fs';
-import { randomBytes } from 'node:crypto';
-import { createInterface } from 'node:readline';
+import { execSync, execFileSync, spawnSync } from 'node:child_process';
+import { existsSync, writeFileSync, readFileSync } from 'node:fs';
+import { randomBytes }           from 'node:crypto';
+import { createInterface }       from 'node:readline';
+import { resolve, dirname }      from 'node:path';
+import { fileURLToPath }         from 'node:url';
+import os                        from 'node:os';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ---
+// Locate ourselves and load package.json from the project root (one level up
+// from public/, which is where this file lives).
+// ---
 
-const BOLD   = '\x1b[1m';
-const RED    = '\x1b[31m';
-const GREEN  = '\x1b[32m';
-const YELLOW = '\x1b[33m';
-const CYAN   = '\x1b[36m';
-const RESET  = '\x1b[0m';
+const __dirname  = dirname(fileURLToPath(import.meta.url));
+const projectDir = resolve(__dirname, '..');
 
-const ok     = (msg) => console.log(`${GREEN}✓${RESET} ${msg}`);
-const warn   = (msg) => console.log(`${YELLOW}⚠${RESET} ${msg}`);
-const fail   = (msg) => console.log(`${RED}✗${RESET} ${msg}`);
-const info   = (msg) => console.log(`${CYAN}→${RESET} ${msg}`);
-const header = (msg) => console.log(`\n${BOLD}${msg}${RESET}\n`);
+/** Pull name / version / author / license out of the nearest package.json. */
+function loadPackageMeta() {
+  const candidates = [
+    resolve(projectDir, 'package.json'),
+    resolve(__dirname, 'package.json'),
+  ];
 
-const isNonInteractive = process.argv.includes('--yes') || process.argv.includes('-y');
+  for (const p of candidates) {
+    if (existsSync(p)) {
+      try {
+        const raw = JSON.parse(readFileSync(p, 'utf-8'));
+        return {
+          name:    raw.name    ?? 'Panel',
+          version: raw.version ?? '0.0.0',
+          author:  typeof raw.author === 'object'
+                     ? (raw.author.name ?? 'Unknown')
+                     : (raw.author ?? 'Unknown'),
+          license: raw.license ?? 'Unknown',
+          engines: raw.engines ?? {},
+        };
+      } catch {
+        // Corrupted JSON - skip it and try the next candidate.
+      }
+    }
+  }
 
-function run(cmd, opts = {}) {
+  return { name: 'Panel', version: '0.0.0', author: 'Unknown', license: 'MIT', engines: {} };
+}
+
+const PKG = loadPackageMeta();
+
+// ---
+// Platform detection - we use this throughout to pick the right install
+// commands and service management approach.
+// ---
+
+const PLATFORM = process.platform; // 'linux' | 'darwin' | 'win32'
+const ARCH     = process.arch;     // 'x64' | 'arm64' | 'arm' | ...
+const IS_WIN   = PLATFORM === 'win32';
+const IS_MAC   = PLATFORM === 'darwin';
+const IS_LINUX = PLATFORM === 'linux';
+
+/** Detect the Linux package manager by checking which binaries exist. */
+function detectLinuxPkgMgr() {
+  for (const mgr of ['apt-get', 'dnf', 'yum', 'pacman', 'zypper', 'apk']) {
+    if (which(mgr)) return mgr;
+  }
+  return null;
+}
+
+/** Detect macOS package manager (homebrew is overwhelmingly dominant). */
+function detectMacPkgMgr() {
+  if (which('brew')) return 'brew';
+  return null;
+}
+
+/** Detect Windows package manager - try winget, choco, scoop in that order. */
+function detectWinPkgMgr() {
+  for (const mgr of ['winget', 'choco', 'scoop']) {
+    if (which(mgr)) return mgr;
+  }
+  return null;
+}
+
+// ---
+// Argument parsing - intentionally hand-rolled so we have zero dependencies
+// at setup time (no commander, no yargs).
+// ---
+
+const argv = process.argv.slice(2);
+
+/** Return the value of a CLI flag, or null if it wasn't passed.
+ *  Handles both "--flag value" and "--flag=value" styles. */
+function flag(name, fallback = null) {
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === name && argv[i + 1] !== undefined && !argv[i + 1].startsWith('-')) {
+      return argv[i + 1];
+    }
+    if (argv[i].startsWith(`${name}=`)) {
+      return argv[i].slice(name.length + 1);
+    }
+  }
+  return fallback;
+}
+
+const opts = {
+  yes:          argv.includes('--yes')          || argv.includes('-y'),
+  help:         argv.includes('--help')         || argv.includes('-h'),
+  skipServices: argv.includes('--skip-services'),
+  skipBuild:    argv.includes('--skip-build'),
+  dbHost:       flag('--db-host',  '127.0.0.1'),
+  dbPort:       flag('--db-port',  '3306'),
+  dbName:       flag('--db-name',  'airlink'),
+  dbUser:       flag('--db-user',  'airlink'),
+  redisUrl:     flag('--redis-url', null),
+};
+
+// ---
+// Terminal colours - we only apply them when stdout is actually a TTY.
+// Piped output (CI logs, redirected files) stays clean.
+// ---
+
+const TTY = process.stdout.isTTY;
+
+const C = {
+  reset:  TTY ? '\x1b[0m'  : '',
+  bold:   TTY ? '\x1b[1m'  : '',
+  dim:    TTY ? '\x1b[2m'  : '',
+  red:    TTY ? '\x1b[31m' : '',
+  green:  TTY ? '\x1b[32m' : '',
+  yellow: TTY ? '\x1b[33m' : '',
+  blue:   TTY ? '\x1b[34m' : '',
+  magenta:TTY ? '\x1b[35m' : '',
+  cyan:   TTY ? '\x1b[36m' : '',
+  white:  TTY ? '\x1b[37m' : '',
+  bgBlue: TTY ? '\x1b[44m' : '',
+};
+
+// ---
+// Logging helpers
+// ---
+
+const ok   = (msg)        => console.log(`  ${C.green}+${C.reset} ${msg}`);
+const warn = (msg)        => console.log(`  ${C.yellow}!${C.reset} ${C.yellow}${msg}${C.reset}`);
+const fail = (msg)        => console.log(`  ${C.red}x${C.reset} ${C.red}${msg}${C.reset}`);
+const info = (msg)        => console.log(`  ${C.cyan}->${C.reset} ${msg}`);
+const dim  = (msg)        => console.log(`  ${C.dim}${msg}${C.reset}`);
+const gap  = ()           => console.log();
+
+/** Print a plain section header. */
+function section(title) {
+  gap();
+  console.log(`${C.bold}${C.blue}  ${title}${C.reset}`);
+}
+
+/** Print project metadata without decorative framing. */
+function banner() {
+  gap();
+  console.log(`${C.bold}${PKG.name} v${PKG.version}${C.reset}`);
+  dim(`Platform: ${PLATFORM} (${ARCH})`);
+  dim(`Node: ${process.version}`);
+  dim(`Project: ${projectDir}`);
+  gap();
+}
+
+/** Print the --help text and exit cleanly. */
+function showHelp() {
+  banner();
+  console.log(`${C.bold}Usage${C.reset}
+  node public/setup.mjs [flags]
+
+${C.bold}Flags${C.reset}
+  --yes, -y           Accept all prompts (non-interactive / CI mode).
+  --skip-services     Don't install or start Redis / MariaDB.
+  --skip-build        Don't run pnpm install, tsc, or tailwindcss.
+  --db-host HOST      MariaDB host          [default: 127.0.0.1]
+  --db-port PORT      MariaDB port          [default: 3306]
+  --db-name NAME      Database name         [default: airlink]
+  --db-user USER      Database username     [default: airlink]
+  --redis-url URL     Redis connection URL  [default: redis://127.0.0.1:6379]
+  --help, -h          Show this message.
+
+${C.bold}Examples${C.reset}
+  node public/setup.mjs
+  node public/setup.mjs --yes
+  node public/setup.mjs --skip-services --db-host=db.internal --yes
+`);
+  process.exit(0);
+}
+
+// ---
+// Shell execution helpers
+// ---
+
+/**
+ * Run a command and return its trimmed stdout, or null on failure.
+ * We swallow stderr by default so the terminal doesn't fill up with noise
+ * during the many "does X exist?" probes.
+ */
+function run(cmd, extraOpts = {}) {
   try {
-    return execSync(cmd, { stdio: 'pipe', timeout: 60_000, ...opts }).toString().trim();
-  } catch {
+    const output = execSync(cmd, {
+      stdio:   'pipe',
+      timeout: 120_000,
+      cwd:     projectDir,
+      ...extraOpts,
+    });
+    const text = output?.toString().trim() ?? '';
+    if (text) console.log(text);
+    return text;
+  } catch (error) {
+    const text = error?.stderr?.toString().trim();
+    if (text) console.error(text);
     return null;
   }
 }
 
-function runOrFail(cmd, errorMsg) {
+function runFile(file, args) {
+  try {
+    const output = execFileSync(file, args, {
+      stdio: 'pipe',
+      timeout: 120_000,
+      cwd: projectDir,
+    });
+    const text = output?.toString().trim() ?? '';
+    if (text) console.log(text);
+    return text;
+  } catch (error) {
+    const text = error?.stderr?.toString().trim();
+    if (text) console.error(text);
+    return null;
+  }
+}
+
+/**
+ * Run a command and stream its output live to the terminal.
+ * Use this for long-running things (pnpm install, tsc) so the user
+ * can see progress rather than staring at a frozen cursor.
+ */
+function runLive(cmd, description) {
+  info(description);
+  const result = spawnSync(cmd, {
+    shell:  true,
+    stdio:  'inherit',
+    cwd:    projectDir,
+    timeout: 300_000,
+  });
+  if (result.status !== 0) {
+    fail(`${description} - exited with code ${result.status ?? 'unknown'}`);
+    process.exit(1);
+  }
+}
+
+/** Like run(), but exits the process on failure rather than returning null. */
+function runOrDie(cmd, errMsg) {
   const result = run(cmd);
   if (result === null) {
-    fail(errorMsg);
+    fail(errMsg);
     process.exit(1);
   }
   return result;
 }
 
+/** Check if a binary is on PATH. */
+function which(bin) {
+  return run(IS_WIN ? `where ${bin}` : `which ${bin}`);
+}
+
+function waitFor(check, attempts = 15) {
+  return new Promise((resolve) => {
+    const retry = (remaining) => {
+      if (check()) return resolve(true);
+      if (remaining <= 0) return resolve(false);
+      setTimeout(() => retry(remaining - 1), 1000);
+    };
+    retry(attempts);
+  });
+}
+
+// ---
+// Interactive prompt helper
+// ---
+
+/**
+ * Ask a yes/no question in the terminal.
+ * Returns true immediately in --yes mode without printing anything.
+ */
 function ask(question) {
-  if (isNonInteractive) return Promise.resolve(true);
+  if (opts.yes) return Promise.resolve(true);
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   return new Promise((resolve) => {
-    rl.question(`${question} (Y/n) `, (answer) => {
+    rl.question(`  ${C.yellow}?${C.reset} ${question} ${C.dim}[Y/n]${C.reset} `, (ans) => {
       rl.close();
-      resolve(answer === '' || answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
+      const lower = ans.trim().toLowerCase();
+      resolve(lower === '' || lower === 'y' || lower === 'yes');
     });
   });
 }
 
-function generatePassword() {
-  return randomBytes(24).toString('base64url');
+// ---
+// Cryptography helpers
+// ---
+
+/** 32-byte URL-safe random string - suitable for DB passwords. */
+function genPassword() { return randomBytes(32).toString('base64url'); }
+
+/** 64-hex-character string - suitable for session secrets. */
+function genSecret()   { return randomBytes(32).toString('hex'); }
+
+function readEnvFile() {
+  const envPath = resolve(projectDir, '.env');
+  if (!existsSync(envPath)) return {};
+  return Object.fromEntries(readFileSync(envPath, 'utf8')
+    .split(/\r?\n/)
+    .map((line) => line.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*["']?([^"']*)["']?\s*$/i))
+    .filter(Boolean)
+    .map((match) => [match[1], match[2]]));
 }
 
-// ── Pre-flight checks ───────────────────────────────────────────────────────
+function isTemplateEnv(env) {
+  return env.SESSION_SECRET === 'change_me';
+}
 
-function checkNodeVersion() {
-  const [major] = process.versions.node.split('.').map(Number);
-  if (major < 22) {
-    fail(`Node.js >= 22 required (found ${process.version})`);
+function assertSqlIdentifier(value, label) {
+  if (!/^[A-Za-z0-9_]+$/.test(value)) {
+    throw new Error(`${label} may contain only letters, numbers, and underscores.`);
+  }
+}
+
+// ---
+// Service management - handles systemd, SysV init, launchctl, Windows SCM,
+// and bare-binary fallbacks for each case.
+// ---
+
+/**
+ * Check whether a named service is currently running.
+ * Tries systemd first, then SysV, then macOS launchd, then Windows SC.
+ */
+function serviceIsActive(name) {
+  if (IS_WIN) {
+    const out = run(`sc query "${name}" 2>nul`);
+    return out?.includes('RUNNING') ?? false;
+  }
+  if (IS_MAC) {
+    // launchctl reports "enabled" or the service PID when running.
+    const out = run(`launchctl list 2>/dev/null | grep "${name}"`);
+    return !!out;
+  }
+  // Linux - try systemd first, fall back to SysV.
+  const systemd = run(`systemctl is-active "${name}" 2>/dev/null`);
+  if (systemd === 'active') return true;
+  const sysv = run(`service "${name}" status 2>/dev/null; echo $?`, { timeout: 5_000 });
+  return sysv?.split('\n').pop() === '0';
+}
+
+/**
+ * Try to start a named service, returning true if it ended up running.
+ * Works across systemd, SysV, launchctl (macOS), and Windows SC.
+ */
+function startService(name, binaryFallback = null) {
+  if (serviceIsActive(name)) return true;
+
+  if (IS_WIN) {
+    run(`net start "${name}" 2>nul || sc start "${name}" 2>nul`);
+  } else if (IS_MAC) {
+    run(`brew services start "${name}" 2>/dev/null || launchctl start "${name}" 2>/dev/null`);
+  } else {
+    // Containers often ship a systemctl shim without a running systemd.
+    if (existsSync('/run/systemd/system')) {
+      run(`sudo systemctl start "${name}" 2>/dev/null`, { timeout: 15_000 });
+    }
+    if (!serviceIsActive(name) && !existsSync('/run/systemd/system')) {
+      // SysV init fallback (older Debian, Alpine, WSL1, some containers).
+      run(`sudo service "${name}" start 2>/dev/null`, { timeout: 5_000 });
+    }
+    if (!serviceIsActive(name) && binaryFallback) {
+      // Last resort: launch the daemon directly in the background.
+      run(binaryFallback);
+    }
+  }
+
+  return serviceIsActive(name);
+}
+
+function startMariaDBFallback() {
+  if (!IS_LINUX || !which('mariadbd')) return false;
+  run('sudo mkdir -p /run/mysqld && sudo chown mysql:mysql /run/mysqld');
+  return run('sudo sh -c "mariadbd --no-defaults --user=mysql --datadir=/var/lib/mysql --bind-address=127.0.0.1 --port=3306 --socket=/run/mysqld/mysqld.sock --pid-file=/run/mysqld/mysqld.pid >/tmp/airlink-mariadb.log 2>&1 &"') !== null;
+}
+
+function initializeMariaDB() {
+  if (!IS_LINUX || !which('mariadbd')) return true;
+  const systemTable = existsSync('/var/lib/mysql/mysql/db.frm')
+    || existsSync('/var/lib/mysql/mysql/db.ibd');
+  if (systemTable) return true;
+
+  info('Initializing MariaDB system tables...');
+  const initializer = which('mariadb-install-db') || which('mysql_install_db');
+  if (!initializer) return false;
+  return run(`sudo ${initializer} --no-defaults --user=mysql --basedir=/usr --datadir=/var/lib/mysql`) !== null;
+}
+
+/** Enable a service so it starts on boot. Best-effort - failures are logged but non-fatal. */
+function enableService(name) {
+  if (IS_WIN) {
+    run(`sc config "${name}" start= auto 2>nul`);
+  } else if (IS_MAC) {
+    run(`brew services restart "${name}" 2>/dev/null`); // brew already auto-enables
+  } else {
+    run(`sudo systemctl enable "${name}" 2>/dev/null || true`);
+  }
+}
+
+// ---
+// Package installation - maps the generic action "install pkg X" onto
+// whatever package manager the host actually has.
+// ---
+
+/**
+ * Build the shell command that installs a package on this platform.
+ *
+ * packageMap example:
+ *   {
+ *     'apt-get': 'redis-server',
+ *     'dnf':     'redis',
+ *     'pacman':  'redis',
+ *     'brew':    'redis',
+ *     'winget':  'Redis.Redis',
+ *     'choco':   'redis',
+ *     'scoop':   'redis',
+ *   }
+ */
+function buildInstallCmd(pkgMgr, packageMap) {
+  const pkg = packageMap[pkgMgr];
+  if (!pkg) return null;
+
+  switch (pkgMgr) {
+    case 'apt-get': return `sudo apt-get update -qq && sudo apt-get install -y ${pkg}`;
+    case 'dnf':     return `sudo dnf install -y ${pkg}`;
+    case 'yum':     return `sudo yum install -y ${pkg}`;
+    case 'pacman':  return `sudo pacman -Sy --noconfirm ${pkg}`;
+    case 'zypper':  return `sudo zypper install -y ${pkg}`;
+    case 'apk':     return `sudo apk add --no-cache ${pkg}`;
+    case 'brew':    return `brew install ${pkg}`;
+    case 'winget':  return `winget install --silent --accept-package-agreements --accept-source-agreements ${pkg}`;
+    case 'choco':   return `choco install ${pkg} -y`;
+    case 'scoop':   return `scoop install ${pkg}`;
+    default:        return null;
+  }
+}
+
+// ---
+// Pre-flight: Node version and pnpm
+// ---
+
+function checkNode() {
+  section('Pre-flight checks');
+
+  // Pull the minimum version from engines.node in package.json, or fall
+  // back to 22 which is what this project currently requires.
+  const minRaw   = PKG.engines?.node?.replace(/[^0-9.]/g, '') ?? '22';
+  const minMajor = parseInt(minRaw, 10) || 22;
+  const curMajor = parseInt(process.versions.node, 10);
+
+  if (curMajor < minMajor) {
+    fail(`Node.js ${minMajor}+ required - you have ${process.version}.`);
+    info(`Download the latest LTS from: https://nodejs.org`);
     process.exit(1);
   }
-  ok(`Node.js ${process.version}`);
+  ok(`Node.js ${process.version} (need >= ${minMajor})`);
 }
 
 function checkPnpm() {
   const ver = run('pnpm --version');
   if (!ver) {
-    fail('pnpm not found — install with: npm i -g pnpm');
-    process.exit(1);
-  }
-  ok(`pnpm ${ver}`);
-}
-
-// ── Redis ────────────────────────────────────────────────────────────────────
-
-function ensureRedis() {
-  header('Redis');
-
-  const bin = run('which redis-server');
-  if (!bin) {
-    warn('redis-server not found');
-    info('Installing redis-server…');
-    const install = run('sudo apt-get update && sudo apt-get install -y redis-server');
-    if (install === null) {
-      fail('Could not install redis-server. Please install manually:');
-      fail('  sudo apt install redis-server');
+    warn('pnpm not found - installing it now via npm...');
+    const installed = run('npm install -g pnpm', { stdio: 'inherit' });
+    if (!which('pnpm')) {
+      fail('Could not install pnpm. Run:  npm install -g pnpm');
       process.exit(1);
     }
-    ok('redis-server installed');
+    ok(`pnpm ${run('pnpm --version')}`);
   } else {
-    ok(`redis-server at ${bin}`);
-  }
-
-  // Start if not active
-  const status = run('systemctl is-active redis-server 2>/dev/null || echo stopped');
-  if (status !== 'active') {
-    warn('redis-server is not running');
-    run('sudo systemctl start redis-server');
-    run('sudo systemctl enable redis-server');
-    ok('redis-server started');
-  } else {
-    ok('redis-server is running');
-  }
-
-  // Quick connectivity check
-  const ping = run('redis-cli ping 2>/dev/null');
-  if (ping === 'PONG') {
-    ok('redis-cli ping → PONG');
-  } else {
-    fail('redis-cli ping failed — check your Redis config');
-    process.exit(1);
+    ok(`pnpm ${ver}`);
   }
 }
 
-// ── MariaDB ──────────────────────────────────────────────────────────────────
+// ---
+// Redis
+// ---
 
-function ensureMariaDB() {
-  header('MariaDB');
+/**
+ * Resolve which package manager is available on this host, then return
+ * the install command for redis-server (or the platform-appropriate name).
+ */
+function getRedisInstallCmd() {
+  if (IS_LINUX) {
+    const mgr = detectLinuxPkgMgr();
+    if (!mgr) return null;
+    return buildInstallCmd(mgr, {
+      'apt-get': 'redis-server',
+      'dnf':     'redis',
+      'yum':     'redis',
+      'pacman':  'redis',
+      'zypper':  'redis',
+      'apk':     'redis',
+    });
+  }
+  if (IS_MAC) {
+    const mgr = detectMacPkgMgr();
+    return mgr ? buildInstallCmd(mgr, { brew: 'redis' }) : null;
+  }
+  if (IS_WIN) {
+    const mgr = detectWinPkgMgr();
+    if (!mgr) return null;
+    return buildInstallCmd(mgr, {
+      winget: 'Redis.Redis',
+      choco:  'redis-64',
+      scoop:  'redis',
+    });
+  }
+  return null;
+}
 
-  const bin = run('which mariadbd') || run('which mysqld');
-  if (!bin) {
-    warn('MariaDB not found');
-    info('Installing mariadb-server…');
-    const install = run('sudo apt-get update && sudo apt-get install -y mariadb-server');
-    if (install === null) {
-      fail('Could not install mariadb-server. Please install manually:');
-      fail('  sudo apt install mariadb-server');
+async function ensureRedis() {
+  section('Redis');
+
+  const redisBin = which('redis-server') || which('redis-server.exe');
+
+  if (!redisBin) {
+    warn('redis-server not found on PATH');
+    const proceed = await ask('Install Redis automatically?');
+    if (!proceed) {
+      fail('Redis is required. Install it manually, then re-run setup.');
       process.exit(1);
     }
-    ok('mariadb-server installed');
+
+    const cmd = getRedisInstallCmd();
+    if (!cmd) {
+      fail('Could not determine how to install Redis on this system.');
+      printManualRedisInstructions();
+      process.exit(1);
+    }
+
+    info(`Installing Redis via: ${cmd}`);
+    const result = run(cmd);
+    if (result === null) {
+      fail('Redis install failed.');
+      printManualRedisInstructions();
+      process.exit(1);
+    }
+    ok('Redis installed');
   } else {
-    ok(`MariaDB at ${bin}`);
+    ok(`redis-server found at ${redisBin}`);
   }
 
-  // Start if not active
-  const status = run('systemctl is-active mariadb 2>/dev/null || echo stopped');
-  if (status !== 'active') {
-    warn('mariadb is not running');
-    run('sudo systemctl start mariadb');
-    run('sudo systemctl enable mariadb');
-    ok('mariadb started');
+  // On Linux/Mac we manage it as a service. On Windows the installer usually
+  // registers a service automatically, but we try both paths.
+  const serviceName = IS_WIN ? 'Redis' : IS_MAC ? 'redis' : 'redis-server';
+
+  const redisCliPath = which('redis-cli') || which('redis-cli.exe') || 'redis-cli';
+  const redisReady = () => run(`${redisCliPath} ping 2>/dev/null`) === 'PONG';
+
+  if (!redisReady() && !serviceIsActive(serviceName)) {
+    warn(`Redis service "${serviceName}" is not running`);
+    // Binary fallback: launch redis in the background if service management fails.
+    const daemonFallback = IS_WIN ? null : 'redis-server --daemonize yes 2>/dev/null';
+    if (!startService(serviceName, daemonFallback)) {
+      fail('Could not start Redis. Start it manually, then re-run setup.');
+      process.exit(1);
+    }
+    enableService(serviceName);
+    ok('Redis started and enabled');
   } else {
-    ok('mariadb is running');
+    ok('Redis is running');
   }
 
-  // Check connectivity (no password, root)
-  const conn = run('mariadb -u root -N -e "SELECT 1" 2>/dev/null');
-  if (conn === '1') {
-    ok('mariadb -u root → connected');
-  } else {
-    fail('Cannot connect to MariaDB as root. If you set a password, set MYSQL_PASSWORD in .env.');
+  // Verify the server actually responds before we move on.
+  if (!await waitFor(redisReady)) {
+    fail('redis-cli ping did not return PONG. Check your Redis config.');
     process.exit(1);
   }
+  ok('Redis ping -> PONG');
 }
 
-// ── Database + user ──────────────────────────────────────────────────────────
+function printManualRedisInstructions() {
+  warn('Install Redis manually:');
+  if (IS_LINUX)  { warn('  Ubuntu/Debian : sudo apt install redis-server'); warn('  Fedora/RHEL   : sudo dnf install redis'); warn('  Arch          : sudo pacman -S redis'); warn('  Alpine        : sudo apk add redis'); }
+  if (IS_MAC)    warn('  macOS         : brew install redis');
+  if (IS_WIN)    { warn('  winget        : winget install Redis.Redis'); warn('  Chocolatey    : choco install redis-64'); warn('  Scoop         : scoop install redis'); }
+  warn('  Docker        : docker run -d -p 6379:6379 redis:alpine');
+}
 
-function setupDatabase() {
-  header('Database');
+// ---
+// MariaDB
+// ---
 
-  const dbUser = 'airlink';
-  const dbPass = generatePassword();
-  const dbName = 'airlink';
+function getMariaDBInstallCmd() {
+  if (IS_LINUX) {
+    const mgr = detectLinuxPkgMgr();
+    if (!mgr) return null;
+    return buildInstallCmd(mgr, {
+      'apt-get': 'mariadb-server',
+      'dnf':     'mariadb-server',
+      'yum':     'mariadb-server',
+      'pacman':  'mariadb',
+      'zypper':  'mariadb',
+      'apk':     'mariadb mariadb-openrc',
+    });
+  }
+  if (IS_MAC) {
+    const mgr = detectMacPkgMgr();
+    return mgr ? buildInstallCmd(mgr, { brew: 'mariadb' }) : null;
+  }
+  if (IS_WIN) {
+    const mgr = detectWinPkgMgr();
+    if (!mgr) return null;
+    return buildInstallCmd(mgr, {
+      winget: 'MariaDB.Server',
+      choco:  'mariadb',
+      scoop:  'mariadb',
+    });
+  }
+  return null;
+}
 
-  // Create database if missing
-  const dbExists = run(`mariadb -u root -N -e "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${dbName}'" 2>/dev/null`);
+async function ensureMariaDB() {
+  section('MariaDB');
+
+  const mariadBin = which('mariadbd') || which('mysqld') || which('mariadbd.exe') || which('mysqld.exe');
+
+  if (!mariadBin) {
+    warn('MariaDB server binary not found on PATH');
+    const proceed = await ask('Install MariaDB automatically?');
+    if (!proceed) {
+      fail('MariaDB is required. Install it manually, then re-run setup.');
+      process.exit(1);
+    }
+
+    const cmd = getMariaDBInstallCmd();
+    if (!cmd) {
+      fail('Could not determine how to install MariaDB on this system.');
+      printManualMariaDBInstructions();
+      process.exit(1);
+    }
+
+    info(`Installing MariaDB via: ${cmd}`);
+    const result = run(cmd);
+    if (result === null) {
+      fail('MariaDB install failed.');
+      printManualMariaDBInstructions();
+      process.exit(1);
+    }
+    ok('MariaDB installed');
+
+    // Some distros (Arch, Alpine) need the data directory initialised before
+    // the service can start.
+    if (IS_LINUX) {
+      run('sudo mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql 2>/dev/null || true');
+    }
+  } else {
+    ok(`MariaDB found at ${mariadBin}`);
+  }
+
+  if (!initializeMariaDB()) {
+    fail('Could not initialize MariaDB system tables.');
+    printManualMariaDBInstructions();
+    process.exit(1);
+  }
+
+  // Service name varies by distro.
+  const serviceName = IS_WIN
+    ? 'MySQL'
+    : IS_MAC
+    ? 'mariadb'
+    : detectMariaDBServiceName();
+
+  const rootClient = which('mariadb') || which('mysql');
+  const mariaReady = () => rootClient && (
+    run(`${rootClient} --no-defaults -u root -N -e "SELECT 1" 2>/dev/null`) === '1'
+    || run(`sudo ${rootClient} --no-defaults -u root -N -e "SELECT 1" 2>/dev/null`) === '1'
+  );
+
+  const hasSystemd = existsSync('/run/systemd/system');
+
+  if (!mariaReady() && (hasSystemd ? !serviceIsActive(serviceName) : true)) {
+    warn(`MariaDB service "${serviceName}" is not running`);
+    const started = existsSync('/run/systemd/system')
+      ? startService(serviceName)
+      : startMariaDBFallback();
+    if (!mariaReady() && !started && !startMariaDBFallback()) {
+      fail('Could not start MariaDB. Start it manually, then re-run setup.');
+      printManualMariaDBInstructions();
+      process.exit(1);
+    }
+    enableService(serviceName);
+    ok('MariaDB started and enabled');
+  } else {
+    ok('MariaDB is running');
+  }
+
+  // Verify root can connect without a password.
+  // On a fresh install this is typically the case; if it fails we print
+  // a helpful message rather than just dying.
+  const conn = await waitFor(mariaReady);
+
+  if (!conn) {
+    fail('Cannot connect to MariaDB as root without a password.');
+    warn('If root has a password, set MYSQL_ROOT_PASSWORD=yourpass before re-running,');
+    warn('or run: sudo mariadb -u root  and grant the app user access manually.');
+    process.exit(1);
+  }
+  ok('MariaDB root connection OK');
+}
+
+/** Different distros register MariaDB under different service names. */
+function detectMariaDBServiceName() {
+  for (const name of ['mariadb', 'mysql', 'mysqld', 'mariadbd']) {
+    const out = run(`systemctl status "${name}" 2>/dev/null || service "${name}" status 2>/dev/null; echo x`, { timeout: 5_000 });
+    if (out && !out.includes('not-found') && !out.includes('unrecognized')) return name;
+  }
+  return 'mariadb'; // best guess
+}
+
+function printManualMariaDBInstructions() {
+  warn('Install MariaDB manually:');
+  if (IS_LINUX)  { warn('  Ubuntu/Debian : sudo apt install mariadb-server'); warn('  Fedora/RHEL   : sudo dnf install mariadb-server'); warn('  Arch          : sudo pacman -S mariadb'); warn('  Alpine        : sudo apk add mariadb'); }
+  if (IS_MAC)    warn('  macOS         : brew install mariadb');
+  if (IS_WIN)    { warn('  winget        : winget install MariaDB.Server'); warn('  Chocolatey    : choco install mariadb'); }
+  warn('  Docker        : docker run -d -p 3306:3306 -e MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=1 mariadb:latest');
+}
+
+// ---
+// Helper to run a raw SQL statement via the root MariaDB client.
+// Returns the trimmed stdout, or null on failure.
+// ---
+
+function sql(statement) {
+  // Pass SQL as an argument so shell syntax in identifiers is not evaluated.
+  const args = ['--no-defaults', '-u', 'root', '-N', '-e', statement];
+  return runFile('sudo', ['mariadb', ...args])
+      ?? runFile('sudo', ['mysql', ...args])
+      ?? runFile('mariadb', args)
+      ?? runFile('mysql', args);
+}
+
+// ---
+// Database + user setup
+// ---
+
+async function setupDatabase() {
+  section('Database');
+
+  const loadedEnv = readEnvFile();
+  const existingEnv = isTemplateEnv(loadedEnv) ? {} : loadedEnv;
+  let existingUrl;
+  try {
+    existingUrl = existingEnv.DATABASE_URL ? new URL(existingEnv.DATABASE_URL) : null;
+  } catch {
+    throw new Error('DATABASE_URL in .env is not a valid URL.');
+  }
+
+  const dbHost = existingEnv.MYSQL_HOST ?? existingUrl?.hostname ?? opts.dbHost;
+  const dbPort = existingEnv.MYSQL_PORT ?? existingUrl?.port ?? opts.dbPort;
+  const dbName = existingUrl?.pathname.slice(1) || opts.dbName;
+  const dbUser = existingEnv.MYSQL_USER ?? existingUrl?.username ?? opts.dbUser;
+  const dbPass = existingEnv.MYSQL_PASSWORD ?? existingUrl?.password ?? genPassword();
+  assertSqlIdentifier(dbName, 'Database name');
+  assertSqlIdentifier(dbUser, 'Database user');
+
+  // Database
+  const dbExists = sql(
+    `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${dbName}'`
+  );
+
   if (!dbExists) {
-    info(`Creating database "${dbName}"…`);
-    run(`mariadb -u root -e "CREATE DATABASE \`${dbName}\`"`);
-    ok(`database "${dbName}" created`);
+    info(`Creating database \`${dbName}\`...`);
+    if (sql(`CREATE DATABASE \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`) === null) {
+      throw new Error(`Could not create database \`${dbName}\`.`);
+    }
+    ok(`Database \`${dbName}\` created`);
   } else {
-    ok(`database "${dbName}" exists`);
+    ok(`Database \`${dbName}\` already exists`);
   }
 
-  // Create user if missing, then grant privileges
-  const userExists = run(`mariadb -u root -N -e "SELECT user FROM mysql.user WHERE user = '${dbUser}'" 2>/dev/null`);
+  // User
+  const userExists = sql(`SELECT user FROM mysql.user WHERE user = '${dbUser}'`);
+
+  if (existingEnv.MYSQL_USER || existingUrl) {
+    ok('Using database credentials from existing .env');
+  }
+
+  // Ensure the configured account matches .env, including after a local
+  // database has been removed and installed again.
+
   if (!userExists) {
-    info(`Creating MySQL user "${dbUser}"…`);
-    run(`mariadb -u root -e "CREATE USER '${dbUser}'@'127.0.0.1' IDENTIFIED BY '${dbPass}'"`);
-    run(`mariadb -u root -e "CREATE USER '${dbUser}'@'localhost' IDENTIFIED BY '${dbPass}'"`);
-    run(`mariadb -u root -e "GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'127.0.0.1'"`);
-    run(`mariadb -u root -e "GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'localhost'"`);
-    run('mariadb -u root -e "FLUSH PRIVILEGES"');
-    ok(`user "${dbUser}" created with full access to "${dbName}"`);
+    info(`Creating database user "${dbUser}"...`);
+    for (const host of ['127.0.0.1', 'localhost', '::1']) {
+      sql(`CREATE USER IF NOT EXISTS '${dbUser}'@'${host}' IDENTIFIED BY '${dbPass}'`);
+      sql(`GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'${host}'`);
+    }
   } else {
-    // User exists — reset password so we control it
-    info(`User "${dbUser}" exists — resetting password…`);
-    run(`mariadb -u root -e "ALTER USER '${dbUser}'@'127.0.0.1' IDENTIFIED BY '${dbPass}'"`);
-    run(`mariadb -u root -e "ALTER USER '${dbUser}'@'localhost' IDENTIFIED BY '${dbPass}'"`);
-    run(`mariadb -u root -e "GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'127.0.0.1'"`);
-    run(`mariadb -u root -e "GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'localhost'"`);
-    run('mariadb -u root -e "FLUSH PRIVILEGES"');
-    ok(`user "${dbUser}" privileges confirmed`);
+    info(`User "${dbUser}" already exists - refreshing password and grants...`);
+    for (const host of ['127.0.0.1', 'localhost', '::1']) {
+      // ALTER USER is safer than DROP + CREATE when the user has objects.
+      sql(`ALTER USER '${dbUser}'@'${host}' IDENTIFIED BY '${dbPass}'`);
+      sql(`GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'${host}'`);
+    }
   }
 
-  // Verify the new user can connect
-  const testConn = run(`mariadb -u ${dbUser} -p${dbPass} -N -e "SELECT 1" 2>/dev/null`);
-  if (testConn === '1') {
-    ok(`user "${dbUser}" → connected`);
-  } else {
-    fail(`Could not connect as "${dbUser}". Check MariaDB config.`);
+  sql('FLUSH PRIVILEGES');
+  ok(`User "${dbUser}" configured with full access to \`${dbName}\``);
+
+  // Verify
+  const passwordArg = dbPass ? ` -p${dbPass}` : '';
+  const testCmd = `mariadb --no-defaults -u ${dbUser}${passwordArg} -h ${dbHost} -P ${dbPort} -N -e "SELECT 1" 2>/dev/null`
+               + ` || mysql --no-defaults -u ${dbUser}${passwordArg} -h ${dbHost} -P ${dbPort} -N -e "SELECT 1" 2>/dev/null`;
+  const testConn = run(testCmd);
+
+  if (testConn !== '1') {
+    fail(`Could not connect as "${dbUser}". Check your MariaDB bind-address and auth config.`);
     process.exit(1);
   }
+  ok(`Connection as "${dbUser}" verified`);
 
-  return { dbUser, dbPass, dbName };
+  return { dbHost, dbPort, dbName, dbUser, dbPass };
 }
 
-// ── .env ─────────────────────────────────────────────────────────────────────
+// ---
+// .env generation
+// ---
 
 function generateEnv(creds) {
-  header('Environment');
+  section('Environment file');
 
-  if (existsSync('.env')) {
-    warn('.env already exists — skipping generation');
-    info('Delete .env and re-run to regenerate');
+  const envPath = resolve(projectDir, '.env');
+
+  const existingEnv = readEnvFile();
+  if (existsSync(envPath) && !isTemplateEnv(existingEnv)) {
+    warn('.env already exists - leaving it untouched.');
+    info('Delete it and re-run setup to regenerate with fresh secrets.');
     return;
   }
 
-  const sessionSecret = randomBytes(32).toString('hex');
+  const { dbHost, dbPort, dbName, dbUser, dbPass } = creds;
+  const redisUrl      = opts.redisUrl ?? 'redis://127.0.0.1:6379';
+  const sessionSecret = genSecret();
+
+  // We write every value with double-quotes so the file is easy to
+  // parse in shell scripts and across all platforms.
   const lines = [
+    '#',
+    `# ${PKG.name} - environment configuration`,
+    `# Generated by setup.mjs on ${new Date().toISOString()}`,
+    '#',
+    '',
+    '# Application',
     'URL="http://localhost:3000"',
-    'PORT=3000',
-    'NAME="Airlink"',
-    `DATABASE_URL="mysql://${creds.dbUser}:${creds.dbPass}@127.0.0.1:3306/${creds.dbName}"`,
-    'REDIS_URL="redis://127.0.0.1:6379"',
-    'NODE_ENV="development"',
+    'PORT="3000"',
+    `NAME="${PKG.name}"`,
+    'NODE_ENV="production"',
+    '',
+    '# Session',
     `SESSION_SECRET="${sessionSecret}"`,
     '',
-    '# Database credentials (used by "Auto-generate database host")',
-    'MYSQL_HOST="127.0.0.1"',
-    'MYSQL_PORT="3306"',
-    `MYSQL_USER="${creds.dbUser}"`,
-    `MYSQL_PASSWORD="${creds.dbPass}"`,
+    '# Database (Prisma)',
+    `DATABASE_URL="mysql://${dbUser}:${dbPass}@${dbHost}:${dbPort}/${dbName}"`,
+    '',
+    '# Database (raw credentials, used by the DB-host auto-generator)',
+    `MYSQL_HOST="${dbHost}"`,
+    `MYSQL_PORT="${dbPort}"`,
+    `MYSQL_USER="${dbUser}"`,
+    `MYSQL_PASSWORD="${dbPass}"`,
+    '',
+    '# Redis',
+    `REDIS_URL="${redisUrl}"`,
     '',
   ];
 
-  writeFileSync('.env', lines.join('\n'), 'utf-8');
-  ok('.env generated with secure SESSION_SECRET');
+  writeFileSync(envPath, lines.join('\n'), 'utf-8');
+  ok('.env written with a fresh SESSION_SECRET');
+  dim(`  Path: ${envPath}`);
 }
 
-// ── Prisma ───────────────────────────────────────────────────────────────────
+// ---
+// Prisma
+// ---
 
 function runPrisma() {
-  header('Prisma');
+  section('Prisma');
 
-  info('Generating Prisma client…');
-  runOrFail('npx prisma generate', 'prisma generate failed');
+  // pnpm exec means we use the project-local prisma binary, not a global one.
+  // This avoids version mismatches.
+  runLive('pnpm exec prisma generate', 'Generating Prisma client...');
   ok('prisma generate');
 
-  info('Pushing schema to database…');
-  runOrFail('npx prisma db push', 'prisma db push failed');
+  runLive('pnpm exec prisma db push', 'Pushing schema to database...');
   ok('prisma db push');
 }
 
-// ── Build ────────────────────────────────────────────────────────────────────
+// ---
+// Build (dependencies + TypeScript + CSS)
+// ---
 
 function runBuild() {
-  header('Build');
+  section('Build');
 
-  info('Installing dependencies…');
-  runOrFail('pnpm install', 'pnpm install failed');
+  runLive('pnpm install', 'Installing dependencies...');
   ok('pnpm install');
 
-  info('Building TypeScript…');
-  const tsc = run('npx tsc 2>&1');
-  if (tsc === null) {
-    warn('tsc reported errors (likely pre-existing) — continuing');
+  // TypeScript compilation - we continue even on type errors because many
+  // projects ship with pre-existing warnings that don't affect runtime.
+  info('Compiling TypeScript (main)...');
+  const tsc1 = run('pnpm exec tsc 2>&1');
+  if (tsc1 === null) {
+    warn('tsc (main) reported errors - the build may still work. Check manually.');
   } else {
-    ok('tsc');
+    ok('tsc (main)');
   }
 
-  const tscPrisma = run('npx tsc -p tsconfig.prisma.json 2>&1');
-  if (tscPrisma === null) {
-    warn('tsc prisma reported errors — continuing');
+  info('Compiling TypeScript (prisma tsconfig)...');
+  const tsc2 = run('pnpm exec tsc -p tsconfig.prisma.json 2>&1');
+  if (tsc2 === null) {
+    warn('tsc (prisma) reported errors - check manually.');
   } else {
-    ok('tsc prisma');
+    ok('tsc (prisma)');
   }
 
-  info('Compiling CSS…');
-  run('npx tailwindcss -i ./public/tw.css -o ./public/styles.css');
-  ok('tailwindcss');
+  // CSS - non-fatal; the app still loads if this fails, just without updated styles.
+  info('Building CSS with Tailwind...');
+  const css = run('pnpm exec tailwindcss -i ./public/tw.css -o ./public/styles.css 2>&1');
+  if (css === null) {
+    warn('Tailwind CSS build failed - styles may be stale. Run: pnpm run build:css');
+  } else {
+    ok('Tailwind CSS compiled');
+  }
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
+// ---
+// Summary screen
+// ---
+
+function printSummary(creds) {
+  gap();
+  console.log(`${C.bold}${C.green}Setup complete!${C.reset}`);
+  gap();
+
+  console.log(`${C.bold}  Database credentials${C.reset}`);
+  console.log(`  Host      ${C.cyan}${creds.dbHost}${C.reset}`);
+  console.log(`  Port      ${C.cyan}${creds.dbPort}${C.reset}`);
+  console.log(`  Database  ${C.cyan}${creds.dbName}${C.reset}`);
+  console.log(`  User      ${C.cyan}${creds.dbUser}${C.reset}`);
+  console.log(`  Password  ${C.cyan}${creds.dbPass}${C.reset}`);
+  gap();
+
+  console.log(`${C.bold}  DATABASE_URL${C.reset}`);
+  console.log(`  ${C.dim}mysql://${creds.dbUser}:${creds.dbPass}@${creds.dbHost}:${creds.dbPort}/${creds.dbName}${C.reset}`);
+  gap();
+
+  console.log(`${C.bold}  Next steps${C.reset}`);
+  console.log(`  ${C.green}->${C.reset}  Start the panel   ${C.bold}pnpm run start${C.reset}`);
+  console.log(`  ${C.green}->${C.reset}  Dev mode (watch)  ${C.bold}pnpm run dev${C.reset}`);
+  console.log(`  ${C.green}->${C.reset}  Config file       ${C.bold}.env${C.reset}  (in project root)`);
+  gap();
+}
+
+// ---
+// Entry point
+// ---
 
 async function main() {
-  console.log();
-  header('════════════════════════════════════════');
-  header('   Airlink Panel — Setup');
-  header('════════════════════════════════════════');
+  if (opts.help) showHelp();
 
-  checkNodeVersion();
+  banner();
+
+  checkNode();
   checkPnpm();
-  ensureRedis();
-  ensureMariaDB();
-  const creds = setupDatabase();
+
+  if (opts.skipServices) {
+    section('Services');
+    warn('--skip-services: skipping Redis and MariaDB install/start.');
+  } else {
+    await ensureRedis();
+    await ensureMariaDB();
+  }
+
+  const creds = await setupDatabase();
+
   generateEnv(creds);
+
   runPrisma();
-  runBuild();
 
-  header('════════════════════════════════════════');
-  ok('Setup complete!');
-  header('════════════════════════════════════════');
+  if (opts.skipBuild) {
+    section('Build');
+    warn('--skip-build: skipping pnpm install and compilation.');
+  } else {
+    runBuild();
+  }
 
-  console.log(`${BOLD}MySQL credentials:${RESET}`);
-  console.log(`  Host:     127.0.0.1`);
-  console.log(`  Port:     3306`);
-  console.log(`  Database: ${creds.dbName}`);
-  console.log(`  User:     ${creds.dbUser}`);
-  console.log(`  Password: ${creds.dbPass}`);
-  console.log();
-  console.log(`${BOLD}DATABASE_URL (already in .env):${RESET}`);
-  console.log(`  mysql://${creds.dbUser}:${creds.dbPass}@127.0.0.1:3306/${creds.dbName}`);
-  console.log();
-  console.log(`${CYAN}Start the panel with: pnpm run start${RESET}`);
-  console.log();
+  printSummary(creds);
 }
 
 main().catch((err) => {
+  gap();
   fail(`Setup failed: ${err.message}`);
+  if (process.env.DEBUG) console.error(err.stack);
+  gap();
   process.exit(1);
 });
