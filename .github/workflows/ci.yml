@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-# Cancel in-progress runs on the same branch/PR to avoid wasting minutes on stale pushes
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -14,11 +13,9 @@ concurrency:
 permissions:
   contents: read
   security-events: write
-  pull-requests: read  # needed for dependency-review
+  pull-requests: read
 
 jobs:
-  # ── Security ────────────────────────────────────────────────────────────────
-
   semgrep:
     name: Semgrep SAST
     runs-on: ubuntu-latest
@@ -33,12 +30,10 @@ jobs:
           else
             semgrep ci --config auto --verbose
           fi
-        # semgrep ci exits non-zero on findings by default; --error is not a valid flag
 
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
-    # Only meaningful on PRs — compares base vs head for newly added vulns
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
@@ -57,12 +52,8 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      # --ignore-scripts skips postinstall (prisma generate), which requires
-      # DATABASE_URL — audit doesn't need generated types at all
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm audit --audit-level=high
-
-  # ── Quality ─────────────────────────────────────────────────────────────────
 
   lint:
     name: Lint
@@ -75,16 +66,27 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      # --ignore-scripts skips postinstall; ESLint doesn't need Prisma types
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      # --fix is for local dev only; CI must only check, never mutate files
       - run: pnpm exec eslint src
 
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: "file:./dev.db"
+      DATABASE_URL: "mysql://root:root@127.0.0.1:3306/airlink_panel_test"
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: airlink_panel_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -93,18 +95,28 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      # --ignore-scripts so postinstall doesn't race with our explicit generate below
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      # Now DATABASE_URL is set, so prisma generate can resolve it
       - run: pnpm exec prisma generate
-      # pnpm run typecheck covers tsconfig, tsconfig.prisma.json, tsconfig.tui.json
       - run: pnpm run typecheck
 
   test:
     name: Test
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: airlink_panel_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     env:
-      DATABASE_URL: "file:./dev.db"
+      DATABASE_URL: "mysql://root:root@127.0.0.1:3306/airlink_panel_test"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -114,9 +126,6 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      # migrate:deploy applies pending migrations AND regenerates the client —
-      # required so Vitest has a real, up-to-date schema to run against.
-      # DATABASE_URL is set above, so this won't fail like postinstall did.
       - run: pnpm run migrate:deploy
       - run: pnpm test
 
@@ -131,19 +140,28 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      # --ignore-scripts: vendor check is pure Node, needs no Prisma types
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      # Fails if the committed vendor bundle is out of sync with sources
       - run: pnpm run verify:vendor
-
-  # ── Build ───────────────────────────────────────────────────────────────────
 
   build:
     name: Build
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: airlink_panel_build
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     needs: [semgrep, lint, typecheck, test, audit, verify-vendor]
     env:
-      DATABASE_URL: "file:./dev.db"
+      DATABASE_URL: "mysql://root:root@127.0.0.1:3306/airlink_panel_build"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -153,10 +171,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile --ignore-scripts
-      # migrate:deploy: applies migrations and regenerates the Prisma client
-      # with DATABASE_URL in scope — this is what postinstall was trying to do
       - run: pnpm run migrate:deploy
-      # build = tsc (main) + tsc (prisma tsconfig) + tailwindcss
       - run: pnpm run build
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
