@@ -8,29 +8,20 @@ export const isAuthenticated =
     async (req: Request, res: Response, next: NextFunction) => {
       const userId = req.session.user?.id;
 
-      if (!userId) {
-        return res.redirect('/login');
-      }
+      if (!userId) return res.redirect('/login');
 
       const user = await prisma.users.findUnique({ where: { id: userId } });
+      if (!user) return res.redirect('/login');
 
-      if (!user) {
-        return res.redirect('/login');
+      if (isAdminRequired && !user.isAdmin) {
+        return renderErrorPage(req, res, 403);
       }
 
-      if (isAdminRequired) {
-        if (!user.isAdmin) {
-          return renderErrorPage(req, res, 403);
+      if (isAdminRequired && !user.totpEnabled) {
+        const settings = await getSettings();
+        if (settings?.require2faForAdmins) {
+          return res.redirect('/account/2fa/setup?required=1');
         }
-
-        if (!user.totpEnabled) {
-          const settings = await await getSettings();
-          if (settings?.require2faForAdmins) {
-            return res.redirect('/account/2fa/setup?required=1');
-          }
-        }
-
-        return next();
       }
 
       if (requiredPermission) {
@@ -42,7 +33,7 @@ export const isAuthenticated =
         }
 
         const hasPermission = userPermissions.some((perm: string) => {
-          if (perm === requiredPermission) {return true;}
+          if (perm === requiredPermission || perm === 'admin.*') return true;
           if (perm.endsWith('.*')) {
             const base = perm.slice(0, -2);
             return requiredPermission.startsWith(`${base}.`);
@@ -50,28 +41,19 @@ export const isAuthenticated =
           return false;
         });
 
-        if (hasPermission) {
-          return next();
-        }
-
-        return renderErrorPage(req, res, 403);
+        if (!hasPermission) return renderErrorPage(req, res, 403);
       }
-      next();
+
+      return next();
     };
 
-// JSON-friendly auth guard for API routes that must return a 401 JSON body
-// (rather than an HTML redirect) when the caller is unauthenticated.
 export const requireApiAuth =
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.session.user?.id;
-    if (!userId) {
-      return res.status(401).json({ results: [] });
-    }
+    if (!userId) return res.status(401).json({ results: [] });
 
     const user = await prisma.users.findUnique({ where: { id: userId } });
-    if (!user) {
-      return res.status(401).json({ results: [] });
-    }
+    if (!user) return res.status(401).json({ results: [] });
 
     return next();
   };
