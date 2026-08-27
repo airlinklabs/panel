@@ -46,7 +46,6 @@ class RedisSessionStore extends session.Store {
     const data = JSON.stringify(sess);
 
     this.redis.set(`${this.prefix}${sid}`, data, 'EX', ttlSec).then(() => {
-      // Track user → session mapping for admin session revocation.
       try {
         const userId = (sess as any)?.user?.id;
         if (userId != null) {
@@ -63,7 +62,6 @@ class RedisSessionStore extends session.Store {
   }
 
   destroy(sid: string, callback?: (err?: Error) => void): void {
-    // Look up session to find userId for index cleanup.
     this.redis.get(`${this.prefix}${sid}`).then((data) => {
       const pipeline = this.redis.pipeline();
       pipeline.del(`${this.prefix}${sid}`);
@@ -86,8 +84,8 @@ class RedisSessionStore extends session.Store {
     });
   }
 
-  touch(sid: string, _sess: session.SessionData, callback?: () => void): void {
-    const ttlSec = this.defaultTtl;
+  touch(sid: string, sess: session.SessionData, callback?: () => void): void {
+    const ttlSec = this.getTTL(sess);
     this.redis.expire(`${this.prefix}${sid}`, ttlSec).then(() => {
       callback?.();
     }).catch(() => {
@@ -140,10 +138,6 @@ class RedisSessionStore extends session.Store {
     }).catch((err) => callback?.(err as Error));
   }
 
-  /**
-   * Destroys every session belonging to the given user.
-   * Used by the admin panel when banning/deleting a user.
-   */
   async destroyUserSessions(userId: number | string): Promise<void> {
     const key = `${USER_INDEX_PREFIX}${userId}`;
     try {
@@ -164,7 +158,7 @@ class RedisSessionStore extends session.Store {
   private getTTL(sess: session.SessionData): number {
     const maxAge = sess.cookie?.maxAge;
     if (typeof maxAge === 'number') {
-      return Math.ceil(maxAge / 1000);
+      return Math.max(1, Math.ceil(maxAge / 1000));
     }
     return this.defaultTtl;
   }
@@ -181,10 +175,6 @@ class RedisSessionStore extends session.Store {
   }
 }
 
-/**
- * Singleton session store instance shared across the application.
- * Used by admin routes to revoke user sessions from Redis.
- */
 let _instance: RedisSessionStore | null = null;
 
 export function getSessionStore(): RedisSessionStore {
