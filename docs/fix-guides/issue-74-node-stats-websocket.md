@@ -1,6 +1,6 @@
 # Example fix for #74: authenticate node-stats WebSocket upgrades
 
-This document is an implementation guide for issue #74. The security boundary must be fixed before this endpoint is considered production-safe.
+This branch is an example scaffold for issue #74. It intentionally documents the required security flow rather than claiming that an unverified patch is production-ready.
 
 ## Required flow
 
@@ -16,92 +16,49 @@ HTTP Upgrade
   -> connect to daemon
 ```
 
-The current implementation checks only that a `connect.sid` cookie exists. That check must not remain as an authentication decision.
+The current implementation checks only that a `connect.sid` cookie exists. That check is not authentication.
 
-## Suggested helper
+## Suggested implementation
 
-Expose a small helper from the authentication/session layer so the HTTP and WebSocket paths share the same session semantics:
+Expose a reusable helper that resolves the same session data used by Express:
 
 ```ts
-type WebSocketAuthContext = {
-  userId: number;
-  user: User;
-  sessionId: string;
-};
-
-async function resolveWebSocketSession(req: IncomingMessage): Promise<WebSocketAuthContext | null> {
+async function resolveWebSocketSession(req: IncomingMessage) {
   const sid = extractSessionId(req);
   if (!sid) return null;
 
-  const sess = await loadSessionFromStore(sid);
-  if (!sess?.user?.id) return null;
+  const session = await loadSessionFromStore(sid);
+  if (!session?.user?.id) return null;
 
-  const user = await prisma.users.findUnique({ where: { id: sess.user.id } });
-  if (!user) return null;
-
-  return { userId: user.id, user, sessionId: sid };
+  const user = await prisma.users.findUnique({ where: { id: session.user.id } });
+  return user ? { user, sessionId: sid } : null;
 }
 ```
 
-Use the real repository session store rather than introducing a second Redis key format.
+The upgrade handler should authenticate and authorize before calling `handleUpgrade()` or opening the daemon connection. The requested node must be included in the authorization decision.
 
-## Upgrade handler shape
+## Security invariant
 
-The intended structure in `nodeStatsWs.ts` is:
+A request with a fabricated session ID or no permission for the requested node must never reach the daemon connection layer. This should be asserted directly with mocks/spies in tests.
 
-```ts
-server.on('upgrade', async (req, socket, head) => {
-  const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
-  const match = url.pathname.match(/^\/ws\/node\/(\d+)\/stats$/);
-  if (!match) return;
+## Tests
 
-  const nodeId = Number(match[1]);
-  if (!Number.isSafeInteger(nodeId) || nodeId <= 0) {
-    rejectUpgrade(socket, 400, 'invalid node');
-    return;
-  }
-
-  const auth = await resolveWebSocketSession(req);
-  if (!auth) {
-    rejectUpgrade(socket, 401, 'unauthorized');
-    return;
-  }
-
-  const node = await prisma.node.findUnique({ where: { id: nodeId } });
-  if (!node) {
-    rejectUpgrade(socket, 404, 'node not found');
-    return;
-  }
-
-  if (!(await canViewNode(auth.user, node))) {
-    rejectUpgrade(socket, 403, 'forbidden');
-    return;
-  }
-
-  wss.handleUpgrade(req, socket, head, (ws) => {
-    wss.emit('connection', ws, req, auth, node);
-  });
-});
-```
-
-The daemon connection must not be established until all checks have passed.
-
-## Tests to add
-
-The test suite should explicitly prove that a fabricated session ID cannot reach the daemon layer. Mock the daemon connection and assert it has zero invocations for every failed authentication/authorization case.
-
-Required cases:
+Mock the daemon connection and verify it is never called for:
 
 - missing cookie
 - malformed cookie
 - fabricated session ID
-- deleted session
-- expired session
-- revoked session
+- expired/revoked session
 - disabled user
-- authenticated user without node access
-- authenticated user accessing a different node
-- valid authorized user
+- unauthorized node
 - nonexistent node
 
-Also add a regression test for logout/revocation followed by a new WebSocket upgrade.
+Add a successful authorized upgrade case and a regression test proving logout/revocation blocks a later upgrade.
+
+## Acceptance criteria
+
+- [ ] Session ID is resolved through the real session store.
+- [ ] User/account state is verified before upgrade.
+- [ ] Node access is checked before `handleUpgrade()`.
+- [ ] Stored node credentials are never used for unauthorized callers.
+- [ ] Tests cover forged sessions and unauthorized node access.
