@@ -13,8 +13,6 @@ import {
   authValidationErrorCode,
 } from './schemas';
 
-// Tight rate limit applied only to auth routes — separate from the global limit.
-// 10 attempts per minute per IP before they get a 429.
 const authRateLimit = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
@@ -27,7 +25,7 @@ const authRateLimit = rateLimit({
 
 async function getSecuritySettings() {
   try {
-    const s = await await getSettings();
+    const s = await getSettings();
     return {
       maxAttempts:    s?.loginMaxAttempts    ?? 5,
       lockoutMinutes: s?.loginLockoutMinutes ?? 15,
@@ -43,14 +41,13 @@ const authServiceModule: Module = {
     description:   'Authentication and authorisation for users.',
     version:          '2.0.0',
     moduleVersion: '2.0.0',
-    author:        'AirlinkLab',
+    author:        'AirLinkLab',
     license:       'MIT',
   },
 
   router: () => {
     const router = Router();
 
-    // ── POST /login ─────────────────────────────────────────────────────────
     router.post('/login', authRateLimit, async (req: Request, res: Response) => {
       const parsed = loginSchema.safeParse(req.body);
 
@@ -67,18 +64,15 @@ const authServiceModule: Module = {
           where: { OR: [{ email: identifier }, { username: identifier }] },
         });
 
-        // Always run bcrypt to prevent timing-based user enumeration.
         const hash            = user?.password ?? `$2b$10$${  'x'.repeat(53)}`;
         const isPasswordValid = await bcrypt.compare(password, hash);
 
-        // Check lockout (only meaningful if the user exists).
         if (user && user.lockedUntil && user.lockedUntil > new Date()) {
           const minutesLeft = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
           return res.redirect(`/login?err=account_locked&wait=${minutesLeft}`);
         }
 
         if (!user || !isPasswordValid) {
-          // Increment failed attempt counter on the matching user account.
           if (user) {
             const newAttempts = (user.loginAttempts ?? 0) + 1;
             const shouldLock  = newAttempts >= maxAttempts;
@@ -92,11 +86,9 @@ const authServiceModule: Module = {
               },
             });
           }
-          // Single generic error — never reveal whether the username exists.
           return res.redirect('/login?err=invalid_credentials');
         }
 
-        // Successful login: reset counters.
         await prisma.users.update({
           where: { id: user.id },
           data: { loginAttempts: 0, lockedUntil: null },
@@ -106,16 +98,10 @@ const authServiceModule: Module = {
           req.session.regenerate(err => (err ? reject(err) : resolve()))
         );
 
-        // Set session duration based on "Remember me" checkbox.
-        // Checked: 30 days. Unchecked: 24 hours.
-        if (rememberMe) {
-          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-        } else {
-          req.session.cookie.maxAge = 24 * 60 * 60 * 1000;
-        }
+        req.session.cookie.maxAge = rememberMe
+          ? 30 * 24 * 60 * 60 * 1000
+          : 24 * 60 * 60 * 1000;
 
-        // Two-factor authentication step: hold the login in a pending state
-        // until the user verifies their TOTP code on /2fa.
         if (user.totpEnabled) {
           req.session.pendingUserId = user.id;
           res.redirect('/2fa');
@@ -148,50 +134,54 @@ const authServiceModule: Module = {
       }
     });
 
-    // ── POST /register ───────────────────────────────────────────────────────
     router.post('/register', authRateLimit, async (req: Request, res: Response) => {
       const parsed = registerSchema.safeParse(req.body);
 
       if (!parsed.success) {
         const code = authValidationErrorCode(parsed.error.issues);
-        if (code === 'missing') {
-          return res.redirect('/register?err=missing_credentials');
-        }
-        if (code === 'invalid_username') {
-          return res.redirect('/register?err=invalid_username');
-        }
+        if (code === 'missing') return res.redirect('/register?err=missing_credentials');
+        if (code === 'invalid_username') return res.redirect('/register?err=invalid_username');
         return res.redirect('/register?err=invalid_input');
       }
 
       const { email, username, password } = parsed.data;
 
       try {
-        const userCount   = await prisma.users.count();
-        const isFirstUser = userCount === 0;
+        const passwordHash = await bcrypt.hash(password, 12);
 
-        if (!isFirstUser) {
-          const settings = await await getSettings();
-          if (!settings?.allowRegistration) {
-            return res.redirect('/login?err=registration_disabled');
+        await prisma.$transaction(async (tx) => {
+          const [lock] = await tx.$queryRaw<Array<{ acquired: number }>>`
+            SELECT GET_LOCK('airlink:first-user-bootstrap', 10) AS acquired
+          `;
+          if (lock?.acquired !== 1) throw new Error('bootstrap_lock_timeout');
+
+          try {
+            const userCount = await tx.users.count();
+            const isFirstUser = userCount === 0;
+
+            if (!isFirstUser) {
+              const settings = await getSettings();
+              if (!settings?.allowRegistration) throw new Error('registration_disabled');
+            }
+
+            const existing = await tx.users.findFirst({
+              where: { OR: [{ email }, { username }] },
+            });
+            if (existing) throw new Error('user_already_exists');
+
+            await tx.users.create({
+              data: {
+                email,
+                username,
+                password: passwordHash,
+                description: 'No About Me',
+                role: isFirstUser ? 'owner' : 'user',
+                isAdmin: isFirstUser,
+              },
+            });
+          } finally {
+            await tx.$queryRaw`SELECT RELEASE_LOCK('airlink:first-user-bootstrap')`;
           }
-        }
-
-        const existing = await prisma.users.findFirst({
-          where: { OR: [{ email }, { username }] },
-        });
-        if (existing) {return res.redirect('/register?err=user_already_exists');}
-
-        await prisma.users.create({
-          data: {
-            email,
-            username,
-            password:    await bcrypt.hash(password, 12),
-            description: 'No About Me',
-            // The first user to register owns the panel; everyone else starts
-            // as a normal user.
-            role:        isFirstUser ? 'owner' : 'user',
-            isAdmin:     isFirstUser,
-          },
         });
 
         res.redirect('/login');
@@ -201,16 +191,10 @@ const authServiceModule: Module = {
       }
     });
 
-    // ── GET /logout ──────────────────────────────────────────────────────────
-    // Canonical logout route. The browser initiates logout via a plain GET link
-    // (<a href="/logout"> in template.ejs / bottomNav.ejs), so only GET is kept;
-    // the duplicate POST handler previously lived in auth.ts and is removed.
     router.get('/logout', (req: Request, res: Response) => {
       if (req.session) {
         req.session.destroy((err) => {
-          if (err) {
-            logger.error('Session destruction error', err);
-          }
+          if (err) logger.error('Session destruction error', err);
           res.clearCookie('connect.sid');
           res.redirect('/login');
         });
