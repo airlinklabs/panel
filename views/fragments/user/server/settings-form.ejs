@@ -1,29 +1,52 @@
-<!-- Server settings form fragment — replaces #server-settings-form on save -->
-<div id="server-settings-form" class="al-card p-5">
+<!-- Server settings form fragment — Alpine auto-save -->
+<div id="server-settings-form" class="al-card p-5"
+  x-data="{
+    saving: false,
+    lastSaved: null,
+    name: '<%= server.name.replace(/'/g, "\\'") %>',
+    description: '<%= (server.description || "").replace(/'/g, "\\'") %>',
+    async save() {
+      this.saving = true;
+      try {
+        const res = await fetch('/server/<%= server.UUID %>/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: this.name, description: this.description }),
+        });
+        const data = await res.json();
+        if (data.success || res.ok) {
+          this.lastSaved = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+          showToast('Server settings saved.', 'success');
+        } else {
+          showToast(data.error || 'Failed to save settings.', 'error');
+        }
+      } catch (e) { showToast('Failed to save settings.', 'error'); }
+      this.saving = false;
+    }
+  }">
   <h2 class="text-lg font-semibold mb-1" style="color:var(--theme-text-strong)"><%= req.translations.serverSettings || 'Server Settings' %></h2>
   <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
 
-  <form hx-post="/server/<%= server.UUID %>/settings"
-        hx-target="#server-settings-form"
-        hx-swap="outerHTML"
-        hx-indicator="#settings-save-indicator"
-        hx-on::after-request="if(event.detail.successful) showToast('Server settings saved.', 'success')">
+  <form @submit.prevent="save()">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div>
         <label for="serverName" class="block text-sm font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= req.translations.serverName || 'Server Name' %></label>
-        <input type="text" id="serverName" name="name" value="<%= server.name %>" class="al-input">
+        <input type="text" id="serverName" name="name" x-model="name" class="al-input"
+          @input.debounce.500ms="save()">
       </div>
       <div>
         <label for="serverDescription" class="block text-sm font-medium mb-1.5" style="color:var(--theme-text-muted)">Description</label>
-        <input type="text" id="serverDescription" name="description" value="<%= server.description || '' %>" class="al-input">
+        <input type="text" id="serverDescription" name="description" x-model="description" class="al-input"
+          @input.debounce.500ms="save()">
       </div>
     </div>
     <div class="mt-5 flex items-center gap-3">
-      <button type="submit" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-2">
+      <button type="submit" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-2" :disabled="saving">
         <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <%= req.translations.saveSettings || 'Save Settings' %>
+        <span x-show="!saving"><%= req.translations.saveSettings || 'Save Settings' %></span>
+        <span x-show="saving">Saving...</span>
       </button>
-      <span id="settings-save-indicator" class="htmx-indicator text-xs" style="color:var(--theme-text-muted)">Saving...</span>
+      <span x-show="lastSaved && !saving" x-transition x-text="'Saved ' + lastSaved" class="text-xs" style="color:var(--theme-success)"></span>
     </div>
   </form>
 </div>

@@ -60,27 +60,38 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
 
             <!-- Username -->
-            <div>
+            <div x-data="{ saving: false, lastSaved: null }">
               <label class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('user', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.username || 'Username' %>
               </label>
               <div class="flex gap-1.5">
                 <input id="username" type="text" name="username" placeholder="<%= user.username %>"
-                  class="al-input flex-1">
-                <span id="username-feedback" class="text-[11px] hidden" style="color:var(--theme-text-muted);"></span>
+                  class="al-input flex-1"
+                  x-ref="username"
+                  @input.debounce.600ms="saving = true; window._accountSave('username').then(d => { saving = false; lastSaved = d ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null; })">
+                <span class="text-[11px] hidden" style="color:var(--theme-text-muted);" x-ref="usernameFeedback"></span>
+              </div>
+              <div class="flex items-center gap-2 mt-1 h-4">
+                <span x-show="saving" x-transition class="text-[11px]" style="color:var(--theme-text-muted)">Saving...</span>
+                <span x-show="lastSaved && !saving" x-transition x-text="'Saved ' + lastSaved" class="text-[11px]" style="color:var(--theme-success)"></span>
               </div>
             </div>
 
             <!-- Email -->
-            <div>
+            <div x-data="{ saving: false, lastSaved: null }">
               <label class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('mail', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.email || 'Email' %>
               </label>
-              <input id="email" type="email" name="email" placeholder="<%= user.email %>" class="al-input">
+              <input id="email" type="email" name="email" placeholder="<%= user.email %>" class="al-input"
+                @input.debounce.600ms="saving = true; window._accountSave('email').then(d => { saving = false; lastSaved = d ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null; })">
+              <div class="flex items-center gap-2 mt-1 h-4">
+                <span x-show="saving" x-transition class="text-[11px]" style="color:var(--theme-text-muted)">Saving...</span>
+                <span x-show="lastSaved && !saving" x-transition x-text="'Saved ' + lastSaved" class="text-[11px]" style="color:var(--theme-success)"></span>
+              </div>
             </div>
 
             <!-- Current password -->
-            <div class="al-field" data-al-field>
+            <div class="al-field" data-al-field x-data="{ saving: false, lastSaved: null }">
               <label for="currentPassword" class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('lock', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.currentPassword || 'Current password' %>
               </label>
@@ -97,7 +108,7 @@
             </div>
 
             <!-- New password -->
-            <div class="al-field" data-al-field>
+            <div class="al-field" data-al-field x-data="{ saving: false, lastSaved: null }">
               <label for="newPassword" class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('lock', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.newPassword || 'New password' %>
               </label>
@@ -111,19 +122,25 @@
             </div>
 
             <!-- Description (full width) -->
-            <div class="md:col-span-2">
+            <div class="md:col-span-2" x-data="{ saving: false, lastSaved: null }">
               <label class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('file-text', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.description || 'Description' %>
               </label>
-              <textarea id="description" name="description" rows="2" class="al-input resize-none"><%= user.description %></textarea>
+              <textarea id="description" name="description" rows="2" class="al-input resize-none"
+                @input.debounce.600ms="saving = true; window._accountSave('description').then(d => { saving = false; lastSaved = d ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null; })"><%= user.description %></textarea>
+              <div class="flex items-center gap-2 mt-1 h-4">
+                <span x-show="saving" x-transition class="text-[11px]" style="color:var(--theme-text-muted)">Saving...</span>
+                <span x-show="lastSaved && !saving" x-transition x-text="'Saved ' + lastSaved" class="text-[11px]" style="color:var(--theme-success)"></span>
+              </div>
             </div>
 
             <!-- Language -->
-            <div>
+            <div x-data="{ saving: false, lastSaved: null }">
               <label for="language" class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
                 <%- icon('globe', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.languagePreference || 'Language' %>
               </label>
-              <select id="language" name="language" class="cs-native">
+              <select id="language" name="language" class="cs-native"
+                @change="saving = true; window._accountSave('language').then(d => { saving = false; lastSaved = d ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null; })">
                 <option value="en"  <%= req.lang === 'en'  ? 'selected' : '' %>>English</option>
                 <option value="fr"  <%= req.lang === 'fr'  ? 'selected' : '' %>>Français</option>
                 <option value="de"  <%= req.lang === 'de'  ? 'selected' : '' %>>Deutsch</option>
@@ -136,6 +153,10 @@
                 <option value="ta"  <%= req.lang === 'ta'  ? 'selected' : '' %>>தமிழ்</option>
               </select>
               <div class="custom-select" data-for="language"></div>
+              <div class="flex items-center gap-2 mt-1 h-4">
+                <span x-show="saving" x-transition class="text-[11px]" style="color:var(--theme-text-muted)">Saving...</span>
+                <span x-show="lastSaved && !saving" x-transition x-text="'Saved ' + lastSaved" class="text-[11px]" style="color:var(--theme-success)"></span>
+              </div>
             </div>
 
             <!-- 2FA -->
@@ -164,28 +185,30 @@
 
           </div>
 
-          <!-- Universal save button -->
-          <div class="mt-6 pt-5" style="border-top:1px solid var(--theme-border)">
-            <button id="saveAccountBtn" type="button" class="al-btn-primary px-6 py-2.5 text-sm font-medium">
-              <%= req.translations.saveChanges || 'Save Changes' %>
+          <!-- Universal save button — triggers saves on all dirty fields -->
+          <div class="mt-6 pt-5" style="border-top:1px solid var(--theme-border)" x-data="{ saving: false }">
+            <button id="saveAccountBtn" type="button" class="al-btn-primary px-6 py-2.5 text-sm font-medium"
+              @click="saving = true; Promise.all(['username','email','description','language','preferredNode'].map(f => window._accountSave(f))).then(results => { saving = false; if(results.some(d => d !== null)) showToast('All changes saved.', 'success'); })">
+              <span x-show="!saving"><%= req.translations.saveChanges || 'Save Changes' %></span>
+              <span x-show="saving">Saving...</span>
             </button>
           </div>
         </div>
 
         <!-- Preferred node -->
-        <div class="al-card p-5">
+        <div class="al-card p-5" x-data="{ saving: false, lastSaved: null }">
           <p class="text-sm font-medium mb-1" style="color:var(--theme-text-strong)"><%= req.translations.preferredNode || 'Preferred node' %></p>
           <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= req.translations.preferredNodeDesc || 'Pick the node your servers are created on by default.' %></p>
-          <select id="preferredNode" class="al-input">
+          <select id="preferredNode" class="al-input"
+            @change="saving = true; window._accountSave('preferredNode').then(d => { saving = false; lastSaved = d ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null; })">
             <option value=""><%= req.translations.autoSelectNode || 'Auto (least loaded)' %></option>
             <% if (nodes && nodes.length) { nodes.forEach(node => { %>
             <option value="<%= node.id %>"<%= user?.preferredNodeId === node.id ? ' selected' : '' %>><%= node.name %> — <%= node.address %></option>
             <% }); } %>
           </select>
-          <div class="mt-4">
-            <button id="savePreferredNodeBtn" type="button" class="al-btn-primary px-4 py-2 text-sm font-medium">
-              <%= req.translations.saveChanges || 'Save' %>
-            </button>
+          <div class="flex items-center gap-2 mt-2 h-4">
+            <span x-show="saving" x-transition class="text-[11px]" style="color:var(--theme-text-muted)">Saving...</span>
+            <span x-show="lastSaved && !saving" x-transition x-text="'Saved ' + lastSaved" class="text-[11px]" style="color:var(--theme-success)"></span>
           </div>
         </div>
         </div>
@@ -393,116 +416,81 @@
 <script nonce="<%- nonce %>">
   const { showToast } = createToastSystem();
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-  let submitting = false;
 
-  async function post(url, data) {
-    if (submitting) return { ok: false, text: 'Already saving...' };
-    submitting = true;
+  // ── Auto-save helper for each field ──────────────────────────────
+  // Called by Alpine x-data components on each field
+  window._accountSave = async function(field) {
+    let url, data;
+    switch (field) {
+      case 'username':
+        data = { newUsername: document.getElementById('username')?.value?.trim() };
+        if (!data.newUsername) return null;
+        url = '/update-username';
+        break;
+      case 'email':
+        data = { email: document.getElementById('email')?.value?.trim() };
+        if (!data.email) return null;
+        url = '/change-email';
+        break;
+      case 'description':
+        data = { description: document.getElementById('description')?.value?.trim() || '' };
+        url = '/update-description';
+        break;
+      case 'language':
+        data = { language: document.getElementById('language')?.value };
+        if (!data.language) return null;
+        url = '/set-language';
+        break;
+      case 'preferredNode':
+        const nodeId = document.getElementById('preferredNode')?.value;
+        data = { preferredNodeId: nodeId || null };
+        url = '/set-preferred-node';
+        break;
+      default: return null;
+    }
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
         body: JSON.stringify(data),
       });
-      const text = await res.text();
-      // Surface only the server's error field, never the raw response body.
-      let message = text;
+      const result = await res.json();
       if (!res.ok) {
-        try {
-          const parsed = JSON.parse(text);
-          message = parsed.error || parsed.message || 'Request failed';
-        } catch {
-          message = 'Request failed';
-        }
+        showToast(result.error || result.message || 'Failed to save ' + field, 'error');
+        return null;
       }
-      return { ok: res.ok, text: message };
-    } finally { submitting = false; }
-  }
-
-  document.getElementById('saveAccountBtn')?.addEventListener('click', async () => {
-    const btn = document.getElementById('saveAccountBtn');
-    if (window.ALAction && typeof window.ALAction.loading === 'function') ALAction.loading(btn, true);
-    else btn.disabled = true;
-    let hasError = false;
-
-    const username = document.getElementById('username')?.value?.trim();
-    if (username) {
-      const r = await post('/update-username', { newUsername: username });
-      if (!r.ok) { showToast(r.text || 'Failed to update username', 'error'); hasError = true; }
-      else { const sb = document.getElementById('sidebar-username'); if (sb) sb.textContent = username; }
-    }
-
-    const email = document.getElementById('email')?.value?.trim();
-    if (email) {
-      const r = await post('/change-email', { email });
-      if (!r.ok) { showToast(r.text || 'Failed to update email', 'error'); hasError = true; }
-    }
-
-    const currentPw = document.getElementById('currentPassword')?.value?.trim();
-    const newPw = document.getElementById('newPassword')?.value?.trim();
-    if (currentPw && newPw) {
-      const r = await post('/change-password', { currentPassword: currentPw, newPassword: newPw });
-      if (!r.ok) { showToast(r.text || 'Failed to update password', 'error'); hasError = true; }
-      else { showToast('Password updated.', 'success'); }
-    }
-
-    const desc = document.getElementById('description')?.value?.trim();
-    if (desc !== undefined) {
-      const r = await post('/update-description', { description: desc });
-      if (!r.ok) { showToast(r.text || 'Failed to update description', 'error'); hasError = true; }
-    }
-
-    const lang = document.getElementById('language')?.value;
-    if (lang) {
-      const r = await post('/set-language', { language: lang });
-      if (!r.ok) { showToast(r.text || 'Failed to update language', 'error'); hasError = true; }
-    }
-
-    if (window.ALAction && typeof window.ALAction.loading === 'function') ALAction.loading(btn, false);
-    else { btn.disabled = false; btn.textContent = 'Save Changes'; }
-    if (!hasError) showToast('All changes saved.', 'success');
-  });
-
-  // Preferred node — saved on its own so creating servers lands on the
-  // node the user prefers rather than the least-loaded default.
-  document.getElementById('savePreferredNodeBtn')?.addEventListener('click', async () => {
-    const btn = document.getElementById('savePreferredNodeBtn');
-    const nodeId = document.getElementById('preferredNode')?.value;
-    if (window.ALAction && typeof window.ALAction.loading === 'function') ALAction.loading(btn, true);
-    else btn.disabled = true;
-    try {
-      const r = await post('/set-preferred-node', { preferredNodeId: nodeId || null });
-      if (r.ok) {
-        showToast(r.message || 'Preferred node saved.', 'success');
-      } else {
-        showToast(r.message || r.text || 'Failed to save preferred node.', 'error');
+      // Update sidebar username if changed
+      if (field === 'username') {
+        const sb = document.getElementById('sidebar-username');
+        if (sb) sb.textContent = data.newUsername;
       }
-    } catch {
-      showToast('Failed to save preferred node.', 'error');
-    } finally {
-      if (window.ALAction && typeof window.ALAction.loading === 'function') ALAction.loading(btn, false);
-      else btn.disabled = false;
+      return result;
+    } catch (err) {
+      showToast('Failed to save ' + field, 'error');
+      return null;
     }
-  });
+  };
 
-  // Username availability check
+  // ── Username availability check ──────────────────────────────────
   const usernameInput = document.getElementById('username');
-  const usernameFb = document.getElementById('username-feedback');
+  const usernameFb = document.querySelector('[x-ref="usernameFeedback"]');
   let usernameTimer;
   usernameInput?.addEventListener('input', () => {
     clearTimeout(usernameTimer);
     usernameTimer = setTimeout(async () => {
       const val = usernameInput.value.trim();
-      if (!val) { usernameFb.textContent = ''; return; }
+      if (!val || !usernameFb) return;
       try {
         const res = await fetch(`/check-username?username=${encodeURIComponent(val)}`);
         const { exists } = await res.json();
         usernameFb.textContent = exists ? '<%= req.translations.usernameTaken || "Username taken" %>' : '<%= req.translations.usernameIsNotTaken || "Username available" %>';
+        usernameFb.style.color = exists ? 'var(--theme-danger)' : 'var(--theme-success)';
+        usernameFb.classList.remove('hidden');
       } catch (err) { console.error('Username check failed:', err); }
     }, 500);
   });
 
-  // Password validation
+  // ── Password validation ──────────────────────────────────────────
   const currentPwInput = document.getElementById('currentPassword');
   const newPwInput = document.getElementById('newPassword');
   const pwFeedback = document.getElementById('current-password-feedback');
@@ -510,7 +498,7 @@
   currentPwInput?.addEventListener('input', () => {
     clearTimeout(pwTimer);
     const val = currentPwInput.value.trim();
-    if (!val) { pwFeedback.textContent = ''; newPwInput.disabled = true; newPwInput.value = ''; return; }
+    if (!val) { if (pwFeedback) pwFeedback.textContent = ''; newPwInput.disabled = true; newPwInput.value = ''; return; }
     pwTimer = setTimeout(async () => {
       try {
         const res = await fetch('/validate-password', {
@@ -519,9 +507,9 @@
           body: JSON.stringify({ currentPassword: val }),
         });
         const { valid } = await res.json();
-        pwFeedback.textContent = valid ? '<%= req.translations.correctPassword || "Correct" %>' : '<%= req.translations.incorrectPassword || "Incorrect password" %>';
+        if (pwFeedback) pwFeedback.textContent = valid ? '<%= req.translations.correctPassword || "Correct" %>' : '<%= req.translations.incorrectPassword || "Incorrect password" %>';
         newPwInput.disabled = !valid;
-      } catch (err) { console.error('Password validation failed:', err); pwFeedback.textContent = 'Could not validate'; newPwInput.disabled = true; }
+      } catch (err) { console.error('Password validation failed:', err); if (pwFeedback) pwFeedback.textContent = 'Could not validate'; newPwInput.disabled = true; }
     }, 500);
   });
 

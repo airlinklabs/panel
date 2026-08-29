@@ -1,5 +1,29 @@
-<!-- Docker image form fragment — replaces #startup-docker-form on save -->
-<div id="startup-docker-form" class="al-card overflow-hidden">
+<!-- Docker image form fragment — Alpine auto-save -->
+<div id="startup-docker-form" class="al-card overflow-hidden"
+  x-data="{
+    saving: false,
+    lastSaved: null,
+    selectedImage: '',
+    async save() {
+      if (!this.selectedImage) return;
+      this.saving = true;
+      try {
+        const res = await fetch('/server/<%= server.UUID %>/startup/docker-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dockerImage: this.selectedImage }),
+        });
+        const data = await res.json();
+        if (data.success || res.ok) {
+          this.lastSaved = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+          showToast('Docker image updated successfully! Server will be restarted if it was running.', 'success');
+        } else {
+          showToast(data.error || 'Failed to update Docker image.', 'error');
+        }
+      } catch (e) { showToast('Failed to update Docker image.', 'error'); }
+      this.saving = false;
+    }
+  }">
   <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
     <div>
       <h3 class="text-lg font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.dockerImageLabel || 'Docker Image' %></h3>
@@ -13,12 +37,7 @@
     </div>
   </div>
 
-  <form hx-post="/server/<%= server.UUID %>/startup/docker-image"
-        hx-target="#startup-docker-form"
-        hx-swap="outerHTML"
-        hx-indicator="#docker-save-indicator"
-        hx-on::after-request="if(event.detail.successful) showToast('Docker image updated successfully! Server will be restarted if it was running.', 'success')"
-        novalidate>
+  <form @submit.prevent="save()">
     <%- include('../../../components/csrf') %>
     <div class="p-5">
       <div class="mb-4">
@@ -48,7 +67,7 @@
         %>
 
         <div class="relative">
-          <select id="dockerImage" name="dockerImage" class="cs-native">
+          <select id="dockerImage" name="dockerImage" class="cs-native" x-model="selectedImage" @change="save()">
             <% if (availableDockerImages.length > 0) { %>
               <% availableDockerImages.forEach(image => { %>
                 <option value="<%= image %>" <%= image === currentDockerImage ? 'selected' : '' %>><%= image %></option>
@@ -64,8 +83,11 @@
     </div>
 
     <div class="px-5 py-4 border-t flex items-center gap-3" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-      <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm"><%= req.translations.updateDockerImage || 'Update Docker Image' %></button>
-      <span id="docker-save-indicator" class="htmx-indicator text-xs" style="color:var(--theme-text-muted)">Updating...</span>
+      <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm" :disabled="saving">
+        <span x-show="!saving"><%= req.translations.updateDockerImage || 'Update Docker Image' %></span>
+        <span x-show="saving">Updating...</span>
+      </button>
+      <span x-show="lastSaved && !saving" x-transition x-text="'Saved ' + lastSaved" class="text-xs" style="color:var(--theme-success)"></span>
     </div>
   </form>
 </div>

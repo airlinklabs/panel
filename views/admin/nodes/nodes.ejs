@@ -125,26 +125,42 @@
             <div class="p-5">
               <div id="admin-locations-status"></div>
               <form id="createLocationForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end"
-                hx-post="/admin/locations"
-                hx-target="#admin-locations-list"
-                hx-swap="outerHTML"
-                hx-disabled-elt="find button[type='submit']"
-                hx-indicator="#create-location-status">
+                x-data="{ saving: false, name: '', shortCode: '', async submit() {
+                  if (!this.name || !this.shortCode) return;
+                  this.saving = true;
+                  try {
+                    const res = await fetch('/admin/locations', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ name: this.name, shortCode: this.shortCode }),
+                    });
+                    const data = await res.json();
+                    if (data.success || res.ok) {
+                      showToast('Location created.', 'success');
+                      this.name = ''; this.shortCode = '';
+                      // Refresh the location list via HTMX
+                      htmx.trigger('#admin-locations-list', 'refresh');
+                    } else {
+                      showToast(data.error || 'Failed to create location.', 'error');
+                    }
+                  } catch (e) { showToast('Failed to create location.', 'error'); }
+                  this.saving = false;
+                }}">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div>
                   <label class="al-label" for="locName">Name</label>
-                  <input id="locName" name="name" type="text" placeholder="US East" class="al-input" required>
+                  <input id="locName" name="name" type="text" placeholder="US East" class="al-input" required x-model="name">
                 </div>
                 <div>
                   <label class="al-label" for="locCode">Short code</label>
-                  <input id="locCode" name="shortCode" type="text" placeholder="us-east" class="al-input" autocapitalize="off" spellcheck="false" required>
+                  <input id="locCode" name="shortCode" type="text" placeholder="us-east" class="al-input" autocapitalize="off" spellcheck="false" required x-model="shortCode">
                 </div>
                 <div class="lg:col-span-2 flex items-end">
-                  <button type="submit" class="al-btn-primary w-full sm:w-auto">
+                  <button type="button" @click="submit()" class="al-btn-primary w-full sm:w-auto" :disabled="saving">
                     <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-                    Create Location
+                    <span x-show="!saving">Create Location</span>
+                    <span x-show="saving">Creating...</span>
                   </button>
-                  <p id="create-location-status" class="htmx-indicator text-xs ml-2" style="color:var(--theme-text-muted)">Creating…</p>
                 </div>
               </form>
             </div>

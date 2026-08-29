@@ -1,15 +1,33 @@
-<!-- Variables form fragment — replaces #startup-variables-form on save -->
-<div id="startup-variables-form" class="al-card p-6 shadow-lg mt-8">
+<!-- Variables form fragment — Alpine auto-save -->
+<div id="startup-variables-form" class="al-card p-6 shadow-lg mt-8"
+  x-data="{
+    saving: false,
+    lastSaved: null,
+    dirty: false,
+    async save() {
+      this.saving = true;
+      const formData = new FormData(this.$refs.form);
+      try {
+        const res = await fetch('/server/<%= server.UUID %>/startup/variables', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success || res.ok) {
+          this.lastSaved = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+          this.dirty = false;
+          showToast('Variables saved successfully!', 'success');
+        } else {
+          showToast(data.error || 'Failed to save variables.', 'error');
+        }
+      } catch (e) { showToast('Failed to save variables.', 'error'); }
+      this.saving = false;
+    }
+  }">
   <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.serverVariables || 'Server Variables' %></h2>
   <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
 
-  <form hx-post="/server/<%= server.UUID %>/startup/variables"
-        hx-target="#startup-variables-form"
-        hx-swap="outerHTML"
-        hx-encoding="multipart/form-data"
-        hx-indicator="#vars-save-indicator"
-        hx-on::after-request="if(event.detail.successful) showToast('Variables saved successfully!', 'success')"
-        novalidate>
+  <form x-ref="form" @submit.prevent="save()" @input="dirty = true">
     <%- include('../../../components/csrf') %>
     <div id="variablesContainer" class="space-y-4">
       <% if (serverVariables && serverVariables.length > 0) { %>
@@ -22,7 +40,7 @@
             <div class="md:col-span-2">
               <% if (variable.type === 'boolean') { %>
                 <label class="relative inline-flex items-center cursor-pointer" for="toggle_<%= variable.env %>">
-                  <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %>>
+                  <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %> @change="dirty = true">
                   <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
                   <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-muted)" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'Enabled' : 'Disabled' %></span>
                 </label>
@@ -45,8 +63,11 @@
     </div>
 
     <div class="mt-6 flex items-center gap-3">
-      <button type="submit" class="al-btn-primary"><%= req.translations.saveVariables || 'Save Variables' %></button>
-      <span id="vars-save-indicator" class="htmx-indicator text-xs" style="color:var(--theme-text-muted)">Saving...</span>
+      <button type="submit" class="al-btn-primary" :disabled="saving">
+        <span x-show="!saving"><%= req.translations.saveVariables || 'Save Variables' %></span>
+        <span x-show="saving">Saving...</span>
+      </button>
+      <span x-show="lastSaved && !saving" x-transition x-text="'Saved ' + lastSaved" class="text-xs" style="color:var(--theme-success)"></span>
     </div>
   </form>
 </div>

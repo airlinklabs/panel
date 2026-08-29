@@ -1,5 +1,29 @@
-<!-- Startup command form fragment — replaces #startup-command-form on save -->
-<div id="startup-command-form" class="al-card overflow-hidden mb-6">
+<!-- Startup command form fragment — Alpine auto-save -->
+<div id="startup-command-form" class="al-card overflow-hidden mb-6"
+  x-data="{
+    saving: false,
+    lastSaved: null,
+    command: '<%= (server.StartCommand || "").replace(/'/g, "\\'").replace(/\n/g, "\\n") %>',
+    async save() {
+      if (!this.command.trim()) return;
+      this.saving = true;
+      try {
+        const res = await fetch('/server/<%= server.UUID %>/startup/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ startCommand: this.command }),
+        });
+        const data = await res.json();
+        if (data.success || res.ok) {
+          this.lastSaved = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+          showToast('Startup command saved successfully!', 'success');
+        } else {
+          showToast(data.error || 'Failed to save command.', 'error');
+        }
+      } catch (e) { showToast('Failed to save command.', 'error'); }
+      this.saving = false;
+    }
+  }">
   <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
     <div>
       <h2 class="text-lg font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.startupCommand || 'Startup Command' %></h2>
@@ -30,17 +54,12 @@
     <% } %>
   </div>
 
-  <form hx-post="/server/<%= server.UUID %>/startup/command"
-        hx-target="#startup-command-form"
-        hx-swap="outerHTML"
-        hx-indicator="#cmd-save-indicator"
-        hx-on::after-request="if(event.detail.successful) showToast('Startup command saved successfully!', 'success')"
-        novalidate>
+  <form @submit.prevent="save()">
     <%- include('../../../components/csrf') %>
     <div class="p-5">
       <div class="mb-4">
         <label for="startCommand" class="block text-sm font-medium mb-2" style="color:var(--theme-text-muted)"><%= req.translations.startupCommand || 'Startup Command' %></label>
-        <textarea id="startCommand" name="startCommand" rows="3" class="al-input <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'readonly' : '' %> aria-label="<%= req.translations.startupCommand || 'Startup Command' %>"><%= server.StartCommand %></textarea>
+        <textarea id="startCommand" name="startCommand" rows="3" class="al-input <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'readonly' : '' %> aria-label="<%= req.translations.startupCommand || 'Startup Command' %>" x-model="command" <%= isStartupEditAllowed ? '@input.debounce.500ms="save()"' : '' %>><%= server.StartCommand %></textarea>
         <% if (!isStartupEditAllowed) { %>
           <p class="mt-2 text-xs" style="color:var(--theme-danger);"><%= req.translations.startupCommandDisabled || 'Startup command editing is disabled for this server. Contact an administrator to enable this feature.' %></p>
         <% } else { %>
@@ -50,8 +69,11 @@
     </div>
 
     <div class="px-5 py-4 border-t flex items-center gap-3" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-      <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
-      <span id="cmd-save-indicator" class="htmx-indicator text-xs" style="color:var(--theme-text-muted)">Saving...</span>
+      <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %> :disabled="saving">
+        <span x-show="!saving"><%= req.translations.saveCommand || 'Save Command' %></span>
+        <span x-show="saving">Saving...</span>
+      </button>
+      <span x-show="lastSaved && !saving" x-transition x-text="'Saved ' + lastSaved" class="text-xs" style="color:var(--theme-success)"></span>
     </div>
   </form>
 </div>
