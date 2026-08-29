@@ -28,13 +28,13 @@
         { label: 'Admin' },
         { label: 'API Keys' }
       ] }) %>
-      <div class="al-page-header flex items-start justify-between gap-4">
+      <div class="al-page-header flex items-start justify-between gap-4" x-data="apikeyPage()">
         <div>
           <h1 class="al-page-title"><%= req.translations.apiKeysManagement || 'API Keys Management' %></h1>
           <p class="al-page-desc"><%= req.translations.apiKeysDesc || 'Create and manage API keys with specific permissions' %></p>
         </div>
         <div class="flex gap-2 shrink-0">
-          <button id="createApiKeyBtn" type="button" class="al-btn-primary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.createApiKey || 'Create API Key' %></button>
+          <button @click="showCreateModal = true" type="button" class="al-btn-primary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.createApiKey || 'Create API Key' %></button>
           <a href="/admin/api/docs" class="al-btn-secondary"><%= req.translations.apiDocs || 'API Documentation' %></a>
         </div>
       </div>
@@ -82,44 +82,26 @@
 
         <div>
           <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);">Presets</p>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" data-preset="full-admin"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
-              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
-              <%- icon('shield', { class: 'size-3', strokeWidth: 1.5 }) %>
-              Full Admin
-            </button>
-            <button type="button" data-preset="read-only"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
-              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
-              <%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %>
-              Read-Only
-            </button>
-            <button type="button" data-preset="server-manager"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
-              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
-              <%- icon('server', { class: 'size-3', strokeWidth: 1.5 }) %>
-              Server Manager
-            </button>
-            <button type="button" data-preset="user-manager"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
-              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
-              <%- icon('user', { class: 'size-3', strokeWidth: 1.5 }) %>
-              User Manager
-            </button>
-            <button type="button" data-preset="node-monitor"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
-              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
-              <%- icon('monitor', { class: 'size-3', strokeWidth: 1.5 }) %>
-              Node Monitor
-            </button>
-            <button type="button" data-preset="none"
-              class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]"
-              style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
-              <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-              Clear All
-            </button>
-          </div>
+        <div class="flex gap-2">
+          <button type="button" @click="applyPreset('full-admin')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'full-admin' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
+            <%- icon('shield', { class: 'size-3', strokeWidth: 1.5 }) %>Full Admin
+          </button>
+          <button type="button" @click="applyPreset('read-only')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'read-only' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
+            <%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %>Read-Only
+          </button>
+          <button type="button" @click="applyPreset('server-manager')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'server-manager' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
+            <%- icon('server', { class: 'size-3', strokeWidth: 1.5 }) %>Server Manager
+          </button>
+          <button type="button" @click="applyPreset('user-manager')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'user-manager' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
+            <%- icon('user', { class: 'size-3', strokeWidth: 1.5 }) %>User Manager
+          </button>
+          <button type="button" @click="applyPreset('node-monitor')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'node-monitor' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
+            <%- icon('monitor', { class: 'size-3', strokeWidth: 1.5 }) %>Node Monitor
+          </button>
+          <button type="button" @click="applyPreset('none')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'none' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
+            <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Clear All
+          </button>
+        </div>
         </div>
 
         <div>
@@ -151,12 +133,13 @@
                   <div class="px-4 py-3 border-t" style="border-color:var(--theme-border);">
                   <div class="grid grid-cols-2 gap-2">
                     <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
-                      <label class="permission-label flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all duration-150 hover:border-[var(--theme-border)] has-[:checked]:border-[var(--theme-accent)] has-[:checked]:bg-[var(--theme-accent-subtle)]"
+                      <label class="flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all duration-150 hover:border-[var(--theme-border)] has-[:checked]:border-[var(--theme-accent)] has-[:checked]:bg-[var(--theme-accent-subtle)]"
                         style="border-color:var(--theme-border);background:var(--theme-bg-secondary);">
-                        <input type="checkbox" name="permissions" value="<%= permission.value %>"
-                          class="permission-checkbox h-3.5 w-3.5 rounded shrink-0" data-category="<%= category %>"
-                          onchange="updateCategoryCount('<%= category %>')">
-                        <span class="permission-label-text text-xs" style="color:var(--theme-text-muted);"><%= permission.name.split(' - ')[1] || permission.name %></span>
+                        <input type="checkbox"
+                          :checked="isCreatePerm('<%= permission.value %>')"
+                          @change="toggleCreatePerm('<%= permission.value %>')"
+                          class="h-3.5 w-3.5 rounded shrink-0">
+                        <span class="text-xs" style="color:var(--theme-text-muted);"><%= permission.name.split(' - ')[1] || permission.name %></span>
                       </label>
                     <% }); %>
                   </div>
@@ -243,9 +226,10 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 px-4 py-3">
               <% allPermissions.filter(p => p.value.includes(cat)).forEach(permission => { %>
               <label class="flex items-center gap-2 cursor-pointer group">
-                <input id="edit-permission-<%= permission.value %>" name="permissions" value="<%= permission.value %>" type="checkbox"
-                  class="h-3.5 w-3.5 rounded focus:ring-[var(--theme-border-accent)] edit-permission-checkbox" data-category="<%= cat %>"
-                  style="border-color:var(--theme-border);color:var(--theme-text);">
+                <input type="checkbox"
+                  :checked="isEditPerm('<%= permission.value %>')"
+                  @change="toggleEditPerm('<%= permission.value %>')"
+                  class="h-3.5 w-3.5 rounded focus:ring-[var(--theme-border-accent)]">
                 <span class="text-xs transition group-hover:text-[var(--theme-text-strong)]" style="color:var(--theme-text);"><%= permission.name %></span>
               </label>
               <% }); %>
@@ -292,421 +276,172 @@
 
 
 <script nonce="<%- nonce %>">
-(function () {
-  let activeModalId = null;
-  let modalReturnFocus = null;
+function apikeyPage() {
+  return {
+    showCreateModal: false,
+    showEditModal: false,
+    showCreatedModal: false,
+    createForm: { name: '', description: '', permissions: [] },
+    editForm: { id: 0, name: '', description: '', permissions: [] },
+    editTarget: null,
+    activePreset: null,
+    createdKey: '<%= typeof created !== "undefined" ? created : "" %>',
 
-  function getFocusableElements(root) {
-    return Array.from(root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
-      .filter(el => !el.disabled && el.offsetParent !== null);
-  }
+    presetPermissions: {
+      'full-admin': ['airlink.api.servers.read','airlink.api.servers.create','airlink.api.servers.update','airlink.api.servers.delete','airlink.api.users.read','airlink.api.users.create','airlink.api.users.update','airlink.api.users.delete','airlink.api.nodes.read','airlink.api.nodes.create','airlink.api.nodes.update','airlink.api.nodes.delete','airlink.api.settings.read','airlink.api.settings.update'],
+      'read-only': ['airlink.api.servers.read','airlink.api.users.read','airlink.api.nodes.read','airlink.api.settings.read'],
+      'server-manager': ['airlink.api.servers.read','airlink.api.servers.create','airlink.api.servers.update','airlink.api.servers.delete','airlink.api.nodes.read'],
+      'user-manager': ['airlink.api.users.read','airlink.api.users.create','airlink.api.users.update','airlink.api.users.delete','airlink.api.servers.read'],
+      'node-monitor': ['airlink.api.nodes.read','airlink.api.servers.read'],
+      'none': []
+    },
 
-  function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-      showToast('API key copied to clipboard', 'success');
-    }).catch(err => {
-      console.error('Could not copy text: ', err);
-      showToast('Failed to copy to clipboard', 'error');
-    });
-  }
+    allPermissions: <%- JSON.stringify(allPermissions) %>,
 
-
-  const createApiKeyBtn = document.getElementById('createApiKeyBtn');
-  const createApiKeyModal = document.getElementById('createApiKeyModal');
-  const createApiKeyPanel = document.getElementById('createApiKeyPanel');
-
-  createApiKeyBtn.addEventListener('click', () => {
-    modalReturnFocus = document.activeElement;
-    activeModalId = 'createApiKeyModal';
-    createApiKeyModal.setAttribute('aria-hidden', 'false');
-    createApiKeyModal.classList.remove('hidden');
-    createApiKeyModal.classList.add('flex');
-    Animate.openModal(createApiKeyModal, createApiKeyPanel);
-    const focusable = getFocusableElements(createApiKeyPanel || createApiKeyModal);
-    (focusable[0] || createApiKeyPanel || createApiKeyModal).focus();
-  });
-
-  function hideCreateModal() {
-    createApiKeyModal.setAttribute('aria-hidden', 'true');
-    const done = function () {
-      createApiKeyModal.classList.add('hidden');
-      createApiKeyModal.classList.remove('flex');
-      if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
-      modalReturnFocus = null;
-      activeModalId = null;
-    };
-    Animate.closeModal(createApiKeyModal, createApiKeyPanel, done);
-  }
-
-  function toggleCategory(btn) {
-    const panel = btn.nextElementSibling;
-    const chevron = btn.querySelector('.category-chevron');
-    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-
-    if (isExpanded) {
-      panel.classList.remove('open');
-      btn.setAttribute('aria-expanded', 'false');
-      chevron.classList.remove('rotate-180');
-      setTimeout(() => {
-        if (!panel.classList.contains('open')) panel.classList.add('hidden');
-      }, 200);
-    } else {
-      panel.classList.remove('hidden');
-      panel.classList.add('open');
-      btn.setAttribute('aria-expanded', 'true');
-      chevron.classList.add('rotate-180');
-    }
-  }
-
-  function updateCategoryCount(category) {
-    const total = document.querySelectorAll(`#createApiKeyModal .permission-checkbox[data-category="${category}"]`).length;
-    const checked = document.querySelectorAll(`#createApiKeyModal .permission-checkbox[data-category="${category}"]:checked`).length;
-    const countEl = document.querySelector(`#createApiKeyModal .category-count[data-category="${category}"]`);
-    if (countEl) countEl.textContent = checked === 0 ? '' : `${checked}/${total}`;
-
-    document.querySelectorAll(`#createApiKeyModal .permission-checkbox[data-category="${category}"]`).forEach(cb => {
-      const label = cb.closest('.permission-label');
-      const text = label.querySelector('.permission-label-text');
-      if (cb.checked) {
-        label.style.borderColor = 'var(--theme-accent)';
-        label.style.background = 'var(--theme-accent-subtle)';
-        text.style.color = 'var(--theme-text-strong)';
-      } else {
-        label.style.borderColor = 'var(--theme-border)';
-        label.style.background = 'var(--theme-bg-secondary)';
-        text.style.color = 'var(--theme-text-muted)';
-      }
-    });
-  }
-
-  const presetPermissions = {
-    'full-admin': [
-      'airlink.api.servers.read', 'airlink.api.servers.create', 'airlink.api.servers.update', 'airlink.api.servers.delete',
-      'airlink.api.users.read', 'airlink.api.users.create', 'airlink.api.users.update', 'airlink.api.users.delete',
-      'airlink.api.nodes.read', 'airlink.api.nodes.create', 'airlink.api.nodes.update', 'airlink.api.nodes.delete',
-      'airlink.api.settings.read', 'airlink.api.settings.update'
-    ],
-    'read-only': [
-      'airlink.api.servers.read', 'airlink.api.users.read', 'airlink.api.nodes.read', 'airlink.api.settings.read'
-    ],
-    'server-manager': [
-      'airlink.api.servers.read', 'airlink.api.servers.create', 'airlink.api.servers.update', 'airlink.api.servers.delete',
-      'airlink.api.nodes.read'
-    ],
-    'user-manager': [
-      'airlink.api.users.read', 'airlink.api.users.create', 'airlink.api.users.update', 'airlink.api.users.delete',
-      'airlink.api.servers.read'
-    ],
-    'node-monitor': [
-      'airlink.api.nodes.read', 'airlink.api.servers.read'
-    ],
-    'none': []
-  };
-
-  document.querySelectorAll('#createApiKeyModal .preset-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const preset = this.dataset.preset;
-      const allowed = presetPermissions[preset] || [];
-
-      document.querySelectorAll('#createApiKeyModal .permission-checkbox').forEach(cb => {
-        cb.checked = allowed.includes(cb.value);
-      });
-
-      ['servers', 'users', 'nodes', 'settings'].forEach(cat => updateCategoryCount(cat));
-
-      document.querySelectorAll('#createApiKeyModal .preset-btn').forEach(b => {
-        b.style.background = 'var(--theme-bg-card)';
-        b.style.color = 'var(--theme-text)';
-        b.style.borderColor = 'var(--theme-border)';
-      });
-      this.style.background = 'var(--theme-primary)';
-      this.style.color = 'var(--theme-accent-text)';
-      this.style.borderColor = 'var(--theme-primary)';
-    });
-  });
-
-
-  const editApiKeyModal = document.getElementById('editApiKeyModal');
-  const editApiKeyModalPanel = document.getElementById('editApiKeyModalPanel');
-  const editApiKeyModalBackdrop = document.getElementById('editApiKeyModalBackdrop');
-  const editApiKeyForm = document.getElementById('editApiKeyForm');
-  const editNameInput = document.getElementById('edit-name');
-  const editDescriptionInput = document.getElementById('edit-description');
-
-  function showEditModal(id, name, description, permissions) {
-    modalReturnFocus = document.activeElement;
-    activeModalId = 'editApiKeyModal';
-    editApiKeyForm.action = `/admin/apikeys/edit/${id}`;
-    editNameInput.value = name;
-    editDescriptionInput.value = description || '';
-
-    document.querySelectorAll('[id^="edit-permission-"]').forEach(cb => cb.checked = false);
-
-    try {
-      const perms = typeof permissions === 'string' ? JSON.parse(permissions) : permissions;
-      perms.forEach(p => {
-        const cb = document.getElementById(`edit-permission-${p}`);
-        if (cb) cb.checked = true;
-      });
-    } catch (e) {
-      console.error('Error parsing permissions:', e);
-      showToast('Could not load permissions for this API key.', 'error');
-    }
-
-    editApiKeyModal.setAttribute('aria-hidden', 'false');
-    editApiKeyModal.classList.remove('hidden');
-    editApiKeyModal.classList.add('flex');
-    Animate.openModal(editApiKeyModal, editApiKeyModalPanel);
-    editNameInput.focus();
-  }
-
-  function hideEditModal() {
-    editApiKeyModal.setAttribute('aria-hidden', 'true');
-    const done = function () {
-      editApiKeyModal.classList.add('hidden');
-      editApiKeyModal.classList.remove('flex');
-      if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
-      modalReturnFocus = null;
-      activeModalId = null;
-    };
-    Animate.closeModal(editApiKeyModal, editApiKeyModalPanel, done);
-  }
-
-  editApiKeyModalBackdrop.addEventListener('click', hideEditModal);
-
-  document.addEventListener('keydown', function(e) {
-    if (!activeModalId) return;
-    const modal = document.getElementById(activeModalId);
-    const panel = modal.querySelector('[role="dialog"]');
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      if (activeModalId === 'createApiKeyModal') hideCreateModal();
-      else hideEditModal();
-      return;
-    }
-    if (e.key !== 'Tab') return;
-    const focusable = getFocusableElements(panel);
-    if (!focusable.length) {
-      e.preventDefault();
-      panel.focus();
-      return;
-    }
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  });
-
-
-  document.querySelectorAll('.select-category').forEach(button => {
-    button.addEventListener('click', function() {
-      const category = this.getAttribute('data-category');
-      const checkboxes = document.querySelectorAll(`.permission-checkbox[data-category="${category}"]`);
-
-
-      const allSelected = Array.from(checkboxes).every(cb => cb.checked);
-
-
-      checkboxes.forEach(checkbox => {
-        checkbox.checked = !allSelected;
-      });
-
-
-      this.textContent = allSelected ? 'Select All' : 'Deselect All';
-    });
-  });
-
-  document.querySelectorAll('.edit-select-category').forEach(button => {
-    button.addEventListener('click', function() {
-      const category = this.getAttribute('data-category');
-      const checkboxes = document.querySelectorAll(`.edit-permission-checkbox[data-category="${category}"]`);
-
-
-      const allSelected = Array.from(checkboxes).every(cb => cb.checked);
-
-
-      checkboxes.forEach(checkbox => {
-        checkbox.checked = !allSelected;
-      });
-
-
-      this.textContent = allSelected ? 'Select All' : 'Deselect All';
-    });
-  });
-
-
-  document.getElementById('editSelectAllBtn').addEventListener('click', function() {
-    document.querySelectorAll('.edit-permission-checkbox').forEach(checkbox => {
-      checkbox.checked = true;
-    });
-    showToast('All permissions selected', 'success');
-  });
-
-  document.getElementById('editSelectNoneBtn').addEventListener('click', function() {
-    document.querySelectorAll('.edit-permission-checkbox').forEach(checkbox => {
-      checkbox.checked = false;
-    });
-    showToast('All permissions cleared', 'success');
-  });
-
-  document.getElementById('editSelectReadOnlyBtn').addEventListener('click', function() {
-
-    document.querySelectorAll('.edit-permission-checkbox').forEach(checkbox => {
-      checkbox.checked = false;
-    });
-
-
-    document.querySelectorAll('.edit-permission-checkbox').forEach(checkbox => {
-      if (checkbox.value.includes('.read')) {
-        checkbox.checked = true;
-      }
-    });
-
-    showToast('Read-only permissions selected', 'success');
-  });
-
-  async function postForm(form, successMessage, onSuccess) {
-    const btn = form.querySelector('[type="submit"]');
-    if (btn) btn.disabled = true;
-    try {
-      const res = await fetch(form.action, {
-        method: 'POST',
-        headers: { 'Accept': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
-        body: new URLSearchParams(new FormData(form))
-      });
-      if (res.ok) {
-        showToast(successMessage, 'success');
-        if (onSuccess) onSuccess(res);
-        return true;
-      }
-      let msg = 'Something went wrong. Try again.';
-      try { const data = await res.json(); msg = data.error || data.message || msg; } catch (e) {
-        console.warn('[apikeys] Failed to parse error response:', e);
-      }
-      showToast(msg, 'error');
-      return false;
-    } catch (e) {
-      console.error('Request failed:', e);
-      showToast('Network error — try again.', 'error');
-      return false;
-    } finally {
-      if (btn) btn.disabled = false;
-    }
-  }
-
-  function updateApiKeyToggle(form, enabling) {
-    const keyId = form.id.replace('toggleKeyForm_', '');
-    const card = document.querySelector('[data-api-key-id="' + keyId + '"]');
-    if (!card) return;
-    const badge = card.querySelector('.api-key-status-badge');
-    if (badge) {
-      badge.textContent = enabling ? 'Active' : 'Inactive';
-      badge.style.background = enabling ? 'var(--theme-success-bg)' : 'var(--theme-danger-bg)';
-      badge.style.color = enabling ? 'var(--theme-success)' : 'var(--theme-danger)';
-      badge.style.setProperty('--tw-ring-color', 'color-mix(in srgb, ' + (enabling ? 'var(--theme-success)' : 'var(--theme-danger)') + ' 25%, transparent)');
-    }
-    const btn = form.querySelector('button[type="submit"]');
-    if (btn) {
-      btn.setAttribute('aria-label', enabling ? 'Disable API key' : 'Enable API key');
-      btn.innerHTML = window.alIcon
-        ? (enabling ? window.alIcon('x-circle', 'w-4 h-4 shrink-0') : window.alIcon('check-circle', 'w-4 h-4 shrink-0'))
-        : '';
-    }
-  }
-
-  function updateApiKeyEdit() {
-    const id = editApiKeyForm.action.split('/').pop();
-    const card = document.querySelector('[data-api-key-id="' + id + '"]');
-    if (!card) return;
-    const content = card.querySelector('.min-w-0.flex-1');
-    if (content) {
-      const nameEl = card.querySelector('.api-key-name');
-      if (nameEl) nameEl.textContent = editNameInput.value.trim();
-      const desc = editDescriptionInput.value.trim();
-      let descEl = card.querySelector('.api-key-desc');
-      if (desc) {
-        if (!descEl) {
-          descEl = document.createElement('p');
-          descEl.className = 'text-xs api-key-desc';
-          descEl.style.color = 'var(--theme-text-muted)';
-          if (content) content.appendChild(descEl);
-        }
-        descEl.textContent = desc;
-      } else if (descEl) {
-        descEl.remove();
-      }
-    }
-  }
-
-  const createApiKeyForm = document.getElementById('createApiKeyForm');
-  if (createApiKeyForm) {
-    createApiKeyForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      // The raw key is only surfaced server-side via the ?created= redirect —
-      // navigate there so the created-key modal can display it once.
-      postForm(createApiKeyForm, 'API key created', function(res) {
-        hideCreateModal();
-        window.location.href = res.url || '/admin/apikeys';
-      });
-    });
-  }
-
-  document.querySelectorAll('form[id^="toggleKeyForm_"]').forEach(function(form) {
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const enabling = form.querySelector('button[type="submit"]').getAttribute('aria-label')?.includes('Enable');
-      postForm(form, enabling ? 'API key enabled' : 'API key disabled', function() {
-        updateApiKeyToggle(form, enabling);
-      });
-    });
-  });
-
-  editApiKeyForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    postForm(editApiKeyForm, 'API key updated', function() {
-      hideEditModal();
-      updateApiKeyEdit();
-    });
-  });
-
-  const createdKeyModal = document.getElementById('createdKeyModal');
-  if (createdKeyModal) {
-    const createdKeyPanel = document.getElementById('createdKeyPanel');
-    createdKeyModal.classList.remove('hidden');
-    createdKeyModal.classList.add('flex');
-    createdKeyModal.setAttribute('aria-hidden', 'false');
-    Animate.openModal(createdKeyModal, createdKeyPanel);
-    if (createdKeyPanel) createdKeyPanel.focus();
-    window.hideCreatedKeyModal = function() {
-      const done = function () {
-        createdKeyModal.classList.add('hidden');
-        createdKeyModal.classList.remove('flex');
-        createdKeyModal.setAttribute('aria-hidden', 'true');
-        history.replaceState({}, '', '/admin/apikeys');
+    init() {
+      if (this.createdKey) this.showCreatedModal = true;
+      // Expose for external callers
+      window.showEditModal = (id, name, desc, perms) => {
+        try { perms = typeof perms === 'string' ? JSON.parse(perms) : perms; } catch { perms = []; }
+        this.editForm = { id, name, description: desc || '', permissions: [...perms] };
+        this.showEditModal = true;
       };
-      Animate.closeModal(createdKeyModal, createdKeyPanel, done);
-    };
-    window.copyCreatedKey = function() {
-      copyToClipboard('<%= created %>');
-    };
-  }
+      window.confirmDeleteApiKey = (keyId) => {
+        window.modal.confirm({
+          title: 'Delete API key', body: 'This will permanently revoke the key. Any integrations using it will stop working.',
+          danger: true, confirmLabel: 'Yeah, delete it',
+          onConfirm: () => this.deleteKey(keyId)
+        });
+      };
+    },
 
-  // Inline HTML attributes on this page call these handlers directly; expose
-  // them so Turbo re-execution keeps the global bindings working.
-  window.copyToClipboard = copyToClipboard;
-  window.showEditModal = showEditModal;
-  window.hideCreateModal = hideCreateModal;
-  window.hideEditModal = hideEditModal;
-  window.toggleCategory = toggleCategory;
-  window.updateCategoryCount = updateCategoryCount;
-})();
+    applyPreset(name) {
+      this.activePreset = name;
+      this.createForm.permissions = [...(this.presetPermissions[name] || [])];
+    },
+
+    toggleCreatePerm(perm) {
+      const idx = this.createForm.permissions.indexOf(perm);
+      if (idx === -1) this.createForm.permissions.push(perm);
+      else this.createForm.permissions.splice(idx, 1);
+    },
+
+    isCreatePerm(perm) { return this.createForm.permissions.includes(perm); },
+
+    toggleEditPerm(perm) {
+      const idx = this.editForm.permissions.indexOf(perm);
+      if (idx === -1) this.editForm.permissions.push(perm);
+      else this.editForm.permissions.splice(idx, 1);
+    },
+
+    isEditPerm(perm) { return this.editForm.permissions.includes(perm); },
+
+    editSelectAll() { this.editForm.permissions = this.allPermissions.map(p => p.value); },
+    editClearAll() { this.editForm.permissions = []; },
+    editReadOnly() { this.editForm.permissions = this.allPermissions.filter(p => p.value.includes('.read')).map(p => p.value); },
+
+    async submitCreate() {
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const params = new URLSearchParams();
+        params.append('name', this.createForm.name);
+        params.append('description', this.createForm.description);
+        params.append('csrf-token', csrfToken);
+        this.createForm.permissions.forEach(p => params.append('permissions', p));
+        const res = await fetch('/admin/apikeys/create', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'csrf-token': csrfToken },
+          body: params,
+        });
+        if (res.ok) {
+          showToast('API key created', 'success');
+          this.showCreateModal = false;
+          window.location.href = res.url || '/admin/apikeys';
+        } else {
+          const data = await res.json().catch(() => ({}));
+          showToast(data.error || 'Failed to create key.', 'error');
+        }
+      } catch (e) { showToast('Network error.', 'error'); }
+    },
+
+    async submitEdit() {
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const params = new URLSearchParams();
+        params.append('name', this.editForm.name);
+        params.append('description', this.editForm.description);
+        params.append('csrf-token', csrfToken);
+        this.editForm.permissions.forEach(p => params.append('permissions', p));
+        const res = await fetch('/admin/apikeys/edit/' + this.editForm.id, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'csrf-token': csrfToken },
+          body: params,
+        });
+        if (res.ok) {
+          showToast('API key updated', 'success');
+          this.showEditModal = false;
+          window.location.reload();
+        } else {
+          const data = await res.json().catch(() => ({}));
+          showToast(data.error || 'Failed to update key.', 'error');
+        }
+      } catch (e) { showToast('Network error.', 'error'); }
+    },
+
+    async deleteKey(keyId) {
+      const form = document.getElementById('deleteKeyForm_' + keyId);
+      if (!form) return;
+      try {
+        const res = await fetch(form.action, { method: 'POST', headers: { 'Accept': 'application/json' }, body: new URLSearchParams(new FormData(form)) });
+        if (res.ok) {
+          showToast('API key deleted', 'success');
+          const card = document.querySelector('[data-api-key-id="' + keyId + '"]');
+          if (card && window.al) al.removeRow(card);
+          else if (card) card.remove();
+        } else {
+          const data = await res.json().catch(() => ({}));
+          showToast(data.error || 'Failed to delete key.', 'error');
+        }
+      } catch (e) { showToast('Network error.', 'error'); }
+    },
+
+    async toggleKey(keyId, enabling) {
+      const form = document.getElementById('toggleKeyForm_' + keyId);
+      if (!form) return;
+      try {
+        const res = await fetch(form.action, { method: 'POST', headers: { 'Accept': 'application/json' }, body: new URLSearchParams(new FormData(form)) });
+        if (res.ok) {
+          showToast(enabling ? 'API key enabled' : 'API key disabled', 'success');
+          window.location.reload();
+        }
+      } catch (e) { showToast('Network error.', 'error'); }
+    },
+
+    get createCatCounts() {
+      const counts = {};
+      ['servers','users','nodes','settings'].forEach(cat => {
+        const total = this.allPermissions.filter(p => p.value.includes(cat)).length;
+        const checked = this.createForm.permissions.filter(p => p.includes(cat)).length;
+        counts[cat] = { total, checked };
+      });
+      return counts;
+    },
+
+    get editCatCounts() {
+      const counts = {};
+      ['servers','users','nodes','settings'].forEach(cat => {
+        const total = this.allPermissions.filter(p => p.value.includes(cat)).length;
+        const checked = this.editForm.permissions.filter(p => p.includes(cat)).length;
+        counts[cat] = { total, checked };
+      });
+      return counts;
+    }
+  };
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => showToast('API key copied to clipboard', 'success')).catch(() => showToast('Failed to copy', 'error'));
+}
 </script>
 
 <%- include('../../components/footer') %>
-
-<script nonce="<%- nonce %>" src="/javascript/admin/apikeys.js?v=5"></script>
