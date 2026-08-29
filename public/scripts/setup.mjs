@@ -843,6 +843,7 @@ async function setupDatabase() {
 
   // Grant privileges
   psql(`GRANT ALL PRIVILEGES ON DATABASE "${dbName}" TO "${dbUser}"`);
+  psql(`GRANT ALL ON SCHEMA public TO "${dbUser}"`);
   psql(
     `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "${dbUser}"`,
   );

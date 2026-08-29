@@ -143,10 +143,10 @@ const databasesModule: Module = {
             host = await prisma.databaseHost.create({
               data: {
                 name: "Auto-generated host",
-                host: process.env.MYSQL_HOST || "127.0.0.1",
-                port: Number(process.env.MYSQL_PORT) || 3306,
-                username: process.env.MYSQL_USER || "root",
-                password: process.env.MYSQL_PASSWORD || "",
+                host: process.env.PGHOST || "127.0.0.1",
+                port: Number(process.env.PGPORT) || 5432,
+                username: process.env.PGUSER || "airlink",
+                password: process.env.PGPASSWORD || "",
               },
             });
             created = true;
@@ -214,12 +214,10 @@ const databasesModule: Module = {
             );
             return res.status(500).send("");
           }
-          return res
-            .status(500)
-            .json({
-              success: false,
-              error: "Failed to auto-generate database host.",
-            });
+          return res.status(500).json({
+            success: false,
+            error: "Failed to auto-generate database host.",
+          });
         }
       },
     );
@@ -357,12 +355,10 @@ const databasesModule: Module = {
                 hint: null,
               });
             }
-            return res
-              .status(400)
-              .json({
-                success: false,
-                error: "Cannot delete host with active databases.",
-              });
+            return res.status(400).json({
+              success: false,
+              error: "Cannot delete host with active databases.",
+            });
           }
           await prisma.databaseHost.delete({ where: { id } });
 

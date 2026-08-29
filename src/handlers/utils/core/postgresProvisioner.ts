@@ -112,6 +112,7 @@ export async function provisionDatabase(
     await conn.query(
       `GRANT ALL PRIVILEGES ON DATABASE "${dbName}" TO "${dbUser}"`,
     );
+    await conn.query(`GRANT ALL ON SCHEMA public TO "${dbUser}"`);
     // Grant default privileges for future objects
     await conn.query(
       `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "${dbUser}"`,
