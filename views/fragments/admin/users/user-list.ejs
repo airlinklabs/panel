@@ -77,7 +77,7 @@
         </thead>
         <tbody>
           <% let userIdx = 0; users.forEach(function(u) { %>
-            <tr id="admin-user-row-<%= u.id %>" style="--i:<%= userIdx++ %>" class="al-table-tr cursor-pointer" tabindex="0" role="link" data-user-id="<%= u.id %>" data-admin="<%= u.isAdmin %>" onclick="handleRowClick(event, '/admin/users/view/<%= u.id %>/')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleRowClick(event, '/admin/users/view/<%= u.id %>/');}">
+            <tr id="admin-user-row-<%= u.id %>" style="--i:<%= userIdx++ %>" class="al-table-tr cursor-pointer" tabindex="0" role="link" data-user-id="<%= u.id %>" data-admin="<%= u.isAdmin %>" @click="handleRowClick(event, '/admin/users/view/<%= u.id %>/')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleRowClick(event, '/admin/users/view/<%= u.id %>/');}">
               <td class="al-table-td sm:pl-6">
                 <div class="flex items-center gap-3">
                   <div class="relative shrink-0">

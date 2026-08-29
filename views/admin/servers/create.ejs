@@ -47,7 +47,7 @@ function serverCreatePage() {
             </div>
 
             <div class="al-page-body space-y-5">
-              <form id="createServerForm" method="POST" action="/admin/servers/create" class="space-y-5">
+              <form id="createServerForm" @submit.prevent class="space-y-5">
                 <div class="al-card">
                   <h2 class="al-card-header">General</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">

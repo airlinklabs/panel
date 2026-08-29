@@ -30,7 +30,7 @@
             </p>
 
             <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <button type="button" onclick="history.length > 1 ? history.back() : location.assign('/')"
+              <button type="button" @click="history.length > 1 ? history.back() : location.assign('/')"
                 class="al-btn-secondary inline-flex items-center gap-1.5">
                 <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %>
                 Back

@@ -65,16 +65,18 @@ const ADDONS = [
 // ---
 
 const TTY = process.stdout.isTTY;
+import chalk from "chalk";
+import boxen from "boxen";
 const C = {
-  reset: TTY ? "\x1b[0m" : "",
-  bold: TTY ? "\x1b[1m" : "",
-  dim: TTY ? "\x1b[2m" : "",
-  rev: TTY ? "\x1b[7m" : "",
-  green: TTY ? "\x1b[92m" : "",
-  red: TTY ? "\x1b[91m" : "",
-  gray: TTY ? "\x1b[90m" : "",
-  cyan: TTY ? "\x1b[96m" : "",
-  yellow: TTY ? "\x1b[93m" : "",
+  reset: "",
+  bold: TTY ? chalk.bold("") : "",
+  dim: TTY ? chalk.dim("") : "",
+  rev: "",
+  green: TTY ? chalk.green("") : "",
+  red: TTY ? chalk.red("") : "",
+  gray: TTY ? chalk.gray("") : "",
+  cyan: TTY ? chalk.cyan("") : "",
+  yellow: TTY ? chalk.yellow("") : "",
   hideCur: TTY ? "\x1b[?25l" : "",
   showCur: TTY ? "\x1b[?25h" : "",
   clear: TTY ? "\x1b[2J\x1b[H" : "",

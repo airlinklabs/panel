@@ -17,7 +17,7 @@
       </div>
       <h2 class="mt-4 text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.noDatabasesYet || 'No databases yet' %></h2>
       <p class="mt-1 text-sm max-w-sm mx-auto" style="color:var(--theme-text-muted)"><%= req.translations.noDatabasesYetDesc || 'Create a database to use with your server.' %></p>
-      <button type="button" onclick="openAddDatabaseModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
+      <button type="button" @click="openAddDatabaseModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
         <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
         <%= req.translations.createDatabase || 'Create Database' %>
       </button>

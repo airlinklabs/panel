@@ -22,7 +22,7 @@
           </div>
           <% if (hosts.length > 0) { %>
           <div class="flex gap-2 shrink-0">
-            <button id="newDatabaseBtn" onclick="openAddDatabaseModal()" type="button"
+            <button id="newDatabaseBtn" @click="openAddDatabaseModal()" type="button"
                 class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
                 <%- icon('plus', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
                 <%= req.translations.newDatabase || 'New Database' %>
@@ -59,7 +59,7 @@
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= req.translations.dbProvisionHint || 'A database, user and password will be provisioned on this host.' %></p>
       </div>
-      <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+      <button type="button" @click="closeAddDatabaseModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
@@ -72,7 +72,7 @@
       </select>
     </div>
     <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border)">
-      <button type="button" onclick="closeAddDatabaseModal()" class="al-btn-secondary inline-flex items-center gap-1.5">
+      <button type="button" @click="closeAddDatabaseModal()" class="al-btn-secondary inline-flex items-center gap-1.5">
         <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
         <%= req.translations.cancel || 'Cancel' %>
       </button>

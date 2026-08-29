@@ -51,7 +51,7 @@
             <div class="flex items-center gap-2 w-full max-w-xs">
               <code class="select-all flex-1 truncate rounded-lg px-3 py-2 text-sm font-mono text-center" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><%= secretBase32 %></code>
               <button type="button" id="copySecret" class="al-btn-ghost shrink-0" aria-label="Copy secret key"
-                onclick="navigator.clipboard.writeText('<%= secretBase32 %>').then(function () { if (window.showToast) showToast('Secret key copied to clipboard.', 'success'); }).catch(function () { if (window.showToast) showToast('Could not copy secret key.', 'error'); })">
+                @click="navigator.clipboard.writeText('<%= secretBase32 %>').then(function () { if (window.showToast) showToast('Secret key copied to clipboard.', 'success'); }).catch(function () { if (window.showToast) showToast('Could not copy secret key.', 'error'); })">
                 <%- icon('copy', { size: 14 }) %>
               </button>
             </div>

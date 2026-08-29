@@ -2,7 +2,7 @@
 <div id="location-nodes-panel">
   <div class="flex items-center justify-between mb-4">
     <div class="flex items-center gap-2">
-      <button type="button" onclick="document.getElementById('location-nodes-panel').closest('.al-sheet-panel')?.querySelector('[data-close-location-nodes]')?.click()"
+      <button type="button" @click="document.getElementById('location-nodes-panel').closest('.al-sheet-panel')?.querySelector('[data-close-location-nodes]')?.click()"
         class="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-75 transition" style="color:var(--theme-text-muted);">
         <%- icon('arrow-left', { class: 'size-4', strokeWidth: 2 }) %>
       </button>

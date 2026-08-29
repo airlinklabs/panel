@@ -24,7 +24,7 @@
         <tr class="al-table-tr transition-colors cursor-pointer img-row"
             style="--i:<%= imgIdx++ %>"
             data-search="<%= (image.name + ' ' + (image.author||'')).toLowerCase() %>"
-            onclick="handleRowClick(event, '/admin/images/edit/<%= image.id %>')">
+            @click="handleRowClick(event, '/admin/images/edit/<%= image.id %>')">
           <td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3 font-medium" style="color:var(--theme-text-strong)"><%= image.name %></td>
           <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= image.author || '—' %></td>
           <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= new Date(image.createdAt).toLocaleDateString() %></td>

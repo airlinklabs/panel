@@ -13,6 +13,8 @@
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import chalk from "chalk";
+import boxen from "boxen";
 
 // ---
 // Paths
@@ -22,33 +24,21 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const envPath = resolve(__dirname, "../../.env");
 const appPath = resolve(__dirname, "../../dist/app.js");
 
+const TTY = process.stdout.isTTY;
+
 // ---
 // Terminal helpers
 // ---
 
-const TTY = process.stdout.isTTY;
-const C = {
-  reset:  TTY ? "\x1b[0m"  : "",
-  bold:   TTY ? "\x1b[1m"  : "",
-  green:  TTY ? "\x1b[32m" : "",
-  yellow: TTY ? "\x1b[33m" : "",
-  red:    TTY ? "\x1b[31m" : "",
-};
-
-const ok   = (msg) => console.log(`  ${C.green}+${C.reset} ${msg}`);
-const warn = (msg) => console.log(`  ${C.yellow}!${C.reset} ${C.yellow}${msg}${C.reset}`);
-const fail = (msg) => console.log(`  ${C.red}x${C.reset} ${C.red}${msg}${C.reset}`);
-const gap  = ()    => console.log();
+const ok = (msg) => console.log(`  ${chalk.green("+")} ${msg}`);
+const warn = (msg) =>
+  console.log(`  ${chalk.yellow("!")} ${chalk.yellow(msg)}`);
+const fail = (msg) => console.log(`  ${chalk.red("x")} ${chalk.red(msg)}`);
+const gap = () => console.log();
 
 function section(title) {
   gap();
-  console.log(`${C.bold}${C.green}  ${title}${C.reset}`);
-}
-
-function banner() {
-  gap();
-  console.log(`${C.bold}  Airlink Panel${C.reset}`);
-  gap();
+  console.log(`  ${chalk.bold.green(title)}`);
 }
 
 // ---
@@ -75,7 +65,10 @@ function loadEnv() {
     let value = trimmed.slice(eqIdx + 1).trim();
 
     // Strip surrounding quotes
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
       value = value.slice(1, -1);
     }
 
@@ -92,7 +85,31 @@ function loadEnv() {
 // ---
 
 function main() {
-  banner();
+  if (TTY) {
+    const ASCII = `  /$$$$$$ /$$         /$$/$$         /$$
+ /$$__  $|__/        | $|__/        | $$
+| $$   $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$
+| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/
+| $$__  $| $| $$  __| $| $| $$   $| $$$$$$/
+| $$  | $| $| $$     | $| $| $$  | $| $$_  $$
+| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$
+|__/  |__|__|__/     |__|__|__/  |__|__/  __/`;
+    const lines = [
+      chalk.cyan(ASCII),
+      "",
+      `  ${chalk.bold.cyan("Airlink Panel")} ${chalk.dim("v3.0")}`,
+    ];
+    console.log(
+      boxen(lines.join("\n"), {
+        padding: 1,
+        margin: 1,
+        borderStyle: "round",
+        borderColor: "cyan",
+      }),
+    );
+  } else {
+    console.log("  Airlink Panel");
+  }
 
   section("Environment");
   loadEnv();
@@ -100,14 +117,14 @@ function main() {
   process.env.NODE_ENV = process.env.NODE_ENV || "production";
 
   if (!existsSync(appPath)) {
-    fail(`dist/app.js not found — run ${C.bold}pnpm run build${C.reset} first`);
+    fail(`dist/app.js not found — run ${chalk.bold("pnpm run build")} first`);
     process.exit(1);
   }
 
   section("Starting");
   ok("Importing dist/app.js...");
 
-  await import(appPath);
+  import(appPath);
 }
 
 main();

@@ -39,6 +39,8 @@ import { createInterface } from "node:readline";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import os from "node:os";
+import chalk from "chalk";
+import boxen from "boxen";
 
 // ---
 // Locate ourselves and load package.json from the project root (one level up
@@ -163,53 +165,64 @@ const opts = {
 
 const TTY = process.stdout.isTTY;
 
-const C = {
-  reset: TTY ? "\x1b[0m" : "",
-  bold: TTY ? "\x1b[1m" : "",
-  dim: TTY ? "\x1b[2m" : "",
-  red: TTY ? "\x1b[31m" : "",
-  green: TTY ? "\x1b[32m" : "",
-  yellow: TTY ? "\x1b[33m" : "",
-  blue: TTY ? "\x1b[34m" : "",
-  magenta: TTY ? "\x1b[35m" : "",
-  cyan: TTY ? "\x1b[36m" : "",
-  white: TTY ? "\x1b[37m" : "",
-  bgBlue: TTY ? "\x1b[44m" : "",
-};
-
 // ---
-// Logging helpers
+// Logging helpers (chalk-based)
 // ---
 
-const ok = (msg) => console.log(`  ${C.green}+${C.reset} ${msg}`);
+const ok = (msg) => console.log(`  ${chalk.green("+")} ${msg}`);
 const warn = (msg) =>
-  console.log(`  ${C.yellow}!${C.reset} ${C.yellow}${msg}${C.reset}`);
-const fail = (msg) =>
-  console.log(`  ${C.red}x${C.reset} ${C.red}${msg}${C.reset}`);
-const info = (msg) => console.log(`  ${C.cyan}->${C.reset} ${msg}`);
-const dim = (msg) => console.log(`  ${C.dim}${msg}${C.reset}`);
+  console.log(`  ${chalk.yellow("!")} ${chalk.yellow(msg)}`);
+const fail = (msg) => console.log(`  ${chalk.red("x")} ${chalk.red(msg)}`);
+const info = (msg) => console.log(`  ${chalk.cyan("->")} ${msg}`);
+const dim = (msg) => console.log(`  ${chalk.dim(msg)}`);
 const gap = () => console.log();
 
 /** Print a plain section header. */
 function section(title) {
   gap();
-  console.log(`${C.bold}${C.blue}  ${title}${C.reset}`);
+  console.log(`  ${chalk.bold.blue(title)}`);
 }
 
 /** Print project metadata without decorative framing. */
 function banner() {
-  gap();
-  console.log(`${C.bold}${PKG.name} v${PKG.version}${C.reset}`);
-  dim(`Platform: ${PLATFORM} (${ARCH})`);
-  dim(`Node: ${process.version}`);
-  dim(`Project: ${projectDir}`);
+  if (TTY) {
+    const ASCII = `  /$$$$$$ /$$         /$$/$$         /$$
+ /$$__  $|__/        | $|__/        | $$
+| $$   $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$
+| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/
+| $$__  $| $| $$  __| $| $| $$   $| $$$$$$/
+| $$  | $| $| $$     | $| $| $$  | $| $$_  $$
+| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$
+|__/  |__|__|__/     |__|__|__/  |__|__/  __/`;
+    const lines = [
+      chalk.cyan(ASCII),
+      "",
+      `  ${chalk.bold.cyan(PKG.name)} ${chalk.dim(`v${PKG.version}`)}`,
+      `  ${chalk.dim(`Platform: ${PLATFORM} (${ARCH})`)}`,
+      `  ${chalk.dim(`Node: ${process.version}`)}`,
+      `  ${chalk.dim(`Project: ${projectDir}`)}`,
+    ];
+    console.log(
+      boxen(lines.join("\n"), {
+        padding: 1,
+        margin: 1,
+        borderStyle: "round",
+        borderColor: "cyan",
+      }),
+    );
+  } else {
+    console.log(`  ${PKG.name} v${PKG.version}`);
+    dim(`Platform: ${PLATFORM} (${ARCH})`);
+    dim(`Node: ${process.version}`);
+    dim(`Project: ${projectDir}`);
+  }
   gap();
 }
 
 /** Print the --help text and exit cleanly. */
 function showHelp() {
   banner();
-  console.log(`${C.bold}Usage${C.reset}
+  console.log(`${chalk.bold}Usage${reset}
   node public/scripts/setup.mjs [flags]
 
 ${C.bold}Flags${C.reset}
@@ -1087,32 +1100,32 @@ function runBuild() {
 
 function printSummary(creds) {
   gap();
-  console.log(`${C.bold}${C.green}Setup complete!${C.reset}`);
+  console.log(`  ${chalk.bold.green("Setup complete!")}`);
   gap();
 
-  console.log(`${C.bold}  Database credentials${C.reset}`);
-  console.log(`  Host      ${C.cyan}${creds.dbHost}${C.reset}`);
-  console.log(`  Port      ${C.cyan}${creds.dbPort}${C.reset}`);
-  console.log(`  Database  ${C.cyan}${creds.dbName}${C.reset}`);
-  console.log(`  User      ${C.cyan}${creds.dbUser}${C.reset}`);
-  console.log(`  Password  ${C.cyan}${creds.dbPass}${C.reset}`);
+  console.log(`  ${chalk.bold("Database credentials")}`);
+  console.log(`  Host      ${chalk.cyan(creds.dbHost)}`);
+  console.log(`  Port      ${chalk.cyan(creds.dbPort)}`);
+  console.log(`  Database  ${chalk.cyan(creds.dbName)}`);
+  console.log(`  User      ${chalk.cyan(creds.dbUser)}`);
+  console.log(`  Password  ${chalk.cyan(creds.dbPass)}`);
   gap();
 
-  console.log(`${C.bold}  DATABASE_URL${C.reset}`);
+  console.log(`  ${chalk.bold("DATABASE_URL")}`);
   console.log(
-    `  ${C.dim}mysql://${creds.dbUser}:${creds.dbPass}@${creds.dbHost}:${creds.dbPort}/${creds.dbName}${C.reset}`,
+    `  ${chalk.dim(`mysql://${creds.dbUser}:${creds.dbPass}@${creds.dbHost}:${creds.dbPort}/${creds.dbName}`)}`,
   );
   gap();
 
-  console.log(`${C.bold}  Next steps${C.reset}`);
+  console.log(`  ${chalk.bold("Next steps")}`);
   console.log(
-    `  ${C.green}->${C.reset}  Start the panel   ${C.bold}pnpm run start${C.reset}`,
+    `  ${chalk.green("->")}  Start the panel   ${chalk.bold("pnpm run start")}`,
   );
   console.log(
-    `  ${C.green}->${C.reset}  Dev mode (watch)  ${C.bold}pnpm run dev${C.reset}`,
+    `  ${chalk.green("->")}  Dev mode (watch)  ${chalk.bold("pnpm run dev")}`,
   );
   console.log(
-    `  ${C.green}->${C.reset}  Config file       ${C.bold}.env${C.reset}  (in project root)`,
+    `  ${chalk.green("->")}  Config file       ${chalk.bold(".env")}  (in project root)`,
   );
   gap();
 }

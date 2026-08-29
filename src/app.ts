@@ -1,54 +1,52 @@
-import { getSettings } from './handlers/settingsCache';
-import type { Request, Response, NextFunction } from 'express';
-import express from 'express';
-import prisma from './db';
-import path from 'path';
-import session from 'express-session';
-import { loadEnv } from './handlers/envLoader';
-import { databaseLoader } from './handlers/databaseLoader';
-import { loadModules } from './handlers/modulesLoader';
-import logger from './handlers/logger';
-import config from '../storage/config.json';
-import cookieParser from 'cookie-parser';
-import expressWs from 'express-ws';
-import compression from 'compression';
-import { translationMiddleware } from './handlers/utils/core/translation';
-import { getSessionStore } from './handlers/sessionStore';
-import { settingsLoader } from './handlers/settingsLoader';
-import { loadAddons, setAppInstance } from './handlers/addonHandler';
+import { getSettings } from "./handlers/settingsCache";
+import type { Request, Response, NextFunction } from "express";
+import express from "express";
+import prisma from "./db";
+import path from "path";
+import session from "express-session";
+import { loadEnv } from "./handlers/envLoader";
+import { databaseLoader } from "./handlers/databaseLoader";
+import { loadModules } from "./handlers/modulesLoader";
+import logger, { drawBanner } from "./handlers/logger";
+import config from "../storage/config.json";
+import cookieParser from "cookie-parser";
+import expressWs from "express-ws";
+import compression from "compression";
+import { translationMiddleware } from "./handlers/utils/core/translation";
+import { getSessionStore } from "./handlers/sessionStore";
+import { settingsLoader } from "./handlers/settingsLoader";
+import { loadAddons, setAppInstance } from "./handlers/addonHandler";
 import {
   initializeDefaultUIComponents,
   uiComponentStore,
-} from './handlers/uiComponentHandler';
-import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
-import { startScheduler } from './handlers/schedulerWorker';
-import { initEggCatalogue } from './handlers/eggCatalogueService';
-import { reenqueueQueuedInstalls } from './handlers/installQueue';
-import crypto from 'crypto';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import icon from './utils/icon';
-import { getClientIp } from './utils/ip';
-// hpp removed: Express 5's req.query parsing (qs with arrayLimit: 0) already
-// prevents HTTP Parameter Pollution. No replacement needed.
+} from "./handlers/uiComponentHandler";
+import { startPlayerStatsCollection } from "./handlers/playerStatsCollector";
+import { startScheduler } from "./handlers/schedulerWorker";
+import { initEggCatalogue } from "./handlers/eggCatalogueService";
+import { reenqueueQueuedInstalls } from "./handlers/installQueue";
+import crypto from "crypto";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import icon from "./utils/icon";
+import { getClientIp } from "./utils/ip";
 import csrfProtection, {
   handleCsrfError,
   addCsrfTokenToLocals,
-} from './handlers/utils/security/csrfProtection';
-import { isCsrfExempt } from './handlers/utils/security/csrfRouting';
+} from "./handlers/utils/security/csrfProtection";
+import { isCsrfExempt } from "./handlers/utils/security/csrfRouting";
 import {
   errorPageHandler,
   notFoundHandler,
   renderErrorPage,
-} from './handlers/errorPages';
+} from "./handlers/errorPages";
 
-import { getConfig } from './config';
-import { installRenderResolver } from './handlers/renderResolver';
-import { validationErrorBoundary } from './utils/validation';
+import { getConfig } from "./config";
+import { installRenderResolver } from "./handlers/renderResolver";
+import { validationErrorBoundary } from "./utils/validation";
 import {
   refreshSecurityCache,
   getSecurityCache,
-} from './handlers/securityCache';
+} from "./handlers/securityCache";
 
 loadEnv();
 
@@ -73,6 +71,9 @@ const name = panelConfig.name;
 const airlinkVersion = config.meta.version;
 const airlinkCodename = config.meta.codename;
 
+// ── Startup banner ───────────────────────────────────────────────────────────
+drawBanner("Airlink Panel", airlinkVersion, airlinkCodename);
+
 // Trust proxy when the panel is behind a reverse proxy (Nginx, Caddy, etc).
 // Reads from DB at startup — affects req.ip used by rate limiting and IP banning.
 // We set this before any middleware so the correct client IP flows through.
@@ -80,7 +81,7 @@ const airlinkCodename = config.meta.codename;
   try {
     const s = await getSettings();
     if (s?.behindReverseProxy) {
-      app.set('trust proxy', 1);
+      app.set("trust proxy", 1);
     }
   } catch {
     // DB not ready yet — leave default (no trust proxy)
@@ -91,52 +92,47 @@ const airlinkCodename = config.meta.codename;
 const expressWsInstance = expressWs(app);
 
 // Load static files
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Runtime uploads (user-uploaded files)
-app.use('/uploads', express.static(path.join(__dirname, '../storage/uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "../storage/uploads")));
 
 // Themes — built-in + user-installed
-app.use('/themes', express.static(path.join(__dirname, '../storage/themes')));
+app.use("/themes", express.static(path.join(__dirname, "../storage/themes")));
 
 // Root favicon (runtime-generated)
 app.use(
-  '/favicon.ico',
-  express.static(path.join(__dirname, '../public/assets/favicon.ico')),
+  "/favicon.ico",
+  express.static(path.join(__dirname, "../public/assets/favicon.ico")),
 );
 
 // Vendor — serve node_modules directly at /vendor/
-app.use('/vendor', express.static(path.join(__dirname, '../node_modules')));
+app.use("/vendor", express.static(path.join(__dirname, "../node_modules")));
 
 // Fonts — Inter via @fontsource
 app.use(
-  '/vendor/@fontsource-variable/inter',
+  "/vendor/@fontsource-variable/inter",
   express.static(
-    path.join(__dirname, '../node_modules/@fontsource-variable/inter'),
+    path.join(__dirname, "../node_modules/@fontsource-variable/inter"),
   ),
 );
 
 // Load views
-const viewsPath = path.join(__dirname, '../views');
-app.set('views', viewsPath);
-app.set('view engine', 'ejs');
+const viewsPath = path.join(__dirname, "../views");
+app.set("views", viewsPath);
+app.set("view engine", "ejs");
 // Cache compiled EJS templates in memory. In production this is already the
 // default, but setting it explicitly ensures it's on regardless of NODE_ENV.
-app.set('view cache', true);
+app.set("view cache", true);
 
-// The global ejs.renderFile monkey-patch used to live here, falling back to
-// addon views for any missing template. It has been replaced by the explicit
-// addon view resolver (src/handlers/addonViewResolver.ts), which validates
-// addon slugs and keeps every resolved path inside the addon's views dir.
-
-const addonViewsDir = path.join(__dirname, '../../storage/addons');
+const addonViewsDir = path.join(__dirname, "../../storage/addons");
 
 // Load compression
 app.use(compression());
 
 // htmx detection — sets req.htmx for all downstream handlers
 app.use((req: any, _res, next) => {
-  req.htmx = req.headers['hx-request'] === 'true';
+  req.htmx = req.headers["hx-request"] === "true";
   next();
 });
 
@@ -149,7 +145,7 @@ const isProduction = panelConfig.isProduction;
 // Nonce middleware — generates a per-request CSP nonce for XSS protection.
 // Exposed as res.locals.nonce (EJS templates) and req.nonce (downstream handlers).
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const nonce = crypto.randomBytes(16).toString('base64');
+  const nonce = crypto.randomBytes(16).toString("base64");
   res.locals.nonce = nonce;
   req.nonce = nonce;
   next();
@@ -157,11 +153,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // X-Request-Id — propagates a stable request ID from browser → panel → daemon for distributed tracing.
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const incoming = req.headers['x-request-id'];
+  const incoming = req.headers["x-request-id"];
   const requestId =
-    (typeof incoming === 'string' && incoming.trim()) || crypto.randomUUID();
-  req.headers['x-request-id'] = requestId;
-  res.setHeader('X-Request-Id', requestId);
+    (typeof incoming === "string" && incoming.trim()) || crypto.randomUUID();
+  req.headers["x-request-id"] = requestId;
+  res.setHeader("X-Request-Id", requestId);
   next();
 });
 
@@ -169,72 +165,39 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use((req: Request, res: Response, next: NextFunction) => {
   const nonce = res.locals.nonce as string;
 
-  // All assets are now served locally — no CDN domains needed in CSP.
-  // Self-hosted assets only — no CDN domains in CSP.
-
   helmet({
     noSniff: true,
-
-    // Legacy browsers fallback — CSP frame-ancestors supersedes this.
-    frameguard: { action: 'deny' },
-
-    // HSTS only over HTTPS — meaningless on HTTP, causes browsers to refuse future HTTP connections.
+    frameguard: { action: "deny" },
     hsts: isHttps
       ? { maxAge: 31536000, includeSubDomains: true, preload: true }
       : false,
-
-    // COOP and OAC only meaningful on HTTPS.
-    crossOriginOpenerPolicy: isHttps ? { policy: 'same-origin' } : false,
+    crossOriginOpenerPolicy: isHttps ? { policy: "same-origin" } : false,
     originAgentCluster: isHttps ? undefined : false,
-
-    // Referrer-Policy — don't leak the full URL to third-party CDNs.
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-
-    permittedCrossDomainPolicies: { permittedPolicies: 'none' },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    permittedCrossDomainPolicies: { permittedPolicies: "none" },
 
     contentSecurityPolicy: isProduction
       ? {
-        directives: {
-          // Fallback for any directive not listed explicitly.
-          defaultSrc: ['\'self\''],
-
-          // Scripts: nonce + strict-dynamic for Monaco loader.
-          scriptSrc: ['\'self\'', `'nonce-${nonce}'`, '\'strict-dynamic\''],
-
-          // unsafe-inline for event handler attrs only — avoids rewriting 126+ EJS handlers.
-          scriptSrcAttr: ['\'unsafe-inline\''],
-
-          // Inline styles needed for Tailwind utility classes.
-          styleSrc: ['\'self\'', '\'unsafe-inline\''],
-
-          fontSrc: ['\'self\'', 'data:'],
-
-          // Self + data URIs (avatars/favicons) + https for remote images.
-          imgSrc: ['\'self\'', 'data:', 'blob:', 'https:'],
-
-          // WebSocket connections for server console + same-origin API calls.
-          connectSrc: ['\'self\'', ...(isHttps ? ['wss:'] : ['ws:', 'wss:'])],
-
-          frameAncestors: ['\'none\''],
-
-          objectSrc: ['\'none\''],
-
-          baseUri: ['\'self\''],
-
-          formAction: ['\'self\''],
-
-          // Only upgrade to HTTPS when actually serving HTTPS — without this guard,
-          // helmet rewrites every asset URL to https://, breaking HTTP installs.
-          ...(isHttps
-            ? { upgradeInsecureRequests: [] }
-            : { upgradeInsecureRequests: null }),
-        },
-      }
+          directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"],
+            scriptSrcAttr: ["'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            fontSrc: ["'self'", "data:"],
+            imgSrc: ["'self'", "data:", "blob:", "https:"],
+            connectSrc: ["'self'", ...(isHttps ? ["wss:"] : ["ws:", "wss:"])],
+            frameAncestors: ["'none'"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            ...(isHttps
+              ? { upgradeInsecureRequests: [] }
+              : { upgradeInsecureRequests: null }),
+          },
+        }
       : false,
   })(req, res, next);
 });
-
-// hpp removed: Express 5 handles parameter pollution natively
 
 // Initial load + refresh every 30 seconds
 refreshSecurityCache();
@@ -248,7 +211,7 @@ app.use((req, res, next) => {
       req,
       res,
       403,
-      'Your IP address is blocked from this panel.',
+      "Your IP address is blocked from this panel.",
     );
     return;
   }
@@ -270,13 +233,7 @@ app.use(
 );
 
 // Load session with Redis store
-// Only mark cookies as secure when the server is actually serving over HTTPS.
-// Setting secure:true on a plain HTTP server causes browsers to silently drop
-// all session cookies, breaking login on local network setups.
 const useSecureCookie = panelConfig.isHttps;
-
-// Session secret comes from the validated config (src/config.ts). The panel
-// never writes secrets to .env at runtime; use `node dist/cli/secret.js`.
 const sessionSecret = panelConfig.sessionSecret;
 
 app.use(
@@ -288,7 +245,7 @@ app.use(
     cookie: {
       secure: useSecureCookie,
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),
@@ -296,24 +253,24 @@ app.use(
 
 app.use(
   express.json({
-    limit: '512kb',
+    limit: "512kb",
   }),
 );
 app.use(
   express.urlencoded({
     extended: false,
-    limit: '512kb',
+    limit: "512kb",
     parameterLimit: 1000,
   }),
 );
 app.use(
   express.raw({
-    limit: '1mb',
+    limit: "1mb",
   }),
 );
 app.use(
   express.text({
-    limit: '512kb',
+    limit: "512kb",
   }),
 );
 
@@ -323,9 +280,7 @@ app.use(cookieParser());
 // Load translation
 app.use(translationMiddleware);
 
-// Apply CSRF protection to all routes except WebSocket upgrades and the
-// bearer-only API mounts. Session-authenticated /api/* routes (folders,
-// admin endpoints, search) ARE protected — see csrfRouting.ts.
+// Apply CSRF protection
 app.use((req, res, next) => {
   if (isCsrfExempt(req)) {
     return next();
@@ -366,8 +321,7 @@ app.use((_req, res, next) => {
   next();
 });
 
-// Explicit primary/addon view resolver — replaces the old global EJS
-// monkey-patch and the inline res.render override (see renderResolver.ts).
+// Explicit primary/addon view resolver
 app.use(
   installRenderResolver({
     viewsPath,
@@ -381,29 +335,38 @@ app.use(errorPageHandler);
 // Load modules, plugins, database and start the webserver
 (async () => {
   try {
+    // ── Initialize with ora-style progress ─────────────────────────────────
     await databaseLoader();
+    logger.info("Database connected");
+
     await settingsLoader();
-    // Initialize default UI components
+    logger.info("Settings loaded");
+
     initializeDefaultUIComponents();
+    logger.info("UI components initialized");
+
     await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
+    logger.info("Modules loaded");
+
     setAppInstance(app);
     await loadAddons(app);
+    logger.info("Addons loaded");
 
-    // Consistent request-validation boundary: converts schema failures from
-    // any feature into a standardized 400 response (see src/utils/validation.ts).
+    // Consistent request-validation boundary
     app.use(validationErrorBoundary);
 
     app.use(notFoundHandler);
     app.use(errorPageHandler);
 
     const server = app.listen(port, () => {
+      logger.success(`Listening on port ${port}`);
       startPlayerStatsCollection();
       startScheduler();
       reenqueueQueuedInstalls();
       initEggCatalogue().catch((err) =>
         logger.warn(`Store catalogue init failed: ${err?.message || err}`),
       );
-      import('./handlers/realtime/nodeStatsWs').then((m) =>
+      import("./handlers/realtime/nodeStatsWs").then((m) =>
         m.attachNodeStatsWs(server),
       );
     });
@@ -424,21 +387,21 @@ app.use(errorPageHandler);
         } catch {
           // best effort
         }
-        logger.info('Server closed');
+        logger.info("Server closed");
         process.exit(0);
       });
 
       // If server.close() doesn't finish within 10s, force exit
       setTimeout(() => {
-        logger.warn('Forced exit after timeout');
+        logger.warn("Forced exit after timeout");
         process.exit(1);
       }, 10_000).unref();
     }
 
-    process.on('SIGINT', () => shutdown('SIGINT'));
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on("SIGINT", () => shutdown("SIGINT"));
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
   } catch (err) {
-    logger.error('Failed to load modules or database:', err);
+    logger.error("Failed to load modules or database:", err);
   }
 })();
 

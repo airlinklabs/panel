@@ -1,220 +1,98 @@
 #!/usr/bin/env node
 
 /**
- * generate-al-icon.mjs - builds public/javascript/shared/al-icon.js.
- *
- * Reads icon data from the installed `lucide` npm package and emits a compact
- * client-side SVG renderer.  The output is a self-contained IIFE that exposes
- * `window.alIcon(name, className, opts)`.
+ * generate-al-icon.mjs - generates al-icon SVG sprite from SVG files.
  *
  * Usage:
  *   node public/scripts/generate-al-icon.mjs
  */
 
-import fs from "node:fs";
-import path from "node:path";
+import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
+import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import * as lucide from "lucide";
+import chalk from "chalk";
+import boxen from "boxen";
 
-// ---
-// Paths
-// ---
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const projectDir = resolve(__dirname, "../..");
+const iconsDir = resolve(projectDir, "node_modules/@airlink/icons/svg");
+const outputDir = resolve(projectDir, "public/assets");
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const outFile = path.resolve(__dirname, "../javascript/shared/al-icon.js");
+const TTY = process.stdout.isTTY;
 
 // ---
 // Terminal helpers
 // ---
 
-const TTY = process.stdout.isTTY;
-const C = {
-  reset: TTY ? "\x1b[0m" : "",
-  bold: TTY ? "\x1b[1m" : "",
-  green: TTY ? "\x1b[32m" : "",
-  yellow: TTY ? "\x1b[33m" : "",
-};
-
-const ok = (msg) => console.log(`  ${C.green}+${C.reset} ${msg}`);
+const ok = (msg) => console.log(`  ${chalk.green("+")} ${msg}`);
 const warn = (msg) =>
-  console.log(`  ${C.yellow}!${C.reset} ${C.yellow}${msg}${C.reset}`);
+  console.log(`  ${chalk.yellow("!")} ${chalk.yellow(msg)}`);
 const gap = () => console.log();
 
 function section(title) {
   gap();
-  console.log(`${C.bold}${C.green}  ${title}${C.reset}`);
-}
-
-function banner() {
-  gap();
-  console.log(`${C.bold}  generate-al-icon${C.reset}`);
-  gap();
+  console.log(`  ${chalk.bold.green(title)}`);
 }
 
 // ---
-// Icons - keep this list tight; each entry costs bytes on the client.
+// Sprite generation
 // ---
 
-const ICONS = [
-  "server",
-  "user",
-  "network",
-  "search",
-  "search-x",
-  "clock",
-  "arrow-up-right",
-  "sparkles",
-  "x",
-  "trash-2",
-  "check",
-  "circle-check",
-  "loader-circle",
-  "triangle-alert",
-  "shield-check",
-  "scan-search",
-  "refresh-cw",
-  "plus",
-  "copy",
-  "info",
-  "circle-x",
-  "circle-help",
-  "ellipsis",
-  "wifi-off",
-  "chevron-left",
-  "chevron-right",
-  "sun",
-  "moon",
-  "settings",
-  "message-square",
-  "plug",
-  "save",
-  "file-text",
-  "globe",
-  "external-link",
-  "more-horizontal",
-  "log-out",
-  "log-in",
-  "users",
-  "layout-grid",
-  "map-pin",
-  "activity",
-  "box",
-  "puzzle",
-  "key",
-  "folder",
-  "calendar",
-  "play",
-  "database",
-  "layers",
-  "square-terminal",
-  "chart-column",
-  "square-arrow-up-right",
-  "archive",
-  "badge-check",
-  "hard-drive",
-  "sparkle",
-  "zap",
-  "pencil",
-  "download",
-];
-
-// ---
-// Build registry
-// ---
-
-function pascal(name) {
-  return name
-    .split("-")
-    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-    .join("");
-}
-
-const registry = {};
-for (const name of ICONS) {
-  const data = lucide[pascal(name)];
-  if (!data || !Array.isArray(data)) {
-    warn(`SKIP unknown lucide icon: ${name}`);
-    continue;
-  }
-  registry[name] = data;
-}
-
-// ---
-// Emit IIFE
-// ---
-
-function emit() {
-  banner();
-  section("Icons");
-
-  const bannerComment = `/* GENERATED FILE — do not edit by hand.
-   Regenerate with: node public/scripts/generate-al-icon.mjs
-   Source: lucide v${lucide.version || "1"} module node arrays. */
-
-(function () {
-  'use strict';
-
-  var ICONS = ${JSON.stringify(registry)};
-
-  function attrsToString(attrs) {
-    var out = '';
-    for (var k in attrs) out += ' ' + k + '="' + String(attrs[k]) + '"';
-    return out;
+function generate() {
+  if (TTY) {
+    const ASCII = `  /$$$$$$ /$$         /$$/$$         /$$
+ /$$__  $|__/        | $|__/        | $$
+| $$   $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$
+| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/
+| $$__  $| $| $$  __| $| $| $$   $| $$$$$$/
+| $$  | $| $| $$     | $| $| $$  | $| $$_  $$
+| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$
+|__/  |__|__|__/     |__|__|__/  |__|__/  __/`;
+    const lines = [
+      chalk.cyan(ASCII),
+      "",
+      `  ${chalk.bold.cyan("generate-al-icon")}`,
+    ];
+    console.log(
+      boxen(lines.join("\n"), {
+        padding: 1,
+        margin: 1,
+        borderStyle: "round",
+        borderColor: "cyan",
+      }),
+    );
+  } else {
+    console.log("  generate-al-icon");
   }
 
-  function renderNode(node) {
-    var tag = node[0];
-    var attrs = node[1];
-    var children = node[2];
-    var open = '<' + tag + attrsToString(attrs) + '>';
-    var inner = '';
-    if (children) {
-      for (var i = 0; i < children.length; i++) inner += renderNode(children[i]);
-    }
-    return open + inner + '</' + tag + '>';
+  if (!existsSync(iconsDir)) {
+    warn("@airlink/icons not found — run pnpm install");
+    return;
   }
 
-  function alIcon(name, className, opts) {
-    var data = ICONS[name];
-    if (!data) {
-      console.warn('[al-icon] Unknown icon: ' + name);
-      return '<span aria-hidden="true" style="display:inline-block;width:16px;height:16px;"></span>';
-    }
-    opts = opts || {};
-    var sw = opts.strokeWidth != null ? opts.strokeWidth : 1.5;
-    var attrs = {
-      xmlns: 'http://www.w3.org/2000/svg',
-      width: opts.width || 16,
-      height: opts.height || 16,
-      viewBox: '0 0 24 24',
-      fill: 'none',
-      stroke: 'currentColor',
-      'stroke-width': sw,
-      'stroke-linecap': 'round',
-      'stroke-linejoin': 'round',
-      'aria-hidden': 'true'
-    };
-    if (className) attrs.class = className;
-    if (opts.style) attrs.style = opts.style;
-    if (opts.id) attrs.id = opts.id;
-    if (opts.label) {
-      attrs.role = 'img';
-      attrs['aria-label'] = opts.label;
-      delete attrs['aria-hidden'];
-    }
-    var inner = '';
-    for (var i = 0; i < data.length; i++) inner += renderNode(data[i]);
-    return '<svg' + attrsToString(attrs) + '>' + inner + '</svg>';
+  section("Generating SVG sprite");
+
+  const svgFiles = readdirSync(iconsDir).filter((f) => f.endsWith(".svg"));
+  if (svgFiles.length === 0) {
+    warn("No SVG files found in @airlink/icons/svg");
+    return;
   }
 
-  if (typeof window !== 'undefined') window.alIcon = alIcon;
-  if (typeof module !== 'undefined' && module.exports) module.exports = alIcon;
-})();
-`;
+  const symbols = svgFiles.map((file) => {
+    const name = file.replace(".svg", "");
+    const svg = readFileSync(resolve(iconsDir, file), "utf-8");
+    const viewBox = svg.match(/viewBox="([^"]*)"/)?.[1] || "0 0 24 24";
+    const content = svg
+      .replace(/<svg[^>]*>/, "")
+      .replace(/<\/svg>/, "")
+      .trim();
+    return `  <symbol id="al-icon-${name}" viewBox="${viewBox}">\n    ${content}\n  </symbol>`;
+  });
 
-  fs.writeFileSync(outFile, bannerComment, "utf8");
-  ok(`${Object.keys(registry).length} icons → ${outFile}`);
-  gap();
+  const sprite = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none">\n${symbols.join("\n")}\n</svg>`;
+
+  writeFileSync(resolve(outputDir, "al-icon.svg"), sprite);
+  ok(`Generated al-icon.svg with ${svgFiles.length} icons`);
 }
 
-emit();
+generate();

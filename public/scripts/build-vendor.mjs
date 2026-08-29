@@ -1,143 +1,103 @@
 #!/usr/bin/env node
 
 /**
- * build-vendor.mjs - bundles @tanstack/query-core into a single IIFE.
- *
- * Other vendor dependencies (htmx, alpine, xterm, chart.js, etc.) are served
- * directly from node_modules via the Express /vendor/ static mount.
- *
- * Flags:
- *   --check   Verify vendor files are up-to-date without writing (for CI).
+ * build-vendor.mjs - copies vendor assets from node_modules into public/vendor.
  *
  * Usage:
  *   node public/scripts/build-vendor.mjs
- *   node public/scripts/build-vendor.mjs --check
  */
 
-import {
-  readFileSync,
-  writeFileSync,
-  unlinkSync,
-  existsSync,
-  mkdirSync,
-} from "node:fs";
-import { execSync } from "node:child_process";
-import { dirname, resolve } from "node:path";
+import { existsSync, mkdirSync, cpSync, rmSync } from "node:fs";
+import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-
-// ---
-// Paths
-// ---
+import chalk from "chalk";
+import boxen from "boxen";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, "../..");
-const VENDOR = resolve(ROOT, "public/javascript/vendor");
-const check = process.argv.includes("--check");
+const projectDir = resolve(__dirname, "../..");
+const vendorDir = resolve(__dirname, "../vendor");
+
+const TTY = process.stdout.isTTY;
 
 // ---
 // Terminal helpers
 // ---
 
-const TTY = process.stdout.isTTY;
-const C = {
-  reset: TTY ? "\x1b[0m" : "",
-  bold: TTY ? "\x1b[1m" : "",
-  green: TTY ? "\x1b[32m" : "",
-  yellow: TTY ? "\x1b[33m" : "",
-  red: TTY ? "\x1b[31m" : "",
-};
-
-const ok = (msg) => console.log(`  ${C.green}+${C.reset} ${msg}`);
-const fail = (msg) =>
-  console.log(`  ${C.red}x${C.reset} ${C.red}${msg}${C.reset}`);
+const ok = (msg) => console.log(`  ${chalk.green("+")} ${msg}`);
+const fail = (msg) => console.log(`  ${chalk.red("x")} ${chalk.red(msg)}`);
 const gap = () => console.log();
 
 function section(title) {
   gap();
-  console.log(`${C.bold}${C.green}  ${title}${C.reset}`);
-}
-
-function banner() {
-  gap();
-  console.log(`${C.bold}  build-vendor${C.reset}`);
-  gap();
+  console.log(`  ${chalk.bold.green(title)}`);
 }
 
 // ---
-// Bundle @tanstack/query-core into a single IIFE via esbuild
+// Vendor assets
 // ---
 
-function buildQueryCore() {
-  mkdirSync(VENDOR, { recursive: true });
-
-  const esbuildBin = resolve(ROOT, "node_modules/.bin/esbuild");
-  if (!existsSync(esbuildBin)) {
-    fail("esbuild not found — cannot build query-core vendor bundle");
-    process.exit(1);
-  }
-
-  const entryFile = resolve(VENDOR, ".query-core-entry.js");
-  const outTemp = resolve(VENDOR, ".query-core-out.js");
-
-  writeFileSync(
-    entryFile,
-    `export { MutationCache, QueryCache, QueryClient, QueryObserver } from '@tanstack/query-core';\n`,
-  );
-
-  try {
-    execSync(
-      `"${esbuildBin}" "${entryFile}" --bundle --outfile="${outTemp}" --format=iife --global-name=ALQuery --minify --log-level=error`,
-      { cwd: ROOT, stdio: "inherit" },
-    );
-
-    const pkg = JSON.parse(
-      readFileSync(
-        resolve(ROOT, "node_modules/@tanstack/query-core/package.json"),
-        "utf8",
-      ),
-    );
-    const generated = readFileSync(outTemp, "utf8");
-    const content = generated.replace(/^"use strict";/, "");
-    const outFile = resolve(VENDOR, "query-core.js");
-
-    if (check) {
-      const current = existsSync(outFile) ? readFileSync(outFile, "utf8") : "";
-      if (content !== current) {
-        fail("@tanstack/query-core → query-core.js differs from source");
-        process.exit(1);
-      }
-      ok(`@tanstack/query-core@${pkg.version} → query-core.js ✓`);
-    } else {
-      writeFileSync(outFile, content);
-      ok(`@tanstack/query-core@${pkg.version} → query-core.js`);
-    }
-  } finally {
-    try {
-      unlinkSync(entryFile);
-    } catch {}
-    try {
-      unlinkSync(outTemp);
-    } catch {}
-  }
-}
-
-// ---
-// Entry point
-// ---
+const ASSETS = [
+  { name: "htmx", src: "htmx.org/dist/htmx.min.js", dst: "htmx.min.js" },
+  { name: "alpinejs", src: "alpinejs/dist/cdn.min.js", dst: "alpine.min.js" },
+  {
+    name: "inter",
+    src: "@fontsource-variable/inter",
+    dst: "@fontsource-variable/inter",
+  },
+  { name: "chart.js", src: "chart.js/dist/chart.umd.js", dst: "chart.umd.js" },
+];
 
 function main() {
-  banner();
-  section("Vendor bundles");
+  if (TTY) {
+    const ASCII = `  /$$$$$$ /$$         /$$/$$         /$$
+ /$$__  $|__/        | $|__/        | $$
+| $$   $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$
+| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/
+| $$__  $| $| $$  __| $| $| $$   $| $$$$$$/
+| $$  | $| $| $$     | $| $| $$  | $| $$_  $$
+| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$
+|__/  |__|__|__/     |__|__|__/  |__|__/  __/`;
+    const lines = [
+      chalk.cyan(ASCII),
+      "",
+      `  ${chalk.bold.cyan("build-vendor")}`,
+    ];
+    console.log(
+      boxen(lines.join("\n"), {
+        padding: 1,
+        margin: 1,
+        borderStyle: "round",
+        borderColor: "cyan",
+      }),
+    );
+  } else {
+    console.log("  build-vendor");
+  }
 
-  buildQueryCore();
+  section("Copying vendor assets");
+
+  if (existsSync(vendorDir)) {
+    rmSync(vendorDir, { recursive: true });
+  }
+  mkdirSync(vendorDir, { recursive: true });
+
+  let copied = 0;
+  for (const asset of ASSETS) {
+    const src = resolve(projectDir, "node_modules", asset.src);
+    const dst = resolve(vendorDir, asset.dst);
+
+    if (!existsSync(src)) {
+      fail(`${asset.name}: ${asset.src} not found — run pnpm install`);
+      continue;
+    }
+
+    cpSync(src, dst, { recursive: true });
+    ok(`${asset.name}`);
+    copied++;
+  }
 
   gap();
-  ok(
-    check
-      ? "Vendor bundle OK."
-      : "Vendor bundle rebuilt. Other deps served from node_modules via /vendor/.",
-  );
-  gap();
+  ok(`Copied ${copied}/${ASSETS.length} vendor assets`);
 }
 
 main();

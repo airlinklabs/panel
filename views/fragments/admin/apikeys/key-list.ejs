@@ -22,7 +22,7 @@
             <% } %>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" onclick="showEditModal(<%- JSON.stringify(apiKey.id) %>, <%- JSON.stringify(apiKey.name) %>, <%- JSON.stringify(apiKey.description || '') %>, <%= apiKey.permissions %>)"
+            <button type="button" @click="showEditModal(<%- JSON.stringify(apiKey.id) %>, <%- JSON.stringify(apiKey.name) %>, <%- JSON.stringify(apiKey.description || '') %>, <%= apiKey.permissions %>)"
               class="w-8 h-8 flex items-center justify-center rounded-lg transition hover:bg-[var(--theme-bg-hover)] hover:text-[var(--theme-text-strong)]" style="color:var(--theme-text-muted)"
               aria-label="Edit API key">
               <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
@@ -39,7 +39,7 @@
             </form>
             <form id="deleteKeyForm_<%= apiKey.id %>" action="/admin/apikeys/delete/<%= apiKey.id %>" method="POST" class="inline">
               <%- include('../../../components/csrf') %>
-              <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="w-9 h-9 flex items-center justify-center rounded-lg transition" style="color:var(--theme-danger)" aria-label="Delete API key">
+              <button type="button" @click="confirmDeleteApiKey('<%= apiKey.id %>')" class="w-9 h-9 flex items-center justify-center rounded-lg transition" style="color:var(--theme-danger)" aria-label="Delete API key">
                 <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
               </button>
             </form>
@@ -47,7 +47,7 @@
         </div>
         <div class="mt-3 flex items-center gap-3 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
           <code class="flex-1 text-xs font-mono truncate" style="color:var(--theme-text-muted)"><%= apiKey.key.substring(0, 12) %>••••••••••••</code>
-          <button onclick="copyToClipboard('<%= apiKey.key %>')" type="button"
+          <button @click="copyToClipboard('<%= apiKey.key %>')" type="button"
             class="text-[11px] font-medium px-2 py-1 rounded-md transition hover:bg-[var(--theme-bg-hover)] inline-flex items-center gap-1.5" style="color:var(--theme-text-muted); background:var(--theme-bg-card); border:1px solid var(--theme-border)">
             <%- icon('copy', { class: 'size-3', strokeWidth: 1.5 }) %>
             Copy

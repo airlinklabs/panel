@@ -1,60 +1,24 @@
+import pino from "pino";
+import chalk from "chalk";
+import boxen from "boxen";
+import cluster from "cluster";
+import fs from "fs";
+import path from "path";
+import util from "util";
 
-import type { ConsolaInstance } from 'consola';
-import { createConsola } from 'consola';
-import cluster from 'cluster';
-import fs from 'fs';
-import path from 'path';
-import util from 'util';
-
-const logsDir = path.join(process.cwd(), 'logs');
+const logsDir = path.join(process.cwd(), "logs");
 if (cluster.isPrimary && !fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  dim: '\x1b[2m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m',
-  white: '\x1b[37m',
-  bgRed: '\x1b[41m',
-  bgGreen: '\x1b[42m',
-  bgYellow: '\x1b[43m',
-  bgBlue: '\x1b[44m',
-  bgMagenta: '\x1b[45m',
-  bgWhite: '\x1b[47m',
-};
+const isDebugMode =
+  process.env.DEBUG === "true" || process.env.NODE_ENV === "development";
+const useJsonFormat =
+  process.env.LOG_FORMAT === "json" || process.env.NODE_ENV === "production";
+const isTTY = process.stdout.isTTY;
 
-const isDebugMode = process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development';
-const useJsonFormat = process.env.LOG_FORMAT === 'json' || process.env.NODE_ENV === 'production';
-
-const consola = createConsola({
-  level: isDebugMode ? 4 : 3,
-  fancy: !useJsonFormat,
-  formatOptions: {
-    date: false,
-    colors: !useJsonFormat,
-    compact: useJsonFormat,
-  },
-}) as ConsolaInstance;
-
-type LogContext = Record<string, unknown>;
-
-/** Wire format sent from workers → primary via IPC. */
-interface LogPayload {
-  __log: boolean;
-  level: string;
-  message: string;
-  context?: string;
-  isError?: boolean;
-}
-
-const REDACTED = '***REDACTED***';
+// ── Secret redaction ─────────────────────────────────────────────────────────
+const REDACTED = "***REDACTED***";
 
 const SENSITIVE_KEYS =
   /("(?:password|passwd|secret|token|api[_ -]?key|client[_ -]?secret|access[_ -]?key|access[_ -]?token|auth(?:orization)?|authorization|refresh[_ -]?token|session[_ -]?id|cookie)"\s*[:=]\s*)(?:"([^"]*)"|'([^']*)'|([^\s,;]+))/gi;
@@ -65,41 +29,104 @@ const SENSITIVE_KEYS_UNQUOTED =
 const SENSITIVE_HEADERS =
   /((?:authorization|set-cookie|cookie|proxy-authorization)\s*[:=]\s*)(?:bearer\s+)?[^\s,;]+/gi;
 
-const SENSITIVE_QUERY = /([?&](?:token|key|secret|api_key|access_token|password|auth)=)[^&\s]+/gi;
+const SENSITIVE_QUERY =
+  /([?&](?:token|key|secret|api_key|access_token|password|auth)=)[^&\s]+/gi;
 
 const redact = (input: string): string => {
   return input
     .replace(SENSITIVE_HEADERS, (match, prefix) => `${prefix}${REDACTED}`)
     .replace(SENSITIVE_QUERY, (match, prefix) => `${prefix}${REDACTED}`)
     .replace(SENSITIVE_KEYS, (match, prefix) => `${prefix}${REDACTED}`)
-    .replace(SENSITIVE_KEYS_UNQUOTED, (match, prefix) => `${prefix}${REDACTED}`);
+    .replace(
+      SENSITIVE_KEYS_UNQUOTED,
+      (match, prefix) => `${prefix}${REDACTED}`,
+    );
 };
 
 export { redact };
 
+// ── Pino logger ──────────────────────────────────────────────────────────────
+const pinoLogger = pino({
+  level: isDebugMode ? "debug" : "info",
+  redact: {
+    paths: [
+      "password",
+      "secret",
+      "token",
+      "apiKey",
+      "clientSecret",
+      "accessToken",
+      "refreshToken",
+      "authorization",
+      "cookie",
+      "sessionId",
+      "passphrase",
+      "signature",
+      "nonce",
+      "hmacSecret",
+      "daemonKey",
+      "privateKey",
+    ],
+    censor: REDACTED,
+  },
+  transport: useJsonFormat
+    ? undefined
+    : {
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          translateTime: "HH:MM:ss",
+          ignore: "pid,hostname",
+          singleLine: false,
+        },
+      },
+});
+
+// ── Colored badges for TTY ───────────────────────────────────────────────────
+const badges = {
+  ERROR: chalk.bgHex("#D32F2F").white.bold(" ERROR "),
+  WARN: chalk.bgHex("#F57C00").white.bold(" WARN  "),
+  INFO: chalk.bgHex("#1976D2").white.bold(" INFO  "),
+  SUCCESS: chalk.bgHex("#388E3C").white.bold("  OK   "),
+  DEBUG: chalk.bgHex("#7B1FA2").white.bold(" DEBUG "),
+  LOG: chalk.bgHex("#616161").white.bold("  LOG  "),
+};
+
+// ── Serialization helpers ────────────────────────────────────────────────────
 const serializeValue = (value: unknown): string => {
   if (value instanceof Error) {
     return redact(value.stack || `${value.name}: ${value.message}`);
   }
-
-  if (typeof value === 'string') {return redact(value);}
-
-  return redact(util.inspect(value, {
-    depth: 5,
-    breakLength: 160,
-    compact: true,
-  }));
+  if (typeof value === "string") {
+    return redact(value);
+  }
+  return redact(
+    util.inspect(value, {
+      depth: 5,
+      breakLength: 160,
+      compact: true,
+    }),
+  );
 };
 
 const serializeContext = (context?: unknown): string => {
-  if (context === undefined) {return '';}
+  if (context === undefined) {
+    return "";
+  }
   return ` ${serializeValue(context)}`;
 };
 
 // ── File writing (primary only) ──────────────────────────────────────────────
+type LogPayload = {
+  __log: boolean;
+  level: string;
+  message: string;
+  context?: string;
+  isError?: boolean;
+};
+
 const writeToLogFile = (level: string, message: string): void => {
   if (cluster.isWorker) {
-    // Workers send log data to the primary via IPC — no direct file writes.
     try {
       process.send?.({ __log: true, level, message } satisfies LogPayload);
     } catch {
@@ -108,118 +135,162 @@ const writeToLogFile = (level: string, message: string): void => {
     return;
   }
   const timestamp = new Date().toISOString();
-  const logMessage = `[${timestamp}] ${level}: ${redact(message)}\n`;
-  fs.appendFile(path.join(logsDir, 'combined.log'), logMessage, (err) => {
-    if (err) {consola.error('Failed to write to combined log file:', err);}
-  });
+  fs.appendFile(
+    path.join(logsDir, "combined.log"),
+    `[${timestamp}] ${level}: ${redact(message)}\n`,
+    (err) => {
+      if (err) {
+        pinoLogger.error("Failed to write to combined log file");
+      }
+    },
+  );
 };
 
 const writeToErrorFile = (fileMessage: string): void => {
-  if (cluster.isWorker) {return;} // primary handles file writes
+  if (cluster.isWorker) {
+    return;
+  }
   const timestamp = new Date().toISOString();
-  fs.appendFile(path.join(logsDir, 'error.log'), `[${timestamp}] ERROR: ${fileMessage}\n`, (err) => {
-    if (err) {consola.error('Failed to write to error log file:', err);}
-  });
+  fs.appendFile(
+    path.join(logsDir, "error.log"),
+    `[${timestamp}] ERROR: ${fileMessage}\n`,
+    (err) => {
+      if (err) {
+        pinoLogger.error("Failed to write to error log file");
+      }
+    },
+  );
 };
 
 // ── Primary process: receive logs from workers ───────────────────────────────
 if (cluster.isPrimary) {
-  cluster.on('message', (worker, payload: LogPayload) => {
-    if (!payload || !payload.__log) {return;}
+  cluster.on("message", (worker, payload: LogPayload) => {
+    if (!payload || !payload.__log) {
+      return;
+    }
     const timestamp = new Date().toISOString();
     const logLine = `[${timestamp}] [W${worker.id}] ${payload.level}: ${payload.message}\n`;
-
-    fs.appendFile(path.join(logsDir, 'combined.log'), logLine, () => {});
+    fs.appendFile(path.join(logsDir, "combined.log"), logLine, () => {});
     if (payload.isError) {
-      fs.appendFile(path.join(logsDir, 'error.log'), `[${timestamp}] [W${worker.id}] ERROR: ${payload.message}\n`, () => {});
+      fs.appendFile(
+        path.join(logsDir, "error.log"),
+        `[${timestamp}] [W${worker.id}] ERROR: ${payload.message}\n`,
+        () => {},
+      );
     }
   });
 }
 
-const getTimestamp = (): string => {
-  const now = new Date();
-  return [
-    now.getHours().toString().padStart(2, '0'),
-    now.getMinutes().toString().padStart(2, '0'),
-    now.getSeconds().toString().padStart(2, '0'),
-  ].join(':');
-};
-
-const workerTag = cluster.isWorker ? ` [W${cluster.worker?.id}]` : '';
-
-const formatLogMessage = (badge: string, message: string, maxWidth = 120): string => {
-  const timestamp = `${colors.dim}${getTimestamp()}${colors.reset}`;
-  const tag = `${colors.dim}${workerTag}${colors.reset}`;
-  const padding = ' '.repeat(Math.max(0, maxWidth - (badge.length + message.length + tag.length + timestamp.length)));
-  return `${badge} ${message}${tag}${padding}${timestamp}`;
-};
-
+// ── Logger interface ─────────────────────────────────────────────────────────
 const logger = {
-  error(message: string, error?: unknown, context?: LogContext): void {
-    const badge = `${colors.bgRed}${colors.white}${colors.bright} ERROR ${colors.reset}`;
+  error(
+    message: string,
+    error?: unknown,
+    context?: Record<string, unknown>,
+  ): void {
     const safeMessage = redact(message);
-    const fileMessage = `${safeMessage}${serializeContext(context)}${error === undefined ? '' : `\n${serializeValue(error)}`}`;
+    const fileMessage = `${safeMessage}${serializeContext(context)}${error === undefined ? "" : `\n${serializeValue(error)}`}`;
 
     if (error instanceof Error) {
-      consola.error(formatLogMessage(badge, safeMessage), error);
+      pinoLogger.error({ err: error }, message);
+    } else if (error !== undefined) {
+      pinoLogger.error(message);
     } else {
-      consola.error(formatLogMessage(badge, `${safeMessage}${serializeContext(error)}`));
+      pinoLogger.error(message);
     }
 
     writeToErrorFile(fileMessage);
-    writeToLogFile('ERROR', fileMessage);
+    writeToLogFile("ERROR", fileMessage);
   },
 
-  warn(message: string, context?: LogContext): void {
-    const badge = `${colors.bgYellow}${colors.white}${colors.bright} WARN ${colors.reset}`;
+  warn(message: string, context?: Record<string, unknown>): void {
     const text = `${redact(message)}${serializeContext(context)}`;
-    consola.warn(formatLogMessage(badge, text));
-    writeToLogFile('WARN', text);
+    pinoLogger.warn(message);
+    writeToLogFile("WARN", text);
   },
 
-  info(message: string, context?: LogContext): void {
-    const badge = `${colors.bgBlue}${colors.white}${colors.bright} INFO ${colors.reset}`;
+  info(message: string, context?: Record<string, unknown>): void {
     const text = `${redact(message)}${serializeContext(context)}`;
-    consola.info(formatLogMessage(badge, `${colors.blue}${text}${colors.reset}`));
-    writeToLogFile('INFO', text);
+    pinoLogger.info(message);
+    writeToLogFile("INFO", text);
   },
 
-  success(message: string, context?: LogContext): void {
-    const badge = `${colors.bgGreen}${colors.white}${colors.bright} SUCCESS ${colors.reset}`;
+  success(message: string, context?: Record<string, unknown>): void {
     const text = `${redact(message)}${serializeContext(context)}`;
-    consola.success(formatLogMessage(badge, text));
-    writeToLogFile('SUCCESS', text);
+    // pino has no "success" level — log at info with a marker
+    pinoLogger.info(message);
+    writeToLogFile("SUCCESS", text);
   },
 
-  debug(message: string, context?: LogContext): void {
-    if (!isDebugMode) {return;}
-
-    const badge = `${colors.bgMagenta}${colors.white}${colors.bright} DEBUG ${colors.reset}`;
+  debug(message: string, context?: Record<string, unknown>): void {
+    if (!isDebugMode) {
+      return;
+    }
     const text = `${redact(message)}${serializeContext(context)}`;
-    consola.debug(formatLogMessage(badge, text));
+    pinoLogger.debug(message);
   },
 
-  log(message: string, context?: LogContext): void {
-    const badge = `${colors.bgWhite}${colors.white}${colors.bright} LOG ${colors.reset}`;
+  log(message: string, context?: Record<string, unknown>): void {
     const text = `${redact(message)}${serializeContext(context)}`;
-    consola.log(formatLogMessage(badge, text));
-    writeToLogFile('LOG', text);
+    pinoLogger.info(message);
+    writeToLogFile("LOG", text);
   },
 
-  box(options: string | { title?: string; message: string | string[]; style?: any }): void {
-    if (typeof options === 'string') {
+  box(
+    options:
+      string | { title?: string; message: string | string[]; style?: any },
+  ): void {
+    if (typeof options === "string") {
       this.info(options);
-      writeToLogFile('BOX', options);
+      writeToLogFile("BOX", options);
       return;
     }
 
-    const title = options.title || '';
-    const messages = Array.isArray(options.message) ? options.message : [options.message];
-    const text = title ? `${title}: ${messages.join(' | ')}` : messages.join(' | ');
+    const title = options.title || "";
+    const messages = Array.isArray(options.message)
+      ? options.message
+      : [options.message];
+    const text = title
+      ? `${title}: ${messages.join(" | ")}`
+      : messages.join(" | ");
 
     this.info(text);
-    writeToLogFile('BOX', text);
+    writeToLogFile("BOX", text);
   },
 };
 
 export default logger;
+
+// ── Startup banner ───────────────────────────────────────────────────────────
+const ASCII_BANNER = `  /$$$$$$ /$$         /$$/$$         /$$
+ /$$__  $|__/        | $|__/        | $$
+| $$   $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$
+| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/
+| $$__  $| $| $$  __| $| $| $$   $| $$$$$$/
+| $$  | $| $| $$     | $| $| $$  | $| $$_  $$
+| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$
+|__/  |__|__|__/     |__|__|__/  |__|__/  __/`;
+
+export function drawBanner(title: string, version: string, codename?: string) {
+  if (!isTTY) {
+    console.log(`${title} v${version}${codename ? ` — ${codename}` : ""}`);
+    return;
+  }
+
+  const lines: string[] = [];
+  lines.push(chalk.cyan(ASCII_BANNER));
+  lines.push("");
+  lines.push(`  ${chalk.bold.cyan(title)} ${chalk.dim(`v${version}`)}`);
+  if (codename) {
+    lines.push(`  ${chalk.dim(codename)}`);
+  }
+
+  console.log(
+    boxen(lines.join("\n"), {
+      padding: 1,
+      margin: 1,
+      borderStyle: "round",
+      borderColor: "cyan",
+    }),
+  );
+}

@@ -16,7 +16,7 @@
   </div>
   <div class="flex items-center justify-between mt-5 gap-3">
     <button type="button" id="copyRecoveryCodes" class="al-btn-ghost text-sm inline-flex items-center gap-1.5"
-      onclick="navigator.clipboard.writeText(document.querySelectorAll('#recoveryCodesList code').forEach(c => c.textContent).join ? Array.from(document.querySelectorAll('#recoveryCodesList code')).map(c => c.textContent).join('\n') : '').then(() => { if (window.showToast) showToast('Recovery codes copied.', 'success'); }).catch(() => { if (window.showToast) showToast('Could not copy recovery codes.', 'error'); })">
+      @click="navigator.clipboard.writeText(document.querySelectorAll('#recoveryCodesList code').forEach(c => c.textContent).join ? Array.from(document.querySelectorAll('#recoveryCodesList code')).map(c => c.textContent).join('\n') : '').then(() => { if (window.showToast) showToast('Recovery codes copied.', 'success'); }).catch(() => { if (window.showToast) showToast('Could not copy recovery codes.', 'error'); })">
       <%- icon('copy', { size: 14 }) %>
       Copy all
     </button>

@@ -69,7 +69,7 @@
               <p class="font-medium">Connection Error</p>
               <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">One or more nodes are offline. Some information may be unavailable.</p>
             </div>
-            <button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
+            <button type="button" @click="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
               <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
               Retry Connection
             </button>

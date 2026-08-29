@@ -37,12 +37,12 @@
               <div class="al-card flex items-center gap-2 p-2.5">
                 <span class="selection-count text-[13px] font-medium mr-1" style="color:var(--theme-text);">0 selected</span>
                 <div class="h-3.5 w-px mx-1" style="background:var(--theme-border);"></div>
-                <button type="button" onclick="bulkRadarScan()"
+                <button type="button" @click="bulkRadarScan()"
                   class="al-btn-secondary text-[11px]">
                   <%- icon('radar', { size: 12, class: 'shrink-0' }) %>
                   Radar Scan
                 </button>
-                <button type="button" onclick="bulkDelete()"
+                <button type="button" @click="bulkDelete()"
                   class="al-btn-danger text-[11px] ml-auto">
                   <%- icon('trash-2', { size: 12, class: 'shrink-0' }) %>
                   Delete
@@ -58,12 +58,12 @@
           <div class="al-card flex items-center gap-2 p-2.5 shadow-xl">
             <span class="selection-count text-[13px] font-medium mr-1" style="color:var(--theme-text);">0 selected</span>
             <div class="h-3.5 w-px mx-1" style="background:var(--theme-border);"></div>
-            <button type="button" onclick="bulkRadarScan()"
+            <button type="button" @click="bulkRadarScan()"
               class="al-btn-secondary text-[11px]">
               <%- icon('radar', { size: 12, class: 'shrink-0' }) %>
               Radar Scan
             </button>
-            <button type="button" onclick="bulkDelete()"
+            <button type="button" @click="bulkDelete()"
               class="al-btn-danger text-[11px] ml-auto">
               <%- icon('trash-2', { size: 12, class: 'shrink-0' }) %>
               Delete
@@ -153,7 +153,7 @@
                       class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
                       <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
                     </a>
-                    <button type="button" onclick="event.stopPropagation(); deleteServer('<%= server.id %>', '<%= server.name %>')" title="Delete" aria-label="Delete server"
+                    <button type="button" @click="event.stopPropagation(); deleteServer('<%= server.id %>', '<%= server.name %>')" title="Delete" aria-label="Delete server"
                       class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);">
                       <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                     </button>
@@ -184,7 +184,7 @@
           <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong);" id="radarScanModalTitle">Radar Scan</h3>
           <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);" id="radarScanModalSubtitle">Pick a script and scan the server volume</p>
         </div>
-        <button type="button" onclick="closeRadarScanModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <button type="button" @click="closeRadarScanModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
@@ -196,12 +196,12 @@
         <div id="scanModeToggle" class="hidden mb-5">
           <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);">Scan method</p>
           <div class="flex flex-col sm:flex-row gap-2">
-            <button type="button" id="modeBuiltin" onclick="setScanMode('builtin')"
+            <button type="button" id="modeBuiltin" @click="setScanMode('builtin')"
               class="flex-1 flex items-center gap-2 px-3 py-3 sm:py-2.5 rounded-lg border-2 text-xs font-medium transition-all min-h-[44px]" style="border-color:var(--theme-border-accent); background:var(--theme-text-strong); color:var(--theme-accent-text);">
               <%- icon('radar', { size: 14, class: 'shrink-0' }) %>
               Built-in patterns
             </button>
-            <button type="button" id="modeVT" onclick="setScanMode('vt')"
+            <button type="button" id="modeVT" @click="setScanMode('vt')"
               class="flex-1 flex items-center gap-2 px-3 py-3 sm:py-2.5 rounded-lg border-2 text-xs font-medium transition-all min-h-[44px]" style="border-color:var(--theme-border); background:var(--theme-bg-secondary); color:var(--theme-text-muted);">
               <%- icon('shield', { size: 14, class: 'shrink-0' }) %>
               VirusTotal file scan
@@ -220,7 +220,7 @@
               <div class="custom-select" data-for="scriptSelect"></div>
             </div>
             <div class="sm:pt-5">
-              <button type="button" id="runScanButton" onclick="runRadarScan()"
+              <button type="button" id="runScanButton" @click="runRadarScan()"
                 class="al-btn-primary w-full sm:w-auto min-h-[44px]">
                 <%- icon('radar', { size: 16, class: 'shrink-0' }) %>
                 Run Scan
@@ -237,7 +237,7 @@
             <p>Excludes world folders, logs, cache. Max 32 MB zip. Takes 30–120 seconds.</p>
             <p style="color:var(--theme-warning);">Free tier: 4 requests/min · 500/day. Do not use for automated scanning.</p>
           </div>
-          <button type="button" id="runVtScanButton" onclick="runVtFileScan()"
+          <button type="button" id="runVtScanButton" @click="runVtFileScan()"
             class="al-btn-primary w-full sm:w-auto min-h-[44px]">
             <%- icon('shield', { size: 16, class: 'shrink-0' }) %>
             Upload to VirusTotal
@@ -255,11 +255,11 @@
 
       <!-- Footer -->
       <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
-        <button type="button" id="radarRescanBtn" class="hidden text-xs hover:underline min-h-[44px] flex items-center justify-center sm:justify-start" style="color:var(--theme-text-muted);" onclick="resetRadarToPickerPhase()">
+        <button type="button" id="radarRescanBtn" class="hidden text-xs hover:underline min-h-[44px] flex items-center justify-center sm:justify-start" style="color:var(--theme-text-muted);" @click="resetRadarToPickerPhase()">
           <%- icon('arrow-left', { class: 'size-3.5 inline mr-1' }) %> Run another scan
         </button>
         <div class="sm:ml-auto">
-          <button type="button" onclick="closeRadarScanModal()"
+          <button type="button" @click="closeRadarScanModal()"
             class="al-btn-secondary w-full sm:w-auto min-h-[44px]">
             <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
             Close

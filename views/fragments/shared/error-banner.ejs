@@ -14,7 +14,7 @@
         <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= hint %></p>
       <% } %>
     </div>
-    <button type="button" class="al-btn-ghost p-1 shrink-0" onclick="this.parentElement.parentElement.remove()" aria-label="Dismiss">
+    <button type="button" class="al-btn-ghost p-1 shrink-0" @click="this.parentElement.parentElement.remove()" aria-label="Dismiss">
       <%- icon('x', { class: 'h-4 w-4', strokeWidth: 1.5 }) %>
     </button>
   </div>

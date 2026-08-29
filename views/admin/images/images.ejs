@@ -22,7 +22,7 @@
         </div>
         <div class="flex gap-2 shrink-0">
           <button id="uploadBtn" type="button" class="al-btn-secondary"><%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.uploadJson || 'Upload JSON' %></button>
-          <button onclick="openCreate()" type="button" class="al-btn-secondary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>New Image</button>
+          <button @click="openCreate()" type="button" class="al-btn-secondary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>New Image</button>
           <a href="/admin/images#store" class="al-btn-secondary">Browse Store</a>
         </div>
       </div>
@@ -132,7 +132,7 @@ function imageReject() {
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Upload Image</h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Select a Pterodactyl egg JSON file to install.</p>
       </div>
-      <button type="button" onclick="closeUploadImageModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+      <button type="button" @click="closeUploadImageModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
@@ -156,7 +156,7 @@ function imageReject() {
             <p id="imageSelectedFileName" class="font-medium truncate" style="color:var(--theme-text-strong)"></p>
             <p id="imageSelectedFileSize" class="text-sm" style="color:var(--theme-text-muted)"></p>
           </div>
-          <button type="button" onclick="removeSelectedImageFile()" class="ml-2" aria-label="Remove selected file" style="color:var(--theme-text-muted)">
+          <button type="button" @click="removeSelectedImageFile()" class="ml-2" aria-label="Remove selected file" style="color:var(--theme-text-muted)">
             <%- icon('x', { class: 'w-5 h-5' }) %>
           </button>
         </div>
@@ -169,7 +169,7 @@ function imageReject() {
       </div>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
-      <button type="button" onclick="closeUploadImageModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
+      <button type="button" @click="closeUploadImageModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
         <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
         Cancel
       </button>
@@ -187,7 +187,7 @@ function imageReject() {
 
 <!-- Create content — hosted inside the shared window.modal shell -->
 <div id="createContent" style="display:none;">
-  <form action="/admin/images/create" method="POST" class="flex flex-col gap-4">
+  <form onsubmit="submitCreateImage(event); return false;" class="flex flex-col gap-4">
       <div class="grid grid-cols-2 gap-3">
       <div class="col-span-2"><label class="al-label">Name <span style="color:var(--theme-danger)">*</span></label><input class="al-input" type="text" name="name" required placeholder="e.g. Minecraft Java"></div>
       <div><label class="al-label">Author</label><input class="al-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
@@ -196,7 +196,7 @@ function imageReject() {
       <div class="col-span-2"><label class="al-label">Description</label><textarea class="al-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
     </div>
     <div class="flex gap-2 pt-1">
-      <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border text-sm font-medium hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text)"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
+      <button type="button" @click="closeCreate()" class="flex-1 py-2 rounded-xl border text-sm font-medium hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);color:var(--theme-text)"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
       <button type="submit" class="flex-1 py-2 rounded-xl border text-sm font-medium shadow-lg hover:bg-[var(--theme-bg-hover)] transition inline-flex items-center justify-center gap-1.5" style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text-strong)"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.createAndEdit || 'Create & Edit' %></button>
     </div>
   </form>
