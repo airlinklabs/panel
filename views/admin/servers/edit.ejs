@@ -1,5 +1,25 @@
 <%- include('../../components/header', { title: 'Edit Server' }) %>
 
+<script nonce="<%- nonce %>">
+const serverEditNames = {
+  listA: ["Charged","Fiery","Mystical","Dark","Angry","Enchanted","Blazing","Cursed","Frozen","Swift","Ancient","Wicked","Luminous","Vengeful","Radiant","Thunderous","Shadow","Frost","Vibrant","Spectral","Nether","Ender","Caving","Toxic","Haunted","Radiant","Ghostly"],
+  listB: ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither","Magma Cube","Blaze","Witch","Slime","Spider","Phantom","Villager","Pillager","Vindicator","Drowned","Illager","Ender Dragon","Husk","Stray","Ravager","Piglin","Hoglin","Shulker","Warden"],
+  generate() {
+    let a, b;
+    do { a = this.listA[Math.floor(Math.random() * this.listA.length)]; b = this.listB[Math.floor(Math.random() * this.listB.length)]; } while (a === b);
+    return a + ' ' + b;
+  }
+};
+function serverEditPage() {
+  return {
+    allowStartupEdit: <%= server.allowStartupEdit ? 'true' : 'false' %>,
+    suspended: <%= server.Suspended ? 'true' : 'false' %>,
+    generateName() { document.getElementById('serverName').value = serverEditNames.generate(); }
+  };
+}
+</script>
+
+<div x-data="serverEditPage()">
 <main class="min-h-screen">
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0">
@@ -32,7 +52,7 @@
                 <label for="serverName" class="al-label"><%= req.translations.name %>:</label>
                 <div class="flex items-center gap-2">
                   <input id="serverName" name="name" value="<%= server.name %>" class="al-input flex-1">
-                  <button type="button" onclick="generateRandomName()" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-[var(--theme-bg-hover)]" style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
+                  <button type="button" @click="generateName()" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-[var(--theme-bg-hover)]" style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
                     <%- icon('dices', { size: 15 }) %>
                   </button>
                 </div>
@@ -249,11 +269,11 @@
                       </div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true" <%= server.allowStartupEdit ? 'checked' : '' %>>
+                      <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true" x-model="allowStartupEdit">
                       <div class="al-toggle-track">
                         <div class="al-toggle-dot"></div>
                       </div>
-                      <span class="ms-3 al-page-desc text-sm" id="allowStartupEditLabel"><%= server.allowStartupEdit ? 'Enabled' : 'Disabled' %></span>
+                      <span class="ms-3 al-page-desc text-sm" x-text="allowStartupEdit ? 'Enabled' : 'Disabled'"><%= server.allowStartupEdit ? 'Enabled' : 'Disabled' %></span>
                     </label>
                   </div>
                 </div>
@@ -292,9 +312,9 @@
                       </div>
                     </div>
                     <label for="suspendServer" class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" name="Suspended" id="suspendServer" aria-label="Server suspension" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
+                      <input type="checkbox" name="Suspended" id="suspendServer" aria-label="Server suspension" class="sr-only peer" value="true" x-model="suspended">
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                      <span class="ms-3 text-sm font-medium" style="color:var(--theme-text)" id="suspendServerLabel"><%= server.Suspended ? 'Suspended' : 'Active' %></span>
+                      <span id="suspendServerLabel" class="ms-3 text-sm font-medium" style="color:var(--theme-text)" x-text="suspended ? 'Suspended' : 'Active'"><%= server.Suspended ? 'Suspended' : 'Active' %></span>
                     </label>
                   </div>
                 </div>
@@ -353,6 +373,7 @@
     </div>
   </div>
 </main>
+</div><!-- /x-data -->
 
 <%- include('../../components/portsAllocator') %>
 <%- include('../../components/loadingPopup') %>
@@ -436,35 +457,9 @@
 #editServerForm .al-card { overflow: visible; }
 #editServerForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
 </style>
-<script nonce="<%- nonce %>">
-(function () {
-const listA = [
-    "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted",
-    "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked",
-    "Luminous", "Vengeful", "Radiant", "Thunderous", "Shadow",
-    "Frost", "Vibrant", "Spectral", "Nether", "Ender", "Caving",
-    "Toxic", "Haunted", "Radiant", "Ghostly"
-];
-const listB = [
-    "Creeper", "Dragon", "Zombie", "Ghoul", "Enderman", "Skeleton",
-    "Wither", "Magma Cube", "Blaze", "Witch", "Slime", "Spider",
-    "Phantom", "Villager", "Pillager", "Vindicator", "Drowned",
-    "Illager", "Ender Dragon", "Husk", "Stray", "Ravager", "Piglin",
-    "Hoglin", "Shulker", "Warden"
-];
-function generateRandomName() {
-    let randomA, randomB;
-    do { randomA = listA[Math.floor(Math.random() * listA.length)]; randomB = listB[Math.floor(Math.random() * listB.length)]; } while (randomA === randomB);
-    document.getElementById("serverName").value = randomA + " " + randomB;
-}
-window.generateRandomName = generateRandomName;
-})();
-</script>
 
 <script nonce="<%- nonce %>">
   const form = document.getElementById('editServerForm');
-    const allowStartupEditToggle = document.getElementById('allowStartupEdit');
-    const allowStartupEditLabel  = document.getElementById('allowStartupEditLabel');
     const suspendServerToggle    = document.getElementById('suspendServer');
     const suspendServerLabel     = document.getElementById('suspendServerLabel');
     const serverNodeSelect = document.getElementById('serverNode');
@@ -559,10 +554,6 @@ window.generateRandomName = generateRandomName;
     serverNodeSelect.addEventListener('change', updatePortsForSelectedNode);
     serverImageSelect.addEventListener('change', () => { ensureMinimumPortRows(); syncPortsButton(); });
     fetchNodesData();
-
-    allowStartupEditToggle.addEventListener('change', function() {
-      allowStartupEditLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
-    });
 
     suspendServerToggle.addEventListener('change', function() {
       const checked = this.checked;
