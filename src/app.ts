@@ -385,10 +385,7 @@ app.use(errorPageHandler);
       }
       shuttingDown = true;
 
-      logger.info(`Shutting down (${signal})...`);
-
-      // Stop accepting new connections and destroy all keep-alive sockets
-      server.close();
+      // Destroy all keep-alive sockets immediately
       for (const conn of connections) {
         try {
           conn.destroy();
@@ -398,17 +395,19 @@ app.use(errorPageHandler);
       }
       connections.clear();
 
-      // Disconnect database, then exit
+      // Stop the HTTP server
+      server.close();
+
+      logger.info(`Shutting down (${signal})...`);
+
+      // Disconnect DB then exit — no waiting for server.close callback
       prisma
         .$disconnect()
         .catch(() => {})
-        .finally(() => {
-          logger.info("Server closed");
-          process.exit(0);
-        });
+        .finally(() => process.exit(0));
 
-      // Force exit if cleanup hangs
-      setTimeout(() => process.exit(0), 3_000).unref();
+      // Hard kill if prisma hangs
+      setTimeout(() => process.exit(0), 2_000).unref();
     }
 
     process.on("SIGINT", () => shutdown("SIGINT"));

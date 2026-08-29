@@ -261,14 +261,16 @@ const logger = {
 export default logger;
 
 // ── Startup banner ───────────────────────────────────────────────────────────
-const ASCII_BANNER = `  /$$$$$$ /$$         /$$/$$         /$$
- /$$__  $|__/        | $|__/        | $$
-| $$   $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$
-| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/
-| $$__  $| $| $$  __| $| $| $$   $| $$$$$$/
-| $$  | $| $| $$     | $| $| $$  | $| $$_  $$
-| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$
-|__/  |__|__|__/     |__|__|__/  |__|__/  __/`;
+const ASCII_LINES = [
+  "  /$$$$$$ /$$         /$$/$$         /$$",
+  " /$$__  $|__/        | $|__/        | $$",
+  "| $$   $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$",
+  "| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/",
+  "| $$__  $| $| $$  __| $| $| $$   $| $$$$$$/",
+  "| $$  | $| $| $$     | $| $| $$  | $| $$_  $$",
+  "| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$",
+  "|__/  |__|__|__/     |__|__|__/  |__|__/  __/",
+];
 
 export function drawBanner(title: string, version: string, codename?: string) {
   if (!isTTY) {
@@ -276,13 +278,17 @@ export function drawBanner(title: string, version: string, codename?: string) {
     return;
   }
 
+  // Each line individually wrapped in cyan so boxen renders ALL lines in color
+  const colored = ASCII_LINES.map((l) => `${chalk.cyan(l)}`).join("\n");
+
   const lines: string[] = [];
-  lines.push(chalk.cyan(ASCII_BANNER));
+  lines.push(colored);
   lines.push("");
   lines.push(`  ${chalk.bold.cyan(title)} ${chalk.dim(`v${version}`)}`);
   if (codename) {
     lines.push(`  ${chalk.dim(codename)}`);
   }
+  lines.push(`  ${chalk.dim("Airlinklabs · MIT License")}`);
 
   console.log(
     boxen(lines.join("\n"), {

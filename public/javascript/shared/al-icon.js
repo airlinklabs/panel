@@ -1,5 +1,4 @@
 /* GENERATED FILE — do not edit by hand.
-   Regenerate with: node public/scripts/generate-al-icon.mjs
    Source: lucide v1 module node arrays. */
 
 (function () {
