@@ -243,9 +243,10 @@ function adminUserEdit() {
           maxDatabases: this.form.maxDatabases,
         };
 
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
         const res = await fetch('/admin/users/update/' + this.userId + '/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
           body: JSON.stringify(data),
         });
 
@@ -277,9 +278,10 @@ function adminUserEdit() {
         onConfirm: async () => {
           const loader = showLoadingPopup('<%= req.translations.transferringOwnership || 'Transferring ownership...' %>', '');
           try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
             const res = await fetch('/admin/users/transfer-owner/' + this.userId + '/', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
             });
             const result = await res.json();
             loader.close();

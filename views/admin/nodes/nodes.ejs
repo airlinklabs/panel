@@ -131,17 +131,23 @@
                   try {
                     const res = await fetch('/admin/locations', {
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
+                      headers: { 'Content-Type': 'application/json', 'HX-Request': 'true' },
                       body: JSON.stringify({ name: this.name, shortCode: this.shortCode }),
                     });
-                    const data = await res.json();
-                    if (data.success || res.ok) {
+                    if (res.ok) {
+                      const html = await res.text();
+                      const target = document.getElementById('admin-locations-list');
+                      if (target) {
+                        const tmp = document.createElement('div');
+                        tmp.innerHTML = html;
+                        const frag = tmp.querySelector('#admin-locations-list');
+                        if (frag) target.replaceWith(frag);
+                      }
                       showToast('Location created.', 'success');
                       this.name = ''; this.shortCode = '';
-                      // Refresh the location list via HTMX
-                      htmx.trigger('#admin-locations-list', 'refresh');
                     } else {
-                      showToast(data.error || 'Failed to create location.', 'error');
+                      const data = await res.json().catch(() => ({}));
+                      showToast(data.error || data.message || 'Failed to create location.', 'error');
                     }
                   } catch (e) { showToast('Failed to create location.', 'error'); }
                   this.saving = false;

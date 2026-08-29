@@ -262,9 +262,10 @@ function adminUserCreate() {
         if (this.form.maxMemoryDisplay !== null && this.form.maxMemory === null) limits.maxMemory = parseInt(this.form.maxMemoryDisplay, 10) || null;
         if (this.form.maxStorageDisplay !== null && this.form.maxStorage === null) limits.maxStorage = parseInt(this.form.maxStorageDisplay, 10) || null;
 
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
         const res = await fetch('/admin/users/create-user', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
           body: JSON.stringify({
             email, username, password, role: this.form.role,
             isAdmin: this.form.isAdmin, ...limits

@@ -414,7 +414,8 @@
 <% } %>
 
 <script nonce="<%- nonce %>">
-  const { showToast } = createToastSystem();
+  const _toastSys = (typeof createToastSystem === 'function') ? createToastSystem() : { showToast: (typeof window.showToast === 'function') ? window.showToast : function(){} };
+  const { showToast } = _toastSys;
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
   // ── Auto-save helper for each field ──────────────────────────────

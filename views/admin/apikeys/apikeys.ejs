@@ -62,7 +62,7 @@
         </button>
       </div>
 
-      <form id="createApiKeyForm" action="/admin/apikeys/create" method="POST" class="px-6 py-4 space-y-5">
+      <form id="createApiKeyForm" @submit.prevent="submitCreate()" class="px-6 py-4 space-y-5">
         <%- include('../../components/csrf') %>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -188,7 +188,7 @@
     </div>
 
     <!-- Body -->
-    <form id="editApiKeyForm" action="/admin/apikeys/edit/0" method="POST" class="flex flex-col min-h-0 flex-1">
+    <form id="editApiKeyForm" @submit.prevent="submitEdit()" class="flex flex-col min-h-0 flex-1">
       <%- include('../../components/csrf') %>
       <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
 

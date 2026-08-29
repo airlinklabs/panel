@@ -101,6 +101,15 @@ const coreModule: Module = {
   router: () => {
     const router = Router();
 
+    // ── V1 Deprecation middleware ──────────────────────────────────────────
+    // Add sunset + deprecation headers so integrators can migrate to /api/v2.
+    router.use((_req: Request, res: Response, next) => {
+      res.setHeader("Deprecation", "true");
+      res.setHeader("Sunset", "2027-03-01T00:00:00Z");
+      res.setHeader("Link", '</api/v2>; rel="successor-version"');
+      next();
+    });
+
     router.get("/api/v1/ping", (_req: Request, res: Response) => {
       res.json({
         status: "ok",

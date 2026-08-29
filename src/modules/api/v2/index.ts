@@ -16,76 +16,83 @@
  *   /api/v2/system     — System status, health, test node
  */
 
-import { Router } from 'express';
-import type { Module } from '../../../handlers/moduleInit';
-import { apiValidator } from '../../../handlers/utils/api/apiValidator';
-import { isAuthenticated } from '../../../handlers/utils/auth/authUtil';
+import { Router } from "express";
+import type { Module } from "../../../handlers/moduleInit";
+import { apiValidator } from "../../../handlers/utils/api/apiValidator";
+import { isAuthenticated } from "../../../handlers/utils/auth/authUtil";
 
-import serversRouter from './servers';
-import filesRouter from './files';
-import databasesRouter from './databases';
-import backupsRouter from './backups';
-import schedulesRouter from './schedules';
-import subusersRouter from './subusers';
-import startupRouter from './startup';
-import accountRouter from './account';
-import systemRouter from './system';
-import adminRouter from './admin';
+import serversRouter from "./servers";
+import filesRouter from "./files";
+import databasesRouter from "./databases";
+import backupsRouter from "./backups";
+import schedulesRouter from "./schedules";
+import subusersRouter from "./subusers";
+import startupRouter from "./startup";
+import accountRouter from "./account";
+import systemRouter from "./system";
+import adminRouter from "./admin";
 
 const v2Module: Module = {
   info: {
-    name: 'V2 API Module',
-    description: 'RESTful API v2 for Airlink panel',
-    version: '2.0.0',
-    moduleVersion: '2.0.0',
-    author: 'AirlinkLabs',
-    license: 'MIT',
+    name: "V2 API Module",
+    description: "RESTful API v2 for Airlink panel",
+    version: "2.0.0",
+    moduleVersion: "2.0.0",
+    author: "AirlinkLabs",
+    license: "MIT",
   },
   router: () => {
+    // Outer router — mounted at root by the module loader. All V2 endpoints
+    // live under the /api/v2 prefix to avoid colliding with page routes
+    // (/account, /admin/*, /servers, etc.) that share the same paths.
     const router = Router();
+    const v2 = Router();
 
     // -----------------------------------------------------------------------
     // Server-scoped endpoints: require either API key or session auth.
     //
     // For API key auth: Authorization: Bearer <key>
     // For session auth: standard browser session cookie
+    //
+    // Auth is applied per-sub-router, NOT as a catch-all. A catch-all on a
+    // root-mounted router would intercept every request (e.g. /login,
+    // /register) that doesn't match a sub-route prefix, causing an infinite
+    // redirect loop when unauthenticated.
     // -----------------------------------------------------------------------
-    const serverRoutes = Router();
-    serverRoutes.use('/servers', serversRouter);
-    serverRoutes.use('/files', filesRouter);
-    serverRoutes.use('/databases', databasesRouter);
-    serverRoutes.use('/backups', backupsRouter);
-    serverRoutes.use('/schedules', schedulesRouter);
-    serverRoutes.use('/subusers', subusersRouter);
-    serverRoutes.use('/startup', startupRouter);
-
-    // Auth: API key OR session
-    serverRoutes.use(async (req, res, next) => {
-      const authHeader = req.headers['authorization'];
-      if (authHeader?.startsWith('Bearer ')) {
-        // API key auth
+    const apiKeyOrSessionAuth = async (req: any, res: any, next: any) => {
+      const authHeader = req.headers["authorization"];
+      if (authHeader?.startsWith("Bearer ")) {
         return apiValidator()(req, res, next);
       }
-      // Session auth (browser)
       return isAuthenticated()(req, res, next);
-    });
+    };
 
-    router.use(serverRoutes);
+    v2.use("/servers", apiKeyOrSessionAuth, serversRouter);
+    v2.use("/files", apiKeyOrSessionAuth, filesRouter);
+    v2.use("/databases", apiKeyOrSessionAuth, databasesRouter);
+    v2.use("/backups", apiKeyOrSessionAuth, backupsRouter);
+    v2.use("/schedules", apiKeyOrSessionAuth, schedulesRouter);
+    v2.use("/subusers", apiKeyOrSessionAuth, subusersRouter);
+    v2.use("/startup", apiKeyOrSessionAuth, startupRouter);
 
     // -----------------------------------------------------------------------
     // Account endpoints: session auth only (browser-facing)
     // -----------------------------------------------------------------------
-    router.use('/account', isAuthenticated(), accountRouter);
+    v2.use("/account", isAuthenticated(), accountRouter);
 
     // -----------------------------------------------------------------------
     // System endpoints: session auth
     // -----------------------------------------------------------------------
-    router.use('/system', isAuthenticated(), systemRouter);
+    v2.use("/system", isAuthenticated(), systemRouter);
 
     // -----------------------------------------------------------------------
     // Admin endpoints: admin-only session auth
     // -----------------------------------------------------------------------
-    router.use('/admin', isAuthenticated(true), adminRouter);
+    v2.use("/admin", isAuthenticated(true), adminRouter);
+
+    // Scope everything under /api/v2 so page routes (/account, /admin/*, etc.)
+    // are not shadowed by API endpoints.
+    router.use("/api/v2", v2);
 
     return router;
   },
