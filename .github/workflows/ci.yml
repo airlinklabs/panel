@@ -55,7 +55,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
       # --ignore-scripts skips postinstall (prisma generate), which requires
       # DATABASE_URL — audit doesn't need generated types at all
       - run: pnpm install --ignore-scripts
@@ -72,7 +71,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
       # --ignore-scripts skips postinstall; ESLint doesn't need Prisma types
       - run: pnpm install --ignore-scripts
       # --fix is for local dev only; CI must only check, never mutate files
@@ -89,7 +87,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
       # --ignore-scripts so postinstall doesn't race with our explicit generate below
       - run: pnpm install --ignore-scripts
       # Now DATABASE_URL is set, so prisma generate can resolve it
@@ -108,7 +105,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
       - run: pnpm install --ignore-scripts
       # migrate:deploy applies pending migrations AND regenerates the client —
       # required so Vitest has a real, up-to-date schema to run against.
@@ -125,7 +121,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
       # --ignore-scripts: vendor check is pure Node, needs no Prisma types
       - run: pnpm install --ignore-scripts
       # Fails if the committed vendor bundle is out of sync with sources
@@ -145,7 +140,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
       - run: pnpm install --ignore-scripts
       # migrate:deploy: applies migrations and regenerates the Prisma client
       # with DATABASE_URL in scope — this is what postinstall was trying to do

@@ -1,17 +1,60 @@
-// Generates public/js/shared/al-icon.js — a compact client-side lucide icon registry.
-// Usage: node public/scripts/generate-al-icon.js
-// Data comes from the installed `lucide` module (v1 node-array format), so client
-// and server icons stay pixel-identical to the server-side icon() helper.
+#!/usr/bin/env node
+
+/**
+ * generate-al-icon.mjs - builds public/js/shared/al-icon.js.
+ *
+ * Reads icon data from the installed `lucide` npm package and emits a compact
+ * client-side SVG renderer.  The output is a self-contained IIFE that exposes
+ * `window.alIcon(name, className, opts)`.
+ *
+ * Usage:
+ *   node public/scripts/generate-al-icon.mjs
+ */
+
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as lucide from "lucide";
 
+// ---
+// Paths
+// ---
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outFile = path.resolve(__dirname, "../js/shared/al-icon.js");
 
-// Icons needed by static client-side JS (search.js, dashboard.js, create-server.js,
-// loading-popup.js, admin-*.js). Keep this list tight — each entry costs bytes.
+// ---
+// Terminal helpers
+// ---
+
+const TTY = process.stdout.isTTY;
+const C = {
+  reset: TTY ? "\x1b[0m" : "",
+  bold: TTY ? "\x1b[1m" : "",
+  green: TTY ? "\x1b[32m" : "",
+  yellow: TTY ? "\x1b[33m" : "",
+};
+
+const ok = (msg) => console.log(`  ${C.green}+${C.reset} ${msg}`);
+const warn = (msg) =>
+  console.log(`  ${C.yellow}!${C.reset} ${C.yellow}${msg}${C.reset}`);
+const gap = () => console.log();
+
+function section(title) {
+  gap();
+  console.log(`${C.bold}${C.green}  ${title}${C.reset}`);
+}
+
+function banner() {
+  gap();
+  console.log(`${C.bold}  generate-al-icon${C.reset}`);
+  gap();
+}
+
+// ---
+// Icons - keep this list tight; each entry costs bytes on the client.
+// ---
+
 const ICONS = [
   "server",
   "user",
@@ -75,6 +118,10 @@ const ICONS = [
   "download",
 ];
 
+// ---
+// Build registry
+// ---
+
 function pascal(name) {
   return name
     .split("-")
@@ -86,14 +133,22 @@ const registry = {};
 for (const name of ICONS) {
   const data = lucide[pascal(name)];
   if (!data || !Array.isArray(data)) {
-    console.warn(`SKIP unknown lucide icon: ${name}`);
+    warn(`SKIP unknown lucide icon: ${name}`);
     continue;
   }
   registry[name] = data;
 }
 
-const banner = `/* GENERATED FILE — do not edit by hand.
-   Regenerate with: node public/scripts/generate-al-icon.js
+// ---
+// Emit IIFE
+// ---
+
+function emit() {
+  banner();
+  section("Icons");
+
+  const bannerComment = `/* GENERATED FILE — do not edit by hand.
+   Regenerate with: node public/scripts/generate-al-icon.mjs
    Source: lucide v${lucide.version || "1"} module node arrays. */
 
 (function () {
@@ -119,7 +174,6 @@ const banner = `/* GENERATED FILE — do not edit by hand.
     return open + inner + '</' + tag + '>';
   }
 
-  // alIcon('trash-2', 'w-4 h-4') -> SVG string, stroke-based, currentColor
   function alIcon(name, className, opts) {
     var data = ICONS[name];
     if (!data) {
@@ -158,5 +212,9 @@ const banner = `/* GENERATED FILE — do not edit by hand.
 })();
 `;
 
-fs.writeFileSync(outFile, banner, "utf8");
-console.log(`Wrote ${outFile} (${Object.keys(registry).length} icons)`);
+  fs.writeFileSync(outFile, bannerComment, "utf8");
+  ok(`${Object.keys(registry).length} icons → ${outFile}`);
+  gap();
+}
+
+emit();
