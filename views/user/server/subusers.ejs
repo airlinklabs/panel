@@ -76,17 +76,154 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
   }
-
-  function escHtml(val) {
-    return String(val)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
 %>
 
+<script nonce="<%- nonce %>">
+function subusersPage() {
+  const serverId = '<%= server.UUID %>';
+  const allPerms = <%- JSON.stringify(permissionGroups.map(g => g.perms).flat()) %>;
+
+  return {
+    showAdd: false,
+    showEdit: false,
+    addEmail: '',
+    addPerms: allPerms.filter(p => p.indexOf('.') === -1),
+    editId: null,
+    editName: '',
+    editPerms: [],
+    saving: false,
+
+    openAdd() {
+      this.addEmail = '';
+      this.addPerms = allPerms.filter(p => p.indexOf('.') === -1);
+      this.showAdd = true;
+    },
+
+    openEdit(id, name, permissions) {
+      this.editId = id;
+      this.editName = name;
+      this.editPerms = [...permissions];
+      this.showEdit = true;
+    },
+
+    isAddPerm(perm) { return this.addPerms.includes(perm); },
+    isEditPerm(perm) { return this.editPerms.includes(perm); },
+
+    toggleAddPerm(perm) {
+      const isParent = perm.indexOf('.') === -1;
+      if (isParent) {
+        const idx = this.addPerms.indexOf(perm);
+        if (idx === -1) {
+          this.addPerms.push(perm);
+          allPerms.filter(p => p.startsWith(perm + '.')).forEach(p => {
+            if (!this.addPerms.includes(p)) this.addPerms.push(p);
+          });
+        } else {
+          this.addPerms = this.addPerms.filter(p => p !== perm && !p.startsWith(perm + '.'));
+        }
+      } else {
+        const idx = this.addPerms.indexOf(perm);
+        if (idx === -1) {
+          this.addPerms.push(perm);
+          const parent = perm.split('.')[0];
+          if (!this.addPerms.includes(parent)) this.addPerms.push(parent);
+        } else {
+          this.addPerms = this.addPerms.filter(p => p !== perm);
+          const parent = perm.split('.')[0];
+          if (!this.addPerms.some(p => p.startsWith(parent + '.') && p !== parent)) {
+            this.addPerms = this.addPerms.filter(p => p !== parent);
+          }
+        }
+      }
+    },
+
+    toggleEditPerm(perm) {
+      const isParent = perm.indexOf('.') === -1;
+      if (isParent) {
+        const idx = this.editPerms.indexOf(perm);
+        if (idx === -1) {
+          this.editPerms.push(perm);
+          allPerms.filter(p => p.startsWith(perm + '.')).forEach(p => {
+            if (!this.editPerms.includes(p)) this.editPerms.push(p);
+          });
+        } else {
+          this.editPerms = this.editPerms.filter(p => p !== perm && !p.startsWith(perm + '.'));
+        }
+      } else {
+        const idx = this.editPerms.indexOf(perm);
+        if (idx === -1) {
+          this.editPerms.push(perm);
+          const parent = perm.split('.')[0];
+          if (!this.editPerms.includes(parent)) this.editPerms.push(parent);
+        } else {
+          this.editPerms = this.editPerms.filter(p => p !== perm);
+          const parent = perm.split('.')[0];
+          if (!this.editPerms.some(p => p.startsWith(parent + '.') && p !== parent)) {
+            this.editPerms = this.editPerms.filter(p => p !== parent);
+          }
+        }
+      }
+    },
+
+    selectAllAdd() { this.addPerms = [...allPerms]; },
+    clearAdd() { this.addPerms = []; },
+    selectAllEdit() { this.editPerms = [...allPerms]; },
+    clearEdit() { this.editPerms = []; },
+
+    async confirmAdd() {
+      if (this.saving) return;
+      if (!this.addEmail.trim()) { showToast('Enter the user email.', 'error'); return; }
+      this.saving = true;
+      try {
+        const result = await api('/server/' + serverId + '/subusers', 'POST', {
+          email: this.addEmail.trim(),
+          permissions: [...this.addPerms]
+        });
+        if (result) {
+          showToast('Subuser added.', 'success');
+          this.showAdd = false;
+          window.location.reload();
+        }
+      } catch (e) { showToast('Failed to add subuser.', 'error'); }
+      finally { this.saving = false; }
+    },
+
+    async confirmEdit() {
+      if (this.saving || !this.editId) return;
+      this.saving = true;
+      try {
+        const result = await api('/server/' + serverId + '/subusers/' + this.editId, 'PUT', {
+          permissions: [...this.editPerms]
+        });
+        if (result) {
+          showToast('Permissions updated.', 'success');
+          this.showEdit = false;
+          window.location.reload();
+        }
+      } catch (e) { showToast('Failed to update permissions.', 'error'); }
+      finally { this.saving = false; }
+    },
+
+    async removeSubUser(id, name) {
+      window.modal.confirm({
+        title: 'Remove subuser',
+        body: 'Remove ' + name + ' from this server? They will lose access immediately.',
+        danger: true,
+        confirmLabel: 'Remove',
+        onConfirm: async () => {
+          const result = await api('/server/' + serverId + '/subusers/' + id, 'DELETE');
+          if (result) {
+            showToast('Subuser removed.', 'success');
+            window.location.reload();
+          }
+        }
+      });
+    }
+  };
+}
+</script>
+
+<div x-data="subusersPage()">
 <main class="h-screen m-auto" style="color:var(--theme-text)">
   <div class="flex h-full">
     <div class="hidden lg:block w-60 h-full">
@@ -108,7 +245,7 @@
             <%- include('../../components/serverMeta') %>
           </div>
           <div class="flex gap-2 shrink-0">
-            <button id="addSubUserBtn" onclick="openAddSubUserModal()" type="button"
+            <button @click="openAdd()" type="button"
                 class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
                 <%- icon('plus', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
                 Add Subuser
@@ -180,19 +317,16 @@
                       <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex justify-end space-x-2">
                           <button type="button"
-                            class="edit-subuser-btn inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-                            data-id="<%= subUser.id %>"
-                            data-name="<%- escAttr(subName) %>"
-                            data-perms="<%- escAttr(JSON.stringify(subUser.permissions)) %>"
+                            @click="openEdit(<%= subUser.id %>, '<%= escAttr(subName) %>', <%- JSON.stringify(subUser.permissions) %>)"
+                            class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                             style="color:var(--theme-accent);background:var(--theme-accent-subtle)"
                           >
                             <%- icon('settings', { class: 'w-3 h-3 mr-1' }) %>
                             Edit
                           </button>
                           <button type="button"
-                            class="remove-subuser-btn inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-                            data-id="<%= subUser.id %>"
-                            data-name="<%- escAttr(subName) %>"
+                            @click="removeSubUser(<%= subUser.id %>, '<%= escAttr(subName) %>')"
+                            class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                             style="color:var(--theme-danger);background:var(--theme-danger-bg)"
                           >
                             <%- icon('trash-2', { class: 'w-3 h-3 mr-1' }) %>
@@ -213,7 +347,7 @@
                 </div>
                 <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">No subusers</h3>
                 <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Invite other users to help manage this server.</p>
-                <button type="button" onclick="openAddSubUserModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
+                <button type="button" @click="openAdd()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium">
                   <%- icon('user-plus', { class: 'size-4', strokeWidth: 1.5 }) %>
                   Add subuser
                 </button>
@@ -229,23 +363,23 @@
 </main>
 
 <!-- Add Subuser Modal -->
-<div id="addSubUserModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
-  <div id="addSubUserModalPanel" class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="addSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+<div x-show="showAdd" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center" style="display:none" @keydown.escape.window="if(showAdd) showAdd = false">
+  <div class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="addSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex justify-between items-center px-6 py-4 border-b">
       <h3 id="addSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Add subuser</h3>
-      <button type="button" onclick="closeModal('addSubUserModal')" aria-label="Close" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
+      <button type="button" @click="showAdd = false" aria-label="Close" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
       <div>
         <label for="addSubUserEmail" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">User email</label>
-        <input id="addSubUserEmail" type="email" class="al-input w-full" placeholder="friend@example.com" autocomplete="off">
+        <input id="addSubUserEmail" x-model="addEmail" type="email" class="al-input w-full" placeholder="friend@example.com" autocomplete="off" @keydown.enter.prevent="confirmAdd()">
       </div>
       <div>
         <div class="flex items-center justify-between mb-2">
           <label class="block text-xs font-medium" style="color:var(--theme-text-muted)">Permissions</label>
           <div class="flex items-center gap-3 text-[11px] font-medium">
-            <button type="button" class="perm-select-all inline-flex items-center gap-1.5" data-modal="addSubUserModal" style="color:var(--theme-accent)"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %>Select all</button>
-            <button type="button" class="perm-select-none inline-flex items-center gap-1.5" data-modal="addSubUserModal" style="color:var(--theme-text-muted)"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Clear</button>
+            <button type="button" @click="selectAllAdd()" class="inline-flex items-center gap-1.5" style="color:var(--theme-accent)"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %>Select all</button>
+            <button type="button" @click="clearAdd()" class="inline-flex items-center gap-1.5" style="color:var(--theme-text-muted)"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Clear</button>
           </div>
         </div>
         <div class="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
@@ -254,8 +388,8 @@
             <p class="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style="color:var(--theme-text-muted)"><%= group.title %></p>
             <div class="space-y-1.5">
               <% group.perms.forEach(perm => { %>
-              <label class="al-perm-row flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
-                <input type="checkbox" class="add-perm form-checkbox h-4 w-4 rounded transition" value="<%= perm %>" <%= perm.indexOf('.') === -1 ? 'checked' : '' %>>
+              <label class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer transition-colors" :style="isAddPerm('<%= perm %>') ? 'background:var(--theme-accent-subtle);border:1px solid var(--theme-accent)' : 'background:var(--theme-bg-secondary);border:1px solid var(--theme-border)'">
+                <input type="checkbox" :checked="isAddPerm('<%= perm %>')" @change="toggleAddPerm('<%= perm %>')" class="form-checkbox h-4 w-4 rounded transition" style="accent-color:var(--theme-accent)">
                 <%- icon(permMeta[perm].icon, { size: 14, class: 'shrink-0' }) %>
                 <span class="shrink-0 font-medium" style="color:var(--theme-text-strong)"><%= permissionLabels[perm] %></span>
                 <span class="ml-auto truncate" style="color:var(--theme-text-muted)"><%= permMeta[perm].desc %></span>
@@ -268,35 +402,33 @@
       </div>
     </div>
     <div class="flex gap-2 px-6 py-4 border-t justify-end">
-      <button type="button" onclick="closeModal('addSubUserModal')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
-        <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-        Cancel
+      <button type="button" @click="showAdd = false" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+        <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel
       </button>
-      <button type="button" id="confirmAddSubUser" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
-        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-        Add subuser
+      <button type="button" @click="confirmAdd()" class="al-btn-primary flex-1 inline-flex items-center gap-1.5" :disabled="saving">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><span x-text="saving ? 'Adding\u2026' : 'Add subuser'">Add subuser</span>
       </button>
     </div>
   </div>
 </div>
 
 <!-- Edit Subuser Modal -->
-<div id="editSubUserModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
-  <div id="editSubUserModalPanel" class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="editSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+<div x-show="showEdit" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center" style="display:none" @keydown.escape.window="if(showEdit) showEdit = false">
+  <div class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="editSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex justify-between items-center px-6 py-4 border-b">
       <div>
         <h3 id="editSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Edit permissions</h3>
-        <p id="editSubUserName" class="text-xs mt-0.5" style="color:var(--theme-text-muted)"></p>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" x-text="editName"></p>
       </div>
-      <button type="button" onclick="closeModal('editSubUserModal')" aria-label="Close" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
+      <button type="button" @click="showEdit = false" aria-label="Close" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
       <div>
         <div class="flex items-center justify-between mb-2">
           <label class="block text-xs font-medium" style="color:var(--theme-text-muted)">Permissions</label>
           <div class="flex items-center gap-3 text-[11px] font-medium">
-            <button type="button" class="perm-select-all inline-flex items-center gap-1.5" data-modal="editSubUserModal" style="color:var(--theme-accent)"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %>Select all</button>
-            <button type="button" class="perm-select-none inline-flex items-center gap-1.5" data-modal="editSubUserModal" style="color:var(--theme-text-muted)"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Clear</button>
+            <button type="button" @click="selectAllEdit()" class="inline-flex items-center gap-1.5" style="color:var(--theme-accent)"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %>Select all</button>
+            <button type="button" @click="clearEdit()" class="inline-flex items-center gap-1.5" style="color:var(--theme-text-muted)"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Clear</button>
           </div>
         </div>
         <div class="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
@@ -305,8 +437,8 @@
             <p class="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style="color:var(--theme-text-muted)"><%= group.title %></p>
             <div class="space-y-1.5">
               <% group.perms.forEach(perm => { %>
-              <label class="al-perm-row flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
-                <input type="checkbox" class="edit-perm form-checkbox h-4 w-4 rounded transition" value="<%= perm %>">
+              <label class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs cursor-pointer transition-colors" :style="isEditPerm('<%= perm %>') ? 'background:var(--theme-accent-subtle);border:1px solid var(--theme-accent)' : 'background:var(--theme-bg-secondary);border:1px solid var(--theme-border)'">
+                <input type="checkbox" :checked="isEditPerm('<%= perm %>')" @change="toggleEditPerm('<%= perm %>')" class="form-checkbox h-4 w-4 rounded transition" style="accent-color:var(--theme-accent)">
                 <%- icon(permMeta[perm].icon, { size: 14, class: 'shrink-0' }) %>
                 <span class="shrink-0 font-medium" style="color:var(--theme-text-strong)"><%= permissionLabels[perm] %></span>
                 <span class="ml-auto truncate" style="color:var(--theme-text-muted)"><%= permMeta[perm].desc %></span>
@@ -319,235 +451,15 @@
       </div>
     </div>
     <div class="flex gap-2 px-6 py-4 border-t justify-end">
-      <button type="button" onclick="closeModal('editSubUserModal')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
-        <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-        Cancel
+      <button type="button" @click="showEdit = false" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+        <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel
       </button>
-      <button type="button" id="confirmEditSubUser" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
-        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>
-        Save changes
+      <button type="button" @click="confirmEdit()" class="al-btn-primary flex-1 inline-flex items-center gap-1.5" :disabled="saving">
+        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><span x-text="saving ? 'Saving\u2026' : 'Save changes'">Save changes</span>
       </button>
     </div>
   </div>
 </div>
-<script nonce="<%- nonce %>">
-(function () {
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-const serverId = '<%= server.UUID %>';
-let editingSubUserId = null;
-
-const { showToast } = typeof createToastSystem === 'function' ? createToastSystem() : { showToast: window.showToast || ((m) => console.warn('[subusers]', m)) };
-
-function openModal(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  Animate.openModal(el, el.querySelector('.al-sheet-panel'));
-}
-function closeModal(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  Animate.closeModal(el, el.querySelector('.al-sheet-panel'));
-}
-window.closeModal = closeModal;
-
-document.querySelectorAll('.perm-select-all, .perm-select-none').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const modal = document.getElementById(btn.dataset.modal);
-    if (!modal) return;
-    const selectAll = btn.classList.contains('perm-select-all');
-    modal.querySelectorAll('.add-perm, .edit-perm').forEach(cb => {
-      cb.checked = selectAll;
-      if (window.animateCheckbox) window.animateCheckbox(cb);
-    });
-  });
-});
-
-document.querySelectorAll('.add-perm, .edit-perm').forEach(cb => {
-  cb.addEventListener('change', () => {
-    if (window.animateCheckbox) window.animateCheckbox(cb);
-  });
-});
-
-document.querySelectorAll('.add-perm, .edit-perm').forEach(cb => {
-  cb.addEventListener('change', () => {
-    const prefix = cb.value + '.';
-    const isParent = cb.value.indexOf('.') === -1;
-    if (isParent) {
-      // Cascade to children
-      const modal = cb.closest('.al-sheet-panel');
-      if (modal) {
-        modal.querySelectorAll('.add-perm, .edit-perm').forEach(child => {
-          if (child.value.startsWith(prefix)) {
-            child.checked = cb.checked;
-            if (window.animateCheckbox) window.animateCheckbox(child);
-          }
-        });
-      }
-    } else {
-      // Check if parent should be unchecked
-      const parentName = cb.value.split('.')[0];
-      const parentCb = document.querySelector(`.add-perm[value="${parentName}"], .edit-perm[value="${parentName}"]`);
-      if (parentCb && !cb.checked) {
-        const modal = cb.closest('.al-sheet-panel');
-        const anySiblingChecked = modal && [...modal.querySelectorAll('.add-perm, .edit-perm')].some(s => s.value.startsWith(parentName + '.') && s.checked);
-        if (!anySiblingChecked) {
-          parentCb.checked = false;
-          if (window.animateCheckbox) window.animateCheckbox(parentCb);
-        }
-      } else if (parentCb && cb.checked) {
-        parentCb.checked = true;
-        if (window.animateCheckbox) window.animateCheckbox(parentCb);
-      }
-    }
-  });
-});
-
-window.openAddSubUserModal = () => {
-  document.getElementById('addSubUserEmail').value = '';
-  document.querySelectorAll('.add-perm').forEach(cb => {
-    const isTopLevel = cb.value.indexOf('.') === -1;
-    cb.checked = isTopLevel;
-    if (isTopLevel) {
-      // Also check all children of this top-level perm
-      const prefix = cb.value + '.';
-      document.querySelectorAll('.add-perm').forEach(child => {
-        if (child.value.startsWith(prefix)) {
-          child.checked = true;
-          if (window.animateCheckbox) window.animateCheckbox(child);
-        }
-      });
-    }
-    if (window.animateCheckbox) window.animateCheckbox(cb);
-  });
-  openModal('addSubUserModal');
-  setTimeout(() => document.getElementById('addSubUserEmail').focus(), 50);
-};
-
-window.openEditSubUserModal = (id, name, permissions) => {
-  editingSubUserId = id;
-  document.getElementById('editSubUserName').textContent = name;
-  document.querySelectorAll('.edit-perm').forEach(cb => cb.checked = permissions.includes(cb.value));
-  openModal('editSubUserModal');
-};
-
-document.querySelectorAll('.edit-subuser-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    let perms = [];
-    try { perms = JSON.parse(btn.dataset.perms || '[]'); } catch (e) { perms = []; }
-    openEditSubUserModal(Number(btn.dataset.id), btn.dataset.name || 'Unknown', perms);
-  });
-});
-
-document.querySelectorAll('.remove-subuser-btn').forEach(btn => {
-  btn.addEventListener('click', () => removeSubUser(Number(btn.dataset.id), btn.dataset.name || 'this user'));
-});
-
-document.getElementById('confirmAddSubUser')?.addEventListener('click', async () => {
-  const email = document.getElementById('addSubUserEmail').value.trim();
-  if (!email) { showToast('Enter the user email.', 'error'); return; }
-  const permissions = [...document.querySelectorAll('.add-perm:checked')].map(cb => cb.value);
-  const result = await api('/server/' + serverId + '/subusers', 'POST', { email, permissions });
-  if (result) {
-    showToast('Subuser added.', 'success');
-    closeModal('addSubUserModal');
-    const sub = result.subuser || result;
-    const subName = sub.user?.username || sub.user?.email || email;
-    const perms = sub.permissions || permissions;
-    const tbody = document.getElementById('subusers-table-body');
-    const newRowHtml = `
-      <tr class="al-table-tr al-subuser-row" data-subuser-id="${sub.id}">
-        <td class="px-6 py-4 whitespace-nowrap">
-          <div class="flex items-center gap-3">
-            <span class="flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold shrink-0" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">${escHtml(subName).slice(0, 1).toUpperCase()}</span>
-            <div class="min-w-0">
-              <div class="text-sm font-medium" style="color:var(--theme-text-strong)">${escHtml(subName)}</div>
-              <div class="text-xs truncate max-w-[200px]" style="color:var(--theme-text-muted)">${escHtml(sub.user?.email || email)}</div>
-            </div>
-          </div>
-        </td>
-        <td class="px-6 py-4">
-          <div class="flex flex-wrap gap-1.5 max-w-xs">
-            ${perms.slice(0, 4).map(p => `<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium" style="background:var(--theme-accent-subtle);color:var(--theme-accent)">${permissionLabels[p] || p}</span>`).join('')}
-            ${perms.length > 4 ? `<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">+${perms.length - 4} more</span>` : ''}
-            ${perms.length === 0 ? `<span class="text-xs italic" style="color:var(--theme-text-placeholder)">No permissions</span>` : ''}
-          </div>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-          <div class="flex justify-end space-x-2">
-            <button type="button"
-              class="edit-subuser-btn inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-              data-id="${sub.id}"
-              data-name="${escAttr(subName)}"
-              data-perms="${escAttr(JSON.stringify(perms))}"
-              style="color:var(--theme-accent);background:var(--theme-accent-subtle)"
-            >
-              <%- icon('settings', { class: 'w-3 h-3 mr-1' }) %>
-              Edit
-            </button>
-            <button type="button"
-              class="remove-subuser-btn inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-              data-id="${sub.id}"
-              data-name="${escAttr(subName)}"
-              style="color:var(--theme-danger);background:var(--theme-danger-bg)"
-            >
-              <%- icon('trash-2', { class: 'w-3 h-3 mr-1' }) %>
-              Remove
-            </button>
-          </div>
-        </td>
-      </tr>`;
-    if (tbody) {
-      al.addRow(tbody, newRowHtml);
-      const addedRow = tbody.lastElementChild;
-      addedRow.querySelector('.edit-subuser-btn')?.addEventListener('click', function() {
-        let p = [];
-        try { p = JSON.parse(this.dataset.perms || '[]'); } catch (e) { p = []; }
-        openEditSubUserModal(Number(this.dataset.id), this.dataset.name || 'Unknown', p);
-      });
-      addedRow.querySelector('.remove-subuser-btn')?.addEventListener('click', function() {
-        removeSubUser(Number(this.dataset.id), this.dataset.name || 'this user');
-      });
-    } else {
-      showToast('Subuser added.', 'success');
-    }
-  }
-});
-
-document.getElementById('addSubUserEmail')?.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    document.getElementById('confirmAddSubUser')?.click();
-  }
-});
-
-document.getElementById('confirmEditSubUser')?.addEventListener('click', async () => {
-  if (!editingSubUserId) return;
-  const permissions = [...document.querySelectorAll('.edit-perm:checked')].map(cb => cb.value);
-  const result = await api('/server/' + serverId + '/subusers/' + editingSubUserId, 'PUT', { permissions });
-  if (result) {
-    showToast('Permissions updated.', 'success');
-    closeModal('editSubUserModal');
-  }
-});
-
-window.removeSubUser = async (id, name) => {
-  await new Promise(resolve => {
-    window.modal.confirm({
-      title: 'Remove subuser',
-      body: 'Remove ' + name + ' from this server? They will lose access immediately.',
-      danger: true,
-      confirmLabel: 'Remove',
-      onConfirm: resolve,
-    });
-  });
-  const result = await api('/server/' + serverId + '/subusers/' + id, 'DELETE');
-  if (result) {
-    showToast('Subuser removed.', 'success');
-    const row = document.querySelector(`tr[data-subuser-id="${id}"]`);
-    if (row) al.removeRow(row);
-  }
-};
-})();
-</script>
+</div><!-- /x-data -->
 
 <%- include('../../components/footer') %>
