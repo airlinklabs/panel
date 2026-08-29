@@ -132,7 +132,8 @@ jobs:
           node-version: 24
       - run: pnpm install --ignore-scripts
       - run: pnpm exec prisma generate
-      - run: pnpm run migrate:deploy
+      # db push: sync schema to test DB (no committed migrations yet)
+      - run: pnpm exec prisma db push --skip-generate
       - run: pnpm test
 
   # ── Build ───────────────────────────────────────────────────────────────────

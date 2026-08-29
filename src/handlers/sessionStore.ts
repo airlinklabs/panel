@@ -110,8 +110,8 @@ class RedisSessionStore extends session.Store {
       });
   }
 
-  touch(sid: string, _sess: session.SessionData, callback?: () => void): void {
-    const ttlSec = this.defaultTtl;
+  touch(sid: string, sess: session.SessionData, callback?: () => void): void {
+    const ttlSec = this.getTTL(sess);
     this.redis
       .expire(`${this.prefix}${sid}`, ttlSec)
       .then(() => {

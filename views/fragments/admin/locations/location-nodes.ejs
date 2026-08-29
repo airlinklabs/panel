@@ -28,7 +28,7 @@
           <span class="shrink-0 w-2 h-2 rounded-full" style="background:<%= node.status === 'online' ? 'var(--theme-success)' : node.status === 'starting' ? 'var(--theme-warning)' : 'var(--theme-text-muted)' %>;"></span>
           <div class="min-w-0 flex-1">
             <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= node.name %></p>
-            <p class="text-xs font-mono truncate" style="color:var(--theme-text-muted);"><%= node.ip %>:<%= node.port %></p>
+            <p class="text-xs font-mono truncate" style="color:var(--theme-text-muted);"><%= node.address %>:<%= node.port %></p>
           </div>
           <div class="flex items-center gap-1 shrink-0">
             <span class="text-xs px-2 py-0.5 rounded-lg" style="background:<%= node.status === 'online' ? 'color-mix(in srgb, var(--theme-success) 12%, transparent)' : node.status === 'starting' ? 'color-mix(in srgb, var(--theme-warning) 12%, transparent)' : 'color-mix(in srgb, var(--theme-text-muted) 12%, transparent)' %>; color:<%= node.status === 'online' ? 'var(--theme-success)' : node.status === 'starting' ? 'var(--theme-warning)' : 'var(--theme-text-muted)' %>;"><%= node.status || 'offline' %></span>

@@ -14,136 +14,90 @@
  * than re-validated on the hot path.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /** Wire version reported by `GET /api/client` and enforced by the version plan. */
-export const CLIENT_API_VERSION = 'client-v1';
+export const CLIENT_API_VERSION = "client-v1";
 
 // --- Request bodies ---
 
-export const POWER_ACTIONS = ['start', 'stop', 'restart', 'kill'] as const;
+export const POWER_ACTIONS = ["start", "stop", "restart", "kill"] as const;
 export type PowerAction = (typeof POWER_ACTIONS)[number];
 
-export const SCHEDULE_ACTIONS = ['command', 'power', 'backup'] as const;
+export const SCHEDULE_ACTIONS = ["command", "power", "backup"] as const;
 export type ScheduleAction = (typeof SCHEDULE_ACTIONS)[number];
 
 /** POST /api/client/servers/:id/power */
-export const powerBodySchema = z
-  .object({ action: z.unknown().optional() })
-  .superRefine((data, ctx) => {
-    if (
-      typeof data.action !== 'string' ||
-      !POWER_ACTIONS.includes(data.action as PowerAction)
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'action must be start, stop, restart, or kill',
-      });
-    }
-  })
-  .transform((data) => ({ action: data.action as PowerAction }));
+export const powerBodySchema = z.object({ action: z.enum(POWER_ACTIONS) });
 export type PowerBody = z.infer<typeof powerBodySchema>;
 
 /** POST /api/client/servers/:id/files/content */
 export const writeFileBodySchema = z
-  .object({ file: z.unknown().optional(), content: z.unknown().optional() })
+  .object({ file: z.string().min(1).max(4096), content: z.string() })
   .superRefine((data, ctx) => {
-    if (data.file === undefined || data.content === undefined) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'file and content are required',
-      });
+    if (data.file.includes("\0")) {
+      ctx.addIssue({ code: "custom", message: "file path contains null byte" });
     }
-  })
-  .transform((data) => ({
-    file: data.file as string,
-    content: data.content as string,
-  }));
+    if (data.file.includes("..")) {
+      ctx.addIssue({ code: "custom", message: "file path contains traversal" });
+    }
+  });
 export type WriteFileBody = z.infer<typeof writeFileBodySchema>;
 
 /** DELETE /api/client/servers/:id/files */
 export const deleteFileBodySchema = z
-  .object({ file: z.unknown().optional() })
+  .object({ file: z.string().min(1).max(4096) })
   .superRefine((data, ctx) => {
-    if (data.file === undefined) {
-      ctx.addIssue({ code: 'custom', message: 'file is required' });
+    if (data.file.includes("\0")) {
+      ctx.addIssue({ code: "custom", message: "file path contains null byte" });
     }
-  })
-  .transform((data) => ({ file: data.file as string }));
+    if (data.file.includes("..")) {
+      ctx.addIssue({ code: "custom", message: "file path contains traversal" });
+    }
+  });
 export type DeleteFileBody = z.infer<typeof deleteFileBodySchema>;
 
 /** POST /api/client/servers/:id/files/rename */
 export const renameFileBodySchema = z
-  .object({ file: z.unknown().optional(), newname: z.unknown().optional() })
+  .object({
+    file: z.string().min(1).max(4096),
+    newname: z.string().min(1).max(255),
+  })
   .superRefine((data, ctx) => {
-    if (data.file === undefined || data.newname === undefined) {
+    if (data.file.includes("\0") || data.newname.includes("\0")) {
+      ctx.addIssue({ code: "custom", message: "path contains null byte" });
+    }
+    if (data.file.includes("..") || data.newname.includes("..")) {
+      ctx.addIssue({ code: "custom", message: "path contains traversal" });
+    }
+    if (data.newname.includes("/") || data.newname.includes("\\")) {
       ctx.addIssue({
-        code: 'custom',
-        message: 'file and newname are required',
+        code: "custom",
+        message: "newname must be a filename, not a path",
       });
     }
-  })
-  .transform((data) => ({
-    file: data.file as string,
-    newname: data.newname as string,
-  }));
+  });
 export type RenameFileBody = z.infer<typeof renameFileBodySchema>;
 
 /** POST /api/client/servers/:id/backups */
-export const createBackupBodySchema = z
-  .object({ name: z.unknown().optional() })
-  .superRefine((data, ctx) => {
-    if (data.name === undefined) {
-      ctx.addIssue({ code: 'custom', message: 'name is required' });
-    }
-  })
-  .transform((data) => ({ name: data.name as string }));
+export const createBackupBodySchema = z.object({
+  name: z.string().min(1).max(100),
+});
 export type CreateBackupBody = z.infer<typeof createBackupBodySchema>;
 
 /** POST /api/client/servers/:id/schedules */
 export const createScheduleBodySchema = z
   .object({
-    name: z.unknown().optional(),
-    cron: z.unknown().optional(),
-    action: z.unknown().optional(),
-    payload: z.unknown().optional(),
+    name: z.string().min(1).max(100),
+    cron: z.string().min(1).max(100),
+    action: z.enum(SCHEDULE_ACTIONS),
+    payload: z.string().max(8192).optional(),
   })
   .superRefine((data, ctx) => {
-    if (
-      data.name === undefined ||
-      data.cron === undefined ||
-      data.action === undefined
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'name, cron, and action are required',
-      });
-      return;
-    }
-    if (
-      typeof data.name !== 'string' ||
-      typeof data.cron !== 'string' ||
-      typeof data.action !== 'string'
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'name, cron, and action are required',
-      });
-      return;
-    }
-    if (!SCHEDULE_ACTIONS.includes(data.action as ScheduleAction)) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'action must be command, power, or backup',
-      });
-      return;
-    }
-    if (data.action === 'power') {
+    if (data.action === "power") {
       let parsed: { action?: string };
       try {
-        parsed = JSON.parse(
-          typeof data.payload === 'string' ? data.payload : '{}',
-        ) as { action?: string };
+        parsed = JSON.parse(data.payload ?? "{}") as { action?: string };
       } catch {
         parsed = {};
       }
@@ -152,18 +106,12 @@ export const createScheduleBodySchema = z
         !POWER_ACTIONS.includes(parsed.action as PowerAction)
       ) {
         ctx.addIssue({
-          code: 'custom',
-          message: 'power payload must include a valid action',
+          code: "custom",
+          message: "power payload must include a valid action",
         });
       }
     }
-  })
-  .transform((data) => ({
-    name: data.name as string,
-    cron: data.cron as string,
-    action: data.action as ScheduleAction,
-    payload: typeof data.payload === 'string' ? data.payload : '{}',
-  }));
+  });
 export type CreateScheduleBody = z.infer<typeof createScheduleBodySchema>;
 
 // --- Response types ---
