@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 export default defineConfig({
   schema: "storage/prisma/schema.prisma",
@@ -7,6 +7,8 @@ export default defineConfig({
     path: "storage/prisma/migrations",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    url:
+      process.env.DATABASE_URL ||
+      "postgresql://airlink:airlink@127.0.0.1:5432/airlink",
   },
 });

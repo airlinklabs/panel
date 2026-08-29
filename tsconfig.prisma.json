@@ -2,9 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
-    "noEmit": true
+    "noEmit": true,
+    "types": ["node"]
   },
-  "include": [
-    "prisma.config.ts"
-  ]
+  "include": ["prisma.config.ts"]
 }
