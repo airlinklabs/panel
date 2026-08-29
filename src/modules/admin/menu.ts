@@ -27,7 +27,7 @@ const adminMenuModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {return res.redirect('/login');}
-          const settings = await await getSettings();
+          const settings = await getSettings();
           res.render('admin/menu/menu', { user, req, settings });
         } catch (error: unknown) {
           logger.error('Error rendering admin menu:', error);
@@ -44,7 +44,7 @@ const adminMenuModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {return res.redirect('/login');}
-          const settings = await await getSettings();
+          const settings = await getSettings();
           res.render('admin/menu/menu', { user, req, settings });
         } catch (error: unknown) {
           logger.error('Error rendering menu:', error);

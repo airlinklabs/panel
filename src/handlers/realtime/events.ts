@@ -1,37 +1,24 @@
-import { randomUUID } from 'node:crypto';
-import { z } from 'zod';
-import logger from '../logger';
+import { randomUUID } from "node:crypto";
+import { z } from "zod";
+import logger from "../logger";
 
-// ── Authoritative real-time event bus ─────────────────────────────────────────
-// The panel publishes structured events every time authoritative server state
-// changes (power ops, installs, backups, file mutations, node status, account
-// updates). Connected realtime sockets receive those events after an
-// authorization check (see hub.ts). Nothing that wants to change the UI should
-// reach for its own poll loop when the source of truth already lives here.
-//
-// Design notes:
-//  - Events carry a monotonic `seq` (per process). Clients use it for
-//    reconnect resynchronisation: after reconnecting they ask for everything
-//    newer than their last seen seq.
-//  - Consumers tolerate duplicates and out-of-order delivery (op IDs,
-//    timestamps and resource versions are compared, never assumed ordered).
-//  - Event payloads are validated at publish time with zod so a malformed
-//    payload never reaches subscribers.
+// Real-time event bus — publishes structured events on authoritative state changes.
+// Clients use monotonic seq for reconnect resync; payloads validated with zod at publish time.
 
 export const REALTIME_EVENT_VERSION = 1;
 
 export const realtimeResourceTypeSchema = z.enum([
-  'server',
-  'node',
-  'user',
-  'account',
-  'backup',
-  'image',
-  'database',
-  'activity',
-  'addon',
-  'settings',
-  'system',
+  "server",
+  "node",
+  "user",
+  "account",
+  "backup",
+  "image",
+  "database",
+  "activity",
+  "addon",
+  "settings",
+  "system",
 ]);
 
 export type RealtimeResourceType = z.infer<typeof realtimeResourceTypeSchema>;
@@ -81,7 +68,10 @@ export const realtimeEventSchema = z.object({
 
 export type RealtimeEvent = z.infer<typeof realtimeEventSchema>;
 
-export type RealtimeEventInput = Omit<z.input<typeof realtimeEventSchema>, 'version' | 'seq' | 'timestamp'>;
+export type RealtimeEventInput = Omit<
+  z.input<typeof realtimeEventSchema>,
+  "version" | "seq" | "timestamp"
+>;
 
 export interface RealtimeEventEnvelope extends RealtimeEvent {
   type: string;
@@ -104,7 +94,9 @@ export function currentSequence(): number {
 }
 
 /** Subscribe to every published event. Returns an unsubscribe function. */
-export function subscribeToRealtime(handler: (event: RealtimeEventEnvelope) => void): () => void {
+export function subscribeToRealtime(
+  handler: (event: RealtimeEventEnvelope) => void,
+): () => void {
   subscribers.add(handler);
   return () => {
     subscribers.delete(handler);
@@ -113,7 +105,9 @@ export function subscribeToRealtime(handler: (event: RealtimeEventEnvelope) => v
 
 /** Events newer than `sinceSeq` (inclusive), oldest first. */
 export function realtimeEventsSince(sinceSeq: number): RealtimeEventEnvelope[] {
-  if (!Number.isFinite(sinceSeq) || sinceSeq <= 0) {return history.slice();}
+  if (!Number.isFinite(sinceSeq) || sinceSeq <= 0) {
+    return history.slice();
+  }
   return history.filter((e) => e.seq >= sinceSeq);
 }
 
@@ -124,11 +118,15 @@ export function currentRealtimeCursor(): number {
 
 /** Events published since this socket's cursor, or the whole history when the
  * client has never synced before. Consumers reconcile state after reconnect. */
-export function syncEventsForClient(
-  sinceSeq: number | null,
-): { cursor: number; events: RealtimeEventEnvelope[] } {
+export function syncEventsForClient(sinceSeq: number | null): {
+  cursor: number;
+  events: RealtimeEventEnvelope[];
+} {
   const cursor = currentRealtimeCursor();
-  const events = sinceSeq == null || sinceSeq === 0 ? history.slice() : realtimeEventsSince(sinceSeq);
+  const events =
+    sinceSeq == null || sinceSeq === 0
+      ? history.slice()
+      : realtimeEventsSince(sinceSeq);
   return { cursor, events };
 }
 
@@ -136,10 +134,14 @@ export function syncEventsForClient(
  * Publish a realtime event. The bus never throws: invalid payloads are logged
  * and dropped so one bad caller cannot take down the realtime system.
  */
-export function emitRealtime(input: RealtimeEventInput): RealtimeEventEnvelope | null {
+export function emitRealtime(
+  input: RealtimeEventInput,
+): RealtimeEventEnvelope | null {
   const parsed = realtimeEventSchema.safeParse(input);
   if (!parsed.success) {
-    logger.warn('[realtime] dropped invalid event', { details: JSON.stringify(parsed.error.flatten()) });
+    logger.warn("[realtime] dropped invalid event", {
+      details: JSON.stringify(parsed.error.flatten()),
+    });
     return null;
   }
 
@@ -152,13 +154,15 @@ export function emitRealtime(input: RealtimeEventInput): RealtimeEventEnvelope |
   envelope.seq = ++sequence;
 
   history.push(envelope);
-  if (history.length > HISTORY_LIMIT) {history.shift();}
+  if (history.length > HISTORY_LIMIT) {
+    history.shift();
+  }
 
   for (const handler of subscribers) {
     try {
       handler(envelope);
     } catch (error) {
-      logger.warn('[realtime] subscriber error', { error: String(error) });
+      logger.warn("[realtime] subscriber error", { error: String(error) });
     }
   }
   return envelope;
@@ -170,11 +174,11 @@ export { randomUUID as realtimeId };
 export function serverEvent(
   type: string,
   serverId: string,
-  extra: Omit<RealtimeEventInput, 'type' | 'scope' | 'resource'> = {},
+  extra: Omit<RealtimeEventInput, "type" | "scope" | "resource"> = {},
 ): RealtimeEventInput {
   return {
     type,
-    resource: { type: 'server', id: serverId },
+    resource: { type: "server", id: serverId },
     scope: { serverId },
     ...extra,
   };
@@ -183,11 +187,11 @@ export function serverEvent(
 export function userEvent(
   type: string,
   userId: number,
-  extra: Omit<RealtimeEventInput, 'type' | 'scope' | 'resource'> = {},
+  extra: Omit<RealtimeEventInput, "type" | "scope" | "resource"> = {},
 ): RealtimeEventInput {
   return {
     type,
-    resource: { type: 'user', id: userId },
+    resource: { type: "user", id: userId },
     scope: { userId },
     ...extra,
   };

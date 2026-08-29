@@ -117,7 +117,7 @@ const userCreateServerModule: Module = {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {return res.redirect('/login');}
 
-        const settings = await await getSettings();
+        const settings = await getSettings();
 
         if (!settings?.allowUserCreateServer) {
           return res.redirect('/');
@@ -213,7 +213,7 @@ const userCreateServerModule: Module = {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {return res.status(401).json({ error: 'Unauthorized' });}
 
-        const settings = await await getSettings();
+        const settings = await getSettings();
 
         if (!settings?.allowUserCreateServer) {
           return res.status(403).json({ error: 'Server creation is not enabled.' });
@@ -401,7 +401,7 @@ const userCreateServerModule: Module = {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {return res.status(401).json({ error: 'Unauthorized' });}
 
-        const settings = await await getSettings();
+        const settings = await getSettings();
         if (!settings?.allowUserDeleteServer) {
           return res.status(403).json({ error: 'Server deletion is not enabled for users.' });
         }

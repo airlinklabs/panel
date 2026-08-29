@@ -85,7 +85,7 @@ export function registerScheduleRoutes(router: Router): void {
           })),
         }));
 
-        const settings = await await getSettings();
+        const settings = await getSettings();
 
         res.render('user/server/schedules', {
           user,

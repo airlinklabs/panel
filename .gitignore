@@ -6,12 +6,14 @@ dist/
 public/styles.css
 
 # Prisma files
-prisma/*
-!prisma/schema.prisma
-!prisma/migrations/
+storage/prisma/*
+!storage/prisma/schema.prisma
+!storage/prisma/migrations/
 
-# Lock file
+# Lock files
 /package-lock.json
+/pnpm-lock.yaml
+/yarn.lock
 /bun.lockb
 bun.lock
 .DS_Store
@@ -32,8 +34,13 @@ storage/dev.db
 storage/dev.db-wal
 storage/dev.db-shm
 
+# Redis dump
+dump.rdb
+
 # Storage (keep structure, ignore data)
 storage/eggs
+storage/uploads/
+storage/themes/user/
 
 # Local tooling / agent work dirs (not project source)
 .agents/

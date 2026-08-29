@@ -108,7 +108,7 @@ const activityModule: Module = {
             }),
           ]);
 
-          const settings = await await getSettings();
+          const settings = await getSettings();
 
           res.render('admin/activity/activity', {
             user,

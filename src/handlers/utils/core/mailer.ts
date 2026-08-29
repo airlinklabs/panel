@@ -7,7 +7,7 @@ const DEFAULT_SMTP_PORT = 587;
 const DEFAULT_SMTP_FROM = 'noreply@airlink';
 
 export async function getTransporter() {
-  const s = await await getSettings();
+  const s = await getSettings();
   if (!s?.smtpHost) {throw new Error('SMTP not configured');}
   return nodemailer.createTransport({
     host: s.smtpHost,
@@ -22,7 +22,7 @@ export async function getTransporter() {
 
 export async function sendMail(to: string, subject: string, html: string): Promise<boolean> {
   try {
-    const s = await await getSettings();
+    const s = await getSettings();
     const t = await getTransporter();
     await t.sendMail({
       from: s?.smtpFrom ?? DEFAULT_SMTP_FROM,

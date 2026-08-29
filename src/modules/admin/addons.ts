@@ -47,7 +47,7 @@ const addonsModule: Module = {
           if (!user) {return res.redirect('/login');}
 
           const addons = await getAllAddons();
-          const settings = await await getSettings();
+          const settings = await getSettings();
 
           let addonTableExists = true;
           try {
@@ -97,7 +97,7 @@ const addonsModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {return res.redirect('/login');}
 
-          const settings = await await getSettings();
+          const settings = await getSettings();
           const addons = await getAllAddons();
 
           res.render('admin/addons/store', { user, req, settings, addons, errorMessage: {} });

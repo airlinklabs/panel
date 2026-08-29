@@ -54,7 +54,7 @@ const passwordResetModule: Module = {
 
     // ── GET /forgot-password ────────────────────────────────────────────────
     router.get('/forgot-password', async (req: Request, res: Response) => {
-      const settings = await await getSettings();
+      const settings = await getSettings();
       res.render('auth/forgot-password', { req, settings });
     });
 
@@ -99,7 +99,7 @@ const passwordResetModule: Module = {
     // ── GET /reset-password ─────────────────────────────────────────────────
     router.get('/reset-password', async (req: Request, res: Response) => {
       const { token } = req.query as { token?: string };
-      const settings = await await getSettings();
+      const settings = await getSettings();
 
       let validToken = false;
       if (token) {

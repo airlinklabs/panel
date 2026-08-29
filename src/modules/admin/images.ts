@@ -92,7 +92,7 @@ const adminModule: Module = {
             creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
           }));
 
-          const settings = await await getSettings();
+          const settings = await getSettings();
           res.render('admin/images/images', {
             user,
             req,
@@ -246,7 +246,7 @@ const adminModule: Module = {
           const image = await prisma.images.findUnique({ where: { id: Number(req.params.id) } });
           if (!image) {return res.redirect('/admin/images?error=Image+not+found');}
 
-          const settings = await await getSettings();
+          const settings = await getSettings();
 
           let dockerImages: Record<string, string> = {};
           try {
@@ -449,7 +449,7 @@ const adminModule: Module = {
 
           if (req.get('HX-Request') === 'true') {
             const images = await prisma.images.findMany();
-            const settings = await await getSettings();
+            const settings = await getSettings();
             res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Image deleted.' } } }));
             return res.render('fragments/admin/images/image-table', { images, settings, req });
           }
@@ -639,7 +639,7 @@ const adminModule: Module = {
               ...i,
               creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
             }));
-            const settings = await await getSettings();
+            const settings = await getSettings();
             res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: `Approved "${image.name}".` } } }));
             return res.render('fragments/admin/images/pending-approvals', { pending: pendingWithCreators, settings, req });
           }
@@ -703,7 +703,7 @@ const adminModule: Module = {
               ...i,
               creator: i.createdById != null ? creatorMap.get(i.createdById) ?? null : null,
             }));
-            const settings = await await getSettings();
+            const settings = await getSettings();
             res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: `Rejected "${image.name}".` } } }));
             return res.render('fragments/admin/images/pending-approvals', { pending: pendingWithCreators, settings, req });
           }

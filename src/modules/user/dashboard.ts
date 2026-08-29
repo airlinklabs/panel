@@ -290,7 +290,7 @@ const dashboardModule: Module = {
             include: { members: true },
             orderBy: { createdAt: 'asc' },
           });
-          const settings2 = await await getSettings();
+          const settings2 = await getSettings();
           const userServerLimit = user.serverLimit !== null && user.serverLimit !== undefined
             ? user.serverLimit
             : (settings2?.defaultServerLimit ?? 0);
@@ -368,7 +368,7 @@ const dashboardModule: Module = {
           orderBy: { createdAt: 'asc' },
         });
 
-        const settings2 = await await getSettings();
+        const settings2 = await getSettings();
         const userServerLimit = user.serverLimit !== null && user.serverLimit !== undefined
           ? user.serverLimit
           : (settings2?.defaultServerLimit ?? 0);

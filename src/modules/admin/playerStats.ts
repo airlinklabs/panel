@@ -33,7 +33,7 @@ const adminModule: Module = {
       isAuthenticated(true, 'airlink.admin.playerstats.view'),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
-        const settings = await await getSettings();
+        const settings = await getSettings();
 
         try {
           const userId = req.session?.user?.id;

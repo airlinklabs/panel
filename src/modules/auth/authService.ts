@@ -27,7 +27,7 @@ const authRateLimit = rateLimit({
 
 async function getSecuritySettings() {
   try {
-    const s = await await getSettings();
+    const s = await getSettings();
     return {
       maxAttempts:    s?.loginMaxAttempts    ?? 5,
       lockoutMinutes: s?.loginLockoutMinutes ?? 15,
@@ -170,7 +170,7 @@ const authServiceModule: Module = {
         const isFirstUser = userCount === 0;
 
         if (!isFirstUser) {
-          const settings = await await getSettings();
+          const settings = await getSettings();
           if (!settings?.allowRegistration) {
             return res.redirect('/login?err=registration_disabled');
           }

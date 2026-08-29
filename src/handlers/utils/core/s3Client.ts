@@ -7,7 +7,7 @@ import prisma from '../../../db';
 export const S3_KEY_PREFIX = 's3:';
 
 export async function getS3Config() {
-  const s = await await getSettings();
+  const s = await getSettings();
   if (!s?.s3Enabled || !s.s3Bucket || !s.s3AccessKey || !s.s3SecretKey) {
     throw new Error('S3 not configured');
   }

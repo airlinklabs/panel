@@ -24,7 +24,7 @@ export const isAuthenticated =
         }
 
         if (!user.totpEnabled) {
-          const settings = await await getSettings();
+          const settings = await getSettings();
           if (settings?.require2faForAdmins) {
             return res.redirect('/account/2fa/setup?required=1');
           }

@@ -4,7 +4,7 @@ import prisma from '../db';
 
 export const settingsLoader = async () => {
   try {
-    const settings = await await getSettings();
+    const settings = await getSettings();
 
     if (!settings) {
       await prisma.settings.create({

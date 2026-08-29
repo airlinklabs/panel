@@ -101,7 +101,7 @@ export function registerStartupRoutes(router: Router): void {
       const errorMessage: ErrorMessage = {};
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
-      const settings = await await getSettings();
+      const settings = await getSettings();
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {

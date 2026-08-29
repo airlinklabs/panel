@@ -197,7 +197,7 @@ const adminModule: Module = {
 
         // Fall back to the global defaults (set in admin settings) when the form
         // leaves overallocation empty or the field isn't sent.
-        const settings = await await getSettings();
+        const settings = await getSettings();
         const defOvMem = settings?.defaultOverallocateMemory ?? 0;
         const defOvDisk = settings?.defaultOverallocateDisk ?? 0;
         const defOvCpu = settings?.defaultOverallocateCpu ?? 0;
@@ -463,7 +463,7 @@ const adminModule: Module = {
                 include: { _count: { select: { nodes: true } } },
                 orderBy: { name: 'asc' },
               });
-              const settings = await await getSettings();
+              const settings = await getSettings();
               res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: deleteInstances ? 'Node and servers deleted.' : 'Node deleted.' } } }));
               return res.render('fragments/admin/nodes/node-table', { nodes, locations, settings, req });
             }

@@ -176,14 +176,14 @@ export function registerPlayersRoutes(router: Router): void {
             players: [],
             server,
             req,
-            settings: await await getSettings(),
+            settings: await getSettings(),
           });
         }
 
         const { players, serverInfo, serverIsOnline, hadFetchError } =
           await fetchPlayerData(server, primaryPort);
 
-        const settings = await await getSettings();
+        const settings = await getSettings();
         const hasError = hadFetchError && !serverIsOnline;
         const serverStatus = await getServerStatus(getServerStatusInput(server));
 

@@ -14,27 +14,31 @@
  * than re-validated on the hot path.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /** Wire version reported by `GET /api/client` and enforced by the version plan. */
-export const CLIENT_API_VERSION = 'client-v1';
+export const CLIENT_API_VERSION = "client-v1";
 
-// ---------------------------------------------------------------------------
-// Request bodies (untrusted input — validated at runtime)
-// ---------------------------------------------------------------------------
+// --- Request bodies ---
 
-export const POWER_ACTIONS = ['start', 'stop', 'restart', 'kill'] as const;
+export const POWER_ACTIONS = ["start", "stop", "restart", "kill"] as const;
 export type PowerAction = (typeof POWER_ACTIONS)[number];
 
-export const SCHEDULE_ACTIONS = ['command', 'power', 'backup'] as const;
+export const SCHEDULE_ACTIONS = ["command", "power", "backup"] as const;
 export type ScheduleAction = (typeof SCHEDULE_ACTIONS)[number];
 
 /** POST /api/client/servers/:id/power */
 export const powerBodySchema = z
   .object({ action: z.unknown().optional() })
   .superRefine((data, ctx) => {
-    if (typeof data.action !== 'string' || !POWER_ACTIONS.includes(data.action as PowerAction)) {
-      ctx.addIssue({ code: 'custom', message: 'action must be start, stop, restart, or kill' });
+    if (
+      typeof data.action !== "string" ||
+      !POWER_ACTIONS.includes(data.action as PowerAction)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "action must be start, stop, restart, or kill",
+      });
     }
   })
   .transform((data) => ({ action: data.action as PowerAction }));
@@ -45,10 +49,16 @@ export const writeFileBodySchema = z
   .object({ file: z.unknown().optional(), content: z.unknown().optional() })
   .superRefine((data, ctx) => {
     if (data.file === undefined || data.content === undefined) {
-      ctx.addIssue({ code: 'custom', message: 'file and content are required' });
+      ctx.addIssue({
+        code: "custom",
+        message: "file and content are required",
+      });
     }
   })
-  .transform((data) => ({ file: data.file as string, content: data.content as string }));
+  .transform((data) => ({
+    file: data.file as string,
+    content: data.content as string,
+  }));
 export type WriteFileBody = z.infer<typeof writeFileBodySchema>;
 
 /** DELETE /api/client/servers/:id/files */
@@ -56,7 +66,7 @@ export const deleteFileBodySchema = z
   .object({ file: z.unknown().optional() })
   .superRefine((data, ctx) => {
     if (data.file === undefined) {
-      ctx.addIssue({ code: 'custom', message: 'file is required' });
+      ctx.addIssue({ code: "custom", message: "file is required" });
     }
   })
   .transform((data) => ({ file: data.file as string }));
@@ -67,10 +77,16 @@ export const renameFileBodySchema = z
   .object({ file: z.unknown().optional(), newname: z.unknown().optional() })
   .superRefine((data, ctx) => {
     if (data.file === undefined || data.newname === undefined) {
-      ctx.addIssue({ code: 'custom', message: 'file and newname are required' });
+      ctx.addIssue({
+        code: "custom",
+        message: "file and newname are required",
+      });
     }
   })
-  .transform((data) => ({ file: data.file as string, newname: data.newname as string }));
+  .transform((data) => ({
+    file: data.file as string,
+    newname: data.newname as string,
+  }));
 export type RenameFileBody = z.infer<typeof renameFileBodySchema>;
 
 /** POST /api/client/servers/:id/backups */
@@ -78,7 +94,7 @@ export const createBackupBodySchema = z
   .object({ name: z.unknown().optional() })
   .superRefine((data, ctx) => {
     if (data.name === undefined) {
-      ctx.addIssue({ code: 'custom', message: 'name is required' });
+      ctx.addIssue({ code: "custom", message: "name is required" });
     }
   })
   .transform((data) => ({ name: data.name as string }));
@@ -93,27 +109,52 @@ export const createScheduleBodySchema = z
     payload: z.unknown().optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.name === undefined || data.cron === undefined || data.action === undefined) {
-      ctx.addIssue({ code: 'custom', message: 'name, cron, and action are required' });
+    if (
+      data.name === undefined ||
+      data.cron === undefined ||
+      data.action === undefined
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "name, cron, and action are required",
+      });
       return;
     }
-    if (typeof data.name !== 'string' || typeof data.cron !== 'string' || typeof data.action !== 'string') {
-      ctx.addIssue({ code: 'custom', message: 'name, cron, and action are required' });
+    if (
+      typeof data.name !== "string" ||
+      typeof data.cron !== "string" ||
+      typeof data.action !== "string"
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "name, cron, and action are required",
+      });
       return;
     }
     if (!SCHEDULE_ACTIONS.includes(data.action as ScheduleAction)) {
-      ctx.addIssue({ code: 'custom', message: 'action must be command, power, or backup' });
+      ctx.addIssue({
+        code: "custom",
+        message: "action must be command, power, or backup",
+      });
       return;
     }
-    if (data.action === 'power') {
+    if (data.action === "power") {
       let parsed: { action?: string };
       try {
-        parsed = JSON.parse(typeof data.payload === 'string' ? data.payload : '{}') as { action?: string };
+        parsed = JSON.parse(
+          typeof data.payload === "string" ? data.payload : "{}",
+        ) as { action?: string };
       } catch {
         parsed = {};
       }
-      if (!parsed.action || !POWER_ACTIONS.includes(parsed.action as PowerAction)) {
-        ctx.addIssue({ code: 'custom', message: 'power payload must include a valid action' });
+      if (
+        !parsed.action ||
+        !POWER_ACTIONS.includes(parsed.action as PowerAction)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          message: "power payload must include a valid action",
+        });
       }
     }
   })
@@ -121,13 +162,11 @@ export const createScheduleBodySchema = z
     name: data.name as string,
     cron: data.cron as string,
     action: data.action as ScheduleAction,
-    payload: typeof data.payload === 'string' ? data.payload : '{}',
+    payload: typeof data.payload === "string" ? data.payload : "{}",
   }));
 export type CreateScheduleBody = z.infer<typeof createScheduleBodySchema>;
 
-// ---------------------------------------------------------------------------
-// Responses (typed contract for the wire shape)
-// ---------------------------------------------------------------------------
+// --- Response types ---
 
 /** Item shape shared by GET /api/client/servers and GET /api/client/servers/:id. */
 export const clientServerSchema = z.object({

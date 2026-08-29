@@ -31,7 +31,7 @@ const adminModule: Module = {
         const userId = req.session?.user?.id;
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {return res.redirect('/login');}
-        const settings = await await getSettings();
+        const settings = await getSettings();
         const vm = await buildMountsViewModel();
 
         res.vary('HX-Request');

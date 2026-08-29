@@ -64,7 +64,7 @@ export async function buildAdminUsersViewModel(actorId: number): Promise<AdminUs
     include: { servers: true },
   });
 
-  const settings = await await getSettings();
+  const settings = await getSettings();
 
   return {
     user: { id: user.id, username: user.username, avatar: user.avatar, description: user.description, isAdmin: user.isAdmin, role: user.role },

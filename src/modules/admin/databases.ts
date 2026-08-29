@@ -46,7 +46,7 @@ const databasesModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
-          const settings = await await getSettings();
+          const settings = await getSettings();
           const vm = await buildDatabasesViewModel();
 
           res.vary('HX-Request');
@@ -66,7 +66,7 @@ const databasesModule: Module = {
       isAuthenticated(true, 'airlink.admin.databases.create'),
       async (req: Request, res: Response) => {
         const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
-        const settings = await await getSettings();
+        const settings = await getSettings();
         const nodes = await prisma.node.findMany({ orderBy: { name: 'asc' } });
         res.render('admin/databases/create', { user, settings, nodes, req });
       },

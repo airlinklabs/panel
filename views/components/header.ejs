@@ -43,24 +43,24 @@ const wallpaperExcluded = req && req.path && (
     <link rel="stylesheet" href="<%= stylesheet %>">
       <% } %>
     <% } %>
-    <!-- ── Foundation: session/CSRF support ────────────────────────────── -->
+    <!-- Session/CSRF support -->
     <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
     <script nonce="<%- nonce %>" defer src="/js/csrf.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/js/shared/al-icon.js?v=8"></script>
 
-    <!-- ── Legacy lifecycle — retained dependencies ──────────────────────── -->
+    <!-- Vendor bundles -->
     <script nonce="<%- nonce %>" defer src="/javascript/vendor/query-core.js?v=1"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/vendor/reconnecting-websocket.js?v=1"></script>
 
-    <!-- ── HTMX: self-hosted, CSP-compatible ──────────────────────────── -->
-    <script nonce="<%- nonce %>" defer src="/javascript/vendor/htmx.min.js?v=2.0.4"></script>
+    <!-- htmx -->
+    <script nonce="<%- nonce %>" defer src="/javascript/vendor/htmx.min.js?v=2.0.10"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/htmx-bootstrap.js?v=1"></script>
 
-    <!-- ── Alpine.js: self-hosted, CSP-compatible ─────────────────────── -->
-    <script nonce="<%- nonce %>" defer src="/javascript/vendor/alpine.min.js?v=3.14.9"></script>
+    <!-- Alpine.js -->
+    <script nonce="<%- nonce %>" defer src="/javascript/vendor/alpine.min.js?v=3.16.3"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/alpine-bootstrap.js?v=1"></script>
 
-    <!-- ── Shared UI components (still live owners) ───────────────────── -->
+    <!-- Shared UI components -->
     <script nonce="<%- nonce %>" defer src="/javascript/shared/format-switcher.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/animations.js?v=8"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/custom-select.js?v=8"></script>

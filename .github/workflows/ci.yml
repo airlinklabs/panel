@@ -14,7 +14,7 @@ concurrency:
 permissions:
   contents: read
   security-events: write
-  pull-requests: read  # needed for dependency-review
+  pull-requests: read # needed for dependency-review
 
 jobs:
   # ── Security ────────────────────────────────────────────────────────────────
@@ -56,10 +56,9 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
       # --ignore-scripts skips postinstall (prisma generate), which requires
       # DATABASE_URL — audit doesn't need generated types at all
-      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm install --ignore-scripts
       - run: pnpm audit --audit-level=high
 
   # ── Quality ─────────────────────────────────────────────────────────────────
@@ -74,9 +73,8 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
       # --ignore-scripts skips postinstall; ESLint doesn't need Prisma types
-      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm install --ignore-scripts
       # --fix is for local dev only; CI must only check, never mutate files
       - run: pnpm exec eslint src
 
@@ -92,9 +90,8 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
       # --ignore-scripts so postinstall doesn't race with our explicit generate below
-      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm install --ignore-scripts
       # Now DATABASE_URL is set, so prisma generate can resolve it
       - run: pnpm exec prisma generate
       # pnpm run typecheck covers tsconfig, tsconfig.prisma.json, tsconfig.tui.json
@@ -112,8 +109,7 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm install --ignore-scripts
       # migrate:deploy applies pending migrations AND regenerates the client —
       # required so Vitest has a real, up-to-date schema to run against.
       # DATABASE_URL is set above, so this won't fail like postinstall did.
@@ -130,9 +126,8 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
       # --ignore-scripts: vendor check is pure Node, needs no Prisma types
-      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm install --ignore-scripts
       # Fails if the committed vendor bundle is out of sync with sources
       - run: pnpm run verify:vendor
 
@@ -151,8 +146,7 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm install --ignore-scripts
       # migrate:deploy: applies migrations and regenerates the Prisma client
       # with DATABASE_URL in scope — this is what postinstall was trying to do
       - run: pnpm run migrate:deploy

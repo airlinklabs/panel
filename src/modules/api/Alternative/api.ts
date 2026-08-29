@@ -278,7 +278,7 @@ const coreModule: Module = {
           const isFirstUser = userCount === 0;
 
           if (!isFirstUser) {
-            const settings = await await getSettings();
+            const settings = await getSettings();
             if (!settings || !settings.allowRegistration) {
               res.status(403).json({ error: 'Registration is disabled' });
               return;

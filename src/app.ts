@@ -1,58 +1,60 @@
-import { getSettings } from './handlers/settingsCache';
-import type { Request, Response, NextFunction } from 'express';
-import express from 'express';
-import prisma from './db';
-import path from 'path';
-import session from 'express-session';
-import { loadEnv } from './handlers/envLoader';
-import { databaseLoader } from './handlers/databaseLoader';
-import { loadModules } from './handlers/modulesLoader';
-import logger from './handlers/logger';
-import config from '../storage/config.json';
-import cookieParser from 'cookie-parser';
-import expressWs from 'express-ws';
-import compression from 'compression';
-import { translationMiddleware } from './handlers/utils/core/translation';
-import { getSessionStore } from './handlers/sessionStore';
-import { settingsLoader } from './handlers/settingsLoader';
-import { loadAddons, setAppInstance } from './handlers/addonHandler';
+import { getSettings } from "./handlers/settingsCache";
+import type { Request, Response, NextFunction } from "express";
+import express from "express";
+import prisma from "./db";
+import path from "path";
+import session from "express-session";
+import { loadEnv } from "./handlers/envLoader";
+import { databaseLoader } from "./handlers/databaseLoader";
+import { loadModules } from "./handlers/modulesLoader";
+import logger from "./handlers/logger";
+import config from "../storage/config.json";
+import cookieParser from "cookie-parser";
+import expressWs from "express-ws";
+import compression from "compression";
+import { translationMiddleware } from "./handlers/utils/core/translation";
+import { getSessionStore } from "./handlers/sessionStore";
+import { settingsLoader } from "./handlers/settingsLoader";
+import { loadAddons, setAppInstance } from "./handlers/addonHandler";
 import {
   initializeDefaultUIComponents,
   uiComponentStore,
-} from './handlers/uiComponentHandler';
-import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
-import { startScheduler } from './handlers/schedulerWorker';
-import { initEggCatalogue } from './handlers/eggCatalogueService';
-import { reenqueueQueuedInstalls } from './handlers/installQueue';
-import crypto from 'crypto';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import icon from './utils/icon';
-import { getClientIp } from './utils/ip';
+} from "./handlers/uiComponentHandler";
+import { startPlayerStatsCollection } from "./handlers/playerStatsCollector";
+import { startScheduler } from "./handlers/schedulerWorker";
+import { initEggCatalogue } from "./handlers/eggCatalogueService";
+import { reenqueueQueuedInstalls } from "./handlers/installQueue";
+import crypto from "crypto";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import icon from "./utils/icon";
+import { getClientIp } from "./utils/ip";
 // hpp removed: Express 5's req.query parsing (qs with arrayLimit: 0) already
 // prevents HTTP Parameter Pollution. No replacement needed.
 import csrfProtection, {
   handleCsrfError,
   addCsrfTokenToLocals,
-} from './handlers/utils/security/csrfProtection';
-import { isCsrfExempt } from './handlers/utils/security/csrfRouting';
+} from "./handlers/utils/security/csrfProtection";
+import { isCsrfExempt } from "./handlers/utils/security/csrfRouting";
 import {
   errorPageHandler,
   notFoundHandler,
   renderErrorPage,
-} from './handlers/errorPages';
+} from "./handlers/errorPages";
 
-import { getConfig } from './config';
-import { installRenderResolver } from './handlers/renderResolver';
-import { validationErrorBoundary } from './utils/validation';
-import { refreshSecurityCache, getSecurityCache } from './handlers/securityCache';
+import { getConfig } from "./config";
+import { installRenderResolver } from "./handlers/renderResolver";
+import { validationErrorBoundary } from "./utils/validation";
+import {
+  refreshSecurityCache,
+  getSecurityCache,
+} from "./handlers/securityCache";
 
 // Module-level app instance.
 let app: ReturnType<typeof express>;
 
 loadEnv();
 
-// Set max listeners
 process.setMaxListeners(20);
 
 app = express();
@@ -79,9 +81,9 @@ const airlinkCodename = config.meta.codename;
 // We set this before any middleware so the correct client IP flows through.
 (async () => {
   try {
-    const s = await await getSettings();
+    const s = await getSettings();
     if (s?.behindReverseProxy) {
-      app.set('trust proxy', 1);
+      app.set("trust proxy", 1);
     }
   } catch {
     // DB not ready yet — leave default (no trust proxy)
@@ -92,56 +94,77 @@ const airlinkCodename = config.meta.codename;
 const expressWsInstance = expressWs(app);
 
 // Load static files
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, "../public")));
 
+// Runtime uploads (user-uploaded files)
+app.use("/uploads", express.static(path.join(__dirname, "../storage/uploads")));
+
+// User-installed themes
 app.use(
-  '/monaco',
-  express.static(path.join(__dirname, '../node_modules', 'monaco-editor/min')),
+  "/themes/user",
+  express.static(path.join(__dirname, "../storage/themes/user")),
+);
+
+// Root favicon (runtime-generated)
+app.use(
+  "/favicon.ico",
+  express.static(path.join(__dirname, "../public/assets/favicon.ico")),
 );
 
 app.use(
-  '/vendor',
-  express.static(path.join(__dirname, '../node_modules', '@formkit/auto-animate')),
+  "/monaco",
+  express.static(path.join(__dirname, "../node_modules", "monaco-editor/min")),
 );
 
 app.use(
-  '/vendor/xterm',
-  express.static(path.join(__dirname, '../node_modules', '@xterm/xterm/css')),
+  "/vendor",
+  express.static(
+    path.join(__dirname, "../node_modules", "@formkit/auto-animate"),
+  ),
 );
 
 app.use(
-  '/vendor/xterm/lib',
-  express.static(path.join(__dirname, '../node_modules', '@xterm/xterm/lib')),
+  "/vendor/xterm",
+  express.static(path.join(__dirname, "../node_modules", "@xterm/xterm/css")),
 );
 
 app.use(
-  '/vendor/marked',
-  express.static(path.join(__dirname, '../node_modules', 'marked/lib')),
+  "/vendor/xterm/lib",
+  express.static(path.join(__dirname, "../node_modules", "@xterm/xterm/lib")),
 );
 
 app.use(
-  '/vendor/xterm-addon-fit',
-  express.static(path.join(__dirname, '../node_modules', '@xterm/addon-fit/lib')),
+  "/vendor/marked",
+  express.static(path.join(__dirname, "../node_modules", "marked/lib")),
 );
 
 app.use(
-  '/vendor/xterm-addon-web-links',
-  express.static(path.join(__dirname, '../node_modules', '@xterm/addon-web-links/lib')),
+  "/vendor/xterm-addon-fit",
+  express.static(
+    path.join(__dirname, "../node_modules", "@xterm/addon-fit/lib"),
+  ),
 );
 
 app.use(
-  '/vendor/chartjs',
-  express.static(path.join(__dirname, '../node_modules', 'chart.js/dist')),
+  "/vendor/xterm-addon-web-links",
+  express.static(
+    path.join(__dirname, "../node_modules", "@xterm/addon-web-links/lib"),
+  ),
+);
+
+app.use(
+  "/vendor/chartjs",
+  express.static(path.join(__dirname, "../node_modules", "chart.js/dist")),
 );
 
 // HTMX — self-hosted, versioned, CSP-compatible
 app.use(
-  '/vendor/htmx',
-  express.static(path.join(__dirname, '../public/javascript/vendor'), {
-    maxAge: '1y',
+  "/vendor/htmx",
+  express.static(path.join(__dirname, "../public/javascript/vendor"), {
+    maxAge: "1y",
     setHeaders(res, filePath) {
-      if (filePath.endsWith('.js')) {
-        res.setHeader('Content-Type', 'application/javascript');
+      if (filePath.endsWith(".js")) {
+        res.setHeader("Content-Type", "application/javascript");
       }
     },
   }),
@@ -149,38 +172,38 @@ app.use(
 
 // Alpine.js — self-hosted, versioned, CSP-compatible
 app.use(
-  '/vendor/alpine',
-  express.static(path.join(__dirname, '../public/javascript/vendor'), {
-    maxAge: '1y',
+  "/vendor/alpine",
+  express.static(path.join(__dirname, "../public/javascript/vendor"), {
+    maxAge: "1y",
     setHeaders(res, filePath) {
-      if (filePath.endsWith('.js')) {
-        res.setHeader('Content-Type', 'application/javascript');
+      if (filePath.endsWith(".js")) {
+        res.setHeader("Content-Type", "application/javascript");
       }
     },
   }),
 );
 
 // Load views
-const viewsPath = path.join(__dirname, '../views');
-app.set('views', viewsPath);
-app.set('view engine', 'ejs');
+const viewsPath = path.join(__dirname, "../views");
+app.set("views", viewsPath);
+app.set("view engine", "ejs");
 // Cache compiled EJS templates in memory. In production this is already the
 // default, but setting it explicitly ensures it's on regardless of NODE_ENV.
-app.set('view cache', true);
+app.set("view cache", true);
 
 // The global ejs.renderFile monkey-patch used to live here, falling back to
 // addon views for any missing template. It has been replaced by the explicit
 // addon view resolver (src/handlers/addonViewResolver.ts), which validates
 // addon slugs and keeps every resolved path inside the addon's views dir.
 
-const addonViewsDir = path.join(__dirname, '../../storage/addons');
+const addonViewsDir = path.join(__dirname, "../../storage/addons");
 
 // Load compression
 app.use(compression());
 
 // htmx detection — sets req.htmx for all downstream handlers
 app.use((req: any, _res, next) => {
-  req.htmx = req.headers['hx-request'] === 'true';
+  req.htmx = req.headers["hx-request"] === "true";
   next();
 });
 
@@ -190,133 +213,90 @@ app.use((req: any, _res, next) => {
 const isHttps = panelConfig.isHttps;
 const isProduction = panelConfig.isProduction;
 
-// ---------------------------------------------------------------------------
-// Nonce middleware — runs before helmet so the nonce is available when we
-// build the CSP header. A fresh cryptographically random nonce is generated
-// for every single HTTP response. It is exposed as:
-//   • res.locals.nonce  — used in EJS templates: <script nonce="<%- nonce %>">
-//   • req.nonce         — available anywhere downstream if needed
-// Every <script> block in the EJS templates MUST carry this nonce attribute.
-// Scripts without a matching nonce are blocked by the browser even if they
-// are served from 'self', which is exactly the XSS protection we want.
-// ---------------------------------------------------------------------------
+// Nonce middleware — generates a per-request CSP nonce for XSS protection.
+// Exposed as res.locals.nonce (EJS templates) and req.nonce (downstream handlers).
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const nonce = crypto.randomBytes(16).toString('base64');
+  const nonce = crypto.randomBytes(16).toString("base64");
   res.locals.nonce = nonce;
   req.nonce = nonce;
   next();
 });
 
-// ---------------------------------------------------------------------------
-// X-Request-Id middleware — propagates a stable request identifier from
-// browser → panel → daemon for distributed tracing. If the browser sends
-// one we honor it; otherwise we generate a new UUID.
-// ---------------------------------------------------------------------------
+// X-Request-Id — propagates a stable request ID from browser → panel → daemon for distributed tracing.
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const incoming = req.headers['x-request-id'];
-  const requestId = (typeof incoming === 'string' && incoming.trim()) || crypto.randomUUID();
-  req.headers['x-request-id'] = requestId;
-  res.setHeader('X-Request-Id', requestId);
+  const incoming = req.headers["x-request-id"];
+  const requestId =
+    (typeof incoming === "string" && incoming.trim()) || crypto.randomUUID();
+  req.headers["x-request-id"] = requestId;
+  res.setHeader("X-Request-Id", requestId);
   next();
 });
 
-// ---------------------------------------------------------------------------
-// Helmet — configured explicitly rather than using defaults so we control
-// every header precisely across both HTTP and HTTPS deployments.
-// ---------------------------------------------------------------------------
+// Helmet — explicit config for precise header control across HTTP and HTTPS.
 app.use((req: Request, res: Response, next: NextFunction) => {
   const nonce = res.locals.nonce as string;
 
   // All assets are now served locally — no CDN domains needed in CSP.
-  // This significantly tightens security by only allowing self-hosted resources.
+  // Self-hosted assets only — no CDN domains in CSP.
 
   helmet({
-    // X-Content-Type-Options: nosniff
     noSniff: true,
 
-    // X-Frame-Options is superseded by frame-ancestors in the CSP below,
-    // but we keep it for legacy browsers that don't understand CSP.
-    frameguard: { action: 'deny' },
+    // Legacy browsers fallback — CSP frame-ancestors supersedes this.
+    frameguard: { action: "deny" },
 
-    // HSTS — only sent over HTTPS. Sending it on HTTP is meaningless and
-    // causes browsers to refuse future HTTP connections to the same host.
+    // HSTS only over HTTPS — meaningless on HTTP, causes browsers to refuse future HTTP connections.
     hsts: isHttps
       ? { maxAge: 31536000, includeSubDomains: true, preload: true }
       : false,
 
-    // Cross-Origin-Opener-Policy and Origin-Agent-Cluster are only meaningful
-    // (and only safe from a browser-warning perspective) on HTTPS origins.
-    crossOriginOpenerPolicy: isHttps ? { policy: 'same-origin' } : false,
+    // COOP and OAC only meaningful on HTTPS.
+    crossOriginOpenerPolicy: isHttps ? { policy: "same-origin" } : false,
     originAgentCluster: isHttps ? undefined : false,
 
     // Referrer-Policy — don't leak the full URL to third-party CDNs.
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
 
-    // Permissions-Policy — deny all sensitive browser APIs we don't use.
-    permittedCrossDomainPolicies: { permittedPolicies: 'none' },
+    permittedCrossDomainPolicies: { permittedPolicies: "none" },
 
     contentSecurityPolicy: isProduction
       ? {
-        directives: {
-          // Fallback for any directive not listed explicitly.
-          defaultSrc: ['\'self\''],
+          directives: {
+            // Fallback for any directive not listed explicitly.
+            defaultSrc: ["'self'"],
 
-          // Scripts:
-          //   'nonce-{nonce}' — allows only <script nonce="…"> blocks that
-          //                     carry the per-request nonce. Blocks all other
-          //                     inline scripts and eval().
-          //   'strict-dynamic' — lets nonce-carrying scripts load further
-          //                     scripts dynamically (needed by Monaco loader).
-          scriptSrc: [
-            '\'self\'',
-            `'nonce-${nonce}'`,
-            '\'strict-dynamic\'',
-          ],
+            // Scripts: nonce + strict-dynamic for Monaco loader.
+            scriptSrc: ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"],
 
-          // Inline event handlers (onclick, onchange, etc.) cannot carry nonces.
-          // 'unsafe-inline' here is scoped only to attributes, not to <script>
-          // blocks (which are governed by scriptSrc above).
-          // This is the minimum needed to avoid rewriting 126+ EJS event handlers.
-          scriptSrcAttr: ['\'unsafe-inline\''],
+            // unsafe-inline for event handler attrs only — avoids rewriting 126+ EJS handlers.
+            scriptSrcAttr: ["'unsafe-inline'"],
 
-          // Styles — allow inline (Tailwind utility classes are inline by nature)
-          // plus the exact external stylesheet CDNs used.
-          styleSrc: ['\'self\'', '\'unsafe-inline\''],
+            // Inline styles needed for Tailwind utility classes.
+            styleSrc: ["'self'", "'unsafe-inline'"],
 
-          fontSrc: ['\'self\'', 'data:'],
+            fontSrc: ["'self'", "data:"],
 
-          // Images — self + data URIs (avatars/favicons) + https for remote images.
-          // http: is intentionally excluded; image URLs served by the daemon
-          // should be proxied through the panel rather than loaded directly.
-          imgSrc: ['\'self\'', 'data:', 'blob:', 'https:'],
+            // Self + data URIs (avatars/favicons) + https for remote images.
+            imgSrc: ["'self'", "data:", "blob:", "https:"],
 
-          // WebSocket connections for the server console + same-origin API calls.
-          connectSrc: [
-            '\'self\'',
-            ...(isHttps ? ['wss:'] : ['ws:', 'wss:']),
-          ],
+            // WebSocket connections for server console + same-origin API calls.
+            connectSrc: ["'self'", ...(isHttps ? ["wss:"] : ["ws:", "wss:"])],
 
-          // Prevent the panel from being embedded in any frame anywhere.
-          // Supersedes X-Frame-Options for modern browsers.
-          frameAncestors: ['\'none\''],
+            frameAncestors: ["'none'"],
 
-          // Prevent any plugins (Flash, PDF, etc.) from being embedded.
-          objectSrc: ['\'none\''],
+            objectSrc: ["'none'"],
 
-          // Lock down <base> tags — prevents base-tag hijacking attacks.
-          baseUri: ['\'self\''],
+            baseUri: ["'self'"],
 
-          // All form submissions must go to same origin.
-          formAction: ['\'self\''],
+            formAction: ["'self'"],
 
-          // Only upgrade to HTTPS when we are actually serving HTTPS.
-          // Without this guard, helmet's default adds upgrade-insecure-requests
-          // which rewrites every asset URL to https://, breaking HTTP installs.
-          ...(isHttps
-            ? { upgradeInsecureRequests: [] }
-            : { upgradeInsecureRequests: null }),
-        },
-      }
+            // Only upgrade to HTTPS when actually serving HTTPS — without this guard,
+            // helmet rewrites every asset URL to https://, breaking HTTP installs.
+            ...(isHttps
+              ? { upgradeInsecureRequests: [] }
+              : { upgradeInsecureRequests: null }),
+          },
+        }
       : false,
   })(req, res, next);
 });
@@ -331,7 +311,12 @@ setInterval(refreshSecurityCache, 30_000);
 app.use((req, res, next) => {
   const clientIp = getClientIp(req);
   if (getSecurityCache().bannedIps.includes(clientIp)) {
-    renderErrorPage(req, res, 403, 'Your IP address is blocked from this panel.');
+    renderErrorPage(
+      req,
+      res,
+      403,
+      "Your IP address is blocked from this panel.",
+    );
     return;
   }
   next();
@@ -341,7 +326,10 @@ app.use((req, res, next) => {
 app.use(
   rateLimit({
     windowMs: 60 * 1000,
-    max: () => { const c = getSecurityCache(); return c.rateLimitEnabled ? c.rateLimitRpm : 0; },
+    max: () => {
+      const c = getSecurityCache();
+      return c.rateLimitEnabled ? c.rateLimitRpm : 0;
+    },
     skip: () => !getSecurityCache().rateLimitEnabled,
     standardHeaders: true,
     legacyHeaders: false,
@@ -367,7 +355,7 @@ app.use(
     cookie: {
       secure: useSecureCookie,
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),
@@ -375,24 +363,24 @@ app.use(
 
 app.use(
   express.json({
-    limit: '512kb',
+    limit: "512kb",
   }),
 );
 app.use(
   express.urlencoded({
     extended: false,
-    limit: '512kb',
+    limit: "512kb",
     parameterLimit: 1000,
   }),
 );
 app.use(
   express.raw({
-    limit: '1mb',
+    limit: "1mb",
   }),
 );
 app.use(
   express.text({
-    limit: '512kb',
+    limit: "512kb",
   }),
 );
 
@@ -479,14 +467,20 @@ app.use(errorPageHandler);
       startPlayerStatsCollection();
       startScheduler();
       reenqueueQueuedInstalls();
-      initEggCatalogue().catch(err => logger.warn(`Store catalogue init failed: ${err?.message || err}`));
-      import('./handlers/realtime/nodeStatsWs').then(m => m.attachNodeStatsWs(server));
+      initEggCatalogue().catch((err) =>
+        logger.warn(`Store catalogue init failed: ${err?.message || err}`),
+      );
+      import("./handlers/realtime/nodeStatsWs").then((m) =>
+        m.attachNodeStatsWs(server),
+      );
     });
 
     let shuttingDown = false;
 
     async function shutdown(signal: string) {
-      if (shuttingDown) {return;}
+      if (shuttingDown) {
+        return;
+      }
       shuttingDown = true;
 
       logger.info(`Shutting down (${signal})...`);
@@ -497,21 +491,21 @@ app.use(errorPageHandler);
         } catch {
           // best effort
         }
-        logger.info('Server closed');
+        logger.info("Server closed");
         process.exit(0);
       });
 
       // If server.close() doesn't finish within 10s, force exit
       setTimeout(() => {
-        logger.warn('Forced exit after timeout');
+        logger.warn("Forced exit after timeout");
         process.exit(1);
       }, 10_000).unref();
     }
 
-    process.on('SIGINT', () => shutdown('SIGINT'));
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on("SIGINT", () => shutdown("SIGINT"));
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
   } catch (err) {
-    logger.error('Failed to load modules or database:', err);
+    logger.error("Failed to load modules or database:", err);
   }
 })();
 

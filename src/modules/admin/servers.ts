@@ -76,7 +76,7 @@ const adminModule: Module = {
               owner: true,
             },
           });
-          const settings = await await getSettings();
+          const settings = await getSettings();
 
           res.render('admin/servers/servers', { user, req, settings, servers });
         } catch (error: unknown) {
@@ -122,7 +122,7 @@ const adminModule: Module = {
           const users = await prisma.users.findMany();
           const nodes = await prisma.node.findMany();
           const images = await prisma.images.findMany();
-          const settings = await await getSettings();
+          const settings = await getSettings();
           const mounts = await prisma.mount.findMany();
           const serverMounts = await prisma.serverMount.findMany({
             where: { serverId: server.UUID },
@@ -370,7 +370,7 @@ const adminModule: Module = {
           const users = await prisma.users.findMany();
           const nodes = await prisma.node.findMany();
           const images = await prisma.images.findMany();
-          const settings = await await getSettings();
+          const settings = await getSettings();
 
           res.render('admin/servers/create', {
             user,
