@@ -26,6 +26,15 @@
 
     <div id="two-factor-verify-status"></div>
 
+    <div id="passkeySection" class="mb-4" style="display:none">
+      <button type="button" id="passkeyBtn" class="auth-submit w-full" style="display:flex;justify-content:center;gap:8px">
+        <%- icon('key', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <span class="btn-label">Sign in with passkey</span>
+        <span class="spinner"></span>
+      </button>
+      <p class="text-sm text-center mt-3" style="color:var(--theme-text-muted)">— or use a different method —</p>
+    </div>
+
     <form
       id="verifyForm"
       hx-post="/2fa"
@@ -106,6 +115,66 @@
     tokenInput.focus();
   });
 })();
+</script>
+
+<script type="module" nonce="<%- nonce %>">
+  import { startAuthentication } from '/vendor/@simplewebauthn/browser/esm/index.js';
+
+  (async function () {
+    var section = document.getElementById('passkeySection');
+    var btn = document.getElementById('passkeyBtn');
+    var statusEl = document.getElementById('two-factor-verify-status');
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    try {
+      var checkRes = await fetch('/api/v2/passkey/auth/options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken }
+      });
+      if (checkRes.ok) {
+        section.style.display = '';
+      }
+    } catch (e) {
+      // passkey not available for this user, leave hidden
+    }
+
+    btn.addEventListener('click', async function () {
+      btn.disabled = true;
+      btn.querySelector('.btn-label').textContent = 'Waiting for passkey…';
+      statusEl.innerHTML = '';
+
+      try {
+        var optionsRes = await fetch('/api/v2/passkey/auth/options', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken }
+        });
+        if (!optionsRes.ok) {
+          var errData = await optionsRes.json().catch(function () { return {}; });
+          throw new Error(errData.error || 'Failed to get passkey options');
+        }
+        var options = await optionsRes.json();
+
+        var credential = await startAuthentication({ optionsJSON: options });
+
+        var verifyRes = await fetch('/api/v2/passkey/auth/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
+          body: JSON.stringify(credential)
+        });
+        var verifyData = await verifyRes.json();
+        if (verifyRes.ok && verifyData.redirect) {
+          window.location.href = verifyData.redirect;
+        } else {
+          throw new Error(verifyData.error || 'Passkey verification failed');
+        }
+      } catch (err) {
+        statusEl.innerHTML = '<div class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)"><p class="text-sm font-medium" style="color:var(--theme-danger)">' + (err.message || 'Passkey sign-in failed') + '</p></div>';
+      } finally {
+        btn.disabled = false;
+        btn.querySelector('.btn-label').textContent = 'Sign in with passkey';
+      }
+    });
+  })();
 </script>
 
 <%- include('../components/footer') %>

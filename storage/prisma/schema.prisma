@@ -30,6 +30,7 @@ role          String            @default("user")
   totpSecret        String?
   totpEnabled       Boolean   @default(false)
   totpRecoveryCodes String?   @db.Text
+  passkeyEnabled    Boolean   @default(false)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -40,6 +41,7 @@ role          String            @default("user")
   subUserAccess  SubUser[]
   passwordResets PasswordReset[]
   activityLogs   ActivityLog[]
+  passkeys       WebAuthnCredential[]
   preferredNode  Node?           @relation("UserPreferredNode", fields: [preferredNodeId], references: [id], onDelete: SetNull)
 }
 
@@ -432,4 +434,18 @@ model ActivityLog {
   @@index([actorId])
   @@index([serverId])
   @@index([createdAt])
+}
+
+model WebAuthnCredential {
+  id           String   @id @default(uuid())
+  credentialId String   @unique @db.VarChar(1024)
+  publicKey    String   @db.Text
+  counter      BigInt   @default(0)
+  transports   String?  @db.Text
+  deviceName   String?
+  userId       Int
+  createdAt    DateTime @default(now())
+  user         Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

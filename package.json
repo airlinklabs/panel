@@ -37,6 +37,8 @@
     "@formkit/auto-animate": "^0.9.0",
     "@prisma/adapter-mariadb": "7.9.1",
     "@prisma/client": "^7.9.1",
+    "@simplewebauthn/browser": "^13.3.0",
+    "@simplewebauthn/server": "^13.3.3",
     "@tanstack/query-core": "^5.101.4",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/addon-web-links": "^0.11.0",

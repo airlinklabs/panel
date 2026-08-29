@@ -71,6 +71,7 @@ export type UsersMinAggregateOutputType = {
   totpSecret: string | null
   totpEnabled: boolean | null
   totpRecoveryCodes: string | null
+  passkeyEnabled: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -98,6 +99,7 @@ export type UsersMaxAggregateOutputType = {
   totpSecret: string | null
   totpEnabled: boolean | null
   totpRecoveryCodes: string | null
+  passkeyEnabled: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -125,6 +127,7 @@ export type UsersCountAggregateOutputType = {
   totpSecret: number
   totpEnabled: number
   totpRecoveryCodes: number
+  passkeyEnabled: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -176,6 +179,7 @@ export type UsersMinAggregateInputType = {
   totpSecret?: true
   totpEnabled?: true
   totpRecoveryCodes?: true
+  passkeyEnabled?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -203,6 +207,7 @@ export type UsersMaxAggregateInputType = {
   totpSecret?: true
   totpEnabled?: true
   totpRecoveryCodes?: true
+  passkeyEnabled?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -230,6 +235,7 @@ export type UsersCountAggregateInputType = {
   totpSecret?: true
   totpEnabled?: true
   totpRecoveryCodes?: true
+  passkeyEnabled?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -344,6 +350,7 @@ export type UsersGroupByOutputType = {
   totpSecret: string | null
   totpEnabled: boolean
   totpRecoveryCodes: string | null
+  passkeyEnabled: boolean
   createdAt: Date
   updatedAt: Date
   _count: UsersCountAggregateOutputType | null
@@ -394,6 +401,7 @@ export type UsersWhereInput = {
   totpSecret?: Prisma.StringNullableFilter<"Users"> | string | null
   totpEnabled?: Prisma.BoolFilter<"Users"> | boolean
   totpRecoveryCodes?: Prisma.StringNullableFilter<"Users"> | string | null
+  passkeyEnabled?: Prisma.BoolFilter<"Users"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   servers?: Prisma.ServerListRelationFilter
@@ -403,6 +411,7 @@ export type UsersWhereInput = {
   subUserAccess?: Prisma.SubUserListRelationFilter
   passwordResets?: Prisma.PasswordResetListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
+  passkeys?: Prisma.WebAuthnCredentialListRelationFilter
   preferredNode?: Prisma.XOR<Prisma.NodeNullableScalarRelationFilter, Prisma.NodeWhereInput> | null
 }
 
@@ -429,6 +438,7 @@ export type UsersOrderByWithRelationInput = {
   totpSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   totpEnabled?: Prisma.SortOrder
   totpRecoveryCodes?: Prisma.SortOrderInput | Prisma.SortOrder
+  passkeyEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   servers?: Prisma.ServerOrderByRelationAggregateInput
@@ -438,6 +448,7 @@ export type UsersOrderByWithRelationInput = {
   subUserAccess?: Prisma.SubUserOrderByRelationAggregateInput
   passwordResets?: Prisma.PasswordResetOrderByRelationAggregateInput
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
+  passkeys?: Prisma.WebAuthnCredentialOrderByRelationAggregateInput
   preferredNode?: Prisma.NodeOrderByWithRelationInput
   _relevance?: Prisma.UsersOrderByRelevanceInput
 }
@@ -468,6 +479,7 @@ export type UsersWhereUniqueInput = Prisma.AtLeast<{
   totpSecret?: Prisma.StringNullableFilter<"Users"> | string | null
   totpEnabled?: Prisma.BoolFilter<"Users"> | boolean
   totpRecoveryCodes?: Prisma.StringNullableFilter<"Users"> | string | null
+  passkeyEnabled?: Prisma.BoolFilter<"Users"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   servers?: Prisma.ServerListRelationFilter
@@ -477,6 +489,7 @@ export type UsersWhereUniqueInput = Prisma.AtLeast<{
   subUserAccess?: Prisma.SubUserListRelationFilter
   passwordResets?: Prisma.PasswordResetListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
+  passkeys?: Prisma.WebAuthnCredentialListRelationFilter
   preferredNode?: Prisma.XOR<Prisma.NodeNullableScalarRelationFilter, Prisma.NodeWhereInput> | null
 }, "id" | "email" | "username">
 
@@ -503,6 +516,7 @@ export type UsersOrderByWithAggregationInput = {
   totpSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   totpEnabled?: Prisma.SortOrder
   totpRecoveryCodes?: Prisma.SortOrderInput | Prisma.SortOrder
+  passkeyEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UsersCountOrderByAggregateInput
@@ -538,6 +552,7 @@ export type UsersScalarWhereWithAggregatesInput = {
   totpSecret?: Prisma.StringNullableWithAggregatesFilter<"Users"> | string | null
   totpEnabled?: Prisma.BoolWithAggregatesFilter<"Users"> | boolean
   totpRecoveryCodes?: Prisma.StringNullableWithAggregatesFilter<"Users"> | string | null
+  passkeyEnabled?: Prisma.BoolWithAggregatesFilter<"Users"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Users"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Users"> | Date | string
 }
@@ -563,6 +578,7 @@ export type UsersCreateInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -572,6 +588,7 @@ export type UsersCreateInput = {
   subUserAccess?: Prisma.SubUserCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   preferredNode?: Prisma.NodeCreateNestedOneWithoutPreferredUsersInput
 }
 
@@ -598,6 +615,7 @@ export type UsersUncheckedCreateInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -607,6 +625,7 @@ export type UsersUncheckedCreateInput = {
   subUserAccess?: Prisma.SubUserUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersUpdateInput = {
@@ -630,6 +649,7 @@ export type UsersUpdateInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -639,6 +659,7 @@ export type UsersUpdateInput = {
   subUserAccess?: Prisma.SubUserUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   preferredNode?: Prisma.NodeUpdateOneWithoutPreferredUsersNestedInput
 }
 
@@ -665,6 +686,7 @@ export type UsersUncheckedUpdateInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -674,6 +696,7 @@ export type UsersUncheckedUpdateInput = {
   subUserAccess?: Prisma.SubUserUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateManyInput = {
@@ -699,6 +722,7 @@ export type UsersCreateManyInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -724,6 +748,7 @@ export type UsersUpdateManyMutationInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -751,6 +776,7 @@ export type UsersUncheckedUpdateManyInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -784,6 +810,7 @@ export type UsersCountOrderByAggregateInput = {
   totpSecret?: Prisma.SortOrder
   totpEnabled?: Prisma.SortOrder
   totpRecoveryCodes?: Prisma.SortOrder
+  passkeyEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -822,6 +849,7 @@ export type UsersMaxOrderByAggregateInput = {
   totpSecret?: Prisma.SortOrder
   totpEnabled?: Prisma.SortOrder
   totpRecoveryCodes?: Prisma.SortOrder
+  passkeyEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -849,6 +877,7 @@ export type UsersMinOrderByAggregateInput = {
   totpSecret?: Prisma.SortOrder
   totpEnabled?: Prisma.SortOrder
   totpRecoveryCodes?: Prisma.SortOrder
+  passkeyEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1064,6 +1093,20 @@ export type UsersUpdateOneWithoutActivityLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutActivityLogsInput, Prisma.UsersUpdateWithoutActivityLogsInput>, Prisma.UsersUncheckedUpdateWithoutActivityLogsInput>
 }
 
+export type UsersCreateNestedOneWithoutPasskeysInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutPasskeysInput, Prisma.UsersUncheckedCreateWithoutPasskeysInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutPasskeysInput
+  connect?: Prisma.UsersWhereUniqueInput
+}
+
+export type UsersUpdateOneRequiredWithoutPasskeysNestedInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutPasskeysInput, Prisma.UsersUncheckedCreateWithoutPasskeysInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutPasskeysInput
+  upsert?: Prisma.UsersUpsertWithoutPasskeysInput
+  connect?: Prisma.UsersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutPasskeysInput, Prisma.UsersUpdateWithoutPasskeysInput>, Prisma.UsersUncheckedUpdateWithoutPasskeysInput>
+}
+
 export type UsersCreateWithoutPasswordResetsInput = {
   email: string
   username?: string | null
@@ -1085,6 +1128,7 @@ export type UsersCreateWithoutPasswordResetsInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1093,6 +1137,7 @@ export type UsersCreateWithoutPasswordResetsInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   subUserAccess?: Prisma.SubUserCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   preferredNode?: Prisma.NodeCreateNestedOneWithoutPreferredUsersInput
 }
 
@@ -1119,6 +1164,7 @@ export type UsersUncheckedCreateWithoutPasswordResetsInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1127,6 +1173,7 @@ export type UsersUncheckedCreateWithoutPasswordResetsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   subUserAccess?: Prisma.SubUserUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutPasswordResetsInput = {
@@ -1166,6 +1213,7 @@ export type UsersUpdateWithoutPasswordResetsInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1174,6 +1222,7 @@ export type UsersUpdateWithoutPasswordResetsInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   subUserAccess?: Prisma.SubUserUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   preferredNode?: Prisma.NodeUpdateOneWithoutPreferredUsersNestedInput
 }
 
@@ -1200,6 +1249,7 @@ export type UsersUncheckedUpdateWithoutPasswordResetsInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1208,6 +1258,7 @@ export type UsersUncheckedUpdateWithoutPasswordResetsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   subUserAccess?: Prisma.SubUserUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateWithoutServersInput = {
@@ -1231,6 +1282,7 @@ export type UsersCreateWithoutServersInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
@@ -1239,6 +1291,7 @@ export type UsersCreateWithoutServersInput = {
   subUserAccess?: Prisma.SubUserCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   preferredNode?: Prisma.NodeCreateNestedOneWithoutPreferredUsersInput
 }
 
@@ -1265,6 +1318,7 @@ export type UsersUncheckedCreateWithoutServersInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
@@ -1273,6 +1327,7 @@ export type UsersUncheckedCreateWithoutServersInput = {
   subUserAccess?: Prisma.SubUserUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutServersInput = {
@@ -1312,6 +1367,7 @@ export type UsersUpdateWithoutServersInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
@@ -1320,6 +1376,7 @@ export type UsersUpdateWithoutServersInput = {
   subUserAccess?: Prisma.SubUserUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   preferredNode?: Prisma.NodeUpdateOneWithoutPreferredUsersNestedInput
 }
 
@@ -1346,6 +1403,7 @@ export type UsersUncheckedUpdateWithoutServersInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1354,6 +1412,7 @@ export type UsersUncheckedUpdateWithoutServersInput = {
   subUserAccess?: Prisma.SubUserUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateWithoutPreferredNodeInput = {
@@ -1377,6 +1436,7 @@ export type UsersCreateWithoutPreferredNodeInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1386,6 +1446,7 @@ export type UsersCreateWithoutPreferredNodeInput = {
   subUserAccess?: Prisma.SubUserCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
 }
 
 export type UsersUncheckedCreateWithoutPreferredNodeInput = {
@@ -1410,6 +1471,7 @@ export type UsersUncheckedCreateWithoutPreferredNodeInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1419,6 +1481,7 @@ export type UsersUncheckedCreateWithoutPreferredNodeInput = {
   subUserAccess?: Prisma.SubUserUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutPreferredNodeInput = {
@@ -1473,6 +1536,7 @@ export type UsersScalarWhereInput = {
   totpSecret?: Prisma.StringNullableFilter<"Users"> | string | null
   totpEnabled?: Prisma.BoolFilter<"Users"> | boolean
   totpRecoveryCodes?: Prisma.StringNullableFilter<"Users"> | string | null
+  passkeyEnabled?: Prisma.BoolFilter<"Users"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Users"> | Date | string
 }
@@ -1498,6 +1562,7 @@ export type UsersCreateWithoutFoldersInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1506,6 +1571,7 @@ export type UsersCreateWithoutFoldersInput = {
   subUserAccess?: Prisma.SubUserCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   preferredNode?: Prisma.NodeCreateNestedOneWithoutPreferredUsersInput
 }
 
@@ -1532,6 +1598,7 @@ export type UsersUncheckedCreateWithoutFoldersInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1540,6 +1607,7 @@ export type UsersUncheckedCreateWithoutFoldersInput = {
   subUserAccess?: Prisma.SubUserUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutFoldersInput = {
@@ -1579,6 +1647,7 @@ export type UsersUpdateWithoutFoldersInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1587,6 +1656,7 @@ export type UsersUpdateWithoutFoldersInput = {
   subUserAccess?: Prisma.SubUserUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   preferredNode?: Prisma.NodeUpdateOneWithoutPreferredUsersNestedInput
 }
 
@@ -1613,6 +1683,7 @@ export type UsersUncheckedUpdateWithoutFoldersInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1621,6 +1692,7 @@ export type UsersUncheckedUpdateWithoutFoldersInput = {
   subUserAccess?: Prisma.SubUserUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateWithoutApiKeysInput = {
@@ -1644,6 +1716,7 @@ export type UsersCreateWithoutApiKeysInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1652,6 +1725,7 @@ export type UsersCreateWithoutApiKeysInput = {
   subUserAccess?: Prisma.SubUserCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   preferredNode?: Prisma.NodeCreateNestedOneWithoutPreferredUsersInput
 }
 
@@ -1678,6 +1752,7 @@ export type UsersUncheckedCreateWithoutApiKeysInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1686,6 +1761,7 @@ export type UsersUncheckedCreateWithoutApiKeysInput = {
   subUserAccess?: Prisma.SubUserUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutApiKeysInput = {
@@ -1725,6 +1801,7 @@ export type UsersUpdateWithoutApiKeysInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1733,6 +1810,7 @@ export type UsersUpdateWithoutApiKeysInput = {
   subUserAccess?: Prisma.SubUserUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   preferredNode?: Prisma.NodeUpdateOneWithoutPreferredUsersNestedInput
 }
 
@@ -1759,6 +1837,7 @@ export type UsersUncheckedUpdateWithoutApiKeysInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1767,6 +1846,7 @@ export type UsersUncheckedUpdateWithoutApiKeysInput = {
   subUserAccess?: Prisma.SubUserUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateWithoutLoginHistoryInput = {
@@ -1790,6 +1870,7 @@ export type UsersCreateWithoutLoginHistoryInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1798,6 +1879,7 @@ export type UsersCreateWithoutLoginHistoryInput = {
   subUserAccess?: Prisma.SubUserCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   preferredNode?: Prisma.NodeCreateNestedOneWithoutPreferredUsersInput
 }
 
@@ -1824,6 +1906,7 @@ export type UsersUncheckedCreateWithoutLoginHistoryInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1832,6 +1915,7 @@ export type UsersUncheckedCreateWithoutLoginHistoryInput = {
   subUserAccess?: Prisma.SubUserUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutLoginHistoryInput = {
@@ -1871,6 +1955,7 @@ export type UsersUpdateWithoutLoginHistoryInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1879,6 +1964,7 @@ export type UsersUpdateWithoutLoginHistoryInput = {
   subUserAccess?: Prisma.SubUserUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   preferredNode?: Prisma.NodeUpdateOneWithoutPreferredUsersNestedInput
 }
 
@@ -1905,6 +1991,7 @@ export type UsersUncheckedUpdateWithoutLoginHistoryInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1913,6 +2000,7 @@ export type UsersUncheckedUpdateWithoutLoginHistoryInput = {
   subUserAccess?: Prisma.SubUserUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateWithoutSubUserAccessInput = {
@@ -1936,6 +2024,7 @@ export type UsersCreateWithoutSubUserAccessInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1944,6 +2033,7 @@ export type UsersCreateWithoutSubUserAccessInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   preferredNode?: Prisma.NodeCreateNestedOneWithoutPreferredUsersInput
 }
 
@@ -1970,6 +2060,7 @@ export type UsersUncheckedCreateWithoutSubUserAccessInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1978,6 +2069,7 @@ export type UsersUncheckedCreateWithoutSubUserAccessInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutActorInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutSubUserAccessInput = {
@@ -2017,6 +2109,7 @@ export type UsersUpdateWithoutSubUserAccessInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2025,6 +2118,7 @@ export type UsersUpdateWithoutSubUserAccessInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   preferredNode?: Prisma.NodeUpdateOneWithoutPreferredUsersNestedInput
 }
 
@@ -2051,6 +2145,7 @@ export type UsersUncheckedUpdateWithoutSubUserAccessInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2059,6 +2154,7 @@ export type UsersUncheckedUpdateWithoutSubUserAccessInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateWithoutActivityLogsInput = {
@@ -2082,6 +2178,7 @@ export type UsersCreateWithoutActivityLogsInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -2090,6 +2187,7 @@ export type UsersCreateWithoutActivityLogsInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   subUserAccess?: Prisma.SubUserCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   preferredNode?: Prisma.NodeCreateNestedOneWithoutPreferredUsersInput
 }
 
@@ -2116,6 +2214,7 @@ export type UsersUncheckedCreateWithoutActivityLogsInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -2124,6 +2223,7 @@ export type UsersUncheckedCreateWithoutActivityLogsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   subUserAccess?: Prisma.SubUserUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutActivityLogsInput = {
@@ -2163,6 +2263,7 @@ export type UsersUpdateWithoutActivityLogsInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2171,6 +2272,7 @@ export type UsersUpdateWithoutActivityLogsInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   subUserAccess?: Prisma.SubUserUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   preferredNode?: Prisma.NodeUpdateOneWithoutPreferredUsersNestedInput
 }
 
@@ -2197,6 +2299,7 @@ export type UsersUncheckedUpdateWithoutActivityLogsInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2205,6 +2308,161 @@ export type UsersUncheckedUpdateWithoutActivityLogsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   subUserAccess?: Prisma.SubUserUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UsersCreateWithoutPasskeysInput = {
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  maxDatabases?: number | null
+  role?: string
+  onboardingCompleted?: boolean
+  onboardingSkipped?: boolean
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  subUserAccess?: Prisma.SubUserCreateNestedManyWithoutUserInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutActorInput
+  preferredNode?: Prisma.NodeCreateNestedOneWithoutPreferredUsersInput
+}
+
+export type UsersUncheckedCreateWithoutPasskeysInput = {
+  id?: number
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  maxDatabases?: number | null
+  role?: string
+  onboardingCompleted?: boolean
+  onboardingSkipped?: boolean
+  preferredNodeId?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  subUserAccess?: Prisma.SubUserUncheckedCreateNestedManyWithoutUserInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UsersCreateOrConnectWithoutPasskeysInput = {
+  where: Prisma.UsersWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsersCreateWithoutPasskeysInput, Prisma.UsersUncheckedCreateWithoutPasskeysInput>
+}
+
+export type UsersUpsertWithoutPasskeysInput = {
+  update: Prisma.XOR<Prisma.UsersUpdateWithoutPasskeysInput, Prisma.UsersUncheckedUpdateWithoutPasskeysInput>
+  create: Prisma.XOR<Prisma.UsersCreateWithoutPasskeysInput, Prisma.UsersUncheckedCreateWithoutPasskeysInput>
+  where?: Prisma.UsersWhereInput
+}
+
+export type UsersUpdateToOneWithWhereWithoutPasskeysInput = {
+  where?: Prisma.UsersWhereInput
+  data: Prisma.XOR<Prisma.UsersUpdateWithoutPasskeysInput, Prisma.UsersUncheckedUpdateWithoutPasskeysInput>
+}
+
+export type UsersUpdateWithoutPasskeysInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  subUserAccess?: Prisma.SubUserUpdateManyWithoutUserNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutActorNestedInput
+  preferredNode?: Prisma.NodeUpdateOneWithoutPreferredUsersNestedInput
+}
+
+export type UsersUncheckedUpdateWithoutPasskeysInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  subUserAccess?: Prisma.SubUserUncheckedUpdateManyWithoutUserNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UsersCreateManyPreferredNodeInput = {
@@ -2229,6 +2487,7 @@ export type UsersCreateManyPreferredNodeInput = {
   totpSecret?: string | null
   totpEnabled?: boolean
   totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2254,6 +2513,7 @@ export type UsersUpdateWithoutPreferredNodeInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2263,6 +2523,7 @@ export type UsersUpdateWithoutPreferredNodeInput = {
   subUserAccess?: Prisma.SubUserUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
 }
 
 export type UsersUncheckedUpdateWithoutPreferredNodeInput = {
@@ -2287,6 +2548,7 @@ export type UsersUncheckedUpdateWithoutPreferredNodeInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2296,6 +2558,7 @@ export type UsersUncheckedUpdateWithoutPreferredNodeInput = {
   subUserAccess?: Prisma.SubUserUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersUncheckedUpdateManyWithoutPreferredNodeInput = {
@@ -2320,6 +2583,7 @@ export type UsersUncheckedUpdateManyWithoutPreferredNodeInput = {
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2337,6 +2601,7 @@ export type UsersCountOutputType = {
   subUserAccess: number
   passwordResets: number
   activityLogs: number
+  passkeys: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2347,6 +2612,7 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   subUserAccess?: boolean | UsersCountOutputTypeCountSubUserAccessArgs
   passwordResets?: boolean | UsersCountOutputTypeCountPasswordResetsArgs
   activityLogs?: boolean | UsersCountOutputTypeCountActivityLogsArgs
+  passkeys?: boolean | UsersCountOutputTypeCountPasskeysArgs
 }
 
 /**
@@ -2408,6 +2674,13 @@ export type UsersCountOutputTypeCountActivityLogsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.ActivityLogWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountPasskeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WebAuthnCredentialWhereInput
+}
+
 
 export type UsersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2432,6 +2705,7 @@ export type UsersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   totpSecret?: boolean
   totpEnabled?: boolean
   totpRecoveryCodes?: boolean
+  passkeyEnabled?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   servers?: boolean | Prisma.Users$serversArgs<ExtArgs>
@@ -2441,6 +2715,7 @@ export type UsersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   subUserAccess?: boolean | Prisma.Users$subUserAccessArgs<ExtArgs>
   passwordResets?: boolean | Prisma.Users$passwordResetsArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Users$activityLogsArgs<ExtArgs>
+  passkeys?: boolean | Prisma.Users$passkeysArgs<ExtArgs>
   preferredNode?: boolean | Prisma.Users$preferredNodeArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
@@ -2470,11 +2745,12 @@ export type UsersSelectScalar = {
   totpSecret?: boolean
   totpEnabled?: boolean
   totpRecoveryCodes?: boolean
+  passkeyEnabled?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UsersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "isAdmin" | "description" | "avatar" | "permissions" | "serverLimit" | "maxMemory" | "maxCpu" | "maxStorage" | "maxDatabases" | "role" | "onboardingCompleted" | "onboardingSkipped" | "preferredNodeId" | "loginAttempts" | "lockedUntil" | "totpSecret" | "totpEnabled" | "totpRecoveryCodes" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
+export type UsersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "isAdmin" | "description" | "avatar" | "permissions" | "serverLimit" | "maxMemory" | "maxCpu" | "maxStorage" | "maxDatabases" | "role" | "onboardingCompleted" | "onboardingSkipped" | "preferredNodeId" | "loginAttempts" | "lockedUntil" | "totpSecret" | "totpEnabled" | "totpRecoveryCodes" | "passkeyEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
 export type UsersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   servers?: boolean | Prisma.Users$serversArgs<ExtArgs>
   folders?: boolean | Prisma.Users$foldersArgs<ExtArgs>
@@ -2483,6 +2759,7 @@ export type UsersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   subUserAccess?: boolean | Prisma.Users$subUserAccessArgs<ExtArgs>
   passwordResets?: boolean | Prisma.Users$passwordResetsArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Users$activityLogsArgs<ExtArgs>
+  passkeys?: boolean | Prisma.Users$passkeysArgs<ExtArgs>
   preferredNode?: boolean | Prisma.Users$preferredNodeArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -2497,6 +2774,7 @@ export type $UsersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     subUserAccess: Prisma.$SubUserPayload<ExtArgs>[]
     passwordResets: Prisma.$PasswordResetPayload<ExtArgs>[]
     activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
+    passkeys: Prisma.$WebAuthnCredentialPayload<ExtArgs>[]
     preferredNode: Prisma.$NodePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -2522,6 +2800,7 @@ export type $UsersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     totpSecret: string | null
     totpEnabled: boolean
     totpRecoveryCodes: string | null
+    passkeyEnabled: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["users"]>
@@ -2871,6 +3150,7 @@ export interface Prisma__UsersClient<T, Null = never, ExtArgs extends runtime.Ty
   subUserAccess<T extends Prisma.Users$subUserAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$subUserAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   passwordResets<T extends Prisma.Users$passwordResetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$passwordResetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityLogs<T extends Prisma.Users$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passkeys<T extends Prisma.Users$passkeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$passkeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebAuthnCredentialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   preferredNode<T extends Prisma.Users$preferredNodeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$preferredNodeArgs<ExtArgs>>): Prisma.Prisma__NodeClient<runtime.Types.Result.GetResult<Prisma.$NodePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2923,6 +3203,7 @@ export interface UsersFieldRefs {
   readonly totpSecret: Prisma.FieldRef<"Users", 'String'>
   readonly totpEnabled: Prisma.FieldRef<"Users", 'Boolean'>
   readonly totpRecoveryCodes: Prisma.FieldRef<"Users", 'String'>
+  readonly passkeyEnabled: Prisma.FieldRef<"Users", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Users", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Users", 'DateTime'>
 }
@@ -3438,6 +3719,30 @@ export type Users$activityLogsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.ActivityLogScalarFieldEnum | Prisma.ActivityLogScalarFieldEnum[]
+}
+
+/**
+ * Users.passkeys
+ */
+export type Users$passkeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WebAuthnCredential
+   */
+  select?: Prisma.WebAuthnCredentialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WebAuthnCredential
+   */
+  omit?: Prisma.WebAuthnCredentialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WebAuthnCredentialInclude<ExtArgs> | null
+  where?: Prisma.WebAuthnCredentialWhereInput
+  orderBy?: Prisma.WebAuthnCredentialOrderByWithRelationInput | Prisma.WebAuthnCredentialOrderByWithRelationInput[]
+  cursor?: Prisma.WebAuthnCredentialWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WebAuthnCredentialScalarFieldEnum | Prisma.WebAuthnCredentialScalarFieldEnum[]
 }
 
 /**

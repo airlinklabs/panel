@@ -180,6 +180,10 @@
                 <button id="disable2faBtn" type="button" class="al-btn-secondary text-sm"><%- icon('shield-off', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.disable2FA || 'Disable 2FA' %></button>
               </div>
               <% } %>
+              <p class="text-xs mt-2" style="color:var(--theme-text-muted)">
+                <span id="passkey-count-info"></span>
+                <a href="/account/2fa/setup" style="color:var(--theme-text-link)" class="hover:underline">Manage passkeys</a>
+              </p>
               </div>
             </div>
 
@@ -567,6 +571,20 @@
     }
     btn.disabled = false;
   });
+
+  // Load passkey count
+  (async function () {
+    try {
+      const res = await fetch('/api/v2/account/passkey/list');
+      if (!res.ok) return;
+      const data = await res.json();
+      const passkeys = data.passkeys || [];
+      const el = document.getElementById('passkey-count-info');
+      if (el && passkeys.length > 0) {
+        el.textContent = passkeys.length + ' passkey' + (passkeys.length !== 1 ? 's' : '') + ' registered · ';
+      }
+    } catch (e) {}
+  })();
 
   function openCropPopup(dataUrl, csrf) {
     const overlay = document.createElement('div');

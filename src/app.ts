@@ -379,13 +379,23 @@ app.use(errorPageHandler);
       conn.on("close", () => connections.delete(conn));
     });
 
-    function shutdown(signal: string) {
+    async function shutdown(signal: string) {
       if (shuttingDown) {
         return;
       }
       shuttingDown = true;
 
-      // Destroy all keep-alive sockets immediately
+      const t0 = Date.now();
+      const elapsed = () => `${Date.now() - t0}ms`;
+
+      logger.info(`${signal} received — starting graceful shutdown`);
+
+      // 1. Stop accepting new connections
+      server.close();
+      logger.info(`HTTP server stopped accepting connections ${elapsed()}`);
+
+      // 2. Destroy existing keep-alive connections
+      const connCount = connections.size;
       for (const conn of connections) {
         try {
           conn.destroy();
@@ -394,20 +404,28 @@ app.use(errorPageHandler);
         }
       }
       connections.clear();
+      logger.info(`Destroyed ${connCount} open connection(s) ${elapsed()}`);
 
-      // Stop the HTTP server
-      server.close();
+      // 3. Disconnect Prisma
+      try {
+        await Promise.race([
+          prisma.$disconnect(),
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error("prisma disconnect timeout")),
+              5_000,
+            ),
+          ),
+        ]);
+        logger.info(`Database disconnected ${elapsed()}`);
+      } catch (err) {
+        logger.warn(
+          `Database disconnect failed: ${err instanceof Error ? err.message : err} ${elapsed()}`,
+        );
+      }
 
-      logger.info(`Shutting down (${signal})...`);
-
-      // Disconnect DB then exit — no waiting for server.close callback
-      prisma
-        .$disconnect()
-        .catch(() => {})
-        .finally(() => process.exit(0));
-
-      // Hard kill if prisma hangs
-      setTimeout(() => process.exit(0), 2_000).unref();
+      logger.info(`Shutdown complete ${elapsed()}`);
+      process.exit(0);
     }
 
     process.on("SIGINT", () => shutdown("SIGINT"));

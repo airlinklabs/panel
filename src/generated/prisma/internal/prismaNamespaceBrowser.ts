@@ -75,7 +75,8 @@ export const ModelName = {
   Backup: 'Backup',
   SftpCredential: 'SftpCredential',
   SubUser: 'SubUser',
-  ActivityLog: 'ActivityLog'
+  ActivityLog: 'ActivityLog',
+  WebAuthnCredential: 'WebAuthnCredential'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -117,6 +118,7 @@ export const UsersScalarFieldEnum = {
   totpSecret: 'totpSecret',
   totpEnabled: 'totpEnabled',
   totpRecoveryCodes: 'totpRecoveryCodes',
+  passkeyEnabled: 'passkeyEnabled',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -514,6 +516,20 @@ export const ActivityLogScalarFieldEnum = {
 export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
 
 
+export const WebAuthnCredentialScalarFieldEnum = {
+  id: 'id',
+  credentialId: 'credentialId',
+  publicKey: 'publicKey',
+  counter: 'counter',
+  transports: 'transports',
+  deviceName: 'deviceName',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type WebAuthnCredentialScalarFieldEnum = (typeof WebAuthnCredentialScalarFieldEnum)[keyof typeof WebAuthnCredentialScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -789,4 +805,15 @@ export const ActivityLogOrderByRelevanceFieldEnum = {
 } as const
 
 export type ActivityLogOrderByRelevanceFieldEnum = (typeof ActivityLogOrderByRelevanceFieldEnum)[keyof typeof ActivityLogOrderByRelevanceFieldEnum]
+
+
+export const WebAuthnCredentialOrderByRelevanceFieldEnum = {
+  id: 'id',
+  credentialId: 'credentialId',
+  publicKey: 'publicKey',
+  transports: 'transports',
+  deviceName: 'deviceName'
+} as const
+
+export type WebAuthnCredentialOrderByRelevanceFieldEnum = (typeof WebAuthnCredentialOrderByRelevanceFieldEnum)[keyof typeof WebAuthnCredentialOrderByRelevanceFieldEnum]
 

@@ -82,9 +82,135 @@
             <p class="mt-1.5">Supported apps: Google Authenticator, Authy, 1Password, Bitwarden and other TOTP-compatible apps.</p>
           </div>
         </div>
+
+        <!-- Passkey registration -->
+        <div id="passkey-setup-card" class="al-card p-6 sm:p-8 max-w-xl mx-auto mt-6">
+          <h3 class="text-sm font-semibold mb-3" style="color:var(--theme-text-strong)">Passkey (Face ID / Fingerprint / Security Key)</h3>
+          <p class="text-sm mb-4" style="color:var(--theme-text-muted)">Register a passkey for passwordless 2FA verification.</p>
+
+          <div id="passkey-setup-status"></div>
+
+          <div class="flex gap-2 mb-4">
+            <input id="passkeyDeviceName" type="text" placeholder="Device name (optional)" class="al-input flex-1">
+            <button type="button" id="registerPasskeyBtn" class="al-btn-primary">
+              <%- icon('key', { class: 'size-4', strokeWidth: 1.5 }) %>Register passkey
+            </button>
+          </div>
+
+          <div id="passkey-list" class="mt-4" style="display:none">
+            <h4 class="text-xs font-medium mb-2" style="color:var(--theme-text-muted)">Registered passkeys</h4>
+            <div id="passkey-items" class="space-y-2"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </main>
+
+<script type="module" nonce="<%- nonce %>">
+  import { startRegistration } from '/vendor/@simplewebauthn/browser/esm/index.js';
+
+  (async function () {
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    var statusEl = document.getElementById('passkey-setup-status');
+    var regBtn = document.getElementById('registerPasskeyBtn');
+    var listEl = document.getElementById('passkey-list');
+    var itemsEl = document.getElementById('passkey-items');
+    var nameInput = document.getElementById('passkeyDeviceName');
+
+    async function loadPasskeys() {
+      try {
+        var res = await fetch('/api/v2/account/passkey/list', {
+          headers: { 'csrf-token': csrfToken }
+        });
+        if (!res.ok) return;
+        var data = await res.json();
+        var passkeys = data.passkeys || [];
+        if (passkeys.length === 0) {
+          listEl.style.display = 'none';
+          return;
+        }
+        listEl.style.display = '';
+        itemsEl.innerHTML = '';
+        passkeys.forEach(function (pk) {
+          var row = document.createElement('div');
+          row.className = 'flex items-center justify-between rounded-lg px-3 py-2';
+          row.style.background = 'var(--theme-bg-secondary)';
+          row.innerHTML =
+            '<div class="min-w-0 flex-1">' +
+              '<p class="text-sm font-medium truncate" style="color:var(--theme-text-strong)">' + (pk.name || 'Unnamed passkey') + '</p>' +
+              '<p class="text-xs" style="color:var(--theme-text-muted)">Added ' + new Date(pk.createdAt).toLocaleDateString() + '</p>' +
+            '</div>' +
+            '<button type="button" class="al-btn-ghost text-xs px-2 py-1" data-delete-passkey="' + pk.id + '">' +
+              '<%- icon("trash-2", { class: "size-3.5" }) %>' +
+            '</button>';
+          itemsEl.appendChild(row);
+        });
+        itemsEl.querySelectorAll('[data-delete-passkey]').forEach(function (delBtn) {
+          delBtn.addEventListener('click', async function () {
+            if (!confirm('Delete this passkey?')) return;
+            try {
+              var r = await fetch('/api/v2/account/passkey/' + delBtn.dataset.deletePasskey, {
+                method: 'DELETE',
+                headers: { 'csrf-token': csrfToken }
+              });
+              if (r.ok) {
+                if (window.showToast) showToast('Passkey removed.', 'success');
+                loadPasskeys();
+              } else {
+                var e = await r.json().catch(function () { return {}; });
+                if (window.showToast) showToast(e.error || 'Failed to delete passkey.', 'error');
+              }
+            } catch (err) {
+              if (window.showToast) showToast('Something went wrong.', 'error');
+            }
+          });
+        });
+      } catch (err) {
+        // ignore
+      }
+    }
+
+    regBtn.addEventListener('click', async function () {
+      regBtn.disabled = true;
+      statusEl.innerHTML = '';
+
+      try {
+        var optRes = await fetch('/api/v2/account/passkey/register/options', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken }
+        });
+        if (!optRes.ok) {
+          var errData = await optRes.json().catch(function () { return {}; });
+          throw new Error(errData.error || 'Failed to get registration options');
+        }
+        var options = await optRes.json();
+
+        var credential = await startRegistration({ optionsJSON: options });
+
+        var deviceName = nameInput.value.trim() || '';
+        var verifyRes = await fetch('/api/v2/account/passkey/register/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
+          body: JSON.stringify({ credential: credential, deviceName: deviceName })
+        });
+        var verifyData = await verifyRes.json();
+        if (verifyRes.ok && verifyData.success) {
+          if (window.showToast) showToast('Passkey registered.', 'success');
+          nameInput.value = '';
+          loadPasskeys();
+        } else {
+          throw new Error(verifyData.error || 'Passkey registration failed');
+        }
+      } catch (err) {
+        statusEl.innerHTML = '<div class="rounded-xl px-4 py-3 mb-3" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)"><p class="text-sm font-medium" style="color:var(--theme-danger)">' + (err.message || 'Failed to register passkey') + '</p></div>';
+      } finally {
+        regBtn.disabled = false;
+      }
+    });
+
+    loadPasskeys();
+  })();
+</script>
 
 <%- include('../components/footer') %>

@@ -122,8 +122,8 @@ const authServiceModule: Module = {
           }
 
           // Two-factor authentication step: hold the login in a pending state
-          // until the user verifies their TOTP code on /2fa.
-          if (user.totpEnabled) {
+          // until the user verifies their TOTP code or passkey on /2fa.
+          if (user.totpEnabled || user.passkeyEnabled) {
             req.session.pendingUserId = user.id;
             res.redirect("/2fa");
             return;

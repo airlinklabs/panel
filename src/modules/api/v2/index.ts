@@ -29,6 +29,7 @@ import schedulesRouter from "./schedules";
 import subusersRouter from "./subusers";
 import startupRouter from "./startup";
 import accountRouter from "./account";
+import passkeyRouter from "./passkey";
 import systemRouter from "./system";
 import adminRouter from "./admin";
 
@@ -79,6 +80,14 @@ const v2Module: Module = {
     // Account endpoints: session auth only (browser-facing)
     // -----------------------------------------------------------------------
     v2.use("/account", isAuthenticated(), accountRouter);
+
+    // -----------------------------------------------------------------------
+    // Passkey endpoints: two sub-groups —
+    //   /api/v2/account/passkey/*  — authenticated (list, delete, register)
+    //   /api/v2/passkey/auth/*     — pending session (auth verify during login)
+    // -----------------------------------------------------------------------
+    v2.use("/account/passkey", isAuthenticated(), passkeyRouter);
+    v2.use("/passkey", passkeyRouter);
 
     // -----------------------------------------------------------------------
     // System endpoints: session auth
