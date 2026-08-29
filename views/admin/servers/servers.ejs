@@ -33,18 +33,18 @@
         <!-- Bulk toolbar -->
         <div id="bulkToolbarRow" class="no-anim" style="display:grid;grid-template-rows:0fr;transition:grid-template-rows 0.36s cubic-bezier(0.16,1,0.3,1)">
           <div style="min-height:0;overflow:hidden">
-            <div id="bulkToolbarContent" class="mb-4 pb-0.5" style="opacity:0;transition:opacity 0.28s ease">
-              <div class="al-card flex items-center gap-2 p-3">
-                <span class="selection-count text-sm font-medium mr-1" style="color:var(--theme-text);">0 selected</span>
-                <div class="h-4 w-px mx-1" style="background:var(--theme-border);"></div>
+            <div id="bulkToolbarContent" class="mb-3 pb-0.5" style="opacity:0;transition:opacity 0.28s ease">
+              <div class="al-card flex items-center gap-2 p-2.5">
+                <span class="selection-count text-[13px] font-medium mr-1" style="color:var(--theme-text);">0 selected</span>
+                <div class="h-3.5 w-px mx-1" style="background:var(--theme-border);"></div>
                 <button type="button" onclick="bulkRadarScan()"
-                  class="al-btn-secondary text-xs">
-                  <%- icon('radar', { size: 14, class: 'shrink-0' }) %>
+                  class="al-btn-secondary text-[11px]">
+                  <%- icon('radar', { size: 12, class: 'shrink-0' }) %>
                   Radar Scan
                 </button>
                 <button type="button" onclick="bulkDelete()"
-                  class="al-btn-danger text-xs ml-auto">
-                  <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
+                  class="al-btn-danger text-[11px] ml-auto">
+                  <%- icon('trash-2', { size: 12, class: 'shrink-0' }) %>
                   Delete
                 </button>
               </div>
@@ -55,17 +55,17 @@
         <!-- Floating pill — fixed below topbar when toolbar scrolls off screen -->
         <div id="floatingToolbar"
           style="position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:40;opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1)">
-          <div class="al-card flex items-center gap-2 p-3 shadow-xl">
-            <span class="selection-count text-sm font-medium mr-1" style="color:var(--theme-text);">0 selected</span>
-            <div class="h-4 w-px mx-1" style="background:var(--theme-border);"></div>
+          <div class="al-card flex items-center gap-2 p-2.5 shadow-xl">
+            <span class="selection-count text-[13px] font-medium mr-1" style="color:var(--theme-text);">0 selected</span>
+            <div class="h-3.5 w-px mx-1" style="background:var(--theme-border);"></div>
             <button type="button" onclick="bulkRadarScan()"
-              class="al-btn-secondary text-xs">
-              <%- icon('radar', { size: 14, class: 'shrink-0' }) %>
+              class="al-btn-secondary text-[11px]">
+              <%- icon('radar', { size: 12, class: 'shrink-0' }) %>
               Radar Scan
             </button>
             <button type="button" onclick="bulkDelete()"
-              class="al-btn-danger text-xs ml-auto">
-              <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
+              class="al-btn-danger text-[11px] ml-auto">
+              <%- icon('trash-2', { size: 12, class: 'shrink-0' }) %>
               Delete
             </button>
           </div>
@@ -110,7 +110,7 @@
                     value="<%= server.id %>" data-uuid="<%= server.UUID %>" data-edit-id="<%= server.id %>" data-name="<%= server.name %>">
                 </td>
                 <td class="al-table-td">
-                  <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-2">
                     <span class="shrink-0">
                       <% if (server.Suspended) { %>
                         <span class="al-dot-offline"></span>
@@ -119,26 +119,26 @@
                       <% } %>
                     </span>
                     <div>
-                      <div class="font-medium truncate max-w-[200px]" style="color:var(--theme-text-strong);"><%= server.name %></div>
-                      <div class="text-xs font-mono mt-0.5" style="color:var(--theme-text-muted);"><%= server.UUID %></div>
+                      <div class="font-medium truncate max-w-[200px] text-[13px]" style="color:var(--theme-text-strong);"><%= server.name %></div>
+                      <div class="text-[10px] font-mono mt-0.5" style="color:var(--theme-text-muted);"><%= server.UUID %></div>
                     </div>
                   </div>
                 </td>
                 <td class="al-table-td">
-                  <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-2 group" onclick="event.stopPropagation()">
-                    <img loading="lazy" decoding="async" class="h-6 w-6 rounded-md object-cover shrink-0"
+                  <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-1.5 group" onclick="event.stopPropagation()">
+                    <img loading="lazy" decoding="async" class="h-5 w-5 rounded-md object-cover shrink-0"
                       src="<%= server.owner.avatar ? server.owner.avatar : '/avatar/' + encodeURIComponent(server.owner.username) %>" alt="<%= server.owner.username %>'s avatar">
-                    <span class="font-medium group-hover:underline truncate max-w-[120px]" style="color:var(--theme-text-strong);"><%= server.owner.username %></span>
+                    <span class="font-medium text-[13px] group-hover:underline truncate max-w-[120px]" style="color:var(--theme-text-strong);"><%= server.owner.username %></span>
                   </a>
                 </td>
                 <td class="al-table-td">
-                  <a href="/admin/node/<%= server.node.id %>/stats" class="font-medium hover:underline truncate max-w-[120px]" style="color:var(--theme-text-strong);" onclick="event.stopPropagation()"><%= server.node.name %></a>
+                  <a href="/admin/node/<%= server.node.id %>/stats" class="font-medium text-[13px] hover:underline truncate max-w-[120px]" style="color:var(--theme-text-strong);" onclick="event.stopPropagation()"><%= server.node.name %></a>
                 </td>
-                <td class="al-table-td">
+                <td class="al-table-td text-[13px]">
                   <%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.externalPort || String(p.Port || '').split(':')[0]).pop() %>
                 </td>
                 <td class="al-table-td">
-                  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                  <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
                     style="<%= server.Suspended ? 'background:var(--theme-warning-bg);color:var(--theme-warning)' : 'background:var(--theme-success-bg);color:var(--theme-success)' %>">
                     <%= server.Suspended ? 'Suspended' : 'Enabled' %>
                   </span>

@@ -21,23 +21,23 @@
 
       <div class="al-page-body">
 
-        <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div class="al-card">
-            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= req.translations.totalUsers %></h2>
-            <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="totalUsersCount"><%= users.length %></p>
+        <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <div class="al-card p-4">
+            <h2 class="text-[11px] font-medium uppercase tracking-wide mb-1.5" style="color:var(--theme-text-muted);"><%= req.translations.totalUsers %></h2>
+            <p class="text-xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="totalUsersCount"><%= users.length %></p>
             <% if (onlineUsers.size > 0) { %>
-              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineUsers || 'Online Users' %>: <%= onlineUsers.size %></p>
+              <p class="text-[11px] mt-1" style="color:var(--theme-text-muted);"><%= req.translations.onlineUsers || 'Online Users' %>: <%= onlineUsers.size %></p>
             <% } else { %>
-              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
+              <p class="text-[11px] mt-1" style="color:var(--theme-text-muted);"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
             <% } %>
           </div>
-          <div class="al-card">
-            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= req.translations.admins || 'Admins' %></h2>
-              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="adminUsersTotal"><%= users.filter(user => user.isAdmin).length %></p>
+          <div class="al-card p-4">
+            <h2 class="text-[11px] font-medium uppercase tracking-wide mb-1.5" style="color:var(--theme-text-muted);"><%= req.translations.admins || 'Admins' %></h2>
+              <p class="text-xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="adminUsersTotal"><%= users.filter(user => user.isAdmin).length %></p>
               <% if (onlineUsers.size > 0) { %>
-                <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineUsers || 'Online Admins' %>: <%= Array.from(onlineUsers).filter(username => users.some(user => user.username === username && user.isAdmin)).length %></p>
+                <p class="text-[11px] mt-1" style="color:var(--theme-text-muted);"><%= req.translations.onlineUsers || 'Online Admins' %>: <%= Array.from(onlineUsers).filter(username => users.some(user => user.username === username && user.isAdmin)).length %></p>
               <% } else { %>
-                <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
+                <p class="text-[11px] mt-1" style="color:var(--theme-text-muted);"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
               <% } %>
           </div>
         </div>
@@ -52,29 +52,29 @@
             iconName: 'users',
             title: req.translations.noUsersYet || 'No users yet',
             description: 'Create your first user to get started.',
-            action: '<button id="createButtonEmpty" type="button" class="al-btn-primary"><span class="inline-flex items-center gap-1.5">' + icon('plus', { class: 'w-4 h-4' }) + ' Create user</span></button>'
+            action: '<button id="createButtonEmpty" type="button" class="al-btn-primary"><span class="inline-flex items-center gap-1.5">' + icon('plus', { class: 'w-3.5 h-3.5' }) + ' Create user</span></button>'
           }) %>
         <% } else { %>
 
         <!-- Mobile card view -->
-        <div class="lg:hidden space-y-2 mb-6">
+        <div class="lg:hidden space-y-1.5 mb-5">
           <% users.forEach(function(user) { %>
-          <div class="al-card flex items-center gap-3" data-user-id="<%= user.id %>" data-admin="<%= user.isAdmin %>">
+          <div class="al-card flex items-center gap-2.5" data-user-id="<%= user.id %>" data-admin="<%= user.isAdmin %>">
             <div class="relative shrink-0">
-              <img loading="lazy" decoding="async" class="w-8 h-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
+              <img loading="lazy" decoding="async" class="w-7 h-7 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
               <% if (onlineUsers.has(user.username)) { %>
-                <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                  <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
+                <span class="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
+                  <span class="relative inline-flex rounded-full h-2 w-2" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
                 </span>
               <% } else { %>
-                <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                  <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
+                <span class="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
+                  <span class="relative inline-flex rounded-full h-2 w-2" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
                 </span>
               <% } %>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= user.username %></p>
-              <p class="text-xs truncate" style="color:var(--theme-text-muted);"><span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset"
+              <p class="text-[13px] font-medium truncate" style="color:var(--theme-text-strong);"><%= user.username %></p>
+              <p class="text-[11px] truncate" style="color:var(--theme-text-muted);"><span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset"
                 style="<%= user.isAdmin ? 'background:var(--theme-accent);color:var(--theme-accent-text)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>"><%= user.isAdmin ? (req.translations.admin || 'Admin') : (req.translations.user || 'User') %></span></p>
             </div>
             <div class="flex items-center gap-1">
@@ -109,42 +109,42 @@
               <% let userIdx = 0; users.forEach(function(user) { %>
                 <tr style="--i:<%= userIdx++ %>" class="al-table-tr cursor-pointer" tabindex="0" role="link" data-user-id="<%= user.id %>" data-admin="<%= user.isAdmin %>" onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleRowClick(event, '/admin/users/view/<%= user.id %>/');}">
                   <td class="al-table-td sm:pl-6">
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
                       <div class="relative shrink-0">
-                        <img loading="lazy" decoding="async" class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
+                        <img loading="lazy" decoding="async" class="h-7 w-7 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
                         <% if (onlineUsers.has(user.username)) { %>
-                          <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                            <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
+                          <span class="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
+                            <span class="relative inline-flex rounded-full h-2 w-2" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
                           </span>
                         <% } else { %>
-                          <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                            <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
+                          <span class="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
+                            <span class="relative inline-flex rounded-full h-2 w-2" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
                           </span>
                         <% } %>
                       </div>
-                      <div class="font-medium" style="color:var(--theme-text-strong);"><%= user.username %></div>
+                      <div class="font-medium text-[13px]" style="color:var(--theme-text-strong);"><%= user.username %></div>
                     </div>
                   </td>
                   <td class="al-table-td">
                     <div class="mt-1 ml-2 inline-flex items-center rounded-md
-                    px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                    px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
                     style="<%= user.isAdmin ? 'background:var(--theme-success-bg);color:var(--theme-success)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>">
                       <%= user.isAdmin ? 'Admin' : 'User' %>
                     </div></td>
-                  <td class="al-table-td"><%= user.servers ? user.servers.length : 0 %></td>
+                  <td class="al-table-td text-[13px]"><%= user.servers ? user.servers.length : 0 %></td>
                   <td class="al-table-td">
-                    <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-1">
                       <a href="/admin/users/view/<%= user.id %>/" onclick="event.stopPropagation()" title="View" aria-label="View user"
-                        class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
-                        <%- icon('external-link', { size: 16, class: 'shrink-0' }) %>
+                        class="al-btn-ghost p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center">
+                        <%- icon('external-link', { size: 14, class: 'shrink-0' }) %>
                       </a>
                       <a href="/admin/users/edit/<%= user.id %>/" onclick="event.stopPropagation()" title="Edit" aria-label="Edit user"
-                        class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
-                        <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
+                        class="al-btn-ghost p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center">
+                        <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
                       </a>
                       <button onclick="event.stopPropagation(); deleteUser('<%= user.id %>')" type="button" title="Delete" aria-label="Delete user"
-                        class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);">
-                        <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
+                        class="al-btn-ghost p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center" style="color:var(--theme-danger);">
+                        <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
                       </button>
                     </div>
                   </td>
