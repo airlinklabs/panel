@@ -299,7 +299,7 @@ app.use((req, res, next) => {
 // Handle CSRF errors
 app.use(handleCsrfError);
 
-app.use((_req, res, next) => {
+app.use(async (_req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
   res.locals.airlinkCodename = airlinkCodename;
@@ -317,6 +317,13 @@ app.use((_req, res, next) => {
   res.locals.adminSidebarGroups = uiComponentStore.getAdminSidebarGroups();
 
   res.locals.isMobileViewport = false;
+
+  try {
+    const { getSettings } = await import("./handlers/settingsCache");
+    res.locals.settings = await getSettings();
+  } catch {
+    res.locals.settings = null;
+  }
 
   next();
 });
