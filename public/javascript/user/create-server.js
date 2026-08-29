@@ -39,6 +39,25 @@
   const swapInput = document.getElementById("Swap");
   const toastContainer = document.getElementById("toast-container");
 
+  // Alpine error integration: use Alpine component if available
+  function setError(msg) {
+    const el = document.querySelector("[x-data]");
+    if (el && el.__x) {
+      el.__x.$data.error = msg;
+    } else if (errorText) {
+      errorText.textContent = msg;
+      errorMsg?.classList.remove("hidden");
+    }
+  }
+  function clearError() {
+    const el = document.querySelector("[x-data]");
+    if (el && el.__x) {
+      el.__x.$data.error = "";
+    } else if (errorMsg) {
+      errorMsg.classList.add("hidden");
+    }
+  }
+
   function getRequiredPorts() {
     const opt = imageSelect.options[imageSelect.selectedIndex];
     try {
@@ -398,8 +417,7 @@
     if (validationErrors.length > 0) {
       btn.disabled = false;
       btn.textContent = origText;
-      errorText.textContent = validationErrors.join("\n");
-      errorMsg.classList.remove("hidden");
+      setError(validationErrors.join("\n"));
       return;
     }
 
@@ -458,15 +476,13 @@
       } else {
         btn.disabled = false;
         btn.textContent = origText;
-        errorText.textContent = d.error || "Something went wrong.";
-        errorMsg.classList.remove("hidden");
+        setError(d.error || "Something went wrong.");
       }
     } catch (err) {
       console.error("Failed to create server:", err);
       btn.disabled = false;
       btn.textContent = origText;
-      errorText.textContent = "Network error. Try again.";
-      errorMsg.classList.remove("hidden");
+      setError("Network error. Try again.");
     }
   });
 })();

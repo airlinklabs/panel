@@ -25,6 +25,17 @@
   .dark .stepper-input { color: var(--theme-text, #e5e5e5); }
 </style>
 
+<script nonce="<%- nonce %>">
+function createServerPage() {
+  return {
+    error: '',
+    showError(msg) { this.error = msg; },
+    clearError() { this.error = ''; }
+  };
+}
+</script>
+
+<div x-data="createServerPage()">
 <main class="h-screen m-auto">
   <div class="flex h-screen">
     <div class="hidden lg:block w-60 h-full"><%- include('../components/sidebar') %></div>
@@ -186,8 +197,8 @@
           </div>
 
           <!-- Error -->
-          <div id="errorMsg" class="hidden rounded-xl px-4 py-3" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);">
-            <p class="text-sm" style="color:var(--theme-danger)" id="errorText"></p>
+          <div x-show="error" x-transition class="hidden rounded-xl px-4 py-3" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);">
+            <p class="text-sm" style="color:var(--theme-danger)" x-text="error"></p>
           </div>
 
           <!-- Submit -->
@@ -204,6 +215,7 @@
     </div>
   </div>
 </main>
+</div><!-- /x-data -->
 
 <div id="portsContent" style="display:none;">
   <p class="text-xs mb-3" style="color:var(--theme-text-muted)">External ports are assigned automatically to the next free node port. Edit the name and internal container port below.</p>
