@@ -237,8 +237,8 @@ function subusersPage() {
         { label: 'Subusers' }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
-      <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
+      <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-6">
+        <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
             <%- include('../../components/serverHeader') %>
             <!-- Server meta: image · node · id -->
@@ -262,12 +262,12 @@ function subusersPage() {
       <div id="server-page-body">
 
       <!-- Subusers Management -->
-      <div class="px-6 mt-8">
+      <div class="px-6 mt-6">
         <div class="al-card rounded-lg shadow overflow-hidden">
           <div class="al-card-header">
             <div>
-              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Server Subusers</h2>
-              <p class="text-xs" style="color:var(--theme-text-muted)">Grant other users access to this server.</p>
+              <h2 class="text-[13px] font-semibold" style="color:var(--theme-text-strong)">Server Subusers</h2>
+              <p class="text-[11px]" style="color:var(--theme-text-muted)">Grant other users access to this server.</p>
             </div>
           </div>
           <div class="overflow-x-auto">
@@ -280,9 +280,9 @@ function subusersPage() {
                 </colgroup>
                 <thead class="al-table-head">
                   <tr>
-                    <th scope="col" class="al-table-th px-6 py-3 uppercase">User</th>
-                    <th scope="col" class="al-table-th px-6 py-3 uppercase">Permissions</th>
-                    <th scope="col" class="al-table-th px-6 py-3 uppercase text-right">Actions</th>
+                    <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide">User</th>
+                    <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide">Permissions</th>
+                    <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="subusers-table-body" class="divide-y" style="border-color:var(--theme-border)">

@@ -15,7 +15,7 @@
       ] }) %>
 
       <div class="al-page-header mb-5">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
           <div class="relative shrink-0">
             <img loading="lazy" decoding="async" id="avatar-preview"
               src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>"
@@ -46,7 +46,7 @@
       </div>
 
       <div class="al-page-body space-y-4" data-al-tabs data-tabs-default="profile" data-tabs-hash>
-        <div role="tablist" aria-label="<%= req.translations.userAccountTitle || 'Account' %>" class="flex gap-1 mb-6">
+        <div role="tablist" aria-label="<%= req.translations.userAccountTitle || 'Account' %>" class="flex gap-1 mb-5">
           <button type="button" role="tab" data-tab="profile" aria-selected="true" tabindex="0" aria-controls="account-panel-profile"
             class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('user', { class: 'size-4', strokeWidth: 1.5 }) %> <%= req.translations.profileTab || 'Profile' %></button>
           <button type="button" role="tab" data-tab="images" aria-selected="false" tabindex="-1" aria-controls="account-panel-images"
@@ -56,8 +56,8 @@
         </div>
 
         <div role="tabpanel" data-tab-panel="profile" id="account-panel-profile">
-        <div class="al-card p-5">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+        <div class="al-card p-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4">
 
             <!-- Username -->
             <div x-data="{ saving: false, lastSaved: null }">
@@ -196,7 +196,7 @@
         </div>
 
         <!-- Preferred node -->
-        <div class="al-card p-5" x-data="{ saving: false, lastSaved: null }">
+        <div class="al-card p-4" x-data="{ saving: false, lastSaved: null }">
           <p class="text-sm font-medium mb-1" style="color:var(--theme-text-strong)"><%= req.translations.preferredNode || 'Preferred node' %></p>
           <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= req.translations.preferredNodeDesc || 'Pick the node your servers are created on by default.' %></p>
           <select id="preferredNode" class="al-input"
@@ -215,7 +215,7 @@
 
         <div role="tabpanel" data-tab-panel="images" id="account-panel-images" hidden>
         <!-- Custom image submissions — full workspace -->
-        <div class="al-card p-5" id="customImagesSection">
+        <div class="al-card p-4" id="customImagesSection">
           <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
             <div>
               <p class="flex items-center gap-1.5 text-sm font-medium mb-1" style="color:var(--theme-text-strong)">
@@ -307,7 +307,7 @@
 
         <div role="tabpanel" data-tab-panel="history" id="account-panel-history" hidden>
         <!-- Login history -->
-        <div class="al-card p-5">
+        <div class="al-card p-4">
           <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= req.translations.loginHistory || 'Login history' %></p>
           <div class="overflow-x-auto shadow-sm rounded-xl border" style="border-color:var(--theme-border)">
             <table class="al-table min-w-full text-sm">

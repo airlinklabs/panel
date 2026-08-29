@@ -13,8 +13,8 @@
         { label: 'Schedules' }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
-      <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
+      <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-6">
+        <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
             <%- include('../../components/serverHeader') %>
             <!-- Server meta: image · node · id -->
@@ -38,12 +38,12 @@
       <div id="server-page-body">
 
       <!-- Schedules -->
-      <div class="px-6 mt-8">
+      <div class="px-6 mt-6">
         <div class="al-card rounded-xl overflow-hidden p-0">
           <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-b" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
             <div>
-              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Schedules</h2>
-              <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Run commands, power actions, or backups on a timer.</p>
+              <h2 class="text-[13px] font-semibold" style="color:var(--theme-text-strong)">Schedules</h2>
+              <p class="text-[11px] mt-0.5" style="color:var(--theme-text-muted)">Run commands, power actions, or backups on a timer.</p>
             </div>
           </div>
         <% if (schedules.length > 0) { %>
@@ -51,11 +51,11 @@
             <table class="al-table min-w-full">
               <thead class="al-table-head">
                 <tr>
-                  <th scope="col" class="al-table-th px-6 py-3 uppercase w-2/5">Name</th>
-                  <th scope="col" class="al-table-th px-6 py-3 uppercase">Schedule</th>
-                  <th scope="col" class="al-table-th px-6 py-3 uppercase">Tasks</th>
-                  <th scope="col" class="al-table-th px-6 py-3 uppercase w-24">Enabled</th>
-                  <th scope="col" class="al-table-th px-6 py-3 uppercase text-right w-52">Actions</th>
+                  <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide w-2/5">Name</th>
+                  <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide">Schedule</th>
+                  <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide">Tasks</th>
+                  <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide w-24">Enabled</th>
+                  <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide text-right w-52">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -114,7 +114,7 @@
                         Run now
                       </button>
                       <button type="button" data-sched-name="<%= schedule.name %>" onclick="deleteSchedule(<%= schedule.id %>, this.dataset.schedName)"
-                        class="al-btn-ghost p-2 -mr-1.5" style="color:var(--theme-danger)" aria-label="Delete schedule">
+                        class="al-btn-ghost p-1.5 -mr-1.5" style="color:var(--theme-danger)" aria-label="Delete schedule">
                         <%- icon('trash-2', { size: 15 }) %>
                       </button>
                     </div>
