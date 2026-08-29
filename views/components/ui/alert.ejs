@@ -4,9 +4,9 @@ const classes = { danger: 'al-alert-danger', warning: 'al-alert-warning', succes
 const icons   = { danger: 'triangle-alert', warning: 'triangle-alert', success: 'circle-check', info: 'info' };
 %>
 <div class="<%= classes[type] || classes.info %>">
-  <%- icon(icons[type] || icons.info, { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
+  <%- icon(icons[type] || icons.info, { class: 'w-3.5 h-3.5 shrink-0 mt-0.5' }) %>
   <div>
-    <p class="font-medium"><%= locals.message || '' %></p>
-    <% if (locals.detail) { %><p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= locals.detail %></p><% } %>
+    <p class="font-medium text-[13px]"><%= locals.message || '' %></p>
+    <% if (locals.detail) { %><p class="text-[11px] mt-0.5" style="color:var(--theme-text-muted)"><%= locals.detail %></p><% } %>
   </div>
 </div>
