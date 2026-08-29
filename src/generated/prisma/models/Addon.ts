@@ -269,7 +269,6 @@ export type AddonOrderByWithRelationInput = {
   mainFile?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  _relevance?: Prisma.AddonOrderByRelevanceInput
 }
 
 export type AddonWhereUniqueInput = Prisma.AtLeast<{
@@ -410,12 +409,6 @@ export type AddonUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type AddonOrderByRelevanceInput = {
-  fields: Prisma.AddonOrderByRelevanceFieldEnum | Prisma.AddonOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
-}
-
 export type AddonCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -478,7 +471,31 @@ export type AddonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   updatedAt?: boolean
 }, ExtArgs["result"]["addon"]>
 
+export type AddonSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  slug?: boolean
+  description?: boolean
+  version?: boolean
+  author?: boolean
+  enabled?: boolean
+  mainFile?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+}, ExtArgs["result"]["addon"]>
 
+export type AddonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  slug?: boolean
+  description?: boolean
+  version?: boolean
+  author?: boolean
+  enabled?: boolean
+  mainFile?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+}, ExtArgs["result"]["addon"]>
 
 export type AddonSelectScalar = {
   id?: boolean
@@ -627,6 +644,30 @@ export interface AddonDelegate<ExtArgs extends runtime.Types.Extensions.Internal
   createMany<T extends AddonCreateManyArgs>(args?: Prisma.SelectSubset<T, AddonCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Addons and returns the data saved in the database.
+   * @param {AddonCreateManyAndReturnArgs} args - Arguments to create many Addons.
+   * @example
+   * // Create many Addons
+   * const addon = await prisma.addon.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Addons and only return the `id`
+   * const addonWithIdOnly = await prisma.addon.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends AddonCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AddonCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AddonPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Addon.
    * @param {AddonDeleteArgs} args - Arguments to delete one Addon.
    * @example
@@ -689,6 +730,36 @@ export interface AddonDelegate<ExtArgs extends runtime.Types.Extensions.Internal
    * 
    */
   updateMany<T extends AddonUpdateManyArgs>(args: Prisma.SelectSubset<T, AddonUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Addons and returns the data updated in the database.
+   * @param {AddonUpdateManyAndReturnArgs} args - Arguments to update many Addons.
+   * @example
+   * // Update many Addons
+   * const addon = await prisma.addon.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Addons and only return the `id`
+   * const addonWithIdOnly = await prisma.addon.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends AddonUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AddonUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AddonPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Addon.
@@ -1102,6 +1173,25 @@ export type AddonCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * Addon createManyAndReturn
+ */
+export type AddonCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Addon
+   */
+  select?: Prisma.AddonSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Addon
+   */
+  omit?: Prisma.AddonOmit<ExtArgs> | null
+  /**
+   * The data used to create many Addons.
+   */
+  data: Prisma.AddonCreateManyInput | Prisma.AddonCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * Addon update
  */
 export type AddonUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1127,6 +1217,32 @@ export type AddonUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
  * Addon updateMany
  */
 export type AddonUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update Addons.
+   */
+  data: Prisma.XOR<Prisma.AddonUpdateManyMutationInput, Prisma.AddonUncheckedUpdateManyInput>
+  /**
+   * Filter which Addons to update
+   */
+  where?: Prisma.AddonWhereInput
+  /**
+   * Limit how many Addons to update.
+   */
+  limit?: number
+}
+
+/**
+ * Addon updateManyAndReturn
+ */
+export type AddonUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Addon
+   */
+  select?: Prisma.AddonSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Addon
+   */
+  omit?: Prisma.AddonOmit<ExtArgs> | null
   /**
    * The data used to update Addons.
    */

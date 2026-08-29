@@ -365,7 +365,6 @@ export type ImagesOrderByWithRelationInput = {
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   servers?: Prisma.ServerOrderByRelationAggregateInput
-  _relevance?: Prisma.ImagesOrderByRelevanceInput
 }
 
 export type ImagesWhereUniqueInput = Prisma.AtLeast<{
@@ -614,12 +613,6 @@ export type ImagesUncheckedUpdateManyInput = {
 export type ImagesScalarRelationFilter = {
   is?: Prisma.ImagesWhereInput
   isNot?: Prisma.ImagesWhereInput
-}
-
-export type ImagesOrderByRelevanceInput = {
-  fields: Prisma.ImagesOrderByRelevanceFieldEnum | Prisma.ImagesOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type ImagesCountOrderByAggregateInput = {
@@ -877,7 +870,51 @@ export type ImagesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   _count?: boolean | Prisma.ImagesCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["images"]>
 
+export type ImagesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  UUID?: boolean
+  name?: boolean
+  description?: boolean
+  author?: boolean
+  authorName?: boolean
+  createdAt?: boolean
+  meta?: boolean
+  dockerImages?: boolean
+  startup?: boolean
+  stop?: boolean
+  startup_done?: boolean
+  config_files?: boolean
+  info?: boolean
+  scripts?: boolean
+  variables?: boolean
+  portRequirements?: boolean
+  status?: boolean
+  createdById?: boolean
+  rejectionReason?: boolean
+}, ExtArgs["result"]["images"]>
 
+export type ImagesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  UUID?: boolean
+  name?: boolean
+  description?: boolean
+  author?: boolean
+  authorName?: boolean
+  createdAt?: boolean
+  meta?: boolean
+  dockerImages?: boolean
+  startup?: boolean
+  stop?: boolean
+  startup_done?: boolean
+  config_files?: boolean
+  info?: boolean
+  scripts?: boolean
+  variables?: boolean
+  portRequirements?: boolean
+  status?: boolean
+  createdById?: boolean
+  rejectionReason?: boolean
+}, ExtArgs["result"]["images"]>
 
 export type ImagesSelectScalar = {
   id?: boolean
@@ -907,6 +944,8 @@ export type ImagesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   servers?: boolean | Prisma.Images$serversArgs<ExtArgs>
   _count?: boolean | Prisma.ImagesCountOutputTypeDefaultArgs<ExtArgs>
 }
+export type ImagesIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type ImagesIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $ImagesPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Images"
@@ -1052,6 +1091,30 @@ export interface ImagesDelegate<ExtArgs extends runtime.Types.Extensions.Interna
   createMany<T extends ImagesCreateManyArgs>(args?: Prisma.SelectSubset<T, ImagesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Images and returns the data saved in the database.
+   * @param {ImagesCreateManyAndReturnArgs} args - Arguments to create many Images.
+   * @example
+   * // Create many Images
+   * const images = await prisma.images.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Images and only return the `id`
+   * const imagesWithIdOnly = await prisma.images.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ImagesCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ImagesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ImagesPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Images.
    * @param {ImagesDeleteArgs} args - Arguments to delete one Images.
    * @example
@@ -1114,6 +1177,36 @@ export interface ImagesDelegate<ExtArgs extends runtime.Types.Extensions.Interna
    * 
    */
   updateMany<T extends ImagesUpdateManyArgs>(args: Prisma.SelectSubset<T, ImagesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Images and returns the data updated in the database.
+   * @param {ImagesUpdateManyAndReturnArgs} args - Arguments to update many Images.
+   * @example
+   * // Update many Images
+   * const images = await prisma.images.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Images and only return the `id`
+   * const imagesWithIdOnly = await prisma.images.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ImagesUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ImagesUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ImagesPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Images.
@@ -1562,6 +1655,25 @@ export type ImagesCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 /**
+ * Images createManyAndReturn
+ */
+export type ImagesCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Images
+   */
+  select?: Prisma.ImagesSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Images
+   */
+  omit?: Prisma.ImagesOmit<ExtArgs> | null
+  /**
+   * The data used to create many Images.
+   */
+  data: Prisma.ImagesCreateManyInput | Prisma.ImagesCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * Images update
  */
 export type ImagesUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1591,6 +1703,32 @@ export type ImagesUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
  * Images updateMany
  */
 export type ImagesUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update Images.
+   */
+  data: Prisma.XOR<Prisma.ImagesUpdateManyMutationInput, Prisma.ImagesUncheckedUpdateManyInput>
+  /**
+   * Filter which Images to update
+   */
+  where?: Prisma.ImagesWhereInput
+  /**
+   * Limit how many Images to update.
+   */
+  limit?: number
+}
+
+/**
+ * Images updateManyAndReturn
+ */
+export type ImagesUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Images
+   */
+  select?: Prisma.ImagesSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Images
+   */
+  omit?: Prisma.ImagesOmit<ExtArgs> | null
   /**
    * The data used to update Images.
    */

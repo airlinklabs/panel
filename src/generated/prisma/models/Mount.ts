@@ -235,7 +235,6 @@ export type MountOrderByWithRelationInput = {
   readOnly?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   servers?: Prisma.ServerMountOrderByRelationAggregateInput
-  _relevance?: Prisma.MountOrderByRelevanceInput
 }
 
 export type MountWhereUniqueInput = Prisma.AtLeast<{
@@ -339,12 +338,6 @@ export type MountUncheckedUpdateManyInput = {
   target?: Prisma.StringFieldUpdateOperationsInput | string
   readOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type MountOrderByRelevanceInput = {
-  fields: Prisma.MountOrderByRelevanceFieldEnum | Prisma.MountOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type MountCountOrderByAggregateInput = {
@@ -493,7 +486,23 @@ export type MountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   _count?: boolean | Prisma.MountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mount"]>
 
+export type MountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  source?: boolean
+  target?: boolean
+  readOnly?: boolean
+  createdAt?: boolean
+}, ExtArgs["result"]["mount"]>
 
+export type MountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  source?: boolean
+  target?: boolean
+  readOnly?: boolean
+  createdAt?: boolean
+}, ExtArgs["result"]["mount"]>
 
 export type MountSelectScalar = {
   id?: boolean
@@ -509,6 +518,8 @@ export type MountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   servers?: boolean | Prisma.Mount$serversArgs<ExtArgs>
   _count?: boolean | Prisma.MountCountOutputTypeDefaultArgs<ExtArgs>
 }
+export type MountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type MountIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $MountPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Mount"
@@ -640,6 +651,30 @@ export interface MountDelegate<ExtArgs extends runtime.Types.Extensions.Internal
   createMany<T extends MountCreateManyArgs>(args?: Prisma.SelectSubset<T, MountCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Mounts and returns the data saved in the database.
+   * @param {MountCreateManyAndReturnArgs} args - Arguments to create many Mounts.
+   * @example
+   * // Create many Mounts
+   * const mount = await prisma.mount.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Mounts and only return the `id`
+   * const mountWithIdOnly = await prisma.mount.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends MountCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, MountCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MountPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Mount.
    * @param {MountDeleteArgs} args - Arguments to delete one Mount.
    * @example
@@ -702,6 +737,36 @@ export interface MountDelegate<ExtArgs extends runtime.Types.Extensions.Internal
    * 
    */
   updateMany<T extends MountUpdateManyArgs>(args: Prisma.SelectSubset<T, MountUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Mounts and returns the data updated in the database.
+   * @param {MountUpdateManyAndReturnArgs} args - Arguments to update many Mounts.
+   * @example
+   * // Update many Mounts
+   * const mount = await prisma.mount.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Mounts and only return the `id`
+   * const mountWithIdOnly = await prisma.mount.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends MountUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, MountUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MountPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Mount.
@@ -1136,6 +1201,25 @@ export type MountCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * Mount createManyAndReturn
+ */
+export type MountCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Mount
+   */
+  select?: Prisma.MountSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Mount
+   */
+  omit?: Prisma.MountOmit<ExtArgs> | null
+  /**
+   * The data used to create many Mounts.
+   */
+  data: Prisma.MountCreateManyInput | Prisma.MountCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * Mount update
  */
 export type MountUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1165,6 +1249,32 @@ export type MountUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
  * Mount updateMany
  */
 export type MountUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update Mounts.
+   */
+  data: Prisma.XOR<Prisma.MountUpdateManyMutationInput, Prisma.MountUncheckedUpdateManyInput>
+  /**
+   * Filter which Mounts to update
+   */
+  where?: Prisma.MountWhereInput
+  /**
+   * Limit how many Mounts to update.
+   */
+  limit?: number
+}
+
+/**
+ * Mount updateManyAndReturn
+ */
+export type MountUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Mount
+   */
+  select?: Prisma.MountSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Mount
+   */
+  omit?: Prisma.MountOmit<ExtArgs> | null
   /**
    * The data used to update Mounts.
    */

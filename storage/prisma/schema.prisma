@@ -4,35 +4,35 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 model Users {
-  id                Int       @id @default(autoincrement())
-  email             String    @unique
-  username          String?   @unique
-  password          String
-  isAdmin           Boolean   @default(false)
-  description       String?   @default("No About Me")
-  avatar            String?
-  permissions       String?   @default("[]") @db.Text
-  serverLimit       Int?      @default(0)
-  maxMemory         Int?      @default(0)
-  maxCpu            Int?      @default(0)
-  maxStorage        Int?      @default(0)
-  maxDatabases      Int?      @default(0)
-role          String            @default("user")
-  onboardingCompleted Boolean     @default(false)
-  onboardingSkipped   Boolean     @default(false)
-  preferredNodeId Int?
-  loginAttempts Int              @default(0)
-  lockedUntil       DateTime?
-  totpSecret        String?
-  totpEnabled       Boolean   @default(false)
-  totpRecoveryCodes String?   @db.Text
-  passkeyEnabled    Boolean   @default(false)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                 Int       @id @default(autoincrement())
+  email              String    @unique
+  username           String?   @unique
+  password           String
+  isAdmin            Boolean   @default(false)
+  description        String?   @default("No About Me")
+  avatar             String?
+  permissions        String?   @default("[]") @db.Text
+  serverLimit        Int?      @default(0)
+  maxMemory          Int?      @default(0)
+  maxCpu             Int?      @default(0)
+  maxStorage         Int?      @default(0)
+  maxDatabases       Int?      @default(0)
+  role               String    @default("user")
+  onboardingCompleted Boolean  @default(false)
+  onboardingSkipped  Boolean   @default(false)
+  preferredNodeId    Int?
+  loginAttempts      Int       @default(0)
+  lockedUntil        DateTime?
+  totpSecret         String?
+  totpEnabled        Boolean   @default(false)
+  totpRecoveryCodes  String?   @db.Text
+  passkeyEnabled     Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   servers        Server[]
   folders        ServerFolder[]
@@ -42,7 +42,7 @@ role          String            @default("user")
   passwordResets PasswordReset[]
   activityLogs   ActivityLog[]
   passkeys       WebAuthnCredential[]
-  preferredNode  Node?           @relation("UserPreferredNode", fields: [preferredNodeId], references: [id], onDelete: SetNull)
+  preferredNode  Node? @relation("UserPreferredNode", fields: [preferredNodeId], references: [id], onDelete: SetNull)
 }
 
 model PasswordReset {
@@ -121,7 +121,7 @@ model DatabaseHost {
   id        Int              @id @default(autoincrement())
   name      String
   host      String
-  port      Int              @default(3306)
+  port      Int              @default(5432)
   username  String
   password  String
   nodeId    Int?
@@ -176,15 +176,15 @@ model Images {
   author           String?
   authorName       String?
   createdAt        DateTime @default(now())
-  meta             String? @db.Text
-  dockerImages     String? @db.Text
-  startup          String? @db.Text
-  stop             String? @db.Text
-  startup_done     String? @db.Text
-  config_files     String? @db.Text
-  info             String? @db.Text
-  scripts          String? @db.Text
-  variables        String? @db.Text
+  meta             String?  @db.Text
+  dockerImages     String?  @db.Text
+  startup          String?  @db.Text
+  stop             String?  @db.Text
+  startup_done     String?  @db.Text
+  config_files     String?  @db.Text
+  info             String?  @db.Text
+  scripts          String?  @db.Text
+  variables        String?  @db.Text
   portRequirements String   @default("[]") @db.Text
   status           String   @default("approved")
   createdById      Int?
@@ -241,66 +241,66 @@ model Location {
 }
 
 model settings {
-  id                        Int      @id @default(autoincrement())
-  title                     String   @default("Airlink")
-  description               String   @default("AirLink is a free and open source project by AirlinkLabs")
-  logo                      String   @default("../assets/logo.png")
-  favicon                   String   @default("../assets/favicon.ico")
-  theme                     String   @default("default")
-  lightTheme                String   @default("default")
-  darkTheme                 String   @default("default")
-  language                  String   @default("en")
-  allowRegistration         Boolean  @default(false)
-  uploadLimit               Int      @default(100)
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
-  sftpPort                  Int      @default(3003)
-  virusTotalApiKey          String?
-  rateLimitEnabled          Boolean  @default(true)
-  rateLimitRpm              Int      @default(100)
-  bannedIps                 String   @default("[]") @db.Text
-  allowUserCreateServer     Boolean  @default(false)
-  allowUserDeleteServer     Boolean  @default(false)
-  defaultServerLimit        Int      @default(0)
-  defaultMaxMemory          Int      @default(512)
-  defaultMaxCpu             Int      @default(100)
-  defaultMaxStorage         Int      @default(5120)
-  defaultMaxDatabases       Int      @default(0)
-  defaultOverallocateMemory Int      @default(0)
-  defaultOverallocateDisk   Int      @default(0)
-  defaultOverallocateCpu    Int      @default(0)
-  loginWallpaper            String?
-  registerWallpaper         String?
-  panelWallpaper            String?
-  loginMaxAttempts          Int      @default(5)
-  loginLockoutMinutes       Int      @default(15)
-  enforceDaemonHttps        Boolean  @default(false)
-  require2faForAdmins       Boolean  @default(false)
-  behindReverseProxy        Boolean  @default(false)
-  hashApiKeys               Boolean  @default(false)
-  airlinkCloudApiKey        String?
-  airlinkCloudBackupEnabled Boolean  @default(false)
-  smtpHost                  String?
-  smtpPort                  Int?     @default(587)
-  smtpUser                  String?
-  smtpPassword              String?
-  smtpFrom                  String?
-  smtpSecure                Boolean  @default(false)
-  s3Enabled                 Boolean  @default(false)
-  s3Endpoint                String?
-  s3Region                  String?
-  s3Bucket                  String?
-  s3AccessKey               String?
-  s3SecretKey               String?
-  s3PathStyle               Boolean  @default(false)
-  allowPrivilegedServerLimit  Int    @default(5)
-  allowPrivilegedMaxMemory    Int    @default(2048)
-  allowPrivilegedMaxCpu       Int    @default(200)
-  allowPrivilegedMaxStorage   Int    @default(61440)
-  allowPrivilegedMaxDatabases Int    @default(10)
-  allowUserCreateImages     Boolean  @default(false)
-  onboardingEnabled         Boolean  @default(true)
-  onboardingSteps           String   @default("[]") @db.Text
+  id                          Int      @id @default(autoincrement())
+  title                       String   @default("Airlink")
+  description                 String   @default("AirLink is a free and open source project by AirlinkLabs")
+  logo                        String   @default("../assets/logo.png")
+  favicon                     String   @default("../assets/favicon.ico")
+  theme                       String   @default("default")
+  lightTheme                  String   @default("default")
+  darkTheme                   String   @default("default")
+  language                    String   @default("en")
+  allowRegistration           Boolean  @default(false)
+  uploadLimit                 Int      @default(100)
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+  sftpPort                    Int      @default(3003)
+  virusTotalApiKey            String?
+  rateLimitEnabled            Boolean  @default(true)
+  rateLimitRpm                Int      @default(100)
+  bannedIps                   String   @default("[]") @db.Text
+  allowUserCreateServer       Boolean  @default(false)
+  allowUserDeleteServer       Boolean  @default(false)
+  defaultServerLimit          Int      @default(0)
+  defaultMaxMemory            Int      @default(512)
+  defaultMaxCpu               Int      @default(100)
+  defaultMaxStorage           Int      @default(5120)
+  defaultMaxDatabases         Int      @default(0)
+  defaultOverallocateMemory   Int      @default(0)
+  defaultOverallocateDisk     Int      @default(0)
+  defaultOverallocateCpu      Int      @default(0)
+  loginWallpaper              String?
+  registerWallpaper           String?
+  panelWallpaper              String?
+  loginMaxAttempts            Int      @default(5)
+  loginLockoutMinutes         Int      @default(15)
+  enforceDaemonHttps          Boolean  @default(false)
+  require2faForAdmins         Boolean  @default(false)
+  behindReverseProxy          Boolean  @default(false)
+  hashApiKeys                 Boolean  @default(false)
+  airlinkCloudApiKey          String?
+  airlinkCloudBackupEnabled   Boolean  @default(false)
+  smtpHost                    String?
+  smtpPort                    Int?     @default(587)
+  smtpUser                    String?
+  smtpPassword                String?
+  smtpFrom                    String?
+  smtpSecure                  Boolean  @default(false)
+  s3Enabled                   Boolean  @default(false)
+  s3Endpoint                  String?
+  s3Region                    String?
+  s3Bucket                    String?
+  s3AccessKey                 String?
+  s3SecretKey                 String?
+  s3PathStyle                 Boolean  @default(false)
+  allowPrivilegedServerLimit  Int      @default(5)
+  allowPrivilegedMaxMemory    Int      @default(2048)
+  allowPrivilegedMaxCpu       Int      @default(200)
+  allowPrivilegedMaxStorage   Int      @default(61440)
+  allowPrivilegedMaxDatabases Int      @default(10)
+  allowUserCreateImages       Boolean  @default(false)
+  onboardingEnabled           Boolean  @default(true)
+  onboardingSteps             String   @default("[]") @db.Text
 }
 
 model ServerFolder {

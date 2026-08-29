@@ -795,7 +795,6 @@ export type settingsOrderByWithRelationInput = {
   allowUserCreateImages?: Prisma.SortOrder
   onboardingEnabled?: Prisma.SortOrder
   onboardingSteps?: Prisma.SortOrder
-  _relevance?: Prisma.settingsOrderByRelevanceInput
 }
 
 export type settingsWhereUniqueInput = Prisma.AtLeast<{
@@ -1436,12 +1435,6 @@ export type settingsUncheckedUpdateManyInput = {
   onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
-export type settingsOrderByRelevanceInput = {
-  fields: Prisma.settingsOrderByRelevanceFieldEnum | Prisma.settingsOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
-}
-
 export type settingsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -1742,7 +1735,131 @@ export type settingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   onboardingSteps?: boolean
 }, ExtArgs["result"]["settings"]>
 
+export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  title?: boolean
+  description?: boolean
+  logo?: boolean
+  favicon?: boolean
+  theme?: boolean
+  lightTheme?: boolean
+  darkTheme?: boolean
+  language?: boolean
+  allowRegistration?: boolean
+  uploadLimit?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  sftpPort?: boolean
+  virusTotalApiKey?: boolean
+  rateLimitEnabled?: boolean
+  rateLimitRpm?: boolean
+  bannedIps?: boolean
+  allowUserCreateServer?: boolean
+  allowUserDeleteServer?: boolean
+  defaultServerLimit?: boolean
+  defaultMaxMemory?: boolean
+  defaultMaxCpu?: boolean
+  defaultMaxStorage?: boolean
+  defaultMaxDatabases?: boolean
+  defaultOverallocateMemory?: boolean
+  defaultOverallocateDisk?: boolean
+  defaultOverallocateCpu?: boolean
+  loginWallpaper?: boolean
+  registerWallpaper?: boolean
+  panelWallpaper?: boolean
+  loginMaxAttempts?: boolean
+  loginLockoutMinutes?: boolean
+  enforceDaemonHttps?: boolean
+  require2faForAdmins?: boolean
+  behindReverseProxy?: boolean
+  hashApiKeys?: boolean
+  airlinkCloudApiKey?: boolean
+  airlinkCloudBackupEnabled?: boolean
+  smtpHost?: boolean
+  smtpPort?: boolean
+  smtpUser?: boolean
+  smtpPassword?: boolean
+  smtpFrom?: boolean
+  smtpSecure?: boolean
+  s3Enabled?: boolean
+  s3Endpoint?: boolean
+  s3Region?: boolean
+  s3Bucket?: boolean
+  s3AccessKey?: boolean
+  s3SecretKey?: boolean
+  s3PathStyle?: boolean
+  allowPrivilegedServerLimit?: boolean
+  allowPrivilegedMaxMemory?: boolean
+  allowPrivilegedMaxCpu?: boolean
+  allowPrivilegedMaxStorage?: boolean
+  allowPrivilegedMaxDatabases?: boolean
+  allowUserCreateImages?: boolean
+  onboardingEnabled?: boolean
+  onboardingSteps?: boolean
+}, ExtArgs["result"]["settings"]>
 
+export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  title?: boolean
+  description?: boolean
+  logo?: boolean
+  favicon?: boolean
+  theme?: boolean
+  lightTheme?: boolean
+  darkTheme?: boolean
+  language?: boolean
+  allowRegistration?: boolean
+  uploadLimit?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  sftpPort?: boolean
+  virusTotalApiKey?: boolean
+  rateLimitEnabled?: boolean
+  rateLimitRpm?: boolean
+  bannedIps?: boolean
+  allowUserCreateServer?: boolean
+  allowUserDeleteServer?: boolean
+  defaultServerLimit?: boolean
+  defaultMaxMemory?: boolean
+  defaultMaxCpu?: boolean
+  defaultMaxStorage?: boolean
+  defaultMaxDatabases?: boolean
+  defaultOverallocateMemory?: boolean
+  defaultOverallocateDisk?: boolean
+  defaultOverallocateCpu?: boolean
+  loginWallpaper?: boolean
+  registerWallpaper?: boolean
+  panelWallpaper?: boolean
+  loginMaxAttempts?: boolean
+  loginLockoutMinutes?: boolean
+  enforceDaemonHttps?: boolean
+  require2faForAdmins?: boolean
+  behindReverseProxy?: boolean
+  hashApiKeys?: boolean
+  airlinkCloudApiKey?: boolean
+  airlinkCloudBackupEnabled?: boolean
+  smtpHost?: boolean
+  smtpPort?: boolean
+  smtpUser?: boolean
+  smtpPassword?: boolean
+  smtpFrom?: boolean
+  smtpSecure?: boolean
+  s3Enabled?: boolean
+  s3Endpoint?: boolean
+  s3Region?: boolean
+  s3Bucket?: boolean
+  s3AccessKey?: boolean
+  s3SecretKey?: boolean
+  s3PathStyle?: boolean
+  allowPrivilegedServerLimit?: boolean
+  allowPrivilegedMaxMemory?: boolean
+  allowPrivilegedMaxCpu?: boolean
+  allowPrivilegedMaxStorage?: boolean
+  allowPrivilegedMaxDatabases?: boolean
+  allowUserCreateImages?: boolean
+  onboardingEnabled?: boolean
+  onboardingSteps?: boolean
+}, ExtArgs["result"]["settings"]>
 
 export type settingsSelectScalar = {
   id?: boolean
@@ -1991,6 +2108,30 @@ export interface settingsDelegate<ExtArgs extends runtime.Types.Extensions.Inter
   createMany<T extends settingsCreateManyArgs>(args?: Prisma.SelectSubset<T, settingsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Settings and returns the data saved in the database.
+   * @param {settingsCreateManyAndReturnArgs} args - Arguments to create many Settings.
+   * @example
+   * // Create many Settings
+   * const settings = await prisma.settings.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Settings and only return the `id`
+   * const settingsWithIdOnly = await prisma.settings.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends settingsCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, settingsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$settingsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Settings.
    * @param {settingsDeleteArgs} args - Arguments to delete one Settings.
    * @example
@@ -2053,6 +2194,36 @@ export interface settingsDelegate<ExtArgs extends runtime.Types.Extensions.Inter
    * 
    */
   updateMany<T extends settingsUpdateManyArgs>(args: Prisma.SelectSubset<T, settingsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Settings and returns the data updated in the database.
+   * @param {settingsUpdateManyAndReturnArgs} args - Arguments to update many Settings.
+   * @example
+   * // Update many Settings
+   * const settings = await prisma.settings.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Settings and only return the `id`
+   * const settingsWithIdOnly = await prisma.settings.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends settingsUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, settingsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$settingsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Settings.
@@ -2516,6 +2687,25 @@ export type settingsCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * settings createManyAndReturn
+ */
+export type settingsCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the settings
+   */
+  select?: Prisma.settingsSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the settings
+   */
+  omit?: Prisma.settingsOmit<ExtArgs> | null
+  /**
+   * The data used to create many settings.
+   */
+  data: Prisma.settingsCreateManyInput | Prisma.settingsCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * settings update
  */
 export type settingsUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2541,6 +2731,32 @@ export type settingsUpdateArgs<ExtArgs extends runtime.Types.Extensions.Internal
  * settings updateMany
  */
 export type settingsUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update settings.
+   */
+  data: Prisma.XOR<Prisma.settingsUpdateManyMutationInput, Prisma.settingsUncheckedUpdateManyInput>
+  /**
+   * Filter which settings to update
+   */
+  where?: Prisma.settingsWhereInput
+  /**
+   * Limit how many settings to update.
+   */
+  limit?: number
+}
+
+/**
+ * settings updateManyAndReturn
+ */
+export type settingsUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the settings
+   */
+  select?: Prisma.settingsSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the settings
+   */
+  omit?: Prisma.settingsOmit<ExtArgs> | null
   /**
    * The data used to update settings.
    */

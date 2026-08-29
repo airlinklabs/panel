@@ -230,7 +230,6 @@ export type LoginHistoryOrderByWithRelationInput = {
   userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   user?: Prisma.UsersOrderByWithRelationInput
-  _relevance?: Prisma.LoginHistoryOrderByRelevanceInput
 }
 
 export type LoginHistoryWhereUniqueInput = Prisma.AtLeast<{
@@ -329,12 +328,6 @@ export type LoginHistoryListRelationFilter = {
 
 export type LoginHistoryOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type LoginHistoryOrderByRelevanceInput = {
-  fields: Prisma.LoginHistoryOrderByRelevanceFieldEnum | Prisma.LoginHistoryOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type LoginHistoryCountOrderByAggregateInput = {
@@ -501,7 +494,23 @@ export type LoginHistorySelect<ExtArgs extends runtime.Types.Extensions.Internal
   user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["loginHistory"]>
 
+export type LoginHistorySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  ipAddress?: boolean
+  userAgent?: boolean
+  timestamp?: boolean
+  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["loginHistory"]>
 
+export type LoginHistorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  ipAddress?: boolean
+  userAgent?: boolean
+  timestamp?: boolean
+  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["loginHistory"]>
 
 export type LoginHistorySelectScalar = {
   id?: boolean
@@ -513,6 +522,12 @@ export type LoginHistorySelectScalar = {
 
 export type LoginHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "ipAddress" | "userAgent" | "timestamp", ExtArgs["result"]["loginHistory"]>
 export type LoginHistoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}
+export type LoginHistoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}
+export type LoginHistoryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
 }
 
@@ -645,6 +660,30 @@ export interface LoginHistoryDelegate<ExtArgs extends runtime.Types.Extensions.I
   createMany<T extends LoginHistoryCreateManyArgs>(args?: Prisma.SelectSubset<T, LoginHistoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many LoginHistories and returns the data saved in the database.
+   * @param {LoginHistoryCreateManyAndReturnArgs} args - Arguments to create many LoginHistories.
+   * @example
+   * // Create many LoginHistories
+   * const loginHistory = await prisma.loginHistory.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many LoginHistories and only return the `id`
+   * const loginHistoryWithIdOnly = await prisma.loginHistory.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends LoginHistoryCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, LoginHistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoginHistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a LoginHistory.
    * @param {LoginHistoryDeleteArgs} args - Arguments to delete one LoginHistory.
    * @example
@@ -707,6 +746,36 @@ export interface LoginHistoryDelegate<ExtArgs extends runtime.Types.Extensions.I
    * 
    */
   updateMany<T extends LoginHistoryUpdateManyArgs>(args: Prisma.SelectSubset<T, LoginHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more LoginHistories and returns the data updated in the database.
+   * @param {LoginHistoryUpdateManyAndReturnArgs} args - Arguments to update many LoginHistories.
+   * @example
+   * // Update many LoginHistories
+   * const loginHistory = await prisma.loginHistory.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more LoginHistories and only return the `id`
+   * const loginHistoryWithIdOnly = await prisma.loginHistory.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends LoginHistoryUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, LoginHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoginHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one LoginHistory.
@@ -1140,6 +1209,29 @@ export type LoginHistoryCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * LoginHistory createManyAndReturn
+ */
+export type LoginHistoryCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LoginHistory
+   */
+  select?: Prisma.LoginHistorySelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the LoginHistory
+   */
+  omit?: Prisma.LoginHistoryOmit<ExtArgs> | null
+  /**
+   * The data used to create many LoginHistories.
+   */
+  data: Prisma.LoginHistoryCreateManyInput | Prisma.LoginHistoryCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoginHistoryIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * LoginHistory update
  */
 export type LoginHistoryUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1181,6 +1273,36 @@ export type LoginHistoryUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many LoginHistories to update.
    */
   limit?: number
+}
+
+/**
+ * LoginHistory updateManyAndReturn
+ */
+export type LoginHistoryUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LoginHistory
+   */
+  select?: Prisma.LoginHistorySelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the LoginHistory
+   */
+  omit?: Prisma.LoginHistoryOmit<ExtArgs> | null
+  /**
+   * The data used to update LoginHistories.
+   */
+  data: Prisma.XOR<Prisma.LoginHistoryUpdateManyMutationInput, Prisma.LoginHistoryUncheckedUpdateManyInput>
+  /**
+   * Filter which LoginHistories to update
+   */
+  where?: Prisma.LoginHistoryWhereInput
+  /**
+   * Limit how many LoginHistories to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoginHistoryIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

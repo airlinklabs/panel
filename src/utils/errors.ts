@@ -1,80 +1,83 @@
 /**
  * Error sanitization for client-facing messages.
  *
- * Raw internal errors — daemon/Docker paths, mysql hostnames, S3 keys,
+ * Raw internal errors — daemon/Docker paths, database hostnames, S3 keys,
  * view paths, stack traces — must never reach the browser. Classify the
  * error, return a fixed safe message (plus an optional recovery hint), and
  * keep the raw detail for the server log only.
  */
 
 export type ErrorCategory =
-  | 'daemon'
-  | 'database'
-  | 'filesystem'
-  | 'network'
-  | 'validation'
-  | 'unknown';
+  "daemon" | "database" | "filesystem" | "network" | "validation" | "unknown";
 
 const CATEGORY_FALLBACK: Record<ErrorCategory, string> = {
-  daemon: 'The server daemon could not complete the request.',
-  database: 'The database could not complete the request.',
-  filesystem: 'The file system could not complete the request.',
-  network: 'The network request could not be completed.',
-  validation: 'The request could not be validated.',
-  unknown: 'Something went wrong. Please try again.',
+  daemon: "The server daemon could not complete the request.",
+  database: "The database could not complete the request.",
+  filesystem: "The file system could not complete the request.",
+  network: "The network request could not be completed.",
+  validation: "The request could not be validated.",
+  unknown: "Something went wrong. Please try again.",
 };
 
 const CATEGORY_HINT: Partial<Record<ErrorCategory, string>> = {
-  daemon: 'Check that the node is online, then try again.',
-  database: 'Check the database host settings, then try again.',
-  network: 'Check your connection, then try again.',
+  daemon: "Check that the node is online, then try again.",
+  database: "Check the database host settings, then try again.",
+  network: "Check your connection, then try again.",
 };
 
 const DAEMON_MARKERS = [
-  'docker',
-  'container',
-  '/var/lib/docker',
-  'docker.sock',
-  'failed to attach',
-  'no such container',
-  'oci runtime',
-  'image not found',
-  'manifest unknown',
-  'pull access denied',
-  'repository does not exist',
-  'daemon returned',
+  "docker",
+  "container",
+  "/var/lib/docker",
+  "docker.sock",
+  "failed to attach",
+  "no such container",
+  "oci runtime",
+  "image not found",
+  "manifest unknown",
+  "pull access denied",
+  "repository does not exist",
+  "daemon returned",
 ];
 
 const DATABASE_MARKERS = [
-  'ecnrefused',
-  'econnrefused',
-  'er_access_denied',
-  'er_con_count_error',
-  'er_bad_db_error',
-  'er_no_such_db',
-  'er_unknown_database',
-  'mysql2',
-  'prismaclient',
-  'sqlstate',
-  'password authentication failed',
-  'duplicate key',
-  's3',
-  'bucket',
-  'amazonaws',
-  'socket hang up',
+  "ecnrefused",
+  "econnrefused",
+  "er_access_denied",
+  "er_con_count_error",
+  "er_bad_db_error",
+  "er_no_such_db",
+  "er_unknown_database",
+  "pg",
+  "prismaclient",
+  "sqlstate",
+  "password authentication failed",
+  "duplicate key",
+  "s3",
+  "bucket",
+  "amazonaws",
+  "socket hang up",
 ];
 
-const FILESYSTEM_MARKERS = ['enoent', 'eacces', 'eperm', 'enotdir', 'eisdir', 'eexist', 'enospc'];
+const FILESYSTEM_MARKERS = [
+  "enoent",
+  "eacces",
+  "eperm",
+  "enotdir",
+  "eisdir",
+  "eexist",
+  "enospc",
+];
 
 const NETWORK_MARKERS = [
-  'ecnrefused',
-  'enotfound',
-  'eai_again',
-  'etimedout',
-  'econnreset',
-  'timed out',
-  'fetch failed',
-  'network',
+  "ecnrefused",
+  "enotfound",
+  "eai_again",
+  "etimedout",
+  "econnreset",
+  "timed out",
+  "fetch failed",
+  "network",
 ];
 
 /** Extract a raw, short message from an unknown thrown value (for logs only). */
@@ -82,47 +85,47 @@ export function rawErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error;
   }
-  if (error && typeof error === 'object') {
+  if (error && typeof error === "object") {
     const record = error as Record<string, unknown>;
-    if (typeof record.message === 'string') {
+    if (typeof record.message === "string") {
       return record.message;
     }
-    if (typeof record.error === 'string') {
+    if (typeof record.error === "string") {
       return record.error;
     }
-    if (typeof record.detail === 'string') {
+    if (typeof record.detail === "string") {
       return record.detail;
     }
   }
-  return String(error ?? '');
+  return String(error ?? "");
 }
 
 function classify(raw: string): ErrorCategory {
   const lower = raw.toLowerCase();
   for (const marker of FILESYSTEM_MARKERS) {
     if (lower.includes(marker)) {
-      return 'filesystem';
+      return "filesystem";
     }
   }
   for (const marker of NETWORK_MARKERS) {
     if (lower.includes(marker)) {
-      return 'network';
+      return "network";
     }
   }
   for (const marker of DATABASE_MARKERS) {
     if (lower.includes(marker)) {
-      return 'database';
+      return "database";
     }
   }
   for (const marker of DAEMON_MARKERS) {
     if (lower.includes(marker)) {
-      return 'daemon';
+      return "daemon";
     }
   }
-  return 'unknown';
+  return "unknown";
 }
 
 export interface SanitizedErrorInfo {
@@ -139,7 +142,10 @@ export interface SanitizeErrorOptions {
   hint?: string;
 }
 
-export function sanitizeError(error: unknown, options?: SanitizeErrorOptions): SanitizedErrorInfo {
+export function sanitizeError(
+  error: unknown,
+  options?: SanitizeErrorOptions,
+): SanitizedErrorInfo {
   const raw = rawErrorMessage(error);
   const category = classify(raw);
   return {
@@ -157,7 +163,7 @@ export function sanitizeError(error: unknown, options?: SanitizeErrorOptions): S
  */
 export function safeClientMessage(
   error: unknown,
-  fallback = 'Something went wrong. Please try again.',
+  fallback = "Something went wrong. Please try again.",
 ): string {
   return sanitizeError(error, { fallback }).safeMessage;
 }
@@ -173,12 +179,12 @@ export function safeClientMessage(
  */
 export function daemonMessage(
   body: unknown,
-  fallback = 'The server daemon could not complete the request.',
+  fallback = "The server daemon could not complete the request.",
 ): string {
-  if (body && typeof body === 'object') {
+  if (body && typeof body === "object") {
     const record = body as Record<string, unknown>;
     const candidate = record.error ?? record.message;
-    if (typeof candidate === 'string' && candidate.trim().length > 0) {
+    if (typeof candidate === "string" && candidate.trim().length > 0) {
       return candidate.trim();
     }
   }
@@ -187,7 +193,7 @@ export function daemonMessage(
 
 /** Extract the error body attached to a thrown HTTP/daemon error, if any. */
 export function errorBody(error: unknown): unknown {
-  if (error && typeof error === 'object') {
+  if (error && typeof error === "object") {
     return (error as Record<string, unknown>).body;
   }
   return undefined;
@@ -199,7 +205,7 @@ export function errorBody(error: unknown): unknown {
  * missing .env files cannot accidentally leak internals to visitors.
  */
 export function isProductionPosture(): boolean {
-  const env = (process.env.NODE_ENV || 'production').toLowerCase();
-  const debug = process.env.DEBUG === 'true';
-  return (env === 'production' || env === 'prod') && !debug;
+  const env = (process.env.NODE_ENV || "production").toLowerCase();
+  const debug = process.env.DEBUG === "true";
+  return (env === "production" || env === "prod") && !debug;
 }

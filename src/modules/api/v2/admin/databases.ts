@@ -8,33 +8,35 @@
  * POST   /api/v2/admin/databases/:id/test — Test connection
  */
 
-import { Router } from 'express';
-import prisma from '../../../../db';
-import { parseBody } from '../../../../utils/validation';
-import { jsonOk, jsonError, requireAdmin, logActivity } from '../helpers';
-import { adminCreateDbHostBody } from '../dto';
+import { Router } from "express";
+import prisma from "../../../../db";
+import { parseBody } from "../../../../utils/validation";
+import { jsonOk, jsonError, requireAdmin, logActivity } from "../helpers";
+import { adminCreateDbHostBody } from "../dto";
 
 const router = Router();
 
 router.use(async (req, res, next) => {
   const admin = await requireAdmin(req, res);
-  if (!admin) {return;}
+  if (!admin) {
+    return;
+  }
   (req as any).adminUser = admin;
   next();
 });
 
-router.get('/', async (_req, res) => {
+router.get("/", async (_req, res) => {
   const hosts = await prisma.databaseHost.findMany({
     include: {
       node: { select: { id: true, name: true } },
       _count: { select: { databases: true } },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
   jsonOk(res, hosts);
 });
 
-router.post('/', parseBody(adminCreateDbHostBody), async (req, res) => {
+router.post("/", parseBody(adminCreateDbHostBody), async (req, res) => {
   const data = req.validatedBody as any;
   const host = await prisma.databaseHost.create({
     data: {
@@ -49,7 +51,7 @@ router.post('/', parseBody(adminCreateDbHostBody), async (req, res) => {
   });
   logActivity(
     (req as any).adminUser?.id,
-    'database_host.created',
+    "database_host.created",
     undefined,
     { name: host.name },
     req.ip,
@@ -57,9 +59,11 @@ router.post('/', parseBody(adminCreateDbHostBody), async (req, res) => {
   jsonOk(res, host);
 });
 
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
-  if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+  }
   const host = await prisma.databaseHost.findUnique({
     where: { id },
     include: {
@@ -67,19 +71,25 @@ router.get('/:id', async (req, res) => {
       _count: { select: { databases: true } },
     },
   });
-  if (!host) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+  if (!host) {
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
+  }
   jsonOk(res, host);
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
-  if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+  }
   const host = await prisma.databaseHost.findUnique({ where: { id } });
-  if (!host) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+  if (!host) {
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
+  }
   await prisma.databaseHost.delete({ where: { id } });
   logActivity(
     (req as any).adminUser?.id,
-    'database_host.deleted',
+    "database_host.deleted",
     undefined,
     { name: host.name },
     req.ip,
@@ -87,21 +97,30 @@ router.delete('/:id', async (req, res) => {
   jsonOk(res, { deleted: id });
 });
 
-router.post('/:id/test', async (req, res) => {
+router.post("/:id/test", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
-  if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+  }
   const host = await prisma.databaseHost.findUnique({ where: { id } });
-  if (!host) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+  if (!host) {
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
+  }
   try {
-    const mysql = await import('mysql2/promise');
-    const conn = await mysql.default.createConnection({
+    const pg = await import("pg");
+    const pool = new pg.Pool({
       host: host.host,
       port: host.port,
       user: host.username,
       password: host.password,
+      database: "postgres",
+      connectionTimeoutMillis: 10_000,
+      max: 1,
     });
-    await conn.ping();
-    await conn.end();
+    const client = await pool.connect();
+    await client.query("SELECT 1");
+    client.release();
+    await pool.end();
     jsonOk(res, { connected: true });
   } catch (err) {
     jsonOk(res, { connected: false, error: String(err) });

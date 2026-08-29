@@ -257,7 +257,6 @@ export type WebAuthnCredentialOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UsersOrderByWithRelationInput
-  _relevance?: Prisma.WebAuthnCredentialOrderByRelevanceInput
 }
 
 export type WebAuthnCredentialWhereUniqueInput = Prisma.AtLeast<{
@@ -389,12 +388,6 @@ export type WebAuthnCredentialListRelationFilter = {
 
 export type WebAuthnCredentialOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type WebAuthnCredentialOrderByRelevanceInput = {
-  fields: Prisma.WebAuthnCredentialOrderByRelevanceFieldEnum | Prisma.WebAuthnCredentialOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type WebAuthnCredentialCountOrderByAggregateInput = {
@@ -604,7 +597,29 @@ export type WebAuthnCredentialSelect<ExtArgs extends runtime.Types.Extensions.In
   user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["webAuthnCredential"]>
 
+export type WebAuthnCredentialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  credentialId?: boolean
+  publicKey?: boolean
+  counter?: boolean
+  transports?: boolean
+  deviceName?: boolean
+  userId?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["webAuthnCredential"]>
 
+export type WebAuthnCredentialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  credentialId?: boolean
+  publicKey?: boolean
+  counter?: boolean
+  transports?: boolean
+  deviceName?: boolean
+  userId?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["webAuthnCredential"]>
 
 export type WebAuthnCredentialSelectScalar = {
   id?: boolean
@@ -619,6 +634,12 @@ export type WebAuthnCredentialSelectScalar = {
 
 export type WebAuthnCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "credentialId" | "publicKey" | "counter" | "transports" | "deviceName" | "userId" | "createdAt", ExtArgs["result"]["webAuthnCredential"]>
 export type WebAuthnCredentialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}
+export type WebAuthnCredentialIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}
+export type WebAuthnCredentialIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
 }
 
@@ -754,6 +775,30 @@ export interface WebAuthnCredentialDelegate<ExtArgs extends runtime.Types.Extens
   createMany<T extends WebAuthnCredentialCreateManyArgs>(args?: Prisma.SelectSubset<T, WebAuthnCredentialCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many WebAuthnCredentials and returns the data saved in the database.
+   * @param {WebAuthnCredentialCreateManyAndReturnArgs} args - Arguments to create many WebAuthnCredentials.
+   * @example
+   * // Create many WebAuthnCredentials
+   * const webAuthnCredential = await prisma.webAuthnCredential.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many WebAuthnCredentials and only return the `id`
+   * const webAuthnCredentialWithIdOnly = await prisma.webAuthnCredential.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends WebAuthnCredentialCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, WebAuthnCredentialCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebAuthnCredentialPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a WebAuthnCredential.
    * @param {WebAuthnCredentialDeleteArgs} args - Arguments to delete one WebAuthnCredential.
    * @example
@@ -816,6 +861,36 @@ export interface WebAuthnCredentialDelegate<ExtArgs extends runtime.Types.Extens
    * 
    */
   updateMany<T extends WebAuthnCredentialUpdateManyArgs>(args: Prisma.SelectSubset<T, WebAuthnCredentialUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more WebAuthnCredentials and returns the data updated in the database.
+   * @param {WebAuthnCredentialUpdateManyAndReturnArgs} args - Arguments to update many WebAuthnCredentials.
+   * @example
+   * // Update many WebAuthnCredentials
+   * const webAuthnCredential = await prisma.webAuthnCredential.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more WebAuthnCredentials and only return the `id`
+   * const webAuthnCredentialWithIdOnly = await prisma.webAuthnCredential.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends WebAuthnCredentialUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, WebAuthnCredentialUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebAuthnCredentialPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one WebAuthnCredential.
@@ -1252,6 +1327,29 @@ export type WebAuthnCredentialCreateManyArgs<ExtArgs extends runtime.Types.Exten
 }
 
 /**
+ * WebAuthnCredential createManyAndReturn
+ */
+export type WebAuthnCredentialCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WebAuthnCredential
+   */
+  select?: Prisma.WebAuthnCredentialSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the WebAuthnCredential
+   */
+  omit?: Prisma.WebAuthnCredentialOmit<ExtArgs> | null
+  /**
+   * The data used to create many WebAuthnCredentials.
+   */
+  data: Prisma.WebAuthnCredentialCreateManyInput | Prisma.WebAuthnCredentialCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WebAuthnCredentialIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * WebAuthnCredential update
  */
 export type WebAuthnCredentialUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1293,6 +1391,36 @@ export type WebAuthnCredentialUpdateManyArgs<ExtArgs extends runtime.Types.Exten
    * Limit how many WebAuthnCredentials to update.
    */
   limit?: number
+}
+
+/**
+ * WebAuthnCredential updateManyAndReturn
+ */
+export type WebAuthnCredentialUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WebAuthnCredential
+   */
+  select?: Prisma.WebAuthnCredentialSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the WebAuthnCredential
+   */
+  omit?: Prisma.WebAuthnCredentialOmit<ExtArgs> | null
+  /**
+   * The data used to update WebAuthnCredentials.
+   */
+  data: Prisma.XOR<Prisma.WebAuthnCredentialUpdateManyMutationInput, Prisma.WebAuthnCredentialUncheckedUpdateManyInput>
+  /**
+   * Filter which WebAuthnCredentials to update
+   */
+  where?: Prisma.WebAuthnCredentialWhereInput
+  /**
+   * Limit how many WebAuthnCredentials to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WebAuthnCredentialIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

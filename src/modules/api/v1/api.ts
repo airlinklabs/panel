@@ -27,7 +27,7 @@ import {
 import {
   provisionDatabase,
   deprovisionDatabase,
-} from "../../../handlers/utils/core/mysqlProvisioner";
+} from "../../../handlers/utils/core/postgresProvisioner";
 import { logActivity } from "../../../handlers/utils/activity/activityLogger";
 import { validateVariableRules } from "../../user/server/startup";
 import { apiEndpoints } from "./apiDocs";

@@ -6,7 +6,7 @@
  * What it does:
  *   1. Reads project metadata from the nearest package.json (one level up).
  *   2. Checks Node.js version and package manager availability.
- *   3. Installs Redis and MariaDB if they're not present, using whatever
+ *   3. Installs Redis and PostgreSQL if they're not present, using whatever
  *      package manager the host OS actually has (apt, dnf, pacman, brew,
  *      winget, choco, scoop).
  *   4. Starts both services and verifies they accept connections.
@@ -16,11 +16,11 @@
  *
  * Flags:
  *   --yes / -y        Skip all "are you sure?" prompts.
- *   --skip-services   Skip Redis + MariaDB install/start (useful when
+ *   --skip-services   Skip Redis + PostgreSQL install/start (useful when
  *                     you're providing your own DB, e.g. Docker Compose).
  *   --skip-build      Skip the pnpm install + tsc + tailwind step.
- *   --db-host HOST    Override the MariaDB host (default: 127.0.0.1).
- *   --db-port PORT    Override the MariaDB port (default: 3306).
+ *   --db-host HOST    Override the PostgreSQL host (default: 127.0.0.1).
+ *   --db-port PORT    Override the PostgreSQL port (default: 5432).
  *   --db-name NAME    Override the database name (default: airlink).
  *   --db-user USER    Override the DB username (default: airlink).
  *   --redis-url URL   Override the Redis connection URL.
@@ -89,17 +89,15 @@ function loadPackageMeta() {
 const PKG = loadPackageMeta();
 
 // ---
-// Platform detection - we use this throughout to pick the right install
-// commands and service management approach.
+// Platform detection
 // ---
 
-const PLATFORM = process.platform; // 'linux' | 'darwin' | 'win32'
-const ARCH = process.arch; // 'x64' | 'arm64' | 'arm' | ...
+const PLATFORM = process.platform;
+const ARCH = process.arch;
 const IS_WIN = PLATFORM === "win32";
 const IS_MAC = PLATFORM === "darwin";
 const IS_LINUX = PLATFORM === "linux";
 
-/** Detect the Linux package manager by checking which binaries exist. */
 function detectLinuxPkgMgr() {
   for (const mgr of ["apt-get", "dnf", "yum", "pacman", "zypper", "apk"]) {
     if (which(mgr)) return mgr;
@@ -107,13 +105,11 @@ function detectLinuxPkgMgr() {
   return null;
 }
 
-/** Detect macOS package manager (homebrew is overwhelmingly dominant). */
 function detectMacPkgMgr() {
   if (which("brew")) return "brew";
   return null;
 }
 
-/** Detect Windows package manager - try winget, choco, scoop in that order. */
 function detectWinPkgMgr() {
   for (const mgr of ["winget", "choco", "scoop"]) {
     if (which(mgr)) return mgr;
@@ -122,14 +118,11 @@ function detectWinPkgMgr() {
 }
 
 // ---
-// Argument parsing - intentionally hand-rolled so we have zero dependencies
-// at setup time (no commander, no yargs).
+// Argument parsing
 // ---
 
 const argv = process.argv.slice(2);
 
-/** Return the value of a CLI flag, or null if it wasn't passed.
- *  Handles both "--flag value" and "--flag=value" styles. */
 function flag(name, fallback = null) {
   for (let i = 0; i < argv.length; i++) {
     if (
@@ -152,22 +145,17 @@ const opts = {
   skipServices: argv.includes("--skip-services"),
   skipBuild: argv.includes("--skip-build"),
   dbHost: flag("--db-host", "127.0.0.1"),
-  dbPort: flag("--db-port", "3306"),
+  dbPort: flag("--db-port", "5432"),
   dbName: flag("--db-name", "airlink"),
   dbUser: flag("--db-user", "airlink"),
   redisUrl: flag("--redis-url", null),
 };
 
 // ---
-// Terminal colours - we only apply them when stdout is actually a TTY.
-// Piped output (CI logs, redirected files) stays clean.
+// Terminal colours
 // ---
 
 const TTY = process.stdout.isTTY;
-
-// ---
-// Logging helpers (chalk-based)
-// ---
 
 const ok = (msg) => console.log(`  ${chalk.green("+")} ${msg}`);
 const warn = (msg) =>
@@ -177,13 +165,11 @@ const info = (msg) => console.log(`  ${chalk.cyan("->")} ${msg}`);
 const dim = (msg) => console.log(`  ${chalk.dim(msg)}`);
 const gap = () => console.log();
 
-/** Print a plain section header. */
 function section(title) {
   gap();
   console.log(`  ${chalk.bold.blue(title)}`);
 }
 
-/** Print project metadata without decorative framing. */
 function banner() {
   if (TTY) {
     const ASCII = `  /$$$$$$ /$$         /$$/$$         /$$
@@ -219,7 +205,6 @@ function banner() {
   gap();
 }
 
-/** Print the --help text and exit cleanly. */
 function showHelp() {
   banner();
   console.log(`${chalk.bold("Usage")}
@@ -227,13 +212,13 @@ function showHelp() {
 
 ${chalk.bold("Flags")}
   --yes, -y           Accept all prompts (non-interactive / CI mode).
-  --skip-services     Don't install or start Redis / MariaDB.
+  --skip-services     Don't install or start Redis / PostgreSQL.
   --skip-build        Don't run pnpm install, tsc, or tailwindcss.
-  --db-host HOST      MariaDB host          [default: 127.0.0.1]
-  --db-port PORT      MariaDB port          [default: 3306]
-  --db-name NAME      Database name         [default: airlink]
-  --db-user USER      Database username     [default: airlink]
-  --redis-url URL     Redis connection URL  [default: redis://127.0.0.1:6379]
+  --db-host HOST      PostgreSQL host      [default: 127.0.0.1]
+  --db-port PORT      PostgreSQL port      [default: 5432]
+  --db-name NAME      Database name        [default: airlink]
+  --db-user USER      Database username    [default: airlink]
+  --redis-url URL     Redis connection URL [default: redis://127.0.0.1:6379]
   --help, -h          Show this message.
 
 ${chalk.bold("Examples")}
@@ -248,11 +233,6 @@ ${chalk.bold("Examples")}
 // Shell execution helpers
 // ---
 
-/**
- * Run a command and return its trimmed stdout, or null on failure.
- * We swallow stderr by default so the terminal doesn't fill up with noise
- * during the many "does X exist?" probes.
- */
 function run(cmd, extraOpts = {}) {
   try {
     const output = execSync(cmd, {
@@ -288,11 +268,6 @@ function runFile(file, args) {
   }
 }
 
-/**
- * Run a command and stream its output live to the terminal.
- * Use this for long-running things (pnpm install, tsc) so the user
- * can see progress rather than staring at a frozen cursor.
- */
 function runLive(cmd, description) {
   info(description);
   const result = spawnSync(cmd, {
@@ -307,7 +282,6 @@ function runLive(cmd, description) {
   }
 }
 
-/** Like run(), but exits the process on failure rather than returning null. */
 function runOrDie(cmd, errMsg) {
   const result = run(cmd);
   if (result === null) {
@@ -317,7 +291,6 @@ function runOrDie(cmd, errMsg) {
   return result;
 }
 
-/** Check if a binary is on PATH. */
 function which(bin) {
   return run(IS_WIN ? `where ${bin}` : `which ${bin}`);
 }
@@ -337,16 +310,12 @@ function waitFor(check, attempts = 15) {
 // Interactive prompt helper
 // ---
 
-/**
- * Ask a yes/no question in the terminal.
- * Returns true immediately in --yes mode without printing anything.
- */
 function ask(question) {
   if (opts.yes) return Promise.resolve(true);
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   return new Promise((resolve) => {
     rl.question(
-      `  ${C.yellow}?${C.reset} ${question} ${C.dim}[Y/n]${C.reset} `,
+      `  ${chalk.yellow("?")} ${question} ${chalk.dim("[Y/n]")} `,
       (ans) => {
         rl.close();
         const lower = ans.trim().toLowerCase();
@@ -360,12 +329,10 @@ function ask(question) {
 // Cryptography helpers
 // ---
 
-/** 32-byte URL-safe random string - suitable for DB passwords. */
 function genPassword() {
   return randomBytes(32).toString("base64url");
 }
 
-/** 64-hex-character string - suitable for session secrets. */
 function genSecret() {
   return randomBytes(32).toString("hex");
 }
@@ -389,33 +356,26 @@ function isTemplateEnv(env) {
 }
 
 function assertSqlIdentifier(value, label) {
-  if (!/^[A-Za-z0-9_]+$/.test(value)) {
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
     throw new Error(
-      `${label} may contain only letters, numbers, and underscores.`,
+      `${label} may contain only letters, numbers, and underscores (must start with a letter or underscore).`,
     );
   }
 }
 
 // ---
-// Service management - handles systemd, SysV init, launchctl, Windows SCM,
-// and bare-binary fallbacks for each case.
+// Service management
 // ---
 
-/**
- * Check whether a named service is currently running.
- * Tries systemd first, then SysV, then macOS launchd, then Windows SC.
- */
 function serviceIsActive(name) {
   if (IS_WIN) {
     const out = run(`sc query "${name}" 2>nul`);
     return out?.includes("RUNNING") ?? false;
   }
   if (IS_MAC) {
-    // launchctl reports "enabled" or the service PID when running.
     const out = run(`launchctl list 2>/dev/null | grep "${name}"`);
     return !!out;
   }
-  // Linux - try systemd first, fall back to SysV.
   const systemd = run(`systemctl is-active "${name}" 2>/dev/null`);
   if (systemd === "active") return true;
   const sysv = run(`service "${name}" status 2>/dev/null; echo $?`, {
@@ -424,10 +384,6 @@ function serviceIsActive(name) {
   return sysv?.split("\n").pop() === "0";
 }
 
-/**
- * Try to start a named service, returning true if it ended up running.
- * Works across systemd, SysV, launchctl (macOS), and Windows SC.
- */
 function startService(name, binaryFallback = null) {
   if (serviceIsActive(name)) return true;
 
@@ -438,16 +394,13 @@ function startService(name, binaryFallback = null) {
       `brew services start "${name}" 2>/dev/null || launchctl start "${name}" 2>/dev/null`,
     );
   } else {
-    // Containers often ship a systemctl shim without a running systemd.
     if (existsSync("/run/systemd/system")) {
       run(`sudo systemctl start "${name}" 2>/dev/null`, { timeout: 15_000 });
     }
     if (!serviceIsActive(name) && !existsSync("/run/systemd/system")) {
-      // SysV init fallback (older Debian, Alpine, WSL1, some containers).
       run(`sudo service "${name}" start 2>/dev/null`, { timeout: 5_000 });
     }
     if (!serviceIsActive(name) && binaryFallback) {
-      // Last resort: launch the daemon directly in the background.
       run(binaryFallback);
     }
   }
@@ -455,67 +408,20 @@ function startService(name, binaryFallback = null) {
   return serviceIsActive(name);
 }
 
-function startMariaDBFallback() {
-  if (!IS_LINUX || !which("mariadbd")) return false;
-  run("sudo mkdir -p /run/mysqld && sudo chown mysql:mysql /run/mysqld");
-  return (
-    run(
-      "sudo -u mysql mariadbd --no-defaults --user=mysql --datadir=/var/lib/mysql --bind-address=127.0.0.1 --port=3306 --socket=/run/mysqld/mysqld.sock --pid-file=/run/mysqld/mysqld.pid >/tmp/airlink-mariadb.log 2>&1 &",
-    ) !== null
-  );
-}
-
-function initializeMariaDB() {
-  if (!IS_LINUX || !which("mariadbd")) return true;
-  const systemTable =
-    run("sudo test -f /var/lib/mysql/mysql/db.frm") !== null ||
-    run("sudo test -f /var/lib/mysql/mysql/db.ibd") !== null;
-  if (systemTable) return true;
-
-  info("Initializing MariaDB system tables...");
-  const initializer = which("mariadb-install-db") || which("mysql_install_db");
-  if (!initializer) return false;
-  run("id mysql >/dev/null 2>&1 || sudo useradd -r -s /bin/false mysql");
-  run(
-    "sudo mkdir -p /var/lib/mysql && sudo chown -R mysql:mysql /var/lib/mysql",
-  );
-  return (
-    run(
-      `sudo -u mysql ${initializer} --no-defaults --user=mysql --basedir=/usr --datadir=/var/lib/mysql`,
-    ) !== null
-  );
-}
-
-/** Enable a service so it starts on boot. Best-effort - failures are logged but non-fatal. */
 function enableService(name) {
   if (IS_WIN) {
     run(`sc config "${name}" start= auto 2>nul`);
   } else if (IS_MAC) {
-    run(`brew services restart "${name}" 2>/dev/null`); // brew already auto-enables
+    run(`brew services restart "${name}" 2>/dev/null`);
   } else {
     run(`sudo systemctl enable "${name}" 2>/dev/null || true`);
   }
 }
 
 // ---
-// Package installation - maps the generic action "install pkg X" onto
-// whatever package manager the host actually has.
+// Package installation
 // ---
 
-/**
- * Build the shell command that installs a package on this platform.
- *
- * packageMap example:
- *   {
- *     'apt-get': 'redis-server',
- *     'dnf':     'redis',
- *     'pacman':  'redis',
- *     'brew':    'redis',
- *     'winget':  'Redis.Redis',
- *     'choco':   'redis',
- *     'scoop':   'redis',
- *   }
- */
 function buildInstallCmd(pkgMgr, packageMap) {
   const pkg = packageMap[pkgMgr];
   if (!pkg) return null;
@@ -552,9 +458,6 @@ function buildInstallCmd(pkgMgr, packageMap) {
 
 function checkNode() {
   section("Pre-flight checks");
-
-  // Pull the minimum version from engines.node in package.json, or fall
-  // back to 22 which is what this project currently requires.
   const minRaw = PKG.engines?.node?.replace(/[^0-9.]/g, "") ?? "22";
   const minMajor = parseInt(minRaw, 10) || 22;
   const curMajor = parseInt(process.versions.node, 10);
@@ -586,10 +489,6 @@ function checkPnpm() {
 // Redis
 // ---
 
-/**
- * Resolve which package manager is available on this host, then return
- * the install command for redis-server (or the platform-appropriate name).
- */
 function getRedisInstallCmd() {
   if (IS_LINUX) {
     const mgr = detectLinuxPkgMgr();
@@ -651,8 +550,6 @@ async function ensureRedis() {
     ok(`redis-server found at ${redisBin}`);
   }
 
-  // On Linux/Mac we manage it as a service. On Windows the installer usually
-  // registers a service automatically, but we try both paths.
   const serviceName = IS_WIN ? "Redis" : IS_MAC ? "redis" : "redis-server";
 
   const redisCliPath =
@@ -661,7 +558,6 @@ async function ensureRedis() {
 
   if (!redisReady() && !serviceIsActive(serviceName)) {
     warn(`Redis service "${serviceName}" is not running`);
-    // Binary fallback: launch redis in the background if service management fails.
     const daemonFallback = IS_WIN
       ? null
       : "redis-server --daemonize yes 2>/dev/null";
@@ -675,7 +571,6 @@ async function ensureRedis() {
     ok("Redis is running");
   }
 
-  // Verify the server actually responds before we move on.
   if (!(await waitFor(redisReady))) {
     fail("redis-cli ping did not return PONG. Check your Redis config.");
     process.exit(1);
@@ -701,143 +596,47 @@ function printManualRedisInstructions() {
 }
 
 // ---
-// MariaDB
+// PostgreSQL
 // ---
 
-function getMariaDBInstallCmd() {
+function getPostgresInstallCmd() {
   if (IS_LINUX) {
     const mgr = detectLinuxPkgMgr();
     if (!mgr) return null;
     return buildInstallCmd(mgr, {
-      "apt-get": "mariadb-server",
-      dnf: "mariadb-server",
-      yum: "mariadb-server",
-      pacman: "mariadb",
-      zypper: "mariadb",
-      apk: "mariadb mariadb-openrc",
+      "apt-get": "postgresql postgresql-contrib",
+      dnf: "postgresql-server postgresql",
+      yum: "postgresql-server postgresql",
+      pacman: "postgresql",
+      zypper: "postgresql-server postgresql",
+      apk: "postgresql postgresql-contrib",
     });
   }
   if (IS_MAC) {
     const mgr = detectMacPkgMgr();
-    return mgr ? buildInstallCmd(mgr, { brew: "mariadb" }) : null;
+    return mgr ? buildInstallCmd(mgr, { brew: "postgresql@16" }) : null;
   }
   if (IS_WIN) {
     const mgr = detectWinPkgMgr();
     if (!mgr) return null;
     return buildInstallCmd(mgr, {
-      winget: "MariaDB.Server",
-      choco: "mariadb",
-      scoop: "mariadb",
+      winget: "PostgreSQL.PostgreSQL.16",
+      choco: "postgresql",
+      scoop: "postgresql",
     });
   }
   return null;
 }
 
-async function ensureMariaDB() {
-  section("MariaDB");
-
-  const mariadBin =
-    which("mariadbd") ||
-    which("mysqld") ||
-    which("mariadbd.exe") ||
-    which("mysqld.exe");
-
-  if (!mariadBin) {
-    warn("MariaDB server binary not found on PATH");
-    const proceed = await ask("Install MariaDB automatically?");
-    if (!proceed) {
-      fail("MariaDB is required. Install it manually, then re-run setup.");
-      process.exit(1);
-    }
-
-    const cmd = getMariaDBInstallCmd();
-    if (!cmd) {
-      fail("Could not determine how to install MariaDB on this system.");
-      printManualMariaDBInstructions();
-      process.exit(1);
-    }
-
-    info(`Installing MariaDB via: ${cmd}`);
-    const result = run(cmd);
-    if (result === null) {
-      fail("MariaDB install failed.");
-      printManualMariaDBInstructions();
-      process.exit(1);
-    }
-    ok("MariaDB installed");
-
-    // Some distros (Arch, Alpine) need the data directory initialised before
-    // the service can start.
-    if (IS_LINUX) {
-      run(
-        "sudo -u mysql mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql 2>/dev/null || true",
-      );
-    }
-  } else {
-    ok(`MariaDB found at ${mariadBin}`);
-  }
-
-  if (!initializeMariaDB()) {
-    fail("Could not initialize MariaDB system tables.");
-    printManualMariaDBInstructions();
-    process.exit(1);
-  }
-
-  // Service name varies by distro.
-  const serviceName = IS_WIN
-    ? "MySQL"
-    : IS_MAC
-      ? "mariadb"
-      : detectMariaDBServiceName();
-
-  const rootClient = which("mariadb") || which("mysql");
-  const mariaReady = () =>
-    rootClient &&
-    (run(`${rootClient} --no-defaults -u root -N -e "SELECT 1" 2>/dev/null`) ===
-      "1" ||
-      run(
-        `sudo ${rootClient} --no-defaults -u root -N -e "SELECT 1" 2>/dev/null`,
-      ) === "1");
-
-  const hasSystemd = existsSync("/run/systemd/system");
-
-  if (!mariaReady() && (hasSystemd ? !serviceIsActive(serviceName) : true)) {
-    warn(`MariaDB service "${serviceName}" is not running`);
-    const started = existsSync("/run/systemd/system")
-      ? startService(serviceName)
-      : startMariaDBFallback();
-    if (!mariaReady() && !started && !startMariaDBFallback()) {
-      fail("Could not start MariaDB. Start it manually, then re-run setup.");
-      printManualMariaDBInstructions();
-      process.exit(1);
-    }
-    enableService(serviceName);
-    ok("MariaDB started and enabled");
-  } else {
-    ok("MariaDB is running");
-  }
-
-  // Verify root can connect without a password.
-  // On a fresh install this is typically the case; if it fails we print
-  // a helpful message rather than just dying.
-  const conn = await waitFor(mariaReady);
-
-  if (!conn) {
-    fail("Cannot connect to MariaDB as root without a password.");
-    warn(
-      "If root has a password, set MYSQL_ROOT_PASSWORD=yourpass before re-running,",
-    );
-    warn(
-      "or run: sudo mariadb -u root  and grant the app user access manually.",
-    );
-    process.exit(1);
-  }
-  ok("MariaDB root connection OK");
-}
-
-/** Different distros register MariaDB under different service names. */
-function detectMariaDBServiceName() {
-  for (const name of ["mariadb", "mysql", "mysqld", "mariadbd"]) {
+function detectPostgresServiceName() {
+  for (const name of [
+    "postgresql",
+    "postgres",
+    "pg",
+    "postgresql@16",
+    "postgresql@15",
+    "postgresql@14",
+  ]) {
     const out = run(
       `systemctl status "${name}" 2>/dev/null || service "${name}" status 2>/dev/null; echo x`,
       { timeout: 5_000 },
@@ -845,40 +644,143 @@ function detectMariaDBServiceName() {
     if (out && !out.includes("not-found") && !out.includes("unrecognized"))
       return name;
   }
-  return "mariadb"; // best guess
+  return "postgresql"; // best guess
 }
 
-function printManualMariaDBInstructions() {
-  warn("Install MariaDB manually:");
-  if (IS_LINUX) {
-    warn("  Ubuntu/Debian : sudo apt install mariadb-server");
-    warn("  Fedora/RHEL   : sudo dnf install mariadb-server");
-    warn("  Arch          : sudo pacman -S mariadb");
-    warn("  Alpine        : sudo apk add mariadb");
+function startPostgresFallback() {
+  if (!IS_LINUX) return false;
+  // Try pg_ctl directly
+  const pgBin = which("pg_ctl") || which("pg_ctlcluster");
+  if (!pgBin) return false;
+  const dataDir = run("sudo -u postgres pg_config --sharedir 2>/dev/null");
+  return (
+    run(
+      "sudo -u postgres pg_ctl start -D /var/lib/postgresql/data -l /tmp/airlink-postgres.log 2>/dev/null &",
+    ) !== null
+  );
+}
+
+async function ensurePostgres() {
+  section("PostgreSQL");
+
+  const pgBin = which("psql") || which("psql.exe");
+
+  if (!pgBin) {
+    warn("psql (PostgreSQL client) not found on PATH");
+    const proceed = await ask("Install PostgreSQL automatically?");
+    if (!proceed) {
+      fail("PostgreSQL is required. Install it manually, then re-run setup.");
+      process.exit(1);
+    }
+
+    const cmd = getPostgresInstallCmd();
+    if (!cmd) {
+      fail("Could not determine how to install PostgreSQL on this system.");
+      printManualPostgresInstructions();
+      process.exit(1);
+    }
+
+    info(`Installing PostgreSQL via: ${cmd}`);
+    const result = run(cmd);
+    if (result === null) {
+      fail("PostgreSQL install failed.");
+      printManualPostgresInstructions();
+      process.exit(1);
+    }
+    ok("PostgreSQL installed");
+
+    // Initialize the database cluster if needed (some distros need this)
+    if (IS_LINUX) {
+      const dataDir = run("sudo -u postgres pg_config --datadir 2>/dev/null");
+      if (dataDir && !existsSync(dataDir.trim())) {
+        const initdb = which("initdb") || which("pg_ctlcluster");
+        if (initdb) {
+          run(
+            "sudo -u postgres initdb -D /var/lib/postgresql/data 2>/dev/null || true",
+          );
+        }
+      }
+    }
+  } else {
+    ok(`psql found at ${pgBin}`);
   }
-  if (IS_MAC) warn("  macOS         : brew install mariadb");
+
+  const serviceName = IS_WIN
+    ? "postgresql-x64-16"
+    : IS_MAC
+      ? "postgresql"
+      : detectPostgresServiceName();
+
+  const pgReady = () => {
+    const result = run(
+      `sudo -u postgres psql -t -c "SELECT 1" 2>/dev/null || psql -U postgres -t -c "SELECT 1" 2>/dev/null`,
+      { timeout: 5_000 },
+    );
+    return result?.trim() === "1";
+  };
+
+  if (!pgReady() && (IS_LINUX ? !serviceIsActive(serviceName) : true)) {
+    warn(`PostgreSQL service "${serviceName}" is not running`);
+    const started = startService(serviceName, startPostgresFallback());
+    if (!pgReady() && !started) {
+      fail("Could not start PostgreSQL. Start it manually, then re-run setup.");
+      printManualPostgresInstructions();
+      process.exit(1);
+    }
+    enableService(serviceName);
+    ok("PostgreSQL started and enabled");
+  } else {
+    ok("PostgreSQL is running");
+  }
+
+  const conn = await waitFor(pgReady);
+  if (!conn) {
+    fail("Cannot connect to PostgreSQL as postgres user.");
+    warn("Check your PostgreSQL authentication config (pg_hba.conf).");
+    process.exit(1);
+  }
+  ok("PostgreSQL postgres connection OK");
+}
+
+function printManualPostgresInstructions() {
+  warn("Install PostgreSQL manually:");
+  if (IS_LINUX) {
+    warn("  Ubuntu/Debian : sudo apt install postgresql postgresql-contrib");
+    warn("  Fedora/RHEL   : sudo dnf install postgresql-server postgresql");
+    warn("  Arch          : sudo pacman -S postgresql");
+    warn("  Alpine        : sudo apk add postgresql postgresql-contrib");
+  }
+  if (IS_MAC) warn("  macOS         : brew install postgresql@16");
   if (IS_WIN) {
-    warn("  winget        : winget install MariaDB.Server");
-    warn("  Chocolatey    : choco install mariadb");
+    warn("  winget        : winget install PostgreSQL.PostgreSQL.16");
+    warn("  Chocolatey    : choco install postgresql");
   }
   warn(
-    "  Docker        : docker run -d -p 3306:3306 -e MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=1 mariadb:latest",
+    "  Docker        : docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=airlink postgres:16",
   );
 }
 
 // ---
-// Helper to run a raw SQL statement via the root MariaDB client.
-// Returns the trimmed stdout, or null on failure.
+// Run a SQL statement via the postgres superuser (postgres).
+// Returns trimmed stdout, or null on failure.
 // ---
 
-function sql(statement) {
-  // Pass SQL as an argument so shell syntax in identifiers is not evaluated.
-  const args = ["--no-defaults", "-u", "root", "-N", "-e", statement];
+function psql(statement) {
+  const args = ["-U", "postgres", "-t", "-A", "-c", statement];
   return (
-    runFile("sudo", ["mariadb", ...args]) ??
-    runFile("sudo", ["mysql", ...args]) ??
-    runFile("mariadb", args) ??
-    runFile("mysql", args)
+    runFile("sudo", ["-u", "postgres", "psql", ...args]) ??
+    runFile("psql", ["-U", "postgres", ...args]) ??
+    runFile("psql", args)
+  );
+}
+
+// Run a SQL statement with a specific database.
+function psqlDb(dbName, statement) {
+  const args = ["-U", "postgres", "-d", dbName, "-t", "-A", "-c", statement];
+  return (
+    runFile("sudo", ["-u", "postgres", "psql", ...args]) ??
+    runFile("psql", ["-U", "postgres", "-d", dbName, ...args]) ??
+    runFile("psql", ["-d", dbName, ...args])
   );
 }
 
@@ -900,76 +802,62 @@ async function setupDatabase() {
     throw new Error("DATABASE_URL in .env is not a valid URL.");
   }
 
-  const dbHost = existingEnv.MYSQL_HOST ?? existingUrl?.hostname ?? opts.dbHost;
-  const dbPort = existingEnv.MYSQL_PORT ?? existingUrl?.port ?? opts.dbPort;
+  const dbHost = existingEnv.PGHOST ?? existingUrl?.hostname ?? opts.dbHost;
+  const dbPort = existingEnv.PGPORT ?? existingUrl?.port ?? opts.dbPort;
   const dbName = existingUrl?.pathname.slice(1) || opts.dbName;
-  const dbUser = existingEnv.MYSQL_USER ?? existingUrl?.username ?? opts.dbUser;
+  const dbUser = existingEnv.PGUSER ?? existingUrl?.username ?? opts.dbUser;
   const dbPass =
-    existingEnv.MYSQL_PASSWORD ?? existingUrl?.password ?? genPassword();
+    existingEnv.PGPASSWORD ?? existingUrl?.password ?? genPassword();
   assertSqlIdentifier(dbName, "Database name");
   assertSqlIdentifier(dbUser, "Database user");
 
   // Database
-  const dbExists = sql(
-    `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${dbName}'`,
+  const dbExists = psql(
+    `SELECT 1 FROM pg_database WHERE datname = '${dbName}'`,
   );
 
-  if (!dbExists) {
-    info(`Creating database \`${dbName}\`...`);
-    if (
-      sql(
-        `CREATE DATABASE \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
-      ) === null
-    ) {
-      throw new Error(`Could not create database \`${dbName}\`.`);
+  if (!dbExists || !dbExists.trim()) {
+    info(`Creating database "${dbName}"...`);
+    if (psql(`CREATE DATABASE "${dbName}"`) === null) {
+      throw new Error(`Could not create database "${dbName}".`);
     }
-    ok(`Database \`${dbName}\` created`);
+    ok(`Database "${dbName}" created`);
   } else {
-    ok(`Database \`${dbName}\` already exists`);
+    ok(`Database "${dbName}" already exists`);
   }
 
-  // User
-  const userExists = sql(
-    `SELECT user FROM mysql.user WHERE user = '${dbUser}'`,
-  );
+  // User / Role
+  const userExists = psql(`SELECT 1 FROM pg_roles WHERE rolname = '${dbUser}'`);
 
-  if (existingEnv.MYSQL_USER || existingUrl) {
+  if (existingEnv.PGUSER || existingUrl) {
     ok("Using database credentials from existing .env");
   }
 
-  // Ensure the configured account matches .env, including after a local
-  // database has been removed and installed again.
-
-  if (!userExists) {
-    info(`Creating database user "${dbUser}"...`);
-    for (const host of ["127.0.0.1", "localhost", "::1"]) {
-      sql(
-        `CREATE USER IF NOT EXISTS '${dbUser}'@'${host}' IDENTIFIED BY '${dbPass}'`,
-      );
-      sql(`GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'${host}'`);
-    }
+  if (!userExists || !userExists.trim()) {
+    info(`Creating database role "${dbUser}"...`);
+    psql(`CREATE ROLE "${dbUser}" WITH LOGIN PASSWORD '${dbPass}'`);
   } else {
-    info(`User "${dbUser}" already exists - refreshing password and grants...`);
-    for (const host of ["127.0.0.1", "localhost", "::1"]) {
-      // ALTER USER is safer than DROP + CREATE when the user has objects.
-      sql(`ALTER USER '${dbUser}'@'${host}' IDENTIFIED BY '${dbPass}'`);
-      sql(`GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'${host}'`);
-    }
+    info(`Role "${dbUser}" already exists - refreshing password...`);
+    psql(`ALTER ROLE "${dbUser}" WITH PASSWORD '${dbPass}'`);
   }
 
-  sql("FLUSH PRIVILEGES");
-  ok(`User "${dbUser}" configured with full access to \`${dbName}\``);
+  // Grant privileges
+  psql(`GRANT ALL PRIVILEGES ON DATABASE "${dbName}" TO "${dbUser}"`);
+  psql(
+    `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "${dbUser}"`,
+  );
+  psql(
+    `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "${dbUser}"`,
+  );
+  ok(`Role "${dbUser}" configured with full access to "${dbName}"`);
 
   // Verify
-  const passwordArg = dbPass ? ` -p${dbPass}` : "";
-  const testCmd =
-    `mariadb --no-defaults -u ${dbUser}${passwordArg} -h ${dbHost} -P ${dbPort} -N -e "SELECT 1" 2>/dev/null` +
-    ` || mysql --no-defaults -u ${dbUser}${passwordArg} -h ${dbHost} -P ${dbPort} -N -e "SELECT 1" 2>/dev/null`;
-  const testConn = run(testCmd);
+  const testCmd = `psql -U ${dbUser} -h ${dbHost} -p ${dbPort} -d ${dbName} -t -A -c "SELECT 1" 2>/dev/null`;
+  const testConn = run(`PGPASSWORD=${dbPass} ${testCmd}`);
 
-  if (testConn !== "1") {
+  if (testConn?.trim() !== "1") {
     fail(
-      `Could not connect as "${dbUser}". Check your MariaDB bind-address and auth config.`,
+      `Could not connect as "${dbUser}". Check your PostgreSQL pg_hba.conf and listen_addresses.`,
     );
     process.exit(1);
   }
@@ -998,8 +886,6 @@ function generateEnv(creds) {
   const redisUrl = opts.redisUrl ?? "redis://127.0.0.1:6379";
   const sessionSecret = genSecret();
 
-  // We write every value with double-quotes so the file is easy to
-  // parse in shell scripts and across all platforms.
   const lines = [
     "#",
     `# ${PKG.name} - environment configuration`,
@@ -1016,13 +902,13 @@ function generateEnv(creds) {
     `SESSION_SECRET="${sessionSecret}"`,
     "",
     "# Database (Prisma)",
-    `DATABASE_URL="mysql://${dbUser}:${dbPass}@${dbHost}:${dbPort}/${dbName}"`,
+    `DATABASE_URL="postgresql://${dbUser}:${dbPass}@${dbHost}:${dbPort}/${dbName}"`,
     "",
     "# Database (raw credentials, used by the DB-host auto-generator)",
-    `MYSQL_HOST="${dbHost}"`,
-    `MYSQL_PORT="${dbPort}"`,
-    `MYSQL_USER="${dbUser}"`,
-    `MYSQL_PASSWORD="${dbPass}"`,
+    `PGHOST="${dbHost}"`,
+    `PGPORT="${dbPort}"`,
+    `PGUSER="${dbUser}"`,
+    `PGPASSWORD="${dbPass}"`,
     "",
     "# Redis",
     `REDIS_URL="${redisUrl}"`,
@@ -1041,8 +927,6 @@ function generateEnv(creds) {
 function runPrisma() {
   section("Prisma");
 
-  // pnpm exec means we use the project-local prisma binary, not a global one.
-  // This avoids version mismatches.
   runLive("pnpm exec prisma generate", "Generating Prisma client...");
   ok("prisma generate");
 
@@ -1051,7 +935,7 @@ function runPrisma() {
 }
 
 // ---
-// Build (dependencies + TypeScript + CSS)
+// Build
 // ---
 
 function runBuild() {
@@ -1060,8 +944,6 @@ function runBuild() {
   runLive("pnpm install", "Installing dependencies...");
   ok("pnpm install");
 
-  // TypeScript compilation - we continue even on type errors because many
-  // projects ship with pre-existing warnings that don't affect runtime.
   info("Compiling TypeScript (main)...");
   const tsc1 = run("pnpm exec tsc 2>&1");
   if (tsc1 === null) {
@@ -1080,7 +962,6 @@ function runBuild() {
     ok("tsc (prisma)");
   }
 
-  // CSS - non-fatal; the app still loads if this fails, just without updated styles.
   info("Building CSS with Tailwind...");
   const css = run(
     "pnpm exec tailwindcss -i ./public/styles/tw.css -o ./public/styles.css 2>&1",
@@ -1095,7 +976,7 @@ function runBuild() {
 }
 
 // ---
-// Summary screen
+// Summary
 // ---
 
 function printSummary(creds) {
@@ -1113,7 +994,7 @@ function printSummary(creds) {
 
   console.log(`  ${chalk.bold("DATABASE_URL")}`);
   console.log(
-    `  ${chalk.dim(`mysql://${creds.dbUser}:${creds.dbPass}@${creds.dbHost}:${creds.dbPort}/${creds.dbName}`)}`,
+    `  ${chalk.dim(`postgresql://${creds.dbUser}:${creds.dbPass}@${creds.dbHost}:${creds.dbPort}/${creds.dbName}`)}`,
   );
   gap();
 
@@ -1144,10 +1025,10 @@ async function main() {
 
   if (opts.skipServices) {
     section("Services");
-    warn("--skip-services: skipping Redis and MariaDB install/start.");
+    warn("--skip-services: skipping Redis and PostgreSQL install/start.");
   } else {
     await ensureRedis();
-    await ensureMariaDB();
+    await ensurePostgres();
   }
 
   const creds = await setupDatabase();

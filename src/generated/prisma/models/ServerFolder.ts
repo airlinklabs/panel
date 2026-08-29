@@ -223,7 +223,6 @@ export type ServerFolderOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   owner?: Prisma.UsersOrderByWithRelationInput
   members?: Prisma.ServerFolderMemberOrderByRelationAggregateInput
-  _relevance?: Prisma.ServerFolderOrderByRelevanceInput
 }
 
 export type ServerFolderWhereUniqueInput = Prisma.AtLeast<{
@@ -317,12 +316,6 @@ export type ServerFolderListRelationFilter = {
 
 export type ServerFolderOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ServerFolderOrderByRelevanceInput = {
-  fields: Prisma.ServerFolderOrderByRelevanceFieldEnum | Prisma.ServerFolderOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type ServerFolderCountOrderByAggregateInput = {
@@ -574,7 +567,21 @@ export type ServerFolderSelect<ExtArgs extends runtime.Types.Extensions.Internal
   _count?: boolean | Prisma.ServerFolderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["serverFolder"]>
 
+export type ServerFolderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  ownerId?: boolean
+  createdAt?: boolean
+  owner?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["serverFolder"]>
 
+export type ServerFolderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  ownerId?: boolean
+  createdAt?: boolean
+  owner?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["serverFolder"]>
 
 export type ServerFolderSelectScalar = {
   id?: boolean
@@ -588,6 +595,12 @@ export type ServerFolderInclude<ExtArgs extends runtime.Types.Extensions.Interna
   owner?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
   members?: boolean | Prisma.ServerFolder$membersArgs<ExtArgs>
   _count?: boolean | Prisma.ServerFolderCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type ServerFolderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
+}
+export type ServerFolderIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UsersDefaultArgs<ExtArgs>
 }
 
 export type $ServerFolderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -719,6 +732,30 @@ export interface ServerFolderDelegate<ExtArgs extends runtime.Types.Extensions.I
   createMany<T extends ServerFolderCreateManyArgs>(args?: Prisma.SelectSubset<T, ServerFolderCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many ServerFolders and returns the data saved in the database.
+   * @param {ServerFolderCreateManyAndReturnArgs} args - Arguments to create many ServerFolders.
+   * @example
+   * // Create many ServerFolders
+   * const serverFolder = await prisma.serverFolder.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many ServerFolders and only return the `id`
+   * const serverFolderWithIdOnly = await prisma.serverFolder.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ServerFolderCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ServerFolderCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerFolderPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a ServerFolder.
    * @param {ServerFolderDeleteArgs} args - Arguments to delete one ServerFolder.
    * @example
@@ -781,6 +818,36 @@ export interface ServerFolderDelegate<ExtArgs extends runtime.Types.Extensions.I
    * 
    */
   updateMany<T extends ServerFolderUpdateManyArgs>(args: Prisma.SelectSubset<T, ServerFolderUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more ServerFolders and returns the data updated in the database.
+   * @param {ServerFolderUpdateManyAndReturnArgs} args - Arguments to update many ServerFolders.
+   * @example
+   * // Update many ServerFolders
+   * const serverFolder = await prisma.serverFolder.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more ServerFolders and only return the `id`
+   * const serverFolderWithIdOnly = await prisma.serverFolder.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ServerFolderUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ServerFolderUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerFolderPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ServerFolder.
@@ -1214,6 +1281,29 @@ export type ServerFolderCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * ServerFolder createManyAndReturn
+ */
+export type ServerFolderCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServerFolder
+   */
+  select?: Prisma.ServerFolderSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServerFolder
+   */
+  omit?: Prisma.ServerFolderOmit<ExtArgs> | null
+  /**
+   * The data used to create many ServerFolders.
+   */
+  data: Prisma.ServerFolderCreateManyInput | Prisma.ServerFolderCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServerFolderIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * ServerFolder update
  */
 export type ServerFolderUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1255,6 +1345,36 @@ export type ServerFolderUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many ServerFolders to update.
    */
   limit?: number
+}
+
+/**
+ * ServerFolder updateManyAndReturn
+ */
+export type ServerFolderUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServerFolder
+   */
+  select?: Prisma.ServerFolderSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServerFolder
+   */
+  omit?: Prisma.ServerFolderOmit<ExtArgs> | null
+  /**
+   * The data used to update ServerFolders.
+   */
+  data: Prisma.XOR<Prisma.ServerFolderUpdateManyMutationInput, Prisma.ServerFolderUncheckedUpdateManyInput>
+  /**
+   * Filter which ServerFolders to update
+   */
+  where?: Prisma.ServerFolderWhereInput
+  /**
+   * Limit how many ServerFolders to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServerFolderIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

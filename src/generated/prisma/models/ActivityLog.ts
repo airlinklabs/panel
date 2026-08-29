@@ -250,7 +250,6 @@ export type ActivityLogOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   actor?: Prisma.UsersOrderByWithRelationInput
   server?: Prisma.ServerOrderByWithRelationInput
-  _relevance?: Prisma.ActivityLogOrderByRelevanceInput
 }
 
 export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
@@ -369,12 +368,6 @@ export type ActivityLogListRelationFilter = {
 
 export type ActivityLogOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ActivityLogOrderByRelevanceInput = {
-  fields: Prisma.ActivityLogOrderByRelevanceFieldEnum | Prisma.ActivityLogOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type ActivityLogCountOrderByAggregateInput = {
@@ -684,7 +677,29 @@ export type ActivityLogSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   server?: boolean | Prisma.ActivityLog$serverArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
 
+export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  actorId?: boolean
+  serverId?: boolean
+  event?: boolean
+  metadata?: boolean
+  ip?: boolean
+  createdAt?: boolean
+  actor?: boolean | Prisma.ActivityLog$actorArgs<ExtArgs>
+  server?: boolean | Prisma.ActivityLog$serverArgs<ExtArgs>
+}, ExtArgs["result"]["activityLog"]>
 
+export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  actorId?: boolean
+  serverId?: boolean
+  event?: boolean
+  metadata?: boolean
+  ip?: boolean
+  createdAt?: boolean
+  actor?: boolean | Prisma.ActivityLog$actorArgs<ExtArgs>
+  server?: boolean | Prisma.ActivityLog$serverArgs<ExtArgs>
+}, ExtArgs["result"]["activityLog"]>
 
 export type ActivityLogSelectScalar = {
   id?: boolean
@@ -698,6 +713,14 @@ export type ActivityLogSelectScalar = {
 
 export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "actorId" | "serverId" | "event" | "metadata" | "ip" | "createdAt", ExtArgs["result"]["activityLog"]>
 export type ActivityLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  actor?: boolean | Prisma.ActivityLog$actorArgs<ExtArgs>
+  server?: boolean | Prisma.ActivityLog$serverArgs<ExtArgs>
+}
+export type ActivityLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  actor?: boolean | Prisma.ActivityLog$actorArgs<ExtArgs>
+  server?: boolean | Prisma.ActivityLog$serverArgs<ExtArgs>
+}
+export type ActivityLogIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   actor?: boolean | Prisma.ActivityLog$actorArgs<ExtArgs>
   server?: boolean | Prisma.ActivityLog$serverArgs<ExtArgs>
 }
@@ -834,6 +857,30 @@ export interface ActivityLogDelegate<ExtArgs extends runtime.Types.Extensions.In
   createMany<T extends ActivityLogCreateManyArgs>(args?: Prisma.SelectSubset<T, ActivityLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many ActivityLogs and returns the data saved in the database.
+   * @param {ActivityLogCreateManyAndReturnArgs} args - Arguments to create many ActivityLogs.
+   * @example
+   * // Create many ActivityLogs
+   * const activityLog = await prisma.activityLog.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many ActivityLogs and only return the `id`
+   * const activityLogWithIdOnly = await prisma.activityLog.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ActivityLogCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ActivityLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a ActivityLog.
    * @param {ActivityLogDeleteArgs} args - Arguments to delete one ActivityLog.
    * @example
@@ -896,6 +943,36 @@ export interface ActivityLogDelegate<ExtArgs extends runtime.Types.Extensions.In
    * 
    */
   updateMany<T extends ActivityLogUpdateManyArgs>(args: Prisma.SelectSubset<T, ActivityLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more ActivityLogs and returns the data updated in the database.
+   * @param {ActivityLogUpdateManyAndReturnArgs} args - Arguments to update many ActivityLogs.
+   * @example
+   * // Update many ActivityLogs
+   * const activityLog = await prisma.activityLog.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more ActivityLogs and only return the `id`
+   * const activityLogWithIdOnly = await prisma.activityLog.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ActivityLogUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ActivityLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ActivityLog.
@@ -1332,6 +1409,29 @@ export type ActivityLogCreateManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * ActivityLog createManyAndReturn
+ */
+export type ActivityLogCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ActivityLog
+   */
+  select?: Prisma.ActivityLogSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ActivityLog
+   */
+  omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * The data used to create many ActivityLogs.
+   */
+  data: Prisma.ActivityLogCreateManyInput | Prisma.ActivityLogCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * ActivityLog update
  */
 export type ActivityLogUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1373,6 +1473,36 @@ export type ActivityLogUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many ActivityLogs to update.
    */
   limit?: number
+}
+
+/**
+ * ActivityLog updateManyAndReturn
+ */
+export type ActivityLogUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ActivityLog
+   */
+  select?: Prisma.ActivityLogSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ActivityLog
+   */
+  omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * The data used to update ActivityLogs.
+   */
+  data: Prisma.XOR<Prisma.ActivityLogUpdateManyMutationInput, Prisma.ActivityLogUncheckedUpdateManyInput>
+  /**
+   * Filter which ActivityLogs to update
+   */
+  where?: Prisma.ActivityLogWhereInput
+  /**
+   * Limit how many ActivityLogs to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

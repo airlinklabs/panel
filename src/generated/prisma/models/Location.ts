@@ -217,7 +217,6 @@ export type LocationOrderByWithRelationInput = {
   shortCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   nodes?: Prisma.NodeOrderByRelationAggregateInput
-  _relevance?: Prisma.LocationOrderByRelevanceInput
 }
 
 export type LocationWhereUniqueInput = Prisma.AtLeast<{
@@ -306,12 +305,6 @@ export type LocationUncheckedUpdateManyInput = {
 export type LocationNullableScalarRelationFilter = {
   is?: Prisma.LocationWhereInput | null
   isNot?: Prisma.LocationWhereInput | null
-}
-
-export type LocationOrderByRelevanceInput = {
-  fields: Prisma.LocationOrderByRelevanceFieldEnum | Prisma.LocationOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type LocationCountOrderByAggregateInput = {
@@ -441,7 +434,19 @@ export type LocationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["location"]>
 
+export type LocationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  shortCode?: boolean
+  createdAt?: boolean
+}, ExtArgs["result"]["location"]>
 
+export type LocationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  shortCode?: boolean
+  createdAt?: boolean
+}, ExtArgs["result"]["location"]>
 
 export type LocationSelectScalar = {
   id?: boolean
@@ -455,6 +460,8 @@ export type LocationInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   nodes?: boolean | Prisma.Location$nodesArgs<ExtArgs>
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
 }
+export type LocationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type LocationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $LocationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Location"
@@ -584,6 +591,30 @@ export interface LocationDelegate<ExtArgs extends runtime.Types.Extensions.Inter
   createMany<T extends LocationCreateManyArgs>(args?: Prisma.SelectSubset<T, LocationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Locations and returns the data saved in the database.
+   * @param {LocationCreateManyAndReturnArgs} args - Arguments to create many Locations.
+   * @example
+   * // Create many Locations
+   * const location = await prisma.location.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Locations and only return the `id`
+   * const locationWithIdOnly = await prisma.location.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends LocationCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, LocationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LocationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Location.
    * @param {LocationDeleteArgs} args - Arguments to delete one Location.
    * @example
@@ -646,6 +677,36 @@ export interface LocationDelegate<ExtArgs extends runtime.Types.Extensions.Inter
    * 
    */
   updateMany<T extends LocationUpdateManyArgs>(args: Prisma.SelectSubset<T, LocationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Locations and returns the data updated in the database.
+   * @param {LocationUpdateManyAndReturnArgs} args - Arguments to update many Locations.
+   * @example
+   * // Update many Locations
+   * const location = await prisma.location.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Locations and only return the `id`
+   * const locationWithIdOnly = await prisma.location.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends LocationUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, LocationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LocationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Location.
@@ -1078,6 +1139,25 @@ export type LocationCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * Location createManyAndReturn
+ */
+export type LocationCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Location
+   */
+  select?: Prisma.LocationSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Location
+   */
+  omit?: Prisma.LocationOmit<ExtArgs> | null
+  /**
+   * The data used to create many Locations.
+   */
+  data: Prisma.LocationCreateManyInput | Prisma.LocationCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * Location update
  */
 export type LocationUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1107,6 +1187,32 @@ export type LocationUpdateArgs<ExtArgs extends runtime.Types.Extensions.Internal
  * Location updateMany
  */
 export type LocationUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update Locations.
+   */
+  data: Prisma.XOR<Prisma.LocationUpdateManyMutationInput, Prisma.LocationUncheckedUpdateManyInput>
+  /**
+   * Filter which Locations to update
+   */
+  where?: Prisma.LocationWhereInput
+  /**
+   * Limit how many Locations to update.
+   */
+  limit?: number
+}
+
+/**
+ * Location updateManyAndReturn
+ */
+export type LocationUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Location
+   */
+  select?: Prisma.LocationSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Location
+   */
+  omit?: Prisma.LocationOmit<ExtArgs> | null
   /**
    * The data used to update Locations.
    */

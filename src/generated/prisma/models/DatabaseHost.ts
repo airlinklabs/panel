@@ -263,7 +263,6 @@ export type DatabaseHostOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   node?: Prisma.NodeOrderByWithRelationInput
   databases?: Prisma.ServerDatabaseOrderByRelationAggregateInput
-  _relevance?: Prisma.DatabaseHostOrderByRelevanceInput
 }
 
 export type DatabaseHostWhereUniqueInput = Prisma.AtLeast<{
@@ -387,12 +386,6 @@ export type DatabaseHostUncheckedUpdateManyInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   nodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type DatabaseHostOrderByRelevanceInput = {
-  fields: Prisma.DatabaseHostOrderByRelevanceFieldEnum | Prisma.DatabaseHostOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type DatabaseHostCountOrderByAggregateInput = {
@@ -716,7 +709,29 @@ export type DatabaseHostSelect<ExtArgs extends runtime.Types.Extensions.Internal
   _count?: boolean | Prisma.DatabaseHostCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["databaseHost"]>
 
+export type DatabaseHostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  host?: boolean
+  port?: boolean
+  username?: boolean
+  password?: boolean
+  nodeId?: boolean
+  createdAt?: boolean
+  node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
+}, ExtArgs["result"]["databaseHost"]>
 
+export type DatabaseHostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  host?: boolean
+  port?: boolean
+  username?: boolean
+  password?: boolean
+  nodeId?: boolean
+  createdAt?: boolean
+  node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
+}, ExtArgs["result"]["databaseHost"]>
 
 export type DatabaseHostSelectScalar = {
   id?: boolean
@@ -734,6 +749,12 @@ export type DatabaseHostInclude<ExtArgs extends runtime.Types.Extensions.Interna
   node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
   databases?: boolean | Prisma.DatabaseHost$databasesArgs<ExtArgs>
   _count?: boolean | Prisma.DatabaseHostCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type DatabaseHostIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
+}
+export type DatabaseHostIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  node?: boolean | Prisma.DatabaseHost$nodeArgs<ExtArgs>
 }
 
 export type $DatabaseHostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -869,6 +890,30 @@ export interface DatabaseHostDelegate<ExtArgs extends runtime.Types.Extensions.I
   createMany<T extends DatabaseHostCreateManyArgs>(args?: Prisma.SelectSubset<T, DatabaseHostCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many DatabaseHosts and returns the data saved in the database.
+   * @param {DatabaseHostCreateManyAndReturnArgs} args - Arguments to create many DatabaseHosts.
+   * @example
+   * // Create many DatabaseHosts
+   * const databaseHost = await prisma.databaseHost.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many DatabaseHosts and only return the `id`
+   * const databaseHostWithIdOnly = await prisma.databaseHost.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends DatabaseHostCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, DatabaseHostCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatabaseHostPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a DatabaseHost.
    * @param {DatabaseHostDeleteArgs} args - Arguments to delete one DatabaseHost.
    * @example
@@ -931,6 +976,36 @@ export interface DatabaseHostDelegate<ExtArgs extends runtime.Types.Extensions.I
    * 
    */
   updateMany<T extends DatabaseHostUpdateManyArgs>(args: Prisma.SelectSubset<T, DatabaseHostUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more DatabaseHosts and returns the data updated in the database.
+   * @param {DatabaseHostUpdateManyAndReturnArgs} args - Arguments to update many DatabaseHosts.
+   * @example
+   * // Update many DatabaseHosts
+   * const databaseHost = await prisma.databaseHost.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more DatabaseHosts and only return the `id`
+   * const databaseHostWithIdOnly = await prisma.databaseHost.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends DatabaseHostUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, DatabaseHostUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatabaseHostPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one DatabaseHost.
@@ -1368,6 +1443,29 @@ export type DatabaseHostCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * DatabaseHost createManyAndReturn
+ */
+export type DatabaseHostCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DatabaseHost
+   */
+  select?: Prisma.DatabaseHostSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DatabaseHost
+   */
+  omit?: Prisma.DatabaseHostOmit<ExtArgs> | null
+  /**
+   * The data used to create many DatabaseHosts.
+   */
+  data: Prisma.DatabaseHostCreateManyInput | Prisma.DatabaseHostCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatabaseHostIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * DatabaseHost update
  */
 export type DatabaseHostUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1409,6 +1507,36 @@ export type DatabaseHostUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many DatabaseHosts to update.
    */
   limit?: number
+}
+
+/**
+ * DatabaseHost updateManyAndReturn
+ */
+export type DatabaseHostUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DatabaseHost
+   */
+  select?: Prisma.DatabaseHostSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DatabaseHost
+   */
+  omit?: Prisma.DatabaseHostOmit<ExtArgs> | null
+  /**
+   * The data used to update DatabaseHosts.
+   */
+  data: Prisma.XOR<Prisma.DatabaseHostUpdateManyMutationInput, Prisma.DatabaseHostUncheckedUpdateManyInput>
+  /**
+   * Filter which DatabaseHosts to update
+   */
+  where?: Prisma.DatabaseHostWhereInput
+  /**
+   * Limit how many DatabaseHosts to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatabaseHostIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

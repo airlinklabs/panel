@@ -369,7 +369,6 @@ export type NodeOrderByWithRelationInput = {
   databaseHosts?: Prisma.DatabaseHostOrderByRelationAggregateInput
   allocations?: Prisma.AllocationOrderByRelationAggregateInput
   preferredUsers?: Prisma.UsersOrderByRelationAggregateInput
-  _relevance?: Prisma.NodeOrderByRelevanceInput
 }
 
 export type NodeWhereUniqueInput = Prisma.AtLeast<{
@@ -598,12 +597,6 @@ export type NodeNullableScalarRelationFilter = {
 export type NodeScalarRelationFilter = {
   is?: Prisma.NodeWhereInput
   isNot?: Prisma.NodeWhereInput
-}
-
-export type NodeOrderByRelevanceInput = {
-  fields: Prisma.NodeOrderByRelevanceFieldEnum | Prisma.NodeOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type NodeCountOrderByAggregateInput = {
@@ -1462,7 +1455,45 @@ export type NodeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   _count?: boolean | Prisma.NodeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["node"]>
 
+export type NodeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  ram?: boolean
+  cpu?: boolean
+  disk?: boolean
+  overallocateMemory?: boolean
+  overallocateDisk?: boolean
+  overallocateCpu?: boolean
+  locationId?: boolean
+  address?: boolean
+  port?: boolean
+  key?: boolean
+  createdAt?: boolean
+  allocatedPorts?: boolean
+  sftpPort?: boolean
+  maintenanceMode?: boolean
+  location?: boolean | Prisma.Node$locationArgs<ExtArgs>
+}, ExtArgs["result"]["node"]>
 
+export type NodeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  ram?: boolean
+  cpu?: boolean
+  disk?: boolean
+  overallocateMemory?: boolean
+  overallocateDisk?: boolean
+  overallocateCpu?: boolean
+  locationId?: boolean
+  address?: boolean
+  port?: boolean
+  key?: boolean
+  createdAt?: boolean
+  allocatedPorts?: boolean
+  sftpPort?: boolean
+  maintenanceMode?: boolean
+  location?: boolean | Prisma.Node$locationArgs<ExtArgs>
+}, ExtArgs["result"]["node"]>
 
 export type NodeSelectScalar = {
   id?: boolean
@@ -1491,6 +1522,12 @@ export type NodeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   allocations?: boolean | Prisma.Node$allocationsArgs<ExtArgs>
   preferredUsers?: boolean | Prisma.Node$preferredUsersArgs<ExtArgs>
   _count?: boolean | Prisma.NodeCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type NodeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  location?: boolean | Prisma.Node$locationArgs<ExtArgs>
+}
+export type NodeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  location?: boolean | Prisma.Node$locationArgs<ExtArgs>
 }
 
 export type $NodePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1637,6 +1674,30 @@ export interface NodeDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
   createMany<T extends NodeCreateManyArgs>(args?: Prisma.SelectSubset<T, NodeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Nodes and returns the data saved in the database.
+   * @param {NodeCreateManyAndReturnArgs} args - Arguments to create many Nodes.
+   * @example
+   * // Create many Nodes
+   * const node = await prisma.node.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Nodes and only return the `id`
+   * const nodeWithIdOnly = await prisma.node.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends NodeCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, NodeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NodePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Node.
    * @param {NodeDeleteArgs} args - Arguments to delete one Node.
    * @example
@@ -1699,6 +1760,36 @@ export interface NodeDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
    * 
    */
   updateMany<T extends NodeUpdateManyArgs>(args: Prisma.SelectSubset<T, NodeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Nodes and returns the data updated in the database.
+   * @param {NodeUpdateManyAndReturnArgs} args - Arguments to update many Nodes.
+   * @example
+   * // Update many Nodes
+   * const node = await prisma.node.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Nodes and only return the `id`
+   * const nodeWithIdOnly = await prisma.node.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends NodeUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, NodeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NodePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Node.
@@ -2147,6 +2238,29 @@ export type NodeCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
+ * Node createManyAndReturn
+ */
+export type NodeCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Node
+   */
+  select?: Prisma.NodeSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Node
+   */
+  omit?: Prisma.NodeOmit<ExtArgs> | null
+  /**
+   * The data used to create many Nodes.
+   */
+  data: Prisma.NodeCreateManyInput | Prisma.NodeCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NodeIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * Node update
  */
 export type NodeUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2188,6 +2302,36 @@ export type NodeUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Nodes to update.
    */
   limit?: number
+}
+
+/**
+ * Node updateManyAndReturn
+ */
+export type NodeUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Node
+   */
+  select?: Prisma.NodeSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Node
+   */
+  omit?: Prisma.NodeOmit<ExtArgs> | null
+  /**
+   * The data used to update Nodes.
+   */
+  data: Prisma.XOR<Prisma.NodeUpdateManyMutationInput, Prisma.NodeUncheckedUpdateManyInput>
+  /**
+   * Filter which Nodes to update
+   */
+  where?: Prisma.NodeWhereInput
+  /**
+   * Limit how many Nodes to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NodeIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

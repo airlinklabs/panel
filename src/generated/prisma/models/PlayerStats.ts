@@ -403,7 +403,23 @@ export type PlayerStatsSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   totalServers?: boolean
 }, ExtArgs["result"]["playerStats"]>
 
+export type PlayerStatsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  timestamp?: boolean
+  totalPlayers?: boolean
+  maxPlayers?: boolean
+  onlineServers?: boolean
+  totalServers?: boolean
+}, ExtArgs["result"]["playerStats"]>
 
+export type PlayerStatsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  timestamp?: boolean
+  totalPlayers?: boolean
+  maxPlayers?: boolean
+  onlineServers?: boolean
+  totalServers?: boolean
+}, ExtArgs["result"]["playerStats"]>
 
 export type PlayerStatsSelectScalar = {
   id?: boolean
@@ -544,6 +560,30 @@ export interface PlayerStatsDelegate<ExtArgs extends runtime.Types.Extensions.In
   createMany<T extends PlayerStatsCreateManyArgs>(args?: Prisma.SelectSubset<T, PlayerStatsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many PlayerStats and returns the data saved in the database.
+   * @param {PlayerStatsCreateManyAndReturnArgs} args - Arguments to create many PlayerStats.
+   * @example
+   * // Create many PlayerStats
+   * const playerStats = await prisma.playerStats.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many PlayerStats and only return the `id`
+   * const playerStatsWithIdOnly = await prisma.playerStats.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends PlayerStatsCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, PlayerStatsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlayerStatsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a PlayerStats.
    * @param {PlayerStatsDeleteArgs} args - Arguments to delete one PlayerStats.
    * @example
@@ -606,6 +646,36 @@ export interface PlayerStatsDelegate<ExtArgs extends runtime.Types.Extensions.In
    * 
    */
   updateMany<T extends PlayerStatsUpdateManyArgs>(args: Prisma.SelectSubset<T, PlayerStatsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more PlayerStats and returns the data updated in the database.
+   * @param {PlayerStatsUpdateManyAndReturnArgs} args - Arguments to update many PlayerStats.
+   * @example
+   * // Update many PlayerStats
+   * const playerStats = await prisma.playerStats.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more PlayerStats and only return the `id`
+   * const playerStatsWithIdOnly = await prisma.playerStats.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends PlayerStatsUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, PlayerStatsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlayerStatsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one PlayerStats.
@@ -1015,6 +1085,25 @@ export type PlayerStatsCreateManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * PlayerStats createManyAndReturn
+ */
+export type PlayerStatsCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlayerStats
+   */
+  select?: Prisma.PlayerStatsSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlayerStats
+   */
+  omit?: Prisma.PlayerStatsOmit<ExtArgs> | null
+  /**
+   * The data used to create many PlayerStats.
+   */
+  data: Prisma.PlayerStatsCreateManyInput | Prisma.PlayerStatsCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * PlayerStats update
  */
 export type PlayerStatsUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1040,6 +1129,32 @@ export type PlayerStatsUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
  * PlayerStats updateMany
  */
 export type PlayerStatsUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update PlayerStats.
+   */
+  data: Prisma.XOR<Prisma.PlayerStatsUpdateManyMutationInput, Prisma.PlayerStatsUncheckedUpdateManyInput>
+  /**
+   * Filter which PlayerStats to update
+   */
+  where?: Prisma.PlayerStatsWhereInput
+  /**
+   * Limit how many PlayerStats to update.
+   */
+  limit?: number
+}
+
+/**
+ * PlayerStats updateManyAndReturn
+ */
+export type PlayerStatsUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlayerStats
+   */
+  select?: Prisma.PlayerStatsSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlayerStats
+   */
+  omit?: Prisma.PlayerStatsOmit<ExtArgs> | null
   /**
    * The data used to update PlayerStats.
    */

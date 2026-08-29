@@ -275,7 +275,6 @@ export type BackupOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   airlinkCloudId?: Prisma.SortOrderInput | Prisma.SortOrder
   server?: Prisma.ServerOrderByWithRelationInput
-  _relevance?: Prisma.BackupOrderByRelevanceInput
 }
 
 export type BackupWhereUniqueInput = Prisma.AtLeast<{
@@ -424,12 +423,6 @@ export type BackupListRelationFilter = {
 
 export type BackupOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type BackupOrderByRelevanceInput = {
-  fields: Prisma.BackupOrderByRelevanceFieldEnum | Prisma.BackupOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type BackupCountOrderByAggregateInput = {
@@ -659,7 +652,33 @@ export type BackupSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["backup"]>
 
+export type BackupSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  UUID?: boolean
+  name?: boolean
+  serverId?: boolean
+  filePath?: boolean
+  size?: boolean
+  checksum?: boolean
+  locked?: boolean
+  createdAt?: boolean
+  airlinkCloudId?: boolean
+  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["backup"]>
 
+export type BackupSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  UUID?: boolean
+  name?: boolean
+  serverId?: boolean
+  filePath?: boolean
+  size?: boolean
+  checksum?: boolean
+  locked?: boolean
+  createdAt?: boolean
+  airlinkCloudId?: boolean
+  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["backup"]>
 
 export type BackupSelectScalar = {
   id?: boolean
@@ -676,6 +695,12 @@ export type BackupSelectScalar = {
 
 export type BackupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "serverId" | "filePath" | "size" | "checksum" | "locked" | "createdAt" | "airlinkCloudId", ExtArgs["result"]["backup"]>
 export type BackupInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
+}
+export type BackupIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
+}
+export type BackupIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   server?: boolean | Prisma.ServerDefaultArgs<ExtArgs>
 }
 
@@ -813,6 +838,30 @@ export interface BackupDelegate<ExtArgs extends runtime.Types.Extensions.Interna
   createMany<T extends BackupCreateManyArgs>(args?: Prisma.SelectSubset<T, BackupCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Backups and returns the data saved in the database.
+   * @param {BackupCreateManyAndReturnArgs} args - Arguments to create many Backups.
+   * @example
+   * // Create many Backups
+   * const backup = await prisma.backup.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Backups and only return the `id`
+   * const backupWithIdOnly = await prisma.backup.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends BackupCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, BackupCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BackupPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Backup.
    * @param {BackupDeleteArgs} args - Arguments to delete one Backup.
    * @example
@@ -875,6 +924,36 @@ export interface BackupDelegate<ExtArgs extends runtime.Types.Extensions.Interna
    * 
    */
   updateMany<T extends BackupUpdateManyArgs>(args: Prisma.SelectSubset<T, BackupUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Backups and returns the data updated in the database.
+   * @param {BackupUpdateManyAndReturnArgs} args - Arguments to update many Backups.
+   * @example
+   * // Update many Backups
+   * const backup = await prisma.backup.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Backups and only return the `id`
+   * const backupWithIdOnly = await prisma.backup.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends BackupUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, BackupUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BackupPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Backup.
@@ -1313,6 +1392,29 @@ export type BackupCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 /**
+ * Backup createManyAndReturn
+ */
+export type BackupCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Backup
+   */
+  select?: Prisma.BackupSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Backup
+   */
+  omit?: Prisma.BackupOmit<ExtArgs> | null
+  /**
+   * The data used to create many Backups.
+   */
+  data: Prisma.BackupCreateManyInput | Prisma.BackupCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BackupIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * Backup update
  */
 export type BackupUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1354,6 +1456,36 @@ export type BackupUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Limit how many Backups to update.
    */
   limit?: number
+}
+
+/**
+ * Backup updateManyAndReturn
+ */
+export type BackupUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Backup
+   */
+  select?: Prisma.BackupSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Backup
+   */
+  omit?: Prisma.BackupOmit<ExtArgs> | null
+  /**
+   * The data used to update Backups.
+   */
+  data: Prisma.XOR<Prisma.BackupUpdateManyMutationInput, Prisma.BackupUncheckedUpdateManyInput>
+  /**
+   * Filter which Backups to update
+   */
+  where?: Prisma.BackupWhereInput
+  /**
+   * Limit how many Backups to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BackupIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
