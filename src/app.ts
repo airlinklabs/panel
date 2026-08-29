@@ -50,14 +50,11 @@ import {
   getSecurityCache,
 } from './handlers/securityCache';
 
-// Module-level app instance.
-let app: ReturnType<typeof express>;
-
 loadEnv();
 
 process.setMaxListeners(20);
 
-app = express();
+const app = express();
 
 // Validated configuration. In production, a missing/weak SESSION_SECRET makes
 // getConfig() throw, which aborts startup with a clear message instead of

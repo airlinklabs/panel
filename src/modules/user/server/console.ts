@@ -1,25 +1,34 @@
-import type { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
-import logger from '../../../handlers/logger';
-import { checkEulaStatus } from '../../../handlers/features';
-import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
-import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
-import { getParamAsString } from '../../../utils/typeHelpers';
-import { safeClientMessage } from '../../../utils/errors';
-import { NodeCapacityExceededError } from '../../../handlers/utils/server/resourceCheck';
-import prisma from '../../../db';
-import { daemonRequest, daemonBaseUrl } from '../../../handlers/utils/core/daemonRequest';
-import { logActivity } from '../../../handlers/utils/activity/activityLogger';
-import { issueWsToken } from '../../../handlers/utils/security/wsToken';
-import { getPrimaryExternalPort } from '../../../handlers/utils/server/ports';
+import type { Router, Request, Response } from "express";
+import {
+  isAuthenticatedForServer,
+  requireSubUserPermission,
+} from "../../../handlers/utils/auth/serverAuthUtil";
+import logger from "../../../handlers/logger";
+import { checkEulaStatus } from "../../../handlers/features";
+import { checkForServerInstallation } from "../../../handlers/checkForServerInstallation";
+import { getServerStatus } from "../../../handlers/utils/server/serverStatus";
+import { getParamAsString } from "../../../utils/typeHelpers";
+import { safeClientMessage } from "../../../utils/errors";
+import { NodeCapacityExceededError } from "../../../handlers/utils/server/resourceCheck";
+import prisma from "../../../db";
+import {
+  daemonRequest,
+  daemonBaseUrl,
+} from "../../../handlers/utils/core/daemonRequest";
+import { logActivity } from "../../../handlers/utils/activity/activityLogger";
+import { issueWsToken } from "../../../handlers/utils/security/wsToken";
+import { getPrimaryExternalPort } from "../../../handlers/utils/server/ports";
 import {
   type ErrorMessage,
   loadServerPageContext,
   getServerStatusInput,
   getImageFeatures,
   stopServerContainer,
-} from './shared';
-import { runtimeStartQueue, QueueBannedError } from '../../../handlers/runtimeQueue';
+} from "./shared";
+import {
+  runtimeStartQueue,
+  QueueBannedError,
+} from "../../../handlers/runtimeQueue";
 
 const LOG_HISTORY_TIMEOUT_MS = 8_000;
 const STATUS_TIMEOUT_MS = 4_000;
@@ -28,9 +37,9 @@ const RESTART_DELAY_MS = 2_000;
 
 export function registerConsoleRoutes(router: Router): void {
   router.get(
-    '/server/:id',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response) => {
       const errorMessage: ErrorMessage = {};
       const serverId = req.params?.id;
@@ -38,13 +47,17 @@ export function registerConsoleRoutes(router: Router): void {
       try {
         const context = await loadServerPageContext(req);
         settings = context.settings;
-        if (context.status === 'missing-user') {
-          errorMessage.message = 'User not found.';
-          return res.render('user/account', { errorMessage, user: context.user, req });
+        if (context.status === "missing-user") {
+          errorMessage.message = "User not found.";
+          return res.render("user/account", {
+            errorMessage,
+            user: context.user,
+            req,
+          });
         }
-        if (context.status === 'missing-server') {
-          errorMessage.message = 'Server not found.';
-          return res.render('user/server/manage', {
+        if (context.status === "missing-server") {
+          errorMessage.message = "Server not found.";
+          return res.render("user/server/manage", {
             errorMessage,
             features: [],
             user: context.user,
@@ -56,20 +69,24 @@ export function registerConsoleRoutes(router: Router): void {
         const { user, server } = context;
         let features = getImageFeatures(server.image);
 
-        if (features.includes('eula')) {
+        if (features.includes("eula")) {
           const eulaStatus = await checkEulaStatus(server.UUID);
           if (eulaStatus.accepted) {
-            features = features.filter((feature) => feature !== 'eula');
+            features = features.filter((feature) => feature !== "eula");
           } else if (eulaStatus.error) {
-            features = features.filter((feature) => feature !== 'eula');
+            features = features.filter((feature) => feature !== "eula");
           }
         }
-        const serverStatus = await getServerStatus(getServerStatusInput(server));
+        const serverStatus = await getServerStatus(
+          getServerStatusInput(server),
+        );
 
-        return res.render('user/server/manage', {
+        return res.render("user/server/manage", {
           errorMessage,
           features: features || [],
-          installed: await checkForServerInstallation(getParamAsString(serverId)),
+          installed: await checkForServerInstallation(
+            getParamAsString(serverId),
+          ),
           user,
           req,
           server,
@@ -77,9 +94,9 @@ export function registerConsoleRoutes(router: Router): void {
           settings,
         });
       } catch (error) {
-        logger.error('Error fetching user:', error);
-        errorMessage.message = 'Error fetching user data.';
-        return res.render('user/server/manage', {
+        logger.error("Error fetching user:", error);
+        errorMessage.message = "Error fetching user data.";
+        return res.render("user/server/manage", {
           errorMessage,
           features: [],
           user: req.session?.user,
@@ -87,18 +104,19 @@ export function registerConsoleRoutes(router: Router): void {
           settings,
         });
       }
-    });
+    },
+  );
 
   router.get(
-    '/server/:id/ws-token',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id/ws-token",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response): Promise<void> => {
       try {
         const serverId = getParamAsString(req.params?.id);
         const user = req.session?.user;
         if (!user?.id || !serverId) {
-          res.status(401).json({ error: 'Unauthorized' });
+          res.status(401).json({ error: "Unauthorized" });
           return;
         }
         const target = await prisma.server.findUnique({
@@ -106,21 +124,21 @@ export function registerConsoleRoutes(router: Router): void {
           select: { UUID: true },
         });
         if (!target) {
-          res.status(404).json({ error: 'Server not found' });
+          res.status(404).json({ error: "Server not found" });
           return;
         }
         res.status(200).json({ token: issueWsToken(serverId, user.id) });
       } catch (error) {
-        logger.error('Error issuing WS token:', error);
-        res.status(500).json({ error: 'Failed to issue WS token' });
+        logger.error("Error issuing WS token:", error);
+        res.status(500).json({ error: "Failed to issue WS token" });
       }
     },
   );
 
   router.get(
-    '/server/:id/logs/history',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id/logs/history",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response): Promise<void> => {
       const serverId = req.params?.id;
 
@@ -131,14 +149,14 @@ export function registerConsoleRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ error: 'Server not found' });
+          res.status(404).json({ error: "Server not found" });
           return;
         }
 
         const { node } = server;
 
         const response = await daemonRequest<{ logs?: string[] }>({
-          method: 'GET',
+          method: "GET",
           path: `/container/logs/history?id=${server.UUID}`,
           nodeAddress: node.address,
           nodePort: node.port,
@@ -149,17 +167,17 @@ export function registerConsoleRoutes(router: Router): void {
         res.status(200).json({ logs: response.data?.logs ?? [] });
         return;
       } catch (error) {
-        logger.error('Error fetching server log history:', error);
-        res.status(500).json({ error: 'Failed to fetch server log history' });
+        logger.error("Error fetching server log history:", error);
+        res.status(500).json({ error: "Failed to fetch server log history" });
         return;
       }
     },
   );
 
   router.get(
-    '/server/:id/status',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id/status",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response): Promise<void> => {
       const serverId = req.params?.id;
 
@@ -170,7 +188,9 @@ export function registerConsoleRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ status: 'error', message: 'Server not found' });
+          res
+            .status(404)
+            .json({ status: "error", message: "Server not found" });
           return;
         }
 
@@ -184,14 +204,14 @@ export function registerConsoleRoutes(router: Router): void {
             nodeKey: node.key,
           }),
           daemonRequest<{ state?: string; error?: string }>({
-            method: 'GET',
+            method: "GET",
             path: `/container/status/${server.UUID}`,
             nodeAddress: node.address,
             nodePort: node.port,
             nodeKey: node.key,
             timeout: STATUS_TIMEOUT_MS,
           })
-            .then(r => ({ state: r.data?.state, error: r.data?.error }))
+            .then((r) => ({ state: r.data?.state, error: r.data?.error }))
             .catch(() => null),
         ]);
 
@@ -199,23 +219,28 @@ export function registerConsoleRoutes(router: Router): void {
           ...serverStatus,
           state: installResult?.state,
           error: installResult?.error
-            ? safeClientMessage(installResult.error, 'The server could not be installed.')
+            ? safeClientMessage(
+                installResult.error,
+                "The server could not be installed.",
+              )
             : undefined,
           queue: await runtimeStartQueue.getPublicQueueState(server.UUID, node),
         });
         return;
       } catch (error) {
-        logger.error('Error fetching server status:', error);
-        res.status(500).json({ status: 'error', message: 'Failed to fetch server status' });
+        logger.error("Error fetching server status:", error);
+        res
+          .status(500)
+          .json({ status: "error", message: "Failed to fetch server status" });
         return;
       }
     },
   );
 
   router.get(
-    '/server/:id/logs',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id/logs",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response): Promise<void> => {
       const errorMessage: ErrorMessage = {};
       const serverId = req.params?.id;
@@ -224,19 +249,26 @@ export function registerConsoleRoutes(router: Router): void {
         const context = await loadServerPageContext(req);
         const settings = context.settings;
 
-        if (context.status === 'missing-user' || context.status === 'missing-server') {
-          res.status(404).json({ error: 'Server not found' });
+        if (
+          context.status === "missing-user" ||
+          context.status === "missing-server"
+        ) {
+          res.status(404).json({ error: "Server not found" });
           return;
         }
 
         const { user, server } = context;
         const features = getImageFeatures(server.image);
-        const serverStatus = await getServerStatus(getServerStatusInput(server));
+        const serverStatus = await getServerStatus(
+          getServerStatusInput(server),
+        );
 
-        res.render('user/server/logs', {
+        res.render("user/server/logs", {
           errorMessage,
           features: features || [],
-          installed: await checkForServerInstallation(getParamAsString(serverId)),
+          installed: await checkForServerInstallation(
+            getParamAsString(serverId),
+          ),
           user,
           req,
           server,
@@ -245,18 +277,18 @@ export function registerConsoleRoutes(router: Router): void {
         });
         return;
       } catch (error) {
-        logger.error('Error loading server logs page:', error);
-        errorMessage.message = 'Error loading server logs page.';
-        res.status(500).json({ error: 'Failed to load server logs page' });
+        logger.error("Error loading server logs page:", error);
+        errorMessage.message = "Error loading server logs page.";
+        res.status(500).json({ error: "Failed to load server logs page" });
         return;
       }
     },
   );
 
   router.get(
-    '/server/:id/logs/archives',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id/logs/archives",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response): Promise<void> => {
       const serverId = req.params?.id;
 
@@ -267,14 +299,16 @@ export function registerConsoleRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ error: 'Server not found' });
+          res.status(404).json({ error: "Server not found" });
           return;
         }
 
         const { node } = server;
 
-        const response = await daemonRequest<{ logs?: { fileName: string; size: number; createdAt: string }[] }>({
-          method: 'GET',
+        const response = await daemonRequest<{
+          logs?: { fileName: string; size: number; createdAt: string }[];
+        }>({
+          method: "GET",
           path: `/container/logs/archives?id=${server.UUID}`,
           nodeAddress: node.address,
           nodePort: node.port,
@@ -285,24 +319,28 @@ export function registerConsoleRoutes(router: Router): void {
         res.status(200).json({ logs: response.data?.logs ?? [] });
         return;
       } catch (error) {
-        logger.error('Error fetching server log archives:', error);
-        res.status(500).json({ error: 'Failed to fetch server log archives' });
+        logger.error("Error fetching server log archives:", error);
+        res.status(500).json({ error: "Failed to fetch server log archives" });
         return;
       }
     },
   );
 
   router.get(
-    '/server/:id/logs/archives/read',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id/logs/archives/read",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response): Promise<void> => {
       const serverId = req.params?.id;
       const file = req.query?.file;
 
       try {
-        if (typeof file !== 'string' || !file || !/^[A-Za-z0-9._-]+$/.test(file)) {
-          res.status(400).json({ error: 'Invalid file name' });
+        if (
+          typeof file !== "string" ||
+          !file ||
+          !/^[A-Za-z0-9._-]+$/.test(file)
+        ) {
+          res.status(400).json({ error: "Invalid file name" });
           return;
         }
 
@@ -312,14 +350,14 @@ export function registerConsoleRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ error: 'Server not found' });
+          res.status(404).json({ error: "Server not found" });
           return;
         }
 
         const { node } = server;
 
         const response = await daemonRequest<{ lines?: string[] }>({
-          method: 'GET',
+          method: "GET",
           path: `/container/logs/archives/read?id=${server.UUID}&file=${encodeURIComponent(file)}`,
           nodeAddress: node.address,
           nodePort: node.port,
@@ -330,24 +368,28 @@ export function registerConsoleRoutes(router: Router): void {
         res.status(200).json({ lines: response.data?.lines ?? [] });
         return;
       } catch (error) {
-        logger.error('Error reading server log archive:', error);
-        res.status(500).json({ error: 'Failed to read server log archive' });
+        logger.error("Error reading server log archive:", error);
+        res.status(500).json({ error: "Failed to read server log archive" });
         return;
       }
     },
   );
 
   router.get(
-    '/server/:id/logs/archives/download',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id/logs/archives/download",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response): Promise<void> => {
       const serverId = req.params?.id;
       const file = req.query?.file;
 
       try {
-        if (typeof file !== 'string' || !file || !/^[A-Za-z0-9._-]+$/.test(file)) {
-          res.status(400).json({ error: 'Invalid file name' });
+        if (
+          typeof file !== "string" ||
+          !file ||
+          !/^[A-Za-z0-9._-]+$/.test(file)
+        ) {
+          res.status(400).json({ error: "Invalid file name" });
           return;
         }
 
@@ -357,15 +399,15 @@ export function registerConsoleRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ error: 'Server not found' });
+          res.status(404).json({ error: "Server not found" });
           return;
         }
 
         const { node } = server;
 
         const response = await daemonRequest<{ token?: string; url?: string }>({
-          method: 'POST',
-          path: '/container/logs/archives/download-token',
+          method: "POST",
+          path: "/container/logs/archives/download-token",
           nodeAddress: node.address,
           nodePort: node.port,
           nodeKey: node.key,
@@ -373,8 +415,14 @@ export function registerConsoleRoutes(router: Router): void {
           timeout: 15000,
         });
 
-        if (response.status !== 200 || !response.data?.token || !response.data?.url) {
-          res.status(response.status || 500).json({ error: 'Failed to start download' });
+        if (
+          response.status !== 200 ||
+          !response.data?.token ||
+          !response.data?.url
+        ) {
+          res
+            .status(response.status || 500)
+            .json({ error: "Failed to start download" });
           return;
         }
 
@@ -382,17 +430,19 @@ export function registerConsoleRoutes(router: Router): void {
         res.redirect(302, `${base}${response.data.url}`);
         return;
       } catch (error) {
-        logger.error('Error downloading server log archive:', error);
-        res.status(500).json({ error: 'Failed to download server log archive' });
+        logger.error("Error downloading server log archive:", error);
+        res
+          .status(500)
+          .json({ error: "Failed to download server log archive" });
         return;
       }
     },
   );
 
   router.post(
-    '/server/:id/power/:poweraction',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id/power/:poweraction",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response): Promise<void> => {
       const errorMessage: ErrorMessage = {};
       const userId = req.session?.user?.id;
@@ -402,8 +452,8 @@ export function registerConsoleRoutes(router: Router): void {
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
-          errorMessage.message = 'User not found.';
-          return res.render('user/account', { errorMessage, user, req });
+          errorMessage.message = "User not found.";
+          return res.render("user/account", { errorMessage, user, req });
         }
 
         const server = await prisma.server.findUnique({
@@ -412,8 +462,8 @@ export function registerConsoleRoutes(router: Router): void {
         });
 
         if (!server) {
-          errorMessage.message = 'Server not found.';
-          return res.render('user/server/manage', {
+          errorMessage.message = "Server not found.";
+          return res.render("user/server/manage", {
             errorMessage,
             features: [],
             user,
@@ -421,32 +471,35 @@ export function registerConsoleRoutes(router: Router): void {
           });
         }
 
-        if (server.Suspended && (powerAction === 'start' || powerAction === 'restart')) {
+        if (
+          server.Suspended &&
+          (powerAction === "start" || powerAction === "restart")
+        ) {
           logger.warn(
             `Attempt to start suspended server ${serverId} by user ${userId}`,
           );
           res.status(403).json({
             error:
-              'This server is suspended. Please contact an administrator for assistance.',
+              "This server is suspended. Please contact an administrator for assistance.",
           });
           return;
         }
 
         if (
           server.node?.maintenanceMode &&
-          (powerAction === 'start' || powerAction === 'restart')
+          (powerAction === "start" || powerAction === "restart")
         ) {
           logger.warn(
             `Attempt to start server ${serverId} on node ${server.node.id} in maintenance mode by user ${userId}`,
           );
           res.status(403).json({
             error:
-              'This server is on a node under maintenance. Please try again later.',
+              "This server is on a node under maintenance. Please try again later.",
           });
           return;
         }
 
-        if (powerAction === 'stop') {
+        if (powerAction === "stop") {
           try {
             const stoppingStatus = {
               online: true,
@@ -466,6 +519,7 @@ export function registerConsoleRoutes(router: Router): void {
                 global.serverStoppingStates &&
                 global.serverStoppingStates[cacheKey]
               ) {
+                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                 delete global.serverStoppingStates[cacheKey];
                 logger.info(
                   `Cleared stopping state for server ${serverId} after timeout`,
@@ -475,36 +529,46 @@ export function registerConsoleRoutes(router: Router): void {
 
             res.status(200).json({
               success: true,
-              message: 'Server is stopping...',
+              message: "Server is stopping...",
               status: stoppingStatus,
             });
 
             await daemonRequest({
-              method: 'POST',
-              path: '/container/stop',
+              method: "POST",
+              path: "/container/stop",
               nodeAddress: server.node.address,
               nodePort: server.node.port,
               nodeKey: server.node.key,
               body: {
                 id: String(serverId),
-                stopCmd: server.image?.stop || 'stop',
+                stopCmd: server.image?.stop || "stop",
               },
             });
-            logger.info(`Container stopped successfully: ${  serverId}`);
-            await prisma.server.update({ where: { UUID: String(serverId) }, data: { Running: false } }).catch(() => {});
+            logger.info(`Container stopped successfully: ${serverId}`);
+            await prisma.server
+              .update({
+                where: { UUID: String(serverId) },
+                data: { Running: false },
+              })
+              .catch(() => {});
             runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
-            await logActivity(req, 'server:stop', { serverId: String(serverId) });
+            await logActivity(req, "server:stop", {
+              serverId: String(serverId),
+            });
             return;
           } catch (stopError: unknown) {
             const stopErr = stopError as { status?: number } | undefined;
-            if (
-              stopErr?.status === 404
-            ) {
+            if (stopErr?.status === 404) {
               logger.info(
-                `Container already stopped or not found: ${  serverId}`,
+                `Container already stopped or not found: ${serverId}`,
               );
 
-              await prisma.server.update({ where: { UUID: String(serverId) }, data: { Running: false } }).catch(() => {});
+              await prisma.server
+                .update({
+                  where: { UUID: String(serverId) },
+                  data: { Running: false },
+                })
+                .catch(() => {});
               runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
 
               const cacheKey = `server_stopping_${serverId}`;
@@ -512,12 +576,13 @@ export function registerConsoleRoutes(router: Router): void {
                 global.serverStoppingStates &&
                 global.serverStoppingStates[cacheKey]
               ) {
+                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                 delete global.serverStoppingStates[cacheKey];
               }
             } else {
-              logger.warn('Failed to stop container', {
+              logger.warn("Failed to stop container", {
                 serverId: String(serverId),
-                action: 'stop',
+                action: "stop",
                 error: stopError,
               });
             }
@@ -525,21 +590,31 @@ export function registerConsoleRoutes(router: Router): void {
           }
         }
 
-        if (powerAction !== 'start' && powerAction !== 'stop' && powerAction !== 'restart') {
-          logger.error('Invalid power action:', powerAction);
-          res.status(400).json({ error: `Invalid power action: ${powerAction}` });
+        if (
+          powerAction !== "start" &&
+          powerAction !== "stop" &&
+          powerAction !== "restart"
+        ) {
+          logger.error("Invalid power action:", powerAction);
+          res
+            .status(400)
+            .json({ error: `Invalid power action: ${powerAction}` });
           return;
         }
 
-        if (powerAction === 'restart') {
+        if (powerAction === "restart") {
           try {
-            await stopServerContainer(server, String(serverId), 'stop', { releaseResources: false });
+            await stopServerContainer(server, String(serverId), "stop", {
+              releaseResources: false,
+            });
           } catch {
             // Container may already be stopped
           }
 
           try {
-            await new Promise(resolve => setTimeout(resolve, RESTART_DELAY_MS));
+            await new Promise((resolve) =>
+              setTimeout(resolve, RESTART_DELAY_MS),
+            );
             // Restarts pass through the capacity queue like fresh starts. The
             // stop above (releaseResources:false) keeps this server's own
             // reservation, so a restart is granted immediately when the node
@@ -547,7 +622,10 @@ export function registerConsoleRoutes(router: Router): void {
             const q = await runtimeStartQueue.enqueueStart({
               serverId: String(serverId),
               userId: user.id,
-              priority: user.isAdmin === true || server.ownerId === user.id || user.role === 'privileged',
+              priority:
+                user.isAdmin === true ||
+                server.ownerId === user.id ||
+                user.role === "privileged",
             });
             if (q.queued) {
               res.status(202).json({
@@ -562,16 +640,23 @@ export function registerConsoleRoutes(router: Router): void {
               res.status(403).json({ error: error.message });
               return;
             }
-            if (error instanceof Error && error.message === 'Server not found.') {
-              res.status(404).json({ error: 'Server not found.' });
+            if (
+              error instanceof Error &&
+              error.message === "Server not found."
+            ) {
+              res.status(404).json({ error: "Server not found." });
               return;
             }
             throw error;
           }
 
-          logger.info(`Container restart queued successfully: ${  serverId}`);
-          await logActivity(req, 'server:restart', { serverId: String(serverId) });
-          res.status(200).json({ success: true, message: 'Server restarted successfully' });
+          logger.info(`Container restart queued successfully: ${serverId}`);
+          await logActivity(req, "server:restart", {
+            serverId: String(serverId),
+          });
+          res
+            .status(200)
+            .json({ success: true, message: "Server restarted successfully" });
           return;
         }
 
@@ -583,10 +668,13 @@ export function registerConsoleRoutes(router: Router): void {
           const q = await runtimeStartQueue.enqueueStart({
             serverId: String(serverId),
             userId: user.id,
-            priority: user.isAdmin === true || server.ownerId === user.id || user.role === 'privileged',
+            priority:
+              user.isAdmin === true ||
+              server.ownerId === user.id ||
+              user.role === "privileged",
           });
           if (q.queued) {
-            await logActivity(req, 'server:start', {
+            await logActivity(req, "server:start", {
               serverId: String(serverId),
               metadata: { queued: true, position: q.position },
             });
@@ -597,34 +685,38 @@ export function registerConsoleRoutes(router: Router): void {
             });
             return;
           }
-          await logActivity(req, 'server:start', { serverId: String(serverId) });
-          res.status(200).json({ message: 'Container is starting.' });
+          await logActivity(req, "server:start", {
+            serverId: String(serverId),
+          });
+          res.status(200).json({ message: "Container is starting." });
           return;
         } catch (error) {
           if (error instanceof QueueBannedError) {
             res.status(403).json({ error: error.message });
             return;
           }
-          if (error instanceof Error && error.message === 'Server not found.') {
-            res.status(404).json({ error: 'Server not found.' });
+          if (error instanceof Error && error.message === "Server not found.") {
+            res.status(404).json({ error: "Server not found." });
             return;
           }
           throw error;
         }
       } catch (error) {
-        logger.error('Failed to process power action', error, {
+        logger.error("Failed to process power action", error, {
           serverId: String(serverId),
           action: String(powerAction),
         });
-        res.status(500).json({ error: safeClientMessage(error, 'Failed to process power action.') });
+        res.status(500).json({
+          error: safeClientMessage(error, "Failed to process power action."),
+        });
       }
     },
   );
 
   router.post(
-    '/server/:id/power/restart',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id/power/restart",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -632,7 +724,7 @@ export function registerConsoleRoutes(router: Router): void {
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
-          res.status(404).json({ error: 'User not found' });
+          res.status(404).json({ error: "User not found" });
           return;
         }
 
@@ -642,7 +734,7 @@ export function registerConsoleRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ error: 'Server not found' });
+          res.status(404).json({ error: "Server not found" });
           return;
         }
 
@@ -652,7 +744,7 @@ export function registerConsoleRoutes(router: Router): void {
           );
           res.status(403).json({
             error:
-              'This server is suspended. Please contact an administrator for assistance.',
+              "This server is suspended. Please contact an administrator for assistance.",
           });
           return;
         }
@@ -663,23 +755,28 @@ export function registerConsoleRoutes(router: Router): void {
           );
           res.status(403).json({
             error:
-              'This server is on a node under maintenance. Please try again later.',
+              "This server is on a node under maintenance. Please try again later.",
           });
           return;
         }
 
         if (!server.dockerImage) {
-          res.status(400).json({ error: 'Docker image not found.' });
+          res.status(400).json({ error: "Docker image not found." });
           return;
         }
 
-        await stopServerContainer(server, String(serverId), 'stop', { releaseResources: false }).catch(() => {});
+        await stopServerContainer(server, String(serverId), "stop", {
+          releaseResources: false,
+        }).catch(() => {});
         const q = await runtimeStartQueue.enqueueStart({
           serverId: String(serverId),
           userId: user.id,
-          priority: user.isAdmin === true || server.ownerId === user.id || user.role === 'privileged',
+          priority:
+            user.isAdmin === true ||
+            server.ownerId === user.id ||
+            user.role === "privileged",
         });
-        logger.info(`Container restart queued successfully: ${  serverId}`);
+        logger.info(`Container restart queued successfully: ${serverId}`);
 
         if (q.queued) {
           res.status(202).json({
@@ -692,24 +789,26 @@ export function registerConsoleRoutes(router: Router): void {
 
         res
           .status(200)
-          .json({ success: true, message: 'Server restarted successfully' });
+          .json({ success: true, message: "Server restarted successfully" });
       } catch (error) {
-        logger.error('Error restarting server:', error);
-        res.status(500).json({ error: 'Failed to restart server' });
+        logger.error("Error restarting server:", error);
+        res.status(500).json({ error: "Failed to restart server" });
       }
     },
   );
 
   router.post(
-    '/server/:id/power/queue/cancel',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('console'),
+    "/server/:id/power/queue/cancel",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("console"),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
       try {
-        const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
+        const user = await prisma.users.findUnique({
+          where: { id: req.session?.user?.id },
+        });
         if (!user) {
-          res.status(404).json({ error: 'User not found' });
+          res.status(404).json({ error: "User not found" });
           return;
         }
 
@@ -718,29 +817,29 @@ export function registerConsoleRoutes(router: Router): void {
           select: { UUID: true, ownerId: true },
         });
         if (!server) {
-          res.status(404).json({ error: 'Server not found' });
+          res.status(404).json({ error: "Server not found" });
           return;
         }
 
         // Only the owning user or an admin may pull a server off the queue.
         if (server.ownerId !== user.id && !user.isAdmin) {
-          res.status(403).json({ error: 'You do not own this server.' });
+          res.status(403).json({ error: "You do not own this server." });
           return;
         }
 
         const removed = await runtimeStartQueue.cancelQueuedStart(server.UUID);
         res.json({ success: true, wasQueued: removed });
       } catch (error) {
-        logger.error('Error cancelling queued start:', error);
-        res.status(500).json({ error: 'Failed to cancel queued start.' });
+        logger.error("Error cancelling queued start:", error);
+        res.status(500).json({ error: "Failed to cancel queued start." });
       }
     },
   );
 
   router.post(
-    '/server/:id/reinstall',
-    isAuthenticatedForServer('id'),
-    requireSubUserPermission('settings.reinstall'),
+    "/server/:id/reinstall",
+    isAuthenticatedForServer("id"),
+    requireSubUserPermission("settings.reinstall"),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -752,7 +851,7 @@ export function registerConsoleRoutes(router: Router): void {
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
-          res.status(404).json({ error: 'User not found' });
+          res.status(404).json({ error: "User not found" });
           return;
         }
 
@@ -762,7 +861,7 @@ export function registerConsoleRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ error: 'Server not found' });
+          res.status(404).json({ error: "Server not found" });
           return;
         }
 
@@ -774,7 +873,7 @@ export function registerConsoleRoutes(router: Router): void {
           },
         });
 
-        const { queueer } = await import('../../../handlers/queueer');
+        const { queueer } = await import("../../../handlers/queueer");
         queueer.addTask(async () => {
           try {
             const serverToReinstall = await prisma.server.findUnique({
@@ -783,24 +882,26 @@ export function registerConsoleRoutes(router: Router): void {
             });
 
             if (!serverToReinstall) {
-              logger.error('Server not found for reinstallation:', serverId);
+              logger.error("Server not found for reinstallation:", serverId);
               return;
             }
 
-            let ServerEnv: import('./shared').ServerVariable[] = [];
+            let ServerEnv: import("./shared").ServerVariable[] = [];
             if (serverToReinstall.Variables) {
               try {
                 ServerEnv = JSON.parse(
                   serverToReinstall.Variables,
-                ) as import('./shared').ServerVariable[];
+                ) as import("./shared").ServerVariable[];
 
-                const primaryPort = getPrimaryExternalPort(serverToReinstall.Ports);
+                const primaryPort = getPrimaryExternalPort(
+                  serverToReinstall.Ports,
+                );
                 if (primaryPort) {
                   ServerEnv.push({
-                    env: 'SERVER_PORT',
-                    name: 'Primary Port',
+                    env: "SERVER_PORT",
+                    name: "Primary Port",
                     value: primaryPort,
-                    type: 'text',
+                    type: "text",
                     default: primaryPort,
                   });
                 }
@@ -813,7 +914,10 @@ export function registerConsoleRoutes(router: Router): void {
             }
 
             const env = ServerEnv.reduce(
-              (acc: Record<string, string | number | boolean>, curr: import('./shared').ServerVariable) => {
+              (
+                acc: Record<string, string | number | boolean>,
+                curr: import("./shared").ServerVariable,
+              ) => {
                 if (
                   curr.env &&
                   curr.value !== undefined &&
@@ -821,21 +925,21 @@ export function registerConsoleRoutes(router: Router): void {
                 ) {
                   let processedValue: string | number | boolean;
                   switch (curr.type) {
-                  case 'boolean':
-                    processedValue =
+                    case "boolean":
+                      processedValue =
                         curr.value === 1 ||
-                        curr.value === '1' ||
+                        curr.value === "1" ||
                         curr.value === true
-                          ? 'true'
-                          : 'false';
-                    break;
-                  case 'number':
-                    processedValue = Number(curr.value);
-                    break;
-                  case 'text':
-                  default:
-                    processedValue = String(curr.value);
-                    break;
+                          ? "true"
+                          : "false";
+                      break;
+                    case "number":
+                      processedValue = Number(curr.value);
+                      break;
+                    case "text":
+                    default:
+                      processedValue = String(curr.value);
+                      break;
                   }
                   acc[curr.env] = processedValue;
                 }
@@ -851,13 +955,20 @@ export function registerConsoleRoutes(router: Router): void {
 
                 let reinstallDockerImage: string | undefined;
                 try {
-                  const parsed = JSON.parse(serverToReinstall.dockerImage || '{}');
-                  reinstallDockerImage = Object.values(parsed)[0] as string | undefined;
-                } catch { /* leave undefined */ }
+                  const parsed = JSON.parse(
+                    serverToReinstall.dockerImage || "{}",
+                  );
+                  reinstallDockerImage = Object.values(parsed)[0] as
+                    string | undefined;
+                } catch {
+                  /* leave undefined */
+                }
 
-                const installResponse = await daemonRequest<{ status?: number }>({
-                  method: 'POST',
-                  path: '/container/reinstall',
+                const installResponse = await daemonRequest<{
+                  status?: number;
+                }>({
+                  method: "POST",
+                  path: "/container/reinstall",
                   nodeAddress: serverToReinstall.node.address,
                   nodePort: serverToReinstall.node.port,
                   nodeKey: serverToReinstall.node.key,
@@ -894,10 +1005,13 @@ export function registerConsoleRoutes(router: Router): void {
                   `Error during reinstallation of server ${serverId}:`,
                   error,
                 );
-                const err = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+                const err =
+                  error && typeof error === "object"
+                    ? (error as Record<string, unknown>)
+                    : {};
                 if (err.status) {
                   logger.error(`Response status: ${err.status}`);
-                  logger.error('Response data:', err.body);
+                  logger.error("Response data:", err.body);
                 }
                 await prisma.server.update({
                   where: { UUID: getParamAsString(serverId) },
@@ -922,19 +1036,21 @@ export function registerConsoleRoutes(router: Router): void {
                 data: { Queued: false, Installing: false },
               })
               .catch((e) =>
-                logger.error('Error updating server queue status:', e),
+                logger.error("Error updating server queue status:", e),
               );
           }
         });
 
         res.status(200).json({
           success: true,
-          message: 'Server reinstallation initiated',
+          message: "Server reinstallation initiated",
         });
-        logActivity(req, 'server:reinstall', { serverId: String(serverId) }).catch(() => {});
+        logActivity(req, "server:reinstall", {
+          serverId: String(serverId),
+        }).catch(() => {});
       } catch (error) {
-        logger.error('Error reinstalling server:', error);
-        res.status(500).json({ error: 'Failed to reinstall server' });
+        logger.error("Error reinstalling server:", error);
+        res.status(500).json({ error: "Failed to reinstall server" });
       }
     },
   );

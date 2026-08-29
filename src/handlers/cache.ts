@@ -1,6 +1,6 @@
-import { getRedisClient } from './redis';
+import { getRedisClient } from "./redis";
 
-const CACHE_PREFIX = 'airlink:cache:';
+const CACHE_PREFIX = "airlink:cache:";
 
 /**
  * Generic Redis cache helper with TTL support.
@@ -15,7 +15,9 @@ export const cache = {
     try {
       const redis = getRedisClient();
       const raw = await redis.get(`${CACHE_PREFIX}${key}`);
-      if (!raw) {return null;}
+      if (!raw) {
+        return null;
+      }
       return JSON.parse(raw) as T;
     } catch {
       return null;
@@ -28,7 +30,12 @@ export const cache = {
   async set(key: string, value: unknown, ttlSec: number): Promise<void> {
     try {
       const redis = getRedisClient();
-      await redis.set(`${CACHE_PREFIX}${key}`, JSON.stringify(value), 'EX', ttlSec);
+      await redis.set(
+        `${CACHE_PREFIX}${key}`,
+        JSON.stringify(value),
+        "EX",
+        ttlSec,
+      );
     } catch {
       // Non-critical — cache miss on next read.
     }
@@ -58,11 +65,13 @@ export const cache = {
    */
   async wrap<T>(key: string, ttlSec: number, fn: () => Promise<T>): Promise<T> {
     const cached = await cache.get<T>(key);
-    if (cached !== null) {return cached;}
+    if (cached !== null) {
+      return cached;
+    }
 
     const result = await fn();
     // Only cache non-null/undefined results.
-    if (result != null) {
+    if (result !== null && result !== undefined) {
       await cache.set(key, result, ttlSec);
     }
     return result;

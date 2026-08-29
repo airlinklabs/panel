@@ -1,7 +1,7 @@
 // @ts-check
 
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -10,25 +10,31 @@ export default tseslint.config(
   tseslint.configs.stylistic,
   {
     rules: {
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-require-imports': 'off',
-      'no-console': 'warn',
-      'no-debugger': 'error',
-      'eqeqeq': ['error', 'always'],
-      'curly': ['error', 'all'],
-      'semi': ['error', 'always'],
-      'quotes': ['warn', 'single'],
-      'indent': ['warn', 2],
-      'prefer-const': 'error',
-      'no-var': 'error',
-      'object-shorthand': 'error',
-      'prefer-template': 'warn',
-      'no-throw-literal': 'error',
-      'no-return-await': 'warn',
-      '@typescript-eslint/consistent-type-imports': 'warn',
-      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
-      '@typescript-eslint/no-dynamic-delete': 'error',
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-non-null-assertion": "warn",
+      "@typescript-eslint/no-empty-function": "warn",
+      "no-console": "warn",
+      "no-debugger": "error",
+      eqeqeq: ["error", "always"],
+      curly: ["error", "all"],
+      semi: ["error", "always"],
+      quotes: ["warn", "single"],
+      indent: ["warn", 2],
+      "prefer-const": "error",
+      "no-var": "error",
+      "object-shorthand": "error",
+      "prefer-template": "warn",
+      "no-throw-literal": "error",
+      "no-return-await": "warn",
+      "no-empty": "warn",
+      "@typescript-eslint/consistent-type-imports": "warn",
+      "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+      "@typescript-eslint/no-dynamic-delete": "error",
     },
     languageOptions: {
       globals: {
@@ -50,8 +56,8 @@ export default tseslint.config(
         beforeEach: true,
         afterEach: true,
         beforeAll: true,
-        afterAll: true
-      }
-    }
-  }
+        afterAll: true,
+      },
+    },
+  },
 );
