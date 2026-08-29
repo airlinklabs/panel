@@ -58,29 +58,64 @@
 </main>
 
 <!-- Reject modal -->
-<div id="rejectModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+<div id="rejectModal" x-data="imageReject()" x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center" style="display:none" @keydown.escape.window="if(open) close()" @image-reject-show.window="show($event.detail.id, $event.detail.name)">
   <div class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="al-sheet-header" style="border-color:var(--theme-border)">
       <div>
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Reject image</h2>
-        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" id="rejectImageName"></p>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" x-text="rejectName"></p>
       </div>
-      <button type="button" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" data-close-reject aria-label="Close">
+      <button type="button" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" @click="close()" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
     <div class="px-6 py-4">
       <label class="al-label" for="rejectReason">Reason <span class="font-normal" style="color:var(--theme-text-muted)">(shown to the user)</span></label>
-      <textarea id="rejectReason" class="al-input w-full" rows="3" placeholder="e.g. Missing startup exit detection or required docker image."></textarea>
+      <textarea x-model="reason" class="al-input w-full" rows="3" placeholder="e.g. Missing startup exit detection or required docker image."></textarea>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
-      <button type="button" class="al-btn-secondary px-4 py-2 text-xs font-medium" data-close-reject>Cancel</button>
-      <button type="button" id="confirmReject" class="al-btn-danger px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-        <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %>Reject
+      <button type="button" class="al-btn-secondary px-4 py-2 text-xs font-medium" @click="close()">Cancel</button>
+      <button type="button" @click="confirm()" class="al-btn-danger px-4 py-2 text-xs font-medium inline-flex items-center gap-2" :disabled="submitting">
+        <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %><span x-text="submitting ? 'Rejecting…' : 'Reject'">Reject</span>
       </button>
     </div>
   </div>
 </div>
+
+<script nonce="<%- nonce %>">
+function imageReject() {
+  return {
+    open: false,
+    rejectId: null,
+    rejectName: '',
+    reason: '',
+    submitting: false,
+    show(id, name) {
+      this.rejectId = id;
+      this.rejectName = name;
+      this.reason = '';
+      this.open = true;
+    },
+    close() { this.open = false; this.rejectId = null; },
+    async confirm() {
+      if (this.submitting || !this.rejectId) return;
+      this.submitting = true;
+      try {
+        const res = await fetch('/admin/images/reject/' + this.rejectId, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: this.reason }),
+        });
+        const data = await res.json();
+        this.close();
+        if (data.error) { showToast(data.error, 'error'); }
+        else { showToast(data.message || 'Image rejected.', 'success'); window.location.reload(); }
+      } catch (e) { this.close(); showToast('Something went wrong.', 'error'); }
+      finally { this.submitting = false; }
+    }
+  };
+}
+</script>
 
 <div id="page-data" style="display:none"
   data-approve-confirm="Approve this image? It will become available to all users."
@@ -179,7 +214,6 @@
 </script>
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-images.js?v=6"></script>
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-image-approvals.js?v=2"></script>
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-image-store.js?v=9"></script>
 
 <%- include('../../components/footer') %>

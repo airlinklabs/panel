@@ -29,17 +29,13 @@
       <div class="flex gap-2 shrink-0">
         <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost inline-flex items-center gap-1.5 text-xs"><%- icon('external-link', { class: 'size-4', strokeWidth: 1.5 }) %>View</a>
         <button
-          hx-post="/admin/images/approve/<%= image.id %>"
-          hx-target="#pendingApprovalsList"
-          hx-swap="outerHTML"
-          hx-confirm="Approve this image? It will become available to all users."
+          x-data="{ approving: false }"
+          @click="if(!approving && confirm('Approve this image? It will become available to all users.')) { approving = true; fetch('/admin/images/approve/<%= image.id %>', { method: 'POST' }).then(r => r.json()).then(d => { if(d.error) { showToast(d.error, 'error'); approving = false; } else { showToast(d.message || 'Image approved.', 'success'); window.location.reload(); } }).catch(() => { showToast('Something went wrong.', 'error'); approving = false; }); }"
           type="button"
-          class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>Approve</button>
+          class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" :disabled="approving"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>Approve</button>
         <button
-          hx-post="/admin/images/reject/<%= image.id %>"
-          hx-target="#pendingApprovalsList"
-          hx-swap="outerHTML"
-          hx-confirm="Reject this image?"
+          x-data="{ rejecting: false }"
+          @click="if(!rejecting) { rejecting = true; $dispatch('image-reject-show', { id: '<%= image.id %>', name: '<%= image.name %>' }); rejecting = false; }"
           type="button"
           class="al-btn-danger inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Reject</button>
       </div>
