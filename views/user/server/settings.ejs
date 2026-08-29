@@ -13,11 +13,10 @@
         { label: 'Settings' }
       ] }) %>
       <!-- Page Header: title + meta left -->
-      <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
+      <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
             <%- include('../../components/serverHeader') %>
-            <!-- Server meta: image · node · id -->
             <%- include('../../components/serverMeta') %>
           </div>
         </div>
@@ -25,45 +24,45 @@
       <%- include('../../components/installHeader') %>
       <%- include('../../components/serverTemplate') %>
 
-      <div class="al-page-body space-y-5 mt-8">
+      <div class="al-page-body space-y-4 mt-6">
 
         <%- include('../../fragments/user/server/settings-form', { req, server }) %>
 
-        <div class="al-card p-5">
-          <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.serverInformation || 'Server Information' %></h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="al-card p-4">
+          <h2 class="text-[15px] font-semibold mb-3" style="color:var(--theme-text-strong)"><%= req.translations.serverInformation || 'Server Information' %></h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-muted)"><%= req.translations.serverId || 'Server ID' %></h3>
-              <p style="color:var(--theme-text-muted)"><%= server.UUID %></p>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.serverId || 'Server ID' %></h3>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.UUID %></p>
             </div>
             <div>
-              <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-muted)"><%= req.translations.createdAt || 'Created' %></h3>
-              <p style="color:var(--theme-text-muted)"><%= new Date(server.createdAt).toLocaleString() %></p>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.createdAt || 'Created' %></h3>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= new Date(server.createdAt).toLocaleString() %></p>
             </div>
             <div>
-              <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-muted)"><%= req.translations.nodes || 'Node' %></h3>
-              <p style="color:var(--theme-text-muted)"><%= server.node.name %></p>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.nodes || 'Node' %></h3>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.node.name %></p>
             </div>
             <div>
-              <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-muted)"><%= req.translations.images || 'Image' %></h3>
-              <p style="color:var(--theme-text-muted)"><%= server.image.name || 'Unknown' %></p>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.images || 'Image' %></h3>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.image.name || 'Unknown' %></p>
             </div>
             <div>
-              <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-muted)"><%= req.translations.memory || 'Memory' %></h3>
-              <p style="color:var(--theme-text-muted)"><%= server.Memory === 0 ? 'Unlimited' : (server.Memory >= 1024 ? (server.Memory / 1024).toFixed(1) + ' GB' : server.Memory + ' MB') %></p>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.memory || 'Memory' %></h3>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Memory === 0 ? 'Unlimited' : (server.Memory >= 1024 ? (server.Memory / 1024).toFixed(1) + ' GB' : server.Memory + ' MB') %></p>
             </div>
             <div>
-              <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-muted)"><%= req.translations.cpu || 'CPU' %></h3>
-              <p style="color:var(--theme-text-muted)"><%= server.Cpu === 0 ? 'Unlimited' : (server.Cpu / 100).toFixed(1) + ' cores' %></p>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.cpu || 'CPU' %></h3>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Cpu === 0 ? 'Unlimited' : (server.Cpu / 100).toFixed(1) + ' cores' %></p>
             </div>
             <div>
-              <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-muted)"><%= req.translations.storage || 'Storage' %></h3>
-              <p style="color:var(--theme-text-muted)"><%= server.Storage === 0 ? 'Unlimited' : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.storage || 'Storage' %></h3>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Storage === 0 ? 'Unlimited' : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
             </div>
             <div>
-              <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-muted)"><%= req.translations.statusColumn || 'Status' %></h3>
-              <p style="color:var(--theme-text-muted)">
-                <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.statusColumn || 'Status' %></h3>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)">
+                <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
                   style="<%= server.Suspended ? 'background:var(--theme-warning-bg);color:var(--theme-warning);--tw-ring-color:color-mix(in srgb, var(--theme-warning) 25%, transparent)' : 'background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent)' %>">
                   <%= server.Suspended ? 'Suspended' : 'Active' %>
                 </span>
@@ -72,40 +71,40 @@
           </div>
         </div>
 
-        <div class="al-card p-5" style="background:var(--theme-danger-bg);border-color:color-mix(in oklch, var(--theme-danger) 20%, transparent)">
-          <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
+        <div class="al-card p-4" style="background:var(--theme-danger-bg);border-color:color-mix(in oklch, var(--theme-danger) 20%, transparent)">
+          <h2 class="text-[15px] font-semibold mb-3" style="color:var(--theme-text-strong)"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
 
           <% if (user && (user.isAdmin || settings?.allowUserDeleteServer)) { %>
-          <div class="flex items-center justify-between mb-5">
+          <div class="flex items-center justify-between mb-3">
             <div>
-              <h3 class="text-sm font-medium" style="color:var(--theme-text-muted)">Delete Server</h3>
-              <p class="text-sm" style="color:var(--theme-text-muted)">Permanently delete this server and all its data.</p>
+              <h3 class="text-[13px] font-medium" style="color:var(--theme-text-muted)">Delete Server</h3>
+              <p class="text-[11px]" style="color:var(--theme-text-muted)">Permanently delete this server and all its data.</p>
             </div>
             <button id="deleteServerButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
-              <%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %>
+              <%- icon('trash-2', { class: 'size-3.5', strokeWidth: 1.5 }) %>
               Delete
             </button>
           </div>
           <% } %>
 
-          <div class="flex items-center justify-between gap-4 mb-5">
+          <div class="flex items-center justify-between gap-3 mb-3">
             <div>
-              <h3 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.reinstallServer || 'Reinstall Server' %></h3>
-              <p class="text-sm" style="color:var(--theme-text-muted)">Re-run the install scripts. Your files, worlds and settings are kept.</p>
+              <h3 class="text-[13px] font-medium" style="color:var(--theme-text-muted)"><%= req.translations.reinstallServer || 'Reinstall Server' %></h3>
+              <p class="text-[11px]" style="color:var(--theme-text-muted)">Re-run the install scripts. Your files, worlds and settings are kept.</p>
             </div>
             <button id="reinstallButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
-              <%- icon('rotate-ccw', { class: 'size-4', strokeWidth: 1.5 }) %>
+              <%- icon('rotate-ccw', { class: 'size-3.5', strokeWidth: 1.5 }) %>
               <%= req.translations.reinstall || 'Reinstall' %>
             </button>
           </div>
 
-          <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center justify-between gap-3">
             <div>
-              <h3 class="text-sm font-medium" style="color:var(--theme-text-muted)">Reinstall &amp; Delete All Data</h3>
-              <p class="text-sm" style="color:var(--theme-text-muted)">Wipes the server volume (worlds, configs, files) then reinstalls from scratch. This cannot be undone.</p>
+              <h3 class="text-[13px] font-medium" style="color:var(--theme-text-muted)">Reinstall &amp; Delete All Data</h3>
+              <p class="text-[11px]" style="color:var(--theme-text-muted)">Wipes the server volume (worlds, configs, files) then reinstalls from scratch. This cannot be undone.</p>
             </div>
             <button id="reinstallWipeButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
-              <%- icon('triangle-alert', { class: 'size-4', strokeWidth: 1.5 }) %>
+              <%- icon('triangle-alert', { class: 'size-3.5', strokeWidth: 1.5 }) %>
               Reinstall &amp; Delete All Data
             </button>
           </div>

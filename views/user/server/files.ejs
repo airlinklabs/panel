@@ -74,30 +74,29 @@ function escJS(val) {
         { label: 'Files' }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
-      <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
+      <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
             <%- include('../../components/serverHeader') %>
-            <!-- Server meta: image · node · id -->
             <%- include('../../components/serverMeta') %>
           </div>
           <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-          <div class="flex flex-wrap gap-2 shrink-0">
+          <div class="flex flex-wrap gap-1.5 shrink-0">
             <button id="createFile" onclick="openCreateFileModal()" type="button"
                 class="al-btn-secondary">
-                <%- icon('file-plus', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
+                <%- icon('file-plus', { class: 'size-3.5 inline-flex mr-1' }) %>
                 New File
             </button>
 
             <button id="uploadFile" onclick="openUploadFileModal()" type="button"
                 class="al-btn-secondary">
-                <%- icon('upload', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
+                <%- icon('upload', { class: 'size-3.5 inline-flex mr-1' }) %>
                 Upload File
             </button>
 
             <button id="pullFile" onclick="openPullFileModal()" type="button"
                 class="al-btn-secondary">
-                <%- icon('download', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
+                <%- icon('download', { class: 'size-3.5 inline-flex mr-1' }) %>
                 Pull From URL
             </button>
 
@@ -118,14 +117,14 @@ function escJS(val) {
 
       <!-- Daemon Offline Warning -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
-      <div class="mx-4 sm:mx-8 mt-8 rounded-xl p-4 flex items-center" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);">
-        <div class="flex-shrink-0 mr-3">
-          <%- icon('triangle-alert', { class: 'h-6 w-6', strokeWidth: 2, style: 'color:var(--theme-danger);' }) %>
+      <div class="mx-4 sm:mx-8 mt-6 rounded-xl p-3 flex items-center" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);">
+        <div class="flex-shrink-0 mr-2.5">
+          <%- icon('triangle-alert', { class: 'h-4 w-4', strokeWidth: 2, style: 'color:var(--theme-danger);' }) %>
         </div>
         <div>
-          <h3 class="text-sm font-medium" style="color:var(--theme-danger);">Connection Error</h3>
-          <p class="text-xs" style="color:var(--theme-danger);"><%= errorMessage.message %></p>
-          <button type="button" onclick="window.location.reload()" class="al-btn-danger mt-2 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5">
+          <h3 class="text-[13px] font-medium" style="color:var(--theme-danger);">Connection Error</h3>
+          <p class="text-[11px]" style="color:var(--theme-danger);"><%= errorMessage.message %></p>
+          <button type="button" onclick="window.location.reload()" class="al-btn-danger mt-1.5 px-2.5 py-1 text-[11px] rounded-lg transition-colors inline-flex items-center gap-1.5">
             <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
             Retry Connection
           </button>
@@ -136,20 +135,20 @@ function escJS(val) {
       <!-- File Table or Daemon Offline Message -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
         <!-- Daemon Offline Message -->
-        <div class="px-6 sm:px-8 mt-8">
-          <div class="al-card rounded-xl p-8 text-center">
-            <div class="flex justify-center mb-6">
-              <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:var(--theme-bg-secondary);">
-              <%- icon('wifi-off', { class: 'size-6', strokeWidth: 1.5 }) %>
+        <div class="px-6 sm:px-8 mt-6">
+          <div class="al-card rounded-xl p-6 text-center">
+            <div class="flex justify-center mb-4">
+              <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background:var(--theme-bg-secondary);">
+              <%- icon('wifi-off', { class: 'size-5', strokeWidth: 1.5 }) %>
               </div>
             </div>
-            <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)">Node's gone quiet — file management is on hold until it's back.</h2>
-            <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
+            <h2 class="text-base font-semibold" style="color:var(--theme-text-strong)">Node's gone quiet — file management is on hold until it's back.</h2>
+            <p class="mt-1.5 text-[13px] max-w-md mx-auto" style="color:var(--theme-text-muted)">
               The daemon appears to be offline. File management is unavailable until the connection is restored.
             </p>
-            <div class="mt-6">
-              <button type="button" onclick="window.location.reload()" class="al-btn-primary px-4 py-2 text-sm rounded-lg inline-flex items-center gap-2">
-                <%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>
+            <div class="mt-4">
+              <button type="button" onclick="window.location.reload()" class="al-btn-primary px-3 py-1.5 text-[13px] rounded-lg inline-flex items-center gap-1.5">
+                <%- icon('refresh-cw', { class: 'size-3.5', strokeWidth: 1.5 }) %>
                 Retry Connection
               </button>
             </div>
@@ -157,10 +156,10 @@ function escJS(val) {
         </div>
       <% } else { %>
         <!-- File Table -->
-        <div class="px-6 sm:px-8 mt-8">
+        <div class="px-6 sm:px-8 mt-6">
           <div class="al-file-panel overflow-x-auto rounded-xl" style="border:1px solid var(--theme-border);">
-            <div class="px-3 py-2.5 flex items-center overflow-hidden">
-              <nav class="flex items-center gap-0 text-xs min-w-0 overflow-hidden">
+            <div class="px-3 py-2 flex items-center overflow-hidden">
+              <nav class="flex items-center gap-0 text-[11px] min-w-0 overflow-hidden">
                 <a class="hover:text-[var(--theme-text)] transition shrink-0" href="./files" style="color:var(--theme-text-muted)">/home/container/</a><span style="color:var(--theme-text-muted)"></span>
                 <%
                     if (req.query.path) {
@@ -186,30 +185,30 @@ function escJS(val) {
               </nav>
             </div>
             <!-- Search/filter bar -->
-            <div class="px-4 py-2 flex items-center gap-2" style="border-bottom:1px solid var(--theme-border);">
-              <%- icon('search', { size: 14, class: 'shrink-0' }) %>
+            <div class="px-3 py-1.5 flex items-center gap-2" style="border-bottom:1px solid var(--theme-border);">
+              <%- icon('search', { size: 12, class: 'shrink-0' }) %>
               <input
                 id="fileSearchInput"
                 type="text"
                 placeholder="Filter files…"
-                class="flex-1 bg-transparent text-sm focus:outline-none"
+                class="flex-1 bg-transparent text-[13px] focus:outline-none"
                 style="color:var(--theme-text-strong);"
                 autocomplete="off"
                 spellcheck="false"
                 aria-label="Filter files">
               <button type="button" id="clearFileSearch" class="hidden p-0.5 rounded transition" aria-label="Clear search filter" style="color:var(--theme-text-muted);">
-                <%- icon('x', { size: 12 }) %>
+                <%- icon('x', { size: 10 }) %>
               </button>
             </div>
             <table class="min-w-full al-table" style="background:var(--theme-bg-card);">
               <thead class="al-table-head">
               <tr>
-                <th class="px-4 py-2.5 text-left w-10" scope="col">
-                  <input type="checkbox" id="selectAll" class="form-checkbox h-4 w-4 rounded transition file-checkbox" aria-label="Select all files">
+                <th class="px-3 py-2 text-left w-10" scope="col">
+                  <input type="checkbox" id="selectAll" class="form-checkbox h-3.5 w-3.5 rounded transition file-checkbox" aria-label="Select all files">
                 </th>
-                <th class="al-table-th px-4 py-2.5 text-left" scope="col">Name</th>
-                <th class="al-table-th px-4 py-2.5 text-left w-24" scope="col">Size</th>
-                <th class="al-table-th px-4 py-2.5 text-left w-32 hidden md:table-cell" scope="col">Modified</th>
+                <th class="al-table-th px-3 py-2 text-left" scope="col">Name</th>
+                <th class="al-table-th px-3 py-2 text-left w-24" scope="col">Size</th>
+                <th class="al-table-th px-3 py-2 text-left w-32 hidden md:table-cell" scope="col">Modified</th>
               </tr>
             </thead>
             <tbody id="fileTableBody">

@@ -107,32 +107,31 @@
         { label: server.name }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
-      <div class="px-8 pt-4">
-        <div class="flex flex-wrap items-start justify-between gap-4">
+      <div class="px-8 pt-3">
+        <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
             <%- include('../../components/serverHeader') %>
-            <!-- Server meta: image · node · id -->
             <%- include('../../components/serverMeta') %>
           </div>
 
           <!-- Control buttons -->
-          <div class="flex gap-2 shrink-0">
+          <div class="flex gap-1.5 shrink-0">
             <button id="startButton" type="button"
               <%= server.Suspended ? 'disabled aria-disabled="true"' : '' %>
-              class="al-btn-success rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
-              <%- icon('play', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
+              class="al-btn-success rounded-xl px-3 py-1.5 text-[13px] font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
+              <%- icon('play', { class: 'size-3.5 inline-flex mr-1 mb-0.5' }) %>
               <%= req.translations.start %>
             </button>
             <button id="restartButton" type="button"
               <%= server.Suspended ? 'disabled aria-disabled="true"' : '' %>
-              class="al-btn-secondary rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
-              <%- icon('refresh-cw', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
+              class="al-btn-secondary rounded-xl px-3 py-1.5 text-[13px] font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
+              <%- icon('refresh-cw', { class: 'size-3.5 inline-flex mr-1 mb-0.5' }) %>
               <%= req.translations.restart %>
             </button>
             <button id="stopButton" type="button"
               <%= server.Suspended ? 'disabled aria-disabled="true"' : '' %>
-              class="al-btn-danger rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
-              <%- icon('square', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
+              class="al-btn-danger rounded-xl px-3 py-1.5 text-[13px] font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>">
+              <%- icon('square', { class: 'size-3.5 inline-flex mr-1 mb-0.5' }) %>
               <%= req.translations.stop %>
             </button>
           </div>
@@ -140,23 +139,23 @@
 
         <!-- Server Suspended Warning -->
         <% if (server.Suspended) { %>
-        <div class="mt-3 border rounded-xl px-4 py-3 flex items-center gap-3" style="background:color-mix(in srgb, var(--theme-danger) 12%, transparent);border-color:color-mix(in srgb, var(--theme-danger) 20%, transparent)">
-          <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-danger);' }) %>
+        <div class="mt-2 border rounded-xl px-3 py-2.5 flex items-center gap-2.5" style="background:color-mix(in srgb, var(--theme-danger) 12%, transparent);border-color:color-mix(in srgb, var(--theme-danger) 20%, transparent)">
+          <%- icon('triangle-alert', { class: 'h-4 w-4 shrink-0', style: 'color:var(--theme-danger);' }) %>
           <div>
-            <p class="text-sm font-medium" style="color:var(--theme-danger);"><%= req.translations.serverSuspended || "This server's been grounded. Reach out to your admin if you think that's a mistake." %></p>
-            <p class="text-xs" style="color:var(--theme-danger);"><%= req.translations.serverSuspendedDesc || 'This server has been suspended by an administrator.' %></p>
+            <p class="text-[13px] font-medium" style="color:var(--theme-danger);"><%= req.translations.serverSuspended || "This server's been grounded. Reach out to your admin if you think that's a mistake." %></p>
+            <p class="text-[11px]" style="color:var(--theme-danger);"><%= req.translations.serverSuspendedDesc || 'This server has been suspended by an administrator.' %></p>
           </div>
         </div>
         <% } %>
 
         <!-- Daemon Offline Warning -->
-        <div id="daemonOfflineWarningRow" class="<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %>hidden<% } %> mt-3">
-          <div id="daemonOfflineWarning" class="border rounded-xl px-4 py-3 flex items-center gap-3" style="background:color-mix(in srgb, var(--theme-danger) 12%, transparent);border-color:color-mix(in srgb, var(--theme-danger) 20%, transparent)">
-            <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-danger);' }) %>
+        <div id="daemonOfflineWarningRow" class="<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %>hidden<% } %> mt-2">
+          <div id="daemonOfflineWarning" class="border rounded-xl px-3 py-2.5 flex items-center gap-2.5" style="background:color-mix(in srgb, var(--theme-danger) 12%, transparent);border-color:color-mix(in srgb, var(--theme-danger) 20%, transparent)">
+            <%- icon('triangle-alert', { class: 'h-4 w-4 shrink-0', style: 'color:var(--theme-danger);' }) %>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon — it might just need a nudge.' %></p>
+              <p class="text-[13px] font-medium" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon — it might just need a nudge.' %></p>
             </div>
-            <button type="button" onclick="retryDaemonConnection()" class="al-btn-danger shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition inline-flex items-center gap-1.5">
+            <button type="button" onclick="retryDaemonConnection()" class="al-btn-danger shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-lg transition inline-flex items-center gap-1.5">
               <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
               Retry Connection
             </button>
@@ -167,7 +166,7 @@
       <%- include('../../components/serverTemplate') %>
       <%- include('../../components/installHeader') %>
 
-      <div id="server-page-body" class="flex flex-col lg:flex-row px-8 mt-8">
+      <div id="server-page-body" class="flex flex-col lg:flex-row px-8 mt-6">
 
 <!-- Left side: Console -->
 <div class="w-full lg:w-2/3 lg:pr-5 flex flex-col min-w-0">
@@ -188,9 +187,9 @@
     <div class="relative">
         <div class="relative">
             <input id="input" type="text" autocomplete="off" aria-label="Console input" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
-                class="w-full px-4 py-3 text-sm rounded-b-xl focus:ring-1 focus:border-transparent placeholder:font-medium bg-transparent relative z-[1]"
+                class="w-full px-3 py-2 text-[13px] rounded-b-xl focus:ring-1 focus:border-transparent placeholder:font-medium bg-transparent relative z-[1]"
                 style="color:var(--theme-text-strong);border-top:1px solid var(--theme-border)">
-            <div id="ghost-text-bg" class="absolute inset-0 px-4 py-3 text-sm pointer-events-none rounded-b-xl overflow-hidden z-0" style="border-top:1px solid var(--theme-border);background:var(--theme-bg-secondary)">
+            <div id="ghost-text-bg" class="absolute inset-0 px-3 py-2 text-[13px] pointer-events-none rounded-b-xl overflow-hidden z-0" style="border-top:1px solid var(--theme-border);background:var(--theme-bg-secondary)">
                 <span id="ghost-typed" class="invisible"></span><span id="ghost-suggestion" style="color:var(--theme-text-muted)"></span>
             </div>
         </div>
@@ -198,63 +197,63 @@
 </div>
 
         <!-- Right side: Stats Cards -->
-        <div class="w-full lg:w-1/3 mt-4 lg:mt-0 space-y-4 flex flex-col">
+        <div class="w-full lg:w-1/3 mt-3 lg:mt-0 space-y-3 flex flex-col">
 
             <!-- IP Address Card -->
-            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:0">
+            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-3 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:0">
                 <div class="relative z-10 flex items-start justify-between gap-2">
                     <div class="min-w-0">
-                        <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %>:</h2>
-                        <p id="server-ip-text" class="mt-1 text-sm font-medium font-mono tracking-tight break-all" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></p>
+                        <h2 class="text-[11px] font-medium uppercase tracking-wide" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %></h2>
+                        <p id="server-ip-text" class="mt-0.5 text-[13px] font-medium font-mono tracking-tight break-all" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></p>
                     </div>
-                    <button type="button" id="copy-ip-btn" title="Copy server address" class="shrink-0 mt-1 rounded-lg p-1.5 transition-colors" style="background:var(--theme-bg-secondary)">
-                        <span id="copy-icon"><%- icon('copy', { class: 'h-3.5 w-3.5', style: 'color:var(--theme-text-muted)' }) %></span>
-                        <span id="check-icon" class="hidden" style="color:var(--theme-success)"><%- icon('check', { class: 'h-3.5 w-3.5', strokeWidth: 2.5 }) %></span>
+                    <button type="button" id="copy-ip-btn" title="Copy server address" class="shrink-0 mt-0.5 rounded-lg p-1 transition-colors" style="background:var(--theme-bg-secondary)">
+                        <span id="copy-icon"><%- icon('copy', { class: 'h-3 w-3', style: 'color:var(--theme-text-muted)' }) %></span>
+                        <span id="check-icon" class="hidden" style="color:var(--theme-success)"><%- icon('check', { class: 'h-3 w-3', strokeWidth: 2.5 }) %></span>
                     </button>
                 </div>
             </div>
 
             <!-- Status Card -->
-            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:1">
+            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-3 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:1">
                 <canvas id="statusChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
-                  <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.Status %>:</h2>
-                  <p id="status" role="status" aria-live="polite" class="mt-1 text-lg font-medium tracking-tight leading-snug" style="color:var(--theme-text-strong)">-</p>
-                  <p id="status-msg" class="text-xs font-medium mt-0.5 leading-snug transition-all duration-300 opacity-0 translate-y-1 pointer-events-none" style="color:var(--theme-text-muted)"></p>
-                  <div id="queue-status" class="hidden mt-2 text-xs leading-snug" style="color:var(--theme-text-muted)">
+                  <h2 class="text-[11px] font-medium uppercase tracking-wide" style="color:var(--theme-text-muted)"><%= req.translations.Status %></h2>
+                  <p id="status" role="status" aria-live="polite" class="mt-0.5 text-base font-medium tracking-tight leading-snug" style="color:var(--theme-text-strong)">-</p>
+                  <p id="status-msg" class="text-[11px] font-medium mt-0.5 leading-snug transition-all duration-300 opacity-0 translate-y-1 pointer-events-none" style="color:var(--theme-text-muted)"></p>
+                  <div id="queue-status" class="hidden mt-1.5 text-[11px] leading-snug" style="color:var(--theme-text-muted)">
                     <p id="queue-position" class="font-medium" style="color:var(--theme-warning)"></p>
                     <p id="queue-available" class="mt-0.5"></p>
                     <% if (!server.Suspended) { %>
-                    <button type="button" id="cancelQueueBtn" class="mt-2 px-2.5 py-1 rounded-lg text-xs font-medium border transition hover:bg-[var(--theme-bg-hover)]" style="border-color:var(--theme-border);color:var(--theme-text-muted)">Cancel start</button>
+                    <button type="button" id="cancelQueueBtn" class="mt-1.5 px-2 py-0.5 rounded-lg text-[11px] font-medium border transition hover:bg-[var(--theme-bg-hover)]" style="border-color:var(--theme-border);color:var(--theme-text-muted)">Cancel start</button>
                     <% } %>
                   </div>
                 </div>
               </div>
 
             <!-- RAM Usage Card -->
-            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:2">
+            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-3 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:2">
                 <canvas id="ramChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
-                    <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.ramUsage %>:</h2>
-                    <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight" style="color:var(--theme-text-strong)">0% (0 MB / 0 MB)</p>
+                    <h2 class="text-[11px] font-medium uppercase tracking-wide" style="color:var(--theme-text-muted)"><%= req.translations.ramUsage %></h2>
+                    <p id="ramUsage" class="mt-0.5 text-base font-medium tracking-tight" style="color:var(--theme-text-strong)">0% (0 MB / 0 MB)</p>
                 </div>
             </div>
 
             <!-- CPU Usage Card -->
-            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:3">
+            <div class="stats-card relative flex-1 overflow-hidden rounded-xl p-3 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:3">
                 <canvas id="cpuChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
-                    <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.cpuUsage %>:</h2>
-                    <p id="cpuUsage" class="mt-1 text-lg font-medium tracking-tight" style="color:var(--theme-text-strong)">0%</p>
+                    <h2 class="text-[11px] font-medium uppercase tracking-wide" style="color:var(--theme-text-muted)"><%= req.translations.cpuUsage %></h2>
+                    <p id="cpuUsage" class="mt-0.5 text-base font-medium tracking-tight" style="color:var(--theme-text-strong)">0%</p>
                 </div>
             </div>
 
             <!-- Disk Usage Card -->
-            <div class="relative flex-1 overflow-hidden rounded-xl p-4 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:4">
+            <div class="relative flex-1 overflow-hidden rounded-xl p-3 transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:4">
                 <canvas id="diskChart" class="absolute inset-0 w-full h-full hidden"></canvas>
                 <div class="relative z-10">
-                    <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.diskUsage %>:</h2>
-                    <p id="diskUsage" class="mt-1 text-lg font-medium tracking-tight" style="color:var(--theme-text-strong)">-</p>
+                    <h2 class="text-[11px] font-medium uppercase tracking-wide" style="color:var(--theme-text-muted)"><%= req.translations.diskUsage %></h2>
+                    <p id="diskUsage" class="mt-0.5 text-base font-medium tracking-tight" style="color:var(--theme-text-strong)">-</p>
                 </div>
             </div>
         </div>

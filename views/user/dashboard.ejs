@@ -22,7 +22,7 @@
       <div class="al-page-body pt-4">
 
         <!-- Header -->
-        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div>
             <h1 class="al-page-title"><%= req.translations.userDashboardTitle %></h1>
             <p class="al-page-desc"><%= req.translations.userDashboardText %></p>
@@ -96,9 +96,9 @@
 
         <!-- ── Folders ──────────────────────────────────────── -->
         <% if (folders && folders.length > 0) { %>
-        <div class="mb-8">
+        <div class="mb-6">
           <p class="al-section-label">Folders</p>
-          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3" id="folderGrid">
+          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5" id="folderGrid">
             <% let folderIdx = 0; folders.forEach(folder => { %>
             <div class="al-card flex items-center gap-3 cursor-pointer relative transition-[background,border-color,box-shadow] select-none hover:border-[var(--theme-border-accent)] group folder-card"
               role="button"
@@ -124,7 +124,7 @@
         <p class="al-section-label">Servers</p>
 
         <!-- Grid view -->
-        <div id="gridView" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+        <div id="gridView" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mb-5">
           <% let serverIdx = 0; servers.forEach(server => { %>
           <%
             const inFolder = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID));
@@ -142,9 +142,9 @@
             style="--i:<%= serverIdx++ %>"
             draggable="true">
             <a href="../server/<%= server.UUID %>" class="block">
-              <div class="flex items-start justify-between mb-3">
-                <div class="min-w-0 flex-1 mr-3">
-                  <h3 class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= server.name %>
+              <div class="flex items-start justify-between mb-2">
+                <div class="min-w-0 flex-1 mr-2">
+                  <h3 class="text-[13px] font-medium truncate" style="color:var(--theme-text-strong);"><%= server.name %>
                     <% if (server.shared) { %>
                     <span class="al-badge-neutral align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> Shared</span>
                     <% } %>
@@ -159,24 +159,24 @@
                   <%- include('../components/ui/status-badge', { status: statusForBadge }) %>
                 </div>
               </div>
-              <div class="flex gap-3 mb-3">
-                <div class="flex-1 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary);">
+              <div class="flex gap-2 mb-2">
+                <div class="flex-1 rounded-lg px-2 py-1.5" style="background:var(--theme-bg-secondary);">
                   <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);">RAM</p>
-                  <p class="text-sm font-medium" style="color:var(--theme-text);"><%= Math.round(server.ramUsage) %>%</p>
+                  <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= Math.round(server.ramUsage) %>%</p>
                 </div>
-                <div class="flex-1 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary);">
+                <div class="flex-1 rounded-lg px-2 py-1.5" style="background:var(--theme-bg-secondary);">
                   <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);">CPU</p>
-                  <p class="text-sm font-medium" style="color:var(--theme-text);"><%= Math.round(server.cpuUsage) %>%</p>
+                  <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= Math.round(server.cpuUsage) %>%</p>
                 </div>
-                <div class="flex-1 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary);">
+                <div class="flex-1 rounded-lg px-2 py-1.5" style="background:var(--theme-bg-secondary);">
                   <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);">Storage</p>
-                  <p class="text-sm font-medium" style="color:var(--theme-text);"><%= server.Storage === 0 ? 'Unlimited' : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
+                  <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= server.Storage === 0 ? 'Unlimited' : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
                 </div>
               </div>
-              <div class="flex items-center justify-between pt-2 border-t" style="border-color:var(--theme-border);">
+              <div class="flex items-center justify-between pt-1.5 border-t" style="border-color:var(--theme-border);">
                 <div class="flex items-center gap-1.5 min-w-0">
-                  <img loading="lazy" decoding="async" class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : '/avatar/' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="<%= server.owner ? server.owner.username : 'Unknown' %>">
-                  <span class="text-xs truncate" style="color:var(--theme-text-muted);"><%= server.owner ? server.owner.username : 'Unknown' %></span>
+                  <img loading="lazy" decoding="async" class="h-3.5 w-3.5 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : '/avatar/' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="<%= server.owner ? server.owner.username : 'Unknown' %>">
+                  <span class="text-[11px] truncate" style="color:var(--theme-text-muted);"><%= server.owner ? server.owner.username : 'Unknown' %></span>
                 </div>
                 <% if (server.node) { %>
                 <span class="text-xs shrink-0 ml-2 truncate max-w-[6rem]" style="color:var(--theme-text-placeholder);"><%= server.node.name || server.node.address %></span>
@@ -241,11 +241,11 @@
         </div>
 
         <% if (totalPages > 1) { %>
-        <div class="flex items-center justify-center gap-3 mt-2">
+        <div class="flex items-center justify-center gap-2 mt-2">
           <% if (currentPage > 1) { %>
           <a href="/?page=<%= currentPage - 1 %>" class="al-btn-secondary"><%= req.translations.prev || 'Previous' %></a>
           <% } %>
-          <span class="text-sm" style="color:var(--theme-text-muted);"><%= currentPage %> / <%= totalPages %></span>
+          <span class="text-[13px]" style="color:var(--theme-text-muted);"><%= currentPage %> / <%= totalPages %></span>
           <% if (currentPage < totalPages) { %>
           <a href="/?page=<%= currentPage + 1 %>" class="al-btn-secondary"><%= req.translations.next || 'Next' %></a>
           <% } %>
