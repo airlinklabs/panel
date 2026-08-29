@@ -129,6 +129,9 @@
   document.getElementById('loginForm').addEventListener('submit', function () {
     document.getElementById('submitBtn').classList.add('loading');
     document.getElementById('submitBtn').disabled = true;
+    // Animate both panels out while the POST is in flight
+    document.querySelector('.auth-split').classList.add('exiting');
+    document.getElementById('authPanel').classList.add('exiting');
   });
 })();
 </script>

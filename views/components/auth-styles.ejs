@@ -87,4 +87,21 @@
 
   .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); will-change: opacity, transform; }
   .auth-panel.visible { opacity: 1; transform: translateX(0); }
+
+  /* Exit animation — triggered on successful form submit */
+  .auth-panel.exiting {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.98);
+    transition: opacity 0.28s ease-in, transform 0.28s ease-in;
+    pointer-events: none;
+  }
+  .auth-split.exiting .auth-image {
+    opacity: 0;
+    transition: opacity 0.25s ease-in;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .auth-panel.exiting { transition: none; transform: none; opacity: 0; }
+    .auth-split.exiting .auth-image { transition: none; opacity: 0; }
+  }
 </style>

@@ -1,6 +1,9 @@
 <%- include('../../components/header', { title: req.translations.adminOverviewTitle || 'Overview' }) %>
 
 <style>
+  @keyframes al-view-in { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+  #page-content { animation: al-view-in 0.35s ease both; }
+  @media (prefers-reduced-motion: reduce) { #page-content { animation: none; } }
   #page-content.admin-overview-bg {
     position: relative;
     isolation: isolate;
