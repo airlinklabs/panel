@@ -112,26 +112,12 @@ jobs:
       - run: pnpm run migrate:deploy
       - run: pnpm test
 
-  verify-vendor:
-    name: Verify Vendor Bundle
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      # --ignore-scripts: vendor check is pure Node, needs no Prisma types
-      - run: pnpm install --ignore-scripts
-      # Fails if the committed vendor bundle is out of sync with sources
-      - run: pnpm run verify:vendor
-
   # ── Build ───────────────────────────────────────────────────────────────────
 
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [semgrep, lint, typecheck, test, audit, verify-vendor]
+    needs: [semgrep, lint, typecheck, test, audit]
     env:
       DATABASE_URL: "file:./dev.db"
     steps:

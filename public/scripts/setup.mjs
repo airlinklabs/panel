@@ -447,7 +447,7 @@ function startMariaDBFallback() {
   run("sudo mkdir -p /run/mysqld && sudo chown mysql:mysql /run/mysqld");
   return (
     run(
-      'sudo sh -c "mariadbd --no-defaults --user=mysql --datadir=/var/lib/mysql --bind-address=127.0.0.1 --port=3306 --socket=/run/mysqld/mysqld.sock --pid-file=/run/mysqld/mysqld.pid >/tmp/airlink-mariadb.log 2>&1 &"',
+      "sudo -u mysql mariadbd --no-defaults --user=mysql --datadir=/var/lib/mysql --bind-address=127.0.0.1 --port=3306 --socket=/run/mysqld/mysqld.sock --pid-file=/run/mysqld/mysqld.pid >/tmp/airlink-mariadb.log 2>&1 &",
     ) !== null
   );
 }
@@ -455,8 +455,8 @@ function startMariaDBFallback() {
 function initializeMariaDB() {
   if (!IS_LINUX || !which("mariadbd")) return true;
   const systemTable =
-    existsSync("/var/lib/mysql/mysql/db.frm") ||
-    existsSync("/var/lib/mysql/mysql/db.ibd");
+    run("sudo test -f /var/lib/mysql/mysql/db.frm") !== null ||
+    run("sudo test -f /var/lib/mysql/mysql/db.ibd") !== null;
   if (systemTable) return true;
 
   info("Initializing MariaDB system tables...");
@@ -468,7 +468,7 @@ function initializeMariaDB() {
   );
   return (
     run(
-      `sudo ${initializer} --no-defaults --user=mysql --basedir=/usr --datadir=/var/lib/mysql`,
+      `sudo -u mysql ${initializer} --no-defaults --user=mysql --basedir=/usr --datadir=/var/lib/mysql`,
     ) !== null
   );
 }
@@ -757,7 +757,7 @@ async function ensureMariaDB() {
     // the service can start.
     if (IS_LINUX) {
       run(
-        "sudo mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql 2>/dev/null || true",
+        "sudo -u mysql mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql 2>/dev/null || true",
       );
     }
   } else {
