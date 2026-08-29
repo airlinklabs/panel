@@ -100,19 +100,22 @@ describe("theme token contrast", () => {
       expect(bg, `${file} needs --theme-bg-card`).toBeTruthy();
       expect(text, `${file} needs --theme-text`).toBeTruthy();
 
-      const bgRgb = hexToRgb(bg[1].trim());
-      const textRgb = hexToRgb(text[1].trim());
+      const bgVal = bg[1].trim();
+      const textVal = text[1].trim();
+      const bgRgb = hexToRgb(bgVal);
+      const textRgb = hexToRgb(textVal);
       if (bgRgb && textRgb) {
-        const c = contrast(bg[1].trim(), text[1].trim());
+        const c = contrast(bgVal, textVal);
         expect(
           c,
           `${file} --theme-text vs --theme-bg-card contrast`,
         ).toBeGreaterThanOrEqual(4.5);
       }
       if (textStrong) {
-        const strongRgb = hexToRgb(textStrong[1].trim());
-        if (strongRgb) {
-          const c = contrast(bg[1].trim(), textStrong[1].trim());
+        const strongVal = textStrong[1].trim();
+        const strongRgb = hexToRgb(strongVal);
+        if (bgRgb && strongRgb) {
+          const c = contrast(bgVal, strongVal);
           expect(
             c,
             `${file} --theme-text-strong vs --theme-bg-card contrast`,

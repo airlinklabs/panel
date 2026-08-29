@@ -316,8 +316,8 @@ describe("server console island wiring", () => {
   });
 
   it("owns the copy-server-address button inside the console island", () => {
-    expect(island).toContain("root.querySelector('#copy-ip-btn')");
-    expect(island).toContain("root.querySelector('#mobile-copy-ip-btn')");
+    expect(island).toContain('root.querySelector("#copy-ip-btn")');
+    expect(island).toContain('root.querySelector("#mobile-copy-ip-btn")');
     expect(manage).not.toContain('onclick="copyServerIP()"');
     expect(manage).not.toContain('onclick="copyMobileServerIP()"');
   });
