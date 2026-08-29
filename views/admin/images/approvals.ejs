@@ -17,61 +17,61 @@
         { label: 'Approvals' }
       ] }) %>
 
-      <div class="al-page-header flex items-start justify-between gap-4">
+      <div class="al-page-header flex items-start justify-between gap-3">
         <div>
           <h1 class="al-page-title">Image Approvals</h1>
           <p class="al-page-desc">Review images submitted by users. Approved images become available in the server-creation flow.</p>
         </div>
-        <div class="flex gap-2 shrink-0">
+        <div class="flex gap-1.5 shrink-0">
           <a href="/admin/images" class="al-btn-secondary inline-flex items-center gap-1.5">
-            <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %>Back to Images
+            <%- icon('arrow-left', { class: 'size-3.5', strokeWidth: 1.5 }) %>Back to Images
           </a>
         </div>
       </div>
 
       <div class="al-page-body">
         <% if (pending.length === 0) { %>
-        <div class="flex flex-col items-center justify-center py-24 text-center">
-          <div class="w-12 h-12 rounded-full bg-emerald-600/10 flex items-center justify-center mb-4">
-            <%- icon('check', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+          <div class="w-12 h-12 rounded-full bg-emerald-600/10 flex items-center justify-center mb-3">
+            <%- icon('check', { class: 'w-5 h-5', style: 'color:var(--theme-text-muted)' }) %>
           </div>
-          <p class="text-sm font-medium" style="color:var(--theme-text-strong)">No images waiting for review.</p>
-          <p class="text-sm mt-1" style="color:var(--theme-text-muted)">User submissions will appear here for approval.</p>
+          <p class="text-[13px] font-medium" style="color:var(--theme-text-strong)">No images waiting for review.</p>
+          <p class="text-[13px] mt-1" style="color:var(--theme-text-muted)">User submissions will appear here for approval.</p>
         </div>
         <% } else { %>
-        <div class="space-y-4">
+        <div class="space-y-3">
           <% pending.forEach(function(image) { %>
-          <div class="rounded-xl border p-5" style="border-color:var(--theme-border); background:var(--theme-bg-card);">
-            <div class="flex items-start justify-between gap-4">
+          <div class="rounded-xl border p-4" style="border-color:var(--theme-border); background:var(--theme-bg-card);">
+            <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <div class="flex items-center gap-2">
-                  <h3 class="text-sm font-semibold truncate" style="color:var(--theme-text-strong)"><%= image.name %></h3>
-                   <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
+                <div class="flex items-center gap-1.5">
+                  <h3 class="text-[13px] font-semibold truncate" style="color:var(--theme-text-strong)"><%= image.name %></h3>
+                   <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
                      style="background:var(--theme-warning-bg);color:var(--theme-warning)">
                      Pending
                    </span>
                 </div>
-                <% if (image.description) { %><p class="text-sm mt-1 line-clamp-2" style="color:var(--theme-text-muted)"><%= image.description %></p><% } %>
+                <% if (image.description) { %><p class="text-[13px] mt-1 line-clamp-2" style="color:var(--theme-text-muted)"><%= image.description %></p><% } %>
                 <% if (image.creator) { %>
-                <p class="text-xs mt-2" style="color:var(--theme-text-muted)">
+                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)">
                   Submitted by <span class="font-medium" style="color:var(--theme-text-strong)"><%= image.creator.username || image.creator.email %></span>
                   &middot; <%= new Date(image.createdAt).toLocaleString() %>
                 </p>
                 <% } %>
-                <div class="flex flex-wrap gap-4 mt-3 text-xs" style="color:var(--theme-text-muted)">
-                  <span class="inline-flex items-center gap-1.5"><%- icon('terminal', { class: 'size-3.5', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.startup || '' %></code></span>
-                  <span class="inline-flex items-center gap-1.5"><%- icon('container', { class: 'size-3.5', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.dockerImages || '[]' %></code></span>
+                <div class="flex flex-wrap gap-3 mt-2 text-[11px]" style="color:var(--theme-text-muted)">
+                  <span class="inline-flex items-center gap-1.5"><%- icon('terminal', { class: 'size-3', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.startup || '' %></code></span>
+                  <span class="inline-flex items-center gap-1.5"><%- icon('container', { class: 'size-3', strokeWidth: 1.5 }) %><code style="font-family:ui-monospace,monospace;color:var(--theme-text-strong)"><%= image.dockerImages || '[]' %></code></span>
                 </div>
               </div>
-              <div class="flex gap-2 shrink-0">
-                <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost inline-flex items-center gap-1.5 text-xs">
-                  <%- icon('external-link', { class: 'size-4', strokeWidth: 1.5 }) %>View
+              <div class="flex gap-1.5 shrink-0">
+                <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost inline-flex items-center gap-1.5 text-[11px]">
+                  <%- icon('external-link', { class: 'size-3.5', strokeWidth: 1.5 }) %>View
                 </a>
-                <button type="button" class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" data-approve-image="<%= image.id %>">
-                  <%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>Approve
+                <button type="button" class="al-btn-primary inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px]" data-approve-image="<%= image.id %>">
+                  <%- icon('check', { class: 'size-3.5', strokeWidth: 1.5 }) %>Approve
                 </button>
-                <button type="button" class="al-btn-danger inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" data-reject-image="<%= image.id %>">
-                  <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Reject
+                <button type="button" class="al-btn-danger inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px]" data-reject-image="<%= image.id %>">
+                  <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %>Reject
                 </button>
               </div>
             </div>
@@ -89,21 +89,21 @@
   <div class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="al-sheet-header" style="border-color:var(--theme-border)">
       <div>
-        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Reject image</h2>
-        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" id="rejectImageName"></p>
+        <h2 class="text-[13px] font-semibold" style="color:var(--theme-text-strong)">Reject image</h2>
+        <p class="text-[11px] mt-0.5" style="color:var(--theme-text-muted)" id="rejectImageName"></p>
       </div>
-      <button type="button" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" data-close-reject aria-label="Close">
-        <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
+      <button type="button" class="al-btn-ghost p-1.5 rounded-lg flex items-center justify-center shrink-0" data-close-reject aria-label="Close">
+        <%- icon('x', { class: 'h-4 w-4', strokeWidth: 1.5 }) %>
       </button>
     </div>
-    <div class="px-6 py-4">
+    <div class="px-5 py-3">
       <label class="field-label" for="rejectReason">Reason <span class="font-normal" style="color:var(--theme-text-muted)">(shown to the user)</span></label>
       <textarea id="rejectReason" class="al-input w-full" rows="3" placeholder="e.g. Missing startup exit detection or required docker image."></textarea>
     </div>
     <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border)">
-      <button type="button" class="al-btn-secondary px-4 py-2 text-xs font-medium" data-close-reject>Cancel</button>
-      <button type="button" id="confirmReject" class="al-btn-danger px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
-        <%- icon('x', { class: 'size-3.5', strokeWidth: 1.5 }) %>Reject
+      <button type="button" class="al-btn-secondary px-3 py-1.5 text-[11px] font-medium" data-close-reject>Cancel</button>
+      <button type="button" id="confirmReject" class="al-btn-danger px-3 py-1.5 text-[11px] font-medium inline-flex items-center gap-1.5">
+        <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Reject
       </button>
     </div>
   </div>
