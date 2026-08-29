@@ -19,12 +19,15 @@
         </div>
         <div class="flex gap-2 shrink-0 items-center">
           <a href="/admin/users" class="al-btn-secondary">Back to Users</a>
-          <button type="submit" form="editUserForm" class="al-btn-primary"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.saveChanges || 'Save Changes' %></button>
+          <button type="submit" form="editUserForm" class="al-btn-primary" x-data x-bind:disabled="$root.querySelector && false"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.saveChanges || 'Save Changes' %></button>
         </div>
       </div>
 
-      <div class="al-page-body space-y-5">
-        <form id="editUserForm" class="space-y-5">
+      <div class="al-page-body space-y-5" x-data="adminUserEdit()">
+        <template x-if="error">
+          <div class="rounded-xl px-4 py-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)" x-text="error"></div>
+        </template>
+        <form id="editUserForm" @submit.prevent="submit()" class="space-y-5">
           <div class="al-card">
             <h2 class="al-card-header"><%= req.translations.userInformation || 'User Information' %></h2>
             <div class="flex items-center gap-4 mb-5 pb-5 border-b" style="border-color:var(--theme-border)">
@@ -40,14 +43,7 @@
                   <%- icon('user', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.username || 'Username' %>
                 </label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value="<%= dataUser.username %>"
-                  class="al-input"
-                  required
-                >
+                <input type="text" x-model="form.username" class="al-input" required>
               </div>
 
               <div>
@@ -55,26 +51,14 @@
                   <%- icon('mail', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.email || 'Email' %>
                 </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value="<%= dataUser.email %>"
-                  class="al-input"
-                  required
-                >
+                <input type="email" x-model="form.email" class="al-input" required>
               </div>
 
               <div class="md:col-span-2">
                 <label for="description" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%= req.translations.description || 'Description' %>
                 </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  rows="3"
-                  class="al-input"
-                ><%= dataUser.description || '' %></textarea>
+                <textarea x-model="form.description" rows="3" class="al-input"><%= dataUser.description || '' %></textarea>
               </div>
             </div>
           </div>
@@ -87,24 +71,14 @@
                   <%- icon('lock', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.newPassword || 'New Password' %> <span class="text-xs" style="color:var(--theme-text-muted)">(<%= req.translations.leaveBlankToKeep || 'Leave blank to keep current password' %>)</span>
                 </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  class="al-input"
-                >
+                <input type="password" x-model="form.password" class="al-input">
               </div>
 
               <div>
                 <label for="confirmPassword" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%= req.translations.confirmPassword || 'Confirm Password' %>
                 </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  class="al-input"
-                >
+                <input type="password" x-model="form.confirmPassword" class="al-input">
               </div>
 
               <div class="md:col-span-2">
@@ -118,7 +92,7 @@
                         <%= req.translations.roleDescription || 'Owner and admin roles are signaled by isAdmin below. Privileged normally have not admin powers but get expanded settings.' %>
                       </p>
                     </div>
-                    <select id="role" name="role" class="al-input w-44">
+                    <select x-model="form.role" class="al-input w-44">
                       <% const currentRole = dataUser.role || (dataUser.isAdmin ? 'admin' : 'user'); %>
                       <option value="user" <%= currentRole === 'user' ? 'selected' : '' %>><%= req.translations.roleUser || 'Normal user' %></option>
                       <option value="privileged" <%= currentRole === 'privileged' ? 'selected' : '' %>><%= req.translations.rolePrivileged || 'Privileged user' %></option>
@@ -140,10 +114,10 @@
                         <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
                       </p>
                     </div>
-                    <label for="isAdmin" class="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input type="checkbox" id="isAdmin" name="isAdmin" class="sr-only peer" <%= dataUser.isAdmin ? 'checked' : '' %>>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input type="checkbox" x-model="form.isAdmin" class="sr-only peer">
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                      <span class="ms-3 text-sm font-medium" id="adminStatusLabel" style="color:var(--theme-text-strong)"><%= dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
+                      <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-strong)" x-text="form.isAdmin ? '<%= req.translations.enabled || 'Enabled' %>' : '<%= req.translations.disabled || 'Disabled' %>'"></span>
                     </label>
                   </div>
                 </div>
@@ -157,18 +131,14 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
-                <input type="number" id="serverLimit" name="serverLimit" min="0" max="100"
-                  value="<%= dataUser.serverLimit !== null && dataUser.serverLimit !== undefined ? dataUser.serverLimit : '' %>"
-                  placeholder="Use global default"
-                  class="al-input">
+                <input type="number" x-model.number="form.serverLimit" min="0" max="100" placeholder="Use global default" class="al-input">
                 <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Max servers this user can create. 0 = cannot create.</p>
               </div>
               <div>
-                <label for="maxMemoryDisplay" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory</label>
-                <input type="hidden" id="maxMemory" name="maxMemory"
-                  value="<%= dataUser.maxMemory !== null && dataUser.maxMemory !== undefined ? dataUser.maxMemory : '' %>">
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory</label>
+                <input type="hidden" :value="form.maxMemory">
                 <div class="flex items-stretch gap-0">
-                  <input type="number" id="maxMemoryDisplay" min="128" max="65536" placeholder="Use global default"
+                  <input type="number" x-model.number="form.maxMemoryDisplay" min="128" max="65536" placeholder="Use global default"
                     class="al-input rounded-l-xl flex-1 border-r-0">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="maxMemoryDisplay" data-hidden="maxMemory"
@@ -177,17 +147,13 @@
               </div>
               <div>
                 <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="font-normal text-xs" style="color:var(--theme-text-muted)">(%)</span></label>
-                <input type="number" id="maxCpu" name="maxCpu" min="10" max="10000"
-                  value="<%= dataUser.maxCpu !== null && dataUser.maxCpu !== undefined ? dataUser.maxCpu : '' %>"
-                  placeholder="Use global default"
-                  class="al-input">
+                <input type="number" x-model.number="form.maxCpu" min="10" max="10000" placeholder="Use global default" class="al-input">
               </div>
               <div>
-                <label for="maxStorageDisplay" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage</label>
-                <input type="hidden" id="maxStorage" name="maxStorage"
-                  value="<%= dataUser.maxStorage !== null && dataUser.maxStorage !== undefined ? dataUser.maxStorage : '' %>">
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage</label>
+                <input type="hidden" :value="form.maxStorage">
                 <div class="flex items-stretch gap-0">
-                  <input type="number" id="maxStorageDisplay" min="1" max="10000" placeholder="Use global default"
+                  <input type="number" x-model.number="form.maxStorageDisplay" min="1" max="10000" placeholder="Use global default"
                     class="al-input rounded-l-xl flex-1 border-r-0">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="maxStorageDisplay" data-hidden="maxStorage"
@@ -196,10 +162,7 @@
               </div>
               <div>
                 <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
-                <input type="number" id="maxDatabases" name="maxDatabases" min="0" max="100000"
-                  value="<%= dataUser.maxDatabases !== null && dataUser.maxDatabases !== undefined ? dataUser.maxDatabases : '' %>"
-                  placeholder="Use global default"
-                  class="al-input">
+                <input type="number" x-model.number="form.maxDatabases" min="0" max="100000" placeholder="Use global default" class="al-input">
                 <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Total databases across all servers. 0 = unlimited.</p>
               </div>
             </div>
@@ -210,7 +173,7 @@
             <h2 class="al-card-header" style="color:#ef4444">Transfer Ownership</h2>
             <p class="text-xs mb-4" style="color:var(--theme-text-muted)">You are the owner. Hand over ownership of this panel to <%= dataUser.username %>. The current owner becomes an admin.</p>
             <div class="flex items-center gap-3">
-              <button type="button" id="transferOwnerBtn" class="al-btn-danger">
+              <button type="button" @click="transferOwner()" class="al-btn-danger">
                 <%- icon('shield-alert', { size: 16 }) %>
                 Transfer ownership to <%= dataUser.username %>
               </button>
@@ -230,22 +193,111 @@
 #editUserForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
 </style>
 
-<div id="page-data" style="display:none"
-  data-user-id="<%= dataUser.id %>"
-  data-enabled-text="<%= req.translations.enabled || 'Enabled' %>"
-  data-disabled-text="<%= req.translations.disabled || 'Disabled' %>"
-  data-passwords-do-not-match="<%= req.translations.passwordsDoNotMatch || 'Passwords do not match' %>"
-  data-updating-user="<%= req.translations.updatingUser || 'Updating User' %>"
-  data-processing-user-update="<%= req.translations.processingUserUpdate || 'Processing user update...' %>"
-  data-sending-user-information="<%= req.translations.sendingUserInformation || 'Sending user information...' %>"
-  data-user-updated-successfully="<%= req.translations.userUpdatedSuccessfully || 'User updated successfully!' %>"
-  data-error-updating-user="<%= req.translations.errorUpdatingUser || 'Error updating user' %>"
-  data-transfer-owner-title="<%= req.translations.transferOwnerTitle || 'Transfer ownership?' %>"
-  data-transfer-owner-confirm="<%= req.translations.transferOwnerConfirm || 'This will make the current owner an admin. Continue?' %>"
-  data-transferring-ownership="<%= req.translations.transferringOwnership || 'Transferring ownership...' %>"
-  data-can-transfer-owner="<%= canTransferOwner ? '1' : '' %>"
-></div>
+<script nonce="<%- nonce %>">
+function adminUserEdit() {
+  return {
+    saving: false,
+    error: '',
+    userId: <%= dataUser.id %>,
+    form: {
+      username: '<%= dataUser.username %>',
+      email: '<%= dataUser.email %>',
+      description: '<%= (dataUser.description || '').replace(/'/g, "\\'") %>',
+      password: '',
+      confirmPassword: '',
+      role: '<%= dataUser.role || (dataUser.isAdmin ? "admin" : "user") %>',
+      isAdmin: <%= dataUser.isAdmin ? 'true' : 'false' %>,
+      serverLimit: <%= dataUser.serverLimit ?? 'null' %>,
+      maxMemory: <%= dataUser.maxMemory ?? 'null' %>,
+      maxMemoryDisplay: null,
+      maxCpu: <%= dataUser.maxCpu ?? 'null' %>,
+      maxStorage: <%= dataUser.maxStorage ?? 'null' %>,
+      maxStorageDisplay: null,
+      maxDatabases: <%= dataUser.maxDatabases ?? 'null' %>,
+    },
+    async submit() {
+      if (this.saving) return;
+      this.error = '';
 
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-user-edit.js?v=5"></script>
+      if (this.form.password && this.form.password !== this.form.confirmPassword) {
+        this.error = '<%= req.translations.passwordsDoNotMatch || 'Passwords do not match' %>';
+        return;
+      }
+
+      this.saving = true;
+      const loader = showLoadingPopup('<%= req.translations.updatingUser || 'Updating User' %>', '<%= req.translations.processingUserUpdate || 'Processing user update...' %>');
+      loader.updateProgress(20, '<%= req.translations.sendingUserInformation || 'Sending user information...' %>');
+
+      try {
+        const data = {
+          username: this.form.username,
+          email: this.form.email,
+          description: this.form.description,
+          role: this.form.role,
+          isAdmin: this.form.isAdmin,
+          password: this.form.password || undefined,
+          serverLimit: this.form.serverLimit,
+          maxMemory: this.form.maxMemoryDisplay !== null && this.form.maxMemoryDisplay !== '' ? parseInt(this.form.maxMemoryDisplay, 10) : this.form.maxMemory,
+          maxCpu: this.form.maxCpu,
+          maxStorage: this.form.maxStorageDisplay !== null && this.form.maxStorageDisplay !== '' ? parseInt(this.form.maxStorageDisplay, 10) : this.form.maxStorage,
+          maxDatabases: this.form.maxDatabases,
+        };
+
+        const res = await fetch('/admin/users/update/' + this.userId + '/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+        if (result.error) {
+          loader.close();
+          this.error = result.error;
+        } else {
+          loader.updateProgress(100, '<%= req.translations.userUpdatedSuccessfully || 'User updated successfully!' %>');
+          setTimeout(() => {
+            loader.close();
+            showToast(result.message || '<%= req.translations.userUpdatedSuccessfully || 'User updated successfully!' %>', 'success');
+            setTimeout(() => { window.location.href = '/admin/users'; }, 1000);
+          }, 500);
+        }
+      } catch (e) {
+        loader.close();
+        this.error = '<%= req.translations.errorUpdatingUser || 'Error updating user' %>';
+      } finally {
+        this.saving = false;
+      }
+    },
+    async transferOwner() {
+      window.modal.confirm({
+        title: '<%= req.translations.transferOwnerTitle || 'Transfer ownership?' %>',
+        body: '<%= req.translations.transferOwnerConfirm || 'This will make the current owner an admin. Continue?' %>',
+        danger: true,
+        confirmLabel: 'Transfer',
+        onConfirm: async () => {
+          const loader = showLoadingPopup('<%= req.translations.transferringOwnership || 'Transferring ownership...' %>', '');
+          try {
+            const res = await fetch('/admin/users/transfer-owner/' + this.userId + '/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+            });
+            const result = await res.json();
+            loader.close();
+            if (result.error) {
+              showToast(result.error, 'error');
+            } else {
+              showToast(result.message || '<%= req.translations.transferringOwnership || 'Transferring ownership...' %>', 'success');
+              setTimeout(() => { window.location.href = '/admin/users'; }, 1000);
+            }
+          } catch (e) {
+            loader.close();
+            showToast('<%= req.translations.errorUpdatingUser || 'Error updating user' %>', 'error');
+          }
+        }
+      });
+    }
+  };
+}
+</script>
 
 <%- include('../../components/footer') %>

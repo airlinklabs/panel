@@ -18,15 +18,15 @@
           <p class="al-page-desc"><%= req.translations.adminCreateUserText || 'Every great panel needs people. Let\'s add one.' %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button id="createuserBtn" type="button" class="al-btn-primary">
-            <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-            <%= req.translations.create || 'Create user' %>
-          </button>
+          <a href="/admin/users" class="al-btn-secondary">Back to Users</a>
         </div>
       </div>
 
-      <div class="al-page-body space-y-5">
-        <form id="createUserForm" class="space-y-5">
+      <div class="al-page-body space-y-5" x-data="adminUserCreate()">
+        <template x-if="error">
+          <div class="rounded-xl px-4 py-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)" x-text="error"></div>
+        </template>
+        <form id="createUserForm" @submit.prevent="submit()" class="space-y-5">
           <div class="al-card">
             <h2 class="al-card-header"><%= req.translations.userInformation || 'User Information' %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -35,7 +35,7 @@
                   <%- icon('mail', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.email %>:
                 </label>
-                <input id="userEmail" type="email" class="al-input" placeholder="example@domain.com">
+                <input id="userEmail" x-model="form.email" type="email" class="al-input" placeholder="example@domain.com">
               </div>
 
               <div>
@@ -43,13 +43,13 @@
                   <%- icon('user', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.username %>:
                 </label>
-                <input id="userUsername" type="text" class="al-input" placeholder="username">
+                <input id="userUsername" x-model="form.username" @input="validateUsername()" type="text" class="al-input" placeholder="username">
                 <div id="username-criteria" class="mt-2 space-y-1">
-                  <p id="crit-username-length" class="text-xs" style="color:var(--theme-text-muted)">
-                    <span class="crit-icon">—</span> 3–20 characters
+                  <p class="text-xs" :class="usernameLenOk ? 'text-green-500' : (form.username ? 'text-red-500' : 'text-neutral-400')" style="">
+                    <span class="crit-icon" x-text="usernameLenOk ? '✓' : (form.username ? '✗' : '—')"></span> 3–20 characters
                   </p>
-                  <p id="crit-username-chars" class="text-xs" style="color:var(--theme-text-muted)">
-                    <span class="crit-icon">—</span> Letters and numbers only
+                  <p class="text-xs" :class="usernameCharsOk ? 'text-green-500' : (form.username ? 'text-red-500' : 'text-neutral-400')" style="">
+                    <span class="crit-icon" x-text="usernameCharsOk ? '✓' : (form.username ? '✗' : '—')"></span> Letters and numbers only
                   </p>
                 </div>
               </div>
@@ -58,7 +58,7 @@
                 <label for="userDescription" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%= req.translations.description || 'Description' %>
                 </label>
-                <textarea id="userDescription" rows="3" class="al-input" placeholder="Optional description"></textarea>
+                <textarea id="userDescription" x-model="form.description" rows="3" class="al-input" placeholder="Optional description"></textarea>
               </div>
             </div>
           </div>
@@ -71,16 +71,16 @@
                   <%- icon('lock', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.password %>:
                 </label>
-                <input id="userPassword" type="password" class="al-input" placeholder="********">
+                <input id="userPassword" x-model="form.password" @input="validatePassword()" type="password" class="al-input" placeholder="********">
                 <div id="password-criteria" class="mt-2 space-y-1">
-                  <p id="crit-length" class="text-xs" style="color:var(--theme-text-muted)">
-                    <span class="crit-icon">—</span> At least 8 characters
+                  <p class="text-xs" :class="pwLenOk ? 'text-green-500' : (form.password ? 'text-red-500' : 'text-neutral-400')">
+                    <span class="crit-icon" x-text="pwLenOk ? '✓' : (form.password ? '✗' : '—')"></span> At least 8 characters
                   </p>
-                  <p id="crit-letter" class="text-xs" style="color:var(--theme-text-muted)">
-                    <span class="crit-icon">—</span> At least one letter
+                  <p class="text-xs" :class="pwLetterOk ? 'text-green-500' : (form.password ? 'text-red-500' : 'text-neutral-400')">
+                    <span class="crit-icon" x-text="pwLetterOk ? '✓' : (form.password ? '✗' : '—')"></span> At least one letter
                   </p>
-                  <p id="crit-number" class="text-xs" style="color:var(--theme-text-muted)">
-                    <span class="crit-icon">—</span> At least one number
+                  <p class="text-xs" :class="pwNumberOk ? 'text-green-500' : (form.password ? 'text-red-500' : 'text-neutral-400')">
+                    <span class="crit-icon" x-text="pwNumberOk ? '✓' : (form.password ? '✗' : '—')"></span> At least one number
                   </p>
                 </div>
               </div>
@@ -89,7 +89,7 @@
                 <label for="userConfirmPassword" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%= req.translations.confirmPassword || 'Confirm Password' %>
                 </label>
-                <input id="userConfirmPassword" type="password" class="al-input" placeholder="********">
+                <input id="userConfirmPassword" x-model="form.confirmPassword" type="password" class="al-input" placeholder="********">
               </div>
 
               <div class="md:col-span-2">
@@ -103,7 +103,7 @@
                         <%= req.translations.roleDescription || 'Privileged and admin roles get expanded limits and powers.' %>
                       </p>
                     </div>
-                    <select id="userRole" name="role" class="al-input w-44">
+                    <select x-model="form.role" class="al-input w-44">
                       <option value="user"><%= req.translations.roleUser || 'Normal user' %></option>
                       <option value="privileged"><%= req.translations.rolePrivileged || 'Privileged user' %></option>
                       <option value="admin"><%= req.translations.roleAdmin || 'Admin' %></option>
@@ -123,10 +123,10 @@
                         <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
                       </p>
                     </div>
-                    <label for="userIsAdminSwitch" class="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input type="checkbox" id="userIsAdminSwitch" aria-label="Administrator status" class="sr-only peer">
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input type="checkbox" x-model="form.isAdmin" aria-label="Administrator status" class="sr-only peer">
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                      <span class="ms-3 text-sm font-medium" id="adminStatusLabel" style="color:var(--theme-text-strong)">Disabled</span>
+                      <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-strong)" x-text="form.isAdmin ? '<%= req.translations.enabled || 'Enabled' %>' : '<%= req.translations.disabled || 'Disabled' %>'"></span>
                     </label>
                   </div>
                 </div>
@@ -139,15 +139,15 @@
             <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Leave blank to use the global defaults set in Admin &rarr; Settings &rarr; Servers.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label for="serverLimit" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
-                <input type="number" id="serverLimit" name="serverLimit" min="0" max="100" placeholder="Use global default" class="al-input">
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
+                <input type="number" x-model.number="form.serverLimit" min="0" max="100" placeholder="Use global default" class="al-input">
                 <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Max servers this user can create. 0 = cannot create.</p>
               </div>
               <div>
-                <label for="maxMemoryDisplay" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory</label>
-                <input type="hidden" id="maxMemory" name="maxMemory" value="">
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory</label>
+                <input type="hidden" :value="form.maxMemory">
                 <div class="flex items-stretch gap-0">
-                  <input type="number" id="maxMemoryDisplay" min="128" max="65536" placeholder="Use global default"
+                  <input type="number" x-model.number="form.maxMemoryDisplay" min="128" max="65536" placeholder="Use global default"
                     class="al-input rounded-l-xl flex-1 border-r-0">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="maxMemoryDisplay" data-hidden="maxMemory"
@@ -155,14 +155,14 @@
                 </div>
               </div>
               <div>
-                <label for="maxCpu" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="font-normal text-xs" style="color:var(--theme-text-muted)">(%)</span></label>
-                <input type="number" id="maxCpu" name="maxCpu" min="10" max="10000" placeholder="Use global default" class="al-input">
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="font-normal text-xs" style="color:var(--theme-text-muted)">(%)</span></label>
+                <input type="number" x-model.number="form.maxCpu" min="10" max="10000" placeholder="Use global default" class="al-input">
               </div>
               <div>
-                <label for="maxStorageDisplay" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage</label>
-                <input type="hidden" id="maxStorage" name="maxStorage" value="">
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage</label>
+                <input type="hidden" :value="form.maxStorage">
                 <div class="flex items-stretch gap-0">
-                  <input type="number" id="maxStorageDisplay" min="1" max="10000" placeholder="Use global default"
+                  <input type="number" x-model.number="form.maxStorageDisplay" min="1" max="10000" placeholder="Use global default"
                     class="al-input rounded-l-xl flex-1 border-r-0">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="maxStorageDisplay" data-hidden="maxStorage"
@@ -170,11 +170,19 @@
                 </div>
               </div>
               <div>
-                <label for="maxDatabases" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
-                <input type="number" id="maxDatabases" name="maxDatabases" min="0" max="100000" placeholder="Use global default" class="al-input">
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
+                <input type="number" x-model.number="form.maxDatabases" min="0" max="100000" placeholder="Use global default" class="al-input">
                 <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Total databases across all servers. 0 = unlimited.</p>
               </div>
             </div>
+          </div>
+
+          <div class="flex justify-end gap-2">
+            <a href="/admin/users" class="al-btn-secondary">Cancel</a>
+            <button type="submit" class="al-btn-primary" :disabled="saving">
+              <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+              <span x-text="saving ? 'Creating…' : '<%= req.translations.create || 'Create user' %>'">Create user</span>
+            </button>
           </div>
         </form>
       </div>
@@ -188,6 +196,101 @@
 #createUserForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
 </style>
 
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-user-create.js?v=5"></script>
+<script nonce="<%- nonce %>">
+function adminUserCreate() {
+  return {
+    saving: false,
+    error: '',
+    form: {
+      email: '', username: '', description: '', password: '', confirmPassword: '',
+      role: 'user', isAdmin: false,
+      serverLimit: null, maxMemory: null, maxMemoryDisplay: null,
+      maxCpu: null, maxStorage: null, maxStorageDisplay: null, maxDatabases: null
+    },
+    usernameLenOk: false,
+    usernameCharsOk: false,
+    pwLenOk: false,
+    pwLetterOk: false,
+    pwNumberOk: false,
+
+    validateUsername() {
+      const v = this.form.username;
+      this.usernameLenOk = v.length >= 3 && v.length <= 20;
+      this.usernameCharsOk = /^[a-zA-Z0-9]+$/.test(v);
+    },
+    validatePassword() {
+      const v = this.form.password;
+      this.pwLenOk = v.length >= 8;
+      this.pwLetterOk = /[A-Za-z]/.test(v);
+      this.pwNumberOk = /\d/.test(v);
+    },
+    async submit() {
+      if (this.saving) return;
+      this.error = '';
+      const { email, username, password, confirmPassword } = this.form;
+
+      if (!email || !username || !password) {
+        this.error = 'Please fill in all required fields.';
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        this.error = 'Please enter a valid email address.';
+        return;
+      }
+      this.validateUsername();
+      if (!this.usernameLenOk || !this.usernameCharsOk) {
+        this.error = 'Username must be 3–20 characters, letters and numbers only.';
+        return;
+      }
+      this.validatePassword();
+      if (!this.pwLenOk || !this.pwLetterOk || !this.pwNumberOk) {
+        this.error = 'Password must be at least 8 characters with a letter and number.';
+        return;
+      }
+
+      this.saving = true;
+      const loader = showLoadingPopup('Creating User', 'Processing user creation...');
+      loader.updateProgress(20, 'Sending user information...');
+
+      try {
+        const limits = {};
+        ['serverLimit', 'maxCpu', 'maxDatabases', 'maxMemory', 'maxStorage'].forEach(k => {
+          const v = this.form[k];
+          limits[k] = (v === null || v === '' || v === undefined) ? null : parseInt(v, 10);
+        });
+        // Handle display fields
+        if (this.form.maxMemoryDisplay !== null && this.form.maxMemory === null) limits.maxMemory = parseInt(this.form.maxMemoryDisplay, 10) || null;
+        if (this.form.maxStorageDisplay !== null && this.form.maxStorage === null) limits.maxStorage = parseInt(this.form.maxStorageDisplay, 10) || null;
+
+        const res = await fetch('/admin/users/create-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email, username, password, role: this.form.role,
+            isAdmin: this.form.isAdmin, ...limits
+          }),
+        });
+        if (res.ok) {
+          loader.updateProgress(100, 'User created successfully!');
+          setTimeout(() => {
+            loader.close();
+            showToast('User added. Welcome to the team.', 'success');
+            setTimeout(() => { window.location.href = '/admin/users?err=none'; }, 1000);
+          }, 500);
+        } else {
+          const err = await res.json().catch(() => ({ message: 'Unknown error' }));
+          loader.close();
+          this.error = err.message || 'Failed to create user.';
+        }
+      } catch (e) {
+        loader.close();
+        this.error = 'Failed to create user. Try again.';
+      } finally {
+        this.saving = false;
+      }
+    }
+  };
+}
+</script>
 
 <%- include('../../components/footer') %>
