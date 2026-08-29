@@ -1,33 +1,33 @@
 import {
   getSettings,
   invalidateSettingsCache,
-} from "../../handlers/settingsCache";
-import type { Request, Response } from "express";
-import { Router } from "express";
-import type { Module } from "../../handlers/moduleInit";
-import prisma from "../../db";
-import { isAuthenticated } from "../../handlers/utils/auth/authUtil";
-import logger from "../../handlers/logger";
-import { refreshSecurityCache } from "../../handlers/securityCache";
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { randomUUID } from "crypto";
-import AdmZip from "adm-zip";
-import nodemailer from "nodemailer";
-import { testS3Connection } from "../../handlers/utils/core/s3Client";
-import { safeClientMessage } from "../../utils/errors";
+} from '../../handlers/settingsCache';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
+import prisma from '../../db';
+import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
+import logger from '../../handlers/logger';
+import { refreshSecurityCache } from '../../handlers/securityCache';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { randomUUID } from 'crypto';
+import AdmZip from 'adm-zip';
+import nodemailer from 'nodemailer';
+import { testS3Connection } from '../../handlers/utils/core/s3Client';
+import { safeClientMessage } from '../../utils/errors';
 
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
 const BCRYPT_SALT_ROUNDS = 12;
 
 const MIME_TYPE_ALLOWLIST = [
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/svg+xml",
-  "image/x-icon",
-  "image/vnd.microsoft.icon",
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/svg+xml',
+  'image/x-icon',
+  'image/vnd.microsoft.icon',
 ] as const;
 
 // Resolve a wallpaper value from an upload-or-URL form field.
@@ -37,14 +37,14 @@ const MIME_TYPE_ALLOWLIST = [
 //   - anything else      -> undefined (ignore — only our own upload handler
 //                           produces local paths, never client input)
 export function resolveWallpaperValue(raw: unknown): string | null | undefined {
-  if (typeof raw !== "string") {
+  if (typeof raw !== 'string') {
     return undefined;
   }
   const u = raw.trim();
-  if (u === "") {
+  if (u === '') {
     return null;
   }
-  if (u.startsWith("http://") || u.startsWith("https://")) {
+  if (u.startsWith('http://') || u.startsWith('https://')) {
     return u;
   }
   return undefined;
@@ -53,24 +53,24 @@ export function resolveWallpaperValue(raw: unknown): string | null | undefined {
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dirs: Record<string, string> = {
-      logo: "logos",
-      favicon: "favicons",
-      themeFile: "theme-zips",
-      loginWallpaperFile: "wallpapers",
-      registerWallpaperFile: "wallpapers",
-      panelWallpaperFile: "wallpapers",
+      logo: 'logos',
+      favicon: 'favicons',
+      themeFile: 'theme-zips',
+      loginWallpaperFile: 'wallpapers',
+      registerWallpaperFile: 'wallpapers',
+      panelWallpaperFile: 'wallpapers',
     };
-    const subdir = dirs[file.fieldname] || "misc";
-    const uploadDir = path.join(process.cwd(), "storage", "uploads", subdir);
+    const subdir = dirs[file.fieldname] || 'misc';
+    const uploadDir = path.join(process.cwd(), 'storage', 'uploads', subdir);
     fs.mkdirSync(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
-    if (file.fieldname === "favicon") {
+    if (file.fieldname === 'favicon') {
       return cb(null, `favicon${ext}`);
     }
-    if (file.fieldname === "themeFile") {
+    if (file.fieldname === 'themeFile') {
       return cb(null, `theme-${Date.now()}.zip`);
     }
     cb(
@@ -85,9 +85,9 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback,
 ) => {
-  if (file.fieldname === "themeFile") {
+  if (file.fieldname === 'themeFile') {
     const ext = path.extname(file.originalname).toLowerCase();
-    return cb(null, ext === ".zip" || file.mimetype.includes("zip"));
+    return cb(null, ext === '.zip' || file.mimetype.includes('zip'));
   }
   cb(null, (MIME_TYPE_ALLOWLIST as readonly string[]).includes(file.mimetype));
 };
@@ -102,47 +102,47 @@ function installThemeZip(zipPath: string): {
   success: boolean;
   error?: string;
 } {
-  const themesDir = path.join(process.cwd(), "storage", "themes", "user");
+  const themesDir = path.join(process.cwd(), 'storage', 'themes', 'user');
   const tempDir = path.join(
     process.cwd(),
-    "storage",
-    "uploads",
-    "theme-zips",
+    'storage',
+    'uploads',
+    'theme-zips',
     `tmp-${Date.now()}`,
   );
   try {
     fs.mkdirSync(tempDir, { recursive: true });
     const zip = new AdmZip(zipPath);
     zip.extractAllTo(tempDir, true);
-    const infoPath = path.join(tempDir, "info.json");
-    const lightPath = path.join(tempDir, "light.css");
-    const darkPath = path.join(tempDir, "dark.css");
+    const infoPath = path.join(tempDir, 'info.json');
+    const lightPath = path.join(tempDir, 'light.css');
+    const darkPath = path.join(tempDir, 'dark.css');
     if (!fs.existsSync(infoPath)) {
-      return { success: false, error: "Theme zip must contain info.json." };
+      return { success: false, error: 'Theme zip must contain info.json.' };
     }
     if (!fs.existsSync(lightPath)) {
-      return { success: false, error: "Theme zip must contain light.css." };
+      return { success: false, error: 'Theme zip must contain light.css.' };
     }
     if (!fs.existsSync(darkPath)) {
-      return { success: false, error: "Theme zip must contain dark.css." };
+      return { success: false, error: 'Theme zip must contain dark.css.' };
     }
-    JSON.parse(fs.readFileSync(infoPath, "utf-8"));
+    JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
     const themeId = randomUUID();
     const themeDir = path.join(themesDir, themeId);
     fs.mkdirSync(themeDir, { recursive: true });
-    fs.copyFileSync(infoPath, path.join(themeDir, "info.json"));
-    fs.copyFileSync(lightPath, path.join(themeDir, "light.css"));
-    fs.copyFileSync(darkPath, path.join(themeDir, "dark.css"));
+    fs.copyFileSync(infoPath, path.join(themeDir, 'info.json'));
+    fs.copyFileSync(lightPath, path.join(themeDir, 'light.css'));
+    fs.copyFileSync(darkPath, path.join(themeDir, 'dark.css'));
     return { success: true };
   } catch (err: unknown) {
     if (err instanceof SyntaxError) {
-      return { success: false, error: "info.json contains invalid JSON." };
+      return { success: false, error: 'info.json contains invalid JSON.' };
     }
-    const errMsg = err instanceof Error ? err.message : "";
-    if (errMsg.startsWith("Theme zip")) {
+    const errMsg = err instanceof Error ? err.message : '';
+    if (errMsg.startsWith('Theme zip')) {
       return { success: false, error: errMsg };
     }
-    return { success: false, error: "Failed to extract theme zip." };
+    return { success: false, error: 'Failed to extract theme zip.' };
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
     fs.rmSync(zipPath, { force: true });
@@ -159,7 +159,7 @@ interface UserTheme {
 }
 
 function loadUserThemes(): UserTheme[] {
-  const dir = path.join(process.cwd(), "storage", "themes", "user");
+  const dir = path.join(process.cwd(), 'storage', 'themes', 'user');
   if (!fs.existsSync(dir)) {
     return [];
   }
@@ -168,9 +168,9 @@ function loadUserThemes(): UserTheme[] {
     if (!entry.isDirectory()) {
       continue;
     }
-    const infoPath = path.join(dir, entry.name, "info.json");
-    const lightPath = path.join(dir, entry.name, "light.css");
-    const darkPath = path.join(dir, entry.name, "dark.css");
+    const infoPath = path.join(dir, entry.name, 'info.json');
+    const lightPath = path.join(dir, entry.name, 'light.css');
+    const darkPath = path.join(dir, entry.name, 'dark.css');
     if (
       !fs.existsSync(infoPath) ||
       !fs.existsSync(lightPath) ||
@@ -179,7 +179,7 @@ function loadUserThemes(): UserTheme[] {
       continue;
     }
     try {
-      const info = JSON.parse(fs.readFileSync(infoPath, "utf-8"));
+      const info = JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
       themes.push({
         name: info.name || entry.name,
         lightPath: `/themes/user/${entry.name}/light.css`,
@@ -203,16 +203,16 @@ async function saveSettings(data: Record<string, unknown>) {
     where: { id: 1 },
     update: data,
     create: {
-      title: "AirLink",
-      logo: "../assets/logo.png",
-      favicon: "../assets/favicon.ico",
-      theme: "default",
-      language: "en",
+      title: 'AirLink',
+      logo: '../assets/logo.png',
+      favicon: '../assets/favicon.ico',
+      theme: 'default',
+      language: 'en',
       allowRegistration: false,
       uploadLimit: 100,
       rateLimitEnabled: true,
       rateLimitRpm: 500,
-      bannedIps: "[]",
+      bannedIps: '[]',
       allowUserCreateServer: false,
       allowUserDeleteServer: false,
       defaultServerLimit: 0,
@@ -233,12 +233,12 @@ async function saveSettings(data: Record<string, unknown>) {
 
 const adminModule: Module = {
   info: {
-    name: "Admin Settings Module",
-    description: "Settings management for the admin panel.",
-    version: "2.0.0",
-    moduleVersion: "2.0.0",
-    author: "AirlinkLab",
-    license: "MIT",
+    name: 'Admin Settings Module',
+    description: 'Settings management for the admin panel.',
+    version: '2.0.0',
+    moduleVersion: '2.0.0',
+    author: 'AirlinkLab',
+    license: 'MIT',
   },
 
   router: () => {
@@ -246,58 +246,58 @@ const adminModule: Module = {
 
     // GET /admin/settings
     router.get(
-      "/admin/settings",
+      '/admin/settings',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect("/login");
+            return res.redirect('/login');
           }
 
           const settings = await getSettings();
 
-          const builtinThemesDir = path.join(process.cwd(), "public", "themes");
+          const builtinThemesDir = path.join(process.cwd(), 'public', 'themes');
           const builtinThemes = fs
             .readdirSync(builtinThemesDir)
-            .filter((f) => f.endsWith(".css"))
+            .filter((f) => f.endsWith('.css'))
             .map((f) => ({
-              name: f.replace(".css", ""),
+              name: f.replace('.css', ''),
               path: `/themes/${f}`,
               builtin: true,
             }));
 
           const allThemes = [
-            { name: "default", path: null, builtin: true },
+            { name: 'default', path: null, builtin: true },
             ...builtinThemes,
             ...loadUserThemes(),
           ];
 
-          res.render("admin/settings/settings", {
+          res.render('admin/settings/settings', {
             user,
             req,
             settings,
             allThemes,
           });
         } catch (error: unknown) {
-          logger.error("Error loading settings page:", error);
-          res.redirect("/login");
+          logger.error('Error loading settings page:', error);
+          res.redirect('/login');
         }
       },
     );
 
     // GET /admin/settings/example-theme
     router.get(
-      "/admin/settings/example-theme",
+      '/admin/settings/example-theme',
       isAuthenticated(true),
       async (_req: Request, res: Response) => {
         try {
           const zipDir = path.join(
             process.cwd(),
-            "storage",
-            "uploads",
-            "theme-zips",
+            'storage',
+            'uploads',
+            'theme-zips',
           );
           fs.mkdirSync(zipDir, { recursive: true });
           const archivePath = path.join(
@@ -305,42 +305,42 @@ const adminModule: Module = {
             `example-theme-${Date.now()}.zip`,
           );
           const info = {
-            name: "Example Theme",
-            author: "Your Name",
-            updatedAt: new Date().toISOString().split("T")[0],
+            name: 'Example Theme',
+            author: 'Your Name',
+            updatedAt: new Date().toISOString().split('T')[0],
           };
           const zip = new AdmZip();
-          zip.addFile("info.json", Buffer.from(JSON.stringify(info, null, 2)));
+          zip.addFile('info.json', Buffer.from(JSON.stringify(info, null, 2)));
           zip.addFile(
-            "light.css",
-            Buffer.from("/* light mode theme */\n:root {}\n"),
+            'light.css',
+            Buffer.from('/* light mode theme */\n:root {}\n'),
           );
           zip.addFile(
-            "dark.css",
-            Buffer.from("/* dark mode theme */\n:root {}\n"),
+            'dark.css',
+            Buffer.from('/* dark mode theme */\n:root {}\n'),
           );
           zip.writeZip(archivePath);
-          res.download(archivePath, "example-theme.zip", () =>
+          res.download(archivePath, 'example-theme.zip', () =>
             fs.rmSync(archivePath, { force: true }),
           );
         } catch (error: unknown) {
-          logger.error("Error generating example theme:", error);
-          res.status(500).json({ error: "Failed to generate example theme." });
+          logger.error('Error generating example theme:', error);
+          res.status(500).json({ error: 'Failed to generate example theme.' });
         }
       },
     );
 
     // POST /admin/settings (appearance)
     router.post(
-      "/admin/settings",
+      '/admin/settings',
       isAuthenticated(true),
       upload.fields([
-        { name: "logo", maxCount: 1 },
-        { name: "favicon", maxCount: 1 },
-        { name: "themeFile", maxCount: 1 },
-        { name: "loginWallpaperFile", maxCount: 1 },
-        { name: "registerWallpaperFile", maxCount: 1 },
-        { name: "panelWallpaperFile", maxCount: 1 },
+        { name: 'logo', maxCount: 1 },
+        { name: 'favicon', maxCount: 1 },
+        { name: 'themeFile', maxCount: 1 },
+        { name: 'loginWallpaperFile', maxCount: 1 },
+        { name: 'registerWallpaperFile', maxCount: 1 },
+        { name: 'panelWallpaperFile', maxCount: 1 },
       ]),
       async (req, res) => {
         try {
@@ -358,21 +358,21 @@ const adminModule: Module = {
 
           const data: Record<string, unknown> = {};
 
-          if (typeof raw.title === "string") {
+          if (typeof raw.title === 'string') {
             data.title = raw.title;
           }
-          if (typeof raw.allowRegistration !== "undefined") {
+          if (typeof raw.allowRegistration !== 'undefined') {
             data.allowRegistration =
-              raw.allowRegistration === "true" ||
+              raw.allowRegistration === 'true' ||
               raw.allowRegistration === true;
           }
-          if (typeof raw.theme === "string") {
+          if (typeof raw.theme === 'string') {
             data.theme = raw.theme;
           }
           if (raw.uploadLimit) {
             data.uploadLimit = parseInt(raw.uploadLimit, 10) || 100;
           }
-          if (typeof raw.virusTotalApiKey === "string") {
+          if (typeof raw.virusTotalApiKey === 'string') {
             data.virusTotalApiKey = raw.virusTotalApiKey.trim() || null;
           }
 
@@ -383,14 +383,14 @@ const adminModule: Module = {
             data.favicon = `/uploads/favicons/${files.favicon[0].filename}`;
             fs.copyFileSync(
               files.favicon[0].path,
-              path.join(process.cwd(), "public", "assets", "favicon.ico"),
+              path.join(process.cwd(), 'public', 'assets', 'favicon.ico'),
             );
           }
 
           // Wallpapers: uploaded file > URL input > no change
           if (files.loginWallpaperFile?.[0]) {
             data.loginWallpaper = `/uploads/wallpapers/${files.loginWallpaperFile[0].filename}`;
-          } else if (typeof raw.loginWallpaperUrl === "string") {
+          } else if (typeof raw.loginWallpaperUrl === 'string') {
             const resolved = resolveWallpaperValue(raw.loginWallpaperUrl);
             if (resolved !== undefined) {
               data.loginWallpaper = resolved;
@@ -399,7 +399,7 @@ const adminModule: Module = {
 
           if (files.registerWallpaperFile?.[0]) {
             data.registerWallpaper = `/uploads/wallpapers/${files.registerWallpaperFile[0].filename}`;
-          } else if (typeof raw.registerWallpaperUrl === "string") {
+          } else if (typeof raw.registerWallpaperUrl === 'string') {
             const resolved = resolveWallpaperValue(raw.registerWallpaperUrl);
             if (resolved !== undefined) {
               data.registerWallpaper = resolved;
@@ -411,7 +411,7 @@ const adminModule: Module = {
           // come exclusively from our own upload handler.
           if (files.panelWallpaperFile?.[0]) {
             data.panelWallpaper = `/uploads/wallpapers/${files.panelWallpaperFile[0].filename}`;
-          } else if (typeof raw.panelWallpaperUrl === "string") {
+          } else if (typeof raw.panelWallpaperUrl === 'string') {
             const resolved = resolveWallpaperValue(raw.panelWallpaperUrl);
             if (resolved !== undefined) {
               data.panelWallpaper = resolved;
@@ -426,10 +426,10 @@ const adminModule: Module = {
             panelWallpaper: data.panelWallpaper ?? null,
           });
         } catch (error: unknown) {
-          logger.error("Error saving appearance settings:", error);
+          logger.error('Error saving appearance settings:', error);
           res
             .status(500)
-            .json({ success: false, error: "Failed to save settings." });
+            .json({ success: false, error: 'Failed to save settings.' });
           return;
         }
       },
@@ -437,7 +437,7 @@ const adminModule: Module = {
 
     // POST /admin/settings/general
     router.post(
-      "/admin/settings/general",
+      '/admin/settings/general',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
@@ -447,29 +447,29 @@ const adminModule: Module = {
           if (req.body.uploadLimit) {
             data.uploadLimit = parseInt(req.body.uploadLimit, 10) || 100;
           }
-          if (typeof req.body.virusTotalApiKey === "string") {
+          if (typeof req.body.virusTotalApiKey === 'string') {
             data.virusTotalApiKey = req.body.virusTotalApiKey.trim() || null;
           }
           await saveSettings(data);
           res.json({ success: true });
         } catch (error: unknown) {
-          logger.error("Error saving general settings:", error);
+          logger.error('Error saving general settings:', error);
           res
             .status(500)
-            .json({ success: false, error: "Failed to save settings." });
+            .json({ success: false, error: 'Failed to save settings.' });
         }
       },
     );
 
     // POST /admin/settings/security
     router.post(
-      "/admin/settings/security",
+      '/admin/settings/security',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
           const rateLimitEnabled =
             req.body.rateLimitEnabled === true ||
-            req.body.rateLimitEnabled === "true";
+            req.body.rateLimitEnabled === 'true';
           const rateLimitRpm = parseInt(req.body.rateLimitRpm, 10);
           const loginMaxAttempts = parseInt(req.body.loginMaxAttempts, 10);
           const loginLockoutMinutes = parseInt(
@@ -484,7 +484,7 @@ const adminModule: Module = {
           if (isNaN(rateLimitRpm) || rateLimitRpm < 1 || rateLimitRpm > 10000) {
             return res.status(400).json({
               success: false,
-              error: "RPM must be between 1 and 10000.",
+              error: 'RPM must be between 1 and 10000.',
             });
           }
           if (
@@ -494,7 +494,7 @@ const adminModule: Module = {
           ) {
             return res.status(400).json({
               success: false,
-              error: "Max attempts must be between 1 and 100.",
+              error: 'Max attempts must be between 1 and 100.',
             });
           }
           if (
@@ -504,7 +504,7 @@ const adminModule: Module = {
           ) {
             return res.status(400).json({
               success: false,
-              error: "Lockout must be between 1 and 1440 minutes.",
+              error: 'Lockout must be between 1 and 1440 minutes.',
             });
           }
 
@@ -518,7 +518,7 @@ const adminModule: Module = {
             behindReverseProxy,
             hashApiKeys,
           };
-          if (typeof req.body.virusTotalApiKey === "string") {
+          if (typeof req.body.virusTotalApiKey === 'string') {
             securityData.virusTotalApiKey =
               req.body.virusTotalApiKey.trim() || null;
           }
@@ -526,10 +526,10 @@ const adminModule: Module = {
           await refreshSecurityCache();
           return res.json({ success: true });
         } catch (error: unknown) {
-          logger.error("Error saving security settings:", error);
+          logger.error('Error saving security settings:', error);
           res
             .status(500)
-            .json({ success: false, error: "Failed to save settings." });
+            .json({ success: false, error: 'Failed to save settings.' });
           return;
         }
       },
@@ -537,22 +537,22 @@ const adminModule: Module = {
 
     // POST /admin/settings/server-policy
     router.post(
-      "/admin/settings/server-policy",
+      '/admin/settings/server-policy',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
           const allowUserCreateServer =
             req.body.allowUserCreateServer === true ||
-            req.body.allowUserCreateServer === "true";
+            req.body.allowUserCreateServer === 'true';
           const allowUserDeleteServer =
             req.body.allowUserDeleteServer === true ||
-            req.body.allowUserDeleteServer === "true";
+            req.body.allowUserDeleteServer === 'true';
           const allowUserCreateImages =
             req.body.allowUserCreateImages === true ||
-            req.body.allowUserCreateImages === "true";
+            req.body.allowUserCreateImages === 'true';
           const onboardingEnabled =
             req.body.onboardingEnabled === true ||
-            req.body.onboardingEnabled === "true";
+            req.body.onboardingEnabled === 'true';
           const defaultServerLimit = parseInt(req.body.defaultServerLimit, 10);
           const defaultMaxMemory = parseInt(req.body.defaultMaxMemory, 10);
           const defaultMaxCpu = parseInt(req.body.defaultMaxCpu, 10);
@@ -577,30 +577,30 @@ const adminModule: Module = {
           if (isNaN(defaultServerLimit) || defaultServerLimit < 0) {
             return res.status(400).json({
               success: false,
-              error: "Server limit must be 0 or greater.",
+              error: 'Server limit must be 0 or greater.',
             });
           }
           if (isNaN(defaultMaxMemory) || defaultMaxMemory < 128) {
             return res.status(400).json({
               success: false,
-              error: "Max memory must be at least 128 MB.",
+              error: 'Max memory must be at least 128 MB.',
             });
           }
           if (isNaN(defaultMaxCpu) || defaultMaxCpu < 10) {
             return res
               .status(400)
-              .json({ success: false, error: "Max CPU must be at least 10%." });
+              .json({ success: false, error: 'Max CPU must be at least 10%.' });
           }
           if (isNaN(defaultMaxStorage) || defaultMaxStorage < 128) {
             return res.status(400).json({
               success: false,
-              error: "Max storage must be at least 128 MB.",
+              error: 'Max storage must be at least 128 MB.',
             });
           }
           if (isNaN(defaultMaxDatabases) || defaultMaxDatabases < 0) {
             return res.status(400).json({
               success: false,
-              error: "Default max databases must be 0 or greater.",
+              error: 'Default max databases must be 0 or greater.',
             });
           }
           if (
@@ -612,7 +612,7 @@ const adminModule: Module = {
           ) {
             return res.status(400).json({
               success: false,
-              error: "Overallocation defaults must be between 0 and 10000%.",
+              error: 'Overallocation defaults must be between 0 and 10000%.',
             });
           }
 
@@ -637,10 +637,10 @@ const adminModule: Module = {
           await saveSettings(serverPolicyData);
           return res.json({ success: true });
         } catch (error: unknown) {
-          logger.error("Error saving server policy:", error);
+          logger.error('Error saving server policy:', error);
           res
             .status(500)
-            .json({ success: false, error: "Failed to save server policy." });
+            .json({ success: false, error: 'Failed to save server policy.' });
           return;
         }
       },
@@ -648,7 +648,7 @@ const adminModule: Module = {
 
     // POST /admin/settings/smtp
     router.post(
-      "/admin/settings/smtp",
+      '/admin/settings/smtp',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
@@ -656,38 +656,38 @@ const adminModule: Module = {
           if (isNaN(smtpPort) || smtpPort < 1 || smtpPort > 65535) {
             return res.status(400).json({
               success: false,
-              error: "SMTP port must be between 1 and 65535.",
+              error: 'SMTP port must be between 1 and 65535.',
             });
           }
 
           const smtpData: Record<string, unknown> = {
             smtpHost:
-              typeof req.body.smtpHost === "string"
+              typeof req.body.smtpHost === 'string'
                 ? req.body.smtpHost.trim() || null
                 : null,
             smtpPort,
             smtpUser:
-              typeof req.body.smtpUser === "string"
+              typeof req.body.smtpUser === 'string'
                 ? req.body.smtpUser.trim() || null
                 : null,
             smtpPassword:
-              typeof req.body.smtpPassword === "string"
+              typeof req.body.smtpPassword === 'string'
                 ? req.body.smtpPassword || null
                 : null,
             smtpFrom:
-              typeof req.body.smtpFrom === "string"
+              typeof req.body.smtpFrom === 'string'
                 ? req.body.smtpFrom.trim() || null
                 : null,
             smtpSecure:
-              req.body.smtpSecure === true || req.body.smtpSecure === "true",
+              req.body.smtpSecure === true || req.body.smtpSecure === 'true',
           };
           await saveSettings(smtpData);
           return res.json({ success: true });
         } catch (error: unknown) {
-          logger.error("Error saving SMTP settings:", error);
+          logger.error('Error saving SMTP settings:', error);
           res
             .status(500)
-            .json({ success: false, error: "Failed to save SMTP settings." });
+            .json({ success: false, error: 'Failed to save SMTP settings.' });
           return;
         }
       },
@@ -695,7 +695,7 @@ const adminModule: Module = {
 
     // POST /admin/settings/smtp/test
     router.post(
-      "/admin/settings/smtp/test",
+      '/admin/settings/smtp/test',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
@@ -703,24 +703,24 @@ const adminModule: Module = {
           if (!smtp?.smtpHost) {
             return res
               .status(400)
-              .json({ success: false, error: "SMTP is not configured yet." });
+              .json({ success: false, error: 'SMTP is not configured yet.' });
           }
           const transporter = nodemailer.createTransport({
             host: smtp.smtpHost,
             port: smtp.smtpPort ?? 587,
             secure: smtp.smtpSecure,
-            auth: { user: smtp.smtpUser ?? "", pass: smtp.smtpPassword ?? "" },
+            auth: { user: smtp.smtpUser ?? '', pass: smtp.smtpPassword ?? '' },
           });
           await transporter.verify();
           return res.json({
             success: true,
-            message: "SMTP connection verified.",
+            message: 'SMTP connection verified.',
           });
         } catch (error: unknown) {
-          logger.error("SMTP test failed:", error);
+          logger.error('SMTP test failed:', error);
           res
             .status(500)
-            .json({ success: false, error: "SMTP connection failed." });
+            .json({ success: false, error: 'SMTP connection failed.' });
           return;
         }
       },
@@ -728,43 +728,43 @@ const adminModule: Module = {
 
     // POST /admin/settings/s3
     router.post(
-      "/admin/settings/s3",
+      '/admin/settings/s3',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
           const s3Data: Record<string, unknown> = {
             s3Enabled:
-              req.body.s3Enabled === true || req.body.s3Enabled === "true",
+              req.body.s3Enabled === true || req.body.s3Enabled === 'true',
             s3Endpoint:
-              typeof req.body.s3Endpoint === "string"
+              typeof req.body.s3Endpoint === 'string'
                 ? req.body.s3Endpoint.trim() || null
                 : null,
             s3Region:
-              typeof req.body.s3Region === "string"
+              typeof req.body.s3Region === 'string'
                 ? req.body.s3Region.trim() || null
                 : null,
             s3Bucket:
-              typeof req.body.s3Bucket === "string"
+              typeof req.body.s3Bucket === 'string'
                 ? req.body.s3Bucket.trim() || null
                 : null,
             s3AccessKey:
-              typeof req.body.s3AccessKey === "string"
+              typeof req.body.s3AccessKey === 'string'
                 ? req.body.s3AccessKey.trim() || null
                 : null,
             s3SecretKey:
-              typeof req.body.s3SecretKey === "string"
+              typeof req.body.s3SecretKey === 'string'
                 ? req.body.s3SecretKey || null
                 : null,
             s3PathStyle:
-              req.body.s3PathStyle === true || req.body.s3PathStyle === "true",
+              req.body.s3PathStyle === true || req.body.s3PathStyle === 'true',
           };
           await saveSettings(s3Data);
           return res.json({ success: true });
         } catch (error: unknown) {
-          logger.error("Error saving S3 settings:", error);
+          logger.error('Error saving S3 settings:', error);
           res
             .status(500)
-            .json({ success: false, error: "Failed to save S3 settings." });
+            .json({ success: false, error: 'Failed to save S3 settings.' });
           return;
         }
       },
@@ -772,7 +772,7 @@ const adminModule: Module = {
 
     // POST /admin/settings/s3/test
     router.post(
-      "/admin/settings/s3/test",
+      '/admin/settings/s3/test',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
@@ -786,14 +786,14 @@ const adminModule: Module = {
           return res.status(500).json({
             success: false,
             error: result.error
-              ? safeClientMessage(result.error, "S3 connection failed.")
-              : "S3 connection failed.",
+              ? safeClientMessage(result.error, 'S3 connection failed.')
+              : 'S3 connection failed.',
           });
         } catch (error: unknown) {
-          logger.error("S3 test failed:", error);
+          logger.error('S3 test failed:', error);
           res
             .status(500)
-            .json({ success: false, error: "S3 connection failed." });
+            .json({ success: false, error: 'S3 connection failed.' });
           return;
         }
       },
@@ -801,20 +801,20 @@ const adminModule: Module = {
 
     // POST /admin/settings/ban-ip
     router.post(
-      "/admin/settings/ban-ip",
+      '/admin/settings/ban-ip',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
           const { ip } = req.body;
-          if (!ip || typeof ip !== "string" || !/^[\d.:a-fA-F]+$/.test(ip)) {
+          if (!ip || typeof ip !== 'string' || !/^[\d.:a-fA-F]+$/.test(ip)) {
             return res
               .status(400)
-              .json({ success: false, error: "Invalid IP address." });
+              .json({ success: false, error: 'Invalid IP address.' });
           }
           const settings = await getSettings();
           let banned: string[] = [];
           try {
-            banned = JSON.parse(settings?.bannedIps || "[]");
+            banned = JSON.parse(settings?.bannedIps || '[]');
           } catch {
             banned = [];
           }
@@ -824,8 +824,8 @@ const adminModule: Module = {
           }
           return res.json({ success: true, banned });
         } catch (error: unknown) {
-          logger.error("Error banning IP:", error);
-          res.status(500).json({ success: false, error: "Failed to ban IP." });
+          logger.error('Error banning IP:', error);
+          res.status(500).json({ success: false, error: 'Failed to ban IP.' });
           return;
         }
       },
@@ -833,20 +833,20 @@ const adminModule: Module = {
 
     // POST /admin/settings/unban-ip
     router.post(
-      "/admin/settings/unban-ip",
+      '/admin/settings/unban-ip',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
           const { ip } = req.body;
-          if (!ip || typeof ip !== "string") {
+          if (!ip || typeof ip !== 'string') {
             return res
               .status(400)
-              .json({ success: false, error: "IP is required." });
+              .json({ success: false, error: 'IP is required.' });
           }
           const settings = await getSettings();
           let banned: string[] = [];
           try {
-            banned = JSON.parse(settings?.bannedIps || "[]");
+            banned = JSON.parse(settings?.bannedIps || '[]');
           } catch {
             banned = [];
           }
@@ -858,10 +858,10 @@ const adminModule: Module = {
             banned: banned.filter((b) => b !== ip),
           });
         } catch (error: unknown) {
-          logger.error("Error unbanning IP:", error);
+          logger.error('Error unbanning IP:', error);
           res
             .status(500)
-            .json({ success: false, error: "Failed to unban IP." });
+            .json({ success: false, error: 'Failed to unban IP.' });
           return;
         }
       },
@@ -869,16 +869,16 @@ const adminModule: Module = {
 
     // POST /admin/settings/reset
     router.post(
-      "/admin/settings/reset",
+      '/admin/settings/reset',
       isAuthenticated(true),
       async (_req: Request, res: Response) => {
         try {
           await saveSettings({
-            title: "Airlink",
-            logo: "../assets/logo.png",
-            favicon: "../assets/favicon.ico",
-            theme: "default",
-            language: "en",
+            title: 'Airlink',
+            logo: '../assets/logo.png',
+            favicon: '../assets/favicon.ico',
+            theme: 'default',
+            language: 'en',
             allowRegistration: false,
             loginWallpaper: null,
             registerWallpaper: null,
@@ -886,25 +886,25 @@ const adminModule: Module = {
           });
           const defaultFavicon = path.join(
             process.cwd(),
-            "public",
-            "assets",
-            "favicon.ico",
+            'public',
+            'assets',
+            'favicon.ico',
           );
           const dest = path.join(
             process.cwd(),
-            "public",
-            "assets",
-            "favicon.ico",
+            'public',
+            'assets',
+            'favicon.ico',
           );
           if (fs.existsSync(defaultFavicon)) {
             fs.copyFileSync(defaultFavicon, dest);
           }
           res.json({ success: true });
         } catch (error: unknown) {
-          logger.error("Error resetting settings:", error);
+          logger.error('Error resetting settings:', error);
           res
             .status(500)
-            .json({ success: false, error: "Failed to reset settings." });
+            .json({ success: false, error: 'Failed to reset settings.' });
         }
       },
     );

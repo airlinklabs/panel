@@ -1393,7 +1393,7 @@ _process_addons() {
     done
 
     cd /var/www/panel
-    npx tailwindcss -i ./public/tw.css -o ./public/styles.css &>/dev/null || true
+    npx tailwindcss -i ./public/styles/tw.css -o ./public/styles.css &>/dev/null || true
 }
 
 # =============================================================================

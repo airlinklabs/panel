@@ -2,8 +2,8 @@
  * Shared in-memory cache for security settings (rate limits, banned IPs).
  * Refreshed periodically from DB and also on-demand after admin changes.
  */
-import { getSettings } from "./settingsCache";
-import prisma from "../db";
+import { getSettings } from './settingsCache';
+import prisma from '../db';
 
 const securityCache = {
   bannedIps: [] as string[],
@@ -18,7 +18,7 @@ export async function refreshSecurityCache() {
       return;
     }
     try {
-      securityCache.bannedIps = JSON.parse(s.bannedIps || "[]");
+      securityCache.bannedIps = JSON.parse(s.bannedIps || '[]');
     } catch {
       securityCache.bannedIps = [];
     }

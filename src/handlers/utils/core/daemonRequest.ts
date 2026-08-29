@@ -1,11 +1,11 @@
-import { getSettings } from "../../settingsCache";
-import crypto from "crypto";
-import { createReadStream, createWriteStream, promises as fsp } from "fs";
-import os from "os";
-import path from "path";
-import { Readable } from "stream";
-import { URL } from "url";
-import prisma from "../../../db";
+import { getSettings } from '../../settingsCache';
+import crypto from 'crypto';
+import { createReadStream, createWriteStream, promises as fsp } from 'fs';
+import os from 'os';
+import path from 'path';
+import { Readable } from 'stream';
+import { URL } from 'url';
+import prisma from '../../../db';
 import {
   httpGet,
   httpPost,
@@ -13,8 +13,8 @@ import {
   httpPatch,
   httpDelete,
   type HttpResponse,
-} from "../../../utils/http";
-export type { HttpResponse } from "../../../utils/http";
+} from '../../../utils/http';
+export type { HttpResponse } from '../../../utils/http';
 
 const SIGNATURE_WINDOW_S = 30;
 const NONCE_BYTE_LENGTH = 16;
@@ -73,25 +73,25 @@ export function buildCanonicalTarget(
   // Sort by encoded key, then by encoded value for deterministic signing.
   entries.sort((a, b) => a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]));
 
-  const qs = entries.map(([k, v]) => `${k}=${v}`).join("&");
+  const qs = entries.map(([k, v]) => `${k}=${v}`).join('&');
   return `${pathname}?${qs}`;
 }
 
-let cachedScheme: "http" | "https" = "http";
+let cachedScheme: 'http' | 'https' = 'http';
 let schemeCachedAt = 0;
 const SCHEME_CACHE_TTL_MS = 60_000;
 
 async function refreshSchemeCache(): Promise<void> {
   try {
     const s = await getSettings();
-    cachedScheme = s?.enforceDaemonHttps ? "https" : "http";
+    cachedScheme = s?.enforceDaemonHttps ? 'https' : 'http';
   } catch {
     // Leave whatever we had before — don't crash on DB error.
   }
   schemeCachedAt = Date.now();
 }
 
-export async function daemonScheme(): Promise<"http" | "https"> {
+export async function daemonScheme(): Promise<'http' | 'https'> {
   if (Date.now() - schemeCachedAt > SCHEME_CACHE_TTL_MS) {
     await refreshSchemeCache();
   }
@@ -126,20 +126,20 @@ function hmacSign(
   nonce: string,
 ): string {
   const payload = `${timestamp}:${nonce}:${method.toUpperCase()}:${path}:${bodyRepr}`;
-  return crypto.createHmac("sha256", key).update(payload).digest("hex");
+  return crypto.createHmac('sha256', key).update(payload).digest('hex');
 }
 
 function sha256Hex(bytes: Uint8Array): string {
-  return crypto.createHash("sha256").update(bytes).digest("hex");
+  return crypto.createHash('sha256').update(bytes).digest('hex');
 }
 
 function isStreamLike(body: unknown): boolean {
-  if (typeof body !== "object" || body === null) {
+  if (typeof body !== 'object' || body === null) {
     return false;
   }
   const record = body as Record<string, unknown>;
   return (
-    typeof record.pipe === "function" || typeof record.getReader === "function"
+    typeof record.pipe === 'function' || typeof record.getReader === 'function'
   );
 }
 
@@ -155,9 +155,9 @@ async function spoolStreamToTemp(
 }> {
   const file = path.join(
     os.tmpdir(),
-    `airlink-hmac-${crypto.randomBytes(8).toString("hex")}.tmp`,
+    `airlink-hmac-${crypto.randomBytes(8).toString('hex')}.tmp`,
   );
-  const hash = crypto.createHash("sha256");
+  const hash = crypto.createHash('sha256');
   const nodeStream: NodeJS.ReadableStream = isWebStream(stream)
     ? Readable.fromWeb(stream as never)
     : stream;
@@ -165,19 +165,19 @@ async function spoolStreamToTemp(
   let total = 0;
   await new Promise<void>((resolve, reject) => {
     const ws = createWriteStream(file);
-    nodeStream.on("data", (chunk: Buffer | string) => {
+    nodeStream.on('data', (chunk: Buffer | string) => {
       total += chunk.length;
       hash.update(chunk);
       if (total > MAX_SPOOL_BYTES) {
         // destroying the destination stops the pipe; the writable 'error' event
         // rejects the promise below with the cap violation
-        ws.destroy(new Error("stream exceeds the spool cap"));
+        ws.destroy(new Error('stream exceeds the spool cap'));
       }
     });
     nodeStream.pipe(ws);
-    nodeStream.on("error", reject);
-    ws.on("error", reject);
-    ws.on("finish", resolve);
+    nodeStream.on('error', reject);
+    ws.on('error', reject);
+    ws.on('finish', resolve);
   });
 
   if (total > MAX_SPOOL_BYTES) {
@@ -185,13 +185,13 @@ async function spoolStreamToTemp(
     throw new Error(`stream exceeds the ${MAX_SPOOL_BYTES}-byte spool cap`);
   }
 
-  return { file, digest: hash.digest("hex") };
+  return { file, digest: hash.digest('hex') };
 }
 
 function isWebStream(
   stream: NodeJS.ReadableStream | ReadableStream,
 ): stream is ReadableStream {
-  return typeof (stream as ReadableStream).getReader === "function";
+  return typeof (stream as ReadableStream).getReader === 'function';
 }
 
 // bodyToWire resolves the exact bytes for the wire and their sha256 digest. Digest is null for empty bodies.
@@ -203,8 +203,8 @@ async function bodyToWire(
     return { wireBody: undefined, digest: null };
   }
 
-  if (typeof body === "string") {
-    return { wireBody: body, digest: sha256Hex(Buffer.from(body, "utf8")) };
+  if (typeof body === 'string') {
+    return { wireBody: body, digest: sha256Hex(Buffer.from(body, 'utf8')) };
   }
 
   if (Buffer.isBuffer(body)) {
@@ -226,7 +226,7 @@ async function bodyToWire(
     if (json === undefined) {
       return { wireBody: undefined, digest: null };
     }
-    return { wireBody: json, digest: sha256Hex(Buffer.from(json, "utf8")) };
+    return { wireBody: json, digest: sha256Hex(Buffer.from(json, 'utf8')) };
   } catch {
     return { wireBody: undefined, digest: null };
   }
@@ -240,7 +240,7 @@ function buildDaemonHeaders(
   digest: string | null,
 ): Record<string, string> {
   const timestamp = Math.floor(Date.now() / 1000);
-  const nonce = crypto.randomBytes(NONCE_BYTE_LENGTH).toString("hex");
+  const nonce = crypto.randomBytes(NONCE_BYTE_LENGTH).toString('hex');
 
   const signature = hmacSign(
     key,
@@ -252,11 +252,11 @@ function buildDaemonHeaders(
   );
 
   return {
-    "X-Airlink-Timestamp": String(timestamp),
-    "X-Airlink-Signature": signature,
-    "X-Airlink-Nonce": nonce,
-    "X-Airlink-Payload-Version": String(HMAC_PAYLOAD_VERSION),
-    ...(digest ? { "X-Airlink-Digest": `sha256:${digest}` } : {}),
+    'X-Airlink-Timestamp': String(timestamp),
+    'X-Airlink-Signature': signature,
+    'X-Airlink-Nonce': nonce,
+    'X-Airlink-Payload-Version': String(HMAC_PAYLOAD_VERSION),
+    ...(digest ? { 'X-Airlink-Digest': `sha256:${digest}` } : {}),
   };
 }
 
@@ -275,7 +275,7 @@ export interface DaemonRequestOptions {
   contentDigest?: string;
   params?: Record<string, string | number | boolean | undefined>;
   timeout?: number;
-  responseType?: "json" | "text" | "arraybuffer" | "stream";
+  responseType?: 'json' | 'text' | 'arraybuffer' | 'stream';
   /** Stable request ID for distributed tracing (forwarded as X-Request-Id). */
   requestId?: string;
   /** Idempotency key for unsafe operations (POST/PUT/PATCH/DELETE). Prevents duplicate side effects on retry. */
@@ -305,7 +305,7 @@ export async function daemonRequest<T = unknown>(
   const canonicalTarget = buildCanonicalTarget(path, params);
   const url = `${await daemonScheme()}://${nodeAddress}:${nodePort}${canonicalTarget}`;
 
-  const isBodyless = methodUpper === "GET" || methodUpper === "HEAD";
+  const isBodyless = methodUpper === 'GET' || methodUpper === 'HEAD';
   const wire = isBodyless
     ? { wireBody: undefined as unknown, digest: null as string | null }
     : await bodyToWire(body, contentDigest);
@@ -314,7 +314,7 @@ export async function daemonRequest<T = unknown>(
     nodeKey,
     methodUpper,
     canonicalTarget,
-    wire.digest ? `digest:${wire.digest}` : "",
+    wire.digest ? `digest:${wire.digest}` : '',
     wire.digest,
   );
 
@@ -323,28 +323,28 @@ export async function daemonRequest<T = unknown>(
     responseType,
     headers: {
       ...hmacHeaders,
-      ...(requestId ? { "X-Request-Id": requestId } : {}),
-      ...(idempotencyKey ? { "X-Idempotency-Key": idempotencyKey } : {}),
+      ...(requestId ? { 'X-Request-Id': requestId } : {}),
+      ...(idempotencyKey ? { 'X-Idempotency-Key': idempotencyKey } : {}),
     },
     // Basic auth is deprecated — only sent during migration period.
     // HMAC is the authoritative auth mechanism.
     ...(SEND_BASIC_AUTH
-      ? { auth: { username: "Airlink", password: nodeKey } }
+      ? { auth: { username: 'Airlink', password: nodeKey } }
       : {}),
   };
 
   try {
     switch (methodUpper) {
-      case "POST":
-        return httpPost<T>(url, wire.wireBody, httpOpts);
-      case "PUT":
-        return httpPut<T>(url, wire.wireBody, httpOpts);
-      case "PATCH":
-        return httpPatch<T>(url, wire.wireBody, httpOpts);
-      case "DELETE":
-        return httpDelete<T>(url, wire.wireBody, httpOpts);
-      default:
-        return httpGet<T>(url, httpOpts);
+    case 'POST':
+      return httpPost<T>(url, wire.wireBody, httpOpts);
+    case 'PUT':
+      return httpPut<T>(url, wire.wireBody, httpOpts);
+    case 'PATCH':
+      return httpPatch<T>(url, wire.wireBody, httpOpts);
+    case 'DELETE':
+      return httpDelete<T>(url, wire.wireBody, httpOpts);
+    default:
+      return httpGet<T>(url, httpOpts);
     }
   } finally {
     if (wire.tempFile) {

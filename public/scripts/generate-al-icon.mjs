@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * generate-al-icon.mjs - builds public/js/shared/al-icon.js.
+ * generate-al-icon.mjs - builds public/javascript/shared/al-icon.js.
  *
  * Reads icon data from the installed `lucide` npm package and emits a compact
  * client-side SVG renderer.  The output is a self-contained IIFE that exposes
@@ -21,7 +21,7 @@ import * as lucide from "lucide";
 // ---
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const outFile = path.resolve(__dirname, "../js/shared/al-icon.js");
+const outFile = path.resolve(__dirname, "../javascript/shared/al-icon.js");
 
 // ---
 // Terminal helpers

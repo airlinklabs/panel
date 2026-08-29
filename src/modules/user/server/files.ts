@@ -1,59 +1,59 @@
-import { getSettings } from "../../../handlers/settingsCache";
-import type { Router, Request, Response } from "express";
+import { getSettings } from '../../../handlers/settingsCache';
+import type { Router, Request, Response } from 'express';
 import {
   isAuthenticatedForServer,
   requireSubUserPermission,
-} from "../../../handlers/utils/auth/serverAuthUtil";
-import logger from "../../../handlers/logger";
-import multer from "multer";
-import { isWorld } from "../../../handlers/features";
+} from '../../../handlers/utils/auth/serverAuthUtil';
+import logger from '../../../handlers/logger';
+import multer from 'multer';
+import { isWorld } from '../../../handlers/features';
 import {
   fsListSchema,
   parseDaemonResponse,
   type FsFileEntry,
-} from "../../../platform/daemon/dtos";
-import { checkForServerInstallation } from "../../../handlers/checkForServerInstallation";
-import { getServerStatus } from "../../../handlers/utils/server/serverStatus";
-import { getParamAsString } from "../../../utils/typeHelpers";
+} from '../../../platform/daemon/dtos';
+import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
+import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
+import { getParamAsString } from '../../../utils/typeHelpers';
 import {
   safeClientMessage,
   daemonMessage,
   errorBody,
-} from "../../../utils/errors";
-import prisma from "../../../db";
+} from '../../../utils/errors';
+import prisma from '../../../db';
 import {
   daemonRequest,
   daemonBaseUrl,
-} from "../../../handlers/utils/core/daemonRequest";
-import { isPathSafe, normalizePath } from "../../../utils/pathSecurity";
-import { logActivity } from "../../../handlers/utils/activity/activityLogger";
+} from '../../../handlers/utils/core/daemonRequest';
+import { isPathSafe, normalizePath } from '../../../utils/pathSecurity';
+import { logActivity } from '../../../handlers/utils/activity/activityLogger';
 import {
   type ErrorMessage,
   loadAuthenticatedServerContext,
   sendMissingServerContext,
   getServerStatusInput,
   getImageFeatures,
-} from "./shared";
+} from './shared';
 
 export function registerFilesRoutes(router: Router): void {
   router.get(
-    "/server/:id/files",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/files',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const errorMessage: ErrorMessage = {};
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
-      let path = req.query?.path || "/";
-      path = typeof path === "string" ? path : String(path);
-      path = path.replace(/\/+/g, "/");
+      let path = req.query?.path || '/';
+      path = typeof path === 'string' ? path : String(path);
+      path = path.replace(/\/+/g, '/');
 
       const settings = await getSettings();
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
-          errorMessage.message = "User not found.";
-          res.render("user/account", { errorMessage, user, req });
+          errorMessage.message = 'User not found.';
+          res.render('user/account', { errorMessage, user, req });
           return;
         }
 
@@ -63,8 +63,8 @@ export function registerFilesRoutes(router: Router): void {
         });
 
         if (!server) {
-          errorMessage.message = "Server not found.";
-          res.render("user/server/files", {
+          errorMessage.message = 'Server not found.';
+          res.render('user/server/files', {
             errorMessage,
             features: [],
             user,
@@ -75,8 +75,8 @@ export function registerFilesRoutes(router: Router): void {
         }
 
         const filesResponse = await daemonRequest<unknown>({
-          method: "GET",
-          path: "/fs/list",
+          method: 'GET',
+          path: '/fs/list',
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
@@ -85,12 +85,12 @@ export function registerFilesRoutes(router: Router): void {
 
         const files = (
           parseDaemonResponse(fsListSchema, filesResponse.data) ?? []
-        ).filter((file) => file.name !== "airlink");
+        ).filter((file) => file.name !== 'airlink');
 
         files.sort((a, b) => {
-          if (a.type === "directory" && b.type === "file") {
+          if (a.type === 'directory' && b.type === 'file') {
             return -1;
-          } else if (a.type === "file" && b.type === "directory") {
+          } else if (a.type === 'file' && b.type === 'directory') {
             return 1;
           } else {
             return 0;
@@ -102,7 +102,7 @@ export function registerFilesRoutes(router: Router): void {
           getServerStatusInput(server),
         );
 
-        res.render("user/server/files", {
+        res.render('user/server/files', {
           errorMessage,
           user,
           features,
@@ -118,16 +118,16 @@ export function registerFilesRoutes(router: Router): void {
         });
       } catch (error: unknown) {
         const errCode =
-          error && typeof error === "object" && "code" in error
+          error && typeof error === 'object' && 'code' in error
             ? String((error as { code: unknown }).code)
             : undefined;
         if (
-          errCode !== "ECONNREFUSED" &&
-          errCode !== "ETIMEDOUT" &&
-          errCode !== "ENOTFOUND" &&
-          errCode !== "ERR_BAD_RESPONSE"
+          errCode !== 'ECONNREFUSED' &&
+          errCode !== 'ETIMEDOUT' &&
+          errCode !== 'ENOTFOUND' &&
+          errCode !== 'ERR_BAD_RESPONSE'
         ) {
-          logger.error("Error fetching files:", error);
+          logger.error('Error fetching files:', error);
         }
 
         const server = await prisma.server.findUnique({
@@ -140,7 +140,7 @@ export function registerFilesRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
@@ -151,17 +151,17 @@ export function registerFilesRoutes(router: Router): void {
 
         if (serverStatus.daemonOffline) {
           errorMessage.message =
-            "Unable to access files. The daemon appears to be offline.";
+            'Unable to access files. The daemon appears to be offline.';
         } else {
-          errorMessage.message = "Error fetching files data.";
+          errorMessage.message = 'Error fetching files data.';
         }
 
-        res.render("user/server/files", {
+        res.render('user/server/files', {
           errorMessage,
           features,
           user: req.session?.user,
           files: [],
-          currentPath: path || "/",
+          currentPath: path || '/',
           req,
           server,
           serverStatus,
@@ -175,9 +175,9 @@ export function registerFilesRoutes(router: Router): void {
   );
 
   router.get(
-    "/server/:id/files/list",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/files/list',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       try {
         const context = await loadAuthenticatedServerContext(req);
@@ -186,13 +186,13 @@ export function registerFilesRoutes(router: Router): void {
         }
         const { server } = context;
 
-        let path = req.query?.path || "/";
-        path = typeof path === "string" ? path : String(path);
-        path = path.replace(/\/+/g, "/");
+        let path = req.query?.path || '/';
+        path = typeof path === 'string' ? path : String(path);
+        path = path.replace(/\/+/g, '/');
 
         const filesResponse = await daemonRequest<unknown>({
-          method: "GET",
-          path: "/fs/list",
+          method: 'GET',
+          path: '/fs/list',
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
@@ -201,13 +201,13 @@ export function registerFilesRoutes(router: Router): void {
 
         const files = (
           parseDaemonResponse(fsListSchema, filesResponse.data) ?? []
-        ).filter((file) => file.name !== "airlink");
+        ).filter((file) => file.name !== 'airlink');
 
         files.sort((a, b) => {
-          if (a.type === "directory" && b.type === "file") {
+          if (a.type === 'directory' && b.type === 'file') {
             return -1;
           }
-          if (a.type === "file" && b.type === "directory") {
+          if (a.type === 'file' && b.type === 'directory') {
             return 1;
           }
           return 0;
@@ -215,36 +215,36 @@ export function registerFilesRoutes(router: Router): void {
 
         const html = await new Promise<string>((resolve, reject) => {
           res.render(
-            "user/server/files-rows",
+            'user/server/files-rows',
             { files, currentPath: path, server, req },
             (err, out) => {
               if (err) {
                 reject(err);
               } else {
-                resolve(out ?? "");
+                resolve(out ?? '');
               }
             },
           );
         });
         res.json({ success: true, files, html });
       } catch (error: unknown) {
-        logger.error("Error listing files for in-place refresh:", error);
-        res.status(500).json({ error: "Failed to list files." });
+        logger.error('Error listing files for in-place refresh:', error);
+        res.status(500).json({ error: 'Failed to list files.' });
       }
     },
   );
 
   router.get(
-    "/server/:id/files/download/{*path}",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/files/download/{*path}',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const filePath = Array.isArray(req.params?.path)
-        ? req.params.path.join("/")
+        ? req.params.path.join('/')
         : getParamAsString(req.params?.path);
 
       if (!isPathSafe(filePath)) {
-        res.status(400).json({ error: "Invalid file path." });
+        res.status(400).json({ error: 'Invalid file path.' });
         return;
       }
 
@@ -258,8 +258,8 @@ export function registerFilesRoutes(router: Router): void {
         // Mint a short-lived single-use daemon token and redirect the browser
         // straight at the daemon — the panel never proxies the file bytes.
         const response = await daemonRequest<{ token?: string; url?: string }>({
-          method: "POST",
-          path: "/fs/download-token",
+          method: 'POST',
+          path: '/fs/download-token',
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
@@ -274,53 +274,53 @@ export function registerFilesRoutes(router: Router): void {
         ) {
           res
             .status(response.status || 500)
-            .json({ error: "Failed to start download" });
+            .json({ error: 'Failed to start download' });
           return;
         }
 
         const base = await daemonBaseUrl(server.node.address, server.node.port);
-        await logActivity(req, "file:download", {
+        await logActivity(req, 'file:download', {
           serverId: String(server.UUID),
           metadata: { path: filePath },
         });
         res.redirect(302, `${base}${response.data.url}`);
       } catch (error) {
-        logger.error("Error downloading file:", error);
-        res.status(500).json({ error: "Failed to download file" });
+        logger.error('Error downloading file:', error);
+        res.status(500).json({ error: 'Failed to download file' });
       }
     },
   );
 
   router.post(
-    "/server/:id/files/mkdir",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/files/mkdir',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
       const relativePath =
-        typeof req.body?.path === "string" ? req.body.path : "/";
+        typeof req.body?.path === 'string' ? req.body.path : '/';
       const folderName = req.body?.name;
 
       if (
-        typeof folderName !== "string" ||
+        typeof folderName !== 'string' ||
         !folderName.trim() ||
-        folderName.includes("..")
+        folderName.includes('..')
       ) {
-        res.status(400).json({ error: "Invalid folder name." });
+        res.status(400).json({ error: 'Invalid folder name.' });
         return;
       }
       if (
-        typeof relativePath === "string" &&
+        typeof relativePath === 'string' &&
         !isPathSafe(relativePath) &&
-        relativePath !== "/"
+        relativePath !== '/'
       ) {
-        res.status(400).json({ error: "Invalid path." });
+        res.status(400).json({ error: 'Invalid path.' });
         return;
       }
 
       try {
         if (!serverId) {
-          res.status(400).json({ error: "Server ID is required." });
+          res.status(400).json({ error: 'Server ID is required.' });
           return;
         }
 
@@ -331,8 +331,8 @@ export function registerFilesRoutes(router: Router): void {
         const { server } = context;
 
         const response = await daemonRequest<{ message?: string }>({
-          method: "POST",
-          path: "/fs/mkdir",
+          method: 'POST',
+          path: '/fs/mkdir',
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
@@ -347,36 +347,36 @@ export function registerFilesRoutes(router: Router): void {
           res.json({ success: true });
         } else {
           res.status(response.status).json({
-            error: response.data?.message || "Failed to create folder",
+            error: response.data?.message || 'Failed to create folder',
           });
         }
       } catch (error) {
-        logger.error("Error creating folder:", error);
-        res.status(502).json({ error: "Failed to create folder" });
+        logger.error('Error creating folder:', error);
+        res.status(502).json({ error: 'Failed to create folder' });
       }
     },
   );
 
   router.post(
-    "/server/:id/zip",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/zip',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
-      let relativePath = req.body?.relativePath || "/";
+      let relativePath = req.body?.relativePath || '/';
       const zipName = req.body?.zipname;
 
-      if (typeof relativePath === "string") {
+      if (typeof relativePath === 'string') {
         relativePath = normalizePath(relativePath);
-        if (!isPathSafe(relativePath) && relativePath !== "/") {
-          res.status(400).json({ error: "Invalid path." });
+        if (!isPathSafe(relativePath) && relativePath !== '/') {
+          res.status(400).json({ error: 'Invalid path.' });
           return;
         }
       }
 
       try {
         if (!serverId) {
-          res.status(400).json({ error: "Server ID is required." });
+          res.status(400).json({ error: 'Server ID is required.' });
           return;
         }
 
@@ -393,8 +393,8 @@ export function registerFilesRoutes(router: Router): void {
           : String(relativePath);
 
         const response = await daemonRequest<{ message?: string }>({
-          method: "POST",
-          path: "/fs/zip",
+          method: 'POST',
+          path: '/fs/zip',
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
@@ -410,42 +410,42 @@ export function registerFilesRoutes(router: Router): void {
         } else {
           res
             .status(response.status)
-            .json({ error: response.data?.message || "Failed to zip files" });
+            .json({ error: response.data?.message || 'Failed to zip files' });
         }
       } catch (error) {
-        logger.error("Error zipping files:", error);
+        logger.error('Error zipping files:', error);
         res
           .status(500)
-          .json({ error: safeClientMessage(error, "Failed to zip files.") });
+          .json({ error: safeClientMessage(error, 'Failed to zip files.') });
       }
     },
   );
 
   router.post(
-    "/server/:id/unzip",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/unzip',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
-      let relativePath = req.body?.relativePath || "/";
+      let relativePath = req.body?.relativePath || '/';
       const zipName = req.body?.zipname;
 
-      if (typeof relativePath === "string") {
+      if (typeof relativePath === 'string') {
         relativePath = normalizePath(relativePath);
-        if (!isPathSafe(relativePath) && relativePath !== "/") {
-          res.status(400).json({ error: "Invalid path." });
+        if (!isPathSafe(relativePath) && relativePath !== '/') {
+          res.status(400).json({ error: 'Invalid path.' });
           return;
         }
       }
 
-      if (typeof zipName !== "string" || !zipName.trim()) {
-        res.status(400).json({ error: "Zip file name is required" });
+      if (typeof zipName !== 'string' || !zipName.trim()) {
+        res.status(400).json({ error: 'Zip file name is required' });
         return;
       }
 
       try {
         if (!serverId) {
-          res.status(400).json({ error: "Server ID is required." });
+          res.status(400).json({ error: 'Server ID is required.' });
           return;
         }
 
@@ -456,14 +456,14 @@ export function registerFilesRoutes(router: Router): void {
         const { server } = context;
 
         const cleanPath = relativePath
-          .replace(/\/+/g, "/")
-          .replace(/^\/|\/$/g, "");
-        const cleanZipName = zipName.replace(/^\/+/, "").replace(/\/+$/, "");
+          .replace(/\/+/g, '/')
+          .replace(/^\/|\/$/g, '');
+        const cleanZipName = zipName.replace(/^\/+/, '').replace(/\/+$/, '');
 
         try {
           const response = await daemonRequest<{ message?: string }>({
-            method: "POST",
-            path: "/fs/unzip",
+            method: 'POST',
+            path: '/fs/unzip',
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -478,28 +478,28 @@ export function registerFilesRoutes(router: Router): void {
             res.json({ success: true });
           } else {
             res.status(response.status).json({
-              error: daemonMessage(response.data, "Failed to unzip file"),
+              error: daemonMessage(response.data, 'Failed to unzip file'),
             });
           }
         } catch (innerError: unknown) {
           const inner =
-            innerError && typeof innerError === "object"
+            innerError && typeof innerError === 'object'
               ? (innerError as Record<string, unknown>)
               : {};
-          logger.error("Error during unzip request:", {
+          logger.error('Error during unzip request:', {
             error: innerError,
             response: inner.body,
             status: inner.status,
           });
           res.status(502).json({
-            error: daemonMessage(inner.body, "Failed to unzip files"),
+            error: daemonMessage(inner.body, 'Failed to unzip files'),
           });
         }
       } catch (error) {
-        logger.error("Error unzipping files:", error);
+        logger.error('Error unzipping files:', error);
         res
           .status(500)
-          .json({ error: safeClientMessage(error, "Failed to unzip files.") });
+          .json({ error: safeClientMessage(error, 'Failed to unzip files.') });
       }
     },
   );
@@ -509,20 +509,20 @@ export function registerFilesRoutes(router: Router): void {
    * Used by the frontend's "Duplicate" action on the files page.
    */
   router.post(
-    "/server/:id/files/copy",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/files/copy',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const location = req.body?.location;
 
-      if (typeof location !== "string" || !location.trim()) {
-        res.status(400).json({ error: "Location is required." });
+      if (typeof location !== 'string' || !location.trim()) {
+        res.status(400).json({ error: 'Location is required.' });
         return;
       }
 
-      const cleanLocation = location.replace(/^\/+/, "");
-      if (cleanLocation === "" || !isPathSafe(cleanLocation)) {
-        res.status(400).json({ error: "Invalid location." });
+      const cleanLocation = location.replace(/^\/+/, '');
+      if (cleanLocation === '' || !isPathSafe(cleanLocation)) {
+        res.status(400).json({ error: 'Invalid location.' });
         return;
       }
 
@@ -537,8 +537,8 @@ export function registerFilesRoutes(router: Router): void {
           message?: string;
           path?: string;
         }>({
-          method: "POST",
-          path: "/fs/copy",
+          method: 'POST',
+          path: '/fs/copy',
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
@@ -559,17 +559,17 @@ export function registerFilesRoutes(router: Router): void {
 
         const body = response.data as { error?: string } | undefined;
         res.status(response.status).json({
-          error: daemonMessage(body, "Failed to duplicate file"),
+          error: daemonMessage(body, 'Failed to duplicate file'),
         });
       } catch (error: unknown) {
-        logger.error("Error duplicating file:", error);
+        logger.error('Error duplicating file:', error);
         const status = (
-          error && typeof error === "object"
+          error && typeof error === 'object'
             ? (error as Record<string, unknown>).status
             : 500
         ) as number;
         res.status(status || 500).json({
-          error: daemonMessage(errorBody(error), "Failed to duplicate file"),
+          error: daemonMessage(errorBody(error), 'Failed to duplicate file'),
         });
       }
     },
@@ -580,20 +580,20 @@ export function registerFilesRoutes(router: Router): void {
    * Thin adapter for the frontend Move modal (posts { oldPath, newPath }).
    */
   router.post(
-    "/server/:id/files/rename",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/files/rename',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const oldPath = req.body?.oldPath;
       const newPath = req.body?.newPath;
 
       if (
-        typeof oldPath !== "string" ||
-        typeof newPath !== "string" ||
+        typeof oldPath !== 'string' ||
+        typeof newPath !== 'string' ||
         !isPathSafe(oldPath) ||
         !isPathSafe(newPath)
       ) {
-        res.status(400).json({ error: "Invalid path." });
+        res.status(400).json({ error: 'Invalid path.' });
         return;
       }
 
@@ -605,8 +605,8 @@ export function registerFilesRoutes(router: Router): void {
         const { server } = context;
 
         const response = await daemonRequest<{ message?: string }>({
-          method: "POST",
-          path: "/fs/rename",
+          method: 'POST',
+          path: '/fs/rename',
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
@@ -623,17 +623,17 @@ export function registerFilesRoutes(router: Router): void {
         }
 
         res.status(response.status).json({
-          error: daemonMessage(response.data, "Failed to rename file"),
+          error: daemonMessage(response.data, 'Failed to rename file'),
         });
       } catch (error) {
-        logger.error("Error renaming file:", error);
+        logger.error('Error renaming file:', error);
         const status = (
-          error && typeof error === "object"
+          error && typeof error === 'object'
             ? (error as Record<string, unknown>).status
             : 500
         ) as number;
         res.status(status || 500).json({
-          error: daemonMessage(errorBody(error), "Failed to rename file"),
+          error: daemonMessage(errorBody(error), 'Failed to rename file'),
         });
       }
     },
@@ -644,17 +644,17 @@ export function registerFilesRoutes(router: Router): void {
    * Used by both the files page and the worlds page
    */
   router.delete(
-    "/server/:id/files/rm/{*path}",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/files/rm/{*path}',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
       const filePath = Array.isArray(req.params?.path)
-        ? req.params.path.join("/")
+        ? req.params.path.join('/')
         : getParamAsString(req.params?.path);
 
       if (!isPathSafe(filePath)) {
-        res.status(400).json({ error: "Invalid file path." });
+        res.status(400).json({ error: 'Invalid file path.' });
         return;
       }
 
@@ -680,8 +680,8 @@ export function registerFilesRoutes(router: Router): void {
 
         try {
           await daemonRequest({
-            method: "DELETE",
-            path: "/fs/rm",
+            method: 'DELETE',
+            path: '/fs/rm',
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -693,9 +693,9 @@ export function registerFilesRoutes(router: Router): void {
           });
 
           logger.success(
-            `Successfully deleted ${isMinecraftWorld ? "world" : "file/directory"}: ${filePath}`,
+            `Successfully deleted ${isMinecraftWorld ? 'world' : 'file/directory'}: ${filePath}`,
           );
-          await logActivity(req, "file:delete", {
+          await logActivity(req, 'file:delete', {
             serverId: String(server.UUID),
             metadata: { path: filePath },
           });
@@ -703,7 +703,7 @@ export function registerFilesRoutes(router: Router): void {
           return;
         } catch (deleteError: unknown) {
           const del =
-            deleteError && typeof deleteError === "object"
+            deleteError && typeof deleteError === 'object'
               ? (deleteError as Record<string, unknown>)
               : {};
           const statusCode = (del.status as number) || 500;
@@ -712,23 +712,23 @@ export function registerFilesRoutes(router: Router): void {
           res.status(statusCode).json({
             error: daemonMessage(
               errorBody(deleteError),
-              "Failed to delete file",
+              'Failed to delete file',
             ),
           });
           return;
         }
       } catch (error) {
-        logger.error("Error in file deletion endpoint:", error);
-        res.status(500).json({ error: "Failed to delete file" });
+        logger.error('Error in file deletion endpoint:', error);
+        res.status(500).json({ error: 'Failed to delete file' });
         return;
       }
     },
   );
 
   router.post(
-    "/server/:id/rename",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/rename',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -736,15 +736,15 @@ export function registerFilesRoutes(router: Router): void {
       const newName = req.body.newName;
 
       const isSafe = (p: string) =>
-        typeof p === "string" && !p.includes("..") && !p.startsWith("/");
+        typeof p === 'string' && !p.includes('..') && !p.startsWith('/');
       if (!isSafe(relativePath) || !isSafe(newName)) {
-        res.status(400).json({ error: "Invalid path" });
+        res.status(400).json({ error: 'Invalid path' });
         return;
       }
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
-          res.status(404).json({ error: "User not found" });
+          res.status(404).json({ error: 'User not found' });
           return;
         }
 
@@ -754,7 +754,7 @@ export function registerFilesRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
@@ -762,8 +762,8 @@ export function registerFilesRoutes(router: Router): void {
           const newPath = newName;
 
           await daemonRequest({
-            method: "POST",
-            path: "/fs/rename",
+            method: 'POST',
+            path: '/fs/rename',
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -774,26 +774,26 @@ export function registerFilesRoutes(router: Router): void {
               newPath,
             },
           });
-          await logActivity(req, "file:rename", {
+          await logActivity(req, 'file:rename', {
             serverId: String(server.UUID),
             metadata: { path: relativePath, newName },
           });
           res.status(200).json({ success: true });
         } catch (error) {
-          logger.error("Error renaming file:", error);
-          res.status(500).json({ error: "Failed to rename file" });
+          logger.error('Error renaming file:', error);
+          res.status(500).json({ error: 'Failed to rename file' });
         }
       } catch (error) {
-        logger.error("Error renaming file:", error);
-        res.status(500).json({ error: "Failed to rename file" });
+        logger.error('Error renaming file:', error);
+        res.status(500).json({ error: 'Failed to rename file' });
       }
     },
   );
 
   router.post(
-    "/server/:id/upload",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/upload',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response, next) => {
       const settings = await getSettings();
       const limitMb = settings?.uploadLimit ?? 100;
@@ -801,33 +801,33 @@ export function registerFilesRoutes(router: Router): void {
         storage: multer.memoryStorage(),
         limits: { fileSize: limitMb * 1024 * 1024 },
       });
-      upload.single("file")(req, res, next);
+      upload.single('file')(req, res, next);
     },
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
       const relativePath =
-        typeof req.body.path === "string" ? req.body.path : "/";
+        typeof req.body.path === 'string' ? req.body.path : '/';
       const fileName =
-        req.body.fileName || (req.file ? req.file.originalname : "");
+        req.body.fileName || (req.file ? req.file.originalname : '');
 
       if (
-        typeof fileName !== "string" ||
+        typeof fileName !== 'string' ||
         !fileName.trim() ||
-        fileName.includes("/") ||
-        fileName.includes("\\") ||
-        fileName.includes("..")
+        fileName.includes('/') ||
+        fileName.includes('\\') ||
+        fileName.includes('..')
       ) {
-        res.status(400).json({ error: "Invalid file name." });
+        res.status(400).json({ error: 'Invalid file name.' });
         return;
       }
 
       if (
-        typeof relativePath === "string" &&
+        typeof relativePath === 'string' &&
         !isPathSafe(relativePath) &&
-        relativePath !== "/"
+        relativePath !== '/'
       ) {
-        res.status(400).json({ error: "Invalid path." });
+        res.status(400).json({ error: 'Invalid path.' });
         return;
       }
 
@@ -839,7 +839,7 @@ export function registerFilesRoutes(router: Router): void {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
           logger.warn(`User not found: ${userId}`);
-          res.status(404).json({ error: "User not found" });
+          res.status(404).json({ error: 'User not found' });
           return;
         }
 
@@ -850,13 +850,13 @@ export function registerFilesRoutes(router: Router): void {
 
         if (!server) {
           logger.warn(`Server not found: ${serverId}`);
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
         if (!req.file) {
-          logger.warn("File content is required");
-          res.status(400).json({ error: "File content is required" });
+          logger.warn('File content is required');
+          res.status(400).json({ error: 'File content is required' });
           return;
         }
 
@@ -866,15 +866,15 @@ export function registerFilesRoutes(router: Router): void {
         logger.info(`File size: ${req.file.size} bytes`);
 
         if (req.file.size < 10 * 1024 * 1024) {
-          const fileContent = req.file.buffer.toString("base64");
+          const fileContent = req.file.buffer.toString('base64');
           const fileContentWithMeta = `data:${req.file.mimetype};base64,${fileContent}`;
 
           const uploadResponse = await daemonRequest<{
             fileName?: string;
             path?: string;
           }>({
-            method: "POST",
-            path: "/fs/upload",
+            method: 'POST',
+            path: '/fs/upload',
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -889,7 +889,7 @@ export function registerFilesRoutes(router: Router): void {
           logger.info(
             `File ${fileName} successfully uploaded to ${relativePath}`,
           );
-          await logActivity(req, "file:upload", {
+          await logActivity(req, 'file:upload', {
             serverId: String(server.UUID),
             metadata: { path: relativePath, fileName, size: req.file.size },
           });
@@ -900,8 +900,8 @@ export function registerFilesRoutes(router: Router): void {
           });
         } else {
           await daemonRequest({
-            method: "POST",
-            path: "/fs/create-empty-file",
+            method: 'POST',
+            path: '/fs/create-empty-file',
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -921,12 +921,12 @@ export function registerFilesRoutes(router: Router): void {
             const start = i * CHUNK_SIZE;
             const end = Math.min(start + CHUNK_SIZE, req.file.size);
             const chunk = req.file.buffer.slice(start, end);
-            const chunkContent = chunk.toString("base64");
+            const chunkContent = chunk.toString('base64');
             const chunkContentWithMeta = `data:${req.file.mimetype};base64,${chunkContent}`;
 
             await daemonRequest({
-              method: "POST",
-              path: "/fs/append-file",
+              method: 'POST',
+              path: '/fs/append-file',
               nodeAddress: server.node.address,
               nodePort: server.node.port,
               nodeKey: server.node.key,
@@ -948,7 +948,7 @@ export function registerFilesRoutes(router: Router): void {
           logger.info(
             `File ${fileName} successfully uploaded to ${relativePath} in ${totalChunks} chunks`,
           );
-          await logActivity(req, "file:upload", {
+          await logActivity(req, 'file:upload', {
             serverId: String(server.UUID),
             metadata: { path: relativePath, fileName, size: req.file.size },
           });
@@ -960,11 +960,11 @@ export function registerFilesRoutes(router: Router): void {
         }
       } catch (error: unknown) {
         const err =
-          error && typeof error === "object"
+          error && typeof error === 'object'
             ? (error as Record<string, unknown>)
             : {};
         const errBody =
-          err.body && typeof err.body === "object"
+          err.body && typeof err.body === 'object'
             ? (err.body as Record<string, unknown>)
             : undefined;
         if (err.status && errBody) {
@@ -973,46 +973,46 @@ export function registerFilesRoutes(router: Router): void {
             errBody,
           );
           res.status(err.status as number).json({
-            error: daemonMessage(errBody, "Failed to upload file"),
+            error: daemonMessage(errBody, 'Failed to upload file'),
           });
         } else if (err.message) {
           logger.error(
-            "Error uploading file - No response received:",
+            'Error uploading file - No response received:',
             err.message,
           );
           res.status(500).json({
             error:
-              "Connection error during file upload. Please try again with a smaller file.",
+              'Connection error during file upload. Please try again with a smaller file.',
           });
         } else {
-          logger.error("Error uploading file - Request setup error:", error);
-          res.status(500).json({ error: "Error setting up upload request" });
+          logger.error('Error uploading file - Request setup error:', error);
+          res.status(500).json({ error: 'Error setting up upload request' });
         }
       }
     },
   );
 
   router.post(
-    "/server/:id/files/pull",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/files/pull',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
       const { url, path } = req.body as { url?: string; path?: string };
 
-      if (!url || typeof url !== "string") {
-        res.status(400).json({ error: "URL is required" });
+      if (!url || typeof url !== 'string') {
+        res.status(400).json({ error: 'URL is required' });
         return;
       }
       let parsed: URL;
       try {
         parsed = new URL(url);
       } catch {
-        res.status(400).json({ error: "Invalid URL" });
+        res.status(400).json({ error: 'Invalid URL' });
         return;
       }
-      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-        res.status(400).json({ error: "Only http(s) URLs are allowed" });
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        res.status(400).json({ error: 'Only http(s) URLs are allowed' });
         return;
       }
 
@@ -1021,7 +1021,7 @@ export function registerFilesRoutes(router: Router): void {
           where: { id: req.session?.user?.id },
         });
         if (!user) {
-          res.status(404).json({ error: "User not found" });
+          res.status(404).json({ error: 'User not found' });
           return;
         }
 
@@ -1030,7 +1030,7 @@ export function registerFilesRoutes(router: Router): void {
           include: { node: true },
         });
         if (!server) {
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
@@ -1040,15 +1040,15 @@ export function registerFilesRoutes(router: Router): void {
           path?: string;
           error?: string;
         }>({
-          method: "POST",
-          path: "/fs/pull",
+          method: 'POST',
+          path: '/fs/pull',
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
           body: {
             id: server.UUID,
             url,
-            path: typeof path === "string" ? path : "/",
+            path: typeof path === 'string' ? path : '/',
           },
           timeout: 120000,
         });
@@ -1059,26 +1059,26 @@ export function registerFilesRoutes(router: Router): void {
             .json({
               error: daemonMessage(
                 pullResponse.data,
-                "Failed to pull file from URL",
+                'Failed to pull file from URL',
               ),
             });
           return;
         }
 
-        await logActivity(req, "file:pull", {
+        await logActivity(req, 'file:pull', {
           serverId: String(server.UUID),
-          metadata: { url, path: pullResponse.data.path ?? "/" },
+          metadata: { url, path: pullResponse.data.path ?? '/' },
         });
         res.json({
           success: true,
-          message: "File pulled successfully",
+          message: 'File pulled successfully',
           file: pullResponse.data.file,
           path: pullResponse.data.path,
         });
       } catch (error: unknown) {
-        logger.error("Error pulling file from URL:", error);
+        logger.error('Error pulling file from URL:', error);
         res.status(500).json({
-          error: safeClientMessage(error, "Failed to pull file from URL"),
+          error: safeClientMessage(error, 'Failed to pull file from URL'),
         });
       }
     },

@@ -26,7 +26,7 @@ const wallpaperExcluded = req && req.path && (
       })();
     </script>
     <link rel="stylesheet" href="/styles.css?v=8">
-    <link rel="stylesheet" href="/layout-animations.css?v=8">
+    <link rel="stylesheet" href="/styles/layout-animations.css?v=8">
     <link rel="stylesheet" href="/styles/motion.css?v=8">
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
@@ -37,7 +37,7 @@ const wallpaperExcluded = req && req.path && (
     <% if (settings.theme && settings.theme !== 'default' && settings.theme !== 'light' && settings.theme !== 'dark') { %>
     <link rel="stylesheet" href="<%= settings.theme %>" id="theme-css">
     <% } %>
-    <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
+    <link rel="stylesheet" href="/vendor/@fontsource-variable/inter/index.css">
     <% if (Array.isArray(typeof extraStyles !== 'undefined' ? extraStyles : undefined)) { %>
       <% for (const stylesheet of extraStyles) { %>
     <link rel="stylesheet" href="<%= stylesheet %>">
@@ -45,19 +45,19 @@ const wallpaperExcluded = req && req.path && (
     <% } %>
     <!-- Session/CSRF support -->
     <script nonce="<%- nonce %>">window.__sessionExpiredMsg = '<%= (req.translations && req.translations.sessionExpired) || "Your session expired. Please sign in again." %>';</script>
-    <script nonce="<%- nonce %>" defer src="/js/csrf.js?v=8"></script>
-    <script nonce="<%- nonce %>" defer src="/js/shared/al-icon.js?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/csrf.js?v=8"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/shared/al-icon.js?v=8"></script>
 
     <!-- Vendor bundles -->
-    <script nonce="<%- nonce %>" defer src="/javascript/vendor/query-core.js?v=1"></script>
-    <script nonce="<%- nonce %>" defer src="/javascript/vendor/reconnecting-websocket.js?v=1"></script>
+    <script nonce="<%- nonce %>" defer src="/vendor/@tanstack/query-core/build/lib/index.js"></script>
+    <script nonce="<%- nonce %>" defer src="/vendor/reconnecting-websocket/dist/reconnecting-websocket-iife.min.js"></script>
 
     <!-- htmx -->
-    <script nonce="<%- nonce %>" defer src="/javascript/vendor/htmx.min.js?v=2.0.10"></script>
+    <script nonce="<%- nonce %>" defer src="/vendor/htmx.org/dist/htmx.min.js?v=2.0.10"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/htmx-bootstrap.js?v=1"></script>
 
     <!-- Alpine.js -->
-    <script nonce="<%- nonce %>" defer src="/javascript/vendor/alpine.min.js?v=3.16.3"></script>
+    <script nonce="<%- nonce %>" defer src="/vendor/alpinejs/dist/cdn.min.js?v=3.16.3"></script>
     <script nonce="<%- nonce %>" defer src="/javascript/shared/alpine-bootstrap.js?v=1"></script>
 
     <!-- Shared UI components -->
@@ -108,7 +108,7 @@ const wallpaperExcluded = req && req.path && (
       }
     </style>
 </head>
-<body style="font-family: 'General Sans';<%= (settings.panelWallpaper && !wallpaperExcluded) ? `--al-wallpaper-image:url('${settings.panelWallpaper}');` : '' %>" class="h-full<%= (settings.panelWallpaper && !wallpaperExcluded) ? ' al-wallpaper' : '' %>">
+<body style="font-family: 'Inter Variable';<%= (settings.panelWallpaper && !wallpaperExcluded) ? `--al-wallpaper-image:url('${settings.panelWallpaper}');` : '' %>" class="h-full<%= (settings.panelWallpaper && !wallpaperExcluded) ? ' al-wallpaper' : '' %>">
 <% if (settings.panelWallpaper && !wallpaperExcluded) { %>
 <!-- Panel wallpaper layer — fixed behind all surfaces. Excluded pages (Overview, Credits) never render this. -->
 <div id="al-wallpaper-layer" aria-hidden="true"></div>

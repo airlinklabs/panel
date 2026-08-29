@@ -1,6 +1,6 @@
-import { randomUUID } from "node:crypto";
-import { z } from "zod";
-import logger from "../logger";
+import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+import logger from '../logger';
 
 // Real-time event bus — publishes structured events on authoritative state changes.
 // Clients use monotonic seq for reconnect resync; payloads validated with zod at publish time.
@@ -8,17 +8,17 @@ import logger from "../logger";
 export const REALTIME_EVENT_VERSION = 1;
 
 export const realtimeResourceTypeSchema = z.enum([
-  "server",
-  "node",
-  "user",
-  "account",
-  "backup",
-  "image",
-  "database",
-  "activity",
-  "addon",
-  "settings",
-  "system",
+  'server',
+  'node',
+  'user',
+  'account',
+  'backup',
+  'image',
+  'database',
+  'activity',
+  'addon',
+  'settings',
+  'system',
 ]);
 
 export type RealtimeResourceType = z.infer<typeof realtimeResourceTypeSchema>;
@@ -70,7 +70,7 @@ export type RealtimeEvent = z.infer<typeof realtimeEventSchema>;
 
 export type RealtimeEventInput = Omit<
   z.input<typeof realtimeEventSchema>,
-  "version" | "seq" | "timestamp"
+  'version' | 'seq' | 'timestamp'
 >;
 
 export interface RealtimeEventEnvelope extends RealtimeEvent {
@@ -139,7 +139,7 @@ export function emitRealtime(
 ): RealtimeEventEnvelope | null {
   const parsed = realtimeEventSchema.safeParse(input);
   if (!parsed.success) {
-    logger.warn("[realtime] dropped invalid event", {
+    logger.warn('[realtime] dropped invalid event', {
       details: JSON.stringify(parsed.error.flatten()),
     });
     return null;
@@ -162,7 +162,7 @@ export function emitRealtime(
     try {
       handler(envelope);
     } catch (error) {
-      logger.warn("[realtime] subscriber error", { error: String(error) });
+      logger.warn('[realtime] subscriber error', { error: String(error) });
     }
   }
   return envelope;
@@ -174,11 +174,11 @@ export { randomUUID as realtimeId };
 export function serverEvent(
   type: string,
   serverId: string,
-  extra: Omit<RealtimeEventInput, "type" | "scope" | "resource"> = {},
+  extra: Omit<RealtimeEventInput, 'type' | 'scope' | 'resource'> = {},
 ): RealtimeEventInput {
   return {
     type,
-    resource: { type: "server", id: serverId },
+    resource: { type: 'server', id: serverId },
     scope: { serverId },
     ...extra,
   };
@@ -187,11 +187,11 @@ export function serverEvent(
 export function userEvent(
   type: string,
   userId: number,
-  extra: Omit<RealtimeEventInput, "type" | "scope" | "resource"> = {},
+  extra: Omit<RealtimeEventInput, 'type' | 'scope' | 'resource'> = {},
 ): RealtimeEventInput {
   return {
     type,
-    resource: { type: "user", id: userId },
+    resource: { type: 'user', id: userId },
     scope: { userId },
     ...extra,
   };
