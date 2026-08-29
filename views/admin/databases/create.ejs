@@ -4,7 +4,7 @@
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="dbHostCreate()">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Databases', href: '/admin/databases' },
@@ -16,23 +16,16 @@
           <p class="al-page-desc">A MySQL-compatible server that databases will be provisioned on.</p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button type="submit" form="hostForm" class="al-btn-primary"
-            hx-disabled-elt="this"
-            hx-indicator="#save-host-status">
-            <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>Save Host
+          <button type="submit" form="hostForm" class="al-btn-primary" :disabled="saving">
+            <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><span x-text="saving ? 'Saving…' : 'Save Host'">Save Host</span>
           </button>
-          <p id="save-host-status" class="htmx-indicator text-xs" style="color:var(--theme-text-muted)">Saving…</p>
           <a href="/admin/databases" class="al-btn-secondary">Back to Databases</a>
         </div>
       </div>
 
       <div id="hostForm" class="al-page-body space-y-5">
-        <div id="database-host-form-status"></div>
-        <form id="hostForm" class="space-y-5"
-          hx-post="/admin/databases/create"
-          hx-target="#database-host-form-status"
-          hx-swap="innerHTML"
-          hx-disabled-elt="find button[type='submit']">
+        <div x-show="error" x-text="error" class="rounded-xl px-4 py-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)"></div>
+        <form @submit.prevent="submit()" class="space-y-5">
           <div class="al-card">
             <h2 class="al-card-header">Connection Details</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -41,7 +34,7 @@
                   <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Name
                 </label>
-                <input id="hostName" name="name" class="al-input" placeholder="Primary MySQL host" required>
+                <input id="hostName" x-model="form.name" class="al-input" placeholder="Primary MySQL host" required>
               </div>
 
               <div>
@@ -49,7 +42,7 @@
                   <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Host Address
                 </label>
-                <input id="hostAddress" name="host" class="al-input" placeholder="localhost or 10.0.0.5" required>
+                <input id="hostAddress" x-model="form.host" class="al-input" placeholder="localhost or 10.0.0.5" required>
               </div>
 
               <div>
@@ -57,7 +50,7 @@
                   <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Port
                 </label>
-                <input id="hostPort" name="port" class="al-input" placeholder="3306" type="number">
+                <input id="hostPort" x-model.number="form.port" class="al-input" placeholder="3306" type="number">
               </div>
 
               <div>
@@ -65,7 +58,7 @@
                   <%- icon('user', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Username
                 </label>
-                <input id="hostUser" name="username" class="al-input" placeholder="root" autocomplete="off" required>
+                <input id="hostUser" x-model="form.username" class="al-input" placeholder="root" autocomplete="off" required>
               </div>
 
               <div>
@@ -73,14 +66,14 @@
                   <%- icon('lock', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Password
                 </label>
-                <input id="hostPassword" name="password" type="password" class="al-input" placeholder="••••••••" autocomplete="new-password" required>
+                <input id="hostPassword" x-model="form.password" type="password" class="al-input" placeholder="••••••••" autocomplete="new-password" required>
               </div>
               <div>
                 <label for="hostNode" class="al-label flex items-center gap-1.5">
                   <%- icon('network', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Node
                 </label>
-                <select id="hostNode" name="nodeId" class="al-input">
+                <select id="hostNode" x-model="form.nodeId" class="al-input">
                   <option value="">Any node (unscoped)</option>
                   <% (nodes || []).forEach(n => { %>
                     <option value="<%= n.id %>"><%= n.name %></option>
@@ -92,6 +85,43 @@
           </div>
         </form>
       </div>
+
+      <script nonce="<%- nonce %>">
+      function dbHostCreate() {
+        return {
+          saving: false,
+          error: '',
+          form: { name: '', host: '', port: 3306, username: 'root', password: '', nodeId: '' },
+          async submit() {
+            if (this.saving) return;
+            this.error = '';
+            if (!this.form.name || !this.form.host || !this.form.username || !this.form.password) {
+              this.error = 'Please fill in all required fields.';
+              return;
+            }
+            this.saving = true;
+            try {
+              const res = await fetch('/admin/databases/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+                body: JSON.stringify(this.form),
+              });
+              if (res.ok) {
+                showToast('Database host added.', 'success');
+                setTimeout(() => { window.location.href = '/admin/databases'; }, 500);
+              } else {
+                const data = await res.json().catch(() => ({ error: 'Failed to create host.' }));
+                this.error = data.error || data.message || 'Failed to create host.';
+              }
+            } catch (e) {
+              this.error = 'Network error. Try again.';
+            } finally {
+              this.saving = false;
+            }
+          }
+        };
+      }
+      </script>
     </div>
   </div>
 </main>

@@ -53,13 +53,12 @@
             <td class="al-table-td">
               <div class="flex gap-3">
                 <button
-                  hx-delete="/admin/mounts/<%= m.id %>"
-                  hx-target="#admin-mounts-list"
-                  hx-swap="outerHTML"
-                  hx-confirm="Delete this mount? Servers using it will no longer be able to attach it."
+                  x-data="{ deleting: false }"
+                  @click="if(!deleting && confirm('Delete this mount? Servers using it will no longer be able to attach it.')) { deleting = true; fetch('/admin/mounts/<%= m.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) { showToast('Mount deleted.', 'success'); window.location.reload(); } else { showToast('Failed to delete.', 'error'); deleting = false; } }).catch(() => { showToast('Network error.', 'error'); deleting = false; }); }"
                   type="button"
                   class="al-btn-ghost"
                   style="color:var(--theme-danger);"
+                  :disabled="deleting"
                   aria-label="Delete mount">
                   <%- icon('trash-2', { size: 16 }) %>
                 </button>

@@ -1,41 +1,72 @@
-<!-- Mount create form — loaded into #admin-mounts-dialog via hx-get -->
-<div id="mountCreateForm">
-  <form
-    hx-post="/admin/mounts"
-    hx-target="#admin-mounts-list"
-    hx-swap="outerHTML"
-    hx-disabled-elt="find button[type='submit']"
-    hx-indicator="#mount-form-status"
-    class="flex flex-col">
-    <div id="mount-form-error"></div>
+<!-- Mount create form — Alpine-driven modal -->
+<div id="mountCreateForm" x-data="mountCreate()" x-cloak>
+  <form @submit.prevent="submit()" class="flex flex-col">
+    <div x-show="error" x-text="error" class="rounded-xl px-4 py-3 mb-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)"></div>
     <div class="space-y-4">
       <div>
         <label for="mountName" class="al-label">Name</label>
-        <input id="mountName" name="name" class="al-input w-full" placeholder="Shared plugins" required>
+        <input id="mountName" x-model="form.name" class="al-input w-full" placeholder="Shared plugins" required>
       </div>
       <div>
         <label for="mountSource" class="al-label">Source (host path)</label>
-        <input id="mountSource" name="source" class="al-input w-full font-mono text-xs" placeholder="/data/shared/plugins" required>
+        <input id="mountSource" x-model="form.source" class="al-input w-full font-mono text-xs" placeholder="/data/shared/plugins" required>
       </div>
       <div>
         <label for="mountTarget" class="al-label">Target (container path)</label>
-        <input id="mountTarget" name="target" class="al-input w-full font-mono text-xs" placeholder="/home/container/plugins" required>
+        <input id="mountTarget" x-model="form.target" class="al-input w-full font-mono text-xs" placeholder="/home/container/plugins" required>
       </div>
       <label class="flex items-center gap-2.5 text-sm cursor-pointer select-none" style="color:var(--theme-text-strong)">
-        <input name="readOnly" type="checkbox" class="h-4 w-4 rounded" style="border-color:var(--theme-border-input);accent-color:var(--theme-accent);">
+        <input x-model="form.readOnly" type="checkbox" class="h-4 w-4 rounded" style="border-color:var(--theme-border-input);accent-color:var(--theme-accent);">
         Read-only
       </label>
     </div>
     <div class="flex gap-2 pt-4">
-      <button type="button" onclick="window.modal.close()" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
+      <button type="button" @click="$dispatch('mount-modal-close')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
         <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
         Cancel
       </button>
-      <button type="submit" class="al-btn-primary flex-1 inline-flex items-center gap-1.5">
+      <button type="submit" class="al-btn-primary flex-1 inline-flex items-center gap-1.5" :disabled="saving">
         <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-        Create mount
+        <span x-text="saving ? 'Creating…' : 'Create mount'">Create mount</span>
       </button>
-      <p id="mount-form-status" class="htmx-indicator text-sm" style="color:var(--theme-text-muted)">Creating…</p>
     </div>
   </form>
 </div>
+
+<script nonce="<%- nonce %>">
+function mountCreate() {
+  return {
+    saving: false,
+    error: '',
+    form: { name: '', source: '', target: '', readOnly: false },
+    async submit() {
+      if (this.saving) return;
+      this.error = '';
+      if (!this.form.name || !this.form.source || !this.form.target) {
+        this.error = 'All fields are required.';
+        return;
+      }
+      this.saving = true;
+      try {
+        const res = await fetch('/admin/mounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+          body: JSON.stringify(this.form),
+        });
+        if (res.ok) {
+          showToast('Mount created.', 'success');
+          window.modal.close();
+          setTimeout(() => { window.location.reload(); }, 300);
+        } else {
+          const data = await res.json().catch(() => ({ error: 'Failed to create mount.' }));
+          this.error = data.error || data.message || 'Failed to create mount.';
+        }
+      } catch (e) {
+        this.error = 'Network error. Try again.';
+      } finally {
+        this.saving = false;
+      }
+    }
+  };
+}
+</script>

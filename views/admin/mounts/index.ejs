@@ -13,7 +13,11 @@
           <h1 class="al-page-title">Mounts</h1>
           <p class="al-page-desc">Host directories that can be bind-mounted into server containers.</p>
         </div>
-        <button type="button" id="newMountBtn" class="al-btn-primary shrink-0" hx-get="/admin/mounts/new" hx-target="#mountCreateForm" hx-swap="none" hx-on::after-request="if(event.detail.xhr.status===200){const d=document.getElementById('mountCreateForm');window.modal.show({title:'New mount',bodyNode:d,panelClass:'max-w-lg'})}"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>New mount</button>
+        <button type="button" class="al-btn-primary shrink-0"
+          x-data
+          @click="window.modal.show({ title: 'New mount', bodyNode: document.getElementById('mountCreateForm'), panelClass: 'max-w-lg' })">
+          <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>New mount
+        </button>
       </div>
 
       <div class="al-page-body">
