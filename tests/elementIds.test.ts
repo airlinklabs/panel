@@ -21,7 +21,12 @@ function walk(dir: string, acc: string[] = [], skip: Set<string>): string[] {
 
 const SKIP_JS = new Set(["modrinth-admin-mobile.js"]);
 
-const KNOWN_DYNAMIC_IDS = new Set(["searchButton", "errorText"]);
+const KNOWN_DYNAMIC_IDS = new Set([
+  "searchButton",
+  "errorText",
+  "pendingApprovalsList",
+  "tabCountApprovals",
+]);
 
 const root = join(__dirname, "..");
 
@@ -106,6 +111,29 @@ describe("element id integrity", () => {
 
   it("inline scripts in views only reference ids defined in that view", () => {
     const offenders: string[] = [];
+
+    // Collect IDs from an included partial (recursively resolving includes)
+    function idsFromInclude(
+      includePath: string,
+      baseDir: string,
+      seen: Set<string> = new Set(),
+    ): Set<string> {
+      const ids = new Set<string>();
+      let resolved = join(baseDir, includePath);
+      if (!existsSync(resolved)) resolved = resolved + ".ejs";
+      if (!existsSync(resolved) || !contents.has(resolved)) return ids;
+      if (seen.has(resolved)) return ids;
+      seen.add(resolved);
+      const inc = contents.get(resolved)!;
+      for (const m of inc.matchAll(/id="([^"]+)"/g)) ids.add(m[1]);
+      // recurse into nested includes
+      for (const m of inc.matchAll(/<%-\s*include\(\s*['"]([^'"]+)['"]/g)) {
+        for (const id of idsFromInclude(m[1], join(resolved, ".."), seen))
+          ids.add(id);
+      }
+      return ids;
+    }
+
     for (const file of viewsOnly) {
       const content = contents.get(file)!;
       const localIds = new Set<string>();
@@ -122,13 +150,18 @@ describe("element id integrity", () => {
       ]) {
         localIds.add(shared);
       }
+      // collect IDs from included partials
+      for (const m of content.matchAll(/<%-\s*include\(\s*['"]([^'"]+)['"]/g)) {
+        for (const id of idsFromInclude(m[1], join(file, "..")))
+          localIds.add(id);
+      }
       for (const m of content.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)) {
         const code = m[1];
         for (const g of code.matchAll(
           /getElementById\(\s*['"]([^'"]+)['"]\s*\)/g,
         )) {
           const id = g[1];
-          if (localIds.has(id)) continue;
+          if (localIds.has(id) || KNOWN_DYNAMIC_IDS.has(id)) continue;
           // created dynamically inside this same file
           const created = new RegExp(
             `id\\s*[=:]\\s*['"]${escapeRegExp(id)}['"]`,

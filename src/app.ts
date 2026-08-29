@@ -372,8 +372,14 @@ app.use(errorPageHandler);
     });
 
     let shuttingDown = false;
+    const connections = new Set<import("net").Socket>();
 
-    async function shutdown(signal: string) {
+    server.on("connection", (conn) => {
+      connections.add(conn);
+      conn.on("close", () => connections.delete(conn));
+    });
+
+    function shutdown(signal: string) {
       if (shuttingDown) {
         return;
       }
@@ -381,21 +387,28 @@ app.use(errorPageHandler);
 
       logger.info(`Shutting down (${signal})...`);
 
-      server.close(async () => {
+      // Stop accepting new connections and destroy all keep-alive sockets
+      server.close();
+      for (const conn of connections) {
         try {
-          await prisma.$disconnect();
+          conn.destroy();
         } catch {
-          // best effort
+          /* already closed */
         }
-        logger.info("Server closed");
-        process.exit(0);
-      });
+      }
+      connections.clear();
 
-      // If server.close() doesn't finish within 10s, force exit
-      setTimeout(() => {
-        logger.warn("Forced exit after timeout");
-        process.exit(1);
-      }, 10_000).unref();
+      // Disconnect database, then exit
+      prisma
+        .$disconnect()
+        .catch(() => {})
+        .finally(() => {
+          logger.info("Server closed");
+          process.exit(0);
+        });
+
+      // Force exit if cleanup hangs
+      setTimeout(() => process.exit(0), 3_000).unref();
     }
 
     process.on("SIGINT", () => shutdown("SIGINT"));

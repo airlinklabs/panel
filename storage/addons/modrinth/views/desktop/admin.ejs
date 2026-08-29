@@ -4,7 +4,7 @@
   <div class="flex min-h-screen">
     <div class="w-60 shrink-0"><%- include(components.template) %></div>
 
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12" x-data="modrinthAdmin()">
       <div class="px-8 pt-5">
         <h1 class="text-base font-medium text-neutral-800 dark:text-white">Modrinth</h1>
         <p class="mt-0.5 text-sm text-neutral-500">Manage Modrinth integration settings and content filters.</p>
@@ -192,6 +192,167 @@
   data-modrinth-settings="<%- JSON.stringify(modrinthSettings || {}) %>">
 </div>
 
-<script src="/javascript/admin/modrinth-admin.js" nonce="<%- nonce %>"></script>
+<script nonce="<%- nonce %>">
+function modrinthAdmin() {
+  return {
+    currentSettings: {},
+    PROJECT_TYPES: ['mod', 'modpack', 'resourcepack', 'shader', 'datapack', 'plugin'],
+
+    init() {
+      window._modrinthInstance = this;
+      var pageData = document.getElementById('page-data');
+      try { this.currentSettings = JSON.parse(pageData.dataset.modrinthSettings || '{}'); } catch (e) { console.error('Failed to parse Modrinth settings:', e); }
+      this.loadCurrentSettings();
+      this.refreshFileStatus();
+      this.setupProjectTypeButtons();
+      this.setupJsonEditor();
+      document.getElementById('newProjectId').addEventListener('keypress', (e) => { if (e.key === 'Enter') this.addBlockedProject(); });
+
+      document.addEventListener('al:tabs-change', (e) => {
+        var name = e.detail && e.detail.name;
+        document.querySelectorAll('.tab-btn').forEach((btn) => {
+          var on = btn.getAttribute('data-tab') === name;
+          btn.classList.toggle('text-neutral-800', on); btn.classList.toggle('dark:text-white', on);
+          btn.classList.toggle('border-neutral-800', on); btn.classList.toggle('dark:border-white', on);
+          btn.classList.toggle('text-neutral-400', !on); btn.classList.toggle('border-transparent', !on);
+        });
+      });
+    },
+
+    setupProjectTypeButtons() {
+      var container = document.getElementById('projectTypeButtons'); if (!container) return;
+      container.innerHTML = '';
+      this.PROJECT_TYPES.forEach((type) => {
+        var btn = document.createElement('button'); btn.setAttribute('data-type', type); btn.type = 'button';
+        btn.className = 'px-3 py-1.5 text-xs border rounded-xl font-medium transition-colors border-neutral-200 dark:border-neutral-600/30 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:border-neutral-400 dark:hover:border-neutral-500 bg-neutral-100 dark:bg-neutral-700/20';
+        btn.textContent = type; btn.addEventListener('click', () => this.toggleProjectType(type)); container.appendChild(btn);
+      });
+    },
+
+    updateProjectTypeButtons() {
+      try {
+        var settings = JSON.parse(document.getElementById('jsonEditor').value), disabled = settings.disabledProjectTypes || [];
+        document.querySelectorAll('[data-type]').forEach((btn) => {
+          var type = btn.getAttribute('data-type');
+          btn.className = disabled.includes(type)
+            ? 'px-3 py-1.5 text-xs border rounded-xl font-medium transition-colors bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400'
+            : 'px-3 py-1.5 text-xs border rounded-xl font-medium transition-colors border-neutral-200 dark:border-neutral-600/30 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:border-neutral-400 dark:hover:border-neutral-500 bg-neutral-100 dark:bg-neutral-700/20';
+        });
+      } catch (e) { console.error('Failed to update project type buttons:', e); }
+    },
+
+    toggleProjectType(type) {
+      try {
+        var settings = JSON.parse(document.getElementById('jsonEditor').value);
+        if (!Array.isArray(settings.disabledProjectTypes)) settings.disabledProjectTypes = [];
+        var idx = settings.disabledProjectTypes.indexOf(type);
+        if (idx > -1) settings.disabledProjectTypes.splice(idx, 1); else settings.disabledProjectTypes.push(type);
+        this.updateJsonEditor(settings); this.updateProjectTypeButtons();
+      } catch (e) { showToast('Could not parse JSON', 'error'); }
+    },
+
+    addBlockedProject() {
+      var input = document.getElementById('newProjectId'), id = input.value.trim();
+      if (!id) { showToast('Enter a project ID', 'error'); return; }
+      try {
+        var settings = JSON.parse(document.getElementById('jsonEditor').value);
+        if (!Array.isArray(settings.blockedProjects)) settings.blockedProjects = [];
+        if (settings.blockedProjects.includes(id)) { showToast('Already blocked', 'warning'); return; }
+        settings.blockedProjects.push(id); this.updateJsonEditor(settings); this.updateBlockedProjectsList();
+        input.value = ''; showToast('"' + id + '" added to blocked list', 'success');
+      } catch (e) { showToast('Could not parse JSON', 'error'); }
+    },
+
+    removeBlockedProject(id) {
+      try {
+        var settings = JSON.parse(document.getElementById('jsonEditor').value);
+        if (!Array.isArray(settings.blockedProjects)) return;
+        var idx = settings.blockedProjects.indexOf(id);
+        if (idx > -1) { settings.blockedProjects.splice(idx, 1); this.updateJsonEditor(settings); this.updateBlockedProjectsList(); showToast('Removed "' + id + '" from blocked list', 'success'); }
+      } catch (e) { showToast('Could not update', 'error'); }
+    },
+
+    updateBlockedProjectsList() {
+      var container = document.getElementById('blockedProjectsList'); if (!container) return;
+      try {
+        var settings = JSON.parse(document.getElementById('jsonEditor').value), list = settings.blockedProjects || [];
+        if (!list.length) { container.innerHTML = '<p class="text-sm text-neutral-400">No blocked projects.</p>'; return; }
+        container.innerHTML = list.map((id) => '<div class="flex items-center justify-between rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-4 py-2.5"><span class="text-sm font-mono text-neutral-700 dark:text-neutral-300">' + window.escHtml(id) + '</span><button onclick="window._modrinthInstance.removeBlockedProject(\'' + window.escHtml(id) + '\')" type="button" class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition">Remove</button></div>').join('');
+      } catch (e) { console.error('Failed to update blocked projects list:', e); }
+    },
+
+    applyEasySettings() {
+      try {
+        var settings = JSON.parse(document.getElementById('jsonEditor').value);
+        settings.modrinthInstallationWarning = document.getElementById('enableWarning').checked;
+        settings.warningTitle = document.getElementById('warningTitle').value.trim() || 'Installation Temporarily Disabled';
+        settings.warningMessage = document.getElementById('warningMessage').value.trim() || '';
+        this.updateJsonEditor(settings); showToast('Settings applied to JSON', 'success');
+      } catch (e) { showToast('Could not parse JSON', 'error'); }
+    },
+
+    loadCurrentSettings() {
+      fetch('/modrinth/api/config', { credentials: 'include' }).then((r) => r.json()).then((data) => {
+        if (data.success && data.data) { this.currentSettings = data.data; this.updateJsonEditor(this.currentSettings); this.updateEasyUI(this.currentSettings); this.updateProjectTypeButtons(); this.updateBlockedProjectsList(); }
+      }).catch(() => { this.updateJsonEditor(this.currentSettings); this.updateEasyUI(this.currentSettings); this.updateProjectTypeButtons(); this.updateBlockedProjectsList(); showToast('Failed to load settings', 'error'); });
+    },
+
+    updateEasyUI(s) {
+      var ew = document.getElementById('enableWarning'), wt = document.getElementById('warningTitle'), wm = document.getElementById('warningMessage');
+      if (ew) ew.checked = !!s.modrinthInstallationWarning; if (wt) wt.value = s.warningTitle || ''; if (wm) wm.value = s.warningMessage || '';
+    },
+
+    saveSettings() {
+      var parsed; try { parsed = JSON.parse(document.getElementById('jsonEditor').value); } catch (e) { showToast('Invalid JSON', 'error'); return; }
+      fetch('/modrinth/admin/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(parsed) })
+        .then((r) => r.json()).then((d) => { if (d.success) showToast('Configuration saved', 'success'); else throw new Error(d.error || 'Save failed'); })
+        .catch((e) => showToast(e.message, 'error'));
+    },
+
+    updateJsonEditor(s) { document.getElementById('jsonEditor').value = JSON.stringify(s, null, 2); this.updateCharacterCount(); },
+
+    setupJsonEditor() {
+      var editor = document.getElementById('jsonEditor');
+      editor.addEventListener('input', () => this.updateCharacterCount());
+      editor.addEventListener('keydown', (e) => { if (e.ctrlKey && e.key === 's') { e.preventDefault(); this.saveSettings(); } if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); this.formatJson(); } });
+    },
+
+    updateCharacterCount() {
+      document.getElementById('characterCount').textContent = document.getElementById('jsonEditor').value.length + ' characters';
+      document.getElementById('jsonValid').classList.add('hidden'); document.getElementById('jsonInvalid').classList.add('hidden');
+    },
+
+    formatJson() {
+      try { document.getElementById('jsonEditor').value = JSON.stringify(JSON.parse(document.getElementById('jsonEditor').value), null, 2); this.updateCharacterCount(); showToast('JSON formatted', 'success'); }
+      catch (e) { showToast('Invalid JSON', 'error'); }
+    },
+
+    validateJson() {
+      try { JSON.parse(document.getElementById('jsonEditor').value); document.getElementById('jsonValid').classList.remove('hidden'); document.getElementById('jsonInvalid').classList.add('hidden'); showToast('JSON is valid', 'success'); }
+      catch (e) { document.getElementById('jsonValid').classList.add('hidden'); document.getElementById('jsonInvalid').classList.remove('hidden'); showToast(e.message, 'error'); }
+    },
+
+    resetToDefaults() {
+      var d = { modrinthInstallationWarning: false, warningTitle: 'Installation Temporarily Disabled', warningMessage: 'Installations are temporarily disabled.', disabledProjectTypes: [], blockedProjects: [] };
+      this.updateJsonEditor(d); this.updateEasyUI(d); this.updateProjectTypeButtons(); this.updateBlockedProjectsList(); showToast('Defaults loaded', 'info');
+    },
+
+    loadTemplate(type) {
+      var t = { restrictive: { modrinthInstallationWarning: true, warningTitle: 'Installation Disabled', warningMessage: 'Mod installation is currently restricted.', disabledProjectTypes: ['shader', 'resourcepack'], blockedProjects: [] }, permissive: { modrinthInstallationWarning: false, warningTitle: '', warningMessage: '', disabledProjectTypes: [], blockedProjects: [] } }[type];
+      if (!t) return; this.updateJsonEditor(t); this.updateEasyUI(t); this.updateProjectTypeButtons(); this.updateBlockedProjectsList(); showToast(type + ' template loaded', 'success');
+    },
+
+    refreshFileStatus() {
+      fetch('/modrinth/api/file-status', { credentials: 'include' }).then((r) => r.json()).then((data) => {
+        var el = document.getElementById('fileStatus');
+        if (data.success && data.data) {
+          var f = data.data;
+          el.innerHTML = '<div class="w-2 h-2 bg-emerald-500 rounded-full"></div><span class="text-sm text-neutral-700 dark:text-neutral-300">File found</span>' + (f.size ? '<span class="text-xs text-neutral-400 dark:text-neutral-600 ml-4">' + f.size + ' bytes</span>' : '') + (f.lastModified ? '<span class="text-xs text-neutral-400 dark:text-neutral-600 ml-2">Modified ' + new Date(f.lastModified).toLocaleString() + '</span>' : '');
+        } else el.innerHTML = '<div class="w-2 h-2 bg-amber-500 rounded-full"></div><span class="text-sm text-neutral-500 dark:text-neutral-400">File not found — will be created on save</span>';
+      }).catch(() => { document.getElementById('fileStatus').innerHTML = '<div class="w-2 h-2 bg-red-500 rounded-full"></div><span class="text-sm text-neutral-500">Could not check file status</span>'; });
+    },
+  };
+}
+</script>
 
 <%- include(components.footer) %>

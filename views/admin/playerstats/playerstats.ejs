@@ -8,7 +8,7 @@
     </div>
 <%- include('../../components/template') %>
     <!-- Content -->
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="playerStats()">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Player Statistics' }
@@ -17,7 +17,7 @@
         <%- include('../../components/ui/page-header', {
           title: 'Player Statistics',
           description: 'View player statistics across all Minecraft servers',
-          actions: '<button type="button" id="refreshBtn" class="al-btn-secondary">' + icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) + ' Refresh Data</button>'
+          actions: '<button type="button" id="refreshBtn" class="al-btn-secondary" @click="fetchPlayerData()" @dblclick.prevent="triggerDataCollection()">' + icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) + ' Refresh Data</button>'
         }) %>
       </div>
 
@@ -138,6 +138,269 @@
 
 <script nonce="<%- nonce %>" src="/vendor/chart.js/dist/chart.js"></script>
 
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-playerstats.js?v=6"></script>
+<script nonce="<%- nonce %>">
+function playerStats() {
+  return {
+    DATA_COLLECTION_DELAY_MS: 1000,
+    playerChart: null,
+    unsubscribeRealtime: null,
+
+    init() {
+      var _rootStyle = getComputedStyle(document.documentElement);
+      var CHART_TICK_COLOR = _rootStyle.getPropertyValue('--theme-text').trim() || '#FFFFFF';
+      var CHART_GRID_COLOR = 'rgba(255, 255, 255, 0.1)';
+
+      var ctx = document.getElementById('playerChart').getContext('2d');
+      this.playerChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Total Players',
+              data: [],
+              backgroundColor: 'rgba(163, 163, 163, 0.2)',
+              borderColor: 'rgba(163, 163, 163, 1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 2,
+              pointBackgroundColor: 'rgba(163, 163, 163, 1)',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 1,
+              pointHoverRadius: 5,
+              pointHoverBackgroundColor: '#fff',
+              pointHoverBorderColor: 'rgba(163, 163, 163, 1)',
+              pointHoverBorderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: CHART_TICK_COLOR,
+              },
+            },
+            tooltip: {
+              callbacks: {
+                title: function (tooltipItems) {
+                  return new Date(tooltipItems[0].label).toLocaleString();
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: CHART_TICK_COLOR,
+                maxRotation: 45,
+                minRotation: 45,
+                callback: function (value, index, values) {
+                  if (index % 12 === 0) {
+                    const date = new Date(this.getLabelForValue(value));
+                    return (
+                      date.toLocaleDateString() +
+                      ' ' +
+                      date.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    );
+                  }
+                  return '';
+                },
+              },
+              grid: {
+                color: CHART_GRID_COLOR,
+              },
+            },
+            y: {
+              position: 'right',
+              beginAtZero: true,
+              ticks: {
+                color: CHART_TICK_COLOR,
+                padding: 10,
+                font: {
+                  weight: 'bold',
+                },
+              },
+              grid: {
+                color: CHART_GRID_COLOR,
+              },
+              title: {
+                display: true,
+                text: 'Players',
+                color: CHART_TICK_COLOR,
+                font: {
+                  size: 12,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      this.fetchPlayerData();
+      this.wirePlayerStatsRealtime();
+    },
+
+    async fetchPlayerData() {
+      var self = this;
+      try {
+        var response = await fetch('/api/admin/playerstats');
+        var data = await response.json();
+
+        if (data.error) {
+          console.error('Error fetching player data:', data.error);
+          showToast(data.error || 'Failed to load player data.', 'error');
+          return;
+        }
+
+        document.getElementById('totalPlayers').textContent = data.totalPlayers;
+        document.getElementById('maxCapacity').textContent = data.totalMaxPlayers;
+        document.getElementById('onlineServers').textContent = data.onlineServers;
+
+        var utilizationPercent =
+          data.totalMaxPlayers > 0
+            ? Math.round((data.totalPlayers / data.totalMaxPlayers) * 100)
+            : 0;
+        document.getElementById('utilization').textContent =
+          `${utilizationPercent}%`;
+
+        var tableBody = document.getElementById('serverTableBody');
+        tableBody.innerHTML = '';
+
+        if (data.servers.length === 0) {
+          var row = document.createElement('tr');
+          row.innerHTML = `<td colspan="4" class="px-6 py-4 text-center text-neutral-400">No servers found</td>`;
+          tableBody.appendChild(row);
+        } else {
+          data.servers.forEach((server) => {
+            var row = document.createElement('tr');
+            row.className =
+              'hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors';
+
+            var statusClass = server.online
+              ? 'text-emerald-700 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30'
+              : 'text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/30 border border-neutral-300 dark:border-neutral-700/30';
+            var statusText = server.online ? 'Online' : 'Offline';
+
+            var nameCell = document.createElement('td');
+            nameCell.className = 'px-6 py-4 whitespace-nowrap';
+            var nameWrap = document.createElement('div');
+            nameWrap.className = 'flex items-center';
+            var metaWrap = document.createElement('div');
+            metaWrap.className = 'ml-4';
+            var serverNameEl = document.createElement('div');
+            serverNameEl.className =
+              'text-sm font-medium text-neutral-800 dark:text-white';
+            serverNameEl.textContent = server.serverName;
+            var serverIdEl = document.createElement('div');
+            serverIdEl.className = 'text-sm text-neutral-400';
+            serverIdEl.textContent = server.serverId;
+            metaWrap.appendChild(serverNameEl);
+            metaWrap.appendChild(serverIdEl);
+            nameWrap.appendChild(metaWrap);
+            nameCell.appendChild(nameWrap);
+
+            var statusCell = document.createElement('td');
+            statusCell.className = 'px-6 py-4 whitespace-nowrap';
+            var badge = document.createElement('span');
+            badge.className =
+              'px-2 inline-flex text-xs leading-5 font-semibold rounded-full ' +
+              statusClass;
+            badge.textContent = statusText;
+            statusCell.appendChild(badge);
+
+            var countCell = document.createElement('td');
+            countCell.className =
+              'px-6 py-4 whitespace-nowrap text-sm text-neutral-700 dark:text-white';
+            countCell.textContent =
+              server.playerCount + ' / ' + server.maxPlayers;
+
+            var versionCell = document.createElement('td');
+            versionCell.className =
+              'px-6 py-4 whitespace-nowrap text-sm text-neutral-400';
+            versionCell.textContent = server.version || 'Unknown';
+
+            row.appendChild(nameCell);
+            row.appendChild(statusCell);
+            row.appendChild(countCell);
+            row.appendChild(versionCell);
+
+            tableBody.appendChild(row);
+          });
+        }
+
+        if (data.historicalData && data.historicalData.length > 0) {
+          var labels = data.historicalData.map((entry) =>
+            new Date(entry.timestamp).toISOString(),
+          );
+          var playerCounts = data.historicalData.map(
+            (entry) => entry.totalPlayers,
+          );
+
+          labels.push(new Date().toISOString());
+          playerCounts.push(data.totalPlayers);
+
+          self.playerChart.data.labels = labels;
+          self.playerChart.data.datasets[0].data = playerCounts;
+          self.playerChart.update();
+        } else {
+          var now = new Date().toISOString();
+
+          self.playerChart.data.labels = [now];
+          self.playerChart.data.datasets[0].data = [data.totalPlayers];
+          self.playerChart.update();
+        }
+      } catch (error) {
+        console.error('Error fetching player data:', error);
+        showToast('Failed to load player data.', 'error');
+      }
+    },
+
+    async triggerDataCollection() {
+      var self = this;
+      try {
+        var response = await fetch('/api/admin/playerstats/collect', {
+          method: 'POST',
+        });
+        var data = await response.json();
+
+        if (data.success) {
+          showToast('Player statistics collected.', 'success');
+          setTimeout(() => self.fetchPlayerData(), self.DATA_COLLECTION_DELAY_MS);
+        } else {
+          console.error('Error collecting player statistics:', data.error);
+          showToast(data.error || 'Failed to collect statistics.', 'error');
+        }
+      } catch (error) {
+        console.error('Error triggering data collection:', error);
+        showToast('Failed to collect statistics.', 'error');
+      }
+    },
+
+    wirePlayerStatsRealtime() {
+      var self = this;
+      if (self.unsubscribeRealtime) return;
+      var rt = window.alRealtime;
+      var st = window.alState;
+      if (!rt || !st) {
+        window.addEventListener('al:realtime-ready', function handler() {
+          window.removeEventListener('al:realtime-ready', handler);
+          self.wirePlayerStatsRealtime();
+        });
+        return;
+      }
+      self.unsubscribeRealtime = st.observe('admin:playerstats', function () {
+        self.fetchPlayerData();
+      });
+    }
+  };
+}
+</script>
 
 <%- include('../../components/footer') %>

@@ -6,7 +6,7 @@
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
 <%- include('../../components/template') %>
     <!-- Content -->
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="nodeEditor()">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Nodes', href: '/admin/nodes' },
@@ -18,7 +18,7 @@
           <p class="al-page-desc"><%= req.translations.adminEditNodeText %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button id="updateNodeBtn" type="button" class="al-btn-primary"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.update || 'Save changes' %></button>
+          <button id="updateNodeBtn" type="button" class="al-btn-primary" @click="updateNode()"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.update || 'Save changes' %></button>
           <a href="/admin/nodes" class="al-btn-secondary">Back to Nodes</a>
         </div>
       </div>
@@ -163,8 +163,8 @@
                 <!-- Port tags will be inserted here -->
               </div>
               <div class="flex gap-2">
-                <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1">
-                <button id="addPortBtn" type="button" class="al-btn-primary">
+                <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1" @keypress.enter.prevent="addPortFromInput()">
+                <button id="addPortBtn" type="button" class="al-btn-primary" @click="addPortFromInput()">
                   <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
                   Add Port
                 </button>
@@ -219,6 +219,230 @@
   data-used-ports="<%= JSON.stringify(usedPortsList) %>"
 ></div>
 
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-node-edit.js?v=5"></script>
+<script nonce="<%- nonce %>">
+function nodeEditor() {
+  return {
+    allocatedPorts: [],
+    usedPortsSet: new Set(),
+    _portEase: getComputedStyle(document.documentElement).getPropertyValue('--ease-standard').trim() || 'ease',
+    PORT_MIN: 1024,
+    PORT_MAX: 65535,
+    PORT_STAGGER_MS: 30,
+    PORT_OUT_DURATION_MS: 160,
+
+    init() {
+      const pd = document.getElementById('page-data').dataset;
+      this.allocatedPorts = JSON.parse(pd.allocatedPorts || '[]');
+      this.usedPortsSet = new Set(JSON.parse(pd.usedPorts || '[]'));
+      this.renderAllocatedPorts();
+    },
+
+    buildPortTag(port, usedPorts) {
+      const isUsed = usedPorts.has(port);
+      const portTag = document.createElement('div');
+      portTag.dataset.port = port;
+      portTag.className = 'flex items-center justify-between rounded-lg ' + (isUsed ? 'bg-amber-600/10 dark:bg-amber-700/20' : 'bg-neutral-800/10 dark:bg-neutral-700/20') + ' px-3 py-1.5 text-sm';
+      portTag.style.opacity = '0';
+      portTag.style.transform = 'translateY(4px)';
+
+      const portText = document.createElement('span');
+      portText.className = isUsed ? 'text-amber-600 dark:text-amber-400 flex items-center' : 'text-neutral-800 dark:text-neutral-300';
+      if (isUsed) {
+        portText.innerHTML = port + ' <span class="ml-2 text-xs bg-amber-600/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">In use</span>';
+      } else {
+        portText.textContent = port;
+      }
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'ml-2 text-neutral-500 hover:text-red-500 transition-colors';
+      deleteBtn.innerHTML = alIcon('x', 'w-4 h-4', { strokeWidth: 1.5 });
+
+      if (isUsed) {
+        deleteBtn.disabled = true;
+        deleteBtn.title = 'Cannot remove port that is in use by a server';
+        deleteBtn.className += ' opacity-50 cursor-not-allowed';
+      } else {
+        deleteBtn.onclick = (e) => {
+          e.preventDefault();
+          this.animatePortOut(portTag, () => this.removePort(port));
+        };
+      }
+
+      portTag.appendChild(portText);
+      portTag.appendChild(deleteBtn);
+      return portTag;
+    },
+
+    animatePortIn(el) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.style.transition = 'opacity 0.18s ' + this._portEase + ', transform 0.18s ' + this._portEase;
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+          setTimeout(() => { el.style.transition = ''; }, 200);
+        });
+      });
+    },
+
+    animatePortOut(el, cb) {
+      el.style.transition = 'opacity 0.15s ' + this._portEase + ', transform 0.15s ' + this._portEase;
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(-4px)';
+      setTimeout(cb, this.PORT_OUT_DURATION_MS);
+    },
+
+    addPort(input) {
+      const usedPorts = this.usedPortsSet;
+      if (input.includes('-')) {
+        const [start, end] = input.split('-').map(p => parseInt(p.trim()));
+        if (isNaN(start) || isNaN(end) || start >= end || start < this.PORT_MIN || end > this.PORT_MAX) {
+          showToast('Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between ' + this.PORT_MIN + ' and ' + this.PORT_MAX + '.', 'error');
+          return;
+        }
+        for (let port = start; port <= end; port++) {
+          if (!this.allocatedPorts.includes(port)) this.allocatedPorts.push(port);
+        }
+      } else {
+        const port = parseInt(input.trim());
+        if (isNaN(port) || port < this.PORT_MIN || port > this.PORT_MAX) {
+          showToast('Invalid port. Port must be between ' + this.PORT_MIN + ' and ' + this.PORT_MAX + '.', 'error');
+          return;
+        }
+        if (!this.allocatedPorts.includes(port)) this.allocatedPorts.push(port);
+      }
+
+      this.allocatedPorts.sort((a, b) => a - b);
+
+      const portsList = document.getElementById('allocatedPortsList');
+      portsList.innerHTML = '';
+      this.allocatedPorts.forEach((port, i) => {
+        const tag = this.buildPortTag(port, usedPorts);
+        portsList.appendChild(tag);
+        setTimeout(() => this.animatePortIn(tag), i * this.PORT_STAGGER_MS);
+      });
+    },
+
+    removePort(port) {
+      const usedPorts = this.usedPortsSet;
+      if (usedPorts.has(port)) {
+        showToast('Cannot remove port that is in use by a server', 'error');
+        return;
+      }
+
+      this.allocatedPorts = this.allocatedPorts.filter(p => p !== Number(port));
+      const portsList = document.getElementById('allocatedPortsList');
+      portsList.innerHTML = '';
+      if (this.allocatedPorts.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'col-span-4 text-sm text-neutral-500 italic';
+        emptyMessage.textContent = 'No ports allocated yet. Add ports that will be available for servers.';
+        portsList.appendChild(emptyMessage);
+        return;
+      }
+      const used = this.usedPortsSet;
+      this.allocatedPorts.forEach((p) => {
+        const tag = this.buildPortTag(p, used);
+        portsList.appendChild(tag);
+        tag.style.opacity = '1';
+        tag.style.transform = '';
+      });
+    },
+
+    addPortFromInput() {
+      const input = document.getElementById('newPortInput').value.trim();
+      if (input) {
+        this.addPort(input);
+        document.getElementById('newPortInput').value = '';
+      }
+    },
+
+    renderAllocatedPorts() {
+      const portsList = document.getElementById('allocatedPortsList');
+      portsList.innerHTML = '';
+      if (this.allocatedPorts.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'col-span-4 text-sm text-neutral-500 italic';
+        emptyMessage.textContent = 'No ports allocated yet. Add ports that will be available for servers.';
+        portsList.appendChild(emptyMessage);
+        return;
+      }
+      const usedPorts = this.usedPortsSet;
+      this.allocatedPorts.forEach((port, i) => {
+        const tag = this.buildPortTag(port, usedPorts);
+        portsList.appendChild(tag);
+        setTimeout(() => this.animatePortIn(tag), i * this.PORT_STAGGER_MS);
+      });
+    },
+
+    gbValue(hiddenId, fallbackId) {
+      const hidden = document.getElementById(hiddenId);
+      if (hidden) {
+        const v = parseFloat(hidden.value);
+        if (hidden.value.trim() === '' || isNaN(v)) {
+          showToast('Value is required.', 'error');
+          return '';
+        }
+        return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
+      }
+      return document.getElementById(fallbackId).value;
+    },
+
+    async updateNode() {
+      const pd = document.getElementById('page-data').dataset;
+      const maintenanceInput = document.getElementById('nodeMaintenanceMode');
+      const maintenanceMode = maintenanceInput ? maintenanceInput.checked : false;
+
+      if (maintenanceInput) {
+        try {
+          await fetch('/admin/node/' + pd.nodeId + '/maintenance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ maintenanceMode })
+          });
+        } catch (err) {
+          console.error('Failed to save maintenance mode:', err);
+          showToast('Failed to save maintenance mode.', 'error');
+        }
+      }
+
+      const nodeData = {
+        name: document.getElementById('nodeName').value,
+        ram: this.gbValue('nodeRamValue', 'nodeRam'),
+        cpu: document.getElementById('nodeCpuValue').value,
+        disk: this.gbValue('nodeDiskValue', 'nodeDisk'),
+        address: document.getElementById('nodeAddress').value,
+        port: document.getElementById('nodePort').value,
+        allocatedPorts: JSON.stringify(this.allocatedPorts),
+        overallocateMemory: document.getElementById('nodeOverallocateMemory').value,
+        overallocateDisk: document.getElementById('nodeOverallocateDisk').value,
+        overallocateCpu: document.getElementById('nodeOverallocateCpu').value,
+        locationId: document.getElementById('nodeLocation').value
+      };
+
+      if (!nodeData.ram) { showToast('RAM is required.', 'error'); return; }
+      if (!nodeData.disk) { showToast('Disk is required.', 'error'); return; }
+
+      try {
+        const response = await fetch('/admin/node/' + pd.nodeId + '/edit', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(nodeData)
+        });
+
+        if (response.ok) {
+          showToast('Node updated. Looking good.', 'success');
+          setTimeout(() => {
+            window.location.href = '/admin/nodes?err=none';
+          }, 1000);
+        } else {
+          throw new Error('Failed to update node');
+        }
+      } catch (error) {
+        showToast('Error updating node: ' + error, 'error');
+      }
+    }
+  };
+}
+</script>
 
 <%- include('../../components/footer') %>

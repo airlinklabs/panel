@@ -222,10 +222,10 @@ function banner() {
 /** Print the --help text and exit cleanly. */
 function showHelp() {
   banner();
-  console.log(`${chalk.bold}Usage${reset}
+  console.log(`${chalk.bold("Usage")}
   node public/scripts/setup.mjs [flags]
 
-${C.bold}Flags${C.reset}
+${chalk.bold("Flags")}
   --yes, -y           Accept all prompts (non-interactive / CI mode).
   --skip-services     Don't install or start Redis / MariaDB.
   --skip-build        Don't run pnpm install, tsc, or tailwindcss.
@@ -236,7 +236,7 @@ ${C.bold}Flags${C.reset}
   --redis-url URL     Redis connection URL  [default: redis://127.0.0.1:6379]
   --help, -h          Show this message.
 
-${C.bold}Examples${C.reset}
+${chalk.bold("Examples")}
   node public/scripts/setup.mjs
   node public/scripts/setup.mjs --yes
   node public/scripts/setup.mjs --skip-services --db-host=db.internal --yes

@@ -8,7 +8,7 @@
     </div>
 <%- include('../../components/template') %>
     <!-- Content -->
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="nodeManager()">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Nodes' }
@@ -17,7 +17,7 @@
         title: req.translations.adminNodesTitle,
         description: req.translations.adminNodesText,
         actions: '<a href="#locations" class="al-btn-secondary text-sm">' + icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) + 'Locations</a>' +
-                 '<button id="createButton" type="button" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
+                 '<button id="createButton" type="button" class="al-btn-primary" @click="location.href=\'/admin/nodes/create\'">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
       }) %>
 
       <div class="al-page-body" data-al-tabs data-tabs-default="nodes" data-tabs-hash>
@@ -191,7 +191,187 @@
 <script nonce="<%- nonce %>">
   document.getElementById('page-data').dataset.nodes = '<%- JSON.stringify(nodes.map(n => ({ id: n.id, status: n.status }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
 </script>
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-nodes.js?v=9"></script>
+<script nonce="<%- nonce %>">
+function handleRowClick(event, url) {
+  if (!event.target.closest('button, a')) {
+    window.location = url;
+  }
+}
+
+function showConfirmModal(title, message, onConfirm) {
+  window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Yeah, delete it', onConfirm });
+}
+
+function configure(nodeId) {
+  fetch(`/admin/node/${nodeId}/configure`)
+    .then(function(response) {
+      if (!response.ok) throw new Error('Failed to fetch configure command');
+      return response.json();
+    })
+    .then(function(data) {
+      var popup = document.createElement('div');
+      popup.style.display = 'none';
+      popup.innerHTML =
+        '<div class="flex justify-center items-center mb-6">' +
+          alIcon('badge-check', 'text-emerald-500', { width: 64, height: 64 }) +
+        '</div>' +
+        '<p class="mb-4 text-neutral-600 dark:text-neutral-300 text-center">Run this command on the daemon machine to connect it to this panel:</p>' +
+        '<pre class="bg-neutral-100 dark:bg-neutral-900 p-3 rounded-xl mb-4 overflow-x-auto"><code id="commandCode" class="text-emerald-500">' + data + '</code></pre>' +
+        '<div class="flex justify-end">' +
+          '<button id="copyBtn" class="bg-emerald-600 text-white px-4 py-2 rounded-xl mr-2 hover:bg-emerald-700 transition-colors">Copy</button>' +
+          '<button id="doneBtn" class="bg-neutral-800 dark:bg-neutral-700 text-white px-4 py-2 rounded-xl hover:bg-neutral-700 dark:hover:bg-neutral-600 transition-colors">Close</button>' +
+        '</div>';
+
+      window.modal.show({
+        title: 'Node Configured',
+        bodyNode: popup,
+        panelClass: 'max-w-xl',
+      });
+
+      var command = data;
+      document.getElementById('copyBtn').addEventListener('click', function() {
+        var copyBtn = this;
+        navigator.clipboard.writeText(command)
+          .then(function() {
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.replace('bg-emerald-600', 'bg-neutral-600');
+            setTimeout(function() {
+              copyBtn.textContent = 'Copy';
+              copyBtn.classList.replace('bg-neutral-600', 'bg-emerald-600');
+            }, 2000);
+          })
+          .catch(function(error) { console.error('Failed to copy:', error); showToast('Couldn\'t copy the command. Try again.', 'error'); });
+      });
+      document.getElementById('doneBtn').addEventListener('click', function() { window.modal.close(); });
+    })
+    .catch(function(error) {
+      console.error(error);
+      showToast(error.message || 'Failed to fetch configure command.', 'error');
+    });
+}
+
+function nodeManager() {
+  return {
+    init() {
+      this.wireNodeStatusRealtime();
+    },
+
+    getStatusClass(status) {
+      if (status === 'Online') return 'al-dot-online';
+      if (status === 'Offline') return 'al-dot-offline';
+      return 'al-dot-warning';
+    },
+
+    updateNodeStatus(nodeId, status) {
+      var cell = document.querySelector('#admin-nodes-table [data-node-id="' + nodeId + '"]');
+      if (!cell) return;
+      var dot = cell.querySelector('.al-dot-online, .al-dot-offline, .al-dot-warning');
+      if (!dot) return;
+      var newClass = this.getStatusClass(status);
+      if (dot.className !== newClass) {
+        dot.className = newClass;
+      }
+    },
+
+    offlineBannerHtml() {
+      return alIcon('triangle-alert', 'w-4 h-4 shrink-0 mt-0.5') +
+        '<div class="flex-1">' +
+        '<p class="font-medium">Connection Error</p>' +
+        '<p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p>' +
+        '</div>' +
+        '<button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">' +
+        alIcon('refresh-cw', 'size-3', { strokeWidth: 1.5 }) + 'Retry Connection</button>';
+    },
+
+    injectOfflineBanner() {
+      if (document.querySelector('.al-alert-danger')) return;
+      var banner = document.createElement('div');
+      banner.className = 'al-alert-danger mb-5';
+      banner.innerHTML = this.offlineBannerHtml();
+      var table = document.getElementById('admin-nodes-table');
+      if (table && table.parentNode) table.parentNode.insertBefore(banner, table);
+    },
+
+    applyNodeStatuses(nodes) {
+      var self = this;
+      nodes.forEach(function (n) {
+        self.updateNodeStatus(n.id, n.status);
+      });
+      var anyOffline = nodes.some(function (n) { return n.status === 'Offline'; });
+      var alertEl = document.querySelector('.al-alert-danger');
+      if (anyOffline) {
+        if (!alertEl) self.injectOfflineBanner();
+      } else if (alertEl) {
+        alertEl.remove();
+      }
+    },
+
+    pollNodeStatus() {
+      var self = this;
+      fetch('/admin/nodes/list')
+        .then(function(r) { return r.json(); })
+        .then(function(nodes) {
+          if (!nodes || !nodes.length) return;
+          self.applyNodeStatuses(nodes);
+        })
+        .catch(function() {});
+    },
+
+    wireNodeStatusRealtime() {
+      var self = this;
+      var rt = window.alRealtime;
+      var st = window.alState;
+      if (!rt || !st) return;
+      if (rt.watchAll) rt.watchAll();
+      st.observe('admin:nodes', function() { self.pollNodeStatus(); });
+      st.observe('node', function() { self.pollNodeStatus(); });
+    }
+  };
+}
+
+window.refreshNodeStatuses = function () {
+  var banner = document.querySelector('.al-alert-danger');
+  if (banner && window.al) al.patchEl(banner, '<div class="flex items-center gap-3">' + alIcon('loader-circle', 'w-4 h-4 animate-spin') + '<p class="font-medium">Reconnecting…</p></div>');
+  fetch('/admin/nodes/list')
+    .then(function(r) { return r.json(); })
+    .then(function(nodes) {
+      if (!nodes || !nodes.length) return;
+      nodes.forEach(function (n) {
+        var cell = document.querySelector('#admin-nodes-table [data-node-id="' + n.id + '"]');
+        if (!cell) return;
+        var dot = cell.querySelector('.al-dot-online, .al-dot-offline, .al-dot-warning');
+        if (!dot) return;
+        var newClass = n.status === 'Online' ? 'al-dot-online' : n.status === 'Offline' ? 'al-dot-offline' : 'al-dot-warning';
+        if (dot.className !== newClass) dot.className = newClass;
+      });
+      var anyOffline = nodes.some(function (n) { return n.status === 'Offline'; });
+      var alertEl = document.querySelector('.al-alert-danger');
+      if (anyOffline) {
+        if (alertEl && window.al) {
+          al.patchEl(alertEl,
+            alIcon('triangle-alert', 'w-4 h-4 shrink-0 mt-0.5') +
+            '<div class="flex-1"><p class="font-medium">Connection Error</p><p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p></div>' +
+            '<button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">' + alIcon('refresh-cw', 'size-3', { strokeWidth: 1.5 }) + 'Retry Connection</button>'
+          );
+        } else if (!alertEl) {
+          var table = document.getElementById('admin-nodes-table');
+          if (table && table.parentNode) {
+            var b = document.createElement('div');
+            b.className = 'al-alert-danger mb-5';
+            b.innerHTML =
+              alIcon('triangle-alert', 'w-4 h-4 shrink-0 mt-0.5') +
+              '<div class="flex-1"><p class="font-medium">Connection Error</p><p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p></div>' +
+              '<button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">' + alIcon('refresh-cw', 'size-3', { strokeWidth: 1.5 }) + 'Retry Connection</button>';
+            table.parentNode.insertBefore(b, table);
+          }
+        }
+      } else if (alertEl) {
+        alertEl.remove();
+      }
+    })
+    .catch(function() {});
+};
+</script>
 <script nonce="<%- nonce %>">
 (function () {
   document.addEventListener('al:tabs-change', function (e) {

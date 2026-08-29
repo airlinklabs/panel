@@ -13,8 +13,7 @@ if (cluster.isPrimary && !fs.existsSync(logsDir)) {
 
 const isDebugMode =
   process.env.DEBUG === "true" || process.env.NODE_ENV === "development";
-const useJsonFormat =
-  process.env.LOG_FORMAT === "json" || process.env.NODE_ENV === "production";
+const useJsonFormat = process.env.LOG_FORMAT === "json";
 const isTTY = process.stdout.isTTY;
 
 // ── Secret redaction ─────────────────────────────────────────────────────────

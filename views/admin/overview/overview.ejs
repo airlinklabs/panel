@@ -29,7 +29,7 @@
       <%- include('../../components/sidebar') %>
     </div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="admin-overview-bg flex-1 overflow-y-auto pt-0 pb-12"<% if (vcodeBg) { %> style="--vcode-bg: url('<%= vcodeBg %>');"<% } %>>
+    <div id="page-content" class="admin-overview-bg flex-1 overflow-y-auto pt-0 pb-12"<% if (vcodeBg) { %> style="--vcode-bg: url('<%= vcodeBg %>');"<% } %> x-data="adminOverview()">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
         { label: 'Overview' }
@@ -62,11 +62,11 @@
               </div>
             </div>
             <div class="flex gap-1.5">
-              <button type="button" id="checkUpdateBtn" class="al-btn-secondary">
+              <button type="button" id="checkUpdateBtn" class="al-btn-secondary" @click="checkUpdate()">
                 <%- icon('refresh-cw', { size: 14, class: 'shrink-0' }) %>
                 Check for Updates
               </button>
-              <button type="button" id="performUpdateBtn" class="hidden al-btn-secondary">
+              <button type="button" id="performUpdateBtn" class="hidden al-btn-secondary" @click="performUpdate()">
                 <%- icon('download', { size: 14, class: 'shrink-0' }) %>
                 <%= req.translations.update || 'Update' %>
               </button>
@@ -144,4 +144,129 @@
   data-running-latest-version="<%= req.translations.runningLatestVersion %>"
 ></div>
 
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-overview.js?v=5"></script>
+<script nonce="<%- nonce %>">
+function adminOverview() {
+  return {
+    UPDATE_RELOAD_DELAY_MS: 5000,
+    UPDATE_CHECK_DELAY_MS: 220,
+    API_LATENCY_POLL_INTERVAL_MS: 30000,
+    LATENCY_GOOD_THRESHOLD_MS: 100,
+    LATENCY_WARNING_THRESHOLD_MS: 300,
+    LATENCY_MAX_MS: 500,
+
+    init() {
+      var pageData = document.getElementById('page-data').dataset;
+      var currentVersion = pageData.airlinkVersion;
+      var runningLatestVersion = pageData.runningLatestVersion;
+
+      document.querySelectorAll('.current-version').forEach(el => el.textContent = currentVersion);
+      var versionInline = document.getElementById('current-version-inline');
+      if (versionInline) versionInline.textContent = currentVersion;
+
+      this._runningLatestVersion = runningLatestVersion;
+
+      this.measureApiLatency();
+      setInterval(() => this.measureApiLatency(), this.API_LATENCY_POLL_INTERVAL_MS);
+    },
+
+    fadeIn(el) {
+      el.style.transition = 'none';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(4px)';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+          setTimeout(() => {
+            el.style.transition = '';
+            el.style.opacity = '';
+            el.style.transform = '';
+          }, this.UPDATE_CHECK_DELAY_MS);
+        });
+      });
+    },
+
+    async checkUpdate() {
+      var self = this;
+      var statusDiv = document.getElementById('updateStatus');
+      statusDiv.innerHTML = '<span class="text-neutral-500">Checking...</span>';
+      statusDiv.classList.remove('hidden');
+
+      try {
+        var response = await fetch('/admin/check-update');
+        var data = await response.json();
+        var updateBtn = document.getElementById('performUpdateBtn');
+        var updateInfo = document.getElementById('updateInfo');
+
+        if (data.hasUpdate) {
+          statusDiv.innerHTML = '<span class="text-amber-600 dark:text-amber-400">Update available — v' + data.latestVersion + '</span>';
+          self.fadeIn(statusDiv);
+          updateBtn.classList.remove('hidden');
+          updateBtn.classList.add('inline-flex');
+          self.fadeIn(updateBtn);
+          if (data.updateInfo) {
+            updateInfo.innerHTML = '<p class="text-xs text-neutral-500">' + data.updateInfo + '</p>';
+            updateInfo.classList.remove('hidden');
+            self.fadeIn(updateInfo);
+          }
+        } else {
+          statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">' + (self._runningLatestVersion || 'Running latest version') + '</span>';
+          self.fadeIn(statusDiv);
+          updateBtn.classList.add('hidden');
+          updateInfo.classList.add('hidden');
+        }
+      } catch (error) {
+        statusDiv.innerHTML = '<span class="text-red-500">Failed to check for updates.</span>';
+        self.fadeIn(statusDiv);
+      }
+    },
+
+    performUpdate() {
+      var self = this;
+      window.modal.confirm({
+        title: 'Install Update',
+        body: 'The panel will perform the update and restart the server.',
+        confirmLabel: 'Install',
+        danger: false,
+        onConfirm: async () => {
+          var statusDiv = document.getElementById('updateStatus');
+          statusDiv.innerHTML = '<span class="text-neutral-500">Installing...</span>';
+          self.fadeIn(statusDiv);
+          try {
+            var response = await fetch('/admin/perform-update', { method: 'POST' });
+            var data = await response.json();
+            showToast(data.message || 'Update complete. Restarting.', 'success');
+            statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';
+            self.fadeIn(statusDiv);
+            setTimeout(() => window.location.reload(), self.UPDATE_RELOAD_DELAY_MS);
+          } catch (error) {
+            statusDiv.innerHTML = '<span class="text-red-500">Update failed.</span>';
+            self.fadeIn(statusDiv);
+            showToast('Update failed. Check the logs.', 'error');
+          }
+        }
+      });
+    },
+
+    async measureApiLatency() {
+      try {
+        var start = performance.now();
+        var response = await fetch('/api/v1/ping');
+        var latency = Math.round(performance.now() - start);
+        if (response.ok) {
+          document.getElementById('apiLatency').textContent = latency + ' ms';
+          var bar = document.getElementById('latencyBar');
+          bar.style.width = Math.min((latency / this.LATENCY_MAX_MS) * 100, 100) + '%';
+          bar.classList.remove('bg-emerald-500', 'bg-amber-500', 'bg-red-500', 'bg-neutral-400', 'dark:bg-neutral-500');
+          if (latency < this.LATENCY_GOOD_THRESHOLD_MS) bar.classList.add('bg-emerald-500');
+          else if (latency < this.LATENCY_WARNING_THRESHOLD_MS) bar.classList.add('bg-amber-500');
+          else bar.classList.add('bg-red-500');
+        }
+      } catch (error) {
+        document.getElementById('apiLatency').textContent = 'Error';
+      }
+    }
+  };
+}
+</script>

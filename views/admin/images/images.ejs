@@ -8,7 +8,7 @@
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
+    <div id="page-content" x-data="imageManager()" class="flex-1 overflow-y-auto pt-0 pb-12">
 
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
@@ -21,7 +21,7 @@
           <p class="al-page-desc">Manage server images installed on this panel</p>
         </div>
         <div class="flex gap-2 shrink-0">
-          <button id="uploadBtn" type="button" class="al-btn-secondary"><%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.uploadJson || 'Upload JSON' %></button>
+          <button @click="openUploadImageModal()" type="button" class="al-btn-secondary"><%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.uploadJson || 'Upload JSON' %></button>
           <button @click="openCreate()" type="button" class="al-btn-secondary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>New Image</button>
           <a href="/admin/images#store" class="al-btn-secondary">Browse Store</a>
         </div>
@@ -203,17 +203,244 @@ function imageReject() {
 </div>
 
 <script nonce="<%- nonce %>">
-  (function() {
-    document.addEventListener('al:tabs-loaded', function(e) {
-      var detail = e.detail;
-      if (detail && detail.name === 'store' && detail.panel && window.AdminImageStore) {
-        window.AdminImageStore.mount(detail.panel);
-      }
-    });
-  })();
-</script>
+function imageManager() {
+  let _deleteId = null;
 
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-images.js?v=6"></script>
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-image-store.js?v=9"></script>
+  function esc(str) {
+    return String(str == null ? "" : str).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function imageRowHtml(image) {
+    return '<tr class="al-table-tr transition-colors cursor-pointer img-row" data-search="' +
+      esc((image.name + " " + (image.author || "")).toLowerCase()) +
+      '" @click="handleRowClick(event, \'/admin/images/edit/' + image.id + '\')">' +
+      '<td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3 font-medium" style="color:var(--theme-text-strong)">' + esc(image.name) + '</td>' +
+      '<td class="al-table-td whitespace-nowrap px-3 py-4 col-hide">' + esc(image.author || "—") + '</td>' +
+      '<td class="al-table-td whitespace-nowrap px-3 py-4 col-hide">' + esc(new Date(image.createdAt).toLocaleDateString()) + '</td>' +
+      '<td class="whitespace-nowrap px-3 py-4 text-sm"><div class="flex gap-2">' +
+      '<a href="/admin/images/edit/' + image.id + '" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">' + (window.alIcon ? alIcon("pencil", "size-4") : "") + 'Edit</a>' +
+      '<a href="/admin/images/export/' + image.id + '" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">' + (window.alIcon ? alIcon("download", "size-4") : "") + 'Export</a>' +
+      '<button onclick="event.stopPropagation(); openDelete(\'' + image.id + '\', \'' + esc(image.name).replace(/'/g, "\\'") + '\')" type="button" class="al-btn-danger" aria-label="Delete image ' + esc(image.name) + '">' + (window.alIcon ? alIcon("trash-2", "size-4") : "") + '</button>' +
+      '</div></td></tr>';
+  }
+
+  function formatImageFileSize(bytes) {
+    if (bytes === 0) return "0 Bytes";
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + " " + sizes[i];
+  }
+
+  function setUploadMode(mode) {
+    const isUrl = mode === "url";
+    const fileBtn = document.getElementById("uploadModeFile");
+    const urlBtn = document.getElementById("uploadModeUrl");
+    const fileSection = document.getElementById("uploadFileSection");
+    const urlSection = document.getElementById("importUrlSection");
+    const uploadBtn = document.getElementById("imageUploadButton");
+    const submitBtn = document.getElementById("importUrlSubmit");
+    const active = "color:var(--theme-text-strong); background:var(--theme-bg-card);";
+    const idle = "color:var(--theme-text-muted);";
+    if (fileBtn) fileBtn.setAttribute("style", isUrl ? idle : active);
+    if (urlBtn) urlBtn.setAttribute("style", isUrl ? active : idle);
+    if (fileSection) fileSection.classList.toggle("hidden", isUrl);
+    if (urlSection) urlSection.classList.toggle("hidden", !isUrl);
+    if (uploadBtn) uploadBtn.classList.toggle("hidden", isUrl);
+    if (submitBtn) submitBtn.classList.toggle("hidden", !isUrl);
+  }
+
+  return {
+    init() {
+      const self = this;
+      window.submitCreateImage = (e) => self.submitCreateImage(e);
+      window.openDelete = (id, name) => self.openDelete(id, name);
+      window.removeSelectedImageFile = () => self.removeSelectedImageFile();
+      setUploadMode("file");
+      const dropZone = document.getElementById("imageDropZone");
+      const fileInput = document.getElementById("imageFileInput");
+      const uploadButton = document.getElementById("imageUploadButton");
+      if (dropZone) {
+        dropZone.addEventListener("dragover", function (e) {
+          e.preventDefault();
+          dropZone.style.background = "var(--theme-bg-hover)";
+          dropZone.style.borderColor = "var(--theme-accent)";
+        });
+        dropZone.addEventListener("dragleave", function (e) {
+          e.preventDefault();
+          dropZone.style.background = "";
+          dropZone.style.borderColor = "var(--theme-border)";
+        });
+        dropZone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dropZone.style.background = "";
+          dropZone.style.borderColor = "var(--theme-border)";
+          if (e.dataTransfer.files.length > 0) this.handleImageFileSelection(e.dataTransfer.files[0]);
+        });
+      }
+      if (fileInput) {
+        fileInput.addEventListener("change", (e) => {
+          if (e.target.files.length > 0) this.handleImageFileSelection(e.target.files[0]);
+        });
+      }
+      if (uploadButton) {
+        uploadButton.addEventListener("click", () => this.confirmImageUpload());
+      }
+      const importUrlSubmit = document.getElementById("importUrlSubmit");
+      if (importUrlSubmit) {
+        importUrlSubmit.addEventListener("click", async () => {
+          const url = document.getElementById("importUrlInput").value.trim();
+          if (!url) { showToast("Enter a URL.", "error"); return; }
+          const btn = importUrlSubmit;
+          btn.disabled = true; btn.classList.add("opacity-60");
+          try {
+            const r = await fetch("/admin/images/import-url", {
+              method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }),
+            });
+            const d = await r.json();
+            if (r.ok && d.success) {
+              showToast(d.message || "Image imported.", "success");
+              this.renderImageTable();
+              this.closeUploadImageModal();
+            } else { showToast(d.error || "Import failed.", "error"); }
+          } catch { showToast("Import failed.", "error"); }
+          finally { btn.disabled = false; btn.classList.remove("opacity-60"); }
+        });
+      }
+      document.getElementById("uploadModeFile").addEventListener("click", () => setUploadMode("file"));
+      document.getElementById("uploadModeUrl").addEventListener("click", () => {
+        setUploadMode("url");
+        document.getElementById("importUrlInput").focus();
+      });
+    },
+    handleRowClick(e, url) {
+      if (!e.target.closest("button,a")) window.location = url;
+    },
+    openCreate() {
+      window.modal.show({
+        title: "New Image",
+        bodyNode: document.getElementById("createContent"),
+        panelClass: "max-w-xl",
+      });
+    },
+    closeCreate() { window.modal.close(); },
+    openDelete(id, name) {
+      _deleteId = id;
+      window.modal.confirm({
+        title: "Delete image?",
+        body: '"' + name + '" will be permanently removed.',
+        danger: true, confirmLabel: "Delete",
+        onConfirm: () => this.deleteImage(),
+      });
+    },
+    async renderImageTable() {
+      const res = await fetch("/admin/images/list");
+      const data = await res.json();
+      const tbody = document.getElementById("tableBody");
+      if (!data.success) return;
+      const emptyState = document.getElementById("installedEmptyState");
+      const tableSection = document.getElementById("installedTableSection");
+      if (emptyState) emptyState.classList.toggle("hidden", data.images.length > 0);
+      if (tableSection) tableSection.classList.toggle("hidden", data.images.length === 0);
+      if (!tbody) return;
+      const searchInput = document.getElementById("imageFilterInput");
+      const q = searchInput ? searchInput.value.toLowerCase().trim() : "";
+      tbody.innerHTML = data.images.map(imageRowHtml).join("");
+      let n = 0;
+      tbody.querySelectorAll(".img-row").forEach(function (r) {
+        const match = !q || r.dataset.search.includes(q);
+        r.style.display = match ? "" : "none";
+        if (match) n++;
+      });
+      const noResults = document.getElementById("noResults");
+      if (noResults) noResults.classList.toggle("hidden", data.images.length === 0 || n > 0 || !q);
+      const installedCountEl = document.getElementById("tabCountInstalled");
+      if (installedCountEl) installedCountEl.textContent = data.images.length;
+      const installedTextEl = document.getElementById("installedImagesCount");
+      if (installedTextEl) installedTextEl.textContent = data.images.length;
+      if (window.alTableScan) alTableScan(tbody);
+    },
+    async deleteImage() {
+      if (!_deleteId) return;
+      const res = await fetch("/admin/images/delete/" + _deleteId, { method: "DELETE" });
+      if (res.ok) { showToast("Image deleted.", "success"); await this.renderImageTable(); }
+      else { showToast("Failed.", "error"); }
+    },
+    openUploadImageModal() {
+      setUploadMode("file");
+      const modal = document.getElementById("uploadImageModal");
+      if (!modal) return;
+      modal.classList.remove("opacity-0", "pointer-events-none");
+      Animate.openModal(modal, document.getElementById("uploadImageModalPanel"));
+      this.removeSelectedImageFile();
+      const fileInput = document.getElementById("imageFileInput");
+      if (fileInput) fileInput.value = "";
+    },
+    closeUploadImageModal() {
+      const modal = document.getElementById("uploadImageModal");
+      if (!modal) return;
+      Animate.closeModal(modal, document.getElementById("uploadImageModalPanel"), function () {
+        modal.classList.add("opacity-0", "pointer-events-none");
+      });
+    },
+    removeSelectedImageFile() {
+      window.selectedImageFile = null;
+      const preview = document.getElementById("imageFilePreview");
+      const dropZone = document.getElementById("imageDropZone");
+      const btn = document.getElementById("imageUploadButton");
+      if (preview) preview.classList.add("hidden");
+      if (dropZone) dropZone.classList.remove("hidden");
+      if (btn) btn.disabled = true;
+    },
+    handleImageFileSelection(file) {
+      if (!file) return;
+      window.selectedImageFile = file;
+      document.getElementById("imageSelectedFileName").textContent = file.name;
+      document.getElementById("imageSelectedFileSize").textContent = formatImageFileSize(file.size);
+      document.getElementById("imageFilePreview").classList.remove("hidden");
+      document.getElementById("imageDropZone").classList.add("hidden");
+      document.getElementById("imageUploadButton").disabled = false;
+    },
+    confirmImageUpload() {
+      if (!window.selectedImageFile) { showToast("Select a JSON file to upload.", "error"); return; }
+      const file = window.selectedImageFile;
+      this.closeUploadImageModal();
+      const self = this;
+      const r = new FileReader();
+      r.onload = function (e) {
+        try { JSON.parse(e.target.result); } catch { showToast("Invalid JSON.", "error"); return; }
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/admin/images/upload", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onload = () => {
+          if (xhr.status === 200) { showToast("Image uploaded.", "success"); self.renderImageTable(); }
+          else { showToast("Upload failed.", "error"); }
+        };
+        xhr.onerror = () => showToast("Upload failed.", "error");
+        xhr.send(e.target.result);
+      };
+      r.readAsText(file);
+    },
+    submitCreateImage(e) {
+      const form = e.target;
+      const data = Object.fromEntries(new FormData(form));
+      if (!data.name || !data.startup) { showToast("Name and startup command are required.", "error"); return; }
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
+      fetch("/admin/images/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "CSRF-Token": csrfToken },
+        body: JSON.stringify(data),
+      }).then(r => r.json()).then(result => {
+        if (result.success !== false) {
+          showToast("Image created.", "success");
+          this.closeCreate();
+          this.renderImageTable();
+        } else { showToast(result.error || result.message || "Failed to create image.", "error"); }
+      }).catch(() => { showToast("Network error.", "error"); });
+    }
+  };
+}
+</script>
 
 <%- include('../../components/footer') %>

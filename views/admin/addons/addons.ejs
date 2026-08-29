@@ -9,7 +9,7 @@
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/sidebar') %></div>
 <%- include('../../components/template') %>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
+    <div id="page-content" x-data="addonManager()" class="flex-1 overflow-y-auto pt-0 pb-12">
 
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
@@ -113,6 +113,71 @@
   </div>
 </main>
 
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-addons.js?v=5"></script>
+<script nonce="<%- nonce %>">
+function addonManager() {
+  const BADGE_ENABLED = 'status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-600/20 dark:ring-emerald-400/20';
+  const BADGE_DISABLED = 'status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-300 ring-neutral-300 dark:ring-white/10';
+  return {
+    init() {
+      document.getElementById('reloadBtn').addEventListener('click', () => {
+        showLoadingPopup('Reloading addons…', 'Please wait…');
+        fetch('/admin/addons/reload', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+          .then(r => r.json()).then(data => { hideLoadingPopup(); showToast(data.message || (data.success ? 'Reloaded' : 'Failed'), data.success ? 'success' : 'error'); })
+          .catch(() => { hideLoadingPopup(); showToast('Something went wrong.', 'error'); });
+      });
+      const addonSearchInput = document.getElementById('addonSearchInput');
+      if (addonSearchInput) {
+        addonSearchInput.addEventListener('input', function() {
+          const q = this.value.toLowerCase().trim();
+          let visible = 0;
+          document.querySelectorAll('.addon-row').forEach(row => {
+            const match = !q || row.dataset.search.includes(q);
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+          });
+          const noResults = document.getElementById('addonNoResults');
+          if (noResults) noResults.classList.toggle('hidden', visible > 0 || !q);
+        });
+      }
+    },
+    toggleAddon(slug, enable) {
+      showLoadingPopup('Updating addon…', 'Applying changes…');
+      fetch('/admin/addons/toggle/' + slug, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: enable.toString() }),
+      }).then(r => r.json()).then(data => {
+        hideLoadingPopup();
+        if (data.success) { showToast('Addon updated', 'success'); this.updateRow(slug, enable); }
+        else showToast(data.message || 'Failed', 'error');
+      }).catch(() => { hideLoadingPopup(); showToast('Something went wrong.', 'error'); });
+    },
+    updateRow(slug, enabled) {
+      const row = document.querySelector('[data-slug="' + slug + '"]');
+      if (!row) return;
+      const badge = row.querySelector('.status-badge');
+      if (badge) {
+        badge.className = enabled ? BADGE_ENABLED : BADGE_DISABLED;
+        badge.textContent = enabled ? 'Enabled' : 'Disabled';
+      }
+      const btn = row.querySelector('.toggle-btn');
+      if (btn) { btn.textContent = enabled ? 'Disable' : 'Enable'; btn.onclick = () => this.toggleAddon(slug, !enabled); }
+    },
+    confirmUninstall(slug, name) {
+      window.modal && window.modal.confirm
+        ? window.modal.confirm({ title: 'Uninstall Addon', body: 'Uninstall "' + name + '"? This cannot be undone.', danger: true, confirmLabel: 'Uninstall', onConfirm: () => this.uninstall(slug) })
+        : this.uninstall(slug);
+    },
+    uninstall(slug) {
+      showLoadingPopup('Uninstalling…', 'Removing files…');
+      fetch('/admin/addons/store/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug }) })
+        .then(r => r.json()).then(data => {
+          hideLoadingPopup();
+          if (data.success) { showToast('Uninstalled', 'success'); const r = document.querySelector('[data-slug="' + slug + '"]'); if (r) r.remove(); }
+          else showToast(data.message || 'Failed', 'error');
+        }).catch(() => { hideLoadingPopup(); showToast('Something went wrong.', 'error'); });
+    }
+  };
+}
+</script>
 
 <%- include('../../components/footer') %>
