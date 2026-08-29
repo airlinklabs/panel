@@ -9,6 +9,7 @@ public/styles.css
 storage/prisma/*
 !storage/prisma/schema.prisma
 !storage/prisma/migrations/
+storage/src/generated/
 
 # Lock files
 /package-lock.json
