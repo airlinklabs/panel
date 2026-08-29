@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @plugin '@tailwindcss/forms';
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -9,6 +9,32 @@
    var(--ease-decelerate)) instead of ad-hoc timings so reduced-motion
    handling and design-system tuning stay in one place. */
 :root {
+  /* Density scale */
+  --space-xs: 0.25rem; /* 4px */
+  --space-sm: 0.5rem; /* 8px */
+  --space-md: 0.75rem; /* 12px */
+  --space-lg: 1rem; /* 16px */
+  --space-xl: 1.5rem; /* 24px */
+
+  /* Icon sizes */
+  --icon-xs: 14px;
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-lg: 20px;
+
+  /* Compact font scale (denser defaults) */
+  --text-dense-xs: 0.6875rem; /* 11px */
+  --text-dense-sm: 0.75rem; /* 12px */
+  --text-dense-base: 0.8125rem; /* 13px */
+  --text-dense-lg: 0.875rem; /* 14px */
+
+  /* Component density */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --pad-card: 0.75rem; /* 12px — tighter cards */
+  --pad-card-header: 0.625rem 0.75rem; /* 10px 12px */
+
   --dur-fast: 120ms;
   --dur-quick: 150ms;
   --dur-default: 200ms;
@@ -74,92 +100,147 @@
   /* ── Airlink component utilities ─────────────────────────────── */
 
   /* Core surfaces */
-  .al-surface        { background: var(--theme-bg-card); border: 1px solid var(--theme-border); }
-  .al-surface-raised { background: var(--theme-bg-card); border: 1px solid var(--theme-border); box-shadow: var(--theme-shadow, 0 1px 3px rgba(0,0,0,0.06)); }
+  .al-surface {
+    background: var(--theme-bg-card);
+    border: 1px solid var(--theme-border);
+  }
+  .al-surface-raised {
+    background: var(--theme-bg-card);
+    border: 1px solid var(--theme-border);
+    box-shadow: var(--theme-shadow, 0 1px 3px rgba(0, 0, 0, 0.06));
+  }
 
-  /* Buttons */
+  /* Buttons — compact */
   .al-btn-primary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
     background: var(--theme-btn-primary-bg);
     border: 1px solid var(--theme-btn-border, var(--theme-border));
     color: var(--theme-btn-primary-text);
   }
-  .al-btn-primary:hover:not(:disabled) { background: var(--theme-btn-primary-hover); }
+  .al-btn-primary:hover:not(:disabled) {
+    background: var(--theme-btn-primary-hover);
+  }
 
   .al-btn-secondary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
     background: var(--theme-btn-secondary-bg);
     border: 1px solid var(--theme-btn-secondary-border);
     color: var(--theme-btn-secondary-text);
   }
-  .al-btn-secondary:hover:not(:disabled) { background: var(--theme-btn-secondary-hover); }
+  .al-btn-secondary:hover:not(:disabled) {
+    background: var(--theme-btn-secondary-hover);
+  }
 
   .al-btn-danger {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
     background: var(--theme-btn-danger-bg, #dc2626);
     border: 1px solid var(--theme-btn-border, var(--theme-border));
     color: var(--theme-btn-danger-text, #ffffff);
   }
-  .al-btn-danger:hover:not(:disabled) { background: var(--theme-btn-danger-hover, #b91c1c); }
+  .al-btn-danger:hover:not(:disabled) {
+    background: var(--theme-btn-danger-hover, #b91c1c);
+  }
 
   .al-btn-success {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
     background: var(--theme-btn-success-bg, #15803d);
     border: 1px solid var(--theme-btn-border, var(--theme-border));
     color: var(--theme-btn-success-text, #ffffff);
   }
-  .al-btn-success:hover:not(:disabled) { background: var(--theme-btn-success-hover, #166534); }
+  .al-btn-success:hover:not(:disabled) {
+    background: var(--theme-btn-success-hover, #166534);
+  }
 
   /* Ghost / icon button */
   .al-btn-ghost {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg p-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
     border: 1px solid var(--theme-btn-border, var(--theme-border));
     color: var(--theme-text-muted);
   }
-  .al-btn-ghost:hover { background: var(--theme-bg-hover); color: var(--theme-text-strong); }
+  .al-btn-ghost:hover {
+    background: var(--theme-bg-hover);
+    color: var(--theme-text-strong);
+  }
 
   /* Inputs */
   .al-input {
-    @apply w-full rounded-xl px-3 py-2 text-sm transition-colors outline-none;
+    @apply w-full rounded-xl px-2.5 py-1.5 text-[13px] transition-colors outline-none;
     background: var(--theme-bg-input);
     border: 1px solid var(--theme-border-input);
     color: var(--theme-text-strong);
   }
-  .al-input::placeholder { color: var(--theme-text-placeholder); }
-  .al-input:focus { border-color: var(--theme-border-accent); box-shadow: 0 0 0 3px var(--theme-accent-subtle); }
-  .al-input:disabled { opacity: 0.5; cursor: not-allowed; }
+  .al-input::placeholder {
+    color: var(--theme-text-placeholder);
+  }
+  .al-input:focus {
+    border-color: var(--theme-border-accent);
+    box-shadow: 0 0 0 3px var(--theme-accent-subtle);
+  }
+  .al-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   /* Labels */
   .al-label {
-    @apply block text-xs font-medium mb-1.5;
+    @apply block text-[11px] font-medium mb-1;
     color: var(--theme-text-muted);
   }
 
   /* Cards */
   .al-card {
-    @apply rounded-xl overflow-hidden p-4;
+    @apply rounded-xl overflow-hidden p-3;
     background: var(--theme-bg-card);
     border: 1px solid var(--theme-border);
-    box-shadow: var(--theme-shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+    box-shadow: var(--theme-shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
   }
   .al-card-header {
-    @apply -mx-4 -mt-4 mb-0 px-4 py-3 text-sm font-medium border-b;
+    @apply -mx-3 -mt-3 mb-0 px-3 py-2.5 text-[13px] font-medium border-b;
     background: var(--theme-bg-secondary);
     border-color: var(--theme-border);
     color: var(--theme-text-muted);
   }
 
   /* Status badge — always shows label alongside color */
-  .al-badge-online  { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-success-bg); color: var(--theme-success); }
-  .al-badge-offline { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-danger-bg); color: var(--theme-danger); }
-  .al-badge-warning { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-warning-bg); color: var(--theme-warning); }
-  .al-badge-info    { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-info-bg); color: var(--theme-info); }
-  .al-badge-neutral { @apply inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full; background: var(--theme-badge-neutral-bg, var(--theme-bg-hover)); color: var(--theme-badge-neutral-text, var(--theme-text-muted)); }
+  .al-badge-online {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full;
+    background: var(--theme-success-bg);
+    color: var(--theme-success);
+  }
+  .al-badge-offline {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full;
+    background: var(--theme-danger-bg);
+    color: var(--theme-danger);
+  }
+  .al-badge-warning {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full;
+    background: var(--theme-warning-bg);
+    color: var(--theme-warning);
+  }
+  .al-badge-info {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full;
+    background: var(--theme-info-bg);
+    color: var(--theme-info);
+  }
+  .al-badge-neutral {
+    @apply inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full;
+    background: var(--theme-badge-neutral-bg, var(--theme-bg-hover));
+    color: var(--theme-badge-neutral-text, var(--theme-text-muted));
+  }
 
   /* Status dot (8px, no ping animation — kills the toy look) */
-  .al-dot-online  { @apply inline-block w-2 h-2 rounded-full shrink-0; background: var(--theme-success); }
-  .al-dot-offline { @apply inline-block w-2 h-2 rounded-full shrink-0; background: var(--theme-danger); }
-  .al-dot-warning { @apply inline-block w-2 h-2 rounded-full shrink-0; background: var(--theme-warning); }
+  .al-dot-online {
+    @apply inline-block w-2 h-2 rounded-full shrink-0;
+    background: var(--theme-success);
+  }
+  .al-dot-offline {
+    @apply inline-block w-2 h-2 rounded-full shrink-0;
+    background: var(--theme-danger);
+  }
+  .al-dot-warning {
+    @apply inline-block w-2 h-2 rounded-full shrink-0;
+    background: var(--theme-warning);
+  }
 
   /* Skeleton */
   .al-skeleton {
@@ -167,70 +248,136 @@
     background: var(--theme-skeleton-base);
   }
   .al-skeleton::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, transparent 0%, var(--theme-skeleton-shine, rgba(255,255,255,0.08)) 50%, transparent 100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--theme-skeleton-shine, rgba(255, 255, 255, 0.08)) 50%,
+      transparent 100%
+    );
     animation: al-skeleton-shimmer 1.5s ease-in-out infinite;
   }
   @keyframes al-skeleton-shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
 
   /* ── al-action: semantic action button states ─────────────────────────
      Loading, success/error flash, and a practical 44px target. The loading
      spinner is a border-only ring so it animates under prefers-reduced-motion
      (opacity/state feedback is preserved, never globally killed). */
-  .al-action-loading { @apply relative pointer-events-none; }
+  .al-action-loading {
+    @apply relative pointer-events-none;
+  }
   .al-action-loading::before {
-    content: '';
+    content: "";
     @apply inline-block w-4 h-4 rounded-full shrink-0;
     border: 2px solid currentColor;
     border-right-color: transparent;
     animation: al-spin var(--motion-default, 180ms) linear infinite;
   }
-  .al-action-loading > * { opacity: 0; } /* spinner replaces content visually */
-  .al-action-success { color: var(--theme-success, #16a34a) !important; }
-  .al-action-error { color: var(--theme-danger, #dc2626) !important; }
+  .al-action-loading > * {
+    opacity: 0;
+  } /* spinner replaces content visually */
+  .al-action-success {
+    color: var(--theme-success, #16a34a) !important;
+  }
+  .al-action-error {
+    color: var(--theme-danger, #dc2626) !important;
+  }
   @keyframes al-spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
   /* Icon-only buttons need an explicit minimum practical target; accessible
      names are enforced by the markup contract (aria-label / visually hidden
      text), not by the button's visible content. */
-  .al-btn-icon-only { @apply inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-xl; }
+  .al-btn-icon-only {
+    @apply inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-xl;
+  }
 
   /* ── al-field: error/success association ────────────────────────────── */
-  .al-field-invalid .al-input { border-color: var(--theme-danger, #dc2626); }
-  .al-field-invalid .al-input:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-danger, #dc2626) 15%, transparent); }
-  .al-field-success .al-input { border-color: var(--theme-success, #16a34a); }
-  .al-field-message { @apply text-xs mt-1.5; }
-  .al-field-invalid .al-field-message { color: var(--theme-danger, #dc2626); }
-  .al-field-success .al-field-message { color: var(--theme-success, #16a34a); }
+  .al-field-invalid .al-input {
+    border-color: var(--theme-danger, #dc2626);
+  }
+  .al-field-invalid .al-input:focus {
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--theme-danger, #dc2626) 15%, transparent);
+  }
+  .al-field-success .al-input {
+    border-color: var(--theme-success, #16a34a);
+  }
+  .al-field-message {
+    @apply text-xs mt-1.5;
+  }
+  .al-field-invalid .al-field-message {
+    color: var(--theme-danger, #dc2626);
+  }
+  .al-field-success .al-field-message {
+    color: var(--theme-success, #16a34a);
+  }
 
   /* ── al-dialog: native <dialog> entry/exit ────────────────────────────
      Travel/scale collapse to opacity under prefers-reduced-motion via
      motion.css; focus outline and final state are never collapsed. */
-  dialog.al-dialog { @apply m-auto p-0 border-0 bg-transparent; }
-  dialog.al-dialog[open] { animation: al-dialog-in var(--motion-fast, 120ms) var(--motion-ease-decelerate, cubic-bezier(0,0,0.2,1)); }
-  dialog.al-dialog::backdrop { background: rgba(0,0,0,0.4); }
+  dialog.al-dialog {
+    @apply m-auto p-0 border-0 bg-transparent;
+  }
+  dialog.al-dialog[open] {
+    animation: al-dialog-in var(--motion-fast, 120ms)
+      var(--motion-ease-decelerate, cubic-bezier(0, 0, 0.2, 1));
+  }
+  dialog.al-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.4);
+  }
   @keyframes al-dialog-in {
-    from { opacity: 0; transform: translateY(6px) scale(0.98); }
-    to { opacity: 1; transform: none; }
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   /* ── al-state: section state panels ─────────────────────────────────── */
-  .al-state-panel { @apply flex flex-col items-center justify-center py-12 text-center; }
-  .al-state-panel[hidden] { display: none; }
-  .al-state-panel[aria-busy="true"] .al-state-icon { animation: al-spin var(--motion-default, 180ms) linear infinite; }
+  .al-state-panel {
+    @apply flex flex-col items-center justify-center py-12 text-center;
+  }
+  .al-state-panel[hidden] {
+    display: none;
+  }
+  .al-state-panel[aria-busy="true"] .al-state-icon {
+    animation: al-spin var(--motion-default, 180ms) linear infinite;
+  }
 
-  /* Page layout */
-  .al-page-header { @apply px-6 sm:px-8 pt-6 pb-4; }
-  .al-page-title  { @apply text-xl font-semibold tracking-tight; color: var(--theme-text-strong); }
-  .al-section-title { @apply text-base font-semibold; color: var(--theme-text-strong); }
-  .al-page-desc   { @apply text-sm mt-0.5; color: var(--theme-text-muted); }
-  .al-page-body   { @apply px-6 sm:px-8 pb-8; }
+  /* Page layout — compact */
+  .al-page-header {
+    @apply px-6 sm:px-8 pt-4 pb-3;
+  }
+  .al-page-title {
+    @apply text-lg font-semibold tracking-tight;
+    color: var(--theme-text-strong);
+  }
+  .al-section-title {
+    @apply text-[15px] font-semibold;
+    color: var(--theme-text-strong);
+  }
+  .al-page-desc {
+    @apply text-[13px] mt-0.5;
+    color: var(--theme-text-muted);
+  }
+  .al-page-body {
+    @apply px-6 sm:px-8 pb-6;
+  }
 
   /* B-043: on phones the header title and its action buttons no longer fit
      on one row. Stack the actions below the title (right-aligned, wrapping)
@@ -249,35 +396,92 @@
     }
   }
 
-  /* Table — auto layout so columns size to their content; per-table
-     min-widths (colgroup/td) provide floors so narrow cells never
-     collapse and wide cells never bleed into their neighbours. */
-  .al-table       { @apply w-full text-sm; table-layout: auto; }
-  .al-table-head  { @apply text-left; background: var(--theme-table-header-bg); }
-  .al-table-th    { @apply px-4 py-2.5 text-xs font-medium uppercase tracking-wide; color: var(--theme-text-muted); }
-  .al-table-tr    { @apply border-b transition-colors; border-color: var(--theme-border); }
-  .al-table-tr:hover { background: var(--theme-table-row-hover); }
-  .al-table-td    { @apply px-4 py-3; color: var(--theme-text); }
+  /* Table — compact */
+  .al-table {
+    @apply w-full text-[13px];
+    table-layout: auto;
+  }
+  .al-table-head {
+    @apply text-left;
+    background: var(--theme-table-header-bg);
+  }
+  .al-table-th {
+    @apply px-3 py-2 text-[11px] font-medium uppercase tracking-wide;
+    color: var(--theme-text-muted);
+  }
+  .al-table-tr {
+    @apply border-b transition-colors;
+    border-color: var(--theme-border);
+  }
+  .al-table-tr:hover {
+    background: var(--theme-table-row-hover);
+  }
+  .al-table-td {
+    @apply px-3 py-2.5;
+    color: var(--theme-text);
+  }
 
-  /* Alert banners */
-  .al-alert-danger  { @apply rounded-xl px-4 py-3 text-sm flex items-start gap-3; background: var(--theme-danger-bg); color: var(--theme-danger); border: 1px solid color-mix(in oklch, var(--theme-danger) 20%, transparent); }
-  .al-alert-warning { @apply rounded-xl px-4 py-3 text-sm flex items-start gap-3; background: var(--theme-warning-bg); color: var(--theme-warning); border: 1px solid color-mix(in oklch, var(--theme-warning) 20%, transparent); }
-  .al-alert-success { @apply rounded-xl px-4 py-3 text-sm flex items-start gap-3; background: var(--theme-success-bg); color: var(--theme-success); border: 1px solid color-mix(in oklch, var(--theme-success) 20%, transparent); }
-  .al-alert-info    { @apply rounded-xl px-4 py-3 text-sm flex items-start gap-3; background: var(--theme-info-bg); color: var(--theme-info); border: 1px solid color-mix(in oklch, var(--theme-info) 20%, transparent); }
+  /* Alert banners — compact */
+  .al-alert-danger {
+    @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
+    background: var(--theme-danger-bg);
+    color: var(--theme-danger);
+    border: 1px solid color-mix(in oklch, var(--theme-danger) 20%, transparent);
+  }
+  .al-alert-warning {
+    @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
+    background: var(--theme-warning-bg);
+    color: var(--theme-warning);
+    border: 1px solid color-mix(in oklch, var(--theme-warning) 20%, transparent);
+  }
+  .al-alert-success {
+    @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
+    background: var(--theme-success-bg);
+    color: var(--theme-success);
+    border: 1px solid color-mix(in oklch, var(--theme-success) 20%, transparent);
+  }
+  .al-alert-info {
+    @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
+    background: var(--theme-info-bg);
+    color: var(--theme-info);
+    border: 1px solid color-mix(in oklch, var(--theme-info) 20%, transparent);
+  }
 
   /* Section divider label */
-  .al-section-label { @apply text-[11px] font-semibold uppercase tracking-widest mb-2; color: var(--theme-text-muted); }
+  .al-section-label {
+    @apply text-[10px] font-semibold uppercase tracking-widest mb-2;
+    color: var(--theme-text-muted);
+  }
 
   /* Radio selection — active state uses theme accent */
-  .al-radio-active { border-color: var(--theme-accent); background: var(--theme-accent-subtle); }
-  .al-radio-ring-active { border-color: var(--theme-accent); }
-  .al-radio-dot-active { background: var(--theme-accent); }
+  .al-radio-active {
+    border-color: var(--theme-accent);
+    background: var(--theme-accent-subtle);
+  }
+  .al-radio-ring-active {
+    border-color: var(--theme-accent);
+  }
+  .al-radio-dot-active {
+    background: var(--theme-accent);
+  }
 
   /* Toggle switch — activated: accent track + accent-text dot */
-  .al-toggle-track { @apply w-10 h-[22px] rounded-full flex items-center p-0.5 transition-colors cursor-pointer; background: var(--theme-toggle-bg, var(--theme-border)); border: 1px solid var(--theme-btn-border, var(--theme-border)); }
-  .peer:checked ~ .al-toggle-track { background: var(--theme-accent); }
-  .al-toggle-dot   { @apply w-[18px] h-[18px] rounded-full transition-transform shadow-sm; background: var(--theme-accent-text); }
-  .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); background: var(--theme-accent-text); }
+  .al-toggle-track {
+    @apply w-10 h-[22px] rounded-full flex items-center p-0.5 transition-colors cursor-pointer;
+    background: var(--theme-toggle-bg, var(--theme-border));
+    border: 1px solid var(--theme-btn-border, var(--theme-border));
+  }
+  .peer:checked ~ .al-toggle-track {
+    background: var(--theme-accent);
+  }
+  .al-toggle-dot {
+    @apply w-[18px] h-[18px] rounded-full transition-transform shadow-sm;
+    background: var(--theme-accent-text);
+  }
+  .peer:checked ~ .al-toggle-track .al-toggle-dot {
+    transform: translateX(18px);
+    background: var(--theme-accent-text);
+  }
 
   /* Legacy aliases — kept for backward compat */
   .al-ui-surface {
@@ -302,33 +506,52 @@
    blue focus ring. These overrides come AFTER the plugin in source
    order, so they win within the same cascade layer. */
 @layer base {
-  input:where([type='text']), input:where(:not([type])),
-  input:where([type='email']), input:where([type='url']),
-  input:where([type='password']), input:where([type='number']),
-  input:where([type='date']), input:where([type='datetime-local']),
-  input:where([type='month']), input:where([type='search']),
-  input:where([type='tel']), input:where([type='time']),
-  input:where([type='week']), select, select:where([multiple]), textarea {
+  input:where([type="text"]),
+  input:where(:not([type])),
+  input:where([type="email"]),
+  input:where([type="url"]),
+  input:where([type="password"]),
+  input:where([type="number"]),
+  input:where([type="date"]),
+  input:where([type="datetime-local"]),
+  input:where([type="month"]),
+  input:where([type="search"]),
+  input:where([type="tel"]),
+  input:where([type="time"]),
+  input:where([type="week"]),
+  select,
+  select:where([multiple]),
+  textarea {
     background-color: var(--theme-bg-input, #fff);
     border-color: var(--theme-border-input, oklch(55.1% 0.027 264.364));
     border-radius: var(--theme-radius-input, 0.75rem);
     color: var(--theme-text-strong, #171717);
   }
 
-  input:where([type='text']):focus, input:where(:not([type])):focus,
-  input:where([type='email']):focus, input:where([type='url']):focus,
-  input:where([type='password']):focus, input:where([type='number']):focus,
-  input:where([type='date']):focus, input:where([type='datetime-local']):focus,
-  input:where([type='month']):focus, input:where([type='search']):focus,
-  input:where([type='tel']):focus, input:where([type='time']):focus,
-  input:where([type='week']):focus, select:focus, select:where([multiple]):focus, textarea:focus {
+  input:where([type="text"]):focus,
+  input:where(:not([type])):focus,
+  input:where([type="email"]):focus,
+  input:where([type="url"]):focus,
+  input:where([type="password"]):focus,
+  input:where([type="number"]):focus,
+  input:where([type="date"]):focus,
+  input:where([type="datetime-local"]):focus,
+  input:where([type="month"]):focus,
+  input:where([type="search"]):focus,
+  input:where([type="tel"]):focus,
+  input:where([type="time"]):focus,
+  input:where([type="week"]):focus,
+  select:focus,
+  select:where([multiple]):focus,
+  textarea:focus {
     border-color: var(--theme-border-accent);
     box-shadow: 0 0 0 3px var(--theme-accent-subtle);
     --tw-ring-color: transparent;
     outline: none;
   }
 
-  input::placeholder, textarea::placeholder {
+  input::placeholder,
+  textarea::placeholder {
     color: var(--theme-text-placeholder, oklch(55.1% 0.027 264.364));
   }
 }
@@ -339,8 +562,14 @@
 }
 
 /* ── Refresh spin animation ─────────────────────────────────── */
-.al-refresh-spinning { animation: al-spin 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
-@keyframes al-spin { to { transform: rotate(360deg); } }
+.al-refresh-spinning {
+  animation: al-spin 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes al-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* ── Wallpaper layer ──────────────────────────────────────────
    Set via body.al-wallpaper + --al-wallpaper-image. The layer is a
@@ -358,13 +587,17 @@
   pointer-events: none;
 }
 #al-wallpaper-layer::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: var(--al-wallpaper-scrim, rgba(0, 0, 0, 0.35));
 }
-html { --al-wallpaper-scrim: rgba(255, 255, 255, 0.55); }
-html.dark { --al-wallpaper-scrim: rgba(0, 0, 0, 0.55); }
+html {
+  --al-wallpaper-scrim: rgba(255, 255, 255, 0.55);
+}
+html.dark {
+  --al-wallpaper-scrim: rgba(0, 0, 0, 0.55);
+}
 
 /* ── Console responsive ─────────────────────────────────────── */
 #terminal {
@@ -372,7 +605,9 @@ html.dark { --al-wallpaper-scrim: rgba(0, 0, 0, 0.55); }
   max-height: 60vh;
 }
 @media (max-width: 1023px) {
-  #terminal { max-height: 45vh; }
+  #terminal {
+    max-height: 45vh;
+  }
 }
 
 /* ── Tabs (shared across settings, image edit, analytics) ───── */
@@ -384,7 +619,9 @@ html.dark { --al-wallpaper-scrim: rgba(0, 0, 0, 0.55); }
   border-radius: 10px 10px 0 0;
   opacity: 0.75;
   cursor: pointer;
-  transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .tab-btn:hover:not([aria-selected="true"]) {
   color: var(--theme-text);
@@ -396,13 +633,22 @@ html.dark { --al-wallpaper-scrim: rgba(0, 0, 0, 0.55); }
   opacity: 1;
   font-weight: 600;
 }
-.tab-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.tab-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 .tab-panel {
   animation: tabIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @keyframes tabIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Resource format switcher (MB/GB/Cores/%) ───────────────── */
@@ -424,7 +670,9 @@ html.dark { --al-wallpaper-scrim: rgba(0, 0, 0, 0.55); }
   white-space: nowrap;
   cursor: pointer;
   min-height: 40px;
-  transition: background 0.15s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    background 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .al-format-switcher:hover {
   background: var(--theme-bg-hover);
@@ -453,8 +701,13 @@ html.dark { --al-wallpaper-scrim: rgba(0, 0, 0, 0.55); }
   }
 
   @keyframes al-motion-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
   }
 
   /* Traveling entrances (dialogs, sheets, cards) land at their final state
@@ -467,60 +720,167 @@ html.dark { --al-wallpaper-scrim: rgba(0, 0, 0, 0.55); }
     animation: none !important;
     transition: opacity var(--dur-quick, 150ms) ease !important;
   }
-  .al-sheet-overlay.open .al-sheet-panel { transform: none !important; }
-  .al-sheet-overlay .al-sheet-panel.closing { transform: none !important; opacity: 0; }
+  .al-sheet-overlay.open .al-sheet-panel {
+    transform: none !important;
+  }
+  .al-sheet-overlay .al-sheet-panel.closing {
+    transform: none !important;
+    opacity: 0;
+  }
 }
 
 /* ── Custom select (shared .custom-select / .cs-*) ─────────────── */
-.custom-select { position: relative; user-select: none; }
-.cs-native { display: none; }
+.custom-select {
+  position: relative;
+  user-select: none;
+}
+.cs-native {
+  display: none;
+}
 .cs-trigger {
-  display: flex; align-items: center; justify-content: space-between;
-  width: 100%; padding: 10px 14px; border-radius: var(--theme-radius-input, 0.75rem); cursor: pointer;
-  font-size: 14px; border: 1px solid var(--theme-border, #e5e5e5);
-  background: var(--theme-bg-secondary, #f5f5f5); color: var(--theme-text-strong, #171717);
-  transition: background 0.15s, border-color 0.15s; min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--theme-radius-input, 0.75rem);
+  cursor: pointer;
+  font-size: 14px;
+  border: 1px solid var(--theme-border, #e5e5e5);
+  background: var(--theme-bg-secondary, #f5f5f5);
+  color: var(--theme-text-strong, #171717);
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+  min-height: 44px;
 }
-.dark .cs-trigger { background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); color: var(--theme-text, #e5e5e5); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
-.cs-trigger:hover { background: var(--theme-bg-hover, #ebebeb); border-color: var(--theme-border, #d4d4d4); }
-.dark .cs-trigger:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.09)); }
-.cs-trigger.open { border-color: var(--theme-border, #a3a3a3); }
-.dark .cs-trigger.open { border-color: var(--theme-border, rgba(255,255,255,0.2)); }
-.cs-trigger:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
-.cs-trigger svg { width: 14px; height: 14px; opacity: 0.4; transition: transform 0.18s; flex-shrink: 0; }
-.cs-trigger.open svg { transform: rotate(180deg); }
-.cs-placeholder { opacity: 0.45; }
+.dark .cs-trigger {
+  background: var(--theme-bg-secondary, rgba(255, 255, 255, 0.06));
+  color: var(--theme-text, #e5e5e5);
+  border-color: var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+}
+.cs-trigger:hover {
+  background: var(--theme-bg-hover, #ebebeb);
+  border-color: var(--theme-border, #d4d4d4);
+}
+.dark .cs-trigger:hover {
+  background: var(--theme-bg-hover, rgba(255, 255, 255, 0.09));
+}
+.cs-trigger.open {
+  border-color: var(--theme-border, #a3a3a3);
+}
+.dark .cs-trigger.open {
+  border-color: var(--theme-border, rgba(255, 255, 255, 0.2));
+}
+.cs-trigger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.cs-trigger svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.4;
+  transition: transform 0.18s;
+  flex-shrink: 0;
+}
+.cs-trigger.open svg {
+  transform: rotate(180deg);
+}
+.cs-placeholder {
+  opacity: 0.45;
+}
 .cs-dropdown {
-  position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 9999;
-  background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1); overflow: hidden;
-  max-height: 200px; overflow-y: auto;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: var(--theme-bg-card, #fff);
+  border: 1px solid var(--theme-border, #e5e5e5);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-height: 200px;
+  overflow-y: auto;
 }
-.dark .cs-dropdown { background: var(--theme-bg-card, #1e1e1e); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-.cs-option { padding: 10px 14px; font-size: 13px; cursor: pointer; color: var(--theme-text-strong, #171717); transition: background 0.1s; min-height: 44px; display: flex; align-items: center; }
-.dark .cs-option { color: var(--theme-text, #e5e5e5); }
-.cs-option:hover { background: rgba(0,0,0,0.05); }
-.dark .cs-option:hover { background: rgba(255,255,255,0.06); }
-.cs-option.cs-active { background: rgba(0,0,0,0.08); }
-.dark .cs-option.cs-active { background: rgba(255,255,255,0.1); }
-.cs-option.selected { background: rgba(0,0,0,0.06); font-weight: 500; }
-.dark .cs-option.selected { background: rgba(255,255,255,0.08); }
-.cs-option.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+.dark .cs-dropdown {
+  background: var(--theme-bg-card, #1e1e1e);
+  border-color: var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.cs-option {
+  padding: 10px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--theme-text-strong, #171717);
+  transition: background 0.1s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.dark .cs-option {
+  color: var(--theme-text, #e5e5e5);
+}
+.cs-option:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.dark .cs-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.cs-option.cs-active {
+  background: rgba(0, 0, 0, 0.08);
+}
+.dark .cs-option.cs-active {
+  background: rgba(255, 255, 255, 0.1);
+}
+.cs-option.selected {
+  background: rgba(0, 0, 0, 0.06);
+  font-weight: 500;
+}
+.dark .cs-option.selected {
+  background: rgba(255, 255, 255, 0.08);
+}
+.cs-option.disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
 
 /* ports allocator external-port list — keyboard-highlighted option */
-.pa-extopt.pa-extopt-active { background: rgba(0,0,0,0.08); }
-.dark .pa-extopt.pa-extopt-active { background: rgba(255,255,255,0.1); }
+.pa-extopt.pa-extopt-active {
+  background: rgba(0, 0, 0, 0.08);
+}
+.dark .pa-extopt.pa-extopt-active {
+  background: rgba(255, 255, 255, 0.1);
+}
 
 /* ── Schedule visual timing mode ──────────────────────────────── */
 .sched-step {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 2.25rem; height: 2.25rem; flex-shrink: 0; border-radius: 0.5rem;
-  border: 1px solid var(--theme-border); color: var(--theme-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text-muted);
   background: var(--theme-bg-card);
-  transition: background var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)), color var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
+  transition:
+    background var(--dur-quick, 150ms)
+      var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)),
+    color var(--dur-quick, 150ms)
+      var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
 }
-.sched-step:hover { background: var(--theme-bg-hover); color: var(--theme-text-strong); }
-.sched-step:disabled { opacity: 0.4; cursor: not-allowed; }
+.sched-step:hover {
+  background: var(--theme-bg-hover);
+  color: var(--theme-text-strong);
+}
+.sched-step:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 .sched-step:focus-visible,
 .sched-day-chip:focus-visible,
 .sched-mode-btn:focus-visible {
@@ -534,39 +894,98 @@ html.dark { --al-wallpaper-scrim: rgba(0, 0, 0, 0.55); }
 }
 
 .sched-every-chip {
-  display: inline-flex; align-items: center; gap: 0.25rem;
-  font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
-  border: 1px solid var(--theme-border); color: var(--theme-text);
-  background: var(--theme-bg-card); cursor: pointer; user-select: none;
-  transition: background var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)), color var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text);
+  background: var(--theme-bg-card);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background var(--dur-quick, 150ms)
+      var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)),
+    color var(--dur-quick, 150ms)
+      var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)),
+    border-color var(--dur-quick, 150ms)
+      var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
 }
-.sched-every-chip svg { opacity: 0; transform: scale(0.6); transition: opacity 120ms cubic-bezier(0.16, 1, 0.3, 1), transform 120ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)); }
-.sched-every-chip.on { background: var(--theme-text-strong); color: var(--theme-bg-card); border-color: var(--theme-text-strong); }
-.sched-every-chip.on svg { opacity: 1; transform: scale(1); }
-.sched-every-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+.sched-every-chip svg {
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 120ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 120ms var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+.sched-every-chip.on {
+  background: var(--theme-text-strong);
+  color: var(--theme-bg-card);
+  border-color: var(--theme-text-strong);
+}
+.sched-every-chip.on svg {
+  opacity: 1;
+  transform: scale(1);
+}
+.sched-every-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .sched-day-chip {
-  padding: 6px 10px; font-size: 11px; font-weight: 500; border-radius: 8px;
-  border: 1px solid var(--theme-border); color: var(--theme-text);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text);
   background: var(--theme-bg-card);
-  transition: background var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)), color var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--dur-quick, 150ms) var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
+  transition:
+    background var(--dur-quick, 150ms)
+      var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)),
+    color var(--dur-quick, 150ms)
+      var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1)),
+    border-color var(--dur-quick, 150ms)
+      var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
 }
-.sched-day-chip:hover { background: var(--theme-bg-hover); color: var(--theme-text-strong); }
+.sched-day-chip:hover {
+  background: var(--theme-bg-hover);
+  color: var(--theme-text-strong);
+}
 .sched-day-chip.on,
-.sched-day-chip.on:hover { background: var(--theme-text-strong); color: var(--theme-bg-card); border-color: var(--theme-text-strong); }
-.sched-day-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+.sched-day-chip.on:hover {
+  background: var(--theme-text-strong);
+  color: var(--theme-bg-card);
+  border-color: var(--theme-text-strong);
+}
+.sched-day-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 /* ── Ports allocator (shared) ──────────────────────────────────── */
 .pa-row {
-  animation: pa-row-in var(--dur-enter, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  animation: pa-row-in var(--dur-enter, 320ms)
+    var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
   animation-delay: calc(var(--pa-i, 0) * var(--dur-stagger, 40ms));
 }
 @keyframes pa-row-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pa-row { animation: none; }
+  .pa-row {
+    animation: none;
+  }
 }
 
 /* ── Settings tab highlight — theme-driven active state ────────
@@ -575,12 +994,14 @@ html.dark { --al-wallpaper-scrim: rgba(0, 0, 0, 0.55); }
 #sliding-background {
   background: var(--theme-accent) !important;
   border-color: var(--theme-accent) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
 }
 .dark #sliding-background {
-  box-shadow: 0 1px 4px rgba(255,255,255,0.18);
+  box-shadow: 0 1px 4px rgba(255, 255, 255, 0.18);
 }
-.nav-link2.nav2-active { color: var(--theme-accent-text); }
+.nav-link2.nav2-active {
+  color: var(--theme-accent-text);
+}
 
 /* Server subnav (serverTemplate) — same active pill */
 .nav-link2[data-active="true"] {
@@ -621,7 +1042,10 @@ html .mobile-nav-link.active-mobile {
    doesn't show between sidebar and topbar — only between sidebar and content) */
 #pc-sidebar2 {
   background: var(--theme-nav-bg);
-  background-image: linear-gradient(var(--theme-nav-border), var(--theme-nav-border));
+  background-image: linear-gradient(
+    var(--theme-nav-border),
+    var(--theme-nav-border)
+  );
   background-size: 1px calc(100% - 64px);
   background-position: right top 64px;
   background-repeat: no-repeat;
@@ -629,8 +1053,12 @@ html .mobile-nav-link.active-mobile {
 
 /* ── Button press feedback ──────────────────────────────────── */
 @keyframes al-btn-press {
-  from { transform: translateY(0) scale(1); }
-  to   { transform: translateY(1px) scale(0.96); }
+  from {
+    transform: translateY(0) scale(1);
+  }
+  to {
+    transform: translateY(1px) scale(0.96);
+  }
 }
 button:not(:disabled):active,
 input[type="submit"]:not(:disabled):active,
@@ -657,108 +1085,151 @@ input[type="button"]:disabled {
    Lives in @layer components so the `hidden`/`flex` display utilities
    can toggle it. */
 @layer components {
-.al-sheet-overlay {
-  @apply fixed inset-0 z-50 flex items-center justify-center p-4;
-  background: rgba(0, 0, 0, 0.5);
-}
+  .al-sheet-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+    background: rgba(0, 0, 0, 0.5);
+  }
 
-/* Every sheet panel keeps its border themed. Tailwind v4's `border`
+  /* Every sheet panel keeps its border themed. Tailwind v4's `border`
    utility defaults to currentColor, which renders as a stray light/white
    edge on any popup that forgets to theme it — this single rule removes
    that class of bug (B-050 stray white border). Inline border-color (the
    common case) still wins. */
-.al-sheet-panel { border-color: var(--theme-border); }
+  .al-sheet-panel {
+    border-color: var(--theme-border);
+  }
 
-/* Shared sheet regions. Popups that use these get one compact, touch-
+  /* Shared sheet regions. Popups that use these get one compact, touch-
    friendly header/footer treatment across every surface instead of each
    page inventing its own paddings. */
-.al-sheet-header { @apply flex items-center justify-between gap-3 px-6 py-4 border-b shrink-0; }
-.al-sheet-footer { @apply flex items-center gap-2 px-6 py-4 border-t shrink-0; }
+  .al-sheet-header {
+    @apply flex items-center justify-between gap-3 px-5 py-3 border-b shrink-0;
+  }
+  .al-sheet-footer {
+    @apply flex items-center gap-2 px-5 py-3 border-t shrink-0;
+  }
 
-@media (max-width: 639px) {
-  .al-sheet-overlay {
-    z-index: 70 !important;
-    align-items: flex-end !important;
-    padding: 0 !important;
-  }
-  .al-sheet-panel {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    border-radius: 1.25rem 1.25rem 0 0 !important;
-    max-height: 92dvh;
-    overflow-y: auto;
-  }
-  .al-sheet-overlay.open .al-sheet-panel {
-    animation: al-sheet-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  .al-sheet-overlay .al-sheet-panel.closing {
-    animation: al-sheet-out 200ms cubic-bezier(0.4, 0, 1, 1) both;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .al-sheet-overlay.open .al-sheet-panel { animation: none; }
-    .al-sheet-overlay .al-sheet-panel.closing { animation: none; }
-  }
-  /* Compact sheet regions on phones: tight horizontal padding, smaller
+  @media (max-width: 639px) {
+    .al-sheet-overlay {
+      z-index: 70 !important;
+      align-items: flex-end !important;
+      padding: 0 !important;
+    }
+    .al-sheet-panel {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      border-radius: 1.25rem 1.25rem 0 0 !important;
+      max-height: 92dvh;
+      overflow-y: auto;
+    }
+    .al-sheet-overlay.open .al-sheet-panel {
+      animation: al-sheet-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .al-sheet-overlay .al-sheet-panel.closing {
+      animation: al-sheet-out 200ms cubic-bezier(0.4, 0, 1, 1) both;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .al-sheet-overlay.open .al-sheet-panel {
+        animation: none;
+      }
+      .al-sheet-overlay .al-sheet-panel.closing {
+        animation: none;
+      }
+    }
+    /* Compact sheet regions on phones: tight horizontal padding, smaller
      vertical rhythm, and 44px touch targets for the header/footer
      controls (B-044, B-045). */
-  .al-sheet-header, .al-sheet-footer { padding-left: 1rem; padding-right: 1rem; }
-  .al-sheet-header { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-  .al-sheet-footer { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-  .al-sheet-header button,
-  .al-sheet-footer button,
-  .al-sheet-header a,
-  .al-sheet-footer a { min-height: 2.75rem; }
-}
-@keyframes al-sheet-in {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
-}
-@keyframes al-sheet-out {
-  from { transform: translateY(0); }
-  to   { transform: translateY(100%); }
-}
+    .al-sheet-header,
+    .al-sheet-footer {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    .al-sheet-header {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    .al-sheet-footer {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    .al-sheet-header button,
+    .al-sheet-footer button,
+    .al-sheet-header a,
+    .al-sheet-footer a {
+      min-height: 2.75rem;
+    }
+  }
+  @keyframes al-sheet-in {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  @keyframes al-sheet-out {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
 }
 
-  /* ── Enhanced al-card: first-class header/title/action ────── */
-  .al-card-header {
-    @apply -mx-4 -mt-4 mb-0 px-4 py-3 text-sm font-medium border-b flex items-center justify-between gap-3;
-    background: var(--theme-bg-secondary);
-    border-color: var(--theme-border);
-    color: var(--theme-text-muted);
-  }
-  .al-card-header-title {
-    @apply text-sm font-semibold truncate;
-    color: var(--theme-text-strong);
-  }
-  .al-card-header-desc {
-    @apply text-xs mt-0.5;
-    color: var(--theme-text-muted);
-  }
-  .al-card-header-actions {
-    @apply flex items-center gap-2 shrink-0;
-  }
+/* ── Enhanced al-card: first-class header/title/action ────── */
+.al-card-header {
+  @apply -mx-4 -mt-4 mb-0 px-4 py-3 text-sm font-medium border-b flex items-center justify-between gap-3;
+  background: var(--theme-bg-secondary);
+  border-color: var(--theme-border);
+  color: var(--theme-text-muted);
+}
+.al-card-header-title {
+  @apply text-sm font-semibold truncate;
+  color: var(--theme-text-strong);
+}
+.al-card-header-desc {
+  @apply text-xs mt-0.5;
+  color: var(--theme-text-muted);
+}
+.al-card-header-actions {
+  @apply flex items-center gap-2 shrink-0;
+}
 
-  /* ── Table compact mode ─────────────────────────────────── */
-  .al-table-compact .al-table-td { @apply px-3 py-1.5; }
-  .al-table-compact .al-table-th { @apply px-3 py-1.5; }
+/* ── Table compact mode ─────────────────────────────────── */
+.al-table-compact .al-table-td {
+  @apply px-3 py-1.5;
+}
+.al-table-compact .al-table-th {
+  @apply px-3 py-1.5;
+}
 
-  /* ── Table sticky header ────────────────────────────────── */
-  .al-table-sticky { border-collapse: separate; border-spacing: 0; }
-  .al-table-sticky thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: var(--theme-bg-card);
-  }
+/* ── Table sticky header ────────────────────────────────── */
+.al-table-sticky {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.al-table-sticky thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--theme-bg-card);
+}
 
-  /* Tables — scroll horizontally on narrow screens instead of bursting
+/* Tables — scroll horizontally on narrow screens instead of bursting
    the layout; normal table layout restored on desktop. Tables that the
    al-table.js upgrader flags (.al-table-card) instead collapse into
    stacked cards on small screens using the injected data-label. */
-.al-table { display: block; overflow-x: auto; }
+.al-table {
+  display: block;
+  overflow-x: auto;
+}
 @media (min-width: 640px) {
-  .al-table { display: table; overflow: visible; }
+  .al-table {
+    display: table;
+    overflow: visible;
+  }
 }
 
 @media (max-width: 639px) {
@@ -767,8 +1238,12 @@ input[type="button"]:disabled {
     overflow: visible;
     width: 100%;
   }
-  .al-table-card thead { display: none; }
-  .al-table-card tbody { display: block; }
+  .al-table-card thead {
+    display: none;
+  }
+  .al-table-card tbody {
+    display: block;
+  }
   .al-table-card tbody tr {
     display: block;
     width: 100%;
@@ -779,8 +1254,12 @@ input[type="button"]:disabled {
     background: var(--theme-bg-card);
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
   }
-  .al-table-card tbody tr:last-child { margin-bottom: 0; }
-  .al-table-card tbody tr:hover { background: var(--theme-bg-card); }
+  .al-table-card tbody tr:last-child {
+    margin-bottom: 0;
+  }
+  .al-table-card tbody tr:hover {
+    background: var(--theme-bg-card);
+  }
   .al-table-card tbody td {
     display: flex;
     align-items: center;
@@ -789,7 +1268,9 @@ input[type="button"]:disabled {
     padding: 0.625rem 0.875rem;
     border-bottom: 1px dashed var(--theme-border);
   }
-  .al-table-card tbody tr > td:last-child { border-bottom: none; }
+  .al-table-card tbody tr > td:last-child {
+    border-bottom: none;
+  }
   .al-table-card tbody td::before {
     content: attr(data-label);
     order: -1;
@@ -800,11 +1281,17 @@ input[type="button"]:disabled {
     letter-spacing: 0.05em;
     color: var(--theme-text-muted);
   }
-  .al-table-card tbody td:first-child { padding-top: 0.75rem; }
-  .al-table-card tbody tr > td:last-child { padding-bottom: 0.75rem; }
+  .al-table-card tbody td:first-child {
+    padding-top: 0.75rem;
+  }
+  .al-table-card tbody tr > td:last-child {
+    padding-bottom: 0.75rem;
+  }
   /* B-041: shared owner for "hide this table column on phones".
      Was previously copy-pasted per-view (images, store, addons). */
-  .col-hide { display: none; }
+  .col-hide {
+    display: none;
+  }
   /* B-042: collapsible expansion rows (e.g. schedules task list) must
      not be re-styled as cards; the single colspan cell spans the row. */
   .al-table-card tbody tr[data-tasks-row] {
@@ -820,15 +1307,27 @@ input[type="button"]:disabled {
     padding: 0;
     border: none;
   }
-  .al-table-card tbody tr[data-tasks-row] > td::before { content: none; }
+  .al-table-card tbody tr[data-tasks-row] > td::before {
+    content: none;
+  }
 }
 
 /* ── Top loading line animation ─────────────────────────────── */
 @keyframes al-page-loader-sweep {
-  0%   { transform: translateX(-110%); }
-  50%  { transform: translateX(10%); }
-  100% { transform: translateX(110%); }
+  0% {
+    transform: translateX(-110%);
+  }
+  50% {
+    transform: translateX(10%);
+  }
+  100% {
+    transform: translateX(110%);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  #al-page-loader { animation: none !important; opacity: 0.6 !important; width: 100% !important; }
+  #al-page-loader {
+    animation: none !important;
+    opacity: 0.6 !important;
+    width: 100% !important;
+  }
 }
