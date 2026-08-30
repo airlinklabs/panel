@@ -762,11 +762,16 @@ export async function mount(root, config) {
   function setAllStatsOffline() {
     serverOnline = false;
     updateLoadLogsButton();
+    const memMB = config.serverMemory;
     root.querySelector("#ramUsage").textContent =
-      `0% (0 MB / ${formatRam(config.serverMemory * 1024 * 1024)})`;
-    const cores = Math.max(1, Math.round(config.serverCpu / 100));
+      memMB > 0
+        ? `0% (0 MB / ${formatRam(memMB * 1024 * 1024)})`
+        : `0 MB used (unlimited)`;
+    const cpuPct = config.serverCpu;
     root.querySelector("#cpuUsage").textContent =
-      `0% of ${cores} core${cores === 1 ? "" : "s"}`;
+      cpuPct > 0
+        ? `0% of ${Math.max(1, Math.round(cpuPct / 100))} core${Math.max(1, Math.round(cpuPct / 100)) === 1 ? "" : "s"}`
+        : `0% (unlimited)`;
     const diskMB = config.serverStorage;
     root.querySelector("#diskUsage").textContent =
       diskMB > 0
@@ -800,12 +805,14 @@ export async function mount(root, config) {
   function updateCpuUsage(stats) {
     let pct = Number(stats?.data?.cpu?.percentage) || 0;
     if (isNaN(pct)) pct = 0;
-    const allocPct = config.serverCpu || 100;
-    const cores = Math.max(1, Math.round(allocPct / 100));
+    const allocPct = config.serverCpu;
+    const cores = allocPct > 0 ? Math.max(1, Math.round(allocPct / 100)) : 0;
     const ofAlloc =
       allocPct > 0 ? Math.round(Math.min(100, (pct / allocPct) * 100)) : 0;
     root.querySelector("#cpuUsage").textContent =
-      `${ofAlloc}% of ${cores} core${cores === 1 ? "" : "s"}`;
+      cores === 0
+        ? `${ofAlloc}% (unlimited)`
+        : `${ofAlloc}% of ${cores} core${cores === 1 ? "" : "s"}`;
     if (ofAlloc > 0) updateChart(cpuChart, ofAlloc);
     const mob = root.querySelector("#mobile-cpuUsage");
     if (mob) mob.textContent = `${ofAlloc}%`;

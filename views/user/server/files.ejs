@@ -88,6 +88,12 @@ function escJS(val) {
                 New File
             </button>
 
+            <button id="createFolder" onclick="openCreateFolderModal()" type="button"
+                class="al-btn-secondary">
+                <%- icon('folder-plus', { class: 'size-3.5 inline-flex mr-1' }) %>
+                New Folder
+            </button>
+
             <button id="uploadFile" onclick="openUploadFileModal()" type="button"
                 class="al-btn-secondary">
                 <%- icon('upload', { class: 'size-3.5 inline-flex mr-1' }) %>
@@ -100,7 +106,12 @@ function escJS(val) {
                 Pull From URL
             </button>
 
-             <%- include('../../components/sftp', { server: server }) %>
+            <button onclick="refreshFileList()" type="button" class="al-btn-secondary">
+                <%- icon('refresh-cw', { class: 'size-3.5 inline-flex mr-1' }) %>
+                Refresh
+            </button>
+
+              <%- include('../../components/sftp', { server: server }) %>
           </div>
           <% } %>
         </div>
@@ -1397,6 +1408,7 @@ function openCreateFileModal() {
   });
 
   window.openCreateFileModal = openCreateFileModal;
+  window.openCreateFolderModal = openCreateFolderModal;
   window.openUploadFileModal = openUploadFileModal;
   window.openPullFileModal = openPullFileModal;
   window.closeMoveModal = closeMoveModal;

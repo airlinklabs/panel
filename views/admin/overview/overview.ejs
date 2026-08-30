@@ -237,7 +237,7 @@ function adminOverview() {
           statusDiv.innerHTML = '<span class="text-neutral-500">Installing...</span>';
           self.fadeIn(statusDiv);
           try {
-            var response = await fetch('/admin/perform-update', { method: 'POST' });
+            var response = await fetch('/admin/perform-update', { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
             var data = await response.json();
             showToast(data.message || 'Update complete. Restarting.', 'success');
             statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';

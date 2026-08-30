@@ -733,7 +733,7 @@ function dashboard() {
         ghost.style.top = (e.clientY + GHOST_OFFSET_Y) + 'px';
       }
 
-      document.querySelectorAll('.server-card[draggable]').forEach(function (card) {
+      document.querySelectorAll('.al-server-card[draggable]').forEach(function (card) {
         card.addEventListener('dragstart', function (e) {
           dragUUID = card.dataset.serverUuid;
           dragName = card.dataset.serverName;
