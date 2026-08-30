@@ -506,7 +506,7 @@ function escJS(val) {
     const loadingRows = '<tr><td colspan="4" class="px-4 py-8 text-center text-sm" style="color:var(--theme-text-muted)"><span class="inline-flex items-center gap-2"><svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Loading files…</span></td></tr>';
     tbody.innerHTML = loadingRows;
     try {
-      const res = await fetch('/server/<%= server.UUID %>/files/list?path=' + encodeURIComponent(fileListPath || '/'));
+      const res = await fetch('/api/v2/servers/<%= server.UUID %>/files?path=' + encodeURIComponent(fileListPath || '/'));
       const data = await res.json();
       if (!data.success || typeof data.html !== 'string') { throw new Error('Bad response'); }
       tbody.innerHTML = data.html;
@@ -528,7 +528,7 @@ function escJS(val) {
       confirmLabel: 'Delete',
       onConfirm: () => {
       const loader = showLoadingPopup('Deleting File', 'Removing file from server...');
-      fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(filePath), {
+      fetch('/api/v2/servers/<%= server.UUID %>/files?path=' + encodeURIComponent(filePath), {
         method: 'DELETE'
       })
       .then(response => {
@@ -656,7 +656,7 @@ function archiveFiles(files) {
     const loader = showLoadingPopup('Creating Archive', 'Preparing files for archiving...');
     loader.updateProgress(20, 'Compressing files...');
 
-    fetch('/server/<%= server.UUID %>/zip', {
+    fetch('/api/v2/servers/<%= server.UUID %>/files/zip', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -710,7 +710,7 @@ confirmMassDeleteBtn.addEventListener('click', async function() {
   loader.updateProgress(10, 'Processing deletion requests...');
 
   const deletePromises = selectedFiles.map(fileName =>
-    fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(fileName), {
+    fetch('/api/v2/servers/<%= server.UUID %>/files?path=' + encodeURIComponent(fileName), {
       method: 'DELETE'
     })
   );
@@ -805,7 +805,7 @@ function openCreateFileModal() {
 
         const parentPath = filePath.substring(0, filePath.lastIndexOf('/'));
 
-        const response = await fetch(`/server/<%= server.UUID %>/unzip`, {
+        const response = await fetch(`/api/v2/servers/<%= server.UUID %>/files/unzip`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1042,7 +1042,7 @@ function openCreateFileModal() {
         const parts = finalPath.split('/');
         const name = parts.pop();
         const parent = parts.join('/');
-        const res = await fetch('/server/<%= server.UUID %>/files/mkdir', {
+        const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/mkdir', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ path: parent || '/', name }),
@@ -1070,7 +1070,7 @@ function openCreateFileModal() {
       // Simple file in current dir — direct POST
       try {
         const encoded = encodeURIComponent(finalPath);
-        const res = await fetch('/server/<%= server.UUID %>/files/' + encoded, {
+        const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/content?path=' + encoded, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: '' }),
@@ -1091,7 +1091,7 @@ function openCreateFileModal() {
     const tempPath = base ? base + '/' + tempName : tempName;
 
     try {
-      const res1 = await fetch('/server/<%= server.UUID %>/files/' + encodeURIComponent(tempPath), {
+      const res1 = await fetch('/api/v2/servers/<%= server.UUID %>/files/content?path=' + encodeURIComponent(tempPath), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: '' }),
@@ -1100,7 +1100,7 @@ function openCreateFileModal() {
 
       loader.updateProgress(50, '<%= req.translations.movingToTarget || "Moving to target path..." %>');
 
-      const res2 = await fetch('/server/<%= server.UUID %>/rename', {
+      const res2 = await fetch('/api/v2/servers/<%= server.UUID %>/files/rename', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: tempPath, newName: finalPath }),
@@ -1119,7 +1119,7 @@ function openCreateFileModal() {
     const keepPath = finalPath.replace(/\/*$/, '') + '/.airlink_keep';
     const encoded = encodeURIComponent(keepPath);
     try {
-      const res = await fetch('/server/<%= server.UUID %>/files/' + encoded, {
+      const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/content?path=' + encoded, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: '' }),
@@ -1145,7 +1145,7 @@ function openCreateFileModal() {
     const loader = showLoadingPopup('Renaming', 'Processing...');
 
     try {
-      const res = await fetch('/server/<%= server.UUID %>/rename', {
+      const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/rename', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: filePath, newName: newPath }),
@@ -1261,7 +1261,7 @@ function openCreateFileModal() {
     const dest = document.getElementById('moveDestPath').value.trim();
     if (!dest) { showToast('Enter a destination path.', 'error'); return; }
     try {
-      const res = await fetch(`/server/<%- server.UUID %>/files/rename`, {
+      const res = await fetch(`/api/v2/servers/<%- server.UUID %>/files/move`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ oldPath: src, newPath: dest }),
@@ -1281,7 +1281,7 @@ function openCreateFileModal() {
     const base = name.includes('.') ? name.slice(0, name.lastIndexOf('.')) : name;
     const dir  = path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : '';
     try {
-      const res = await fetch(`/server/<%- server.UUID %>/files/copy`, {
+      const res = await fetch(`/api/v2/servers/<%- server.UUID %>/files/copy`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ location: path }),
@@ -1388,7 +1388,7 @@ function openCreateFileModal() {
     closePullFileModal();
     const loader = showLoadingPopup('Pulling File', 'Downloading from URL...');
     try {
-      const res = await fetch('/server/<%= server.UUID %>/files/pull', {
+      const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/pull', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, path: '<%= currentPath %>' }),

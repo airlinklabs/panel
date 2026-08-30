@@ -9,6 +9,7 @@
  * POST   /api/v2/admin/servers/:id/suspend  — Suspend server
  * POST   /api/v2/admin/servers/:id/unsuspend — Unsuspend server
  * POST   /api/v2/admin/servers/:id/transfer — Transfer server
+ * GET    /api/v2/admin/servers/:id/transfer/status — Transfer poll
  */
 
 import { Router } from "express";
@@ -29,6 +30,7 @@ import {
   adminTransferServerBody,
 } from "../dto";
 import { daemonRequest } from "../../../../services/daemonService";
+import { getTransferState } from "../../../../handlers/utils/server/serverTransfer";
 
 const router = Router();
 
@@ -404,5 +406,30 @@ router.post(
     });
   },
 );
+
+// ---------------------------------------------------------------------------
+// GET /api/v2/admin/servers/:id/transfer/status — Transfer poll
+// ---------------------------------------------------------------------------
+router.get("/:id/transfer/status", async (req, res) => {
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid server ID", 400);
+  }
+
+  const state = getTransferState(id);
+  if (!state) {
+    return jsonOk(res, { status: "idle" });
+  }
+
+  jsonOk(res, {
+    status: state.status,
+    error: state.error,
+    startedAt: state.startedAt,
+    completedAt: state.completedAt,
+    serverName: state.serverName,
+    sourceNodeId: state.sourceNodeId,
+    targetNodeId: state.targetNodeId,
+  });
+});
 
 export default router;

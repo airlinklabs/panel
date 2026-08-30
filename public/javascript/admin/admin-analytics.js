@@ -3,29 +3,41 @@
   const ACTIVITY_PERIOD_DAYS = 30;
   const BAR_HIGH_THRESHOLD = 90;
   const BAR_MEDIUM_THRESHOLD = 70;
-  var BAR_COLOR_HIGH = _rootStyle.getPropertyValue('--theme-danger').trim() || '#ef4444';
-  var BAR_COLOR_MEDIUM = _rootStyle.getPropertyValue('--theme-warning').trim() || '#f97316';
-  var BAR_COLOR_LOW = _rootStyle.getPropertyValue('--theme-info').trim() || '#3b82f6';
+  var BAR_COLOR_HIGH =
+    _rootStyle.getPropertyValue("--theme-danger").trim() || "#ef4444";
+  var BAR_COLOR_MEDIUM =
+    _rootStyle.getPropertyValue("--theme-warning").trim() || "#f97316";
+  var BAR_COLOR_LOW =
+    _rootStyle.getPropertyValue("--theme-info").trim() || "#3b82f6";
   const CHART_BORDER_RADIUS = 4;
   const MAX_TICKS = 10;
 
   let analyticsData = null;
-  let loginChart  = null;
+  let loginChart = null;
 
   // Tab selection is owned by al-tabs (`[data-al-tabs]` on .al-page-body),
   // which drives panel visibility through the `hidden` attribute and syncs
   // the URL hash. This script only renders data into the active panel.
 
-  const isDark    = () => document.documentElement.classList.contains('dark');
-  const textColor = () => isDark() ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)';
-  const gridColor = () => isDark() ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  const isDark = () => document.documentElement.classList.contains("dark");
+  const textColor = () =>
+    isDark() ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.35)";
+  const gridColor = () =>
+    isDark() ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
 
-  function fmt(n) { return n.toLocaleString(); }
+  function fmt(n) {
+    return n.toLocaleString();
+  }
 
   function bar(label, value, max) {
-    const pct   = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
-    const color = pct >= BAR_HIGH_THRESHOLD ? BAR_COLOR_HIGH : pct >= BAR_MEDIUM_THRESHOLD ? BAR_COLOR_MEDIUM : BAR_COLOR_LOW;
-    const label2 = max > 0 ? pct + '%' : '—';
+    const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
+    const color =
+      pct >= BAR_HIGH_THRESHOLD
+        ? BAR_COLOR_HIGH
+        : pct >= BAR_MEDIUM_THRESHOLD
+          ? BAR_COLOR_MEDIUM
+          : BAR_COLOR_LOW;
+    const label2 = max > 0 ? pct + "%" : "—";
     return `<div>
       <div class="flex justify-between text-xs text-neutral-600 dark:text-neutral-400 mb-1.5">
         <span class="truncate max-w-[60%] font-medium">${label}</span>
@@ -39,32 +51,40 @@
 
   function renderServers(d) {
     const s = d.servers;
-    document.getElementById('sv-total').textContent   = fmt(s.total);
-    document.getElementById('sv-ram').textContent     = s.totalRamMb >= 1024 ? (s.totalRamMb / 1024).toFixed(1) + ' GB' : s.totalRamMb + ' MB';
-    document.getElementById('sv-cpu').textContent     = s.totalCpuPct + '%';
-    document.getElementById('sv-storage').textContent = s.totalStorageGb + ' GB';
+    document.getElementById("sv-total").textContent = fmt(s.total);
+    document.getElementById("sv-ram").textContent =
+      s.totalRamMb >= 1024
+        ? (s.totalRamMb / 1024).toFixed(1) + " GB"
+        : s.totalRamMb + " MB";
+    document.getElementById("sv-cpu").textContent = s.totalCpuPct + "%";
+    document.getElementById("sv-storage").textContent =
+      s.totalStorageGb + " GB";
 
-    const suspLabel = document.getElementById('sv-suspended-label');
+    const suspLabel = document.getElementById("sv-suspended-label");
     if (s.suspended > 0) {
-      suspLabel.textContent = s.suspended + ' suspended';
-      suspLabel.className   = 'text-xs text-amber-600 dark:text-amber-400 mt-1';
+      suspLabel.textContent = s.suspended + " suspended";
+      suspLabel.className = "text-xs text-amber-600 dark:text-amber-400 mt-1";
     } else {
-      suspLabel.textContent = 'none suspended';
-      suspLabel.className   = 'text-xs text-neutral-500 mt-1';
+      suspLabel.textContent = "none suspended";
+      suspLabel.className = "text-xs text-neutral-500 mt-1";
     }
 
-    const imgEl = document.getElementById('sv-images');
+    const imgEl = document.getElementById("sv-images");
     if (s.topImages.length) {
       const maxCount = s.topImages[0].count;
-      imgEl.innerHTML = s.topImages.map(i =>
-        bar(i.name || 'Unknown', i.count, maxCount)
-      ).join('');
+      imgEl.innerHTML = s.topImages
+        .map((i) => bar(i.name || "Unknown", i.count, maxCount))
+        .join("");
     } else {
-      imgEl.innerHTML = '<p class="text-sm text-neutral-400">No servers yet.</p>';
+      imgEl.innerHTML =
+        '<p class="text-sm text-neutral-400">No servers yet.</p>';
     }
 
-    const heavyEl = document.getElementById('sv-heavy');
-    heavyEl.innerHTML = s.topServers.map(sv => `
+    const heavyEl = document.getElementById("sv-heavy");
+    heavyEl.innerHTML =
+      s.topServers
+        .map(
+          (sv) => `
       <div class="flex items-center gap-4 px-5 py-3">
         <div class="min-w-0 flex-1">
           <p class="text-sm text-neutral-700 dark:text-neutral-300 truncate font-medium">${sv.name}</p>
@@ -77,44 +97,52 @@
           <span class="text-neutral-300 dark:text-neutral-600">·</span>
           <span>${sv.storage} GB</span>
         </div>
-        ${sv.suspended ? '<span class="text-[10px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-1.5 py-0.5 rounded-md shrink-0">Suspended</span>' : ''}
-      </div>`).join('') || '<p class="px-5 py-4 text-sm text-neutral-400">No servers.</p>';
+        ${sv.suspended ? '<span class="text-[10px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-1.5 py-0.5 rounded-md shrink-0">Suspended</span>' : ""}
+      </div>`,
+        )
+        .join("") ||
+      '<p class="px-5 py-4 text-sm text-neutral-400">No servers.</p>';
   }
 
   function renderNodes(d) {
     const nodes = d.nodes;
-    const online  = nodes.filter(n => n.online).length;
-    const offline = nodes.filter(n => !n.online).length;
-    document.getElementById('nd-total').textContent  = fmt(nodes.length);
-    document.getElementById('nd-online').textContent  = fmt(online);
-    document.getElementById('nd-offline').textContent = fmt(offline);
+    const online = nodes.filter((n) => n.online).length;
+    const offline = nodes.filter((n) => !n.online).length;
+    document.getElementById("nd-total").textContent = fmt(nodes.length);
+    document.getElementById("nd-online").textContent = fmt(online);
+    document.getElementById("nd-offline").textContent = fmt(offline);
 
-    const listEl = document.getElementById('nd-list');
+    const listEl = document.getElementById("nd-list");
     if (!nodes.length) {
-      listEl.innerHTML = '<p class="text-sm text-neutral-400">No nodes configured.</p>';
+      listEl.innerHTML =
+        '<p class="text-sm text-neutral-400">No nodes configured.</p>';
       return;
     }
-    listEl.innerHTML = nodes.map(n => `
+    listEl.innerHTML = nodes
+      .map(
+        (n) => `
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-3">
-            <span class="w-2 h-2 rounded-full ${n.online ? 'bg-emerald-500' : 'bg-red-500'} shrink-0"></span>
+            <span class="w-2 h-2 rounded-full ${n.online ? "bg-emerald-500" : "bg-red-500"} shrink-0"></span>
             <div>
               <p class="text-sm font-medium text-neutral-800 dark:text-white">${n.name}</p>
               <p class="text-xs text-neutral-400 font-mono">${n.address}:${n.port}</p>
             </div>
           </div>
           <div class="flex items-center gap-3 text-xs text-neutral-500">
-            ${n.online && n.versionRelease ? `<span class="font-mono bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/5 px-2 py-0.5 rounded-md">${n.versionRelease}</span>` : ''}
-            <span>${n.serverCount} server${n.serverCount !== 1 ? 's' : ''}</span>
-            <span class="px-2 py-0.5 rounded-md text-xs font-medium ${n.online ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}">${n.online ? 'Online' : 'Offline'}</span>
+            ${n.online && n.versionRelease ? `<span class="font-mono bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/5 px-2 py-0.5 rounded-md">${n.versionRelease}</span>` : ""}
+            <span>${n.serverCount} server${n.serverCount !== 1 ? "s" : ""}</span>
+            <span class="px-2 py-0.5 rounded-md text-xs font-medium ${n.online ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20" : "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20"}">${n.online ? "Online" : "Offline"}</span>
           </div>
         </div>
-        ${n.ram > 0 || n.cpu > 0 || n.disk > 0 ? `
+        ${
+          n.ram > 0 || n.cpu > 0 || n.disk > 0
+            ? `
         <div class="grid grid-cols-3 gap-4">
           <div>
             <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-2">RAM limit</p>
-            <p class="text-sm font-medium text-neutral-800 dark:text-white">${n.ram >= 1024 ? (n.ram/1024).toFixed(1)+' GB' : n.ram+' MB'}</p>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">${n.ram >= 1024 ? (n.ram / 1024).toFixed(1) + " GB" : n.ram + " MB"}</p>
           </div>
           <div>
             <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-2">CPU limit</p>
@@ -124,82 +152,103 @@
             <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-2">Disk limit</p>
             <p class="text-sm font-medium text-neutral-800 dark:text-white">${n.disk} GB</p>
           </div>
-        </div>` : '<p class="text-xs text-neutral-400">No capacity limits configured for this node.</p>'}
-      </div>`).join('');
+        </div>`
+            : '<p class="text-xs text-neutral-400">No capacity limits configured for this node.</p>'
+        }
+      </div>`,
+      )
+      .join("");
   }
 
   function renderActivity(d) {
     const a = d.activity;
     const totalLogins = Object.values(a.loginsByDay).reduce((s, v) => s + v, 0);
-    const avgPerDay   = Math.round(totalLogins / ACTIVITY_PERIOD_DAYS);
+    const avgPerDay = Math.round(totalLogins / ACTIVITY_PERIOD_DAYS);
 
-    document.getElementById('ac-users').textContent  = fmt(a.totalUsers);
-    document.getElementById('ac-images').textContent = fmt(a.totalImages);
-    document.getElementById('ac-logins').textContent = fmt(totalLogins);
-    document.getElementById('ac-avg').textContent    = fmt(avgPerDay);
-    document.getElementById('ac-admins-label').textContent = a.adminCount + ' admin' + (a.adminCount !== 1 ? 's' : '');
+    document.getElementById("ac-users").textContent = fmt(a.totalUsers);
+    document.getElementById("ac-images").textContent = fmt(a.totalImages);
+    document.getElementById("ac-logins").textContent = fmt(totalLogins);
+    document.getElementById("ac-avg").textContent = fmt(avgPerDay);
+    document.getElementById("ac-admins-label").textContent =
+      a.adminCount + " admin" + (a.adminCount !== 1 ? "s" : "");
 
-    const labels = Object.keys(a.loginsByDay).map(d => d.slice(5));
+    const labels = Object.keys(a.loginsByDay).map((d) => d.slice(5));
     const values = Object.values(a.loginsByDay);
 
     if (loginChart) loginChart.destroy();
-    loginChart = new Chart(document.getElementById('loginChart'), {
-      type: 'bar',
+    loginChart = new Chart(document.getElementById("loginChart"), {
+      type: "bar",
       data: {
         labels,
-        datasets: [{
-          data:            values,
-          backgroundColor: 'rgba(59,130,246,0.5)',
-          borderColor:     _rootStyle.getPropertyValue('--theme-info').trim() || '#3b82f6',
-          borderWidth:     1,
-          borderRadius:    CHART_BORDER_RADIUS,
-        }],
+        datasets: [
+          {
+            data: values,
+            backgroundColor: "rgba(59,130,246,0.5)",
+            borderColor:
+              _rootStyle.getPropertyValue("--theme-info").trim() || "#3b82f6",
+            borderWidth: 1,
+            borderRadius: CHART_BORDER_RADIUS,
+          },
+        ],
       },
       options: {
-        responsive:          true,
+        responsive: true,
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { color: gridColor() }, ticks: { color: textColor(), maxTicksLimit: MAX_TICKS } },
-          y: { grid: { color: gridColor() }, ticks: { color: textColor(), stepSize: 1 }, min: 0 },
+          x: {
+            grid: { color: gridColor() },
+            ticks: { color: textColor(), maxTicksLimit: MAX_TICKS },
+          },
+          y: {
+            grid: { color: gridColor() },
+            ticks: { color: textColor(), stepSize: 1 },
+            min: 0,
+          },
         },
       },
     });
 
-    const tbody = document.getElementById('ac-logins-table');
-    tbody.innerHTML = (a.recentLogins || []).map(l => `
+    const tbody = document.getElementById("ac-logins-table");
+    tbody.innerHTML =
+      (a.recentLogins || [])
+        .map(
+          (l) => `
       <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition">
         <td class="px-5 py-3 text-xs font-mono text-neutral-500">#${l.userId}</td>
-        <td class="px-5 py-3 text-xs font-mono text-neutral-600 dark:text-neutral-400">${l.ipAddress || 'Unknown'}</td>
+        <td class="px-5 py-3 text-xs font-mono text-neutral-600 dark:text-neutral-400">${l.ipAddress || "Unknown"}</td>
         <td class="px-5 py-3 text-xs text-neutral-500">${new Date(l.timestamp).toLocaleString()}</td>
-      </tr>`).join('') || '<tr><td colspan="3" class="px-5 py-5 text-center text-sm text-neutral-400">No login history.</td></tr>';
+      </tr>`,
+        )
+        .join("") ||
+      '<tr><td colspan="3" class="px-5 py-5 text-center text-sm text-neutral-400">No login history.</td></tr>';
   }
 
   async function load() {
-    const icon    = document.getElementById('refreshIcon');
-    const loading = document.getElementById('loading-state');
-    icon.classList.add('animate-spin');
-    loading.classList.remove('hidden');
+    const icon = document.getElementById("refreshIcon");
+    const loading = document.getElementById("loading-state");
+    icon.classList.add("animate-spin");
+    loading.classList.remove("hidden");
 
     try {
-      const res = await fetch('/api/admin/analytics/summary');
-      if (!res.ok) throw new Error('Request failed');
+      const res = await fetch("/api/v2/admin/analytics/summary");
+      if (!res.ok) throw new Error("Request failed");
       analyticsData = await res.json();
 
-      loading.classList.add('hidden');
+      loading.classList.add("hidden");
 
       renderServers(analyticsData);
       renderNodes(analyticsData);
       renderActivity(analyticsData);
-      showToast('Analytics refreshed. Fresh data.', 'success');
+      showToast("Analytics refreshed. Fresh data.", "success");
     } catch {
-      loading.classList.add('hidden');
-      showToast('Failed to load analytics', 'error');
+      loading.classList.add("hidden");
+      showToast("Failed to load analytics", "error");
     } finally {
-      icon.classList.remove('animate-spin');
+      icon.classList.remove("animate-spin");
     }
   }
 
-  document.getElementById('refreshBtn').addEventListener('click', load);
+  document.getElementById("refreshBtn").addEventListener("click", load);
   load();
 })();

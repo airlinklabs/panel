@@ -90,7 +90,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center justify-end gap-1.5">
                     <button
-                      hx-post="/server/<%= server.UUID %>/databases/<%= db.id %>/rotate-password"
+                      hx-post="/api/v2/servers/<%= server.UUID %>/databases/<%= db.id %>/rotate"
                       hx-target="#server-db-list"
                       hx-swap="outerHTML"
                       hx-confirm="Generate a new password for this database user? Existing connections will be dropped."
@@ -101,7 +101,7 @@
                       <%= req.translations.rotatePassword || 'Rotate' %>
                     </button>
                     <button
-                      hx-delete="/server/<%= server.UUID %>/databases/<%= db.id %>"
+                      hx-delete="/api/v2/servers/<%= server.UUID %>/databases/<%= db.id %>"
                       hx-target="#server-db-list"
                       hx-swap="outerHTML"
                       hx-confirm="This will permanently delete the database and its user from the host. This cannot be undone. (<%= db.databaseName %>)"

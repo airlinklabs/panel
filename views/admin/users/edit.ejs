@@ -244,8 +244,8 @@ function adminUserEdit() {
         };
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-        const res = await fetch('/admin/users/update/' + this.userId + '/', {
-          method: 'POST',
+        const res = await fetch('/api/v2/admin/users/' + this.userId, {
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
           body: JSON.stringify(data),
         });
@@ -279,7 +279,7 @@ function adminUserEdit() {
           const loader = showLoadingPopup('<%= req.translations.transferringOwnership || 'Transferring ownership...' %>', '');
           try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            const res = await fetch('/admin/users/transfer-owner/' + this.userId + '/', {
+            const res = await fetch('/api/v2/admin/users/' + this.userId + '/transfer', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
             });

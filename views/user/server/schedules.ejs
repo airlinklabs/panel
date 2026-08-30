@@ -730,7 +730,7 @@ document.getElementById('confirmAddSchedule')?.addEventListener('click', async (
   btn.disabled = true;
   btn.classList.add('opacity-60', 'pointer-events-none');
   btn.querySelector('span').textContent = 'Creating\u2026';
-  const result = await api('/server/' + serverId + '/schedules', 'POST', { name, cron, timeOffset: document.getElementById('schedTimeOffset').value });
+  const result = await api('/api/v2/servers/' + serverId + '/schedules', { method: 'POST', body: { name, cron, timeOffset: document.getElementById('schedTimeOffset').value } });
   if (result) {
     showToast('Schedule created.', 'success');
     closeAddScheduleModal();
@@ -862,7 +862,7 @@ document.querySelectorAll('.sched-toggle').forEach((toggle) => {
     const scheduleId = this.closest('[data-schedule-id]').dataset.scheduleId;
     this.setAttribute('aria-label', this.checked ? 'Disable schedule' : 'Enable schedule');
     this.closest('label').setAttribute('title', this.checked ? 'Disable schedule' : 'Enable schedule');
-    api('/server/' + serverId + '/schedules/' + scheduleId, 'PATCH', { enabled: this.checked }).then((r) => {
+    api('/api/v2/servers/' + serverId + '/schedules/' + scheduleId, { method: 'PATCH', body: { enabled: this.checked } }).then((r) => {
       if (r) showToast(this.checked ? 'Schedule enabled.' : 'Schedule disabled.', 'success');
       else {
         this.checked = !this.checked;
@@ -903,7 +903,7 @@ window.runSchedule = async (scheduleId, name) => {
       onConfirm: resolve,
     });
   });
-  const result = await api('/server/' + serverId + '/schedules/' + scheduleId + '/run', 'POST');
+  const result = await api('/api/v2/servers/' + serverId + '/schedules/' + scheduleId + '/run', { method: 'POST' });
   if (result) { showToast('Schedule run triggered.', 'success'); }
 };
 
@@ -917,7 +917,7 @@ window.deleteSchedule = async (scheduleId, name) => {
       onConfirm: resolve,
     });
   });
-  const result = await api('/server/' + serverId + '/schedules/' + scheduleId, 'DELETE');
+  const result = await api('/api/v2/servers/' + serverId + '/schedules/' + scheduleId, { method: 'DELETE' });
   if (result) {
     showToast('Schedule deleted.', 'success');
     const tr = document.querySelector('[data-schedule-id="' + scheduleId + '"]');
@@ -1018,7 +1018,7 @@ window.saveTasks = async (scheduleId) => {
   btn.classList.add('opacity-60', 'pointer-events-none');
   let ok = true;
   for (const task of tasks) {
-    const result = await api('/server/' + serverId + '/schedules/' + scheduleId + '/tasks', 'POST', { action: task.action, payload: task.payload, timeOffset: task.timeOffset || 0 });
+    const result = await api('/api/v2/servers/' + serverId + '/schedules/' + scheduleId + '/tasks', { method: 'POST', body: { action: task.action, payload: task.payload, timeOffset: task.timeOffset || 0 } });
     if (!result) { ok = false; break; }
   }
   btn.disabled = false;
@@ -1030,7 +1030,7 @@ window.saveTasks = async (scheduleId) => {
 };
 
 window.deleteTask = async (scheduleId, taskId) => {
-  const result = await api('/server/' + serverId + '/schedules/' + scheduleId + '/tasks/' + taskId, 'DELETE');
+  const result = await api('/api/v2/servers/' + serverId + '/schedules/' + scheduleId + '/tasks/' + taskId, { method: 'DELETE' });
   if (!result) return;
   const row = document.querySelector('[data-task-row="' + taskId + '"]');
   if (row) row.remove();

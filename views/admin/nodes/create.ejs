@@ -401,7 +401,7 @@ function nodeCreate() {
       loader.updateProgress(20, 'Sending node configuration...');
 
       try {
-        const response = await fetch('/admin/nodes/create', {
+        const response = await fetch('/api/v2/admin/nodes', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(nodeData)
@@ -479,7 +479,7 @@ function nodeCreate() {
       result.classList.add('hidden');
 
       try {
-        const res = await fetch('/admin/node/' + node.id + '/verify', { method: 'POST' });
+        const res = await fetch('/api/v2/admin/nodes/' + node.id + '/verify', { method: 'POST' });
         const d = await res.json().catch(() => ({}));
         result.classList.remove('hidden');
         if (d.connected) {

@@ -1,9 +1,11 @@
 /**
  * V2 API — Admin nodes endpoints.
  *
- * GET    /api/v2/admin/nodes              — List nodes
+ * GET    /api/v2/admin/nodes              — List nodes (paginated)
+ * GET    /api/v2/admin/nodes/list         — Lightweight list for dropdowns
  * POST   /api/v2/admin/nodes              — Create node
  * GET    /api/v2/admin/nodes/:id          — Get node
+ * GET    /api/v2/admin/nodes/:id/configure — Get daemon configure command
  * PUT    /api/v2/admin/nodes/:id          — Update node
  * DELETE /api/v2/admin/nodes/:id          — Delete node
  * POST   /api/v2/admin/nodes/:id/verify   — Verify node
@@ -109,6 +111,17 @@ router.post("/", parseBody(adminCreateNodeBody), async (req, res) => {
   );
 
   jsonOk(res, node);
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/v2/admin/nodes/list — Lightweight list for dropdowns
+// ---------------------------------------------------------------------------
+router.get("/list", async (_req, res) => {
+  const nodes = await prisma.node.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+  jsonOk(res, nodes);
 });
 
 // ---------------------------------------------------------------------------
@@ -248,6 +261,29 @@ router.post("/:id/verify", async (req, res) => {
   } catch (err) {
     jsonOk(res, { verified: false, error: String(err) });
   }
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/v2/admin/nodes/:id/configure — Get daemon configure command
+// ---------------------------------------------------------------------------
+router.get("/:id/configure", async (req, res) => {
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid node ID", 400);
+  }
+
+  const node = await prisma.node.findUnique({ where: { id } });
+  if (!node) {
+    return jsonError(res, "NOT_FOUND", "Node not found", 404);
+  }
+
+  jsonOk(res, {
+    nodeId: node.id,
+    name: node.name,
+    address: node.address,
+    port: node.port,
+    key: node.key,
+  });
 });
 
 // ---------------------------------------------------------------------------

@@ -139,7 +139,7 @@
   retryBtn.addEventListener('click', function() {
     retryBtn.disabled = true;
     retryBtn.textContent = 'Retrying…';
-    fetch('/server/' + encodeURIComponent(serverUUID) + '/reinstall', { method: 'POST', credentials: 'same-origin', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
+    fetch('/api/v2/servers/' + encodeURIComponent(serverUUID) + '/reinstall', { method: 'POST', credentials: 'same-origin', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
       .then(function(r) {
         if (!r.ok) { return r.json().then(function(d) { throw new Error(d.error || 'Reinstall failed'); }); }
         if (window.retryDaemonConnection) {
@@ -171,7 +171,7 @@
 
   function poll() {
     if (finished) return;
-    fetch('/server/' + serverUUID + '/status')
+    fetch('/api/v2/servers/' + serverUUID + '/status')
       .then(function(r) { return r.json(); })
       .then(function(data) {
         const state = data.state || (data.installed ? 'installed' : data.failed ? 'failed' : 'installing');
@@ -247,7 +247,7 @@
     window.showProgressToast('Installing server…', {
       indeterminate: true,
       group: 'install:' + serverUUID,
-      job: { url: '/server/' + serverUUID + '/status', intervalMs: 3000 },
+      job: { url: '/api/v2/servers/' + serverUUID + '/status', intervalMs: 3000 },
     });
   }
 })();

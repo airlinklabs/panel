@@ -157,7 +157,7 @@
   function deleteWorld(worldName, callback) {
     showToast('Deleting world ' + worldName + '...', 'info');
 
-    fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(worldName), {
+    fetch('/api/v2/servers/<%= server.UUID %>/files?path=' + encodeURIComponent(worldName), {
       method: 'DELETE',
       headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }
     })

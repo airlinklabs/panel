@@ -8,8 +8,8 @@
       if (!this.command.trim()) return;
       this.saving = true;
       try {
-        const res = await fetch('/server/<%= server.UUID %>/startup/command', {
-          method: 'POST',
+        const res = await fetch('/api/v2/servers/<%= server.UUID %>/startup/command', {
+          method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ startCommand: this.command }),
         });

@@ -308,7 +308,7 @@ function serverManager() {
         });
       });
 
-      fetch('/admin/radar/virustotal-enabled')
+      fetch('/api/v2/admin/radar/virustotal-enabled')
         .then((r) => r.json())
         .then((d) => {
           this.vtEnabled = d.enabled;
@@ -400,7 +400,7 @@ function serverManager() {
         onConfirm: () => {
           const ids = checked.map((cb) => cb.value);
           let chain = Promise.resolve(), failed = false;
-          ids.forEach((id) => { chain = chain.then(() => fetch('/admin/server/delete/' + id, { method: 'POST' }).then((r) => { if (!r.ok) failed = true; })); });
+          ids.forEach((id) => { chain = chain.then(() => fetch('/api/v2/admin/servers/' + id, { method: 'DELETE' }).then((r) => { if (!r.ok) failed = true; })); });
           chain.then(() => {
             if (failed) { showToast('Some servers failed to delete.', 'error'); return; }
             showToast('Servers deleted.', 'success'); this.removeServerRows(ids);
@@ -413,7 +413,7 @@ function serverManager() {
       window.modal.confirm({
         title: 'Delete Server', body: 'Delete "' + name + '"? All data will be permanently removed.', danger: true, confirmLabel: 'Delete',
         onConfirm: async () => {
-          const d = await window.api('/admin/server/delete/' + id, 'POST');
+          const d = await window.api('/api/v2/admin/servers/' + id, { method: 'DELETE' });
           if (d !== null) { showToast('Server deleted.', 'success'); this.removeServerRows([String(id)]); }
         }
       });
@@ -459,7 +459,7 @@ function serverManager() {
     fetchRadarScripts() {
       const select = document.getElementById('scriptSelect'), runBtn = document.getElementById('runScanButton');
       select.innerHTML = '<option value="">Loading...</option>'; runBtn.disabled = true;
-      fetch('/admin/radar/scripts').then((r) => r.json()).then((data) => {
+      fetch('/api/v2/admin/radar/scripts').then((r) => r.json()).then((data) => {
         if (!data.success) { showToast('Failed to fetch scripts', 'error'); return; }
         this.availableScripts = data.scripts || []; select.innerHTML = '';
         if (!this.availableScripts.length) { select.innerHTML = '<option value="">No scripts available</option>'; document.getElementById('scriptDescription').textContent = 'No radar scripts found in storage/radar/'; return; }
@@ -481,7 +481,7 @@ function serverManager() {
       const btn = document.getElementById('runScanButton');
       btn.disabled = true; btn.innerHTML = alIcon('loader-circle', 'animate-spin h-4 w-4') + ' Scanning...';
       Promise.all(this.currentServerIds.map((id) =>
-        fetch('/admin/radar/scan/' + id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scriptId }) })
+        fetch('/api/v2/admin/radar/scan/' + id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scriptId }) })
           .then((r) => r.json()).then((data) => ({ id, data }))
       )).then((allResults) => {
         if (this.currentServerIds.length > 1) {
@@ -515,7 +515,7 @@ function serverManager() {
         { at: 75000, pct: 82, msg: 'Waiting for final verdicts...', step: 'Collecting final results' },
       ];
       const timers = steps.map((s) => setTimeout(() => { p.setProgress(s.pct, s.msg); p.addStep(s.step); }, s.at));
-      fetch('/admin/radar/vtscan/' + serverId, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+      fetch('/api/v2/admin/radar/vtscan/' + serverId, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
         .then((r) => r.json()).then((data) => {
           timers.forEach((t) => clearTimeout(t));
           if (!data.success) { p.setProgress(100, 'Scan failed'); p.addStep(data.error || 'VT scan failed', 'error'); p.setIcon('error'); showToast(data.error || 'VT scan failed', 'error'); setTimeout(() => p.close(), 3000); return; }
@@ -542,7 +542,7 @@ function serverManager() {
       var btn = document.querySelector('#' + matchId + ' .vt-btn'), resultEl = document.querySelector('.vt-result-' + matchId);
       if (!btn || !resultEl) return;
       btn.disabled = true; btn.textContent = '...';
-      fetch('/admin/radar/virustotal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash }) })
+      fetch('/api/v2/admin/radar/virustotal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash }) })
         .then((r) => r.json()).then((data) => {
           if (!data.success) { resultEl.innerHTML = '<span class="text-xs text-red-500">VT error: ' + window.escHtml(data.error) + '</span>'; }
           else if (!data.found) { resultEl.innerHTML = '<span class="text-xs text-neutral-400">Not in VirusTotal database</span>'; }

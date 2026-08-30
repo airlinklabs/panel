@@ -31,6 +31,10 @@
  *
  * Radar:
  *   POST   /api/v2/admin/radar/scan/:serverId
+ *   GET    /api/v2/admin/radar/virustotal-enabled
+ *   GET    /api/v2/admin/radar/scripts
+ *   POST   /api/v2/admin/radar/vtscan/:serverId
+ *   POST   /api/v2/admin/radar/virustotal
  *
  * Analytics:
  *   GET    /api/v2/admin/analytics/summary
@@ -51,6 +55,11 @@ import {
   adminCreateApiKeyBody,
   adminUpdateApiKeyBody,
 } from "../dto";
+import { getSettings } from "../../../../handlers/settingsCache";
+import logger from "../../../../handlers/logger";
+import fs from "fs/promises";
+import path from "path";
+import { httpGet } from "../../../../utils/http";
 
 const router = Router();
 
@@ -458,6 +467,353 @@ router.post("/radar/scan/:serverId", async (req, res) => {
   }
   logActivity(req.adminUser?.id, "radar.scan", server.UUID, {}, req.ip);
   jsonOk(res, { scanRequested: true, serverId });
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/v2/admin/radar/virustotal-enabled — VT status check
+// ---------------------------------------------------------------------------
+router.get("/radar/virustotal-enabled", async (_req, res) => {
+  try {
+    const settings = await getSettings();
+    jsonOk(res, { enabled: !!settings?.virusTotalApiKey });
+  } catch {
+    jsonOk(res, { enabled: false });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/v2/admin/radar/scripts — List radar scan scripts
+// ---------------------------------------------------------------------------
+router.get("/radar/scripts", async (_req, res) => {
+  try {
+    const radarDir = path.join(__dirname, "../../../../storage/radar");
+
+    try {
+      await fs.access(radarDir);
+    } catch {
+      await fs.mkdir(radarDir, { recursive: true });
+    }
+
+    const files = await fs.readdir(radarDir);
+    const scripts = await Promise.all(
+      files
+        .filter((file) => file.endsWith(".json"))
+        .map(async (file) => {
+          const content = await fs.readFile(path.join(radarDir, file), "utf-8");
+          try {
+            const scriptData = JSON.parse(content);
+            return {
+              id: file.replace(".json", ""),
+              name: scriptData.name || file,
+              description: scriptData.description || "",
+              version: scriptData.version || "1.0.0",
+              filename: file,
+            };
+          } catch {
+            return {
+              id: file.replace(".json", ""),
+              name: file,
+              description: "Invalid script format",
+              version: "unknown",
+              filename: file,
+            };
+          }
+        }),
+    );
+
+    jsonOk(res, scripts);
+  } catch (error: unknown) {
+    logger.error("Error fetching radar scripts:", error);
+    jsonError(res, "SCRIPTS_ERROR", "Failed to fetch radar scripts", 500);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/v2/admin/radar/vtscan/:serverId — VT file scan
+// ---------------------------------------------------------------------------
+router.post("/radar/vtscan/:serverId", async (req, res) => {
+  const settings = await getSettings();
+  const apiKey = settings?.virusTotalApiKey;
+
+  if (!apiKey) {
+    return jsonError(
+      res,
+      "VT_NOT_CONFIGURED",
+      "VirusTotal API key is not configured. Add it in Admin Settings.",
+      503,
+    );
+  }
+
+  const serverId = parseInt(String(req.params.serverId), 10);
+  if (isNaN(serverId)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid server ID", 400);
+  }
+
+  const server = await prisma.server.findUnique({
+    where: { id: serverId },
+    include: { node: true },
+  });
+  if (!server) {
+    return jsonError(res, "NOT_FOUND", "Server not found", 404);
+  }
+
+  try {
+    const { default: fsSync } = await import("fs");
+    const { default: pathMod } = await import("path");
+
+    const tmpPath = pathMod.join(
+      "/tmp",
+      `vtscan-${server.UUID}-${Date.now()}.zip`,
+    );
+
+    // Import daemonRequest from the services layer
+    const { daemonRequest } =
+      await import("../../../../services/daemonService");
+
+    const zipResponse = await daemonRequest(server.UUID, "/radar/zip", {
+      method: "POST",
+      body: {
+        id: server.UUID,
+        include: ["plugins", "mods", "config", "addons", "datapacks"],
+        exclude: [
+          "world",
+          "world_nether",
+          "world_the_end",
+          "logs",
+          "cache",
+          "crash-reports",
+        ],
+        maxFileSizeMb: 32,
+      },
+      timeout: 120000,
+    });
+
+    if (!zipResponse.ok) {
+      return jsonError(
+        res,
+        "DAEMON_ERROR",
+        `Daemon returned ${zipResponse.status}`,
+        502,
+      );
+    }
+
+    const buffer = Buffer.from(await zipResponse.arrayBuffer());
+    fsSync.writeFileSync(tmpPath, buffer);
+
+    const stat = fsSync.statSync(tmpPath);
+    if (stat.size > 32 * 1024 * 1024) {
+      fsSync.unlinkSync(tmpPath);
+      return jsonError(
+        res,
+        "FILE_TOO_LARGE",
+        "Zipped server files exceed 32 MB — VT free tier limit.",
+        413,
+      );
+    }
+
+    const fileBuffer = fsSync.readFileSync(tmpPath);
+    const boundary = `----FormBoundary${Math.random().toString(36).slice(2)}`;
+    const fileName = `${server.name}-scan.zip`;
+
+    const formBody = Buffer.concat([
+      Buffer.from(
+        `--${boundary}\r\n` +
+          `Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n` +
+          "Content-Type: application/zip\r\n\r\n",
+      ),
+      fileBuffer,
+      Buffer.from(`\r\n--${boundary}--\r\n`),
+    ]);
+
+    const { httpPost } = await import("../../../../utils/http");
+
+    const uploadResponse = await httpPost<Record<string, unknown>>(
+      "https://www.virustotal.com/api/v3/files",
+      formBody,
+      {
+        headers: {
+          "Content-Type": `multipart/form-data; boundary=${boundary}`,
+          "x-apikey": apiKey,
+        },
+        timeout: 90000,
+      },
+    );
+
+    fsSync.unlinkSync(tmpPath);
+
+    if (uploadResponse.status !== 200 && uploadResponse.status !== 409) {
+      return jsonError(
+        res,
+        "VT_ERROR",
+        `VT returned status ${uploadResponse.status}`,
+        502,
+      );
+    }
+
+    const vtUploadData = uploadResponse.data as {
+      data?: { id?: string };
+    };
+    const analysisId = vtUploadData?.data?.id;
+    if (!analysisId) {
+      return jsonError(
+        res,
+        "VT_ERROR",
+        "VT did not return an analysis ID",
+        502,
+      );
+    }
+
+    // Poll VT up to 8 times, 20s apart
+    let analysisData: Record<string, unknown> | null = null;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      await new Promise((r) => setTimeout(r, 20000));
+
+      const pollResponse = await httpGet<Record<string, unknown>>(
+        `https://www.virustotal.com/api/v3/analyses/${analysisId}`,
+        { headers: { "x-apikey": apiKey }, timeout: 15000 },
+      );
+
+      const pollData = pollResponse.data as Record<string, unknown> | undefined;
+      const status = (
+        (pollData?.data as Record<string, unknown> | undefined)?.attributes as
+          Record<string, unknown> | undefined
+      )?.status;
+      if (status === "completed") {
+        analysisData = pollResponse.data;
+        break;
+      }
+    }
+
+    if (!analysisData) {
+      return jsonOk(res, {
+        pending: true,
+        analysisId,
+        vtLink: "https://www.virustotal.com/gui/home/upload",
+      });
+    }
+
+    const meta = analysisData.meta as Record<string, unknown> | undefined;
+    const fileInfo = meta?.file_info as Record<string, unknown> | undefined;
+    const sha256 = fileInfo?.sha256 as string | undefined;
+    const vtLink = sha256
+      ? `https://www.virustotal.com/gui/file/${sha256}`
+      : "https://www.virustotal.com/gui/home/upload";
+
+    const dataAttrs = (analysisData.data as Record<string, unknown>)
+      ?.attributes as Record<string, unknown> | undefined;
+    const results = (dataAttrs?.results || {}) as Record<
+      string,
+      Record<string, unknown>
+    >;
+    const stats = (dataAttrs?.stats || {}) as Record<string, number>;
+    const maliciousEngines = Object.entries(results)
+      .filter(
+        ([, v]) => v.category === "malicious" || v.category === "suspicious",
+      )
+      .map(([engine, v]) => ({ engine, result: v.result }));
+
+    jsonOk(res, {
+      pending: false,
+      serverName: server.name,
+      maliciousEngines,
+      stats,
+      totalEngines: Object.keys(results).length,
+      vtLink,
+    });
+  } catch (error: unknown) {
+    logger.error(
+      "VT file scan error:",
+      error instanceof Error ? error.message : error,
+    );
+    jsonError(res, "VT_SCAN_FAILED", "File scan failed", 502);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/v2/admin/radar/virustotal — VT hash lookup
+// ---------------------------------------------------------------------------
+router.post("/radar/virustotal", async (req, res) => {
+  const settings = await getSettings();
+  const apiKey = settings?.virusTotalApiKey;
+
+  if (!apiKey) {
+    return jsonError(
+      res,
+      "VT_NOT_CONFIGURED",
+      "VirusTotal API key is not configured. Add it in Admin Settings.",
+      503,
+    );
+  }
+
+  const { hash } = req.body as { hash?: string };
+  if (!hash || !/^[a-fA-F0-9]{32,64}$/.test(hash)) {
+    return jsonError(
+      res,
+      "BAD_REQUEST",
+      "A valid MD5, SHA1, or SHA256 hash is required",
+      400,
+    );
+  }
+
+  try {
+    const vtResponse = await httpGet<Record<string, unknown>>(
+      `https://www.virustotal.com/api/v3/files/${hash}`,
+      {
+        headers: { "x-apikey": apiKey },
+        timeout: 15000,
+      },
+    );
+
+    if (vtResponse.status === 404) {
+      return jsonOk(res, { found: false });
+    }
+
+    if (vtResponse.status !== 200) {
+      logger.error("VirusTotal API error:", `Status ${vtResponse.status}`);
+      return jsonError(
+        res,
+        "VT_ERROR",
+        `VirusTotal request failed — status ${vtResponse.status}`,
+        502,
+      );
+    }
+
+    const vtData = vtResponse.data as Record<string, unknown> | undefined;
+    const attrs = (vtData?.data as Record<string, unknown> | undefined)
+      ?.attributes as Record<string, unknown> | undefined;
+    if (!attrs) {
+      return jsonOk(res, { found: false });
+    }
+
+    const stats = (attrs.last_analysis_stats || {}) as Record<string, number>;
+    const total = Object.values(stats).reduce(
+      (a: number, b: number) => a + b,
+      0,
+    );
+    const malicious = (stats.malicious || 0) + (stats.suspicious || 0);
+
+    jsonOk(res, {
+      found: true,
+      hash,
+      malicious,
+      total,
+      name: String(attrs.meaningful_name || attrs.name || null),
+      type: String(attrs.type_description || null),
+      size: attrs.size || null,
+      firstSeen: attrs.first_submission_date
+        ? new Date(Number(attrs.first_submission_date) * 1000)
+            .toISOString()
+            .split("T")[0]
+        : null,
+      vtLink: `https://www.virustotal.com/gui/file/${hash}`,
+    });
+  } catch (error: unknown) {
+    logger.error(
+      "VirusTotal API error:",
+      error instanceof Error ? error.message : error,
+    );
+    jsonError(res, "VT_FAILED", "VirusTotal scan failed", 502);
+  }
 });
 
 // ======================== ANALYTICS ========================

@@ -291,7 +291,7 @@ function serverCreatePage() {
 
         async function fetchNodesData() {
           try {
-            const response = await fetch('/admin/nodes/list');
+            const response = await fetch('/api/v2/admin/nodes/list');
             const nodes = await response.json();
             nodes.forEach(node => {
               let ports = [];
@@ -458,7 +458,7 @@ function serverCreatePage() {
           data.ports = assignedPorts;
           const loader = showLoadingPopup('Creating Server', 'Initializing server creation...');
           loader.updateProgress(20, 'Sending server configuration...');
-          fetch('/admin/servers/create', {
+          fetch('/api/v2/admin/servers', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }, body: JSON.stringify(data),
           })
             .then(response => {

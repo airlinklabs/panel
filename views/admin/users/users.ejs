@@ -185,7 +185,7 @@ function userManager() {
         title: pageData.deleteUserTitle || 'Delete User', body: pageData.deleteUserBody || 'Are you sure you want to delete this user?',
         danger: true, confirmLabel: 'Yeah, delete it',
         onConfirm: () => {
-          fetch('/admin/users/delete/' + userId, { method: 'DELETE' }).then((response) => {
+          fetch('/api/v2/admin/users/' + userId, { method: 'DELETE' }).then((response) => {
             if (response.ok) {
               showToast('User deleted.', 'success');
               var tbody = document.querySelector('#userTable tbody');

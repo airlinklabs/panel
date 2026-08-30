@@ -650,7 +650,7 @@ function adminSettings() {
       document.getElementById('banIpBtn').addEventListener('click', async () => {
         const ip = document.getElementById('banIpInput').value.trim();
         if (!ip) return showToast('Enter an IP address', 'error');
-        const d = await window.api('/admin/settings/ban-ip', 'POST', { ip });
+        const d = await window.api('/api/v2/admin/settings/ban-ip', 'POST', { ip });
         if (d && d.success) { document.getElementById('banIpInput').value = ''; showToast('IP banned. Bye bye.', 'success'); this.addBanRow(ip); }
         else if (d) showToast(d.error || 'Failed', 'error');
       });
@@ -658,7 +658,7 @@ function adminSettings() {
       document.getElementById('bannedIpList').addEventListener('click', async (e) => {
         var btn = e.target.closest('.unban-btn');
         if (!btn) return;
-        const d = await window.api('/admin/settings/unban-ip', 'POST', { ip: btn.dataset.ip });
+        const d = await window.api('/api/v2/admin/settings/unban-ip', 'POST', { ip: btn.dataset.ip });
         if (d && d.success) { showToast('IP unbanned. Welcome back.', 'success'); this.removeBanRow(btn); }
         else if (d) showToast(d.error || 'Failed', 'error');
       });
@@ -667,7 +667,7 @@ function adminSettings() {
         const btn = document.getElementById('smtpTestBtn'), result = document.getElementById('smtpTestResult'), orig = btn.innerHTML;
         btn.disabled = true; btn.textContent = 'Testing\u2026'; result.classList.add('hidden');
         try {
-          const d = await fetch('/admin/settings/smtp/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(r => r.json());
+          const d = await fetch('/api/v2/admin/settings/smtp/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(r => r.json());
           result.classList.remove('hidden'); result.textContent = d.success ? 'Connection OK.' : d.error || 'Connection failed.';
           result.className = 'px-5 pb-5 text-xs ' + (d.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400');
         } catch { result.classList.remove('hidden'); result.textContent = 'Connection failed.'; result.className = 'px-5 pb-5 text-xs text-red-600 dark:text-red-400'; }
@@ -678,7 +678,7 @@ function adminSettings() {
         const btn = document.getElementById('s3TestBtn'), result = document.getElementById('s3TestResult'), orig = btn.innerHTML;
         btn.disabled = true; btn.textContent = 'Testing\u2026'; result.classList.add('hidden');
         try {
-          const d = await fetch('/admin/settings/s3/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(r => r.json());
+          const d = await fetch('/api/v2/admin/settings/s3/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(r => r.json());
           result.classList.remove('hidden'); result.textContent = d.success ? d.message || 'Connection OK.' : d.error || 'Connection failed.';
           result.className = 'px-5 pb-5 text-xs ' + (d.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400');
         } catch { result.classList.remove('hidden'); result.textContent = 'Connection failed.'; result.className = 'px-5 pb-5 text-xs text-red-600 dark:text-red-400'; }
@@ -750,12 +750,12 @@ function adminSettings() {
       var themeRadio = formAppearance.querySelector('input[name="theme"]:checked'); if (themeRadio) fd.set('theme', themeRadio.value);
       ['logo-input', 'favicon-input', 'theme-file-input', 'login-wallpaper-file', 'register-wallpaper-file', 'panel-wallpaper-file'].forEach((id) => { var el = document.getElementById(id); if (el && el._selectedFile) fd.set(el.name, el._selectedFile); });
       ['login-wallpaper-url', 'register-wallpaper-url', 'panel-wallpaper-url'].forEach((id) => { var el = document.getElementById(id); if (el) fd.set(el.name, el.value); });
-      const ok = await this.post('/admin/settings', fd);
+      const ok = await this.post('/api/v2/admin/settings/general', fd);
       if (ok) { this.applyThemeFromForm(); this.applyWallpaperFromResponse(ok.panelWallpaper); }
     },
 
     saveServers() {
-      this.post('/admin/settings/server-policy', {
+      this.post('/api/v2/admin/settings/server-policy', {
         allowUserCreateServer: document.getElementById('allowUserCreateServer').checked, allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
         allowUserCreateImages: document.getElementById('allowUserCreateImages').checked, onboardingEnabled: document.getElementById('onboardingEnabled').checked,
         defaultServerLimit: parseInt(document.getElementById('defaultServerLimit').value, 10) || 0, defaultMaxMemory: parseInt(document.getElementById('defaultMaxMemory').value, 10) || 0,
@@ -768,20 +768,20 @@ function adminSettings() {
 
     saveSecurity() {
       Promise.all([
-        this.post('/admin/settings/security', {
+        this.post('/api/v2/admin/settings/security', {
           rateLimitEnabled: document.getElementById('rateLimitEnabled').checked, rateLimitRpm: parseInt(document.getElementById('rateLimitRpm').value, 10) || 0,
           loginMaxAttempts: parseInt(document.getElementById('loginMaxAttempts').value, 10) || 0, loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes').value, 10) || 0,
           enforceDaemonHttps: document.getElementById('enforceDaemonHttps').checked, require2faForAdmins: document.getElementById('require2faForAdmins').checked,
           behindReverseProxy: document.getElementById('behindReverseProxy').checked, hashApiKeys: document.getElementById('hashApiKeys').checked,
           virusTotalApiKey: document.getElementById('vtKeyInput').value.trim() || null,
         }),
-        this.post('/admin/settings', (() => { var fd = new FormData(); var reg = document.getElementById('allowRegistration'); fd.set('allowRegistration', reg && reg.checked ? 'true' : 'false'); return fd; })()),
-        this.post('/admin/settings/smtp', {
+        this.post('/api/v2/admin/settings/general', (() => { var fd = new FormData(); var reg = document.getElementById('allowRegistration'); fd.set('allowRegistration', reg && reg.checked ? 'true' : 'false'); return fd; })()),
+        this.post('/api/v2/admin/settings/smtp', {
           smtpHost: document.getElementById('smtpHost').value.trim() || null, smtpPort: parseInt(document.getElementById('smtpPort').value, 10) || 587,
           smtpUser: document.getElementById('smtpUser').value.trim() || null, smtpPassword: document.getElementById('smtpPassword').value || null,
           smtpFrom: document.getElementById('smtpFrom').value.trim() || null, smtpSecure: document.getElementById('smtpSecure').checked,
         }),
-        this.post('/admin/settings/s3', {
+        this.post('/api/v2/admin/settings/s3', {
           s3Enabled: document.getElementById('s3Enabled').checked, s3Endpoint: document.getElementById('s3Endpoint').value.trim() || null,
           s3Region: document.getElementById('s3Region').value.trim() || null, s3Bucket: document.getElementById('s3Bucket').value.trim() || null,
           s3AccessKey: document.getElementById('s3AccessKey').value.trim() || null, s3SecretKey: document.getElementById('s3SecretKey').value || null,

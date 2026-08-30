@@ -101,7 +101,7 @@ function imageReject() {
       if (this.submitting || !this.rejectId) return;
       this.submitting = true;
       try {
-        const res = await fetch('/admin/images/reject/' + this.rejectId, {
+        const res = await fetch('/api/v2/admin/images/' + this.rejectId + '/reject', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ reason: this.reason }),
@@ -295,7 +295,7 @@ function imageManager() {
           const btn = importUrlSubmit;
           btn.disabled = true; btn.classList.add("opacity-60");
           try {
-            const r = await fetch("/admin/images/import-url", {
+            const r = await fetch("/api/v2/admin/images/import-url", {
               method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }),
             });
             const d = await r.json();
@@ -335,7 +335,7 @@ function imageManager() {
       });
     },
     async renderImageTable() {
-      const res = await fetch("/admin/images/list");
+      const res = await fetch("/api/v2/admin/images/list");
       const data = await res.json();
       const tbody = document.getElementById("tableBody");
       if (!data.success) return;
@@ -363,7 +363,7 @@ function imageManager() {
     },
     async deleteImage() {
       if (!_deleteId) return;
-      const res = await fetch("/admin/images/delete/" + _deleteId, { method: "DELETE" });
+      const res = await fetch("/api/v2/admin/images/" + _deleteId, { method: "DELETE" });
       if (res.ok) { showToast("Image deleted.", "success"); await this.renderImageTable(); }
       else { showToast("Failed.", "error"); }
     },
@@ -427,7 +427,7 @@ function imageManager() {
       const data = Object.fromEntries(new FormData(form));
       if (!data.name || !data.startup) { showToast("Name and startup command are required.", "error"); return; }
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
-      fetch("/admin/images/create", {
+      fetch("/api/v2/admin/images", {
         method: "POST",
         headers: { "Content-Type": "application/json", "CSRF-Token": csrfToken },
         body: JSON.stringify(data),
