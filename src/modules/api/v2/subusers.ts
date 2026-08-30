@@ -16,6 +16,9 @@ import {
   resolveServer,
   logActivity,
   getAuthenticatedUserId,
+  paginateQuery,
+  parsePage,
+  parsePerPage,
 } from "./helpers";
 import { createSubUserBody, updateSubUserBody } from "./dto";
 
@@ -47,15 +50,28 @@ router.get("/", async (req, res) => {
     }
   }
 
-  const subUsers = await prisma.subUser.findMany({
-    where: { serverId: resolved.server.UUID },
-    include: {
-      user: { select: { id: true, username: true, email: true, avatar: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const page = parsePage(req.query.page);
+  const perPage = parsePerPage(req.query.perPage);
+  const where = { serverId: resolved.server.UUID };
 
-  jsonOk(res, subUsers);
+  const { data: subUsers, meta } = await paginateQuery(
+    (args) =>
+      prisma.subUser.findMany({
+        where,
+        ...args,
+        include: {
+          user: {
+            select: { id: true, username: true, email: true, avatar: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    () => prisma.subUser.count({ where }),
+    page,
+    perPage,
+  );
+
+  jsonOk(res, subUsers, meta);
 });
 
 // ---------------------------------------------------------------------------

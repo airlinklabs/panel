@@ -28,6 +28,7 @@ import {
   adminUpdateServerBody,
   adminTransferServerBody,
 } from "../dto";
+import { daemonRequest } from "../../../../services/daemonService";
 
 const router = Router();
 
@@ -267,20 +268,10 @@ router.delete("/:id", async (req, res) => {
 
   // Notify daemon
   try {
-    const node = await prisma.node.findUnique({ where: { id: server.nodeId } });
-    if (node) {
-      await fetch(
-        `http://${node.address}:${node.port}/servers/${server.UUID}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${node.key}`,
-          },
-          signal: AbortSignal.timeout(10000),
-        },
-      );
-    }
+    await daemonRequest(server.UUID, `/servers/${server.UUID}`, {
+      method: "DELETE",
+      timeout: 10000,
+    });
   } catch {
     // Best effort
   }
@@ -323,21 +314,10 @@ router.post("/:id/suspend", async (req, res) => {
 
   // Notify daemon to stop the server
   try {
-    const node = await prisma.node.findUnique({ where: { id: server.nodeId } });
-    if (node) {
-      await fetch(
-        `http://${node.address}:${node.port}/server/${server.UUID}/power`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${node.key}`,
-          },
-          body: JSON.stringify({ action: "stop" }),
-          signal: AbortSignal.timeout(30000),
-        },
-      );
-    }
+    await daemonRequest(server.UUID, `/server/${server.UUID}/power`, {
+      method: "POST",
+      body: { action: "stop" },
+    });
   } catch {
     // Best effort
   }

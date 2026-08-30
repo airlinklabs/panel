@@ -22,6 +22,9 @@ import {
   checkSuspended,
   logActivity,
   getAuthenticatedUserId,
+  paginateQuery,
+  parsePage,
+  parsePerPage,
 } from "./helpers";
 import { createBackupBody } from "./dto";
 import {
@@ -43,12 +46,23 @@ router.get("/", async (req, res) => {
     return;
   }
 
-  const backups = await prisma.backup.findMany({
-    where: { serverId: resolved.server.UUID },
-    orderBy: { createdAt: "desc" },
-  });
+  const page = parsePage(req.query.page);
+  const perPage = parsePerPage(req.query.perPage);
+  const where = { serverId: resolved.server.UUID };
 
-  jsonOk(res, backups);
+  const { data: backups, meta } = await paginateQuery(
+    (args) =>
+      prisma.backup.findMany({
+        where,
+        ...args,
+        orderBy: { createdAt: "desc" },
+      }),
+    () => prisma.backup.count({ where }),
+    page,
+    perPage,
+  );
+
+  jsonOk(res, backups, meta);
 });
 
 // ---------------------------------------------------------------------------

@@ -18,6 +18,9 @@ import {
   checkSuspended,
   logActivity,
   getAuthenticatedUserId,
+  paginateQuery,
+  parsePage,
+  parsePerPage,
 } from "./helpers";
 import { createDatabaseBody } from "./dto";
 import { daemonRequestByNode } from "../../../services/daemonService";
@@ -36,15 +39,26 @@ router.get("/", async (req, res) => {
     return;
   }
 
-  const databases = await prisma.serverDatabase.findMany({
-    where: { serverId: resolved.server.UUID },
-    include: {
-      host: { select: { id: true, name: true, host: true, port: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const page = parsePage(req.query.page);
+  const perPage = parsePerPage(req.query.perPage);
+  const where = { serverId: resolved.server.UUID };
 
-  jsonOk(res, databases);
+  const { data: databases, meta } = await paginateQuery(
+    (args) =>
+      prisma.serverDatabase.findMany({
+        where,
+        ...args,
+        include: {
+          host: { select: { id: true, name: true, host: true, port: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    () => prisma.serverDatabase.count({ where }),
+    page,
+    perPage,
+  );
+
+  jsonOk(res, databases, meta);
 });
 
 // ---------------------------------------------------------------------------

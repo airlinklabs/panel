@@ -21,6 +21,9 @@ import {
   checkSuspended,
   logActivity,
   getAuthenticatedUserId,
+  paginateQuery,
+  parsePage,
+  parsePerPage,
 } from "./helpers";
 import {
   createScheduleBody,
@@ -46,13 +49,24 @@ router.get("/", async (req, res) => {
     return;
   }
 
-  const schedules = await prisma.schedule.findMany({
-    where: { serverId: resolved.server.UUID },
-    include: { tasks: { orderBy: { order: "asc" } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const page = parsePage(req.query.page);
+  const perPage = parsePerPage(req.query.perPage);
+  const where = { serverId: resolved.server.UUID };
 
-  jsonOk(res, schedules);
+  const { data: schedules, meta } = await paginateQuery(
+    (args) =>
+      prisma.schedule.findMany({
+        where,
+        ...args,
+        include: { tasks: { orderBy: { order: "asc" } } },
+        orderBy: { createdAt: "desc" },
+      }),
+    () => prisma.schedule.count({ where }),
+    page,
+    perPage,
+  );
+
+  jsonOk(res, schedules, meta);
 });
 
 // ---------------------------------------------------------------------------

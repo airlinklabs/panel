@@ -90,6 +90,22 @@ export function paginate<T>(
   };
 }
 
+export async function paginateQuery<T>(
+  findManyFn: (args: { skip: number; take: number }) => Promise<T[]>,
+  countFn: () => Promise<number>,
+  page: number,
+  perPage: number,
+): Promise<{ data: T[]; meta: PaginationMeta }> {
+  const total = await countFn();
+  const totalPages = Math.ceil(total / perPage);
+  const safePage = Math.max(1, Math.min(page, totalPages || 1));
+  const data = await findManyFn({
+    skip: (safePage - 1) * perPage,
+    take: perPage,
+  });
+  return { data, meta: { page: safePage, perPage, total, totalPages } };
+}
+
 export function parsePage(query: unknown): number {
   const raw = typeof query === "string" ? parseInt(query, 10) : 1;
   return Number.isFinite(raw) && raw > 0 ? raw : 1;

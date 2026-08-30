@@ -21,7 +21,7 @@ import {
   requireSubUserPermission,
   checkSuspended,
   logActivity,
-  paginate,
+  paginateQuery,
   parsePage,
   parsePerPage,
   getAuthenticatedUserId,
@@ -52,24 +52,27 @@ router.get("/", async (req, res) => {
         OR: [{ ownerId: user.id }, { subUsers: { some: { userId: user.id } } }],
       };
 
-  const [servers, total] = await Promise.all([
-    prisma.server.findMany({
-      where,
-      include: {
-        node: { select: { id: true, name: true, address: true } },
-        image: { select: { id: true, name: true } },
-        owner: { select: { id: true, username: true, email: true } },
-        _count: { select: { backups: true, databases: true, subUsers: true } },
-      },
-      skip: (page - 1) * perPage,
-      take: perPage,
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.server.count({ where }),
-  ]);
+  const { data: servers, meta } = await paginateQuery(
+    (args) =>
+      prisma.server.findMany({
+        where,
+        include: {
+          node: { select: { id: true, name: true, address: true } },
+          image: { select: { id: true, name: true } },
+          owner: { select: { id: true, username: true, email: true } },
+          _count: {
+            select: { backups: true, databases: true, subUsers: true },
+          },
+        },
+        ...args,
+        orderBy: { createdAt: "desc" },
+      }),
+    () => prisma.server.count({ where }),
+    page,
+    perPage,
+  );
 
-  const totalPages = Math.ceil(total / perPage);
-  jsonOk(res, servers, { page, perPage, total, totalPages });
+  jsonOk(res, servers, meta);
 });
 
 // ---------------------------------------------------------------------------

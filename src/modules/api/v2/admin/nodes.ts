@@ -31,6 +31,7 @@ import {
   adminUpdateNodeBody,
   adminCreateAllocationBody,
 } from "../dto";
+import { daemonRequestByNode } from "../../../../services/daemonService";
 
 const router = Router();
 
@@ -226,9 +227,8 @@ router.post("/:id/verify", async (req, res) => {
   }
 
   try {
-    const response = await fetch(`http://${node.address}:${node.port}/`, {
-      headers: { Authorization: `Bearer ${node.key}` },
-      signal: AbortSignal.timeout(10000),
+    const response = await daemonRequestByNode(node.id, "/", {
+      timeout: 10000,
     });
 
     if (response.ok) {
@@ -292,9 +292,8 @@ router.get("/:id/stats", async (req, res) => {
   }
 
   try {
-    const response = await fetch(`http://${node.address}:${node.port}/stats`, {
-      headers: { Authorization: `Bearer ${node.key}` },
-      signal: AbortSignal.timeout(10000),
+    const response = await daemonRequestByNode(node.id, "/stats", {
+      timeout: 10000,
     });
 
     if (!response.ok) {
