@@ -1,6 +1,6 @@
 /**
  * Node service — shared CRUD for node + allocation operations.
- * Used by both the v1 and Alternative (Pterodactyl-compatible) API layers.
+ * Used by the Alternative (Pterodactyl-compatible) API layer.
  */
 
 import prisma from "../db";

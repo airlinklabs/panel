@@ -5,10 +5,10 @@ import type { Module } from "../../handlers/moduleInit";
 import prisma from "../../db";
 import { isAuthenticated } from "../../handlers/utils/auth/authUtil";
 import logger from "../../handlers/logger";
-import rateLimit from "express-rate-limit";
 import { checkForUpdates, performUpdate } from "../../handlers/updater";
 import { registerPermission } from "../../handlers/permissions";
 import { getClientIp } from "../../utils/ip";
+import { createRedisRateLimit } from "../../handlers/utils/security/redisRateLimit";
 import fs from "fs";
 import path from "path";
 
@@ -21,14 +21,12 @@ interface ErrorMessage {
 }
 
 // Rate limit for expensive admin routes (file system access, update checks/runs) — 100 req/15min/IP.
-const adminOverviewLimiter = rateLimit({
+const adminOverviewLimiter = createRedisRateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many requests. Try again later." },
-  keyGenerator: (req) => getClientIp(req),
-  validate: false,
+  keyGenerator: (req) => getClientIp(req) ?? "unknown",
 });
 
 const adminModule: Module = {

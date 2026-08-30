@@ -1,8 +1,12 @@
-import prisma from '../db';
-import logger from './logger';
-import { assertNodeCapacity } from './utils/server/resourceCheck';
-import { ServerStartFailure, startServerContainer } from '../modules/user/server/shared';
-import { emitRealtime, serverEvent } from './realtime/events';
+import prisma from "../db";
+import logger from "./logger";
+import { assertNodeCapacity } from "./utils/server/resourceCheck";
+import {
+  ServerStartFailure,
+  startServerContainer,
+} from "../modules/user/server/shared";
+import { emitRealtime, serverEvent } from "./realtime/events";
+import { getRedisClient } from "./redis";
 
 // ── Runtime start queue ───────────────────────────────────────────────────────
 // A capacity-aware admission queue for *runtime container starts*. Installs and
@@ -38,14 +42,14 @@ interface QueueEntry {
 export class QueueBlockedError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'QueueBlockedError';
+    this.name = "QueueBlockedError";
   }
 }
 
 export class QueueBannedError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'QueueBannedError';
+    this.name = "QueueBannedError";
   }
 }
 
@@ -65,15 +69,117 @@ const bannedUsers = new Map<number, number>();
 const pendingRetries = new Set<number>();
 const processing = new Set<number>();
 
+// ── Redis persistence ──────────────────────────────────────────────────────
+// Backs the in-memory Maps to Redis for durability across process restarts.
+const REDIS_QUEUES_KEY = "airlink:runtime:queues";
+const REDIS_SERVER_NODE_KEY = "airlink:runtime:serverNode";
+const REDIS_BANNED_KEY = "airlink:runtime:banned";
+
+async function persistQueues(): Promise<void> {
+  try {
+    const redis = getRedisClient();
+    const data: Record<string, string> = {};
+    for (const [nodeId, list] of queues) {
+      data[String(nodeId)] = JSON.stringify(list);
+    }
+    if (Object.keys(data).length > 0) {
+      await redis.del(REDIS_QUEUES_KEY);
+      await redis.hset(REDIS_QUEUES_KEY, data);
+    } else {
+      await redis.del(REDIS_QUEUES_KEY);
+    }
+  } catch {
+    /* Redis unavailable — in-memory still works */
+  }
+}
+
+async function persistServerNode(): Promise<void> {
+  try {
+    const redis = getRedisClient();
+    if (serverNode.size > 0) {
+      const data: Record<string, string> = {};
+      for (const [sid, nid] of serverNode) {
+        data[sid] = String(nid);
+      }
+      await redis.del(REDIS_SERVER_NODE_KEY);
+      await redis.hset(REDIS_SERVER_NODE_KEY, data);
+    } else {
+      await redis.del(REDIS_SERVER_NODE_KEY);
+    }
+  } catch {
+    /* Redis unavailable */
+  }
+}
+
+async function persistBanned(): Promise<void> {
+  try {
+    const redis = getRedisClient();
+    if (bannedUsers.size > 0) {
+      const data: Record<string, string> = {};
+      for (const [uid, until] of bannedUsers) {
+        data[String(uid)] = String(until);
+      }
+      await redis.del(REDIS_BANNED_KEY);
+      await redis.hset(REDIS_BANNED_KEY, data);
+    } else {
+      await redis.del(REDIS_BANNED_KEY);
+    }
+  } catch {
+    /* Redis unavailable */
+  }
+}
+
+async function restoreFromRedis(): Promise<void> {
+  try {
+    const redis = getRedisClient();
+    // Restore queues
+    const rawQueues = await redis.hgetall(REDIS_QUEUES_KEY);
+    for (const [nodeId, json] of Object.entries(rawQueues)) {
+      queues.set(Number(nodeId), JSON.parse(json) as QueueEntry[]);
+    }
+    // Restore serverNode
+    const rawSN = await redis.hgetall(REDIS_SERVER_NODE_KEY);
+    for (const [sid, nid] of Object.entries(rawSN)) {
+      serverNode.set(sid, Number(nid));
+    }
+    // Restore bans
+    const rawBans = await redis.hgetall(REDIS_BANNED_KEY);
+    for (const [uid, until] of Object.entries(rawBans)) {
+      bannedUsers.set(Number(uid), Number(until));
+    }
+    const total = queues.size + serverNode.size + bannedUsers.size;
+    if (total > 0) {
+      logger.info(`[runtimeQueue] restored ${total} entries from Redis`);
+    }
+  } catch {
+    /* Redis unavailable — start fresh */
+  }
+}
+
+// Restore on module load
+restoreFromRedis().catch(() => {});
+
+/** Persist all Maps to Redis after a mutation. Fire-and-forget. */
+function persistAll(): void {
+  Promise.all([persistQueues(), persistServerNode(), persistBanned()]).catch(
+    () => {},
+  );
+}
+
 // ── Mutex ─────────────────────────────────────────────────────────────────────
 let mutexTail: Promise<void> = Promise.resolve();
 
 function withQueueLock<T>(task: () => Promise<T>): Promise<T> {
   let release!: () => void;
-  const next = new Promise<void>((resolve) => { release = resolve; });
+  const next = new Promise<void>((resolve) => {
+    release = resolve;
+  });
   const prev = mutexTail;
   mutexTail = prev.catch(() => undefined).then(() => next);
-  return prev.catch(() => undefined).then(() => task()).finally(release);
+  return prev
+    .catch(() => undefined)
+    .then(() => task())
+    .finally(release);
 }
 
 function pruneBans(): void {
@@ -129,9 +235,12 @@ async function getNodeAvailable(node: {
   const usedCpu = running.reduce((sum, s) => sum + s.Cpu, 0);
   const usedDiskMb = running.reduce((sum, s) => sum + s.Storage, 0);
 
-  const available: { memoryMb?: number; cpuPercent?: number; diskMb?: number } = {};
+  const available: { memoryMb?: number; cpuPercent?: number; diskMb?: number } =
+    {};
   if (node.ram > 0) {
-    const capMb = Math.round(node.ram * 1024 * (1 + node.overallocateMemory / 100));
+    const capMb = Math.round(
+      node.ram * 1024 * (1 + node.overallocateMemory / 100),
+    );
     available.memoryMb = Math.max(0, capMb - usedMemoryMb);
   }
   if (node.cpu > 0) {
@@ -139,7 +248,9 @@ async function getNodeAvailable(node: {
     available.cpuPercent = Math.max(0, Math.round(cap - usedCpu));
   }
   if (node.disk > 0) {
-    const capMb = Math.round(node.disk * 1024 * (1 + node.overallocateDisk / 100));
+    const capMb = Math.round(
+      node.disk * 1024 * (1 + node.overallocateDisk / 100),
+    );
     available.diskMb = Math.max(0, capMb - usedDiskMb);
   }
   return available;
@@ -149,7 +260,10 @@ async function getNodeAvailable(node: {
 // no longer exists (drop it), throws QueueBlockedError when the node lacks
 // capacity, and true otherwise. This re-queries the server so capacity and
 // suspend state are always evaluated fresh at grant time.
-async function capacityAllows(serverId: string, nodeId: number): Promise<boolean> {
+async function capacityAllows(
+  serverId: string,
+  nodeId: number,
+): Promise<boolean> {
   const server = await prisma.server.findUnique({
     where: { UUID: serverId },
     include: { node: true },
@@ -158,7 +272,7 @@ async function capacityAllows(serverId: string, nodeId: number): Promise<boolean
     return false;
   }
   if (server.Suspended) {
-    throw new QueueBlockedError('The server is suspended.');
+    throw new QueueBlockedError("The server is suspended.");
   }
   try {
     await assertNodeCapacity(
@@ -171,34 +285,36 @@ async function capacityAllows(serverId: string, nodeId: number): Promise<boolean
     );
     return true;
   } catch (error) {
-    if (error instanceof Error && error.name === 'NodeCapacityExceededError') {
-      throw new QueueBlockedError('Node is at capacity.');
+    if (error instanceof Error && error.name === "NodeCapacityExceededError") {
+      throw new QueueBlockedError("Node is at capacity.");
     }
     throw error;
   }
 }
 
-async function attemptStart(serverId: string): Promise<'started' | 'gone' | 'failed' | 'permanent-failure'> {
+async function attemptStart(
+  serverId: string,
+): Promise<"started" | "gone" | "failed" | "permanent-failure"> {
   const server = await prisma.server.findUnique({
     where: { UUID: serverId },
     include: { node: true, image: true },
   });
   if (!server) {
-    return 'gone';
+    return "gone";
   }
   if (server.Suspended) {
-    return 'failed';
+    return "failed";
   }
 
   try {
     await startServerContainer(server, serverId);
-    return 'started';
+    return "started";
   } catch (error) {
     logger.error(`Queued start failed for server ${serverId}:`, error);
     if (error instanceof ServerStartFailure && !error.retryable) {
-      return 'permanent-failure';
+      return "permanent-failure";
     }
-    return 'failed';
+    return "failed";
   }
 }
 
@@ -234,11 +350,17 @@ async function processNode(nodeId: number): Promise<void> {
       }
 
       const outcome = await attemptStart(head.serverId);
-      if (outcome === 'started' || outcome === 'gone' || outcome === 'permanent-failure') {
+      if (
+        outcome === "started" ||
+        outcome === "gone" ||
+        outcome === "permanent-failure"
+      ) {
         removeEntry(list, head.serverId);
         broadcastNodeQueue(nodeId);
-        if (outcome === 'permanent-failure') {
-          logger.warn(`Dropped queued start for ${head.serverId}: its daemon start error cannot succeed on retry.`);
+        if (outcome === "permanent-failure") {
+          logger.warn(
+            `Dropped queued start for ${head.serverId}: its daemon start error cannot succeed on retry.`,
+          );
         }
         continue;
       }
@@ -250,12 +372,18 @@ async function processNode(nodeId: number): Promise<void> {
       if (head.failures >= MAX_GRANT_FAILURES) {
         removeEntry(list, head.serverId);
         emitRealtime(
-          serverEvent('server.start.failed', head.serverId, {
-            error: { message: 'The server could not be started after several attempts.', code: 'QUEUE_GRANT_FAILED' },
+          serverEvent("server.start.failed", head.serverId, {
+            error: {
+              message:
+                "The server could not be started after several attempts.",
+              code: "QUEUE_GRANT_FAILED",
+            },
           }),
         );
         broadcastNodeQueue(nodeId);
-        logger.warn(`Dropped queued start for ${head.serverId} after ${head.failures} failures.`);
+        logger.warn(
+          `Dropped queued start for ${head.serverId} after ${head.failures} failures.`,
+        );
       } else {
         scheduleRetry(nodeId);
       }
@@ -263,6 +391,7 @@ async function processNode(nodeId: number): Promise<void> {
     }
   } finally {
     processing.delete(nodeId);
+    persistAll();
   }
 }
 
@@ -273,7 +402,9 @@ function scheduleRetry(nodeId: number): void {
   pendingRetries.add(nodeId);
   setTimeout(() => {
     pendingRetries.delete(nodeId);
-    processNode(nodeId).catch((err) => logger.error('Queued start retry failed:', err));
+    processNode(nodeId).catch((err) =>
+      logger.error("Queued start retry failed:", err),
+    );
   }, RETRY_DELAY_MS);
 }
 
@@ -289,7 +420,7 @@ function broadcastNodeQueue(nodeId: number): void {
   const list = nodeQueue(nodeId);
   list.forEach((entry, index) => {
     emitRealtime(
-      serverEvent('server.start.queue.changed', entry.serverId, {
+      serverEvent("server.start.queue.changed", entry.serverId, {
         state: { queued: true, position: index + 1, total: list.length },
       }),
     );
@@ -306,8 +437,13 @@ export async function enqueueStart(params: {
     pruneBans();
     const bannedUntil = bannedUsers.get(userId);
     if (bannedUntil && bannedUntil > Date.now()) {
-      const minutes = Math.max(1, Math.ceil((bannedUntil - Date.now()) / 60000));
-      throw new QueueBannedError(`You are temporarily banned from the start queue (${minutes} min remaining).`);
+      const minutes = Math.max(
+        1,
+        Math.ceil((bannedUntil - Date.now()) / 60000),
+      );
+      throw new QueueBannedError(
+        `You are temporarily banned from the start queue (${minutes} min remaining).`,
+      );
     }
 
     const server = await prisma.server.findUnique({
@@ -315,10 +451,10 @@ export async function enqueueStart(params: {
       select: { nodeId: true, Running: true, Suspended: true },
     });
     if (!server) {
-      throw new Error('Server not found.');
+      throw new Error("Server not found.");
     }
     if (server.Suspended) {
-      throw new Error('This server is suspended.');
+      throw new Error("This server is suspended.");
     }
     if (server.Running) {
       return { queued: false, position: 0, total: 0 };
@@ -328,33 +464,49 @@ export async function enqueueStart(params: {
     if (existing !== undefined) {
       const list = nodeQueue(existing);
       const position = list.findIndex((e) => e.serverId === serverId) + 1;
-      return { queued: true, position: Math.max(position, 1), total: list.length };
+      return {
+        queued: true,
+        position: Math.max(position, 1),
+        total: list.length,
+      };
     }
 
-    const globalCount = queues.size === 0 ? 0 : Array.from(queues.values()).reduce((sum, q) => sum + q.length, 0);
+    const globalCount =
+      queues.size === 0
+        ? 0
+        : Array.from(queues.values()).reduce((sum, q) => sum + q.length, 0);
     if (globalCount >= MAX_GLOBAL_QUEUE) {
-      throw new Error('The start queue is full. Please try again in a moment.');
+      throw new Error("The start queue is full. Please try again in a moment.");
     }
     const userCount = Array.from(queues.values()).reduce(
       (sum, q) => sum + q.filter((e) => e.userId === userId).length,
       0,
     );
     if (userCount >= MAX_PER_USER) {
-      throw new Error('You already have too many servers waiting to start.');
+      throw new Error("You already have too many servers waiting to start.");
     }
 
     const list = nodeQueue(server.nodeId);
-    const entry: QueueEntry = { serverId, userId, priority, addedAt: Date.now(), failures: 0 };
+    const entry: QueueEntry = {
+      serverId,
+      userId,
+      priority,
+      addedAt: Date.now(),
+      failures: 0,
+    };
     const index = insertEntry(list, entry);
     serverNode.set(serverId, server.nodeId);
 
     emitRealtime(
-      serverEvent('server.start.queued', serverId, {
+      serverEvent("server.start.queued", serverId, {
         state: { queued: true, position: index + 1, total: list.length },
       }),
     );
 
-    processNode(server.nodeId).catch((err) => logger.error('Queued start processor failed:', err));
+    processNode(server.nodeId).catch((err) =>
+      logger.error("Queued start processor failed:", err),
+    );
+    persistAll();
     return { queued: true, position: index + 1, total: list.length };
   });
 }
@@ -367,15 +519,21 @@ export async function cancelQueuedStart(serverId: string): Promise<boolean> {
       return false;
     }
     removeEntry(nodeQueue(nodeId), serverId);
-    emitRealtime(serverEvent('server.start.cancelled', serverId));
+    emitRealtime(serverEvent("server.start.cancelled", serverId));
     broadcastNodeQueue(nodeId);
-    processNode(nodeId).catch((err) => logger.error('Queued start processor failed:', err));
+    processNode(nodeId).catch((err) =>
+      logger.error("Queued start processor failed:", err),
+    );
+    persistAll();
     return true;
   });
 }
 
 // Admin: drop every queued start owned by a user and block them from queueing.
-export async function banUserFromQueue(userId: number, minutes = DEFAULT_BAN_MINUTES): Promise<number> {
+export async function banUserFromQueue(
+  userId: number,
+  minutes = DEFAULT_BAN_MINUTES,
+): Promise<number> {
   const duration = Math.max(1, minutes) * 60000;
   return withQueueLock(async () => {
     pruneBans();
@@ -398,8 +556,11 @@ export async function banUserFromQueue(userId: number, minutes = DEFAULT_BAN_MIN
     }
     for (const nodeId of affected) {
       broadcastNodeQueue(nodeId);
-      processNode(nodeId).catch((err) => logger.error('Queued start processor failed:', err));
+      processNode(nodeId).catch((err) =>
+        logger.error("Queued start processor failed:", err),
+      );
     }
+    persistAll();
     return removed;
   });
 }
@@ -407,7 +568,9 @@ export async function banUserFromQueue(userId: number, minutes = DEFAULT_BAN_MIN
 export async function unbanUserFromQueue(userId: number): Promise<boolean> {
   return withQueueLock(async () => {
     pruneBans();
-    return bannedUsers.delete(userId);
+    const deleted = bannedUsers.delete(userId);
+    if (deleted) persistAll();
+    return deleted;
   });
 }
 
@@ -422,7 +585,9 @@ export function isUserBannedFromQueue(userId: number): boolean {
 export async function cleanCapacityFreed(): Promise<void> {
   for (const nodeId of queues.keys()) {
     if (nodeQueue(nodeId).length > 0) {
-      processNode(nodeId).catch((err) => logger.error('Queued start processor failed:', err));
+      processNode(nodeId).catch((err) =>
+        logger.error("Queued start processor failed:", err),
+      );
     }
   }
 }
@@ -456,8 +621,15 @@ export async function getPublicQueueState(
   }
   const list = nodeQueue(nodeId);
   const position = list.findIndex((e) => e.serverId === serverId) + 1;
-  const available = node ? await getNodeAvailable(node).catch(() => null) : null;
-  return { queued: true, position: Math.max(position, 1), total: list.length, available };
+  const available = node
+    ? await getNodeAvailable(node).catch(() => null)
+    : null;
+  return {
+    queued: true,
+    position: Math.max(position, 1),
+    total: list.length,
+    available,
+  };
 }
 
 export interface QueueAdminView {

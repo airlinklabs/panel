@@ -172,6 +172,8 @@ model Schedule {
   createdAt  DateTime       @default(now())
   server     Server         @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
   tasks      ScheduleTask[]
+
+  @@index([serverId])
 }
 
 model ScheduleTask {
@@ -182,6 +184,8 @@ model ScheduleTask {
   payload    String   @db.Text
   timeOffset Int      @default(0)
   schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleId])
 }
 
 model Images {
@@ -364,6 +368,8 @@ model ApiKey {
   active      Boolean  @default(true)
   userId      Int?
   user        Users?   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model LoginHistory {
@@ -373,6 +379,9 @@ model LoginHistory {
   ipAddress String?
   userAgent String?
   timestamp DateTime @default(now())
+
+  @@index([userId])
+  @@index([timestamp])
 }
 
 model PlayerStats {

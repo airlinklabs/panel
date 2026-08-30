@@ -14,7 +14,6 @@ import type { Request } from "express";
 
 /** API mounts authenticated exclusively via API-key headers, never cookies. */
 const BEARER_ONLY_MOUNTS = [
-  "/api/v1",
   "/api/client",
   "/api/application",
   "/api/health",
@@ -40,7 +39,7 @@ export function isBearerOnlyApi(path: string): boolean {
  *
  * Exemptions:
  *   1. WebSocket upgrades
- *   2. Bearer-only mounts (V1, client, application, health)
+ *   2. Bearer-only mounts (client, application, health)
  *   3. Any request with Authorization: Bearer header (API-key auth, no cookie)
  */
 export function isCsrfExempt(req: Pick<Request, "path" | "headers">): boolean {

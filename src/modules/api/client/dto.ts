@@ -17,7 +17,7 @@
 import { z } from "zod";
 
 /** Wire version reported by `GET /api/client` and enforced by the version plan. */
-export const CLIENT_API_VERSION = "client-v1";
+export const CLIENT_API_VERSION = "client-v2";
 
 // --- Request bodies ---
 

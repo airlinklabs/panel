@@ -5,7 +5,7 @@ import type { Request, Response } from "express";
 import { Router } from "express";
 import type { Module } from "../../handlers/moduleInit";
 import logger from "../../handlers/logger";
-import rateLimit from "express-rate-limit";
+import { createRedisRateLimit } from "../../handlers/utils/security/redisRateLimit";
 import { getClientIp } from "../../utils/ip";
 import {
   loginSchema,
@@ -15,14 +15,12 @@ import {
 
 // Tight rate limit applied only to auth routes — separate from the global limit.
 // 10 attempts per minute per IP before they get a 429.
-const authRateLimit = rateLimit({
+const authRateLimit = createRedisRateLimit({
   windowMs: 60 * 1000,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many attempts. Try again in a minute." },
-  keyGenerator: (req) => getClientIp(req),
-  validate: false,
+  keyGenerator: (req) => getClientIp(req) ?? "unknown",
 });
 
 async function getSecuritySettings() {
