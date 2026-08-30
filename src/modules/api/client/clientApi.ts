@@ -5,16 +5,20 @@ import prisma from "../../../db";
 import logger from "../../../handlers/logger";
 import { apiValidator } from "../../../handlers/utils/api/apiValidator";
 import { getParamAsString } from "../../../utils/typeHelpers";
-import {
-  fsListSchema,
-  parseDaemonResponse,
-} from "../../../platform/daemon/dtos";
 import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
+import { listServers, getServerRaw } from "../../../services/serverService";
 import {
   listBackups,
   createBackup,
   deleteBackup,
 } from "../../../services/backupService";
+import {
+  listFiles,
+  readFile,
+  writeFile,
+  deleteFile,
+  renameFile,
+} from "../../../services/fileService";
 import {
   listSchedules,
   createSchedule,
@@ -25,7 +29,6 @@ import { NodeCapacityExceededError } from "../../../handlers/utils/server/resour
 import { logActivity } from "../../../handlers/utils/activity/activityLogger";
 import { nextRunFromCron } from "../../../utils/cron";
 import { parseBody, validationErrorBoundary } from "../../../utils/validation";
-import { isPathSafe } from "../../../utils/pathSecurity";
 import {
   parsePermissions,
   subUserHasPermission,
@@ -69,10 +72,7 @@ async function resolveServerForUser(serverId: string, userId: number) {
   const result = await resolveServerAccess(serverId, userId);
   if (!result) return null;
   // Include node relation for client API responses
-  const server = await prisma.server.findUnique({
-    where: { UUID: serverId },
-    include: { node: true },
-  });
+  const server = await getServerRaw(serverId);
   if (!server) return null;
   return { server, isOwner: result.isOwner, subUser: result.subUser };
 }
@@ -121,9 +121,11 @@ const clientApiModule: Module = {
           return jsonError(res, "API key must be associated with a user", 403);
         }
 
-        const servers = await prisma.server.findMany({
+        const servers = await listServers({
+          page: 1,
+          perPage: 10000,
           where: { ownerId: userId },
-          select: {
+          include: {
             UUID: true,
             name: true,
             description: true,
@@ -133,7 +135,6 @@ const clientApiModule: Module = {
             nodeId: true,
             createdAt: true,
           },
-          orderBy: { createdAt: "desc" },
         });
         const data = servers satisfies ClientServer[];
 
@@ -338,19 +339,8 @@ const clientApiModule: Module = {
 
           const dir = (req.query.dir as string) || "/";
 
-          const response = await daemonRequest<unknown>({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "GET",
-            path: "/fs/list",
-            params: { id: server.UUID, path: dir },
-            timeout: 15000,
-          });
-
-          res.json({
-            data: parseDaemonResponse(fsListSchema, response.data) ?? [],
-          });
+          const data = await listFiles(server.UUID, dir);
+          res.json({ data });
         } catch (err) {
           logger.error("Client API: list files error", err);
           jsonError(res, "Failed to list files", 500);
@@ -393,21 +383,9 @@ const clientApiModule: Module = {
           if (!file) {
             return jsonError(res, "file query parameter is required");
           }
-          if (!isPathSafe(file)) {
-            return jsonError(res, "invalid file path");
-          }
 
-          const response = await daemonRequest({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "GET",
-            path: "/fs/file/content",
-            params: { id: server.UUID, path: file },
-            timeout: 15000,
-          });
-
-          res.json({ data: response.data });
+          const data = await readFile(server.UUID, file);
+          res.json({ data });
         } catch (err) {
           logger.error("Client API: read file error", err);
           jsonError(res, "Failed to read file", 500);
@@ -449,15 +427,7 @@ const clientApiModule: Module = {
 
           const { file, content } = req.validatedBody as WriteFileBody;
 
-          await daemonRequest({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "POST",
-            path: "/fs/file/content",
-            body: { id: server.UUID, path: file, content },
-            timeout: 15000,
-          });
+          await writeFile(server.UUID, file, content);
 
           await logActivity(req, "file:edit", {
             serverId: server.UUID,
@@ -506,15 +476,7 @@ const clientApiModule: Module = {
 
           const { file } = req.validatedBody as DeleteFileBody;
 
-          await daemonRequest({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "DELETE",
-            path: "/fs/rm",
-            body: { id: server.UUID, path: file },
-            timeout: 15000,
-          });
+          await deleteFile(server.UUID, file);
 
           await logActivity(req, "file:delete", {
             serverId: server.UUID,
@@ -563,15 +525,7 @@ const clientApiModule: Module = {
 
           const { file, newname } = req.validatedBody as RenameFileBody;
 
-          await daemonRequest({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "POST",
-            path: "/fs/rename",
-            body: { id: server.UUID, path: file, newName: newname },
-            timeout: 15000,
-          });
+          await renameFile(server.UUID, file, newname);
 
           await logActivity(req, "file:rename", {
             serverId: server.UUID,

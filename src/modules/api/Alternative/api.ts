@@ -12,6 +12,7 @@ import {
   deleteNode,
   NodeError,
 } from "../../../services/nodeService";
+import { deleteServer } from "../../../services/serverService";
 import {
   listUsers,
   getUser,
@@ -773,41 +774,11 @@ const coreModule: Module = {
         try {
           const serverId = String(req.params.id);
 
-          const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
-            include: { node: true },
-          });
-
-          if (!server) {
+          const deleted = await deleteServer(serverId);
+          if (!deleted) {
             res.status(404).json({ error: "Server not found" });
             return;
           }
-
-          if (server.node) {
-            try {
-              await daemonRequest({
-                nodeAddress: server.node.address,
-                nodePort: server.node.port,
-                nodeKey: server.node.key,
-                method: "DELETE",
-                path: "/container",
-                body: { id: server.UUID },
-              });
-            } catch (err: unknown) {
-              const daemonErr = err as {
-                status?: number;
-                body?: { error?: string };
-              };
-              const isGone =
-                daemonErr.status === 404 ||
-                daemonErr.body?.error?.includes("not exist");
-              if (!isGone) {
-                logger.warn(`Could not delete container on daemon: ${err}`);
-              }
-            }
-          }
-
-          await prisma.server.delete({ where: { UUID: serverId } });
 
           res.status(200).json({
             object: "server",

@@ -15,7 +15,6 @@ import {
   updateUser,
   deleteUser,
 } from "../../../services/userService";
-import crypto from "crypto";
 import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
 import { AirlinkCloudClient } from "../../../handlers/utils/core/airlinkCloud";
 import {
@@ -73,12 +72,27 @@ import {
   deleteSchedule,
 } from "../../../services/scheduleService";
 import {
+  listSubUsers,
+  addSubUser,
+  updateSubUser,
+  deleteSubUser,
+  SubUserError,
+} from "../../../services/subuserService";
+import {
   BCRYPT_SALT_ROUNDS,
   DEFAULT_PAGE_SIZE,
   DEFAULT_MEMORY_MB,
   DEFAULT_CPU_PERCENT,
   DEFAULT_STORAGE_MB,
 } from "../../../config/constants";
+import {
+  listServers,
+  getServer,
+  createServer,
+  deleteServer,
+  suspendServer,
+  unsuspendServer,
+} from "../../../services/serverService";
 
 const POWER_ACTIONS = ["start", "stop", "restart", "kill"] as const;
 const TASK_ACTIONS = ["command", "power", "backup"] as const;
@@ -703,24 +717,7 @@ const coreModule: Module = {
           const page = Number(req.query.page) || 1;
           const perPage = Number(req.query.per_page) || DEFAULT_PAGE_SIZE;
 
-          const servers = await prisma.server.findMany({
-            include: {
-              owner: {
-                select: {
-                  id: true,
-                  username: true,
-                  email: true,
-                },
-              },
-              node: {
-                select: {
-                  id: true,
-                  name: true,
-                  address: true,
-                },
-              },
-            },
-          });
+          const servers = await listServers({ page, perPage });
 
           res.json(paginate(servers, page, perPage));
         } catch (error) {
@@ -738,25 +735,7 @@ const coreModule: Module = {
         try {
           const serverId = req.params.id;
 
-          const server = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(serverId) },
-            include: {
-              owner: {
-                select: {
-                  id: true,
-                  username: true,
-                  email: true,
-                },
-              },
-              node: {
-                select: {
-                  id: true,
-                  name: true,
-                  address: true,
-                },
-              },
-            },
-          });
+          const server = await getServer(getParamAsString(serverId));
 
           if (!server) {
             res.status(404).json({ error: "Server not found" });
@@ -822,35 +801,24 @@ const coreModule: Module = {
             return;
           }
 
-          const UUID = crypto.randomUUID();
-
-          const server = await prisma.server.create({
-            data: {
-              UUID,
-              name,
-              description: description ?? null,
-              ownerId,
-              nodeId,
-              imageId,
-              Ports: Ports ?? "[]",
-              Memory: Memory ?? DEFAULT_MEMORY_MB,
-              Swap: Swap ?? DEFAULT_SWAP_MB,
-              Cpu: Cpu ?? DEFAULT_CPU_PERCENT,
-              Storage: Storage ?? DEFAULT_STORAGE_MB,
-              Variables: Variables ?? null,
-              StartCommand: StartCommand ?? image.startup,
-              dockerImage: dockerImage ?? null,
-              Installing: false,
-              Queued: false,
-            },
-            include: {
-              owner: { select: { id: true, username: true, email: true } },
-              node: { select: { id: true, name: true, address: true } },
-            },
+          const server = await createServer({
+            name,
+            description: description ?? null,
+            ownerId,
+            nodeId,
+            imageId,
+            Ports,
+            Memory,
+            Swap,
+            Cpu,
+            Storage,
+            Variables,
+            StartCommand: StartCommand ?? image.startup,
+            dockerImage,
           });
 
           logger.info(
-            `[AUDIT] userId=${req.session.user?.id} action=create-server target=${UUID}`,
+            `[AUDIT] userId=${req.session.user?.id} action=create-server target=${server.UUID}`,
           );
           res.status(201).json({ data: server });
         } catch (error) {
@@ -948,28 +916,22 @@ const coreModule: Module = {
         try {
           const serverId = getParamAsString(req.params.id);
 
-          const existing = await prisma.server.findUnique({
-            where: { UUID: serverId },
-          });
-          if (!existing) {
+          const result = await suspendServer(serverId);
+
+          if (result === null) {
             res.status(404).json({ error: "Server not found" });
             return;
           }
 
-          if (existing.Suspended) {
+          if (result === "already_suspended") {
             res.status(409).json({ error: "Server is already suspended" });
             return;
           }
 
-          const server = await prisma.server.update({
-            where: { UUID: serverId },
-            data: { Suspended: true },
-          });
-
           logger.info(
             `[AUDIT] userId=${req.session.user?.id} action=suspend-server target=${serverId}`,
           );
-          res.json({ data: server });
+          res.json({ data: result });
         } catch (error) {
           logger.error("Error suspending server:", error);
           res.status(500).json({ error: "Internal Server Error" });
@@ -985,28 +947,22 @@ const coreModule: Module = {
         try {
           const serverId = getParamAsString(req.params.id);
 
-          const existing = await prisma.server.findUnique({
-            where: { UUID: serverId },
-          });
-          if (!existing) {
+          const result = await unsuspendServer(serverId);
+
+          if (result === null) {
             res.status(404).json({ error: "Server not found" });
             return;
           }
 
-          if (!existing.Suspended) {
+          if (result === "not_suspended") {
             res.status(409).json({ error: "Server is not suspended" });
             return;
           }
 
-          const server = await prisma.server.update({
-            where: { UUID: serverId },
-            data: { Suspended: false },
-          });
-
           logger.info(
             `[AUDIT] userId=${req.session.user?.id} action=unsuspend-server target=${serverId}`,
           );
-          res.json({ data: server });
+          res.json({ data: result });
         } catch (error) {
           logger.error("Error unsuspending server:", error);
           res.status(500).json({ error: "Internal Server Error" });
@@ -1022,40 +978,11 @@ const coreModule: Module = {
         try {
           const serverId = getParamAsString(req.params.id);
 
-          const existing = await prisma.server.findUnique({
-            where: { UUID: serverId },
-            include: { node: true },
-          });
-          if (!existing) {
+          const deleted = await deleteServer(serverId);
+          if (!deleted) {
             res.status(404).json({ error: "Server not found" });
             return;
           }
-
-          if (existing.node) {
-            try {
-              await daemonRequest({
-                nodeAddress: existing.node.address,
-                nodePort: existing.node.port,
-                nodeKey: existing.node.key,
-                method: "DELETE",
-                path: "/container",
-                body: { id: existing.UUID },
-              });
-            } catch (err: unknown) {
-              const daemonErr = err as {
-                status?: number;
-                body?: { error?: string };
-              };
-              const isGone =
-                daemonErr.status === 404 ||
-                daemonErr.body?.error?.includes("not exist");
-              if (!isGone) {
-                logger.warn(`Could not delete container on daemon: ${err}`);
-              }
-            }
-          }
-
-          await prisma.server.delete({ where: { UUID: serverId } });
 
           logger.info(
             `[AUDIT] userId=${req.session.user?.id} action=delete-server target=${serverId}`,
@@ -1782,33 +1709,9 @@ const coreModule: Module = {
             return;
           }
 
-          const subUsers = await prisma.subUser.findMany({
-            where: { serverId: server.UUID },
-            include: {
-              user: { select: { id: true, username: true, email: true } },
-            },
-            orderBy: { createdAt: "asc" },
-          });
+          const subUsers = await listSubUsers(server.UUID);
 
-          res.json({
-            data: subUsers.map((s) => {
-              let permissions: string[] = [];
-              try {
-                const parsed = JSON.parse(s.permissions);
-                if (Array.isArray(parsed)) {
-                  permissions = parsed;
-                }
-              } catch {
-                // ignore malformed permission payloads
-              }
-              return {
-                id: s.id,
-                user: s.user,
-                permissions,
-                createdAt: s.createdAt,
-              };
-            }),
-          });
+          res.json({ data: subUsers });
         } catch (error) {
           logger.error("Error fetching subusers:", error);
           res.status(500).json({ error: "Failed to fetch subusers" });
@@ -1846,50 +1749,17 @@ const coreModule: Module = {
             return;
           }
 
-          const target = await prisma.users.findUnique({
-            where: { email: email.trim().toLowerCase() },
-          });
-          if (!target) {
-            res.status(404).json({ error: "No user found with that email." });
-            return;
-          }
-
-          const existing = await prisma.subUser.findUnique({
-            where: {
-              serverId_userId: { serverId: server.UUID, userId: target.id },
-            },
-          });
-          if (existing) {
-            res.status(409).json({
-              error: "That user is already a subuser of this server.",
-            });
-            return;
-          }
-
-          const subUser = await prisma.subUser.create({
-            data: {
-              serverId: server.UUID,
-              userId: target.id,
-              permissions: JSON.stringify(permissions),
-            },
-          });
+          const subUser = await addSubUser(serverId, email, permissions);
 
           await apiAudit(req, "subuser:create", serverId, {
-            targetUserId: target.id,
+            targetUserId: subUser.user.id,
           });
-          res.status(201).json({
-            data: {
-              id: subUser.id,
-              user: {
-                id: target.id,
-                username: target.username,
-                email: target.email,
-              },
-              permissions,
-              createdAt: subUser.createdAt,
-            },
-          });
+          res.status(201).json({ data: subUser });
         } catch (error) {
+          if (error instanceof SubUserError) {
+            res.status(error.status).json({ error: error.message });
+            return;
+          }
           logger.error("Error adding subuser:", error);
           res.status(500).json({ error: "Failed to add subuser" });
           return;
@@ -1920,22 +1790,19 @@ const coreModule: Module = {
             return;
           }
 
-          const subUser = await prisma.subUser.findFirst({
-            where: { id: subUserId, serverId: server.UUID },
-          });
-          if (!subUser) {
-            res.status(404).json({ error: "Subuser not found" });
-            return;
-          }
-
-          await prisma.subUser.update({
-            where: { id: subUser.id },
-            data: { permissions: JSON.stringify(permissions) },
-          });
+          const result = await updateSubUser(
+            subUserId,
+            server.UUID,
+            permissions,
+          );
 
           await apiAudit(req, "subuser:update", serverId, { subUserId });
-          res.json({ data: { success: true, permissions } });
+          res.json({ data: result });
         } catch (error) {
+          if (error instanceof SubUserError) {
+            res.status(error.status).json({ error: error.message });
+            return;
+          }
           logger.error("Error updating subuser permissions:", error);
           res
             .status(500)
@@ -1962,18 +1829,14 @@ const coreModule: Module = {
             return;
           }
 
-          const subUser = await prisma.subUser.findFirst({
-            where: { id: subUserId, serverId: server.UUID },
-          });
-          if (!subUser) {
-            res.status(404).json({ error: "Subuser not found" });
-            return;
-          }
-
-          await prisma.subUser.delete({ where: { id: subUser.id } });
+          await deleteSubUser(subUserId, server.UUID);
           await apiAudit(req, "subuser:delete", serverId, { subUserId });
           res.json({ data: { success: true } });
         } catch (error) {
+          if (error instanceof SubUserError) {
+            res.status(error.status).json({ error: error.message });
+            return;
+          }
           logger.error("Error removing subuser:", error);
           res.status(500).json({ error: "Failed to remove subuser" });
           return;
