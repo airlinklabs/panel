@@ -128,22 +128,6 @@ router.post("/", parseBody(adminCreateUserBody), async (req, res) => {
     }
   }
 
-  // Single-owner constraint: only one user can have the owner role
-  const role = data.role || (data.isAdmin ? 'admin' : 'user');
-  if (role === 'owner') {
-    const existingOwner = await prisma.users.findFirst({
-      where: { role: 'owner' },
-    });
-    if (existingOwner) {
-      return jsonError(
-        res,
-        'CONFLICT',
-        'An owner already exists. Transfer ownership first.',
-        409,
-      );
-    }
-  }
-
   const hashedPassword = await bcrypt.hash(data.password, 12);
 
   const user = await prisma.users.create({
@@ -152,7 +136,7 @@ router.post("/", parseBody(adminCreateUserBody), async (req, res) => {
       username: data.username,
       password: hashedPassword,
       role,
-      isAdmin: role === 'owner' || role === 'admin' ? true : data.isAdmin,
+      isAdmin: role === "owner" || role === "admin" ? true : data.isAdmin,
       serverLimit: data.serverLimit,
       maxMemory: data.maxMemory,
       maxCpu: data.maxCpu,
@@ -171,7 +155,7 @@ router.post("/", parseBody(adminCreateUserBody), async (req, res) => {
 
   logActivity(
     req.adminUser?.id,
-    'user.created',
+    "user.created",
     undefined,
     { email: data.email },
     req.ip,
@@ -186,7 +170,7 @@ router.post("/", parseBody(adminCreateUserBody), async (req, res) => {
 router.get("/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid user ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid user ID", 400);
   }
 
   const user = await prisma.users.findUnique({
@@ -214,7 +198,7 @@ router.get("/:id", async (req, res) => {
   });
 
   if (!user) {
-    return jsonError(res, 'NOT_FOUND', 'User not found', 404);
+    return jsonError(res, "NOT_FOUND", "User not found", 404);
   }
   jsonOk(res, user);
 });
@@ -225,12 +209,12 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", parseBody(adminUpdateUserBody), async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid user ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid user ID", 400);
   }
 
   const existing = await prisma.users.findUnique({ where: { id } });
   if (!existing) {
-    return jsonError(res, 'NOT_FOUND', 'User not found', 404);
+    return jsonError(res, "NOT_FOUND", "User not found", 404);
   }
 
   const data = req.validatedBody as any;
@@ -238,26 +222,26 @@ router.put("/:id", parseBody(adminUpdateUserBody), async (req, res) => {
 
   // Owner role protections
   if (
-    existing.role === 'owner' &&
+    existing.role === "owner" &&
     data.role !== undefined &&
-    data.role !== 'owner'
+    data.role !== "owner"
   ) {
     return jsonError(
       res,
-      'FORBIDDEN',
-      'Cannot change the owner\'s role directly. Use the transfer ownership endpoint.',
+      "FORBIDDEN",
+      "Cannot change the owner's role directly. Use the transfer ownership endpoint.",
       403,
     );
   }
-  if (data.role === 'owner' && existing.role !== 'owner') {
+  if (data.role === "owner" && existing.role !== "owner") {
     const existingOwner = await prisma.users.findFirst({
-      where: { role: 'owner', id: { not: id } },
+      where: { role: "owner", id: { not: id } },
     });
     if (existingOwner) {
       return jsonError(
         res,
-        'CONFLICT',
-        'An owner already exists. Transfer ownership first.',
+        "CONFLICT",
+        "An owner already exists. Transfer ownership first.",
         409,
       );
     }
@@ -288,7 +272,7 @@ router.put("/:id", parseBody(adminUpdateUserBody), async (req, res) => {
   if (data.role !== undefined) {
     updateData.role = data.role;
     // Owner must always be admin
-    if (data.role === 'owner' && data.isAdmin === undefined) {
+    if (data.role === "owner" && data.isAdmin === undefined) {
       updateData.isAdmin = true;
     }
   }
@@ -328,7 +312,7 @@ router.put("/:id", parseBody(adminUpdateUserBody), async (req, res) => {
 
   logActivity(
     req.adminUser?.id,
-    'user.updated',
+    "user.updated",
     undefined,
     { userId: id, fields: Object.keys(updateData) },
     req.ip,
@@ -343,25 +327,25 @@ router.put("/:id", parseBody(adminUpdateUserBody), async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid user ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid user ID", 400);
   }
 
   const user = await prisma.users.findUnique({ where: { id } });
   if (!user) {
-    return jsonError(res, 'NOT_FOUND', 'User not found', 404);
+    return jsonError(res, "NOT_FOUND", "User not found", 404);
   }
 
   // Can't delete yourself
   if (req.adminUser?.id === id) {
-    return jsonError(res, 'BAD_REQUEST', 'Cannot delete your own account', 400);
+    return jsonError(res, "BAD_REQUEST", "Cannot delete your own account", 400);
   }
 
   // Can't delete the owner
-  if (user.role === 'owner') {
+  if (user.role === "owner") {
     return jsonError(
       res,
-      'FORBIDDEN',
-      'Cannot delete the owner. Transfer ownership first.',
+      "FORBIDDEN",
+      "Cannot delete the owner. Transfer ownership first.",
       403,
     );
   }
@@ -381,7 +365,7 @@ router.delete("/:id", async (req, res) => {
 
   logActivity(
     req.adminUser?.id,
-    'user.deleted',
+    "user.deleted",
     undefined,
     { email: user.email },
     req.ip,
@@ -393,15 +377,15 @@ router.delete("/:id", async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/admin/users/:id/onboarding/reset — Reset onboarding state
 // ---------------------------------------------------------------------------
-router.post('/:id/onboarding/reset', async (req, res) => {
+router.post("/:id/onboarding/reset", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid user ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid user ID", 400);
   }
 
   const user = await prisma.users.findUnique({ where: { id } });
   if (!user) {
-    return jsonError(res, 'NOT_FOUND', 'User not found', 404);
+    return jsonError(res, "NOT_FOUND", "User not found", 404);
   }
 
   await prisma.users.update({
@@ -414,7 +398,7 @@ router.post('/:id/onboarding/reset', async (req, res) => {
 
   logActivity(
     req.adminUser?.id,
-    'user.onboarding.reset',
+    "user.onboarding.reset",
     undefined,
     { userId: id },
     req.ip,
@@ -432,20 +416,20 @@ router.post(
   async (req, res) => {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) {
-      return jsonError(res, 'BAD_REQUEST', 'Invalid user ID', 400);
+      return jsonError(res, "BAD_REQUEST", "Invalid user ID", 400);
     }
 
     const { newOwnerId } = req.validatedBody as { newOwnerId: number };
 
     const user = await prisma.users.findUnique({ where: { id } });
     if (!user) {
-      return jsonError(res, 'NOT_FOUND', 'User not found', 404);
+      return jsonError(res, "NOT_FOUND", "User not found", 404);
     }
-    if (user.role !== 'owner') {
+    if (user.role !== "owner") {
       return jsonError(
         res,
-        'FORBIDDEN',
-        'Only the current owner can transfer ownership',
+        "FORBIDDEN",
+        "Only the current owner can transfer ownership",
         403,
       );
     }
@@ -454,13 +438,13 @@ router.post(
       where: { id: newOwnerId },
     });
     if (!newOwner) {
-      return jsonError(res, 'NOT_FOUND', 'New owner not found', 404);
+      return jsonError(res, "NOT_FOUND", "New owner not found", 404);
     }
     if (newOwnerId === id) {
       return jsonError(
         res,
-        'BAD_REQUEST',
-        'Cannot transfer ownership to yourself',
+        "BAD_REQUEST",
+        "Cannot transfer ownership to yourself",
         400,
       );
     }
@@ -470,12 +454,12 @@ router.post(
       // Set new owner's role to 'owner'
       await tx.users.update({
         where: { id: newOwnerId },
-        data: { role: 'owner', isAdmin: true },
+        data: { role: "owner", isAdmin: true },
       });
       // Demote old owner to 'admin'
       await tx.users.update({
         where: { id },
-        data: { role: 'admin', isAdmin: true },
+        data: { role: "admin", isAdmin: true },
       });
       // Transfer all servers
       await tx.server.updateMany({
@@ -487,7 +471,7 @@ router.post(
     // Invalidate old owner's sessions (destroy all sessions for that user)
     try {
       const sessionStore = req.sessionStore as any;
-      if (sessionStore && typeof sessionStore.destroy === 'function') {
+      if (sessionStore && typeof sessionStore.destroy === "function") {
         await new Promise<void>((resolve) => {
           sessionStore.all((err: Error | null, sessions: any) => {
             if (err || !sessions) {
@@ -512,7 +496,7 @@ router.post(
 
     logActivity(
       req.adminUser?.id,
-      'user.ownership.transferred',
+      "user.ownership.transferred",
       undefined,
       { fromUserId: id, toUserId: newOwnerId },
       req.ip,

@@ -21,6 +21,39 @@ vi.mock("../../src/handlers/utils/core/daemonRequest", () => ({
   daemonRequest: vi.fn(),
 }));
 
+const mockRedisOps = {
+  zremrangebyscore: vi.fn().mockResolvedValue(0),
+  zcard: vi.fn().mockResolvedValue(0),
+  zadd: vi.fn().mockResolvedValue(1),
+  expire: vi.fn().mockResolvedValue(1),
+};
+vi.mock("../../src/handlers/redis", () => ({
+  getRedisClient: vi.fn(() => mockRedisOps),
+}));
+
+// Also mock the rate limiter module so passwordReset's rate limit actually works in-memory
+let rateLimitCounts = new Map<string, number>();
+vi.mock("../../src/handlers/utils/security/redisRateLimit", () => ({
+  createRedisRateLimit: (opts: any) => {
+    return (req: any, res: any, next: any) => {
+      const ip = req.ip ?? "unknown";
+      const key = `${opts.keyPrefix ?? "rl:"}:${ip}`;
+      const count = (rateLimitCounts.get(key) ?? 0) + 1;
+      rateLimitCounts.set(key, count);
+      if (count > opts.max) {
+        if (opts.handler) {
+          opts.handler(req, res);
+          return;
+        }
+        res.status(429).json(opts.message ?? { error: "Too many requests" });
+        return;
+      }
+      next();
+    };
+  },
+  redisRateLimit: (_req: any, _res: any, next: any) => next(),
+}));
+
 import coreModule from "../../src/modules/core/index";
 import systemRouter from "../../src/modules/api/v2/system";
 import authServiceModule from "../../src/modules/auth/authService";
