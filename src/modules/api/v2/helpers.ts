@@ -1,6 +1,23 @@
 /**
  * V2 API — shared helpers.
  *
+ * ## Response contracts
+ *
+ * ### Success
+ * ```json
+ * { "success": true, "data": <T>, "meta": <PaginationMeta?> }
+ * ```
+ *
+ * ### Error
+ * ```json
+ * { "success": false, "error": { "code": "NOT_FOUND", "message": "Resource not found" } }
+ * ```
+ *
+ * ### Pagination meta (snake_case)
+ * ```json
+ * { "total": 100, "per_page": 25, "current_page": 1, "last_page": 4 }
+ * ```
+ *
  * Standardised response envelope, pagination, auth resolution, and error
  * formatting used by every V2 endpoint file.
  */
@@ -41,13 +58,21 @@ export interface V2ErrorResponse {
 }
 
 export interface PaginationMeta {
-  page: number;
-  perPage: number;
+  /** Current page number (1-indexed). */
+  current_page: number;
+  /** Items per page. */
+  per_page: number;
+  /** Total item count across all pages. */
   total: number;
-  totalPages: number;
+  /** Total number of pages. */
+  last_page: number;
 }
 
-/** Send a success response with the standard envelope. */
+/**
+ * Send a success response with the standard V2 envelope.
+ *
+ * Shape: `{ success: true, data: T, meta?: PaginationMeta }`
+ */
 export function jsonOk<T>(res: Response, data: T, meta?: PaginationMeta): void {
   const body: V2SuccessResponse<T> = { success: true, data };
   if (meta) {
@@ -56,7 +81,11 @@ export function jsonOk<T>(res: Response, data: T, meta?: PaginationMeta): void {
   res.json(body);
 }
 
-/** Send an error response with the standard envelope. */
+/**
+ * Send an error response with the standard V2 envelope.
+ *
+ * Shape: `{ success: false, error: { code: string, message: string, details? } }`
+ */
 export function jsonError(
   res: Response,
   code: string,
@@ -86,7 +115,12 @@ export function paginate<T>(
   const start = (safePage - 1) * perPage;
   return {
     data: items.slice(start, start + perPage),
-    meta: { page: safePage, perPage, total, totalPages },
+    meta: {
+      current_page: safePage,
+      per_page: perPage,
+      total,
+      last_page: totalPages,
+    },
   };
 }
 
@@ -103,7 +137,15 @@ export async function paginateQuery<T>(
     skip: (safePage - 1) * perPage,
     take: perPage,
   });
-  return { data, meta: { page: safePage, perPage, total, totalPages } };
+  return {
+    data,
+    meta: {
+      current_page: safePage,
+      per_page: perPage,
+      total,
+      last_page: totalPages,
+    },
+  };
 }
 
 export function parsePage(query: unknown): number {

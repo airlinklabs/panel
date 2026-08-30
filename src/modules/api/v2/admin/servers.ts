@@ -72,7 +72,12 @@ router.get("/", async (req, res) => {
   ]);
 
   const totalPages = Math.ceil(total / perPage);
-  jsonOk(res, servers, { page, perPage, total, totalPages });
+  jsonOk(res, servers, {
+    current_page: page,
+    per_page: perPage,
+    total,
+    last_page: totalPages,
+  });
 });
 
 // ---------------------------------------------------------------------------

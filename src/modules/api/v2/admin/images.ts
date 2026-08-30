@@ -45,10 +45,10 @@ router.get("/", async (req, res) => {
     prisma.images.count(),
   ]);
   jsonOk(res, images, {
-    page,
-    perPage,
+    current_page: page,
+    per_page: perPage,
     total,
-    totalPages: Math.ceil(total / perPage),
+    last_page: Math.ceil(total / perPage),
   });
 });
 
