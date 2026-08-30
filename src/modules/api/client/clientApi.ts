@@ -10,6 +10,11 @@ import {
   parseDaemonResponse,
 } from "../../../platform/daemon/dtos";
 import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
+import {
+  listBackups,
+  createBackup,
+  deleteBackup,
+} from "../../../services/backupService";
 import { runtimeStartQueue } from "../../../handlers/runtimeQueue";
 import { NodeCapacityExceededError } from "../../../handlers/utils/server/resourceCheck";
 import { logActivity } from "../../../handlers/utils/activity/activityLogger";
@@ -609,17 +614,7 @@ const clientApiModule: Module = {
             return;
           }
 
-          const backups = await prisma.backup.findMany({
-            where: { serverId: server.UUID },
-            select: {
-              UUID: true,
-              name: true,
-              createdAt: true,
-              locked: true,
-              size: true,
-            },
-            orderBy: { createdAt: "desc" },
-          });
+          const backups = await listBackups(server.UUID);
 
           const data = backups.map(
             (backup) =>
@@ -672,47 +667,9 @@ const clientApiModule: Module = {
             return;
           }
 
-          const existingBackups = await prisma.backup.count({
-            where: { serverId: server.UUID },
-          });
-          if (existingBackups >= server.backupLimit) {
-            return jsonError(res, "Backup limit reached", 400);
-          }
-
           const { name } = req.validatedBody as CreateBackupBody;
 
-          const response = await daemonRequest<{
-            success: boolean;
-            backup: {
-              uuid: string;
-              filePath: string;
-              size: number;
-              checksum?: string;
-            };
-          }>({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "POST",
-            path: "/container/backup",
-            body: { id: server.UUID, name },
-            timeout: 120000,
-          });
-
-          if (!response.data?.success || !response.data?.backup) {
-            return jsonError(res, "Failed to create backup on daemon", 502);
-          }
-
-          const backup = await prisma.backup.create({
-            data: {
-              UUID: response.data.backup.uuid,
-              name,
-              serverId: server.UUID,
-              filePath: response.data.backup.filePath,
-              size: BigInt(response.data.backup.size),
-              checksum: response.data.backup.checksum ?? null,
-            },
-          });
+          const backup = await createBackup(server.UUID, name);
 
           await logActivity(req, "backup:create", {
             serverId: server.UUID,
@@ -759,32 +716,12 @@ const clientApiModule: Module = {
           }
 
           const backupUUID = getParamAsString(req.params.backupId);
-          const backup = await prisma.backup.findFirst({
-            where: { UUID: backupUUID, serverId: server.UUID },
-          });
-          if (!backup) {
-            return jsonError(res, "Backup not found", 404);
-          }
-          if (backup.locked) {
-            return jsonError(res, "Backup is locked", 400);
-          }
 
-          await daemonRequest({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "DELETE",
-            path: "/container/backup",
-            body: { backupPath: backup.filePath },
-            timeout: 30000,
-          });
-
-          await prisma.backup.delete({ where: { UUID: backupUUID } });
+          await deleteBackup(backupUUID, server.UUID);
 
           await logActivity(req, "backup:delete", {
             serverId: server.UUID,
             metadata: {
-              name: backup.name,
               uuid: backupUUID,
               source: "client-api",
             },

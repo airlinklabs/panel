@@ -5,14 +5,26 @@ import type { Module } from "../../../handlers/moduleInit";
 import prisma from "../../../db";
 import logger from "../../../handlers/logger";
 import { queueer } from "../../../handlers/queueer";
-import type { Prisma } from "../../../generated/prisma/client";
-import bcrypt from "bcryptjs";
 import { getParamAsNumber } from "../../../utils/typeHelpers";
+import {
+  listNodes,
+  getNode,
+  deleteNode,
+  NodeError,
+} from "../../../services/nodeService";
+import {
+  listUsers,
+  getUser,
+  getUserFull,
+  createUser,
+  updateUser,
+  deleteUser,
+  isLastAdmin,
+} from "../../../services/userService";
 import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
 import { getUsedExternalPorts } from "../../../handlers/utils/server/ports";
 import { apiValidator } from "../../../handlers/utils/api/apiValidator";
 import {
-  BCRYPT_SALT_ROUNDS,
   DEFAULT_PAGE_SIZE,
   DEFAULT_MEMORY_MB,
   DEFAULT_CPU_PERCENT,
@@ -92,19 +104,13 @@ const coreModule: Module = {
               : req.query.filter;
 
           const include = req.query.include;
-          const users = await prisma.users.findMany({
-            where: filter || {},
+          const { users, servers: rawServers } = await listUsers({
+            page: 1,
+            perPage: DEFAULT_PAGE_SIZE,
+            include: include === "servers" ? ["servers"] : undefined,
+            filter,
           });
-
-          let serverData: Prisma.ServerGetPayload<{
-            include: { node: true; owner: true };
-          }>[] = [];
-          if (include && include === "servers") {
-            serverData = await prisma.server.findMany({
-              where: { ownerId: { in: users.map((user) => user.id) } },
-              include: { node: true, owner: true },
-            });
-          }
+          const servers = rawServers as any[];
 
           const response = users.map((user) => {
             const userData = {
@@ -121,16 +127,16 @@ const coreModule: Module = {
                   attributes: {
                     id: number;
                     name: string;
-                    node: (typeof serverData)[number]["node"];
+                    node: (typeof servers)[number]["node"];
                   };
                 }[],
               },
             };
 
-            if (include && include === "servers" && serverData) {
-              userData.relationships.servers = serverData
+            if (include && include === "servers" && servers) {
+              userData.relationships.servers = servers
                 .filter((server) => server.ownerId === user.id)
-                .map((server) => ({
+                .map((server: any) => ({
                   object: "server",
                   attributes: {
                     id: server.id,
@@ -176,12 +182,10 @@ const coreModule: Module = {
               : req.query.filter;
           const include = req.query.include;
 
-          let user;
+          let user: any = null;
 
           if (userId) {
-            user = await prisma.users.findUnique({
-              where: { id: getParamAsNumber(userId) },
-            });
+            user = await getUserFull(getParamAsNumber(userId));
           } else if (filter?.email) {
             user = await prisma.users.findUnique({
               where: { email: filter.email },
@@ -308,17 +312,10 @@ const coreModule: Module = {
             return;
           }
 
-          const hashedPassword = await bcrypt.hash(
+          const newUser = await createUser({
+            username,
+            email,
             password,
-            BCRYPT_SALT_ROUNDS,
-          );
-
-          const newUser = await prisma.users.create({
-            data: {
-              username,
-              email,
-              password: hashedPassword,
-            },
           });
 
           res.status(201).json({
@@ -357,30 +354,10 @@ const coreModule: Module = {
             return;
           }
 
-          const updatedData: Record<string, string | undefined> = {};
-
-          if (username) {
-            updatedData.username = username;
-          }
-          if (email) {
-            updatedData.email = email;
-          }
-          if (first_name) {
-            updatedData.first_name = first_name;
-          }
-          if (last_name) {
-            updatedData.last_name = last_name;
-          }
-          if (password) {
-            updatedData.password = await bcrypt.hash(
-              password,
-              BCRYPT_SALT_ROUNDS,
-            );
-          }
-
-          const updatedUser = await prisma.users.update({
-            where: { id: userId },
-            data: updatedData,
+          const updatedUser = await updateUser(userId, {
+            username,
+            email,
+            password,
           });
 
           res.status(200).json({
@@ -416,10 +393,8 @@ const coreModule: Module = {
 
           // Never allow deleting the last admin — that would lock the panel.
           if (user.isAdmin) {
-            const adminCount = await prisma.users.count({
-              where: { isAdmin: true },
-            });
-            if (adminCount <= 1) {
+            const isLast = await isLastAdmin(userId);
+            if (isLast) {
               res
                 .status(400)
                 .json({ error: "Cannot delete the last admin user." });
@@ -427,7 +402,7 @@ const coreModule: Module = {
             }
           }
 
-          await prisma.users.delete({ where: { id: userId } });
+          await deleteUser(userId);
           res.status(200).json({
             object: "user",
             attributes: { id: user.id, deleted: true },
@@ -444,15 +419,7 @@ const coreModule: Module = {
       legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
-          const nodes = await prisma.node.findMany({
-            include: {
-              _count: {
-                select: {
-                  servers: true,
-                },
-              },
-            },
-          });
+          const nodes = await listNodes();
 
           const formattedNodes = nodes.map((node) => ({
             object: "node",
@@ -498,23 +465,7 @@ const coreModule: Module = {
       legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
-          const nodeId = getParamAsNumber(req.params.id);
-
-          const node = await prisma.node.findUnique({
-            where: { id: nodeId },
-            include: {
-              servers: {
-                select: {
-                  id: true,
-                  UUID: true,
-                  name: true,
-                  Memory: true,
-                  Cpu: true,
-                  Storage: true,
-                },
-              },
-            },
-          });
+          const node = await getNode(getParamAsNumber(req.params.id));
 
           if (!node) {
             res.status(404).json({ error: "Node not found" });
@@ -555,35 +506,16 @@ const coreModule: Module = {
       legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
-          const nodeId = getParamAsNumber(req.params.id);
-
-          const node = await prisma.node.findUnique({
-            where: { id: nodeId },
-            select: {
-              id: true,
-              name: true,
-              _count: { select: { servers: true } },
-            },
-          });
-
-          if (!node) {
-            res.status(404).json({ error: "Node not found" });
-            return;
-          }
-
-          if (node._count.servers > 0) {
-            res
-              .status(400)
-              .json({ error: "Cannot delete a node with assigned servers." });
-            return;
-          }
-
-          await prisma.node.delete({ where: { id: nodeId } });
+          const node = await deleteNode(getParamAsNumber(req.params.id));
           res.status(200).json({
             object: "node",
             attributes: { id: node.id, deleted: true },
           });
         } catch (error) {
+          if (error instanceof NodeError) {
+            res.status(error.status).json({ error: error.message });
+            return;
+          }
           logger.error("Error deleting node:", error);
           res.status(500).json({ error: "Internal Server Error" });
         }

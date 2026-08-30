@@ -1,4 +1,4 @@
-import { getSettings } from "../../../handlers/settingsCache";
+import { getSettings, updateSettings } from "../../../services/settingsService";
 import type { Request, Response } from "express";
 import { Router } from "express";
 import type { Module } from "../../../handlers/moduleInit";
@@ -7,8 +7,14 @@ import logger from "../../../handlers/logger";
 import { apiValidator } from "../../../handlers/utils/api/apiValidator";
 import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
 import { safeClientMessage } from "../../../utils/errors";
-import bcrypt from "bcryptjs";
 import validator from "validator";
+import {
+  listUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser,
+} from "../../../services/userService";
 import crypto from "crypto";
 import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
 import { AirlinkCloudClient } from "../../../handlers/utils/core/airlinkCloud";
@@ -20,10 +26,17 @@ import {
   S3_KEY_PREFIX,
 } from "../../../handlers/utils/core/s3Client";
 import {
-  withNodePortLock,
-  getNodePortPool,
-  syncNodeAllocations,
-} from "../../../handlers/utils/server/allocations";
+  listNodes,
+  getNode,
+  getNodeForDelete,
+  createNode,
+  updateNode,
+  deleteNode,
+  listAllocations,
+  createAllocation,
+  deleteAllocation,
+  NodeError,
+} from "../../../services/nodeService";
 import {
   provisionDatabase,
   deprovisionDatabase,
@@ -32,6 +45,25 @@ import { logActivity } from "../../../handlers/utils/activity/activityLogger";
 import { validateVariableRules } from "../../user/server/startup";
 import { apiEndpoints } from "./apiDocs";
 import { nextRunFromCron, isValidCron } from "../../../utils/cron";
+import {
+  listImages,
+  getImage,
+  createImage,
+  updateImage,
+  deleteImage,
+  countServersByImage,
+} from "../../../services/imageService";
+import {
+  listLocations,
+  createLocation,
+} from "../../../services/locationService";
+import {
+  listBackups,
+  getBackup,
+  createBackupOnDaemon,
+  createBackupRecord,
+  deleteBackupRecord,
+} from "../../../services/backupService";
 import {
   BCRYPT_SALT_ROUNDS,
   DEFAULT_PAGE_SIZE,
@@ -455,15 +487,7 @@ const coreModule: Module = {
           const page = Number(req.query.page) || 1;
           const perPage = Number(req.query.per_page) || DEFAULT_PAGE_SIZE;
 
-          const users = await prisma.users.findMany({
-            select: {
-              id: true,
-              username: true,
-              email: true,
-              isAdmin: true,
-              description: true,
-            },
-          });
+          const { users } = await listUsers({ page, perPage });
 
           res.json(paginate(users, page, perPage));
         } catch (error) {
@@ -480,17 +504,7 @@ const coreModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = getParamAsNumber(req.params.id);
-
-          const user = await prisma.users.findUnique({
-            where: { id: userId },
-            select: {
-              id: true,
-              username: true,
-              email: true,
-              isAdmin: true,
-              description: true,
-            },
-          });
+          const user = await getUser(userId);
 
           if (!user) {
             res.status(404).json({ error: "User not found" });
@@ -551,26 +565,12 @@ const coreModule: Module = {
             return;
           }
 
-          const hashedPassword = await bcrypt.hash(
+          const user = await createUser({
+            email,
+            username,
             password,
-            BCRYPT_SALT_ROUNDS,
-          );
-
-          const user = await prisma.users.create({
-            data: {
-              email,
-              username,
-              password: hashedPassword,
-              isAdmin: isAdmin ?? false,
-              description: description ?? null,
-            },
-            select: {
-              id: true,
-              username: true,
-              email: true,
-              isAdmin: true,
-              description: true,
-            },
+            isAdmin,
+            description,
           });
 
           logger.info(
@@ -638,33 +638,12 @@ const coreModule: Module = {
             }
           }
 
-          const data: Record<string, unknown> = {};
-          if (email !== undefined) {
-            data.email = email;
-          }
-          if (username !== undefined) {
-            data.username = username;
-          }
-          if (isAdmin !== undefined) {
-            data.isAdmin = isAdmin;
-          }
-          if (description !== undefined) {
-            data.description = description;
-          }
-          if (password !== undefined) {
-            data.password = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
-          }
-
-          const user = await prisma.users.update({
-            where: { id: userId },
-            data,
-            select: {
-              id: true,
-              username: true,
-              email: true,
-              isAdmin: true,
-              description: true,
-            },
+          const user = await updateUser(userId, {
+            email,
+            username,
+            password,
+            isAdmin,
+            description,
           });
 
           logger.info(
@@ -694,7 +673,7 @@ const coreModule: Module = {
             return;
           }
 
-          await prisma.users.delete({ where: { id: userId } });
+          await deleteUser(userId);
 
           logger.info(
             `[AUDIT] userId=${req.session.user?.id} action=delete-user target=${existing.email}`,
@@ -1090,24 +1069,7 @@ const coreModule: Module = {
           const page = Number(req.query.page) || 1;
           const perPage = Number(req.query.per_page) || DEFAULT_PAGE_SIZE;
 
-          const nodes = await prisma.node.findMany({
-            select: {
-              id: true,
-              name: true,
-              address: true,
-              port: true,
-              ram: true,
-              cpu: true,
-              disk: true,
-              createdAt: true,
-              _count: {
-                select: {
-                  servers: true,
-                },
-              },
-            },
-          });
-
+          const nodes = await listNodes();
           res.json(paginate(nodes, page, perPage));
         } catch (error) {
           logger.error("Error fetching nodes:", error);
@@ -1122,37 +1084,11 @@ const coreModule: Module = {
       apiValidator("airlink.api.nodes.read"),
       async (req: Request, res: Response) => {
         try {
-          const nodeId = getParamAsNumber(req.params.id);
-
-          const node = await prisma.node.findUnique({
-            where: { id: nodeId },
-            select: {
-              id: true,
-              name: true,
-              address: true,
-              port: true,
-              ram: true,
-              cpu: true,
-              disk: true,
-              createdAt: true,
-              servers: {
-                select: {
-                  id: true,
-                  UUID: true,
-                  name: true,
-                  Memory: true,
-                  Cpu: true,
-                  Storage: true,
-                },
-              },
-            },
-          });
-
+          const node = await getNode(getParamAsNumber(req.params.id));
           if (!node) {
             res.status(404).json({ error: "Node not found" });
             return;
           }
-
           res.json({ data: node });
         } catch (error) {
           logger.error("Error fetching node:", error);
@@ -1175,27 +1111,15 @@ const coreModule: Module = {
             return;
           }
 
-          const node = await prisma.node.create({
-            data: {
-              name,
-              address: address ?? "127.0.0.1",
-              port: port ?? DEFAULT_NODE_PORT,
-              ram: ram ?? 0,
-              cpu: cpu ?? 0,
-              disk: disk ?? 0,
-              key,
-              sftpPort: sftpPort ?? DEFAULT_SFTP_PORT,
-            },
-            select: {
-              id: true,
-              name: true,
-              address: true,
-              port: true,
-              ram: true,
-              cpu: true,
-              disk: true,
-              createdAt: true,
-            },
+          const node = await createNode({
+            name,
+            address,
+            port,
+            ram,
+            cpu,
+            disk,
+            key,
+            sftpPort,
           });
 
           logger.info(
@@ -1227,45 +1151,15 @@ const coreModule: Module = {
             return;
           }
 
-          const data: Record<string, unknown> = {};
-          if (name !== undefined) {
-            data.name = name;
-          }
-          if (address !== undefined) {
-            data.address = address;
-          }
-          if (port !== undefined) {
-            data.port = port;
-          }
-          if (ram !== undefined) {
-            data.ram = ram;
-          }
-          if (cpu !== undefined) {
-            data.cpu = cpu;
-          }
-          if (disk !== undefined) {
-            data.disk = disk;
-          }
-          if (key !== undefined) {
-            data.key = key;
-          }
-          if (sftpPort !== undefined) {
-            data.sftpPort = sftpPort;
-          }
-
-          const node = await prisma.node.update({
-            where: { id: nodeId },
-            data,
-            select: {
-              id: true,
-              name: true,
-              address: true,
-              port: true,
-              ram: true,
-              cpu: true,
-              disk: true,
-              createdAt: true,
-            },
+          const node = await updateNode(nodeId, {
+            name,
+            address,
+            port,
+            ram,
+            cpu,
+            disk,
+            key,
+            sftpPort,
           });
 
           logger.info(
@@ -1285,35 +1179,17 @@ const coreModule: Module = {
       apiValidator("airlink.api.nodes.delete"),
       async (req: Request, res: Response) => {
         try {
-          const nodeId = getParamAsNumber(req.params.id);
-
-          const existing = await prisma.node.findUnique({
-            where: { id: nodeId },
-            select: {
-              id: true,
-              name: true,
-              _count: { select: { servers: true } },
-            },
-          });
-          if (!existing) {
-            res.status(404).json({ error: "Node not found" });
-            return;
-          }
-
-          if (existing._count.servers > 0) {
-            res
-              .status(409)
-              .json({ error: "Cannot delete node with assigned servers" });
-            return;
-          }
-
-          await prisma.node.delete({ where: { id: nodeId } });
+          const node = await deleteNode(getParamAsNumber(req.params.id));
 
           logger.info(
-            `[AUDIT] userId=${req.session.user?.id} action=delete-node target=${existing.name}`,
+            `[AUDIT] userId=${req.session.user?.id} action=delete-node target=${node.name}`,
           );
           res.json({ data: { success: true } });
         } catch (error) {
+          if (error instanceof NodeError) {
+            res.status(error.status).json({ error: error.message });
+            return;
+          }
           logger.error("Error deleting node:", error);
           res.status(500).json({ error: "Internal Server Error" });
           return;
@@ -1350,30 +1226,19 @@ const coreModule: Module = {
           const { title, description, logo, favicon, theme, language } =
             req.body;
 
-          const currentSettings = await getSettings();
+          const updatedSettings = await updateSettings({
+            title,
+            description,
+            logo,
+            favicon,
+            theme,
+            language,
+          });
 
-          if (!currentSettings) {
+          if (!updatedSettings) {
             res.status(404).json({ error: "Settings not found" });
             return;
           }
-
-          const updatedSettings = await prisma.settings.update({
-            where: { id: currentSettings.id },
-            data: {
-              title: title !== undefined ? title : currentSettings.title,
-              description:
-                description !== undefined
-                  ? description
-                  : currentSettings.description,
-              logo: logo !== undefined ? logo : currentSettings.logo,
-              favicon:
-                favicon !== undefined ? favicon : currentSettings.favicon,
-              theme: theme !== undefined ? theme : currentSettings.theme,
-              language:
-                language !== undefined ? language : currentSettings.language,
-              updatedAt: new Date(),
-            },
-          });
 
           res.json({ data: updatedSettings });
         } catch (error) {
@@ -1398,18 +1263,7 @@ const coreModule: Module = {
             return;
           }
 
-          const backups = await prisma.backup.findMany({
-            where: { serverId: server.UUID },
-            orderBy: { createdAt: "desc" },
-            select: {
-              UUID: true,
-              name: true,
-              size: true,
-              checksum: true,
-              locked: true,
-              createdAt: true,
-            },
-          });
+          const backups = await listBackups(server.UUID);
 
           res.json({
             data: backups.map((b) => ({
@@ -1462,28 +1316,15 @@ const coreModule: Module = {
             return;
           }
 
-          const response = await daemonRequest<{
-            success: boolean;
-            backup?: {
-              filePath: string;
-              uuid: string;
-              size: number;
-              checksum?: string;
-            };
-          }>({
-            method: "POST",
-            path: "/container/backup",
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            body: {
-              id: serverId,
-              name: name.trim(),
-            },
-            timeout: BACKUP_TIMEOUT_MS,
-          });
+          const result = await createBackupOnDaemon(
+            server.node.address,
+            server.node.port,
+            server.node.key,
+            serverId,
+            name.trim(),
+          );
 
-          if (!response.data.success || !response.data.backup) {
+          if (!result.success || !result.backup) {
             res
               .status(502)
               .json({ error: "Failed to create backup on daemon" });
@@ -1491,7 +1332,7 @@ const coreModule: Module = {
           }
 
           let airlinkCloudId: string | null = null;
-          let filePath = response.data.backup.filePath;
+          let filePath = result.backup.filePath;
 
           if (isCloudBackupEnabled) {
             try {
@@ -1510,7 +1351,7 @@ const coreModule: Module = {
                 responseType: "stream",
               });
 
-              const uniqueCloudFileName = `${serverId}_${response.data.backup.uuid}_${Date.now()}.tar.gz`;
+              const uniqueCloudFileName = `${serverId}_${result.backup.uuid}_${Date.now()}.tar.gz`;
               const uploadResult = await cloudClient.uploadFile(
                 downloadResponse.data,
                 uniqueCloudFileName,
@@ -1553,7 +1394,7 @@ const coreModule: Module = {
                 params: { backupPath: filePath },
                 responseType: "stream",
               });
-              const s3Key = s3KeyFor(serverId, response.data.backup.uuid);
+              const s3Key = s3KeyFor(serverId, result.backup.uuid);
               await uploadStreamToS3(downloadResponse.data, s3Key);
               await daemonRequest({
                 method: "DELETE",
@@ -1571,27 +1412,14 @@ const coreModule: Module = {
             }
           }
 
-          const backup = await prisma.backup.create({
-            data: {
-              UUID: response.data.backup.uuid,
-              name: name.trim(),
-              serverId,
-              filePath,
-              size: BigInt(response.data.backup.size),
-              checksum:
-                typeof response.data.backup.checksum === "string"
-                  ? response.data.backup.checksum
-                  : null,
-              airlinkCloudId,
-            },
-            select: {
-              UUID: true,
-              name: true,
-              size: true,
-              checksum: true,
-              locked: true,
-              createdAt: true,
-            },
+          const backup = await createBackupRecord({
+            uuid: result.backup.uuid,
+            name: name.trim(),
+            serverId,
+            filePath,
+            size: result.backup.size,
+            checksum: result.backup.checksum,
+            airlinkCloudId: airlinkCloudId ?? undefined,
           });
 
           await apiAudit(req, "backup:create", serverId, {
@@ -1632,9 +1460,7 @@ const coreModule: Module = {
             return;
           }
 
-          const backup = await prisma.backup.findUnique({
-            where: { UUID: backupId, serverId },
-          });
+          const backup = await getBackup(backupId, serverId);
           if (!backup) {
             res.status(404).json({ error: "Backup not found" });
             return;
@@ -1787,9 +1613,7 @@ const coreModule: Module = {
             return;
           }
 
-          const backup = await prisma.backup.findUnique({
-            where: { UUID: backupId, serverId },
-          });
+          const backup = await getBackup(backupId, serverId);
           if (!backup) {
             res.status(404).json({ error: "Backup not found" });
             return;
@@ -1837,7 +1661,7 @@ const coreModule: Module = {
             }
           }
 
-          await prisma.backup.delete({ where: { UUID: backupId } });
+          await deleteBackupRecord(backupId);
           await apiAudit(req, "backup:delete", serverId, {
             name: backup.name,
             uuid: backup.UUID,
@@ -2735,19 +2559,9 @@ const coreModule: Module = {
       apiValidator("airlink.api.nodes.read"),
       async (req: Request, res: Response) => {
         try {
-          const nodeId = getParamAsNumber(req.params.id);
-          const node = await prisma.node.findUnique({ where: { id: nodeId } });
-          if (!node) {
-            res.status(404).json({ error: "Node not found" });
-            return;
-          }
-
-          const allocations = await prisma.allocation.findMany({
-            where: { nodeId },
-            include: { server: { select: { UUID: true, name: true } } },
-            orderBy: { port: "asc" },
-          });
-
+          const allocations = await listAllocations(
+            getParamAsNumber(req.params.id),
+          );
           res.json({ data: allocations });
         } catch (error) {
           logger.error("Error fetching allocations:", error);
@@ -2766,53 +2580,21 @@ const coreModule: Module = {
         const { ip, port } = req.body as { ip?: string; port?: unknown };
 
         try {
-          const node = await prisma.node.findUnique({ where: { id: nodeId } });
-          if (!node) {
-            res.status(404).json({ error: "Node not found" });
-            return;
-          }
-
-          const parsedPort = parseInt(String(port), 10);
-          if (
-            isNaN(parsedPort) ||
-            parsedPort < MIN_PORT_NUMBER ||
-            parsedPort > MAX_PORT_NUMBER
-          ) {
-            res.status(422).json({
-              error: `Port must be a number between ${MIN_PORT_NUMBER} and ${MAX_PORT_NUMBER}`,
-            });
-            return;
-          }
-
-          await withNodePortLock(nodeId, async () => {
-            const pool = await getNodePortPool(nodeId);
-            const next = Array.from(new Set([...pool, parsedPort])).sort(
-              (a, b) => a - b,
-            );
-            await syncNodeAllocations(nodeId, next, String(ip ?? ""));
-            // Keep the admin-configured pool in sync with the new row.
-            await prisma.node.update({
-              where: { id: nodeId },
-              data: { allocatedPorts: JSON.stringify(next) },
-            });
-          });
-
-          const allocation = await prisma.allocation.findUnique({
-            where: {
-              nodeId_ip_port: {
-                nodeId,
-                ip: String(ip ?? ""),
-                port: parsedPort,
-              },
-            },
+          const allocation = await createAllocation(nodeId, {
+            ip,
+            port: parseInt(String(port), 10),
           });
 
           await apiAudit(req, "allocation:create", undefined, {
             nodeId,
-            port: parsedPort,
+            port,
           });
           res.status(201).json({ data: allocation });
         } catch (error) {
+          if (error instanceof NodeError) {
+            res.status(error.status).json({ error: error.message });
+            return;
+          }
           logger.error("Error creating allocation:", error);
           res.status(500).json({ error: "Failed to create allocation" });
           return;
@@ -2829,34 +2611,7 @@ const coreModule: Module = {
         const allocationId = getParamAsNumber(req.params.allocationId);
 
         try {
-          const node = await prisma.node.findUnique({ where: { id: nodeId } });
-          if (!node) {
-            res.status(404).json({ error: "Node not found" });
-            return;
-          }
-
-          const allocation = await prisma.allocation.findUnique({
-            where: { id: allocationId },
-          });
-          if (!allocation || allocation.nodeId !== nodeId) {
-            res.status(404).json({ error: "Allocation not found" });
-            return;
-          }
-          if (allocation.serverId) {
-            res
-              .status(409)
-              .json({ error: "Allocation is in use and cannot be deleted." });
-            return;
-          }
-
-          await withNodePortLock(nodeId, async () => {
-            await prisma.allocation.delete({ where: { id: allocation.id } });
-            const pool = await getNodePortPool(nodeId);
-            await prisma.node.update({
-              where: { id: nodeId },
-              data: { allocatedPorts: JSON.stringify(pool) },
-            });
-          });
+          const allocation = await deleteAllocation(nodeId, allocationId);
 
           await apiAudit(req, "node:delete-allocation", undefined, {
             nodeId,
@@ -2864,6 +2619,10 @@ const coreModule: Module = {
           });
           res.json({ data: { success: true } });
         } catch (error) {
+          if (error instanceof NodeError) {
+            res.status(error.status).json({ error: error.message });
+            return;
+          }
           logger.error("Error deleting allocation:", error);
           res.status(500).json({ error: "Failed to delete allocation" });
           return;
@@ -2880,22 +2639,8 @@ const coreModule: Module = {
           const page = Number(req.query.page) || 1;
           const perPage = Number(req.query.per_page) || DEFAULT_PAGE_SIZE;
 
-          const images = await prisma.images.findMany({
-            select: {
-              id: true,
-              UUID: true,
-              name: true,
-              description: true,
-              author: true,
-              authorName: true,
-              startup: true,
-              stop: true,
-              createdAt: true,
-            },
-            orderBy: { createdAt: "desc" },
-          });
-
-          res.json(paginate(images, page, perPage));
+          const result = await listImages({ page, perPage });
+          res.json(result);
         } catch (error) {
           logger.error("Error fetching images:", error);
           res.status(500).json({ error: "Internal Server Error" });
@@ -2935,31 +2680,13 @@ const coreModule: Module = {
             return;
           }
 
-          const image = await prisma.images.create({
-            data: {
-              name: name.trim(),
-              description: description ?? "",
-              author: author ?? "",
-              authorName: authorName ?? "",
-              startup: startup.trim(),
-              stop: stop ?? "stop",
-              startup_done: "",
-              config_files: "",
-              meta: JSON.stringify({ version: "AL_V1" }),
-              dockerImages: JSON.stringify([]),
-              info: JSON.stringify({ features: [] }),
-              scripts: JSON.stringify({}),
-              variables: JSON.stringify([]),
-              portRequirements: JSON.stringify([]),
-            },
-            select: {
-              id: true,
-              UUID: true,
-              name: true,
-              description: true,
-              startup: true,
-              createdAt: true,
-            },
+          const image = await createImage({
+            name,
+            description,
+            author,
+            authorName,
+            startup,
+            stop,
           });
 
           await apiAudit(req, "image:create", undefined, {
@@ -2981,9 +2708,7 @@ const coreModule: Module = {
       apiValidator("airlink.api.images.read"),
       async (req: Request, res: Response) => {
         try {
-          const image = await prisma.images.findUnique({
-            where: { id: getParamAsNumber(req.params.id) },
-          });
+          const image = await getImage(getParamAsNumber(req.params.id));
           if (!image) {
             res.status(404).json({ error: "Image not found" });
             return;
@@ -3004,9 +2729,7 @@ const coreModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const imageId = getParamAsNumber(req.params.id);
-          const existing = await prisma.images.findUnique({
-            where: { id: imageId },
-          });
+          const existing = await getImage(imageId);
           if (!existing) {
             res.status(404).json({ error: "Image not found" });
             return;
@@ -3028,58 +2751,20 @@ const coreModule: Module = {
             portRequirements,
           } = req.body as Record<string, unknown>;
 
-          const data: Record<string, unknown> = {};
-          if (name !== undefined) {
-            data.name = name;
-          }
-          if (description !== undefined) {
-            data.description = description;
-          }
-          if (author !== undefined) {
-            data.author = author;
-          }
-          if (authorName !== undefined) {
-            data.authorName = authorName;
-          }
-          if (startup !== undefined) {
-            data.startup = startup;
-          }
-          if (stop !== undefined) {
-            data.stop = stop;
-          }
-          if (startup_done !== undefined) {
-            data.startup_done = startup_done;
-          }
-          if (config_files !== undefined) {
-            data.config_files = config_files;
-          }
-          if (dockerImages !== undefined) {
-            data.dockerImages = JSON.stringify(dockerImages);
-          }
-          if (variables !== undefined) {
-            data.variables = JSON.stringify(variables);
-          }
-          if (info !== undefined) {
-            data.info = JSON.stringify(info);
-          }
-          if (scripts !== undefined) {
-            data.scripts = JSON.stringify(scripts);
-          }
-          if (portRequirements !== undefined) {
-            data.portRequirements = JSON.stringify(portRequirements);
-          }
-
-          const image = await prisma.images.update({
-            where: { id: imageId },
-            data,
-            select: {
-              id: true,
-              UUID: true,
-              name: true,
-              description: true,
-              startup: true,
-              createdAt: true,
-            },
+          const image = await updateImage(imageId, {
+            name,
+            description,
+            author,
+            authorName,
+            startup,
+            stop,
+            startup_done,
+            config_files,
+            dockerImages,
+            variables,
+            info,
+            scripts,
+            portRequirements,
           });
 
           await apiAudit(req, "image:update", undefined, {
@@ -3102,7 +2787,7 @@ const coreModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const imageId = getParamAsNumber(req.params.id);
-          const serverCount = await prisma.server.count({ where: { imageId } });
+          const serverCount = await countServersByImage(imageId);
           if (serverCount > 0) {
             res
               .status(409)
@@ -3110,16 +2795,14 @@ const coreModule: Module = {
             return;
           }
 
-          const existing = await prisma.images.findUnique({
-            where: { id: imageId },
-            select: { name: true },
-          });
+          const existing = await getImage(imageId);
           if (!existing) {
             res.status(404).json({ error: "Image not found" });
             return;
           }
 
-          await prisma.images.delete({ where: { id: imageId } });
+          await deleteImage(imageId);
+
           await apiAudit(req, "image:delete", undefined, {
             imageId,
             name: existing.name,
@@ -3142,10 +2825,7 @@ const coreModule: Module = {
           const page = Number(req.query.page) || 1;
           const perPage = Number(req.query.per_page) || DEFAULT_PAGE_SIZE;
 
-          const locations = await prisma.location.findMany({
-            include: { _count: { select: { nodes: true } } },
-            orderBy: { name: "asc" },
-          });
+          const locations = await listLocations({ page, perPage });
 
           res.json(paginate(locations, page, perPage));
         } catch (error) {
@@ -3194,8 +2874,9 @@ const coreModule: Module = {
             return;
           }
 
-          const location = await prisma.location.create({
-            data: { name: cleanName, shortCode: cleanShortCode },
+          const location = await createLocation({
+            name: cleanName,
+            shortCode: cleanShortCode,
           });
           await apiAudit(req, "location:create", undefined, {
             locationId: location.id,
