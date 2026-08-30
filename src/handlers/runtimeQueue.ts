@@ -42,14 +42,14 @@ interface QueueEntry {
 export class QueueBlockedError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'QueueBlockedError';
+    this.name = "QueueBlockedError";
   }
 }
 
 export class QueueBannedError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'QueueBannedError';
+    this.name = "QueueBannedError";
   }
 }
 
@@ -276,7 +276,7 @@ async function capacityAllows(
     return false;
   }
   if (server.Suspended) {
-    throw new QueueBlockedError('The server is suspended.');
+    throw new QueueBlockedError("The server is suspended.");
   }
   try {
     await assertNodeCapacity(
@@ -289,8 +289,8 @@ async function capacityAllows(
     );
     return true;
   } catch (error) {
-    if (error instanceof Error && error.name === 'NodeCapacityExceededError') {
-      throw new QueueBlockedError('Node is at capacity.');
+    if (error instanceof Error && error.name === "NodeCapacityExceededError") {
+      throw new QueueBlockedError("Node is at capacity.");
     }
     throw error;
   }
@@ -304,21 +304,21 @@ async function attemptStart(
     include: { node: true, image: true },
   });
   if (!server) {
-    return 'gone';
+    return "gone";
   }
   if (server.Suspended) {
-    return 'failed';
+    return "failed";
   }
 
   try {
     await startServerContainer(server, serverId);
-    return 'started';
+    return "started";
   } catch (error) {
     logger.error(`Queued start failed for server ${serverId}:`, error);
     if (error instanceof ServerStartFailure && !error.retryable) {
-      return 'permanent-failure';
+      return "permanent-failure";
     }
-    return 'failed';
+    return "failed";
   }
 }
 
@@ -424,7 +424,7 @@ function broadcastNodeQueue(nodeId: number): void {
   const list = nodeQueue(nodeId);
   list.forEach((entry, index) => {
     emitRealtime(
-      serverEvent('server.start.queue.changed', entry.serverId, {
+      serverEvent("server.start.queue.changed", entry.serverId, {
         state: { queued: true, position: index + 1, total: list.length },
       }),
     );
@@ -455,10 +455,10 @@ export async function enqueueStart(params: {
       select: { nodeId: true, Running: true, Suspended: true },
     });
     if (!server) {
-      throw new Error('Server not found.');
+      throw new Error("Server not found.");
     }
     if (server.Suspended) {
-      throw new Error('This server is suspended.');
+      throw new Error("This server is suspended.");
     }
     if (server.Running) {
       return { queued: false, position: 0, total: 0 };
@@ -480,14 +480,14 @@ export async function enqueueStart(params: {
         ? 0
         : Array.from(queues.values()).reduce((sum, q) => sum + q.length, 0);
     if (globalCount >= MAX_GLOBAL_QUEUE) {
-      throw new Error('The start queue is full. Please try again in a moment.');
+      throw new Error("The start queue is full. Please try again in a moment.");
     }
     const userCount = Array.from(queues.values()).reduce(
       (sum, q) => sum + q.filter((e) => e.userId === userId).length,
       0,
     );
     if (userCount >= MAX_PER_USER) {
-      throw new Error('You already have too many servers waiting to start.');
+      throw new Error("You already have too many servers waiting to start.");
     }
 
     const list = nodeQueue(server.nodeId);
@@ -502,7 +502,7 @@ export async function enqueueStart(params: {
     serverNode.set(serverId, server.nodeId);
 
     emitRealtime(
-      serverEvent('server.start.queued', serverId, {
+      serverEvent("server.start.queued", serverId, {
         state: { queued: true, position: index + 1, total: list.length },
       }),
     );
@@ -523,7 +523,7 @@ export async function cancelQueuedStart(serverId: string): Promise<boolean> {
       return false;
     }
     removeEntry(nodeQueue(nodeId), serverId);
-    emitRealtime(serverEvent('server.start.cancelled', serverId));
+    emitRealtime(serverEvent("server.start.cancelled", serverId));
     broadcastNodeQueue(nodeId);
     processNode(nodeId).catch((err) =>
       logger.error('Queued start processor failed:', err),

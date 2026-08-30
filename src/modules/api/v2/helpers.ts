@@ -149,12 +149,12 @@ export async function paginateQuery<T>(
 }
 
 export function parsePage(query: unknown): number {
-  const raw = typeof query === 'string' ? parseInt(query, 10) : 1;
+  const raw = typeof query === "string" ? parseInt(query, 10) : 1;
   return Number.isFinite(raw) && raw > 0 ? raw : 1;
 }
 
 export function parsePerPage(query: unknown, defaultVal = 25): number {
-  const raw = typeof query === 'string' ? parseInt(query, 10) : defaultVal;
+  const raw = typeof query === "string" ? parseInt(query, 10) : defaultVal;
   return Number.isFinite(raw) && raw > 0 ? Math.min(raw, 100) : defaultVal;
 }
 
@@ -238,12 +238,12 @@ export async function requireUser(
 ): Promise<Users | null> {
   const userId = getAuthenticatedUserId(req);
   if (!userId) {
-    jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
+    jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
     return null;
   }
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) {
-    jsonError(res, 'UNAUTHORIZED', 'User not found', 401);
+    jsonError(res, "UNAUTHORIZED", "User not found", 401);
     return null;
   }
   return user;
@@ -259,7 +259,7 @@ export async function requireAdmin(
     return null;
   }
   if (!user.isAdmin) {
-    jsonError(res, 'FORBIDDEN', 'Admin access required', 403);
+    jsonError(res, "FORBIDDEN", "Admin access required", 403);
     return null;
   }
   return user;
@@ -282,17 +282,17 @@ export interface ResolvedServer {
 export async function resolveServer(
   req: Request,
   res: Response,
-  serverIdParam = 'id',
+  serverIdParam = "id",
 ): Promise<ResolvedServer | null> {
   const userId = getAuthenticatedUserId(req);
   if (!userId) {
-    jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
+    jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
     return null;
   }
 
-  const serverUUID = String(req.params[serverIdParam] ?? '');
+  const serverUUID = String(req.params[serverIdParam] ?? "");
   if (!serverUUID) {
-    jsonError(res, 'BAD_REQUEST', 'Server ID is required', 400);
+    jsonError(res, "BAD_REQUEST", "Server ID is required", 400);
     return null;
   }
 
@@ -300,7 +300,7 @@ export async function resolveServer(
     where: { UUID: serverUUID },
   });
   if (!server) {
-    jsonError(res, 'NOT_FOUND', 'Server not found', 404);
+    jsonError(res, "NOT_FOUND", "Server not found", 404);
     return null;
   }
 
@@ -320,7 +320,7 @@ export async function resolveServer(
     where: { serverId_userId: { serverId: server.UUID, userId } },
   });
   if (!subUser) {
-    jsonError(res, 'FORBIDDEN', 'You do not have access to this server', 403);
+    jsonError(res, "FORBIDDEN", "You do not have access to this server", 403);
     return null;
   }
 
@@ -333,7 +333,7 @@ export function checkSuspended(
   resolved: ResolvedServer,
 ): boolean {
   if (resolved.server.Suspended) {
-    jsonError(res, 'FORBIDDEN', 'Server is suspended', 403);
+    jsonError(res, "FORBIDDEN", "Server is suspended", 403);
     return true;
   }
   return false;
@@ -344,26 +344,26 @@ export function checkSuspended(
 // ---------------------------------------------------------------------------
 
 export type SubUserPermission =
-  | 'console'
-  | 'console.send'
-  | 'files'
-  | 'files.read'
-  | 'files.write'
-  | 'backups'
-  | 'backups.create'
-  | 'backups.delete'
-  | 'schedule.read'
-  | 'schedule.create'
-  | 'schedule.delete'
-  | 'databases'
-  | 'databases.create'
-  | 'databases.delete'
-  | 'start'
-  | 'stop'
-  | 'restart'
-  | 'kill'
-  | 'reinstall'
-  | 'websocket.connect';
+  | "console"
+  | "console.send"
+  | "files"
+  | "files.read"
+  | "files.write"
+  | "backups"
+  | "backups.create"
+  | "backups.delete"
+  | "schedule.read"
+  | "schedule.create"
+  | "schedule.delete"
+  | "databases"
+  | "databases.create"
+  | "databases.delete"
+  | "start"
+  | "stop"
+  | "restart"
+  | "kill"
+  | "reinstall"
+  | "websocket.connect";
 
 /** Parse the permissions JSON string from a SubUser record. */
 export const parsePermissions = _parsePermissions;
@@ -416,6 +416,6 @@ export async function logActivity(
       },
     });
   } catch (err) {
-    logger.error('Failed to log activity:', err);
+    logger.error("Failed to log activity:", err);
   }
 }

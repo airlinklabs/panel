@@ -116,6 +116,22 @@ export const RoleScalarFieldEnum = {
 export type RoleScalarFieldEnum =
   (typeof RoleScalarFieldEnum)[keyof typeof RoleScalarFieldEnum];
 
+export const RoleScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  displayName: 'displayName',
+  description: 'description',
+  isAdmin: 'isAdmin',
+  permissions: 'permissions',
+  isSystem: 'isSystem',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RoleScalarFieldEnum = (typeof RoleScalarFieldEnum)[keyof typeof RoleScalarFieldEnum]
+
+
 export const UsersScalarFieldEnum = {
   id: "id",
   email: "email",
@@ -566,6 +582,19 @@ export const SystemLogScalarFieldEnum = {
 
 export type SystemLogScalarFieldEnum =
   (typeof SystemLogScalarFieldEnum)[keyof typeof SystemLogScalarFieldEnum];
+
+export const SystemLogScalarFieldEnum = {
+  id: 'id',
+  message: 'message',
+  stack: 'stack',
+  component: 'component',
+  severity: 'severity',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type SystemLogScalarFieldEnum = (typeof SystemLogScalarFieldEnum)[keyof typeof SystemLogScalarFieldEnum]
+
 
 export const WebAuthnCredentialScalarFieldEnum = {
   id: "id",

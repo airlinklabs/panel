@@ -14,7 +14,7 @@ import { logActivity } from '../../handlers/utils/activity/activityLogger';
 const MAX_API_KEYS_PER_USER = 25;
 
 function sha256(value: string): string {
-  return crypto.createHash('sha256').update(value).digest('hex');
+  return crypto.createHash("sha256").update(value).digest("hex");
 }
 
 async function shouldHashKeys(): Promise<boolean> {
@@ -26,36 +26,36 @@ async function shouldHashKeys(): Promise<boolean> {
   }
 }
 
-registerPermission('airlink.admin.apikeys.view');
-registerPermission('airlink.admin.apikeys.create');
-registerPermission('airlink.admin.apikeys.delete');
-registerPermission('airlink.admin.apikeys.edit');
-registerPermission('airlink.admin.api.docs.view');
+registerPermission("airlink.admin.apikeys.view");
+registerPermission("airlink.admin.apikeys.create");
+registerPermission("airlink.admin.apikeys.delete");
+registerPermission("airlink.admin.apikeys.edit");
+registerPermission("airlink.admin.api.docs.view");
 
 const coreModule: Module = {
   info: {
-    name: 'API Keys Module',
-    description: 'API key CRUD and validation.',
-    version: '2.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
+    name: "API Keys Module",
+    description: "API key CRUD and validation.",
+    version: "2.0.0",
+    moduleVersion: "1.0.0",
+    author: "AirLinkLab",
+    license: "MIT",
   },
 
   router: () => {
     const router = Router();
 
     router.get(
-      '/admin/api/docs',
-      isAuthenticated(true, 'airlink.admin.api.docs.view'),
+      "/admin/api/docs",
+      isAuthenticated(true, "airlink.admin.api.docs.view"),
       async (req: Request, res: Response) => {
         res.redirect('/admin/apikeys');
       },
     );
 
     router.get(
-      '/admin/apikeys',
-      isAuthenticated(true, 'airlink.admin.apikeys.view'),
+      "/admin/apikeys",
+      isAuthenticated(true, "airlink.admin.apikeys.view"),
       async (req: Request, res: Response) => {
         try {
           const apiKeys = await prisma.apiKey.findMany({
@@ -73,44 +73,44 @@ const coreModule: Module = {
           const settings = await getSettings();
 
           const allPermissions = [
-            { name: 'Servers - Read', value: 'airlink.api.servers.read' },
-            { name: 'Servers - Create', value: 'airlink.api.servers.create' },
-            { name: 'Servers - Update', value: 'airlink.api.servers.update' },
-            { name: 'Servers - Delete', value: 'airlink.api.servers.delete' },
-            { name: 'Users - Read', value: 'airlink.api.users.read' },
-            { name: 'Users - Create', value: 'airlink.api.users.create' },
-            { name: 'Users - Update', value: 'airlink.api.users.update' },
-            { name: 'Users - Delete', value: 'airlink.api.users.delete' },
-            { name: 'Nodes - Read', value: 'airlink.api.nodes.read' },
-            { name: 'Nodes - Create', value: 'airlink.api.nodes.create' },
-            { name: 'Nodes - Update', value: 'airlink.api.nodes.update' },
-            { name: 'Nodes - Delete', value: 'airlink.api.nodes.delete' },
-            { name: 'Settings - Read', value: 'airlink.api.settings.read' },
-            { name: 'Settings - Update', value: 'airlink.api.settings.update' },
-            { name: 'Images - Read', value: 'airlink.api.images.read' },
-            { name: 'Images - Create', value: 'airlink.api.images.create' },
-            { name: 'Images - Update', value: 'airlink.api.images.update' },
-            { name: 'Images - Delete', value: 'airlink.api.images.delete' },
-            { name: 'Locations - Read', value: 'airlink.api.locations.read' },
+            { name: "Servers - Read", value: "airlink.api.servers.read" },
+            { name: "Servers - Create", value: "airlink.api.servers.create" },
+            { name: "Servers - Update", value: "airlink.api.servers.update" },
+            { name: "Servers - Delete", value: "airlink.api.servers.delete" },
+            { name: "Users - Read", value: "airlink.api.users.read" },
+            { name: "Users - Create", value: "airlink.api.users.create" },
+            { name: "Users - Update", value: "airlink.api.users.update" },
+            { name: "Users - Delete", value: "airlink.api.users.delete" },
+            { name: "Nodes - Read", value: "airlink.api.nodes.read" },
+            { name: "Nodes - Create", value: "airlink.api.nodes.create" },
+            { name: "Nodes - Update", value: "airlink.api.nodes.update" },
+            { name: "Nodes - Delete", value: "airlink.api.nodes.delete" },
+            { name: "Settings - Read", value: "airlink.api.settings.read" },
+            { name: "Settings - Update", value: "airlink.api.settings.update" },
+            { name: "Images - Read", value: "airlink.api.images.read" },
+            { name: "Images - Create", value: "airlink.api.images.create" },
+            { name: "Images - Update", value: "airlink.api.images.update" },
+            { name: "Images - Delete", value: "airlink.api.images.delete" },
+            { name: "Locations - Read", value: "airlink.api.locations.read" },
             {
-              name: 'Locations - Create',
-              value: 'airlink.api.locations.create',
+              name: "Locations - Create",
+              value: "airlink.api.locations.create",
             },
           ];
 
-          res.render('admin/apikeys/apikeys', {
+          res.render("admin/apikeys/apikeys", {
             apiKeys,
             allPermissions,
             settings,
             user: req.session.user,
             created:
-              typeof req.query.created === 'string' ? req.query.created : null,
+              typeof req.query.created === "string" ? req.query.created : null,
             req,
           });
         } catch (error: unknown) {
-          logger.error('Error fetching API keys:', error);
-          res.status(500).render('errors/error', {
-            error: 'Failed to fetch API keys',
+          logger.error("Error fetching API keys:", error);
+          res.status(500).render("errors/error", {
+            error: "Failed to fetch API keys",
             req,
           });
         }
@@ -118,14 +118,14 @@ const coreModule: Module = {
     );
 
     router.post(
-      '/admin/apikeys/create',
-      isAuthenticated(true, 'airlink.admin.apikeys.create'),
+      "/admin/apikeys/create",
+      isAuthenticated(true, "airlink.admin.apikeys.create"),
       async (req: Request, res: Response) => {
         try {
           const { name, description, permissions } = req.body ?? {};
 
           if (!name) {
-            res.status(400).json({ error: 'API key name is required' });
+            res.status(400).json({ error: "API key name is required" });
             return;
           }
 
@@ -162,7 +162,7 @@ const coreModule: Module = {
             },
           });
 
-          await logActivity(req, 'apikey:create', {
+          await logActivity(req, "apikey:create", {
             metadata: { name, userId },
           });
 
@@ -171,18 +171,18 @@ const coreModule: Module = {
               `/admin/apikeys?created=${encodeURIComponent(rawKey)}`,
             );
           } else {
-            res.redirect('/admin/apikeys');
+            res.redirect("/admin/apikeys");
           }
         } catch (error: unknown) {
-          logger.error('Error creating API key:', error);
-          res.status(500).json({ error: 'Failed to create API key' });
+          logger.error("Error creating API key:", error);
+          res.status(500).json({ error: "Failed to create API key" });
         }
       },
     );
 
     router.post(
-      '/admin/apikeys/delete/:id',
-      isAuthenticated(true, 'airlink.admin.apikeys.delete'),
+      "/admin/apikeys/delete/:id",
+      isAuthenticated(true, "airlink.admin.apikeys.delete"),
       async (req: Request, res: Response) => {
         try {
           const id = getParamAsNumber(req.params.id);
@@ -192,14 +192,14 @@ const coreModule: Module = {
           });
 
           if (!existing) {
-            if (req.get('HX-Request') === 'true') {
-              return res.status(404).render('fragments/shared/error-banner', {
-                targetId: 'admin-apikeys',
-                message: 'API key not found.',
+            if (req.get("HX-Request") === "true") {
+              return res.status(404).render("fragments/shared/error-banner", {
+                targetId: "admin-apikeys",
+                message: "API key not found.",
                 hint: null,
               });
             }
-            res.status(404).json({ error: 'API key not found' });
+            res.status(404).json({ error: "API key not found" });
             return;
           }
 
@@ -207,9 +207,9 @@ const coreModule: Module = {
             where: { id },
           });
 
-          await logActivity(req, 'apikey:delete', { metadata: { keyId: id } });
+          await logActivity(req, "apikey:delete", { metadata: { keyId: id } });
 
-          if (req.get('HX-Request') === 'true') {
+          if (req.get("HX-Request") === "true") {
             const apiKeys = await prisma.apiKey.findMany({
               include: {
                 user: { select: { id: true, username: true, email: true } },
@@ -217,35 +217,35 @@ const coreModule: Module = {
             });
             const settings = await getSettings();
             res.setHeader(
-              'HX-Trigger',
+              "HX-Trigger",
               JSON.stringify({
-                al: { toast: { type: 'success', message: 'API key deleted.' } },
+                al: { toast: { type: "success", message: "API key deleted." } },
               }),
             );
-            return res.render('fragments/admin/apikeys/key-list', {
+            return res.render("fragments/admin/apikeys/key-list", {
               apiKeys,
               settings,
               req,
             });
           }
-          res.redirect('/admin/apikeys');
+          res.redirect("/admin/apikeys");
         } catch (error: unknown) {
-          logger.error('Error deleting API key:', error);
-          if (req.get('HX-Request') === 'true') {
-            return res.status(500).render('fragments/shared/error-banner', {
-              targetId: 'admin-apikeys',
-              message: 'Failed to delete API key.',
+          logger.error("Error deleting API key:", error);
+          if (req.get("HX-Request") === "true") {
+            return res.status(500).render("fragments/shared/error-banner", {
+              targetId: "admin-apikeys",
+              message: "Failed to delete API key.",
               hint: null,
             });
           }
-          res.status(500).json({ error: 'Failed to delete API key' });
+          res.status(500).json({ error: "Failed to delete API key" });
         }
       },
     );
 
     router.post(
-      '/admin/apikeys/toggle/:id',
-      isAuthenticated(true, 'airlink.admin.apikeys.edit'),
+      "/admin/apikeys/toggle/:id",
+      isAuthenticated(true, "airlink.admin.apikeys.edit"),
       async (req: Request, res: Response) => {
         try {
           const id = getParamAsNumber(req.params.id);
@@ -255,14 +255,14 @@ const coreModule: Module = {
           });
 
           if (!apiKey) {
-            if (req.get('HX-Request') === 'true') {
-              return res.status(404).render('fragments/shared/error-banner', {
-                targetId: 'admin-apikeys',
-                message: 'API key not found.',
+            if (req.get("HX-Request") === "true") {
+              return res.status(404).render("fragments/shared/error-banner", {
+                targetId: "admin-apikeys",
+                message: "API key not found.",
                 hint: null,
               });
             }
-            res.status(404).json({ error: 'API key not found' });
+            res.status(404).json({ error: "API key not found" });
             return;
           }
 
@@ -274,7 +274,7 @@ const coreModule: Module = {
             },
           });
 
-          if (req.get('HX-Request') === 'true') {
+          if (req.get("HX-Request") === "true") {
             const apiKeys = await prisma.apiKey.findMany({
               include: {
                 user: { select: { id: true, username: true, email: true } },
@@ -282,54 +282,54 @@ const coreModule: Module = {
             });
             const settings = await getSettings();
             res.setHeader(
-              'HX-Trigger',
+              "HX-Trigger",
               JSON.stringify({
                 al: {
                   toast: {
-                    type: 'success',
-                    message: `API key ${apiKey.active ? 'disabled' : 'enabled'}.`,
+                    type: "success",
+                    message: `API key ${apiKey.active ? "disabled" : "enabled"}.`,
                   },
                 },
               }),
             );
-            return res.render('fragments/admin/apikeys/key-list', {
+            return res.render("fragments/admin/apikeys/key-list", {
               apiKeys,
               settings,
               req,
             });
           }
-          res.redirect('/admin/apikeys');
+          res.redirect("/admin/apikeys");
         } catch (error: unknown) {
-          logger.error('Error toggling API key status:', error);
-          if (req.get('HX-Request') === 'true') {
-            return res.status(500).render('fragments/shared/error-banner', {
-              targetId: 'admin-apikeys',
-              message: 'Failed to toggle API key status.',
+          logger.error("Error toggling API key status:", error);
+          if (req.get("HX-Request") === "true") {
+            return res.status(500).render("fragments/shared/error-banner", {
+              targetId: "admin-apikeys",
+              message: "Failed to toggle API key status.",
               hint: null,
             });
           }
-          res.status(500).json({ error: 'Failed to toggle API key status' });
+          res.status(500).json({ error: "Failed to toggle API key status" });
         }
       },
     );
 
     router.post(
-      '/admin/apikeys/edit/:id',
-      isAuthenticated(true, 'airlink.admin.apikeys.edit'),
+      "/admin/apikeys/edit/:id",
+      isAuthenticated(true, "airlink.admin.apikeys.edit"),
       async (req: Request, res: Response) => {
         try {
           const id = getParamAsNumber(req.params.id);
           const { name, description, permissions } = req.body;
 
           if (!name) {
-            if (req.get('HX-Request') === 'true') {
-              return res.status(400).render('fragments/shared/error-banner', {
-                targetId: 'admin-apikeys',
-                message: 'API key name is required.',
+            if (req.get("HX-Request") === "true") {
+              return res.status(400).render("fragments/shared/error-banner", {
+                targetId: "admin-apikeys",
+                message: "API key name is required.",
                 hint: null,
               });
             }
-            res.status(400).json({ error: 'API key name is required' });
+            res.status(400).json({ error: "API key name is required" });
             return;
           }
 
@@ -349,7 +349,7 @@ const coreModule: Module = {
             },
           });
 
-          if (req.get('HX-Request') === 'true') {
+          if (req.get("HX-Request") === "true") {
             const apiKeys = await prisma.apiKey.findMany({
               include: {
                 user: { select: { id: true, username: true, email: true } },
@@ -357,28 +357,28 @@ const coreModule: Module = {
             });
             const settings = await getSettings();
             res.setHeader(
-              'HX-Trigger',
+              "HX-Trigger",
               JSON.stringify({
-                al: { toast: { type: 'success', message: 'API key updated.' } },
+                al: { toast: { type: "success", message: "API key updated." } },
               }),
             );
-            return res.render('fragments/admin/apikeys/key-list', {
+            return res.render("fragments/admin/apikeys/key-list", {
               apiKeys,
               settings,
               req,
             });
           }
-          res.redirect('/admin/apikeys');
+          res.redirect("/admin/apikeys");
         } catch (error: unknown) {
-          logger.error('Error updating API key:', error);
-          if (req.get('HX-Request') === 'true') {
-            return res.status(500).render('fragments/shared/error-banner', {
-              targetId: 'admin-apikeys',
-              message: 'Failed to update API key.',
+          logger.error("Error updating API key:", error);
+          if (req.get("HX-Request") === "true") {
+            return res.status(500).render("fragments/shared/error-banner", {
+              targetId: "admin-apikeys",
+              message: "Failed to update API key.",
               hint: null,
             });
           }
-          res.status(500).json({ error: 'Failed to update API key' });
+          res.status(500).json({ error: "Failed to update API key" });
         }
       },
     );

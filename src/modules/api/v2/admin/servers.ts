@@ -12,9 +12,9 @@
  * GET    /api/v2/admin/servers/:id/transfer/status — Transfer poll
  */
 
-import { Router } from 'express';
-import prisma from '../../../../db';
-import { parseBody } from '../../../../utils/validation';
+import { Router } from "express";
+import prisma from "../../../../db";
+import { parseBody } from "../../../../utils/validation";
 import {
   jsonOk,
   jsonError,
@@ -22,7 +22,7 @@ import {
   logActivity,
   parsePage,
   parsePerPage,
-} from '../helpers';
+} from "../helpers";
 import {
   adminCreateServerBody,
   adminUpdateServerBody,
@@ -45,15 +45,15 @@ router.use(async (req, res, next) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/admin/servers — List all servers
 // ---------------------------------------------------------------------------
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const page = parsePage(req.query.page);
   const perPage = parsePerPage(req.query.perPage);
-  const search = (req.query.search as string) || '';
+  const search = (req.query.search as string) || "";
 
   const where = search
     ? {
-      OR: [{ name: { contains: search } }, { UUID: { contains: search } }],
-    }
+        OR: [{ name: { contains: search } }, { UUID: { contains: search } }],
+      }
     : {};
 
   const [servers, total] = await Promise.all([
@@ -67,7 +67,7 @@ router.get('/', async (req, res) => {
       },
       skip: (page - 1) * perPage,
       take: perPage,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     }),
     prisma.server.count({ where }),
   ]);
@@ -84,7 +84,7 @@ router.get('/', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/admin/servers — Create server
 // ---------------------------------------------------------------------------
-router.post('/', parseBody(adminCreateServerBody), async (req, res) => {
+router.post("/", parseBody(adminCreateServerBody), async (req, res) => {
   const data = req.validatedBody as any;
 
   // Verify owner exists
@@ -116,7 +116,7 @@ router.post('/', parseBody(adminCreateServerBody), async (req, res) => {
       Cpu: data.cpu,
       Storage: data.storage,
       Swap: data.swap,
-      Ports: data.Ports ?? '[]',
+      Ports: data.Ports ?? "[]",
       StartCommand: data.StartCommand,
       dockerImage: data.dockerImage,
       Variables: data.Variables,
@@ -146,7 +146,7 @@ router.post('/', parseBody(adminCreateServerBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/admin/servers/:id — Get server
 // ---------------------------------------------------------------------------
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid server ID', 400);
@@ -180,7 +180,7 @@ router.get('/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // PUT /api/v2/admin/servers/:id — Update server
 // ---------------------------------------------------------------------------
-router.put('/:id', parseBody(adminUpdateServerBody), async (req, res) => {
+router.put("/:id", parseBody(adminUpdateServerBody), async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid server ID', 400);
@@ -234,7 +234,7 @@ router.put('/:id', parseBody(adminUpdateServerBody), async (req, res) => {
   }
 
   if (Object.keys(updateData).length === 0) {
-    return jsonError(res, 'BAD_REQUEST', 'No fields to update', 400);
+    return jsonError(res, "BAD_REQUEST", "No fields to update", 400);
   }
 
   const updated = await prisma.server.update({
@@ -261,7 +261,7 @@ router.put('/:id', parseBody(adminUpdateServerBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/admin/servers/:id — Delete server
 // ---------------------------------------------------------------------------
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid server ID', 400);
@@ -298,7 +298,7 @@ router.delete('/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/admin/servers/:id/suspend — Suspend server
 // ---------------------------------------------------------------------------
-router.post('/:id/suspend', async (req, res) => {
+router.post("/:id/suspend", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid server ID', 400);
@@ -310,7 +310,7 @@ router.post('/:id/suspend', async (req, res) => {
   }
 
   if (server.Suspended) {
-    return jsonError(res, 'BAD_REQUEST', 'Server is already suspended', 400);
+    return jsonError(res, "BAD_REQUEST", "Server is already suspended", 400);
   }
 
   const updated = await prisma.server.update({
@@ -336,7 +336,7 @@ router.post('/:id/suspend', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/admin/servers/:id/unsuspend — Unsuspend server
 // ---------------------------------------------------------------------------
-router.post('/:id/unsuspend', async (req, res) => {
+router.post("/:id/unsuspend", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid server ID', 400);
@@ -348,7 +348,7 @@ router.post('/:id/unsuspend', async (req, res) => {
   }
 
   if (!server.Suspended) {
-    return jsonError(res, 'BAD_REQUEST', 'Server is not suspended', 400);
+    return jsonError(res, "BAD_REQUEST", "Server is not suspended", 400);
   }
 
   const updated = await prisma.server.update({
@@ -365,7 +365,7 @@ router.post('/:id/unsuspend', async (req, res) => {
 // POST /api/v2/admin/servers/:id/transfer — Transfer server
 // ---------------------------------------------------------------------------
 router.post(
-  '/:id/transfer',
+  "/:id/transfer",
   parseBody(adminTransferServerBody),
   async (req, res) => {
     const id = parseInt(String(req.params.id), 10);

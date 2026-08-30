@@ -3098,6 +3098,129 @@ export type UsersUncheckedUpdateManyWithoutRoleRelationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
+export type UsersCreateManyRoleRelationInput = {
+  id?: number
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  maxDatabases?: number | null
+  onboardingCompleted?: boolean
+  onboardingSkipped?: boolean
+  preferredNodeId?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  totpSecret?: string | null
+  totpEnabled?: boolean
+  totpRecoveryCodes?: string | null
+  passkeyEnabled?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UsersUpdateWithoutRoleRelationInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  subUserAccess?: Prisma.SubUserUpdateManyWithoutUserNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
+  preferredNode?: Prisma.NodeUpdateOneWithoutPreferredUsersNestedInput
+}
+
+export type UsersUncheckedUpdateWithoutRoleRelationInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  subUserAccess?: Prisma.SubUserUncheckedUpdateManyWithoutUserNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutActorNestedInput
+  passkeys?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UsersUncheckedUpdateManyWithoutRoleRelationInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  totpRecoveryCodes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passkeyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type UsersCreateManyPreferredNodeInput = {
   id?: number;
   email: string;
@@ -4799,6 +4922,25 @@ export type Users$roleRelationArgs<
   include?: Prisma.RoleInclude<ExtArgs> | null;
   where?: Prisma.RoleWhereInput;
 };
+
+/**
+ * Users.roleRelation
+ */
+export type Users$roleRelationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Role
+   */
+  select?: Prisma.RoleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Role
+   */
+  omit?: Prisma.RoleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RoleInclude<ExtArgs> | null
+  where?: Prisma.RoleWhereInput
+}
 
 /**
  * Users.servers

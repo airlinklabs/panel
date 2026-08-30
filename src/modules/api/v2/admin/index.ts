@@ -25,6 +25,6 @@ router.use('/images', imagesRouter);
 router.use('/roles', rolesRouter);
 
 // miscRouter handles: locations, mounts, apikeys, addons, overview, radar, analytics, playerstats
-router.use('/', miscRouter);
+router.use("/", miscRouter);
 
 export default router;

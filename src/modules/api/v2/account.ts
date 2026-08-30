@@ -27,11 +27,12 @@
  * POST   /api/v2/account/onboarding/skip        — Skip onboarding
  */
 
-import { Router } from 'express';
-import prisma from '../../../db';
-import bcrypt from 'bcryptjs';
-import { parseBody } from '../../../utils/validation';
-import { jsonOk, jsonError, requireUser, logActivity } from './helpers';
+import { Router } from "express";
+import prisma from "../../../db";
+import bcrypt from "bcryptjs";
+import multer from "multer";
+import { parseBody } from "../../../utils/validation";
+import { jsonOk, jsonError, requireUser, logActivity } from "./helpers";
 import {
   updateUsernameBody,
   updateEmailBody,
@@ -51,7 +52,7 @@ const router = Router();
 // ---------------------------------------------------------------------------
 // GET /api/v2/account — Get current user profile
 // ---------------------------------------------------------------------------
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -84,7 +85,7 @@ router.get('/', async (req, res) => {
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/account/username — Update username
 // ---------------------------------------------------------------------------
-router.patch('/username', parseBody(updateUsernameBody), async (req, res) => {
+router.patch("/username", parseBody(updateUsernameBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -95,7 +96,7 @@ router.patch('/username', parseBody(updateUsernameBody), async (req, res) => {
   // Check uniqueness
   const existing = await prisma.users.findUnique({ where: { username } });
   if (existing && existing.id !== user.id) {
-    return jsonError(res, 'CONFLICT', 'Username is already taken', 409);
+    return jsonError(res, "CONFLICT", "Username is already taken", 409);
   }
 
   const updated = await prisma.users.update({
@@ -106,7 +107,7 @@ router.patch('/username', parseBody(updateUsernameBody), async (req, res) => {
 
   logActivity(
     user.id,
-    'account.username.updated',
+    "account.username.updated",
     undefined,
     { username },
     req.ip,
@@ -118,7 +119,7 @@ router.patch('/username', parseBody(updateUsernameBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/account/email — Change email
 // ---------------------------------------------------------------------------
-router.patch('/email', parseBody(updateEmailBody), async (req, res) => {
+router.patch("/email", parseBody(updateEmailBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -128,7 +129,7 @@ router.patch('/email', parseBody(updateEmailBody), async (req, res) => {
 
   const existing = await prisma.users.findUnique({ where: { email } });
   if (existing && existing.id !== user.id) {
-    return jsonError(res, 'CONFLICT', 'Email is already in use', 409);
+    return jsonError(res, "CONFLICT", "Email is already in use", 409);
   }
 
   const updated = await prisma.users.update({
@@ -137,7 +138,7 @@ router.patch('/email', parseBody(updateEmailBody), async (req, res) => {
     select: { id: true, email: true },
   });
 
-  logActivity(user.id, 'account.email.updated', undefined, { email }, req.ip);
+  logActivity(user.id, "account.email.updated", undefined, { email }, req.ip);
 
   jsonOk(res, updated);
 });
@@ -145,7 +146,7 @@ router.patch('/email', parseBody(updateEmailBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/account/password — Change password
 // ---------------------------------------------------------------------------
-router.patch('/password', parseBody(updatePasswordBody), async (req, res) => {
+router.patch("/password", parseBody(updatePasswordBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -158,7 +159,7 @@ router.patch('/password', parseBody(updatePasswordBody), async (req, res) => {
 
   const valid = await bcrypt.compare(currentPassword, user.password);
   if (!valid) {
-    return jsonError(res, 'UNAUTHORIZED', 'Current password is incorrect', 401);
+    return jsonError(res, "UNAUTHORIZED", "Current password is incorrect", 401);
   }
 
   const hashed = await bcrypt.hash(newPassword, 12);
@@ -167,7 +168,7 @@ router.patch('/password', parseBody(updatePasswordBody), async (req, res) => {
     data: { password: hashed },
   });
 
-  logActivity(user.id, 'account.password.updated', undefined, {}, req.ip);
+  logActivity(user.id, "account.password.updated", undefined, {}, req.ip);
 
   jsonOk(res, { updated: true });
 });
@@ -176,7 +177,7 @@ router.patch('/password', parseBody(updatePasswordBody), async (req, res) => {
 // PATCH /api/v2/account/description — Update description
 // ---------------------------------------------------------------------------
 router.patch(
-  '/description',
+  "/description",
   parseBody(updateDescriptionBody),
   async (req, res) => {
     const user = await requireUser(req, res);
@@ -200,7 +201,7 @@ router.patch(
 // PATCH /api/v2/account/preferred-node — Set preferred node
 // ---------------------------------------------------------------------------
 router.patch(
-  '/preferred-node',
+  "/preferred-node",
   parseBody(updatePreferredNodeBody),
   async (req, res) => {
     const user = await requireUser(req, res);
@@ -213,7 +214,7 @@ router.patch(
     if (nodeId !== null) {
       const node = await prisma.node.findUnique({ where: { id: nodeId } });
       if (!node) {
-        return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
+        return jsonError(res, "NOT_FOUND", "Node not found", 404);
       }
     }
 
@@ -230,7 +231,7 @@ router.patch(
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/account/language — Set language
 // ---------------------------------------------------------------------------
-router.patch('/language', parseBody(updateLanguageBody), async (req, res) => {
+router.patch("/language", parseBody(updateLanguageBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -245,7 +246,7 @@ router.patch('/language', parseBody(updateLanguageBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/avatar — Upload avatar
 // ---------------------------------------------------------------------------
-router.post('/avatar', async (req, res) => {
+router.post("/avatar", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -253,35 +254,35 @@ router.post('/avatar', async (req, res) => {
 
   // Check if multipart file upload
   if (!req.file) {
-    return jsonError(res, 'BAD_REQUEST', 'No file uploaded', 400);
+    return jsonError(res, "BAD_REQUEST", "No file uploaded", 400);
   }
 
   const file = req.file;
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
   if (!allowedTypes.includes(file.mimetype)) {
     return jsonError(
       res,
-      'BAD_REQUEST',
-      'Only JPEG, PNG, GIF, and WebP images are allowed',
+      "BAD_REQUEST",
+      "Only JPEG, PNG, GIF, and WebP images are allowed",
       400,
     );
   }
 
   const maxSize = 5 * 1024 * 1024; // 5MB
   if (file.size > maxSize) {
-    return jsonError(res, 'BAD_REQUEST', 'File must be less than 5MB', 400);
+    return jsonError(res, "BAD_REQUEST", "File must be less than 5MB", 400);
   }
 
   // Generate avatar path
-  const ext = file.mimetype.split('/')[1] || 'png';
+  const ext = file.mimetype.split("/")[1] || "png";
   const avatarName = `avatar-${user.id}-${Date.now()}.${ext}`;
-  const fs = await import('fs/promises');
-  const path = await import('path');
+  const fs = await import("fs/promises");
+  const path = await import("path");
   const uploadDir = path.default.join(
     process.cwd(),
-    'public',
-    'uploads',
-    'avatars',
+    "public",
+    "uploads",
+    "avatars",
   );
   await fs.default.mkdir(uploadDir, { recursive: true });
   await fs.default.writeFile(
@@ -298,7 +299,7 @@ router.post('/avatar', async (req, res) => {
 
   logActivity(
     user.id,
-    'account.avatar.updated',
+    "account.avatar.updated",
     undefined,
     { avatar: avatarUrl },
     req.ip,
@@ -310,7 +311,7 @@ router.post('/avatar', async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/account/avatar — Remove avatar
 // ---------------------------------------------------------------------------
-router.delete('/avatar', async (req, res) => {
+router.delete("/avatar", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -321,7 +322,7 @@ router.delete('/avatar', async (req, res) => {
     data: { avatar: null },
   });
 
-  logActivity(user.id, 'account.avatar.removed', undefined, {}, req.ip);
+  logActivity(user.id, "account.avatar.removed", undefined, {}, req.ip);
 
   jsonOk(res, { removed: true });
 });
@@ -329,7 +330,7 @@ router.delete('/avatar', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/account/2fa/setup — Get 2FA setup data
 // ---------------------------------------------------------------------------
-router.get('/2fa/setup', async (req, res) => {
+router.get("/2fa/setup", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -339,14 +340,18 @@ router.get('/2fa/setup', async (req, res) => {
     return jsonError(res, 'BAD_REQUEST', '2FA is already enabled', 400);
   }
 
-  const OTPAuth = await import('otpauth');
+  if (user.totpEnabled) {
+    return jsonError(res, "BAD_REQUEST", "2FA is already enabled", 400);
+  }
+
+  const OTPAuth = await import("otpauth");
   const secret = new OTPAuth.Secret({ size: 20 });
   const secretBase32 = secret.base32;
 
   const totp = new OTPAuth.TOTP({
-    issuer: 'Airlink',
+    issuer: "Airlink",
     label: user.email,
-    algorithm: 'SHA1',
+    algorithm: "SHA1",
     digits: 6,
     period: 30,
     secret,
@@ -369,35 +374,35 @@ router.get('/2fa/setup', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/2fa/enable — Enable 2FA
 // ---------------------------------------------------------------------------
-router.post('/2fa/enable', async (req, res) => {
+router.post("/2fa/enable", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
   }
 
   if (user.totpEnabled) {
-    return jsonError(res, 'BAD_REQUEST', '2FA is already enabled', 400);
+    return jsonError(res, "BAD_REQUEST", "2FA is already enabled", 400);
   }
 
   const { code } = req.body as { code?: string };
   if (!code) {
-    return jsonError(res, 'BAD_REQUEST', 'Verification code is required', 400);
+    return jsonError(res, "BAD_REQUEST", "Verification code is required", 400);
   }
 
   if (!user.totpSecret) {
     return jsonError(
       res,
-      'BAD_REQUEST',
-      'No 2FA setup in progress. Call GET /2fa/setup first',
+      "BAD_REQUEST",
+      "No 2FA setup in progress. Call GET /2fa/setup first",
       400,
     );
   }
 
-  const OTPAuth = await import('otpauth');
+  const OTPAuth = await import("otpauth");
   const totp = new OTPAuth.TOTP({
-    issuer: 'Airlink',
+    issuer: "Airlink",
     label: user.email,
-    algorithm: 'SHA1',
+    algorithm: "SHA1",
     digits: 6,
     period: 30,
     secret: OTPAuth.Secret.fromBase32(user.totpSecret),
@@ -405,13 +410,13 @@ router.post('/2fa/enable', async (req, res) => {
 
   const delta = totp.validate({ token: code, window: 2 });
   if (delta === null) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid verification code', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid verification code", 400);
   }
 
   // Generate recovery codes
-  const crypto = await import('crypto');
+  const crypto = await import("crypto");
   const recoveryCodes = Array.from({ length: 8 }, () =>
-    crypto.randomBytes(4).toString('hex'),
+    crypto.randomBytes(4).toString("hex"),
   );
 
   await prisma.users.update({
@@ -422,7 +427,7 @@ router.post('/2fa/enable', async (req, res) => {
     },
   });
 
-  logActivity(user.id, 'account.2fa.enabled', undefined, {}, req.ip);
+  logActivity(user.id, "account.2fa.enabled", undefined, {}, req.ip);
 
   jsonOk(res, { enabled: true, recoveryCodes });
 });
@@ -430,14 +435,14 @@ router.post('/2fa/enable', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/2fa/disable — Disable 2FA
 // ---------------------------------------------------------------------------
-router.post('/2fa/disable', async (req, res) => {
+router.post("/2fa/disable", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
   }
 
   if (!user.totpEnabled) {
-    return jsonError(res, 'BAD_REQUEST', '2FA is not enabled', 400);
+    return jsonError(res, "BAD_REQUEST", "2FA is not enabled", 400);
   }
 
   const { code, recoveryCode } = req.body as {
@@ -448,11 +453,11 @@ router.post('/2fa/disable', async (req, res) => {
   let verified = false;
 
   if (code && user.totpSecret) {
-    const OTPAuth = await import('otpauth');
+    const OTPAuth = await import("otpauth");
     const totp = new OTPAuth.TOTP({
-      issuer: 'Airlink',
+      issuer: "Airlink",
       label: user.email,
-      algorithm: 'SHA1',
+      algorithm: "SHA1",
       digits: 6,
       period: 30,
       secret: OTPAuth.Secret.fromBase32(user.totpSecret),
@@ -473,7 +478,7 @@ router.post('/2fa/disable', async (req, res) => {
   }
 
   if (!verified) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid code or recovery code', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid code or recovery code", 400);
   }
 
   await prisma.users.update({
@@ -485,7 +490,7 @@ router.post('/2fa/disable', async (req, res) => {
     },
   });
 
-  logActivity(user.id, 'account.2fa.disabled', undefined, {}, req.ip);
+  logActivity(user.id, "account.2fa.disabled", undefined, {}, req.ip);
 
   jsonOk(res, { disabled: true });
 });

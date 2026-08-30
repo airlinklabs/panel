@@ -109,7 +109,7 @@ router.get('/', async (req, res) => {
     prisma.images.findMany({
       skip: (page - 1) * perPage,
       take: perPage,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     }),
     prisma.images.count(),
   ]);

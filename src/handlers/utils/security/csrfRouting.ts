@@ -10,7 +10,7 @@
  * used, CSRF protection applies normally.
  */
 
-import type { Request } from 'express';
+import type { Request } from "express";
 
 /** API mounts authenticated exclusively via API-key headers, never cookies. */
 const BEARER_ONLY_MOUNTS = [
@@ -25,7 +25,7 @@ function isMount(path: string, mount: string): boolean {
 
 /** True for the realtime websocket upgrade paths. */
 export function isWsUpgrade(path: string): boolean {
-  return path === '/ws' || path.startsWith('/ws/');
+  return path === "/ws" || path.startsWith("/ws/");
 }
 
 /** True when the path belongs to a bearer-only (API-key) mount. */

@@ -11,9 +11,9 @@
  * GET    /api/v2/servers/:id/backups/restore/progress   — Restore progress
  */
 
-import { Router } from 'express';
-import prisma from '../../../db';
-import { parseBody } from '../../../utils/validation';
+import { Router } from "express";
+import prisma from "../../../db";
+import { parseBody } from "../../../utils/validation";
 import {
   jsonOk,
   jsonError,
@@ -37,7 +37,7 @@ const router = Router();
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups — List backups
 // ---------------------------------------------------------------------------
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -68,7 +68,7 @@ router.get('/', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/backups — Create backup
 // ---------------------------------------------------------------------------
-router.post('/', parseBody(createBackupBody), async (req, res) => {
+router.post("/", parseBody(createBackupBody), async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -101,10 +101,10 @@ router.post('/', parseBody(createBackupBody), async (req, res) => {
     );
 
     if (!response.ok) {
-      const text = await response.text().catch(() => 'Daemon error');
+      const text = await response.text().catch(() => "Daemon error");
       return jsonError(
         res,
-        'DAEMON_ERROR',
+        "DAEMON_ERROR",
         `Failed to create backup: ${text}`,
         502,
       );
@@ -130,7 +130,7 @@ router.post('/', parseBody(createBackupBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/servers/:id/backups/:backupId — Delete backup
 // ---------------------------------------------------------------------------
-router.delete('/:backupId', async (req, res) => {
+router.delete("/:backupId", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -143,11 +143,11 @@ router.delete('/:backupId', async (req, res) => {
     where: { UUID: req.params.backupId },
   });
   if (!backup || backup.serverId !== resolved.server.UUID) {
-    return jsonError(res, 'NOT_FOUND', 'Backup not found', 404);
+    return jsonError(res, "NOT_FOUND", "Backup not found", 404);
   }
 
   if (backup.locked) {
-    return jsonError(res, 'FORBIDDEN', 'Backup is locked', 403);
+    return jsonError(res, "FORBIDDEN", "Backup is locked", 403);
   }
 
   try {
@@ -176,7 +176,7 @@ router.delete('/:backupId', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/backups/:backupId/restore — Restore backup
 // ---------------------------------------------------------------------------
-router.post('/:backupId/restore', async (req, res) => {
+router.post("/:backupId/restore", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -200,10 +200,10 @@ router.post('/:backupId/restore', async (req, res) => {
     );
 
     if (!response.ok) {
-      const text = await response.text().catch(() => 'Daemon error');
+      const text = await response.text().catch(() => "Daemon error");
       return jsonError(
         res,
-        'DAEMON_ERROR',
+        "DAEMON_ERROR",
         `Failed to restore backup: ${text}`,
         502,
       );
@@ -229,7 +229,7 @@ router.post('/:backupId/restore', async (req, res) => {
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/servers/:id/backups/:backupId/lock — Toggle lock
 // ---------------------------------------------------------------------------
-router.patch('/:backupId/lock', async (req, res) => {
+router.patch("/:backupId/lock", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -239,7 +239,7 @@ router.patch('/:backupId/lock', async (req, res) => {
     where: { UUID: req.params.backupId },
   });
   if (!backup || backup.serverId !== resolved.server.UUID) {
-    return jsonError(res, 'NOT_FOUND', 'Backup not found', 404);
+    return jsonError(res, "NOT_FOUND", "Backup not found", 404);
   }
 
   const updated = await prisma.backup.update({
@@ -253,7 +253,7 @@ router.patch('/:backupId/lock', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups/:backupId/download — Download backup
 // ---------------------------------------------------------------------------
-router.get('/:backupId/download', async (req, res) => {
+router.get("/:backupId/download", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -277,18 +277,18 @@ router.get('/:backupId/download', async (req, res) => {
     );
 
     if (!response.ok) {
-      const text = await response.text().catch(() => 'Daemon error');
+      const text = await response.text().catch(() => "Daemon error");
       return jsonError(
         res,
-        'DAEMON_ERROR',
+        "DAEMON_ERROR",
         `Failed to download backup: ${text}`,
         502,
       );
     }
 
-    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader(
-      'Content-Disposition',
+      "Content-Disposition",
       `attachment; filename="${backup.name}.zip"`,
     );
     if (response.body) {
@@ -313,7 +313,7 @@ router.get('/:backupId/download', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups/progress — Backup progress
 // ---------------------------------------------------------------------------
-router.get('/progress', async (req, res) => {
+router.get("/progress", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -327,7 +327,7 @@ router.get('/progress', async (req, res) => {
     );
 
     if (!response.ok) {
-      return jsonOk(res, { progress: 0, status: 'unknown' });
+      return jsonOk(res, { progress: 0, status: "unknown" });
     }
 
     const data = await response.json();
@@ -343,7 +343,7 @@ router.get('/progress', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups/restore/progress — Restore progress
 // ---------------------------------------------------------------------------
-router.get('/restore/progress', async (req, res) => {
+router.get("/restore/progress", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -357,7 +357,7 @@ router.get('/restore/progress', async (req, res) => {
     );
 
     if (!response.ok) {
-      return jsonOk(res, { progress: 0, status: 'unknown' });
+      return jsonOk(res, { progress: 0, status: "unknown" });
     }
 
     const data = await response.json();

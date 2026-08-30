@@ -10,10 +10,10 @@
  * POST   /api/v2/admin/users/:id/onboarding/reset — Reset onboarding
  */
 
-import { Router } from 'express';
-import prisma from '../../../../db';
-import bcrypt from 'bcryptjs';
-import { parseBody } from '../../../../utils/validation';
+import { Router } from "express";
+import prisma from "../../../../db";
+import bcrypt from "bcryptjs";
+import { parseBody } from "../../../../utils/validation";
 import {
   jsonOk,
   jsonError,
@@ -21,12 +21,12 @@ import {
   logActivity,
   parsePage,
   parsePerPage,
-} from '../helpers';
+} from "../helpers";
 import {
   adminCreateUserBody,
   adminUpdateUserBody,
   adminTransferOwnerBody,
-} from '../dto';
+} from "../dto";
 
 const router = Router();
 
@@ -42,18 +42,18 @@ router.use(async (req, res, next) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/admin/users — List users
 // ---------------------------------------------------------------------------
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const page = parsePage(req.query.page);
   const perPage = parsePerPage(req.query.perPage);
-  const search = (req.query.search as string) || '';
+  const search = (req.query.search as string) || "";
 
   const where = search
     ? {
-      OR: [
-        { email: { contains: search } },
-        { username: { contains: search } },
-      ],
-    }
+        OR: [
+          { email: { contains: search } },
+          { username: { contains: search } },
+        ],
+      }
     : {};
 
   const [users, total] = await Promise.all([
@@ -74,7 +74,7 @@ router.get('/', async (req, res) => {
       },
       skip: (page - 1) * perPage,
       take: perPage,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     }),
     prisma.users.count({ where }),
   ]);
@@ -91,7 +91,7 @@ router.get('/', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/admin/users — Create user
 // ---------------------------------------------------------------------------
-router.post('/', parseBody(adminCreateUserBody), async (req, res) => {
+router.post("/", parseBody(adminCreateUserBody), async (req, res) => {
   const data = req.validatedBody as any;
 
   // Check email uniqueness
@@ -99,7 +99,7 @@ router.post('/', parseBody(adminCreateUserBody), async (req, res) => {
     where: { email: data.email },
   });
   if (existingEmail) {
-    return jsonError(res, 'CONFLICT', 'Email is already registered', 409);
+    return jsonError(res, "CONFLICT", "Email is already registered", 409);
   }
 
   // Check username uniqueness if provided
@@ -108,7 +108,23 @@ router.post('/', parseBody(adminCreateUserBody), async (req, res) => {
       where: { username: data.username },
     });
     if (existingUsername) {
-      return jsonError(res, 'CONFLICT', 'Username is already taken', 409);
+      return jsonError(res, "CONFLICT", "Username is already taken", 409);
+    }
+  }
+
+  // Single-owner constraint: only one user can have the owner role
+  const role = data.role || (data.isAdmin ? "admin" : "user");
+  if (role === "owner") {
+    const existingOwner = await prisma.users.findFirst({
+      where: { role: "owner" },
+    });
+    if (existingOwner) {
+      return jsonError(
+        res,
+        "CONFLICT",
+        "An owner already exists. Transfer ownership first.",
+        409,
+      );
     }
   }
 
@@ -167,7 +183,7 @@ router.post('/', parseBody(adminCreateUserBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/admin/users/:id — Get user
 // ---------------------------------------------------------------------------
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid user ID', 400);
@@ -206,7 +222,7 @@ router.get('/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // PUT /api/v2/admin/users/:id — Update user
 // ---------------------------------------------------------------------------
-router.put('/:id', parseBody(adminUpdateUserBody), async (req, res) => {
+router.put("/:id", parseBody(adminUpdateUserBody), async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid user ID', 400);
@@ -250,7 +266,7 @@ router.put('/:id', parseBody(adminUpdateUserBody), async (req, res) => {
   if (data.email !== undefined) {
     const dup = await prisma.users.findUnique({ where: { email: data.email } });
     if (dup && dup.id !== id) {
-      return jsonError(res, 'CONFLICT', 'Email is already in use', 409);
+      return jsonError(res, "CONFLICT", "Email is already in use", 409);
     }
     updateData.email = data.email;
   }
@@ -259,7 +275,7 @@ router.put('/:id', parseBody(adminUpdateUserBody), async (req, res) => {
       where: { username: data.username },
     });
     if (dup && dup.id !== id) {
-      return jsonError(res, 'CONFLICT', 'Username is already taken', 409);
+      return jsonError(res, "CONFLICT", "Username is already taken", 409);
     }
     updateData.username = data.username;
   }
@@ -293,7 +309,7 @@ router.put('/:id', parseBody(adminUpdateUserBody), async (req, res) => {
   }
 
   if (Object.keys(updateData).length === 0) {
-    return jsonError(res, 'BAD_REQUEST', 'No fields to update', 400);
+    return jsonError(res, "BAD_REQUEST", "No fields to update", 400);
   }
 
   const updated = await prisma.users.update({
@@ -324,7 +340,7 @@ router.put('/:id', parseBody(adminUpdateUserBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/admin/users/:id — Delete user
 // ---------------------------------------------------------------------------
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid user ID', 400);
@@ -355,7 +371,7 @@ router.delete('/:id', async (req, res) => {
   if (serverCount > 0) {
     return jsonError(
       res,
-      'CONFLICT',
+      "CONFLICT",
       `Cannot delete user with ${serverCount} servers. Transfer ownership first.`,
       409,
     );
@@ -411,7 +427,7 @@ router.post('/:id/onboarding/reset', async (req, res) => {
 // POST /api/v2/admin/users/:id/transfer — Transfer ownership
 // ---------------------------------------------------------------------------
 router.post(
-  '/:id/transfer',
+  "/:id/transfer",
   parseBody(adminTransferOwnerBody),
   async (req, res) => {
     const id = parseInt(String(req.params.id), 10);

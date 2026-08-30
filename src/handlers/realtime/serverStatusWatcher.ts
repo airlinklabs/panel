@@ -200,7 +200,7 @@ function cleanup(serverId: string): void {
   }
   if (state.socket) {
     try {
-      state.socket.close(1000, 'no watchers');
+      state.socket.close(1000, "no watchers");
     } catch {
       /* already closed */
     }

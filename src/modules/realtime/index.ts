@@ -1,10 +1,10 @@
-import { Router, type Request } from 'express';
-import { randomUUID } from 'node:crypto';
-import type { WebSocket } from 'ws';
-import type { Module } from '../../handlers/moduleInit';
-import prisma from '../../db';
-import logger from '../../handlers/logger';
-import { getUserServerIds } from '../../handlers/realtime/access';
+import { Router, type Request } from "express";
+import { randomUUID } from "node:crypto";
+import type { WebSocket } from "ws";
+import type { Module } from "../../handlers/moduleInit";
+import prisma from "../../db";
+import logger from "../../handlers/logger";
+import { getUserServerIds } from "../../handlers/realtime/access";
 import {
   dropRealtimeSession,
   realtimeSessions,
@@ -171,12 +171,12 @@ async function endEventWatch(
 
 const realtimeModule: Module = {
   info: {
-    name: 'Realtime Module',
-    description: 'Real-time event stream for the panel UI.',
-    version: '2.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
+    name: "Realtime Module",
+    description: "Real-time event stream for the panel UI.",
+    version: "2.0.0",
+    moduleVersion: "1.0.0",
+    author: "AirLinkLab",
+    license: "MIT",
   },
 
   router: (applyWs?: (router: Router) => void) => {
@@ -185,11 +185,11 @@ const realtimeModule: Module = {
       applyWs(router);
     }
 
-    router.ws('/ws/realtime', async (rawWs: WebSocket, req: Request) => {
+    router.ws("/ws/realtime", async (rawWs: WebSocket, req: Request) => {
       const ws = rawWs as RealtimeWS;
       const userId = req.session?.user?.id;
       if (!userId) {
-        ws.close(4401, 'unauthenticated');
+        ws.close(4401, "unauthenticated");
         return;
       }
 
@@ -197,11 +197,11 @@ const realtimeModule: Module = {
       try {
         user = await prisma.users.findUnique({ where: { id: userId } });
       } catch {
-        ws.close(1011, 'internal error');
+        ws.close(1011, "internal error");
         return;
       }
       if (!user?.username) {
-        ws.close(1008, 'invalid user');
+        ws.close(1008, "invalid user");
         return;
       }
 
@@ -217,8 +217,8 @@ const realtimeModule: Module = {
           ws,
         );
       } catch (error) {
-        logger.error('Failed to register realtime session:', error);
-        ws.close(1011, 'internal error');
+        logger.error("Failed to register realtime session:", error);
+        ws.close(1011, "internal error");
         return;
       }
 
@@ -232,17 +232,17 @@ const realtimeModule: Module = {
           logger.debug(`realtime heartbeat timeout for session ${sessionId}`);
           dropRealtimeSession(sessionId);
           try {
-            ws.close(4001, 'heartbeat timeout');
+            ws.close(4001, "heartbeat timeout");
           } catch {
             /* already closed */
           }
         }, HEARTBEAT_TIMEOUT_MS);
-        ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
+        ws.send(JSON.stringify({ type: "ping", timestamp: Date.now() }));
         // Remember the pending timeout on the socket for cancellation.
         ws.__pongTimer = timeout;
       }, HEARTBEAT_INTERVAL_MS);
 
-      ws.on('message', async (raw) => {
+      ws.on("message", async (raw) => {
         let msg: { type?: string; sinceSeq?: number | null; serverId?: string };
         try {
           msg = JSON.parse(String(raw));
@@ -253,7 +253,7 @@ const realtimeModule: Module = {
           return;
         }
 
-        if (msg.type === 'pong') {
+        if (msg.type === "pong") {
           const pending = ws.__pongTimer;
           if (pending) {
             clearTimeout(pending);
@@ -262,13 +262,13 @@ const realtimeModule: Module = {
           return;
         }
 
-        if (msg.type === 'sync') {
+        if (msg.type === "sync") {
           const sinceSeq =
             typeof msg.sinceSeq === 'number' && Number.isFinite(msg.sinceSeq)
               ? msg.sinceSeq
               : null;
           resynchronizeSession(sessionId, sinceSeq).catch((err) =>
-            logger.warn('realtime resync failed:', { error: String(err) }),
+            logger.warn("realtime resync failed:", { error: String(err) }),
           );
           return;
         }
@@ -312,7 +312,7 @@ const realtimeModule: Module = {
           return;
         }
 
-        if (msg.type === 'watchAll' && session && session.serverIds === 'all') {
+        if (msg.type === "watchAll" && session && session.serverIds === "all") {
           // Admin dashboards watch everything; server ids are resolved here so
           // a single message glues the session to all reachable servers.
           try {
@@ -323,12 +323,12 @@ const realtimeModule: Module = {
               await beginWatch(session, s.UUID);
             }
           } catch (error) {
-            logger.warn('realtime watchAll failed:', { error: String(error) });
+            logger.warn("realtime watchAll failed:", { error: String(error) });
           }
         }
       });
 
-      ws.on('close', () => {
+      ws.on("close", () => {
         clearInterval(heartbeat);
         const pending = ws.__pongTimer;
         if (pending) {
@@ -338,7 +338,7 @@ const realtimeModule: Module = {
         dropRealtimeSession(sessionId);
       });
 
-      ws.on('error', () => {
+      ws.on("error", () => {
         clearInterval(heartbeat);
         const pending = ws.__pongTimer;
         if (pending) {

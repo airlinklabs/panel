@@ -10,9 +10,9 @@
  * GET    /api/v2/servers/:id/status   — Get server status
  */
 
-import { Router } from 'express';
-import prisma from '../../../db';
-import { parseBody } from '../../../utils/validation';
+import { Router } from "express";
+import prisma from "../../../db";
+import { parseBody } from "../../../utils/validation";
 import {
   jsonOk,
   jsonError,
@@ -37,7 +37,7 @@ const router = Router();
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers — List user's servers
 // ---------------------------------------------------------------------------
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -49,8 +49,8 @@ router.get('/', async (req, res) => {
   const where = user.isAdmin
     ? {}
     : {
-      OR: [{ ownerId: user.id }, { subUsers: { some: { userId: user.id } } }],
-    };
+        OR: [{ ownerId: user.id }, { subUsers: { some: { userId: user.id } } }],
+      };
 
   const { data: servers, meta } = await paginateQuery(
     (args) =>
@@ -78,7 +78,7 @@ router.get('/', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id — Get server details
 // ---------------------------------------------------------------------------
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -109,7 +109,7 @@ router.get('/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/servers/:id — Update server
 // ---------------------------------------------------------------------------
-router.patch('/:id', parseBody(updateServerBody), async (req, res) => {
+router.patch("/:id", parseBody(updateServerBody), async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -125,8 +125,8 @@ router.patch('/:id', parseBody(updateServerBody), async (req, res) => {
     if (!user?.isAdmin) {
       return jsonError(
         res,
-        'FORBIDDEN',
-        'Only the server owner can update settings',
+        "FORBIDDEN",
+        "Only the server owner can update settings",
         403,
       );
     }
@@ -164,7 +164,7 @@ router.patch('/:id', parseBody(updateServerBody), async (req, res) => {
   }
 
   if (Object.keys(updateData).length === 0) {
-    return jsonError(res, 'BAD_REQUEST', 'No fields to update', 400);
+    return jsonError(res, "BAD_REQUEST", "No fields to update", 400);
   }
 
   const updated = await prisma.server.update({
@@ -186,7 +186,7 @@ router.patch('/:id', parseBody(updateServerBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/servers/:id — Delete server
 // ---------------------------------------------------------------------------
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -201,8 +201,8 @@ router.delete('/:id', async (req, res) => {
     if (!user?.isAdmin) {
       return jsonError(
         res,
-        'FORBIDDEN',
-        'Only the server owner can delete the server',
+        "FORBIDDEN",
+        "Only the server owner can delete the server",
         403,
       );
     }
@@ -238,7 +238,7 @@ router.delete('/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/power — Power action
 // ---------------------------------------------------------------------------
-router.post('/:id/power', parseBody(powerBody), async (req, res) => {
+router.post("/:id/power", parseBody(powerBody), async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -250,10 +250,10 @@ router.post('/:id/power', parseBody(powerBody), async (req, res) => {
   // Permission check for sub-users
   const { action } = req.validatedBody as { action: string };
   const permMap: Record<string, string> = {
-    start: 'start',
-    stop: 'stop',
-    restart: 'restart',
-    kill: 'kill',
+    start: "start",
+    stop: "stop",
+    restart: "restart",
+    kill: "kill",
   };
   if (
     permMap[action] &&
@@ -270,10 +270,10 @@ router.post('/:id/power', parseBody(powerBody), async (req, res) => {
     );
 
     if (!response.ok) {
-      const text = await response.text().catch(() => 'Daemon error');
+      const text = await response.text().catch(() => "Daemon error");
       return jsonError(
         res,
-        'DAEMON_ERROR',
+        "DAEMON_ERROR",
         `Daemon returned ${response.status}: ${text}`,
         502,
       );
@@ -287,7 +287,7 @@ router.post('/:id/power', parseBody(powerBody), async (req, res) => {
       req.ip,
     );
 
-    jsonOk(res, { action, status: 'sent' });
+    jsonOk(res, { action, status: "sent" });
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
       return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
@@ -299,7 +299,7 @@ router.post('/:id/power', parseBody(powerBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/reinstall — Reinstall server
 // ---------------------------------------------------------------------------
-router.post('/:id/reinstall', async (req, res) => {
+router.post("/:id/reinstall", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -320,10 +320,10 @@ router.post('/:id/reinstall', async (req, res) => {
     );
 
     if (!response.ok) {
-      const text = await response.text().catch(() => 'Daemon error');
+      const text = await response.text().catch(() => "Daemon error");
       return jsonError(
         res,
-        'DAEMON_ERROR',
+        "DAEMON_ERROR",
         `Daemon returned ${response.status}: ${text}`,
         502,
       );
@@ -354,7 +354,7 @@ router.post('/:id/reinstall', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/status — Get server status
 // ---------------------------------------------------------------------------
-router.get('/:id/status', async (req, res) => {
+router.get("/:id/status", async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -368,7 +368,7 @@ router.get('/:id/status', async (req, res) => {
     );
 
     if (!response.ok) {
-      return jsonOk(res, { online: false, status: 'unknown' });
+      return jsonOk(res, { online: false, status: "unknown" });
     }
 
     const data = (await response.json()) as {
@@ -377,7 +377,7 @@ router.get('/:id/status', async (req, res) => {
     };
     jsonOk(res, {
       online: data.running ?? false,
-      status: data.status ?? 'unknown',
+      status: data.status ?? "unknown",
     });
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {

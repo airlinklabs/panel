@@ -40,21 +40,21 @@ const resetRateLimit = createRedisRateLimit({
 
 const passwordResetModule: Module = {
   info: {
-    name: 'Password Reset Module',
-    description: 'Forgot password flow with email delivery and secure tokens.',
-    version: '2.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
+    name: "Password Reset Module",
+    description: "Forgot password flow with email delivery and secure tokens.",
+    version: "2.0.0",
+    moduleVersion: "1.0.0",
+    author: "AirLinkLab",
+    license: "MIT",
   },
 
   router: () => {
     const router = Router();
 
     // ── GET /forgot-password ────────────────────────────────────────────────
-    router.get('/forgot-password', async (req: Request, res: Response) => {
+    router.get("/forgot-password", async (req: Request, res: Response) => {
       const settings = await getSettings();
-      res.render('auth/forgot-password', { req, settings });
+      res.render("auth/forgot-password", { req, settings });
     });
 
     // ── POST /forgot-password ───────────────────────────────────────────────
@@ -107,7 +107,7 @@ const passwordResetModule: Module = {
     );
 
     // ── GET /reset-password ─────────────────────────────────────────────────
-    router.get('/reset-password', async (req: Request, res: Response) => {
+    router.get("/reset-password", async (req: Request, res: Response) => {
       const { token } = req.query as { token?: string };
       const settings = await getSettings();
 
@@ -120,11 +120,11 @@ const passwordResetModule: Module = {
           validToken =
             !!record && !record.used && record.expiresAt > new Date();
         } catch (error) {
-          logger.error('Reset token lookup error:', error);
+          logger.error("Reset token lookup error:", error);
         }
       }
 
-      res.render('auth/reset-password', {
+      res.render("auth/reset-password", {
         req,
         settings,
         token: validToken ? token : null,

@@ -44,10 +44,10 @@
  *   POST   /api/v2/admin/playerstats/collect
  */
 
-import { Router } from 'express';
-import prisma from '../../../../db';
-import { parseBody } from '../../../../utils/validation';
-import { jsonOk, jsonError, requireAdmin, logActivity } from '../helpers';
+import { Router } from "express";
+import prisma from "../../../../db";
+import { parseBody } from "../../../../utils/validation";
+import { jsonOk, jsonError, requireAdmin, logActivity } from "../helpers";
 import {
   adminCreateLocationBody,
   adminUpdateLocationBody,
@@ -76,16 +76,16 @@ router.use(async (req, res, next) => {
 
 // ======================== LOCATIONS ========================
 
-router.get('/locations', async (_req, res) => {
+router.get("/locations", async (_req, res) => {
   const locations = await prisma.location.findMany({
     include: { _count: { select: { nodes: true } } },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
   jsonOk(res, locations);
 });
 
 router.post(
-  '/locations',
+  "/locations",
   parseBody(adminCreateLocationBody),
   async (req, res) => {
     const data = req.validatedBody as any;
@@ -108,7 +108,7 @@ router.post(
 );
 
 router.put(
-  '/locations/:id',
+  "/locations/:id",
   parseBody(adminUpdateLocationBody),
   async (req, res) => {
     const id = parseInt(String(req.params.id), 10);
@@ -133,7 +133,7 @@ router.put(
   },
 );
 
-router.delete('/locations/:id', async (req, res) => {
+router.delete("/locations/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
@@ -164,15 +164,15 @@ router.delete('/locations/:id', async (req, res) => {
 
 // ======================== MOUNTS ========================
 
-router.get('/mounts', async (_req, res) => {
+router.get("/mounts", async (_req, res) => {
   const mounts = await prisma.mount.findMany({
     include: { _count: { select: { servers: true } } },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
   jsonOk(res, mounts);
 });
 
-router.post('/mounts', parseBody(adminCreateMountBody), async (req, res) => {
+router.post("/mounts", parseBody(adminCreateMountBody), async (req, res) => {
   const data = req.validatedBody as any;
   const mount = await prisma.mount.create({ data });
   logActivity(
@@ -185,7 +185,7 @@ router.post('/mounts', parseBody(adminCreateMountBody), async (req, res) => {
   jsonOk(res, mount);
 });
 
-router.delete('/mounts/:id', async (req, res) => {
+router.delete("/mounts/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
@@ -218,7 +218,7 @@ router.delete('/mounts/:id', async (req, res) => {
 
 // ======================== API KEYS ========================
 
-router.get('/apikeys', async (_req, res) => {
+router.get("/apikeys", async (_req, res) => {
   const keys = await prisma.apiKey.findMany({
     select: {
       id: true,
@@ -229,15 +229,15 @@ router.get('/apikeys', async (_req, res) => {
       createdAt: true,
       updatedAt: true,
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
   jsonOk(res, keys);
 });
 
-router.post('/apikeys', parseBody(adminCreateApiKeyBody), async (req, res) => {
+router.post("/apikeys", parseBody(adminCreateApiKeyBody), async (req, res) => {
   const data = req.validatedBody as any;
-  const crypto = await import('crypto');
-  const key = crypto.randomBytes(48).toString('base64url');
+  const crypto = await import("crypto");
+  const key = crypto.randomBytes(48).toString("base64url");
   const apiKey = await prisma.apiKey.create({
     data: {
       name: data.name,
@@ -266,7 +266,7 @@ router.post('/apikeys', parseBody(adminCreateApiKeyBody), async (req, res) => {
 });
 
 router.put(
-  '/apikeys/:id',
+  "/apikeys/:id",
   parseBody(adminUpdateApiKeyBody),
   async (req, res) => {
     const id = parseInt(String(req.params.id), 10);
@@ -306,7 +306,7 @@ router.put(
   },
 );
 
-router.delete('/apikeys/:id', async (req, res) => {
+router.delete("/apikeys/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
@@ -326,7 +326,7 @@ router.delete('/apikeys/:id', async (req, res) => {
   jsonOk(res, { deleted: id });
 });
 
-router.post('/apikeys/:id/toggle', async (req, res) => {
+router.post("/apikeys/:id/toggle", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
@@ -345,14 +345,14 @@ router.post('/apikeys/:id/toggle', async (req, res) => {
 
 // ======================== ADDONS ========================
 
-router.get('/addons', async (_req, res) => {
+router.get("/addons", async (_req, res) => {
   const addons = await prisma.addon.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
   jsonOk(res, addons);
 });
 
-router.post('/addons/:slug/toggle', async (req, res) => {
+router.post("/addons/:slug/toggle", async (req, res) => {
   const addon = await prisma.addon.findUnique({
     where: { slug: String(req.params.slug) },
   });
@@ -373,7 +373,7 @@ router.post('/addons/:slug/toggle', async (req, res) => {
   jsonOk(res, updated);
 });
 
-router.post('/addons/:slug/reload', async (req, res) => {
+router.post("/addons/:slug/reload", async (req, res) => {
   const addon = await prisma.addon.findUnique({
     where: { slug: String(req.params.slug) },
   });
@@ -390,7 +390,7 @@ router.post('/addons/:slug/reload', async (req, res) => {
   jsonOk(res, { reloaded: addon.slug });
 });
 
-router.post('/addons/:slug/uninstall', async (req, res) => {
+router.post("/addons/:slug/uninstall", async (req, res) => {
   const addon = await prisma.addon.findUnique({
     where: { slug: String(req.params.slug) },
   });
@@ -411,10 +411,10 @@ router.post('/addons/:slug/uninstall', async (req, res) => {
 
 // ======================== OVERVIEW ========================
 
-router.get('/overview/check-update', async (_req, res) => {
+router.get("/overview/check-update", async (_req, res) => {
   try {
     const response = await fetch(
-      'https://api.github.com/repos/airlinklabs/panel/releases/latest',
+      "https://api.github.com/repos/airlinklabs/panel/releases/latest",
       {
         signal: AbortSignal.timeout(10000),
       },
@@ -426,8 +426,8 @@ router.get('/overview/check-update', async (_req, res) => {
       tag_name?: string;
       name?: string;
     };
-    const currentVersion = process.env.AIRLINK_VERSION ?? '2.0.0';
-    const latestVersion = release.tag_name ?? 'unknown';
+    const currentVersion = process.env.AIRLINK_VERSION ?? "2.0.0";
+    const latestVersion = release.tag_name ?? "unknown";
     jsonOk(res, {
       updateAvailable: currentVersion !== latestVersion,
       currentVersion,
@@ -437,28 +437,28 @@ router.get('/overview/check-update', async (_req, res) => {
   } catch {
     jsonOk(res, {
       updateAvailable: false,
-      error: 'Could not check for updates',
+      error: "Could not check for updates",
     });
   }
 });
 
 router.post('/overview/perform-update', redisRateLimit, async (req, res) => {
   try {
-    const { execSync } = await import('child_process');
-    execSync('git pull && npm install && npm run build', {
+    const { execSync } = await import("child_process");
+    execSync("git pull && npm install && npm run build", {
       cwd: process.cwd(),
       timeout: 120000,
     });
     logActivity(req.adminUser?.id, 'system.updated', undefined, {}, req.ip);
     jsonOk(res, { updated: true });
   } catch (err) {
-    jsonError(res, 'UPDATE_FAILED', `Update failed: ${String(err)}`, 500);
+    jsonError(res, "UPDATE_FAILED", `Update failed: ${String(err)}`, 500);
   }
 });
 
 // ======================== RADAR ========================
 
-router.post('/radar/scan/:serverId', async (req, res) => {
+router.post("/radar/scan/:serverId", async (req, res) => {
   const serverId = parseInt(String(req.params.serverId), 10);
   if (isNaN(serverId)) {
     return jsonError(res, 'BAD_REQUEST', 'Invalid server ID', 400);
@@ -820,7 +820,7 @@ router.post('/radar/virustotal', async (req, res) => {
 
 // ======================== ANALYTICS ========================
 
-router.get('/analytics/summary', async (_req, res) => {
+router.get("/analytics/summary", async (_req, res) => {
   const [totalServers, totalUsers, totalNodes, onlineServers] =
     await Promise.all([
       prisma.server.count(),
@@ -1014,9 +1014,9 @@ router.get('/system-logs/summary', async (req, res) => {
 
 // ======================== PLAYER STATS ========================
 
-router.get('/playerstats', async (_req, res) => {
+router.get("/playerstats", async (_req, res) => {
   const stats = await prisma.playerStats.findMany({
-    orderBy: { timestamp: 'desc' },
+    orderBy: { timestamp: "desc" },
     take: 100,
   });
   jsonOk(res, stats);

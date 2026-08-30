@@ -19,18 +19,18 @@ const safePath = z
   .string()
   .min(1)
   .max(4096)
-  .refine((v) => !v.includes('\0'), 'path contains null byte')
-  .refine((v) => !v.includes('..'), 'path contains traversal');
+  .refine((v) => !v.includes("\0"), "path contains null byte")
+  .refine((v) => !v.includes(".."), "path contains traversal");
 
 const safeFilename = z
   .string()
   .min(1)
   .max(255)
-  .refine((v) => !v.includes('\0'), 'filename contains null byte')
-  .refine((v) => !v.includes('..'), 'filename contains traversal')
+  .refine((v) => !v.includes("\0"), "filename contains null byte")
+  .refine((v) => !v.includes(".."), "filename contains traversal")
   .refine(
-    (v) => !v.includes('/') && !v.includes('\\'),
-    'must be a filename, not a path',
+    (v) => !v.includes("/") && !v.includes("\\"),
+    "must be a filename, not a path",
   );
 
 const VALID_PERMISSIONS = new Set<string>(SUBUSER_PERMISSIONS);
@@ -76,7 +76,7 @@ export type UpdateServerBody = z.infer<typeof updateServerBody>;
 // Power
 // ---------------------------------------------------------------------------
 
-export const POWER_ACTIONS = ['start', 'stop', 'restart', 'kill'] as const;
+export const POWER_ACTIONS = ["start", "stop", "restart", "kill"] as const;
 export const powerBody = z.object({ action: z.enum(POWER_ACTIONS) });
 export type PowerBody = z.infer<typeof powerBody>;
 
@@ -142,7 +142,7 @@ export type CreateBackupBody = z.infer<typeof createBackupBody>;
 // Schedules
 // ---------------------------------------------------------------------------
 
-export const SCHEDULE_ACTIONS = ['command', 'power', 'backup'] as const;
+export const SCHEDULE_ACTIONS = ["command", "power", "backup"] as const;
 
 export const createScheduleBody = z.object({
   name: z.string().min(1).max(100),
@@ -164,7 +164,7 @@ export type UpdateScheduleBody = z.infer<typeof updateScheduleBody>;
 
 export const createScheduleTaskBody = z.object({
   action: z.string().min(1).max(50),
-  payload: z.string().max(8192).optional().default('{}'),
+  payload: z.string().max(8192).optional().default("{}"),
   order: z.number().int().min(0).optional().default(0),
   timeOffset: z.number().int().min(0).optional().default(0),
 });
@@ -220,7 +220,7 @@ export const updateUsernameBody = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, underscores'),
+    .regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, hyphens, underscores"),
 });
 export type UpdateUsernameBody = z.infer<typeof updateUsernameBody>;
 

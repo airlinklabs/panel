@@ -79,7 +79,7 @@ export async function buildAdminUsersViewModel(
 ): Promise<AdminUsersViewModel> {
   const user = await prisma.users.findUnique({ where: { id: actorId } });
   if (!user) {
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 
   const users = await prisma.users.findMany({
@@ -105,35 +105,35 @@ export async function buildAdminUsersViewModel(
 
 const adminModule: Module = {
   info: {
-    name: 'Admin Users Module',
-    description: 'This file is for admin functionality of the Users.',
-    version: '2.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
+    name: "Admin Users Module",
+    description: "This file is for admin functionality of the Users.",
+    version: "2.0.0",
+    moduleVersion: "1.0.0",
+    author: "AirLinkLab",
+    license: "MIT",
   },
 
   router: () => {
     const router = Router();
 
     router.get(
-      '/admin/users',
-      isAuthenticated(true, 'airlink.admin.users.view'),
+      "/admin/users",
+      isAuthenticated(true, "airlink.admin.users.view"),
       async (req: Request, res: Response, next: NextFunction) => {
         try {
           const vm = await buildAdminUsersViewModel(req.session!.user!.id);
 
-          res.vary('HX-Request');
-          if (req.get('HX-Request') === 'true') {
-            return res.render('fragments/admin/users/user-list', vm);
+          res.vary("HX-Request");
+          if (req.get("HX-Request") === "true") {
+            return res.render("fragments/admin/users/user-list", vm);
           }
 
-          return res.render('admin/users/users', { ...vm, req });
+          return res.render("admin/users/users", { ...vm, req });
         } catch (error: unknown) {
-          logger.error('[admin/users] Failed to load users list', {
-            route: '/admin/users',
-            fragment: 'fragments/admin/users/user-list',
-            requestId: req.headers['x-request-id'],
+          logger.error("[admin/users] Failed to load users list", {
+            route: "/admin/users",
+            fragment: "fragments/admin/users/user-list",
+            requestId: req.headers["x-request-id"],
             error: rawErrorMessage(error),
           });
           return next(error);
@@ -142,28 +142,28 @@ const adminModule: Module = {
     );
 
     router.get(
-      '/admin/users/create',
-      isAuthenticated(true, 'airlink.admin.users.view'),
+      "/admin/users/create",
+      isAuthenticated(true, "airlink.admin.users.view"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            return res.redirect("/login");
           }
           const settings = await getSettings();
 
-          res.render('admin/users/create', { user, req, settings });
+          res.render("admin/users/create", { user, req, settings });
         } catch (error: unknown) {
-          logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          logger.error("Error fetching user:", error);
+          return res.redirect("/login");
         }
       },
     );
 
     router.post(
-      '/admin/users/create-user',
-      isAuthenticated(true, 'airlink.admin.users.create'),
+      "/admin/users/create-user",
+      isAuthenticated(true, "airlink.admin.users.create"),
       parseBody(createUserSchema),
       async (req: Request, res: Response) => {
         const {
@@ -197,7 +197,7 @@ const adminModule: Module = {
           });
 
           if (existingUser) {
-            if (req.get('HX-Request') === 'true') {
+            if (req.get("HX-Request") === "true") {
               const vm = await buildAdminUsersViewModel(req.session!.user!.id);
               return res
                 .status(422)
@@ -209,7 +209,7 @@ const adminModule: Module = {
             }
             res
               .status(400)
-              .json({ message: 'Email or username already exists.' });
+              .json({ message: "Email or username already exists." });
             return;
           }
 
@@ -232,7 +232,7 @@ const adminModule: Module = {
             metadata: { username, email },
           });
 
-          if (req.get('HX-Request') === 'true') {
+          if (req.get("HX-Request") === "true") {
             const vm = await buildAdminUsersViewModel(req.session!.user!.id);
             res.setHeader(
               'HX-Trigger',
@@ -243,7 +243,7 @@ const adminModule: Module = {
             return res.render('fragments/admin/users/user-list', vm);
           }
 
-          res.status(200).json({ message: 'User created successfully.' });
+          res.status(200).json({ message: "User created successfully." });
           return;
         } catch (error: unknown) {
           logger.error('Error creating user:', error);
@@ -257,21 +257,21 @@ const adminModule: Module = {
           }
           res
             .status(500)
-            .json({ message: 'Error creating user. Please try again later.' });
+            .json({ message: "Error creating user. Please try again later." });
           return;
         }
       },
     );
 
     router.get(
-      '/admin/users/edit/:id/',
-      isAuthenticated(true, 'airlink.admin.users.edit'),
+      "/admin/users/edit/:id/",
+      isAuthenticated(true, "airlink.admin.users.edit"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            return res.redirect("/login");
           }
 
           const dataUser = await prisma.users.findUnique({
@@ -281,11 +281,11 @@ const adminModule: Module = {
             },
           });
           if (!dataUser) {
-            return res.redirect('/admin/users');
+            return res.redirect("/admin/users");
           }
           const settings = await getSettings();
 
-          res.render('admin/users/edit', {
+          res.render("admin/users/edit", {
             user,
             req,
             settings,
@@ -294,21 +294,21 @@ const adminModule: Module = {
               user.role === 'owner' && dataUser.role !== 'owner',
           });
         } catch (error: unknown) {
-          logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          logger.error("Error fetching user:", error);
+          return res.redirect("/login");
         }
       },
     );
 
     router.get(
-      '/admin/users/view/:id/',
-      isAuthenticated(true, 'airlink.admin.users.view'),
+      "/admin/users/view/:id/",
+      isAuthenticated(true, "airlink.admin.users.view"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            return res.redirect("/login");
           }
 
           const dataUser = await prisma.users.findUnique({
@@ -318,39 +318,39 @@ const adminModule: Module = {
             },
           });
           if (!dataUser) {
-            return res.redirect('/admin/users');
+            return res.redirect("/admin/users");
           }
 
           const settings = await getSettings();
 
-          res.render('admin/users/user', {
+          res.render("admin/users/user", {
             user,
             req,
             settings,
             dataUser,
           });
         } catch (error: unknown) {
-          logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          logger.error("Error fetching user:", error);
+          return res.redirect("/login");
         }
       },
     );
 
     router.delete(
-      '/admin/users/delete/:id/',
-      isAuthenticated(true, 'airlink.admin.users.delete'),
+      "/admin/users/delete/:id/",
+      isAuthenticated(true, "airlink.admin.users.delete"),
       async (req: Request, res: Response): Promise<void> => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            if (req.get('HX-Request') === 'true') {
-              return res.status(401).render('fragments/shared/error-banner', {
-                targetId: 'admin-users',
-                message: 'Unauthorized',
+            if (req.get("HX-Request") === "true") {
+              return res.status(401).render("fragments/shared/error-banner", {
+                targetId: "admin-users",
+                message: "Unauthorized",
               });
             }
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: "Unauthorized" });
             return;
           }
 
@@ -359,24 +359,24 @@ const adminModule: Module = {
             where: { id: targetId },
           });
           if (!dataUser) {
-            if (req.get('HX-Request') === 'true') {
-              return res.status(404).render('fragments/shared/error-banner', {
-                targetId: 'admin-users',
-                message: 'User not found',
+            if (req.get("HX-Request") === "true") {
+              return res.status(404).render("fragments/shared/error-banner", {
+                targetId: "admin-users",
+                message: "User not found",
               });
             }
-            res.status(404).json({ error: 'User not found' });
+            res.status(404).json({ error: "User not found" });
             return;
           }
 
           if (userId === targetId) {
-            if (req.get('HX-Request') === 'true') {
-              return res.status(400).render('fragments/shared/error-banner', {
-                targetId: 'admin-users',
-                message: 'Cannot delete your own account',
+            if (req.get("HX-Request") === "true") {
+              return res.status(400).render("fragments/shared/error-banner", {
+                targetId: "admin-users",
+                message: "Cannot delete your own account",
               });
             }
-            res.status(400).json({ error: 'Cannot delete your own account' });
+            res.status(400).json({ error: "Cannot delete your own account" });
             return;
           }
 
@@ -436,7 +436,7 @@ const adminModule: Module = {
             where: { id: targetId },
           });
 
-          if (req.get('HX-Request') === 'true') {
+          if (req.get("HX-Request") === "true") {
             const vm = await buildAdminUsersViewModel(req.session!.user!.id);
             res.setHeader(
               'HX-Trigger',
@@ -447,23 +447,23 @@ const adminModule: Module = {
             return res.render('fragments/admin/users/user-list', vm);
           }
 
-          res.status(200).json({ message: 'User deleted successfully.' });
+          res.status(200).json({ message: "User deleted successfully." });
         } catch (error: unknown) {
-          logger.error('Error deleting user:', error);
-          if (req.get('HX-Request') === 'true') {
-            return res.status(500).render('fragments/shared/error-banner', {
-              targetId: 'admin-users',
-              message: 'Failed to delete user. Please try again.',
+          logger.error("Error deleting user:", error);
+          if (req.get("HX-Request") === "true") {
+            return res.status(500).render("fragments/shared/error-banner", {
+              targetId: "admin-users",
+              message: "Failed to delete user. Please try again.",
             });
           }
-          res.status(500).json({ error: 'Internal server error' });
+          res.status(500).json({ error: "Internal server error" });
         }
       },
     );
 
     router.post(
-      '/admin/users/update/:id/',
-      isAuthenticated(true, 'airlink.admin.users.edit'),
+      "/admin/users/update/:id/",
+      isAuthenticated(true, "airlink.admin.users.edit"),
       parseBody(updateUserSchema),
       async (req: Request, res: Response): Promise<void> => {
         try {
@@ -472,7 +472,7 @@ const adminModule: Module = {
             where: { id: userId },
           });
           if (!adminUser) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: "Unauthorized" });
             return;
           }
 
@@ -482,7 +482,7 @@ const adminModule: Module = {
           });
 
           if (!targetUser) {
-            res.status(404).json({ error: 'User not found' });
+            res.status(404).json({ error: "User not found" });
             return;
           }
 
@@ -510,7 +510,7 @@ const adminModule: Module = {
             });
 
             if (existingUserWithEmail) {
-              res.status(400).json({ error: 'Email already in use' });
+              res.status(400).json({ error: "Email already in use" });
               return;
             }
           }
@@ -524,7 +524,7 @@ const adminModule: Module = {
             });
 
             if (existingUserWithUsername) {
-              res.status(400).json({ error: 'Username already in use' });
+              res.status(400).json({ error: "Username already in use" });
               return;
             }
           }
@@ -580,7 +580,7 @@ const adminModule: Module = {
 
           // Handle isAdmin field (convert to boolean)
           if (isAdmin !== undefined) {
-            updateData.isAdmin = isAdmin === true || isAdmin === 'true';
+            updateData.isAdmin = isAdmin === true || isAdmin === "true";
           }
 
           // Role field stays in sync with isAdmin when either is provided.
@@ -657,17 +657,17 @@ const adminModule: Module = {
             }),
           );
 
-          res.status(200).json({ message: 'User updated successfully' });
+          res.status(200).json({ message: "User updated successfully" });
         } catch (error: unknown) {
-          logger.error('Error updating user:', error);
-          res.status(500).json({ error: 'Internal server error' });
+          logger.error("Error updating user:", error);
+          res.status(500).json({ error: "Internal server error" });
         }
       },
     );
 
     router.post(
-      '/admin/users/transfer-owner/:id/',
-      isAuthenticated(true, 'airlink.admin.users.edit'),
+      "/admin/users/transfer-owner/:id/",
+      isAuthenticated(true, "airlink.admin.users.edit"),
       async (req: Request, res: Response): Promise<void> => {
         try {
           const actorId = req.session?.user?.id;
@@ -675,7 +675,7 @@ const adminModule: Module = {
             where: { id: actorId },
           });
           if (!actor) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: "Unauthorized" });
             return;
           }
 
@@ -693,7 +693,7 @@ const adminModule: Module = {
             where: { id: targetUserId },
           });
           if (!targetUser) {
-            res.status(404).json({ error: 'User not found' });
+            res.status(404).json({ error: "User not found" });
             return;
           }
 
@@ -704,8 +704,8 @@ const adminModule: Module = {
             return;
           }
 
-          const ownerData = roleFields('owner');
-          const adminData = roleFields('admin');
+          const ownerData = roleFields("owner");
+          const adminData = roleFields("admin");
 
           await prisma.$transaction([
             prisma.users.update({
@@ -730,8 +730,8 @@ const adminModule: Module = {
             message: `Ownership transferred to ${targetUser.username}.`,
           });
         } catch (error: unknown) {
-          logger.error('Error transferring owner role:', error);
-          res.status(500).json({ error: 'Internal server error' });
+          logger.error("Error transferring owner role:", error);
+          res.status(500).json({ error: "Internal server error" });
         }
       },
     );

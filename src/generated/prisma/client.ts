@@ -180,6 +180,11 @@ export type ActivityLog = Prisma.ActivityLogModel;
  */
 export type SystemLog = Prisma.SystemLogModel;
 /**
+ * Model SystemLog
+ * 
+ */
+export type SystemLog = Prisma.SystemLogModel
+/**
  * Model WebAuthnCredential
  *
  */
