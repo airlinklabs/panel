@@ -35,7 +35,6 @@ import auth_auth from "./auth/auth";
 import auth_authService from "./auth/authService";
 import auth_passwordReset from "./auth/passwordReset";
 import core from "./core";
-import docs from "./docs";
 import realtime from "./realtime";
 import user_account from "./user/account";
 import user_createServer from "./user/createServer";
@@ -111,7 +110,6 @@ const candidates: { module: unknown; name: string }[] = [
   { module: auth_authService, name: "auth/service" },
   { module: auth_passwordReset, name: "auth/passwordReset" },
   { module: core, name: "core" },
-  { module: docs, name: "docs" },
   { module: realtime, name: "realtime" },
   { module: user_account, name: "user/account" },
   { module: user_createServer, name: "user/createServer" },

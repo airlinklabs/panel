@@ -49,7 +49,7 @@ const coreModule: Module = {
       "/admin/api/docs",
       isAuthenticated(true, "airlink.admin.api.docs.view"),
       async (req: Request, res: Response) => {
-        res.redirect("/docs");
+        res.redirect("/admin/apikeys");
       },
     );
 
