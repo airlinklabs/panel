@@ -1,0 +1,10 @@
+# Public JS files are source-inspected by tests — prettier quote changes break them
+public/javascript/
+# Generated files
+storage/
+# Vendor served from node_modules
+node_modules/
+# Build output
+dist/
+# Prisma generated
+node_modules/.prisma/

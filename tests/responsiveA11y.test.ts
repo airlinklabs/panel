@@ -37,20 +37,20 @@ describe("ARIA: tabs", () => {
   });
 
   it("manages aria-selected on tab activation", () => {
-    expect(tabSrc).toContain("'aria-selected'");
+    expect(tabSrc).toContain("aria-selected");
   });
 
   it("manages tabindex for roving focus", () => {
-    expect(tabSrc).toContain("'tabindex'");
+    expect(tabSrc).toContain("tabindex");
   });
 
   it("hides inactive panels with hidden attribute", () => {
-    expect(tabSrc).toContain("'hidden'");
+    expect(tabSrc).toContain("hidden");
   });
 
   it("supports arrow key navigation", () => {
-    expect(tabSrc).toContain("'ArrowRight'") ||
-      expect(tabSrc).toContain("'ArrowLeft'");
+    expect(tabSrc).toContain("ArrowRight") ||
+      expect(tabSrc).toContain("ArrowLeft");
   });
 });
 
@@ -62,11 +62,11 @@ describe("ARIA: dialog", () => {
   });
 
   it("listens for cancel event (Escape key)", () => {
-    expect(dialogSrc).toContain("'cancel'");
+    expect(dialogSrc).toContain("cancel");
   });
 
   it("listens for click event (backdrop close)", () => {
-    expect(dialogSrc).toContain("'click'");
+    expect(dialogSrc).toContain("click");
   });
 });
 

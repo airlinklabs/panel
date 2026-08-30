@@ -30,7 +30,7 @@ function serverIconNames(): string[] {
   const names = new Set<string>();
   for (const file of files) {
     const content = readFileSync(file, "utf8");
-    for (const m of content.matchAll(/icon\(\s*'([a-z0-9-]+)'/g))
+    for (const m of content.matchAll(/icon\(\s*['"]([a-z0-9-]+)['"]/g))
       names.add(m[1]);
   }
   return [...names];
@@ -41,7 +41,7 @@ function clientIconNames(): string[] {
   const names = new Set<string>();
   for (const file of files) {
     const content = readFileSync(file, "utf8");
-    for (const m of content.matchAll(/alIcon\(\s*'([a-zA-Z0-9.-]+)'/g))
+    for (const m of content.matchAll(/alIcon\(\s*['"]([a-zA-Z0-9.-]+)['"]/g))
       names.add(m[1]);
   }
   return [...names];

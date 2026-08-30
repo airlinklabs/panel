@@ -85,12 +85,10 @@ const locationsModule: Module = {
                 hint: null,
               });
             }
-            res
-              .status(400)
-              .json({
-                message:
-                  'Short code must be 2-32 chars: lowercase letters, numbers, dashes.',
-              });
+            res.status(400).json({
+              message:
+                'Short code must be 2-32 chars: lowercase letters, numbers, dashes.',
+            });
             return;
           }
 
@@ -105,11 +103,9 @@ const locationsModule: Module = {
                 hint: null,
               });
             }
-            res
-              .status(400)
-              .json({
-                message: 'A location with this short code already exists.',
-              });
+            res.status(400).json({
+              message: 'A location with this short code already exists.',
+            });
             return;
           }
 
@@ -234,23 +230,19 @@ const locationsModule: Module = {
               .json({ message: 'Name must be between 2 and 50 characters.' });
           }
           if (!/^[a-z0-9-]{2,32}$/.test(shortCode)) {
-            return res
-              .status(400)
-              .json({
-                message:
-                  'Short code must be 2-32 chars: lowercase letters, numbers, dashes.',
-              });
+            return res.status(400).json({
+              message:
+                'Short code must be 2-32 chars: lowercase letters, numbers, dashes.',
+            });
           }
 
           const existing = await prisma.location.findFirst({
             where: { shortCode, id: { not: locationId } },
           });
           if (existing) {
-            return res
-              .status(400)
-              .json({
-                message: 'A location with this short code already exists.',
-              });
+            return res.status(400).json({
+              message: 'A location with this short code already exists.',
+            });
           }
 
           const location = await prisma.location.update({

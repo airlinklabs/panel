@@ -187,11 +187,9 @@ const sftpModule: Module = {
             res.status(status).json({ error: message });
           } else {
             logger.error('SFTP credential request error:', error);
-            res
-              .status(500)
-              .json({
-                error: 'Internal error while generating SFTP credentials.',
-              });
+            res.status(500).json({
+              error: 'Internal error while generating SFTP credentials.',
+            });
           }
         }
       },
@@ -247,11 +245,9 @@ const sftpModule: Module = {
             res.status(status).json({ error: message });
           } else {
             logger.error('SFTP revocation error:', error);
-            res
-              .status(500)
-              .json({
-                error: 'Internal error while revoking SFTP credentials.',
-              });
+            res.status(500).json({
+              error: 'Internal error while revoking SFTP credentials.',
+            });
           }
         }
       },

@@ -621,12 +621,10 @@ export function registerStartupRoutes(router: Router): void {
         logger.warn(
           `Variable validation failed for server ${serverId}: ${JSON.stringify(validationErrors)}`,
         );
-        res
-          .status(400)
-          .json({
-            error: 'Variable validation failed.',
-            fields: validationErrors,
-          });
+        res.status(400).json({
+          error: 'Variable validation failed.',
+          fields: validationErrors,
+        });
         return;
       }
 

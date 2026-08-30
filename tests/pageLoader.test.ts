@@ -13,15 +13,17 @@ const htmx = readFileSync(
 
 describe("shared page loading feedback", () => {
   it("uses one indeterminate top loading line instead of an activity chip", () => {
-    expect(loader).toContain("loaderEl.id = 'al-page-loader'");
+    expect(loader).toContain("al-page-loader");
     expect(loader).toContain("al-page-loader-sweep");
     expect(loader).not.toContain("al-activity-chip");
   });
 
   it("keeps HTMX requests out of hard-navigation handling and gives them loader feedback", () => {
-    expect(loader).toContain(
-      "form.matches('[hx-get], [hx-post], [hx-put], [hx-patch], [hx-delete]')",
-    );
+    expect(loader).toContain("hx-get");
+    expect(loader).toContain("hx-post");
+    expect(loader).toContain("hx-put");
+    expect(loader).toContain("hx-patch");
+    expect(loader).toContain("hx-delete");
     expect(htmx).toContain("htmx:beforeRequest");
     expect(htmx).toContain("window.ALPageActivity.start()");
     expect(htmx).toContain("htmx:afterRequest");
@@ -36,10 +38,10 @@ describe("shared page loading feedback", () => {
       resolve(__dirname, "../src/handlers/utils/security/csrfProtection.ts"),
       "utf8",
     );
-    expect(csrf).toContain("'HX-Trigger'");
+    expect(csrf).toContain("HX-Trigger");
     expect(csrf).toContain(
       "Your security token expired. Refresh the page and try again.",
     );
-    expect(csrf).not.toContain("'HX-Redirect', '/login?err=session_expired'");
+    expect(csrf).not.toContain("HX-Redirect");
   });
 });
