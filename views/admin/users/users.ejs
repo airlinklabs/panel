@@ -75,7 +75,7 @@
             <div class="flex-1 min-w-0">
               <p class="text-[13px] font-medium truncate" style="color:var(--theme-text-strong);"><%= user.username %></p>
               <p class="text-[11px] truncate" style="color:var(--theme-text-muted);"><span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset"
-                style="<%= user.isAdmin ? 'background:var(--theme-accent);color:var(--theme-accent-text)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>"><%= user.isAdmin ? (req.translations.admin || 'Admin') : (req.translations.user || 'User') %></span></p>
+                style="<%= user.role === 'owner' ? 'background:var(--theme-warning-bg);color:var(--theme-warning)' : user.isAdmin ? 'background:var(--theme-accent);color:var(--theme-accent-text)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>"><% if (user.role === 'owner') { %><%- icon('crown', { size: 9, class: 'inline-block mr-0.5' }) %><% } %><%= user.role === 'owner' ? 'Owner' : user.isAdmin ? (req.translations.admin || 'Admin') : (req.translations.user || 'User') %></span></p>
             </div>
             <div class="flex items-center gap-1">
               <a href="/admin/users/view/<%= user.id %>/" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="View user"><%- icon('external-link', { size: 16, class: 'shrink-0' }) %></a>
@@ -125,12 +125,12 @@
                       <div class="font-medium text-[13px]" style="color:var(--theme-text-strong);"><%= user.username %></div>
                     </div>
                   </td>
-                  <td class="al-table-td">
-                    <div class="mt-1 ml-2 inline-flex items-center rounded-md
-                    px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
-                    style="<%= user.isAdmin ? 'background:var(--theme-success-bg);color:var(--theme-success)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>">
-                      <%= user.isAdmin ? 'Admin' : 'User' %>
-                    </div></td>
+                   <td class="al-table-td">
+                     <div class="mt-1 ml-2 inline-flex items-center rounded-md
+                     px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
+                     style="<%= user.role === 'owner' ? 'background:var(--theme-warning-bg);color:var(--theme-warning)' : user.isAdmin ? 'background:var(--theme-success-bg);color:var(--theme-success)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>">
+                       <% if (user.role === 'owner') { %><%- icon('crown', { size: 10, class: 'inline-block mr-0.5 -mt-0.5' }) %><% } %><%= user.role === 'owner' ? 'Owner' : user.isAdmin ? 'Admin' : 'User' %>
+                     </div></td>
                   <td class="al-table-td text-[13px]"><%= user.servers ? user.servers.length : 0 %></td>
                   <td class="al-table-td">
                     <div class="flex items-center gap-1">
@@ -185,7 +185,7 @@ function userManager() {
         title: pageData.deleteUserTitle || 'Delete User', body: pageData.deleteUserBody || 'Are you sure you want to delete this user?',
         danger: true, confirmLabel: 'Yeah, delete it',
         onConfirm: () => {
-          fetch('/admin/users/delete/' + userId, { method: 'DELETE' }).then((response) => {
+          fetch('/api/v2/admin/users/' + userId, { method: 'DELETE' }).then((response) => {
             if (response.ok) {
               showToast('User deleted.', 'success');
               var tbody = document.querySelector('#userTable tbody');

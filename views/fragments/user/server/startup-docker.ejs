@@ -8,7 +8,7 @@
       if (!this.selectedImage) return;
       this.saving = true;
       try {
-        const res = await fetch('/server/<%= server.UUID %>/startup/docker-image', {
+        const res = await fetch('/api/v2/servers/<%= server.UUID %>/startup/docker-image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dockerImage: this.selectedImage }),

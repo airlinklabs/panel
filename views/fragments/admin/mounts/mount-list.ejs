@@ -9,7 +9,7 @@
       <h3 class="text-sm font-medium" style="color:var(--theme-text-strong);">No mounts yet</h3>
       <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);">Create a mount to expose a host directory to server containers.</p>
       <div class="mt-5">
-        <button type="button" class="al-btn-primary" hx-get="/admin/mounts/new" hx-target="#admin-mounts-dialog" hx-swap="innerHTML">
+        <button type="button" class="al-btn-primary" hx-get="/api/v2/admin/mounts/new" hx-target="#admin-mounts-dialog" hx-swap="innerHTML">
           <span class="inline-flex items-center gap-1.5"><%- icon('plus', { class: 'w-4 h-4' }) %> New mount</span>
         </button>
       </div>
@@ -54,7 +54,7 @@
               <div class="flex gap-3">
                 <button
                   x-data="{ deleting: false }"
-                  @click="if(!deleting && confirm('Delete this mount? Servers using it will no longer be able to attach it.')) { deleting = true; fetch('/admin/mounts/<%= m.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) { showToast('Mount deleted.', 'success'); window.location.reload(); } else { showToast('Failed to delete.', 'error'); deleting = false; } }).catch(() => { showToast('Network error.', 'error'); deleting = false; }); }"
+                  @click="if(!deleting && confirm('Delete this mount? Servers using it will no longer be able to attach it.')) { deleting = true; fetch('/api/v2/admin/mounts/<%= m.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) { showToast('Mount deleted.', 'success'); window.location.reload(); } else { showToast('Failed to delete.', 'error'); deleting = false; } }).catch(() => { showToast('Network error.', 'error'); deleting = false; }); }"
                   type="button"
                   class="al-btn-ghost"
                   style="color:var(--theme-danger);"

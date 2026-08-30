@@ -33,7 +33,7 @@
               <a href="/admin/images/edit/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5"><%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>Edit</a>
               <a href="/admin/images/export/<%= image.id %>" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5"><%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>Export</a>
               <button
-                hx-delete="/admin/images/delete/<%= image.id %>"
+                hx-delete="/api/v2/admin/images/<%= image.id %>"
                 hx-target="#installedTableSection"
                 hx-swap="outerHTML"
                 hx-confirm="Delete &quot;<%= image.name %>&quot;? This cannot be undone."

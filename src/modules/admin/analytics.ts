@@ -1,31 +1,31 @@
-import { getSettings } from '../../handlers/settingsCache';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
-import type { Module } from '../../handlers/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import logger from '../../handlers/logger';
-import { registerPermission } from '../../handlers/permissions';
-import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { getSettings } from "../../handlers/settingsCache";
+import type { Request, Response } from "express";
+import { Router } from "express";
+import type { Module } from "../../handlers/moduleInit";
+import prisma from "../../db";
+import { isAuthenticated } from "../../handlers/utils/auth/authUtil";
+import logger from "../../handlers/logger";
+import { registerPermission } from "../../handlers/permissions";
+import { daemonRequest } from "../../handlers/utils/core/daemonRequest";
 
-registerPermission('airlink.admin.analytics.view');
+registerPermission("airlink.admin.analytics.view");
 
 const analyticsModule: Module = {
   info: {
-    name: 'Admin Analytics Module',
-    description: 'Admin analytics dashboard.',
-    version: '2.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
+    name: "Admin Analytics Module",
+    description: "Admin analytics dashboard.",
+    version: "2.0.0",
+    moduleVersion: "1.0.0",
+    author: "AirLinkLab",
+    license: "MIT",
   },
 
   router: () => {
     const router = Router();
 
     router.get(
-      '/admin/analytics',
-      isAuthenticated(true, 'airlink.admin.analytics.view'),
+      "/admin/analytics",
+      isAuthenticated(true, "airlink.admin.analytics.view"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -34,24 +34,24 @@ const analyticsModule: Module = {
             await getSettings(),
           ]);
           if (!user) {
-            return res.redirect('/login');
+            return res.redirect("/login");
           }
-          res.render('admin/analytics/analytics', {
+          res.render("admin/analytics/analytics", {
             user,
             req,
             settings,
-            title: 'Analytics',
+            title: "Analytics",
           });
         } catch (error: unknown) {
-          logger.error('Error loading analytics page:', error);
-          res.redirect('/admin/overview');
+          logger.error("Error loading analytics page:", error);
+          res.redirect("/admin/overview");
         }
       },
     );
 
     router.get(
-      '/api/admin/analytics/summary',
-      isAuthenticated(true, 'airlink.admin.analytics.view'),
+      "/api/admin/analytics/summary",
+      isAuthenticated(true, "airlink.admin.analytics.view"),
       async (_req: Request, res: Response) => {
         try {
           const [servers, users, nodes, images, loginHistory, playerHistory] =
@@ -63,16 +63,16 @@ const analyticsModule: Module = {
                   owner: { select: { username: true } },
                 },
               }),
-              prisma.users.findMany({ select: { id: true, isAdmin: true } }),
+              prisma.users.findMany({ select: { id: true, role: true } }),
               prisma.node.findMany(),
               prisma.images.findMany({ select: { id: true, name: true } }),
               prisma.loginHistory.findMany({
-                orderBy: { timestamp: 'desc' },
+                orderBy: { timestamp: "desc" },
                 take: 200,
                 select: { userId: true, ipAddress: true, timestamp: true },
               }),
               prisma.playerStats.findMany({
-                orderBy: { timestamp: 'asc' },
+                orderBy: { timestamp: "asc" },
                 take: 288,
               }),
             ]);
@@ -118,13 +118,13 @@ const analyticsModule: Module = {
               memory: s.Memory,
               cpu: s.Cpu,
               storage: s.Storage,
-              owner: s.owner?.username ?? '—',
-              image: s.image?.name ?? '—',
+              owner: s.owner?.username ?? "—",
+              image: s.image?.name ?? "—",
               suspended: s.Suspended,
             }));
 
           // — Nodes section: check daemon health for each node
-          const TIMEOUT = parseInt(process.env.DAEMON_TIMEOUT || '4000');
+          const TIMEOUT = parseInt(process.env.DAEMON_TIMEOUT || "4000");
           const nodeStatuses = await Promise.all(
             nodes.map(async (node) => {
               const serverCount = servers.filter(
@@ -135,8 +135,8 @@ const analyticsModule: Module = {
                   nodeAddress: node.address,
                   nodePort: node.port,
                   nodeKey: node.key,
-                  method: 'GET',
-                  path: '/',
+                  method: "GET",
+                  path: "/",
                   timeout: TIMEOUT,
                 });
                 return {
@@ -171,7 +171,9 @@ const analyticsModule: Module = {
           );
 
           // — Activity section
-          const adminCount = users.filter((u) => u.isAdmin).length;
+          const adminCount = users.filter(
+            (u) => u.role === "owner" || u.role === "admin",
+          ).length;
           const last30Days = new Date();
           last30Days.setDate(last30Days.getDate() - 30);
           const recentLogins = loginHistory.filter(
@@ -213,8 +215,8 @@ const analyticsModule: Module = {
             },
           });
         } catch (error: unknown) {
-          logger.error('Error fetching analytics summary:', error);
-          res.status(500).json({ error: 'Failed to fetch analytics' });
+          logger.error("Error fetching analytics summary:", error);
+          res.status(500).json({ error: "Failed to fetch analytics" });
         }
       },
     );

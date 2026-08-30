@@ -17,9 +17,11 @@
  */
 
 import { Router } from "express";
+import type { Request, Response, NextFunction } from "express";
 import type { Module } from "../../../handlers/moduleInit";
 import { apiValidator } from "../../../handlers/utils/api/apiValidator";
 import { isAuthenticated } from "../../../handlers/utils/auth/authUtil";
+import type { ApiCapability } from "./helpers";
 
 import serversRouter from "./servers";
 import filesRouter from "./files";
@@ -55,26 +57,31 @@ const v2Module: Module = {
     // For API key auth: Authorization: Bearer <key>
     // For session auth: standard browser session cookie
     //
+    // When a requiredCapability is provided, API keys must have that scope.
+    // Session users bypass capability checks (full access if authenticated).
+    //
     // Auth is applied per-sub-router, NOT as a catch-all. A catch-all on a
     // root-mounted router would intercept every request (e.g. /login,
     // /register) that doesn't match a sub-route prefix, causing an infinite
     // redirect loop when unauthenticated.
     // -----------------------------------------------------------------------
-    const apiKeyOrSessionAuth = async (req: any, res: any, next: any) => {
-      const authHeader = req.headers["authorization"];
-      if (authHeader?.startsWith("Bearer ")) {
-        return apiValidator()(req, res, next);
-      }
-      return isAuthenticated()(req, res, next);
-    };
+    const apiKeyOrSessionAuth =
+      (requiredCapability?: ApiCapability) =>
+      async (req: Request, res: Response, next: NextFunction) => {
+        const authHeader = req.headers["authorization"];
+        if (authHeader?.startsWith("Bearer ")) {
+          return apiValidator(requiredCapability)(req, res, next);
+        }
+        return isAuthenticated()(req, res, next);
+      };
 
-    v2.use("/servers", apiKeyOrSessionAuth, serversRouter);
-    v2.use("/files", apiKeyOrSessionAuth, filesRouter);
-    v2.use("/databases", apiKeyOrSessionAuth, databasesRouter);
-    v2.use("/backups", apiKeyOrSessionAuth, backupsRouter);
-    v2.use("/schedules", apiKeyOrSessionAuth, schedulesRouter);
-    v2.use("/subusers", apiKeyOrSessionAuth, subusersRouter);
-    v2.use("/startup", apiKeyOrSessionAuth, startupRouter);
+    v2.use("/servers", apiKeyOrSessionAuth("servers.*"), serversRouter);
+    v2.use("/files", apiKeyOrSessionAuth("files.*"), filesRouter);
+    v2.use("/databases", apiKeyOrSessionAuth("databases.*"), databasesRouter);
+    v2.use("/backups", apiKeyOrSessionAuth("backups.*"), backupsRouter);
+    v2.use("/schedules", apiKeyOrSessionAuth("schedules.*"), schedulesRouter);
+    v2.use("/subusers", apiKeyOrSessionAuth("subusers.*"), subusersRouter);
+    v2.use("/startup", apiKeyOrSessionAuth("startup.*"), startupRouter);
 
     // -----------------------------------------------------------------------
     // Account endpoints: session auth only (browser-facing)

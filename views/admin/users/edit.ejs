@@ -23,7 +23,7 @@
         </div>
       </div>
 
-      <div class="al-page-body space-y-5" x-data="adminUserEdit()">
+      <div class="al-page-body space-y-5" x-data="adminUserEdit()" x-init="init()">
         <template x-if="error">
           <div class="rounded-xl px-4 py-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)" x-text="error"></div>
         </template>
@@ -92,13 +92,14 @@
                         <%= req.translations.roleDescription || 'Owner and admin roles are signaled by isAdmin below. Privileged normally have not admin powers but get expanded settings.' %>
                       </p>
                     </div>
-                    <select x-model="form.role" class="al-input w-44">
-                      <% const currentRole = dataUser.role || (dataUser.isAdmin ? 'admin' : 'user'); %>
-                      <option value="user" <%= currentRole === 'user' ? 'selected' : '' %>><%= req.translations.roleUser || 'Normal user' %></option>
-                      <option value="privileged" <%= currentRole === 'privileged' ? 'selected' : '' %>><%= req.translations.rolePrivileged || 'Privileged user' %></option>
-                      <option value="admin" <%= currentRole === 'admin' ? 'selected' : '' %>><%= req.translations.roleAdmin || 'Admin' %></option>
-                      <option value="owner" <%= currentRole === 'owner' ? 'selected' : '' %>><%= req.translations.roleOwner || 'Owner' %></option>
+                    <select x-model="form.role" class="al-input w-44" :disabled="form.role === 'owner'">
+                      <template x-for="r in roles" :key="r.name">
+                        <option :value="r.name" x-text="r.displayName" :selected="r.name === form.role" :disabled="r.name === 'owner' && form.role !== 'owner'"></option>
+                      </template>
                     </select>
+                    <% if (dataUser.role === 'owner') { %>
+                      <p class="text-xs mt-2" style="color:var(--theme-text-muted)">Owner role cannot be changed. Use Transfer Ownership to assign a new owner.</p>
+                    <% } %>
                   </div>
                 </div>
               </div>
@@ -114,8 +115,8 @@
                         <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
                       </p>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input type="checkbox" x-model="form.isAdmin" class="sr-only peer">
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0" <% if (dataUser.role === 'owner') { %>title="Owner is always an administrator"<% } %>>
+                      <input type="checkbox" x-model="form.isAdmin" class="sr-only peer" <% if (dataUser.role === 'owner') { %>disabled<% } %>>
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
                       <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-strong)" x-text="form.isAdmin ? '<%= req.translations.enabled || 'Enabled' %>' : '<%= req.translations.disabled || 'Disabled' %>'"></span>
                     </label>
@@ -181,6 +182,16 @@
             </div>
           </div>
           <% } %>
+
+          <div class="al-card">
+            <h2 class="al-card-header">Onboarding</h2>
+            <div class="p-4">
+              <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Reset this user's onboarding state so they see the tutorial again on next login.</p>
+              <button type="button" @click="resetOnboarding()" class="al-btn-secondary">
+                <%- icon('rotate-ccw', { size: 16 }) %> Reset Onboarding
+              </button>
+            </div>
+          </div>
         </form>
       </div>
     </div>
@@ -198,6 +209,7 @@ function adminUserEdit() {
   return {
     saving: false,
     error: '',
+    roles: [],
     userId: <%= dataUser.id %>,
     form: {
       username: '<%= dataUser.username %>',
@@ -214,6 +226,23 @@ function adminUserEdit() {
       maxStorage: <%= dataUser.maxStorage ?? 'null' %>,
       maxStorageDisplay: null,
       maxDatabases: <%= dataUser.maxDatabases ?? 'null' %>,
+    },
+    async init() {
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const res = await fetch('/api/v2/admin/roles', { headers: { 'CSRF-Token': csrfToken } });
+        if (res.ok) {
+          const result = await res.json();
+          this.roles = result.data || result;
+        }
+      } catch (e) {
+        this.roles = [
+          { name: 'user', displayName: 'User' },
+          { name: 'privileged', displayName: 'Privileged User' },
+          { name: 'admin', displayName: 'Administrator' },
+          { name: 'owner', displayName: 'Owner' },
+        ];
+      }
     },
     async submit() {
       if (this.saving) return;
@@ -244,8 +273,8 @@ function adminUserEdit() {
         };
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-        const res = await fetch('/admin/users/update/' + this.userId + '/', {
-          method: 'POST',
+        const res = await fetch('/api/v2/admin/users/' + this.userId, {
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
           body: JSON.stringify(data),
         });
@@ -279,7 +308,7 @@ function adminUserEdit() {
           const loader = showLoadingPopup('<%= req.translations.transferringOwnership || 'Transferring ownership...' %>', '');
           try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            const res = await fetch('/admin/users/transfer-owner/' + this.userId + '/', {
+            const res = await fetch('/api/v2/admin/users/' + this.userId + '/transfer', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
             });
@@ -294,6 +323,34 @@ function adminUserEdit() {
           } catch (e) {
             loader.close();
             showToast('<%= req.translations.errorUpdatingUser || 'Error updating user' %>', 'error');
+          }
+        }
+      });
+    },
+    async resetOnboarding() {
+      window.modal.confirm({
+        title: 'Reset onboarding?',
+        body: 'This user will see the onboarding tutorial again on their next login.',
+        danger: false,
+        confirmLabel: 'Reset',
+        onConfirm: async () => {
+          const loader = showLoadingPopup('Resetting onboarding...', '');
+          try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            const res = await fetch('/api/v2/admin/users/' + this.userId + '/onboarding/reset', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+            });
+            const result = await res.json();
+            loader.close();
+            if (result.error) {
+              showToast(result.error, 'error');
+            } else {
+              showToast('Onboarding reset successfully.', 'success');
+            }
+          } catch (e) {
+            loader.close();
+            showToast('Error resetting onboarding.', 'error');
           }
         }
       });

@@ -353,7 +353,7 @@ function apikeyPage() {
         params.append('description', this.createForm.description);
         params.append('csrf-token', csrfToken);
         this.createForm.permissions.forEach(p => params.append('permissions', p));
-        const res = await fetch('/admin/apikeys/create', {
+        const res = await fetch('/api/v2/admin/apikeys', {
           method: 'POST',
           headers: { 'Accept': 'application/json', 'csrf-token': csrfToken },
           body: params,
@@ -377,8 +377,8 @@ function apikeyPage() {
         params.append('description', this.editForm.description);
         params.append('csrf-token', csrfToken);
         this.editForm.permissions.forEach(p => params.append('permissions', p));
-        const res = await fetch('/admin/apikeys/edit/' + this.editForm.id, {
-          method: 'POST',
+        const res = await fetch('/api/v2/admin/apikeys/' + this.editForm.id, {
+          method: 'PUT',
           headers: { 'Accept': 'application/json', 'csrf-token': csrfToken },
           body: params,
         });

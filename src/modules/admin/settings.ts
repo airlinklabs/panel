@@ -17,9 +17,9 @@ import AdmZip from "adm-zip";
 import nodemailer from "nodemailer";
 import { testS3Connection } from "../../handlers/utils/core/s3Client";
 import { safeClientMessage } from "../../utils/errors";
+import { BCRYPT_SALT_ROUNDS } from "../../config/constants";
 
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
-const BCRYPT_SALT_ROUNDS = 12;
 
 const MIME_TYPE_ALLOWLIST = [
   "image/jpeg",

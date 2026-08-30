@@ -1,0 +1,8 @@
+{
+  "ignore": [
+    "src/generated/**",
+    "public/vendor/**",
+    "dist/**",
+    "node_modules/**"
+  ]
+}

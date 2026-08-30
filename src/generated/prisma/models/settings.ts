@@ -47,6 +47,11 @@ export type SettingsAvgAggregateOutputType = {
   allowPrivilegedMaxCpu: number | null
   allowPrivilegedMaxStorage: number | null
   allowPrivilegedMaxDatabases: number | null
+  defaultMemory: number | null
+  defaultCpu: number | null
+  defaultDisk: number | null
+  maxServersPerUser: number | null
+  emailCooldown: number | null
 }
 
 export type SettingsSumAggregateOutputType = {
@@ -70,6 +75,11 @@ export type SettingsSumAggregateOutputType = {
   allowPrivilegedMaxCpu: number | null
   allowPrivilegedMaxStorage: number | null
   allowPrivilegedMaxDatabases: number | null
+  defaultMemory: number | null
+  defaultCpu: number | null
+  defaultDisk: number | null
+  maxServersPerUser: number | null
+  emailCooldown: number | null
 }
 
 export type SettingsMinAggregateOutputType = {
@@ -133,6 +143,21 @@ export type SettingsMinAggregateOutputType = {
   allowUserCreateImages: boolean | null
   onboardingEnabled: boolean | null
   onboardingSteps: string | null
+  twoFactorRequired: boolean | null
+  sftpEnabled: boolean | null
+  backupsEnabled: boolean | null
+  schedulesEnabled: boolean | null
+  databasesEnabled: boolean | null
+  fileManagerEnabled: boolean | null
+  consoleEnabled: boolean | null
+  playerTrackingEnabled: boolean | null
+  scannerEnabled: boolean | null
+  airlinkCloudEnabled: boolean | null
+  defaultMemory: number | null
+  defaultCpu: number | null
+  defaultDisk: number | null
+  maxServersPerUser: number | null
+  emailCooldown: number | null
 }
 
 export type SettingsMaxAggregateOutputType = {
@@ -196,6 +221,21 @@ export type SettingsMaxAggregateOutputType = {
   allowUserCreateImages: boolean | null
   onboardingEnabled: boolean | null
   onboardingSteps: string | null
+  twoFactorRequired: boolean | null
+  sftpEnabled: boolean | null
+  backupsEnabled: boolean | null
+  schedulesEnabled: boolean | null
+  databasesEnabled: boolean | null
+  fileManagerEnabled: boolean | null
+  consoleEnabled: boolean | null
+  playerTrackingEnabled: boolean | null
+  scannerEnabled: boolean | null
+  airlinkCloudEnabled: boolean | null
+  defaultMemory: number | null
+  defaultCpu: number | null
+  defaultDisk: number | null
+  maxServersPerUser: number | null
+  emailCooldown: number | null
 }
 
 export type SettingsCountAggregateOutputType = {
@@ -259,6 +299,21 @@ export type SettingsCountAggregateOutputType = {
   allowUserCreateImages: number
   onboardingEnabled: number
   onboardingSteps: number
+  twoFactorRequired: number
+  sftpEnabled: number
+  backupsEnabled: number
+  schedulesEnabled: number
+  databasesEnabled: number
+  fileManagerEnabled: number
+  consoleEnabled: number
+  playerTrackingEnabled: number
+  scannerEnabled: number
+  airlinkCloudEnabled: number
+  defaultMemory: number
+  defaultCpu: number
+  defaultDisk: number
+  maxServersPerUser: number
+  emailCooldown: number
   _all: number
 }
 
@@ -284,6 +339,11 @@ export type SettingsAvgAggregateInputType = {
   allowPrivilegedMaxCpu?: true
   allowPrivilegedMaxStorage?: true
   allowPrivilegedMaxDatabases?: true
+  defaultMemory?: true
+  defaultCpu?: true
+  defaultDisk?: true
+  maxServersPerUser?: true
+  emailCooldown?: true
 }
 
 export type SettingsSumAggregateInputType = {
@@ -307,6 +367,11 @@ export type SettingsSumAggregateInputType = {
   allowPrivilegedMaxCpu?: true
   allowPrivilegedMaxStorage?: true
   allowPrivilegedMaxDatabases?: true
+  defaultMemory?: true
+  defaultCpu?: true
+  defaultDisk?: true
+  maxServersPerUser?: true
+  emailCooldown?: true
 }
 
 export type SettingsMinAggregateInputType = {
@@ -370,6 +435,21 @@ export type SettingsMinAggregateInputType = {
   allowUserCreateImages?: true
   onboardingEnabled?: true
   onboardingSteps?: true
+  twoFactorRequired?: true
+  sftpEnabled?: true
+  backupsEnabled?: true
+  schedulesEnabled?: true
+  databasesEnabled?: true
+  fileManagerEnabled?: true
+  consoleEnabled?: true
+  playerTrackingEnabled?: true
+  scannerEnabled?: true
+  airlinkCloudEnabled?: true
+  defaultMemory?: true
+  defaultCpu?: true
+  defaultDisk?: true
+  maxServersPerUser?: true
+  emailCooldown?: true
 }
 
 export type SettingsMaxAggregateInputType = {
@@ -433,6 +513,21 @@ export type SettingsMaxAggregateInputType = {
   allowUserCreateImages?: true
   onboardingEnabled?: true
   onboardingSteps?: true
+  twoFactorRequired?: true
+  sftpEnabled?: true
+  backupsEnabled?: true
+  schedulesEnabled?: true
+  databasesEnabled?: true
+  fileManagerEnabled?: true
+  consoleEnabled?: true
+  playerTrackingEnabled?: true
+  scannerEnabled?: true
+  airlinkCloudEnabled?: true
+  defaultMemory?: true
+  defaultCpu?: true
+  defaultDisk?: true
+  maxServersPerUser?: true
+  emailCooldown?: true
 }
 
 export type SettingsCountAggregateInputType = {
@@ -496,6 +591,21 @@ export type SettingsCountAggregateInputType = {
   allowUserCreateImages?: true
   onboardingEnabled?: true
   onboardingSteps?: true
+  twoFactorRequired?: true
+  sftpEnabled?: true
+  backupsEnabled?: true
+  schedulesEnabled?: true
+  databasesEnabled?: true
+  fileManagerEnabled?: true
+  consoleEnabled?: true
+  playerTrackingEnabled?: true
+  scannerEnabled?: true
+  airlinkCloudEnabled?: true
+  defaultMemory?: true
+  defaultCpu?: true
+  defaultDisk?: true
+  maxServersPerUser?: true
+  emailCooldown?: true
   _all?: true
 }
 
@@ -646,6 +756,21 @@ export type SettingsGroupByOutputType = {
   allowUserCreateImages: boolean
   onboardingEnabled: boolean
   onboardingSteps: string
+  twoFactorRequired: boolean
+  sftpEnabled: boolean
+  backupsEnabled: boolean
+  schedulesEnabled: boolean
+  databasesEnabled: boolean
+  fileManagerEnabled: boolean
+  consoleEnabled: boolean
+  playerTrackingEnabled: boolean
+  scannerEnabled: boolean
+  airlinkCloudEnabled: boolean
+  defaultMemory: number
+  defaultCpu: number
+  defaultDisk: number
+  maxServersPerUser: number
+  emailCooldown: number
   _count: SettingsCountAggregateOutputType | null
   _avg: SettingsAvgAggregateOutputType | null
   _sum: SettingsSumAggregateOutputType | null
@@ -732,6 +857,21 @@ export type settingsWhereInput = {
   allowUserCreateImages?: Prisma.BoolFilter<"settings"> | boolean
   onboardingEnabled?: Prisma.BoolFilter<"settings"> | boolean
   onboardingSteps?: Prisma.StringFilter<"settings"> | string
+  twoFactorRequired?: Prisma.BoolFilter<"settings"> | boolean
+  sftpEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  backupsEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  schedulesEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  databasesEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  fileManagerEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  consoleEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  playerTrackingEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  scannerEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  airlinkCloudEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  defaultMemory?: Prisma.IntFilter<"settings"> | number
+  defaultCpu?: Prisma.IntFilter<"settings"> | number
+  defaultDisk?: Prisma.IntFilter<"settings"> | number
+  maxServersPerUser?: Prisma.IntFilter<"settings"> | number
+  emailCooldown?: Prisma.IntFilter<"settings"> | number
 }
 
 export type settingsOrderByWithRelationInput = {
@@ -795,6 +935,21 @@ export type settingsOrderByWithRelationInput = {
   allowUserCreateImages?: Prisma.SortOrder
   onboardingEnabled?: Prisma.SortOrder
   onboardingSteps?: Prisma.SortOrder
+  twoFactorRequired?: Prisma.SortOrder
+  sftpEnabled?: Prisma.SortOrder
+  backupsEnabled?: Prisma.SortOrder
+  schedulesEnabled?: Prisma.SortOrder
+  databasesEnabled?: Prisma.SortOrder
+  fileManagerEnabled?: Prisma.SortOrder
+  consoleEnabled?: Prisma.SortOrder
+  playerTrackingEnabled?: Prisma.SortOrder
+  scannerEnabled?: Prisma.SortOrder
+  airlinkCloudEnabled?: Prisma.SortOrder
+  defaultMemory?: Prisma.SortOrder
+  defaultCpu?: Prisma.SortOrder
+  defaultDisk?: Prisma.SortOrder
+  maxServersPerUser?: Prisma.SortOrder
+  emailCooldown?: Prisma.SortOrder
 }
 
 export type settingsWhereUniqueInput = Prisma.AtLeast<{
@@ -861,6 +1016,21 @@ export type settingsWhereUniqueInput = Prisma.AtLeast<{
   allowUserCreateImages?: Prisma.BoolFilter<"settings"> | boolean
   onboardingEnabled?: Prisma.BoolFilter<"settings"> | boolean
   onboardingSteps?: Prisma.StringFilter<"settings"> | string
+  twoFactorRequired?: Prisma.BoolFilter<"settings"> | boolean
+  sftpEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  backupsEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  schedulesEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  databasesEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  fileManagerEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  consoleEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  playerTrackingEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  scannerEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  airlinkCloudEnabled?: Prisma.BoolFilter<"settings"> | boolean
+  defaultMemory?: Prisma.IntFilter<"settings"> | number
+  defaultCpu?: Prisma.IntFilter<"settings"> | number
+  defaultDisk?: Prisma.IntFilter<"settings"> | number
+  maxServersPerUser?: Prisma.IntFilter<"settings"> | number
+  emailCooldown?: Prisma.IntFilter<"settings"> | number
 }, "id">
 
 export type settingsOrderByWithAggregationInput = {
@@ -924,6 +1094,21 @@ export type settingsOrderByWithAggregationInput = {
   allowUserCreateImages?: Prisma.SortOrder
   onboardingEnabled?: Prisma.SortOrder
   onboardingSteps?: Prisma.SortOrder
+  twoFactorRequired?: Prisma.SortOrder
+  sftpEnabled?: Prisma.SortOrder
+  backupsEnabled?: Prisma.SortOrder
+  schedulesEnabled?: Prisma.SortOrder
+  databasesEnabled?: Prisma.SortOrder
+  fileManagerEnabled?: Prisma.SortOrder
+  consoleEnabled?: Prisma.SortOrder
+  playerTrackingEnabled?: Prisma.SortOrder
+  scannerEnabled?: Prisma.SortOrder
+  airlinkCloudEnabled?: Prisma.SortOrder
+  defaultMemory?: Prisma.SortOrder
+  defaultCpu?: Prisma.SortOrder
+  defaultDisk?: Prisma.SortOrder
+  maxServersPerUser?: Prisma.SortOrder
+  emailCooldown?: Prisma.SortOrder
   _count?: Prisma.settingsCountOrderByAggregateInput
   _avg?: Prisma.settingsAvgOrderByAggregateInput
   _max?: Prisma.settingsMaxOrderByAggregateInput
@@ -995,6 +1180,21 @@ export type settingsScalarWhereWithAggregatesInput = {
   allowUserCreateImages?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
   onboardingEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
   onboardingSteps?: Prisma.StringWithAggregatesFilter<"settings"> | string
+  twoFactorRequired?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  sftpEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  backupsEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  schedulesEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  databasesEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  fileManagerEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  consoleEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  playerTrackingEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  scannerEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  airlinkCloudEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
+  defaultMemory?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  defaultCpu?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  defaultDisk?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  maxServersPerUser?: Prisma.IntWithAggregatesFilter<"settings"> | number
+  emailCooldown?: Prisma.IntWithAggregatesFilter<"settings"> | number
 }
 
 export type settingsCreateInput = {
@@ -1057,6 +1257,21 @@ export type settingsCreateInput = {
   allowUserCreateImages?: boolean
   onboardingEnabled?: boolean
   onboardingSteps?: string
+  twoFactorRequired?: boolean
+  sftpEnabled?: boolean
+  backupsEnabled?: boolean
+  schedulesEnabled?: boolean
+  databasesEnabled?: boolean
+  fileManagerEnabled?: boolean
+  consoleEnabled?: boolean
+  playerTrackingEnabled?: boolean
+  scannerEnabled?: boolean
+  airlinkCloudEnabled?: boolean
+  defaultMemory?: number
+  defaultCpu?: number
+  defaultDisk?: number
+  maxServersPerUser?: number
+  emailCooldown?: number
 }
 
 export type settingsUncheckedCreateInput = {
@@ -1120,6 +1335,21 @@ export type settingsUncheckedCreateInput = {
   allowUserCreateImages?: boolean
   onboardingEnabled?: boolean
   onboardingSteps?: string
+  twoFactorRequired?: boolean
+  sftpEnabled?: boolean
+  backupsEnabled?: boolean
+  schedulesEnabled?: boolean
+  databasesEnabled?: boolean
+  fileManagerEnabled?: boolean
+  consoleEnabled?: boolean
+  playerTrackingEnabled?: boolean
+  scannerEnabled?: boolean
+  airlinkCloudEnabled?: boolean
+  defaultMemory?: number
+  defaultCpu?: number
+  defaultDisk?: number
+  maxServersPerUser?: number
+  emailCooldown?: number
 }
 
 export type settingsUpdateInput = {
@@ -1182,6 +1412,21 @@ export type settingsUpdateInput = {
   allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
+  twoFactorRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sftpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  backupsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schedulesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  databasesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fileManagerEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  consoleEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  playerTrackingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scannerEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  airlinkCloudEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  defaultMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultCpu?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultDisk?: Prisma.IntFieldUpdateOperationsInput | number
+  maxServersPerUser?: Prisma.IntFieldUpdateOperationsInput | number
+  emailCooldown?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type settingsUncheckedUpdateInput = {
@@ -1245,6 +1490,21 @@ export type settingsUncheckedUpdateInput = {
   allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
+  twoFactorRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sftpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  backupsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schedulesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  databasesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fileManagerEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  consoleEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  playerTrackingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scannerEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  airlinkCloudEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  defaultMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultCpu?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultDisk?: Prisma.IntFieldUpdateOperationsInput | number
+  maxServersPerUser?: Prisma.IntFieldUpdateOperationsInput | number
+  emailCooldown?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type settingsCreateManyInput = {
@@ -1308,6 +1568,21 @@ export type settingsCreateManyInput = {
   allowUserCreateImages?: boolean
   onboardingEnabled?: boolean
   onboardingSteps?: string
+  twoFactorRequired?: boolean
+  sftpEnabled?: boolean
+  backupsEnabled?: boolean
+  schedulesEnabled?: boolean
+  databasesEnabled?: boolean
+  fileManagerEnabled?: boolean
+  consoleEnabled?: boolean
+  playerTrackingEnabled?: boolean
+  scannerEnabled?: boolean
+  airlinkCloudEnabled?: boolean
+  defaultMemory?: number
+  defaultCpu?: number
+  defaultDisk?: number
+  maxServersPerUser?: number
+  emailCooldown?: number
 }
 
 export type settingsUpdateManyMutationInput = {
@@ -1370,6 +1645,21 @@ export type settingsUpdateManyMutationInput = {
   allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
+  twoFactorRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sftpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  backupsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schedulesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  databasesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fileManagerEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  consoleEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  playerTrackingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scannerEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  airlinkCloudEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  defaultMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultCpu?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultDisk?: Prisma.IntFieldUpdateOperationsInput | number
+  maxServersPerUser?: Prisma.IntFieldUpdateOperationsInput | number
+  emailCooldown?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type settingsUncheckedUpdateManyInput = {
@@ -1433,6 +1723,21 @@ export type settingsUncheckedUpdateManyInput = {
   allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
+  twoFactorRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sftpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  backupsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schedulesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  databasesEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fileManagerEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  consoleEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  playerTrackingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scannerEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  airlinkCloudEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  defaultMemory?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultCpu?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultDisk?: Prisma.IntFieldUpdateOperationsInput | number
+  maxServersPerUser?: Prisma.IntFieldUpdateOperationsInput | number
+  emailCooldown?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type settingsCountOrderByAggregateInput = {
@@ -1496,6 +1801,21 @@ export type settingsCountOrderByAggregateInput = {
   allowUserCreateImages?: Prisma.SortOrder
   onboardingEnabled?: Prisma.SortOrder
   onboardingSteps?: Prisma.SortOrder
+  twoFactorRequired?: Prisma.SortOrder
+  sftpEnabled?: Prisma.SortOrder
+  backupsEnabled?: Prisma.SortOrder
+  schedulesEnabled?: Prisma.SortOrder
+  databasesEnabled?: Prisma.SortOrder
+  fileManagerEnabled?: Prisma.SortOrder
+  consoleEnabled?: Prisma.SortOrder
+  playerTrackingEnabled?: Prisma.SortOrder
+  scannerEnabled?: Prisma.SortOrder
+  airlinkCloudEnabled?: Prisma.SortOrder
+  defaultMemory?: Prisma.SortOrder
+  defaultCpu?: Prisma.SortOrder
+  defaultDisk?: Prisma.SortOrder
+  maxServersPerUser?: Prisma.SortOrder
+  emailCooldown?: Prisma.SortOrder
 }
 
 export type settingsAvgOrderByAggregateInput = {
@@ -1519,6 +1839,11 @@ export type settingsAvgOrderByAggregateInput = {
   allowPrivilegedMaxCpu?: Prisma.SortOrder
   allowPrivilegedMaxStorage?: Prisma.SortOrder
   allowPrivilegedMaxDatabases?: Prisma.SortOrder
+  defaultMemory?: Prisma.SortOrder
+  defaultCpu?: Prisma.SortOrder
+  defaultDisk?: Prisma.SortOrder
+  maxServersPerUser?: Prisma.SortOrder
+  emailCooldown?: Prisma.SortOrder
 }
 
 export type settingsMaxOrderByAggregateInput = {
@@ -1582,6 +1907,21 @@ export type settingsMaxOrderByAggregateInput = {
   allowUserCreateImages?: Prisma.SortOrder
   onboardingEnabled?: Prisma.SortOrder
   onboardingSteps?: Prisma.SortOrder
+  twoFactorRequired?: Prisma.SortOrder
+  sftpEnabled?: Prisma.SortOrder
+  backupsEnabled?: Prisma.SortOrder
+  schedulesEnabled?: Prisma.SortOrder
+  databasesEnabled?: Prisma.SortOrder
+  fileManagerEnabled?: Prisma.SortOrder
+  consoleEnabled?: Prisma.SortOrder
+  playerTrackingEnabled?: Prisma.SortOrder
+  scannerEnabled?: Prisma.SortOrder
+  airlinkCloudEnabled?: Prisma.SortOrder
+  defaultMemory?: Prisma.SortOrder
+  defaultCpu?: Prisma.SortOrder
+  defaultDisk?: Prisma.SortOrder
+  maxServersPerUser?: Prisma.SortOrder
+  emailCooldown?: Prisma.SortOrder
 }
 
 export type settingsMinOrderByAggregateInput = {
@@ -1645,6 +1985,21 @@ export type settingsMinOrderByAggregateInput = {
   allowUserCreateImages?: Prisma.SortOrder
   onboardingEnabled?: Prisma.SortOrder
   onboardingSteps?: Prisma.SortOrder
+  twoFactorRequired?: Prisma.SortOrder
+  sftpEnabled?: Prisma.SortOrder
+  backupsEnabled?: Prisma.SortOrder
+  schedulesEnabled?: Prisma.SortOrder
+  databasesEnabled?: Prisma.SortOrder
+  fileManagerEnabled?: Prisma.SortOrder
+  consoleEnabled?: Prisma.SortOrder
+  playerTrackingEnabled?: Prisma.SortOrder
+  scannerEnabled?: Prisma.SortOrder
+  airlinkCloudEnabled?: Prisma.SortOrder
+  defaultMemory?: Prisma.SortOrder
+  defaultCpu?: Prisma.SortOrder
+  defaultDisk?: Prisma.SortOrder
+  maxServersPerUser?: Prisma.SortOrder
+  emailCooldown?: Prisma.SortOrder
 }
 
 export type settingsSumOrderByAggregateInput = {
@@ -1668,6 +2023,11 @@ export type settingsSumOrderByAggregateInput = {
   allowPrivilegedMaxCpu?: Prisma.SortOrder
   allowPrivilegedMaxStorage?: Prisma.SortOrder
   allowPrivilegedMaxDatabases?: Prisma.SortOrder
+  defaultMemory?: Prisma.SortOrder
+  defaultCpu?: Prisma.SortOrder
+  defaultDisk?: Prisma.SortOrder
+  maxServersPerUser?: Prisma.SortOrder
+  emailCooldown?: Prisma.SortOrder
 }
 
 
@@ -1733,6 +2093,21 @@ export type settingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   allowUserCreateImages?: boolean
   onboardingEnabled?: boolean
   onboardingSteps?: boolean
+  twoFactorRequired?: boolean
+  sftpEnabled?: boolean
+  backupsEnabled?: boolean
+  schedulesEnabled?: boolean
+  databasesEnabled?: boolean
+  fileManagerEnabled?: boolean
+  consoleEnabled?: boolean
+  playerTrackingEnabled?: boolean
+  scannerEnabled?: boolean
+  airlinkCloudEnabled?: boolean
+  defaultMemory?: boolean
+  defaultCpu?: boolean
+  defaultDisk?: boolean
+  maxServersPerUser?: boolean
+  emailCooldown?: boolean
 }, ExtArgs["result"]["settings"]>
 
 export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1796,6 +2171,21 @@ export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   allowUserCreateImages?: boolean
   onboardingEnabled?: boolean
   onboardingSteps?: boolean
+  twoFactorRequired?: boolean
+  sftpEnabled?: boolean
+  backupsEnabled?: boolean
+  schedulesEnabled?: boolean
+  databasesEnabled?: boolean
+  fileManagerEnabled?: boolean
+  consoleEnabled?: boolean
+  playerTrackingEnabled?: boolean
+  scannerEnabled?: boolean
+  airlinkCloudEnabled?: boolean
+  defaultMemory?: boolean
+  defaultCpu?: boolean
+  defaultDisk?: boolean
+  maxServersPerUser?: boolean
+  emailCooldown?: boolean
 }, ExtArgs["result"]["settings"]>
 
 export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1859,6 +2249,21 @@ export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   allowUserCreateImages?: boolean
   onboardingEnabled?: boolean
   onboardingSteps?: boolean
+  twoFactorRequired?: boolean
+  sftpEnabled?: boolean
+  backupsEnabled?: boolean
+  schedulesEnabled?: boolean
+  databasesEnabled?: boolean
+  fileManagerEnabled?: boolean
+  consoleEnabled?: boolean
+  playerTrackingEnabled?: boolean
+  scannerEnabled?: boolean
+  airlinkCloudEnabled?: boolean
+  defaultMemory?: boolean
+  defaultCpu?: boolean
+  defaultDisk?: boolean
+  maxServersPerUser?: boolean
+  emailCooldown?: boolean
 }, ExtArgs["result"]["settings"]>
 
 export type settingsSelectScalar = {
@@ -1922,9 +2327,24 @@ export type settingsSelectScalar = {
   allowUserCreateImages?: boolean
   onboardingEnabled?: boolean
   onboardingSteps?: boolean
+  twoFactorRequired?: boolean
+  sftpEnabled?: boolean
+  backupsEnabled?: boolean
+  schedulesEnabled?: boolean
+  databasesEnabled?: boolean
+  fileManagerEnabled?: boolean
+  consoleEnabled?: boolean
+  playerTrackingEnabled?: boolean
+  scannerEnabled?: boolean
+  airlinkCloudEnabled?: boolean
+  defaultMemory?: boolean
+  defaultCpu?: boolean
+  defaultDisk?: boolean
+  maxServersPerUser?: boolean
+  emailCooldown?: boolean
 }
 
-export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "panelWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "require2faForAdmins" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle" | "allowPrivilegedServerLimit" | "allowPrivilegedMaxMemory" | "allowPrivilegedMaxCpu" | "allowPrivilegedMaxStorage" | "allowPrivilegedMaxDatabases" | "allowUserCreateImages" | "onboardingEnabled" | "onboardingSteps", ExtArgs["result"]["settings"]>
+export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "panelWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "require2faForAdmins" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle" | "allowPrivilegedServerLimit" | "allowPrivilegedMaxMemory" | "allowPrivilegedMaxCpu" | "allowPrivilegedMaxStorage" | "allowPrivilegedMaxDatabases" | "allowUserCreateImages" | "onboardingEnabled" | "onboardingSteps" | "twoFactorRequired" | "sftpEnabled" | "backupsEnabled" | "schedulesEnabled" | "databasesEnabled" | "fileManagerEnabled" | "consoleEnabled" | "playerTrackingEnabled" | "scannerEnabled" | "airlinkCloudEnabled" | "defaultMemory" | "defaultCpu" | "defaultDisk" | "maxServersPerUser" | "emailCooldown", ExtArgs["result"]["settings"]>
 
 export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "settings"
@@ -1990,6 +2410,21 @@ export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     allowUserCreateImages: boolean
     onboardingEnabled: boolean
     onboardingSteps: string
+    twoFactorRequired: boolean
+    sftpEnabled: boolean
+    backupsEnabled: boolean
+    schedulesEnabled: boolean
+    databasesEnabled: boolean
+    fileManagerEnabled: boolean
+    consoleEnabled: boolean
+    playerTrackingEnabled: boolean
+    scannerEnabled: boolean
+    airlinkCloudEnabled: boolean
+    defaultMemory: number
+    defaultCpu: number
+    defaultDisk: number
+    maxServersPerUser: number
+    emailCooldown: number
   }, ExtArgs["result"]["settings"]>
   composites: {}
 }
@@ -2473,6 +2908,21 @@ export interface settingsFieldRefs {
   readonly allowUserCreateImages: Prisma.FieldRef<"settings", 'Boolean'>
   readonly onboardingEnabled: Prisma.FieldRef<"settings", 'Boolean'>
   readonly onboardingSteps: Prisma.FieldRef<"settings", 'String'>
+  readonly twoFactorRequired: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly sftpEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly backupsEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly schedulesEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly databasesEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly fileManagerEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly consoleEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly playerTrackingEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly scannerEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly airlinkCloudEnabled: Prisma.FieldRef<"settings", 'Boolean'>
+  readonly defaultMemory: Prisma.FieldRef<"settings", 'Int'>
+  readonly defaultCpu: Prisma.FieldRef<"settings", 'Int'>
+  readonly defaultDisk: Prisma.FieldRef<"settings", 'Int'>
+  readonly maxServersPerUser: Prisma.FieldRef<"settings", 'Int'>
+  readonly emailCooldown: Prisma.FieldRef<"settings", 'Int'>
 }
     
 

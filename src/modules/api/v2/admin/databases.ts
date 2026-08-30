@@ -21,7 +21,7 @@ router.use(async (req, res, next) => {
   if (!admin) {
     return;
   }
-  (req as any).adminUser = admin;
+  req.adminUser = admin;
   next();
 });
 
@@ -50,7 +50,7 @@ router.post("/", parseBody(adminCreateDbHostBody), async (req, res) => {
     include: { node: { select: { id: true, name: true } } },
   });
   logActivity(
-    (req as any).adminUser?.id,
+    req.adminUser?.id,
     "database_host.created",
     undefined,
     { name: host.name },
@@ -88,7 +88,7 @@ router.delete("/:id", async (req, res) => {
   }
   await prisma.databaseHost.delete({ where: { id } });
   logActivity(
-    (req as any).adminUser?.id,
+    req.adminUser?.id,
     "database_host.deleted",
     undefined,
     { name: host.name },

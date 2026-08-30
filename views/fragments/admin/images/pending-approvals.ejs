@@ -30,7 +30,7 @@
         <a href="/admin/images/edit/<%= image.id %>" class="al-btn-ghost inline-flex items-center gap-1.5 text-xs"><%- icon('external-link', { class: 'size-4', strokeWidth: 1.5 }) %>View</a>
         <button
           x-data="{ approving: false }"
-          @click="if(!approving && confirm('Approve this image? It will become available to all users.')) { approving = true; fetch('/admin/images/approve/<%= image.id %>', { method: 'POST' }).then(r => r.json()).then(d => { if(d.error) { showToast(d.error, 'error'); approving = false; } else { showToast(d.message || 'Image approved.', 'success'); window.location.reload(); } }).catch(() => { showToast('Something went wrong.', 'error'); approving = false; }); }"
+          @click="if(!approving && confirm('Approve this image? It will become available to all users.')) { approving = true; fetch('/api/v2/admin/images/<%= image.id %>/approve', { method: 'POST' }).then(r => r.json()).then(d => { if(d.error) { showToast(d.error, 'error'); approving = false; } else { showToast(d.message || 'Image approved.', 'success'); window.location.reload(); } }).catch(() => { showToast('Something went wrong.', 'error'); approving = false; }); }"
           type="button"
           class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" :disabled="approving"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>Approve</button>
         <button

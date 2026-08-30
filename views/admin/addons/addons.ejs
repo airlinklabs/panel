@@ -121,7 +121,7 @@ function addonManager() {
     init() {
       document.getElementById('reloadBtn').addEventListener('click', () => {
         showLoadingPopup('Reloading addons…', 'Please wait…');
-        fetch('/admin/addons/reload', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+        fetch('/api/v2/admin/addons/reload', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
           .then(r => r.json()).then(data => { hideLoadingPopup(); showToast(data.message || (data.success ? 'Reloaded' : 'Failed'), data.success ? 'success' : 'error'); })
           .catch(() => { hideLoadingPopup(); showToast('Something went wrong.', 'error'); });
       });
@@ -142,7 +142,7 @@ function addonManager() {
     },
     toggleAddon(slug, enable) {
       showLoadingPopup('Updating addon…', 'Applying changes…');
-      fetch('/admin/addons/toggle/' + slug, {
+      fetch('/api/v2/admin/addons/' + slug + '/toggle', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: enable.toString() }),
       }).then(r => r.json()).then(data => {
@@ -169,7 +169,7 @@ function addonManager() {
     },
     uninstall(slug) {
       showLoadingPopup('Uninstalling…', 'Removing files…');
-      fetch('/admin/addons/store/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug }) })
+      fetch('/api/v2/admin/addons/' + slug + '/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug }) })
         .then(r => r.json()).then(data => {
           hideLoadingPopup();
           if (data.success) { showToast('Uninstalled', 'success'); const r = document.querySelector('[data-slug="' + slug + '"]'); if (r) r.remove(); }

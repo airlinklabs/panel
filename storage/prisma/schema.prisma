@@ -1,10 +1,25 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  displayName String
+  description String?
+  isAdmin     Boolean  @default(false)
+  permissions String   @default("[]") // JSON array of permission strings
+  isSystem    Boolean  @default(false) // prevent deletion of owner/admin
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       Users[]  @relation("UserRole")
 }
 
 model Users {
@@ -22,6 +37,7 @@ model Users {
   maxStorage         Int?      @default(0)
   maxDatabases       Int?      @default(0)
   role               String    @default("user")
+  roleRelation       Role?     @relation("UserRole", fields: [role], references: [name])
   onboardingCompleted Boolean  @default(false)
   onboardingSkipped  Boolean   @default(false)
   preferredNodeId    Int?
@@ -156,6 +172,8 @@ model Schedule {
   createdAt  DateTime       @default(now())
   server     Server         @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
   tasks      ScheduleTask[]
+
+  @@index([serverId])
 }
 
 model ScheduleTask {
@@ -166,6 +184,8 @@ model ScheduleTask {
   payload    String   @db.Text
   timeOffset Int      @default(0)
   schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleId])
 }
 
 model Images {
@@ -301,6 +321,21 @@ model settings {
   allowUserCreateImages       Boolean  @default(false)
   onboardingEnabled           Boolean  @default(true)
   onboardingSteps             String   @default("[]") @db.Text
+  twoFactorRequired           Boolean  @default(false)
+  sftpEnabled                 Boolean  @default(true)
+  backupsEnabled              Boolean  @default(true)
+  schedulesEnabled            Boolean  @default(true)
+  databasesEnabled            Boolean  @default(true)
+  fileManagerEnabled          Boolean  @default(true)
+  consoleEnabled              Boolean  @default(true)
+  playerTrackingEnabled       Boolean  @default(false)
+  scannerEnabled              Boolean  @default(true)
+  airlinkCloudEnabled         Boolean  @default(false)
+  defaultMemory               Int      @default(512)
+  defaultCpu                  Int      @default(100)
+  defaultDisk                 Int      @default(5120)
+  maxServersPerUser           Int      @default(10)
+  emailCooldown               Int      @default(30)
 }
 
 model ServerFolder {
@@ -333,6 +368,8 @@ model ApiKey {
   active      Boolean  @default(true)
   userId      Int?
   user        Users?   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model LoginHistory {
@@ -342,6 +379,9 @@ model LoginHistory {
   ipAddress String?
   userAgent String?
   timestamp DateTime @default(now())
+
+  @@index([userId])
+  @@index([timestamp])
 }
 
 model PlayerStats {
@@ -425,6 +465,8 @@ model ActivityLog {
   actorId   Int?
   serverId  String?
   event     String
+  category  String   @default("user_action")
+  severity  String   @default("info")
   metadata  String?  @db.Text
   ip        String?
   createdAt DateTime @default(now())
@@ -433,6 +475,22 @@ model ActivityLog {
 
   @@index([actorId])
   @@index([serverId])
+  @@index([createdAt])
+  @@index([category])
+  @@index([severity])
+}
+
+model SystemLog {
+  id        Int      @id @default(autoincrement())
+  message   String   @db.Text
+  stack     String?  @db.Text
+  component String
+  severity  String
+  metadata  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([component])
+  @@index([severity])
   @@index([createdAt])
 }
 

@@ -430,26 +430,26 @@
       case 'username':
         data = { newUsername: document.getElementById('username')?.value?.trim() };
         if (!data.newUsername) return null;
-        url = '/update-username';
+        url = '/api/v2/account/update-username';
         break;
       case 'email':
         data = { email: document.getElementById('email')?.value?.trim() };
         if (!data.email) return null;
-        url = '/change-email';
+        url = '/api/v2/account/change-email';
         break;
       case 'description':
         data = { description: document.getElementById('description')?.value?.trim() || '' };
-        url = '/update-description';
+        url = '/api/v2/account/update-description';
         break;
       case 'language':
         data = { language: document.getElementById('language')?.value };
         if (!data.language) return null;
-        url = '/set-language';
+        url = '/api/v2/account/set-language';
         break;
       case 'preferredNode':
         const nodeId = document.getElementById('preferredNode')?.value;
         data = { preferredNodeId: nodeId || null };
-        url = '/set-preferred-node';
+        url = '/api/v2/account/set-preferred-node';
         break;
       default: return null;
     }
@@ -486,7 +486,7 @@
       const val = usernameInput.value.trim();
       if (!val || !usernameFb) return;
       try {
-        const res = await fetch(`/check-username?username=${encodeURIComponent(val)}`);
+        const res = await fetch(`/api/v2/account/check-username?username=${encodeURIComponent(val)}`);
         const { exists } = await res.json();
         usernameFb.textContent = exists ? '<%= req.translations.usernameTaken || "Username taken" %>' : '<%= req.translations.usernameIsNotTaken || "Username available" %>';
         usernameFb.style.color = exists ? 'var(--theme-danger)' : 'var(--theme-success)';
@@ -506,7 +506,7 @@
     if (!val) { if (pwFeedback) pwFeedback.textContent = ''; newPwInput.disabled = true; newPwInput.value = ''; return; }
     pwTimer = setTimeout(async () => {
       try {
-        const res = await fetch('/validate-password', {
+        const res = await fetch('/api/v2/account/validate-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
           body: JSON.stringify({ currentPassword: val }),
@@ -536,7 +536,7 @@
   });
 
   document.getElementById('remove-avatar-btn')?.addEventListener('click', async () => {
-    const res = await fetch('/remove-avatar', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken } });
+    const res = await fetch('/api/v2/account/avatar', { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken } });
     if (res.ok) {
       avatarPreview.src = '/avatar/<%= encodeURIComponent(user.username) %>';
       const removeAvatarBtn = document.getElementById('remove-avatar-btn');
@@ -552,7 +552,7 @@
     const btn = document.getElementById('disable2faBtn');
     btn.disabled = true;
     try {
-      const res = await fetch('/account/2fa/disable', {
+      const res = await fetch('/api/v2/account/2fa/disable', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
         body: JSON.stringify({ password }),
@@ -688,7 +688,7 @@
         const form = new FormData();
         form.append('avatar', blob, 'avatar.png');
         try {
-          const res = await fetch('/upload-avatar', { method: 'POST', headers: { 'CSRF-Token': csrf }, body: form });
+          const res = await fetch('/api/v2/account/avatar', { method: 'POST', headers: { 'CSRF-Token': csrf }, body: form });
           if (res.ok) {
             const { avatar } = await res.json();
             avatarPreview.src = avatar + '?t=' + Date.now();
@@ -782,7 +782,7 @@ function loader() {
       const payload = new FormData(this);
       const data = {};
       for (const [key, value] of payload.entries()) data[key] = value;
-      const response = await fetch('/my-images/create', {
+      const response = await fetch('/api/v2/account/images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -814,7 +814,7 @@ function loader() {
     }
     const l = loader();
     try {
-      const response = await fetch('/my-images/create', {
+      const response = await fetch('/api/v2/account/images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -839,7 +839,7 @@ function loader() {
     if (!url.trim()) { showToast('Please enter an image URL.', 'error'); return; }
     const l = loader();
     try {
-      const response = await fetch('/my-images/import-url', {
+      const response = await fetch('/api/v2/account/images/import-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim() }),
@@ -886,7 +886,7 @@ function loader() {
         if (!confirm(msg)) return;
         const row = btn.closest('[data-image-id]');
         try {
-          const response = await fetch('/my-images/' + id, { method: 'DELETE' });
+          const response = await fetch('/api/v2/account/images/' + id, { method: 'DELETE' });
           const data = await response.json();
           if (data.error) {
             showToast(data.error, 'error');

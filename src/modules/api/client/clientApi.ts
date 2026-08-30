@@ -5,21 +5,36 @@ import prisma from "../../../db";
 import logger from "../../../handlers/logger";
 import { apiValidator } from "../../../handlers/utils/api/apiValidator";
 import { getParamAsString } from "../../../utils/typeHelpers";
-import {
-  fsListSchema,
-  parseDaemonResponse,
-} from "../../../platform/daemon/dtos";
 import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
+import { listServers, getServerRaw } from "../../../services/serverService";
+import {
+  listBackups,
+  createBackup,
+  deleteBackup,
+} from "../../../services/backupService";
+import {
+  listFiles,
+  readFile,
+  writeFile,
+  deleteFile,
+  renameFile,
+} from "../../../services/fileService";
+import {
+  listSchedules,
+  createSchedule,
+  deleteSchedule,
+} from "../../../services/scheduleService";
 import { runtimeStartQueue } from "../../../handlers/runtimeQueue";
 import { NodeCapacityExceededError } from "../../../handlers/utils/server/resourceCheck";
 import { logActivity } from "../../../handlers/utils/activity/activityLogger";
 import { nextRunFromCron } from "../../../utils/cron";
 import { parseBody, validationErrorBoundary } from "../../../utils/validation";
-import { isPathSafe } from "../../../utils/pathSecurity";
 import {
-  parseSubUserPermissions,
-  type SubUserPermission,
-} from "../../../handlers/utils/auth/serverAuthUtil";
+  parsePermissions,
+  subUserHasPermission,
+  resolveServerAccess,
+} from "../../../handlers/utils/auth/authorization";
+import type { SubUserPermission } from "../../../handlers/utils/auth/serverAuthUtil";
 import {
   CLIENT_API_VERSION,
   powerBodySchema,
@@ -54,49 +69,12 @@ type ServerResult = Awaited<ReturnType<typeof prisma.server.findUnique>> & {
 };
 
 async function resolveServerForUser(serverId: string, userId: number) {
-  const server = await prisma.server.findUnique({
-    where: { UUID: serverId },
-    include: { node: true },
-  });
-  if (!server) {
-    return null;
-  }
-  if (server.ownerId === userId) {
-    return { server, isOwner: true, subUser: null };
-  }
-  const subUser = await prisma.subUser.findFirst({
-    where: { serverId: server.UUID, userId },
-  });
-  if (!subUser) {
-    return null;
-  }
-  return { server, isOwner: false, subUser };
-}
-
-function subUserHasPermission(
-  subUser: { permissions: string | null | undefined },
-  permission: SubUserPermission,
-): boolean {
-  const perms = parseSubUserPermissions(subUser.permissions);
-  const parent = permission.includes(".")
-    ? permission.slice(0, permission.lastIndexOf("."))
-    : null;
-
-  for (const p of perms) {
-    if (p === permission) {
-      return true;
-    }
-    if (
-      p.endsWith(".*") &&
-      (permission === p.slice(0, -2) || permission.startsWith(p.slice(0, -1)))
-    ) {
-      return true;
-    }
-    if (parent && p === parent) {
-      return true;
-    }
-  }
-  return false;
+  const result = await resolveServerAccess(serverId, userId);
+  if (!result) return null;
+  // Include node relation for client API responses
+  const server = await getServerRaw(serverId);
+  if (!server) return null;
+  return { server, isOwner: result.isOwner, subUser: result.subUser };
 }
 
 function requirePermission(
@@ -143,9 +121,11 @@ const clientApiModule: Module = {
           return jsonError(res, "API key must be associated with a user", 403);
         }
 
-        const servers = await prisma.server.findMany({
+        const servers = await listServers({
+          page: 1,
+          perPage: 10000,
           where: { ownerId: userId },
-          select: {
+          include: {
             UUID: true,
             name: true,
             description: true,
@@ -155,7 +135,6 @@ const clientApiModule: Module = {
             nodeId: true,
             createdAt: true,
           },
-          orderBy: { createdAt: "desc" },
         });
         const data = servers satisfies ClientServer[];
 
@@ -248,10 +227,11 @@ const clientApiModule: Module = {
           if (action === "start") {
             const apiUser = await prisma.users.findUnique({
               where: { id: userId },
-              select: { isAdmin: true, role: true },
+              select: { role: true },
             });
             const priority =
-              apiUser?.isAdmin === true ||
+              apiUser?.role === "owner" ||
+              apiUser?.role === "admin" ||
               server.ownerId === userId ||
               apiUser?.role === "privileged";
             const queued = await runtimeStartQueue.enqueueStart({
@@ -360,19 +340,8 @@ const clientApiModule: Module = {
 
           const dir = (req.query.dir as string) || "/";
 
-          const response = await daemonRequest<unknown>({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "GET",
-            path: "/fs/list",
-            params: { id: server.UUID, path: dir },
-            timeout: 15000,
-          });
-
-          res.json({
-            data: parseDaemonResponse(fsListSchema, response.data) ?? [],
-          });
+          const data = await listFiles(server.UUID, dir);
+          res.json({ data });
         } catch (err) {
           logger.error("Client API: list files error", err);
           jsonError(res, "Failed to list files", 500);
@@ -415,21 +384,9 @@ const clientApiModule: Module = {
           if (!file) {
             return jsonError(res, "file query parameter is required");
           }
-          if (!isPathSafe(file)) {
-            return jsonError(res, "invalid file path");
-          }
 
-          const response = await daemonRequest({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "GET",
-            path: "/fs/file/content",
-            params: { id: server.UUID, path: file },
-            timeout: 15000,
-          });
-
-          res.json({ data: response.data });
+          const data = await readFile(server.UUID, file);
+          res.json({ data });
         } catch (err) {
           logger.error("Client API: read file error", err);
           jsonError(res, "Failed to read file", 500);
@@ -471,15 +428,7 @@ const clientApiModule: Module = {
 
           const { file, content } = req.validatedBody as WriteFileBody;
 
-          await daemonRequest({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "POST",
-            path: "/fs/file/content",
-            body: { id: server.UUID, path: file, content },
-            timeout: 15000,
-          });
+          await writeFile(server.UUID, file, content);
 
           await logActivity(req, "file:edit", {
             serverId: server.UUID,
@@ -528,15 +477,7 @@ const clientApiModule: Module = {
 
           const { file } = req.validatedBody as DeleteFileBody;
 
-          await daemonRequest({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "DELETE",
-            path: "/fs/rm",
-            body: { id: server.UUID, path: file },
-            timeout: 15000,
-          });
+          await deleteFile(server.UUID, file);
 
           await logActivity(req, "file:delete", {
             serverId: server.UUID,
@@ -585,15 +526,7 @@ const clientApiModule: Module = {
 
           const { file, newname } = req.validatedBody as RenameFileBody;
 
-          await daemonRequest({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "POST",
-            path: "/fs/rename",
-            body: { id: server.UUID, path: file, newName: newname },
-            timeout: 15000,
-          });
+          await renameFile(server.UUID, file, newname);
 
           await logActivity(req, "file:rename", {
             serverId: server.UUID,
@@ -641,17 +574,7 @@ const clientApiModule: Module = {
             return;
           }
 
-          const backups = await prisma.backup.findMany({
-            where: { serverId: server.UUID },
-            select: {
-              UUID: true,
-              name: true,
-              createdAt: true,
-              locked: true,
-              size: true,
-            },
-            orderBy: { createdAt: "desc" },
-          });
+          const backups = await listBackups(server.UUID);
 
           const data = backups.map(
             (backup) =>
@@ -704,47 +627,9 @@ const clientApiModule: Module = {
             return;
           }
 
-          const existingBackups = await prisma.backup.count({
-            where: { serverId: server.UUID },
-          });
-          if (existingBackups >= server.backupLimit) {
-            return jsonError(res, "Backup limit reached", 400);
-          }
-
           const { name } = req.validatedBody as CreateBackupBody;
 
-          const response = await daemonRequest<{
-            success: boolean;
-            backup: {
-              uuid: string;
-              filePath: string;
-              size: number;
-              checksum?: string;
-            };
-          }>({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "POST",
-            path: "/container/backup",
-            body: { id: server.UUID, name },
-            timeout: 120000,
-          });
-
-          if (!response.data?.success || !response.data?.backup) {
-            return jsonError(res, "Failed to create backup on daemon", 502);
-          }
-
-          const backup = await prisma.backup.create({
-            data: {
-              UUID: response.data.backup.uuid,
-              name,
-              serverId: server.UUID,
-              filePath: response.data.backup.filePath,
-              size: BigInt(response.data.backup.size),
-              checksum: response.data.backup.checksum ?? null,
-            },
-          });
+          const backup = await createBackup(server.UUID, name);
 
           await logActivity(req, "backup:create", {
             serverId: server.UUID,
@@ -791,32 +676,12 @@ const clientApiModule: Module = {
           }
 
           const backupUUID = getParamAsString(req.params.backupId);
-          const backup = await prisma.backup.findFirst({
-            where: { UUID: backupUUID, serverId: server.UUID },
-          });
-          if (!backup) {
-            return jsonError(res, "Backup not found", 404);
-          }
-          if (backup.locked) {
-            return jsonError(res, "Backup is locked", 400);
-          }
 
-          await daemonRequest({
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            nodeKey: server.node.key,
-            method: "DELETE",
-            path: "/container/backup",
-            body: { backupPath: backup.filePath },
-            timeout: 30000,
-          });
-
-          await prisma.backup.delete({ where: { UUID: backupUUID } });
+          await deleteBackup(backupUUID, server.UUID);
 
           await logActivity(req, "backup:delete", {
             serverId: server.UUID,
             metadata: {
-              name: backup.name,
               uuid: backupUUID,
               source: "client-api",
             },
@@ -863,24 +728,22 @@ const clientApiModule: Module = {
             return;
           }
 
-          const schedules = await prisma.schedule.findMany({
-            where: { serverId: server.UUID },
-            select: {
-              id: true,
-              name: true,
-              cron: true,
-              enabled: true,
-              nextRunAt: true,
-              lastRunAt: true,
-              createdAt: true,
-              tasks: {
-                orderBy: { order: "asc" },
-                select: { id: true, action: true, payload: true, order: true },
-              },
-            },
-            orderBy: { createdAt: "desc" },
-          });
-          const data = schedules satisfies ClientSchedule[];
+          const allSchedules = await listSchedules(server.UUID);
+          const data = allSchedules.map((s) => ({
+            id: s.id,
+            name: s.name,
+            cron: s.cron,
+            enabled: s.enabled,
+            nextRunAt: s.nextRunAt,
+            lastRunAt: s.lastRunAt,
+            createdAt: s.createdAt,
+            tasks: s.tasks.map((t) => ({
+              id: t.id,
+              action: t.action,
+              payload: t.payload,
+              order: t.order,
+            })),
+          })) satisfies ClientSchedule[];
 
           res.json({ data });
         } catch (err) {
@@ -925,22 +788,17 @@ const clientApiModule: Module = {
           const { name, cron, action, payload } =
             req.validatedBody as CreateScheduleBody;
 
-          const schedule = await prisma.schedule.create({
-            data: {
-              name,
-              cron,
-              enabled: true,
-              nextRunAt: nextRunFromCron(cron.trim()),
-              serverId: server.UUID,
-              tasks: {
-                create: {
-                  order: 0,
-                  action,
-                  payload: payload ?? "{}",
-                },
+          const schedule = await createSchedule(server.UUID, {
+            name,
+            cron,
+            nextRunAt: nextRunFromCron(cron.trim()),
+            tasks: {
+              create: {
+                order: 0,
+                action,
+                payload: payload ?? "{}",
               },
             },
-            include: { tasks: { orderBy: { order: "asc" } } },
           });
 
           await logActivity(
@@ -999,21 +857,17 @@ const clientApiModule: Module = {
             return jsonError(res, "Invalid schedule ID");
           }
 
-          const schedule = await prisma.schedule.findFirst({
-            where: { id: scheduleId, serverId: server.UUID },
-          });
-          if (!schedule) {
+          const deleted = await deleteSchedule(scheduleId, server.UUID);
+          if (!deleted) {
             return jsonError(res, "Schedule not found", 404);
           }
-
-          await prisma.schedule.delete({ where: { id: scheduleId } });
 
           await logActivity(
             req,
             "schedule:delete" as Parameters<typeof logActivity>[1],
             {
               serverId: server.UUID,
-              metadata: { name: schedule.name, source: "client-api" },
+              metadata: { name: deleted.name, source: "client-api" },
             },
           );
 

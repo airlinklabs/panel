@@ -26,7 +26,7 @@ import { initEggCatalogue } from "./handlers/eggCatalogueService";
 import { reenqueueQueuedInstalls } from "./handlers/installQueue";
 import crypto from "crypto";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import { createRedisRateLimit } from "./handlers/utils/security/redisRateLimit";
 import icon from "./utils/icon";
 import { getClientIp } from "./utils/ip";
 import csrfProtection, {
@@ -39,6 +39,7 @@ import {
   notFoundHandler,
   renderErrorPage,
 } from "./handlers/errorPages";
+import { logSystemError } from "./services/systemLogService";
 
 import { getConfig } from "./config";
 import { installRenderResolver } from "./handlers/renderResolver";
@@ -218,14 +219,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rate limiter — uses cached settings, no per-request DB hit
+// Rate limiter — Redis-backed sliding window for distributed/multi-instance support
 app.use(
-  rateLimit({
+  createRedisRateLimit({
     windowMs: 60 * 1000,
-    max: () => {
-      const c = getSecurityCache();
-      return c.rateLimitEnabled ? c.rateLimitRpm : 0;
-    },
+    max: 500,
+    keyPrefix: "rl:global",
     skip: () => !getSecurityCache().rateLimitEnabled,
     standardHeaders: true,
     legacyHeaders: false,
@@ -364,6 +363,26 @@ app.use(errorPageHandler);
 
     app.use(notFoundHandler);
     app.use(errorPageHandler);
+
+    // Global unhandled error logger — captures errors that slip through middleware
+    process.on("unhandledRejection", (reason: unknown) => {
+      const msg = reason instanceof Error ? reason.message : String(reason);
+      const stack = reason instanceof Error ? reason.stack : undefined;
+      logSystemError({
+        message: `Unhandled rejection: ${msg}`,
+        stack,
+        component: "api",
+        severity: "error",
+      });
+    });
+    process.on("uncaughtException", (err: Error) => {
+      logSystemError({
+        message: `Uncaught exception: ${err.message}`,
+        stack: err.stack,
+        component: "api",
+        severity: "critical",
+      });
+    });
 
     const server = app.listen(port, () => {
       logger.success(`Listening on port ${port}`);

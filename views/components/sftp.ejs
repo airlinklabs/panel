@@ -263,7 +263,7 @@
     // previous generate on a fresh load; force a regenerate prompt instead.
     sftpPlainPassword = null;
     sftpExpired = false;
-    fetch('/server/' + SERVER_ID + '/sftp/credentials')
+    fetch('/api/v2/servers/' + SERVER_ID + '/sftp')
       .then(function (resp) {
         if (resp.status === 404) {
           document.getElementById('sftpErrorTitle').textContent = 'No SFTP credentials yet.';
@@ -292,7 +292,7 @@
     sftpExpired = false;
     showSftpState('loading');
 
-    return fetch('/server/' + SERVER_ID + '/sftp/credentials', {
+    return fetch('/api/v2/servers/' + SERVER_ID + '/sftp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
     })
@@ -318,7 +318,7 @@
   };
 
   window.revokeSftpCredentials = function () {
-    fetch('/server/' + SERVER_ID + '/sftp/credentials', {
+    fetch('/api/v2/servers/' + SERVER_ID + '/sftp', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
     })

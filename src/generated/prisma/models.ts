@@ -8,6 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Role'
 export type * from './models/Users'
 export type * from './models/PasswordReset'
 export type * from './models/Server'
@@ -33,5 +34,6 @@ export type * from './models/Backup'
 export type * from './models/SftpCredential'
 export type * from './models/SubUser'
 export type * from './models/ActivityLog'
+export type * from './models/SystemLog'
 export type * from './models/WebAuthnCredential'
 export type * from './commonInputTypes'

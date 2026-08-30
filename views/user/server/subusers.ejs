@@ -175,10 +175,10 @@ function subusersPage() {
       if (!this.addEmail.trim()) { showToast('Enter the user email.', 'error'); return; }
       this.saving = true;
       try {
-        const result = await api('/server/' + serverId + '/subusers', 'POST', {
+        const result = await api('/api/v2/servers/' + serverId + '/subusers', { method: 'POST', body: {
           email: this.addEmail.trim(),
           permissions: [...this.addPerms]
-        });
+        } });
         if (result) {
           showToast('Subuser added.', 'success');
           this.showAdd = false;
@@ -192,9 +192,9 @@ function subusersPage() {
       if (this.saving || !this.editId) return;
       this.saving = true;
       try {
-        const result = await api('/server/' + serverId + '/subusers/' + this.editId, 'PUT', {
+        const result = await api('/api/v2/servers/' + serverId + '/subusers/' + this.editId, { method: 'PUT', body: {
           permissions: [...this.editPerms]
-        });
+        } });
         if (result) {
           showToast('Permissions updated.', 'success');
           this.showEdit = false;
@@ -211,7 +211,7 @@ function subusersPage() {
         danger: true,
         confirmLabel: 'Remove',
         onConfirm: async () => {
-          const result = await api('/server/' + serverId + '/subusers/' + id, 'DELETE');
+          const result = await api('/api/v2/servers/' + serverId + '/subusers/' + id, { method: 'DELETE' });
           if (result) {
             showToast('Subuser removed.', 'success');
             window.location.reload();

@@ -50,7 +50,7 @@
                   <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>
                 </button>
                 <button
-                  hx-delete="/admin/location/<%= loc.id %>"
+                  hx-delete="/api/v2/admin/locations/<%= loc.id %>"
                   hx-target="#admin-locations-list"
                   hx-swap="outerHTML"
                   hx-confirm="Delete &quot;<%= loc.name %>&quot;? Servers in it will lose their grouping."

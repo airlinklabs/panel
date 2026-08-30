@@ -30,7 +30,11 @@ async function loadServerForUser(
   if (!server) {
     return null;
   }
-  if (server.ownerId === userId || (req.session?.user?.isAdmin ?? false)) {
+  if (
+    server.ownerId === userId ||
+    req.session?.user?.role === "owner" ||
+    req.session?.user?.role === "admin"
+  ) {
     return server;
   }
   const subUser = req.subUser;
@@ -152,12 +156,10 @@ export function registerDatabaseRoutes(router: Router): void {
           return;
         }
         if (host.nodeId !== null && host.nodeId !== server.nodeId) {
-          res
-            .status(403)
-            .json({
-              error:
-                "This database host is not available for this server's node.",
-            });
+          res.status(403).json({
+            error:
+              "This database host is not available for this server's node.",
+          });
           return;
         }
 
@@ -167,11 +169,9 @@ export function registerDatabaseRoutes(router: Router): void {
             where: { serverId: server.UUID },
           });
           if (existing >= databaseLimit) {
-            res
-              .status(400)
-              .json({
-                error: `Database limit reached (${databaseLimit}). Delete an existing database first.`,
-              });
+            res.status(400).json({
+              error: `Database limit reached (${databaseLimit}). Delete an existing database first.`,
+            });
             return;
           }
         }

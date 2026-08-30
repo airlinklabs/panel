@@ -18,6 +18,11 @@ export { Prisma }
 export * as $Enums from './enums'
 export * from './enums';
 /**
+ * Model Role
+ * 
+ */
+export type Role = Prisma.RoleModel
+/**
  * Model Users
  * 
  */
@@ -142,6 +147,11 @@ export type SubUser = Prisma.SubUserModel
  * 
  */
 export type ActivityLog = Prisma.ActivityLogModel
+/**
+ * Model SystemLog
+ * 
+ */
+export type SystemLog = Prisma.SystemLogModel
 /**
  * Model WebAuthnCredential
  * 

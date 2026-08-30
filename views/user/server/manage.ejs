@@ -204,7 +204,7 @@
                 <div class="relative z-10 flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <h2 class="text-[11px] font-medium uppercase tracking-wide" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %></h2>
-                        <p id="server-ip-text" class="mt-0.5 text-[13px] font-medium font-mono tracking-tight break-all" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></p>
+                        <p id="server-ip-text" class="mt-0.5 text-[13px] font-medium font-mono tracking-tight break-all" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= (() => { const ports = JSON.parse(server.Ports); const primary = ports.filter(Port => Port.primary); return (primary.length ? primary : ports).slice(-1)[0]?.externalPort || String((primary.length ? primary : ports).slice(-1)[0]?.Port || '').split(':')[0]; })() %></p>
                     </div>
                     <button type="button" id="copy-ip-btn" title="Copy server address" class="shrink-0 mt-0.5 rounded-lg p-1 transition-colors" style="background:var(--theme-bg-secondary)">
                         <span id="copy-icon"><%- icon('copy', { class: 'h-3 w-3', style: 'color:var(--theme-text-muted)' }) %></span>
@@ -349,7 +349,7 @@
       <div class="rounded-xl px-3 py-2.5 flex items-center gap-2" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm)">
         <%- icon('globe', { class: 'h-4 w-4 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
         <span class="text-[10px] font-medium shrink-0" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %>:</span>
-        <span class="text-xs font-medium font-mono truncate flex-1" id="mobile-server-ip-text" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></span>
+        <span class="text-xs font-medium font-mono truncate flex-1" id="mobile-server-ip-text" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= (() => { const ports = JSON.parse(server.Ports); const primary = ports.filter(Port => Port.primary); return (primary.length ? primary : ports).slice(-1)[0]?.externalPort || String((primary.length ? primary : ports).slice(-1)[0]?.Port || '').split(':')[0]; })() %></span>
         <button type="button" id="mobile-copy-ip-btn" title="Copy server address" class="shrink-0 rounded-md p-1 transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">
           <%- icon('copy', { id: 'mobile-copy-icon', class: 'h-3.5 w-3.5', style: 'color:var(--theme-text-muted)', strokeWidth: 2 }) %>
           <%- icon('check', { id: 'mobile-check-icon', class: 'h-3.5 w-3.5 hidden', style: 'color:var(--theme-success)', strokeWidth: 2.5 }) %>

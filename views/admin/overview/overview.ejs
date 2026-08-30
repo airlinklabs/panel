@@ -197,7 +197,7 @@ function adminOverview() {
       statusDiv.classList.remove('hidden');
 
       try {
-        var response = await fetch('/admin/check-update');
+        var response = await fetch('/api/v2/admin/overview/check-update');
         var data = await response.json();
         var updateBtn = document.getElementById('performUpdateBtn');
         var updateInfo = document.getElementById('updateInfo');
@@ -237,7 +237,7 @@ function adminOverview() {
           statusDiv.innerHTML = '<span class="text-neutral-500">Installing...</span>';
           self.fadeIn(statusDiv);
           try {
-            var response = await fetch('/admin/perform-update', { method: 'POST' });
+            var response = await fetch('/api/v2/admin/overview/perform-update', { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
             var data = await response.json();
             showToast(data.message || 'Update complete. Restarting.', 'success');
             statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';
@@ -255,7 +255,7 @@ function adminOverview() {
     async measureApiLatency() {
       try {
         var start = performance.now();
-        var response = await fetch('/api/v1/ping');
+        var response = await fetch('/api/v2/system/health');
         var latency = Math.round(performance.now() - start);
         if (response.ok) {
           document.getElementById('apiLatency').textContent = latency + ' ms';

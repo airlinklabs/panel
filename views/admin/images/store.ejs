@@ -111,7 +111,7 @@ function imageStore() {
     show("loadingEl"); hide("listEl"); hide("errorEl"); hide("emptyEl");
     var st=document.getElementById("statusText"); if(st)st.textContent="";
     try {
-      var res=await fetch("/admin/images/store/catalogue");
+      var res=await fetch("/api/v2/admin/images/store/catalogue");
       if(!res.ok) throw new Error(res.status);
       var data=await res.json();
       allImages=data.images||[];
@@ -126,9 +126,9 @@ function imageStore() {
     document.getElementById("refreshBtnLoad").disabled=true;
     var st=document.getElementById("statusText"); if(st)st.textContent="Refreshing\u2026";
     var before=0;
-    try { before=(await(await fetch("/admin/images/store/catalogue")).json()).builtAt||0; } catch(e) {}
+    try { before=(await(await fetch("/api/v2/admin/images/store/catalogue")).json()).builtAt||0; } catch(e) {}
     try {
-      var refreshRes=await fetch("/admin/images/store/refresh",{method:"POST"});
+      var refreshRes=await fetch("/api/v2/admin/images/store/refresh",{method:"POST"});
       if(!refreshRes.ok) throw new Error("Refresh failed");
     } catch(e) {
       document.getElementById("refreshBtnLoad").disabled=false;
@@ -138,7 +138,7 @@ function imageStore() {
     }
     for(var i=0;i<60;i++) {
       await new Promise(function(r){setTimeout(r,1000);});
-      try { var cur=(await(await fetch("/admin/images/store/catalogue")).json()).builtAt||0; if(cur!==before)break; } catch(e) {}
+      try { var cur=(await(await fetch("/api/v2/admin/images/store/catalogue")).json()).builtAt||0; if(cur!==before)break; } catch(e) {}
     }
     allImages=[]; show("loadingEl"); hide("listEl"); hide("emptyEl");
     await loadCatalogue();
@@ -230,7 +230,7 @@ function imageStore() {
     var btn=document.getElementById("eggInstallBtn");
     btn.disabled=true; btn.textContent="Installing\u2026"; hide("eggErr");
     try {
-      var res=await fetch("/admin/images/store/install",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(pendingEgg.egg)});
+      var res=await fetch("/api/v2/admin/images/store/install",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(pendingEgg.egg)});
       var body=await res.json();
       if(!res.ok){document.getElementById("eggErrTxt").textContent=body.error||"Installation failed.";show("eggErr");btn.disabled=false;btn.innerHTML="Install";return;}
       var installedName=pendingEgg.name;

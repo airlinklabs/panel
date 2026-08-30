@@ -133,8 +133,8 @@
             loader.updateProgress(20, 'Contacting node...');
             <% if (user && user.isAdmin) { %>
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            fetch('/admin/server/delete/<%= server.id %>', {
-              method: 'POST',
+            fetch('/api/v2/admin/servers/<%= server.id %>', {
+              method: 'DELETE',
               headers: { 'csrf-token': csrfToken },
             })
               .then(r => {
@@ -144,7 +144,7 @@
               })
               .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
             <% } else { %>
-            fetch('/user/server/<%= server.UUID %>', { method: 'DELETE' })
+            fetch('/api/v2/servers/<%= server.UUID %>', { method: 'DELETE' })
               .then(r => r.json())
               .then(d => { loader.close(); if (d.success) window.location.href = '/'; else showToast(d.error || "Couldn't delete the server.", 'error'); })
               .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
@@ -163,7 +163,7 @@
         onConfirm: () => {
           const loader = showProgressToast ? showProgressToast('Reinstalling Server…') : showLoadingToast('Reinstalling Server...');
           loader.updateProgress(10, 'Preparing for reinstallation...');
-          fetch(`/server/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: true }) })
+          fetch(`/api/v2/servers/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: true }) })
             .then(r => r.json())
             .then(data => {
               loader.updateProgress(100, 'Reinstallation initiated!');
@@ -185,7 +185,7 @@
           onConfirm: () => {
                 const loader = showProgressToast ? showProgressToast('Reinstalling Server…') : showLoadingToast('Reinstalling Server...');
             loader.updateProgress(10, 'Preparing for reinstallation...');
-            fetch(`/server/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: false }) })
+            fetch(`/api/v2/servers/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: false }) })
               .then(r => r.json())
               .then(data => {
                 loader.updateProgress(100, 'Reinstallation initiated!');

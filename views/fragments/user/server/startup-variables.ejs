@@ -8,8 +8,8 @@
       this.saving = true;
       const formData = new FormData(this.$refs.form);
       try {
-        const res = await fetch('/server/<%= server.UUID %>/startup/variables', {
-          method: 'POST',
+        const res = await fetch('/api/v2/servers/<%= server.UUID %>/startup/variables', {
+          method: 'PATCH',
           body: formData,
         });
         const data = await res.json();

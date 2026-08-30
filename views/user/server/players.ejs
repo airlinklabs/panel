@@ -224,7 +224,7 @@
           async function refreshPlayers() {
             lastRefresh = Date.now();
             try {
-              const res = await fetch('/server/<%= server.UUID %>/players/data', { headers: { 'Accept': 'application/json' } });
+              const res = await fetch('/api/v2/servers/<%= server.UUID %>/players', { headers: { 'Accept': 'application/json' } });
               if (!res.ok) return;
               const data = await res.json();
               if (data.error) return;

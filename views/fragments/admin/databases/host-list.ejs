@@ -9,7 +9,7 @@
       <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);">Add a MySQL host to start provisioning databases.</p>
       <div class="mt-5">
         <button type="button" class="al-btn-primary"
-          hx-post="/admin/databases/auto-host"
+          hx-post="/api/v2/admin/databases/auto-host"
           hx-target="#admin-databases-list"
           hx-swap="outerHTML"
           hx-indicator="#auto-host-status">
@@ -60,7 +60,7 @@
           <td class="al-table-td">
             <div class="flex gap-3 whitespace-nowrap">
               <button
-                hx-post="/admin/databases/<%= host.id %>/test"
+                hx-post="/api/v2/admin/databases/<%= host.id %>/test"
                 hx-swap="none"
                 hx-indicator="find .htmx-indicator"
                 type="button"
@@ -68,7 +68,7 @@
                 <%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %> Test
               </button>
               <button
-                hx-delete="/admin/databases/<%= host.id %>"
+                hx-delete="/api/v2/admin/databases/<%= host.id %>"
                 hx-target="#admin-databases-list"
                 hx-swap="outerHTML"
                 hx-confirm="This will permanently remove the database host. This cannot be undone."

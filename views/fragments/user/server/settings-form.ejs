@@ -8,8 +8,8 @@
     async save() {
       this.saving = true;
       try {
-        const res = await fetch('/server/<%= server.UUID %>/settings', {
-          method: 'POST',
+        const res = await fetch('/api/v2/servers/<%= server.UUID %>/settings', {
+          method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: this.name, description: this.description }),
         });

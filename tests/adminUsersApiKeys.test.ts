@@ -76,6 +76,7 @@ const sha256 = (value: string) =>
 const adminUser = {
   id: 1,
   isAdmin: true,
+  role: "admin",
   totpEnabled: true,
   username: "admin",
   email: "admin@air.link",
@@ -84,6 +85,7 @@ const adminUser = {
 const otherAdmin = {
   id: 3,
   isAdmin: true,
+  role: "admin",
   totpEnabled: true,
   username: "boss",
   email: "boss@air.link",
@@ -92,6 +94,7 @@ const otherAdmin = {
 const regularUser = {
   id: 2,
   isAdmin: false,
+  role: "user",
   totpEnabled: true,
   username: "player",
   email: "player@air.link",

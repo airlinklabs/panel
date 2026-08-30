@@ -239,7 +239,7 @@ async function confirmCreateBackup() {
   }) : window.showLoadingToast('Creating backup...');
 
   try {
-    const response = await fetch(`/server/${serverUUID}/backups/create`, {
+    const response = await fetch(`/api/v2/servers/${serverUUID}/backups`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -284,7 +284,7 @@ function restoreBackup(backupId, backupName) {
       }) : window.showLoadingToast('Restoring backup...');
 
       try {
-        const response = await fetch(`/server/${serverUUID}/backups/${backupId}/restore`, {
+        const response = await fetch(`/api/v2/servers/${serverUUID}/backups/${backupId}/restore`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -384,7 +384,7 @@ function addBackupRow(backup) {
 // Toggle backup lock
 async function toggleBackupLock(backupId, backupName, currentlyLocked) {
   try {
-    const response = await fetch(`/server/${serverUUID}/backups/${backupId}/lock`, {
+    const response = await fetch(`/api/v2/servers/${serverUUID}/backups/${backupId}/lock`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -455,7 +455,7 @@ function deleteBackup(backupId, backupName) {  showConfirmation(
     `Are you sure you want to delete the backup "${backupName}"? This action cannot be undone.`,
     async () => {
       try {
-        const response = await fetch(`/server/${serverUUID}/backups/${backupId}`, {
+        const response = await fetch(`/api/v2/servers/${serverUUID}/backups/${backupId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',

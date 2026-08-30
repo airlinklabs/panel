@@ -48,7 +48,7 @@ function mountCreate() {
       }
       this.saving = true;
       try {
-        const res = await fetch('/admin/mounts', {
+        const res = await fetch('/api/v2/admin/mounts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
           body: JSON.stringify(this.form),

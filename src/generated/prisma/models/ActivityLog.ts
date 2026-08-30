@@ -41,6 +41,8 @@ export type ActivityLogMinAggregateOutputType = {
   actorId: number | null
   serverId: string | null
   event: string | null
+  category: string | null
+  severity: string | null
   metadata: string | null
   ip: string | null
   createdAt: Date | null
@@ -51,6 +53,8 @@ export type ActivityLogMaxAggregateOutputType = {
   actorId: number | null
   serverId: string | null
   event: string | null
+  category: string | null
+  severity: string | null
   metadata: string | null
   ip: string | null
   createdAt: Date | null
@@ -61,6 +65,8 @@ export type ActivityLogCountAggregateOutputType = {
   actorId: number
   serverId: number
   event: number
+  category: number
+  severity: number
   metadata: number
   ip: number
   createdAt: number
@@ -83,6 +89,8 @@ export type ActivityLogMinAggregateInputType = {
   actorId?: true
   serverId?: true
   event?: true
+  category?: true
+  severity?: true
   metadata?: true
   ip?: true
   createdAt?: true
@@ -93,6 +101,8 @@ export type ActivityLogMaxAggregateInputType = {
   actorId?: true
   serverId?: true
   event?: true
+  category?: true
+  severity?: true
   metadata?: true
   ip?: true
   createdAt?: true
@@ -103,6 +113,8 @@ export type ActivityLogCountAggregateInputType = {
   actorId?: true
   serverId?: true
   event?: true
+  category?: true
+  severity?: true
   metadata?: true
   ip?: true
   createdAt?: true
@@ -200,6 +212,8 @@ export type ActivityLogGroupByOutputType = {
   actorId: number | null
   serverId: string | null
   event: string
+  category: string
+  severity: string
   metadata: string | null
   ip: string | null
   createdAt: Date
@@ -233,6 +247,8 @@ export type ActivityLogWhereInput = {
   actorId?: Prisma.IntNullableFilter<"ActivityLog"> | number | null
   serverId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   event?: Prisma.StringFilter<"ActivityLog"> | string
+  category?: Prisma.StringFilter<"ActivityLog"> | string
+  severity?: Prisma.StringFilter<"ActivityLog"> | string
   metadata?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   ip?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
@@ -245,6 +261,8 @@ export type ActivityLogOrderByWithRelationInput = {
   actorId?: Prisma.SortOrderInput | Prisma.SortOrder
   serverId?: Prisma.SortOrderInput | Prisma.SortOrder
   event?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   ip?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -260,6 +278,8 @@ export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
   actorId?: Prisma.IntNullableFilter<"ActivityLog"> | number | null
   serverId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   event?: Prisma.StringFilter<"ActivityLog"> | string
+  category?: Prisma.StringFilter<"ActivityLog"> | string
+  severity?: Prisma.StringFilter<"ActivityLog"> | string
   metadata?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   ip?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
@@ -272,6 +292,8 @@ export type ActivityLogOrderByWithAggregationInput = {
   actorId?: Prisma.SortOrderInput | Prisma.SortOrder
   serverId?: Prisma.SortOrderInput | Prisma.SortOrder
   event?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   ip?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -290,6 +312,8 @@ export type ActivityLogScalarWhereWithAggregatesInput = {
   actorId?: Prisma.IntNullableWithAggregatesFilter<"ActivityLog"> | number | null
   serverId?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
   event?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
+  category?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
+  severity?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
   metadata?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
   ip?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
@@ -297,6 +321,8 @@ export type ActivityLogScalarWhereWithAggregatesInput = {
 
 export type ActivityLogCreateInput = {
   event: string
+  category?: string
+  severity?: string
   metadata?: string | null
   ip?: string | null
   createdAt?: Date | string
@@ -309,6 +335,8 @@ export type ActivityLogUncheckedCreateInput = {
   actorId?: number | null
   serverId?: string | null
   event: string
+  category?: string
+  severity?: string
   metadata?: string | null
   ip?: string | null
   createdAt?: Date | string
@@ -316,6 +344,8 @@ export type ActivityLogUncheckedCreateInput = {
 
 export type ActivityLogUpdateInput = {
   event?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -328,6 +358,8 @@ export type ActivityLogUncheckedUpdateInput = {
   actorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -338,6 +370,8 @@ export type ActivityLogCreateManyInput = {
   actorId?: number | null
   serverId?: string | null
   event: string
+  category?: string
+  severity?: string
   metadata?: string | null
   ip?: string | null
   createdAt?: Date | string
@@ -345,6 +379,8 @@ export type ActivityLogCreateManyInput = {
 
 export type ActivityLogUpdateManyMutationInput = {
   event?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -355,6 +391,8 @@ export type ActivityLogUncheckedUpdateManyInput = {
   actorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -375,6 +413,8 @@ export type ActivityLogCountOrderByAggregateInput = {
   actorId?: Prisma.SortOrder
   serverId?: Prisma.SortOrder
   event?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
   ip?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -390,6 +430,8 @@ export type ActivityLogMaxOrderByAggregateInput = {
   actorId?: Prisma.SortOrder
   serverId?: Prisma.SortOrder
   event?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
   ip?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -400,6 +442,8 @@ export type ActivityLogMinOrderByAggregateInput = {
   actorId?: Prisma.SortOrder
   serverId?: Prisma.SortOrder
   event?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
   ip?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -496,6 +540,8 @@ export type ActivityLogUncheckedUpdateManyWithoutServerNestedInput = {
 
 export type ActivityLogCreateWithoutActorInput = {
   event: string
+  category?: string
+  severity?: string
   metadata?: string | null
   ip?: string | null
   createdAt?: Date | string
@@ -506,6 +552,8 @@ export type ActivityLogUncheckedCreateWithoutActorInput = {
   id?: number
   serverId?: string | null
   event: string
+  category?: string
+  severity?: string
   metadata?: string | null
   ip?: string | null
   createdAt?: Date | string
@@ -545,6 +593,8 @@ export type ActivityLogScalarWhereInput = {
   actorId?: Prisma.IntNullableFilter<"ActivityLog"> | number | null
   serverId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   event?: Prisma.StringFilter<"ActivityLog"> | string
+  category?: Prisma.StringFilter<"ActivityLog"> | string
+  severity?: Prisma.StringFilter<"ActivityLog"> | string
   metadata?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   ip?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
@@ -552,6 +602,8 @@ export type ActivityLogScalarWhereInput = {
 
 export type ActivityLogCreateWithoutServerInput = {
   event: string
+  category?: string
+  severity?: string
   metadata?: string | null
   ip?: string | null
   createdAt?: Date | string
@@ -562,6 +614,8 @@ export type ActivityLogUncheckedCreateWithoutServerInput = {
   id?: number
   actorId?: number | null
   event: string
+  category?: string
+  severity?: string
   metadata?: string | null
   ip?: string | null
   createdAt?: Date | string
@@ -597,6 +651,8 @@ export type ActivityLogCreateManyActorInput = {
   id?: number
   serverId?: string | null
   event: string
+  category?: string
+  severity?: string
   metadata?: string | null
   ip?: string | null
   createdAt?: Date | string
@@ -604,6 +660,8 @@ export type ActivityLogCreateManyActorInput = {
 
 export type ActivityLogUpdateWithoutActorInput = {
   event?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -614,6 +672,8 @@ export type ActivityLogUncheckedUpdateWithoutActorInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -623,6 +683,8 @@ export type ActivityLogUncheckedUpdateManyWithoutActorInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -632,6 +694,8 @@ export type ActivityLogCreateManyServerInput = {
   id?: number
   actorId?: number | null
   event: string
+  category?: string
+  severity?: string
   metadata?: string | null
   ip?: string | null
   createdAt?: Date | string
@@ -639,6 +703,8 @@ export type ActivityLogCreateManyServerInput = {
 
 export type ActivityLogUpdateWithoutServerInput = {
   event?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -649,6 +715,8 @@ export type ActivityLogUncheckedUpdateWithoutServerInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   actorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   event?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -658,6 +726,8 @@ export type ActivityLogUncheckedUpdateManyWithoutServerInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   actorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   event?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ip?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -670,6 +740,8 @@ export type ActivityLogSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   actorId?: boolean
   serverId?: boolean
   event?: boolean
+  category?: boolean
+  severity?: boolean
   metadata?: boolean
   ip?: boolean
   createdAt?: boolean
@@ -682,6 +754,8 @@ export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   actorId?: boolean
   serverId?: boolean
   event?: boolean
+  category?: boolean
+  severity?: boolean
   metadata?: boolean
   ip?: boolean
   createdAt?: boolean
@@ -694,6 +768,8 @@ export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   actorId?: boolean
   serverId?: boolean
   event?: boolean
+  category?: boolean
+  severity?: boolean
   metadata?: boolean
   ip?: boolean
   createdAt?: boolean
@@ -706,12 +782,14 @@ export type ActivityLogSelectScalar = {
   actorId?: boolean
   serverId?: boolean
   event?: boolean
+  category?: boolean
+  severity?: boolean
   metadata?: boolean
   ip?: boolean
   createdAt?: boolean
 }
 
-export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "actorId" | "serverId" | "event" | "metadata" | "ip" | "createdAt", ExtArgs["result"]["activityLog"]>
+export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "actorId" | "serverId" | "event" | "category" | "severity" | "metadata" | "ip" | "createdAt", ExtArgs["result"]["activityLog"]>
 export type ActivityLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   actor?: boolean | Prisma.ActivityLog$actorArgs<ExtArgs>
   server?: boolean | Prisma.ActivityLog$serverArgs<ExtArgs>
@@ -736,6 +814,8 @@ export type $ActivityLogPayload<ExtArgs extends runtime.Types.Extensions.Interna
     actorId: number | null
     serverId: string | null
     event: string
+    category: string
+    severity: string
     metadata: string | null
     ip: string | null
     createdAt: Date
@@ -1168,6 +1248,8 @@ export interface ActivityLogFieldRefs {
   readonly actorId: Prisma.FieldRef<"ActivityLog", 'Int'>
   readonly serverId: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly event: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly category: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly severity: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly metadata: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly ip: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly createdAt: Prisma.FieldRef<"ActivityLog", 'DateTime'>

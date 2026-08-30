@@ -286,7 +286,7 @@ function createServerPage() {
         var ok = await showConfirm('Create server?', '"' + name + '" will be created and queued for installation. This may take a moment.');
         if (!ok) { btn.disabled = false; btn.textContent = origText; return; }
         try {
-          var r = await fetch('/create-server', {
+          var r = await fetch('/api/v2/servers', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: name, description: description, nodeId: nodeId, imageId: imageId, dockerImage: dockerImage, Memory: mem, Cpu: cpu, Storage: storage, Swap: swap, ports: portsState }),

@@ -31,6 +31,10 @@
  *
  * Radar:
  *   POST   /api/v2/admin/radar/scan/:serverId
+ *   GET    /api/v2/admin/radar/virustotal-enabled
+ *   GET    /api/v2/admin/radar/scripts
+ *   POST   /api/v2/admin/radar/vtscan/:serverId
+ *   POST   /api/v2/admin/radar/virustotal
  *
  * Analytics:
  *   GET    /api/v2/admin/analytics/summary
@@ -40,51 +44,60 @@
  *   POST   /api/v2/admin/playerstats/collect
  */
 
-import { Router } from 'express';
-import prisma from '../../../../db';
-import { parseBody } from '../../../../utils/validation';
-import { jsonOk, jsonError, requireAdmin, logActivity } from '../helpers';
+import { Router } from "express";
+import prisma from "../../../../db";
+import { parseBody } from "../../../../utils/validation";
+import { jsonOk, jsonError, requireAdmin, logActivity } from "../helpers";
 import {
   adminCreateLocationBody,
   adminUpdateLocationBody,
   adminCreateMountBody,
   adminCreateApiKeyBody,
   adminUpdateApiKeyBody,
-} from '../dto';
+} from "../dto";
+import { getSettings } from "../../../../handlers/settingsCache";
+import logger from "../../../../handlers/logger";
+import fs from "fs/promises";
+import path from "path";
+import { httpGet } from "../../../../utils/http";
+import { getSystemLogs } from "../../../../services/systemLogService";
 
 const router = Router();
 
 router.use(async (req, res, next) => {
   const admin = await requireAdmin(req, res);
-  if (!admin) {return;}
-  (req as any).adminUser = admin;
+  if (!admin) {
+    return;
+  }
+  req.adminUser = admin;
   next();
 });
 
 // ======================== LOCATIONS ========================
 
-router.get('/locations', async (_req, res) => {
+router.get("/locations", async (_req, res) => {
   const locations = await prisma.location.findMany({
     include: { _count: { select: { nodes: true } } },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
   jsonOk(res, locations);
 });
 
 router.post(
-  '/locations',
+  "/locations",
   parseBody(adminCreateLocationBody),
   async (req, res) => {
     const data = req.validatedBody as any;
     const existing = await prisma.location.findUnique({
       where: { shortCode: data.shortCode },
     });
-    if (existing)
-    {return jsonError(res, 'CONFLICT', 'Short code already in use', 409);}
+    if (existing) {
+      return jsonError(res, "CONFLICT", "Short code already in use", 409);
+    }
     const location = await prisma.location.create({ data });
     logActivity(
-      (req as any).adminUser?.id,
-      'location.created',
+      req.adminUser?.id,
+      "location.created",
       undefined,
       { name: location.name },
       req.ip,
@@ -94,43 +107,53 @@ router.post(
 );
 
 router.put(
-  '/locations/:id',
+  "/locations/:id",
   parseBody(adminUpdateLocationBody),
   async (req, res) => {
     const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+    if (isNaN(id)) {
+      return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+    }
     const existing = await prisma.location.findUnique({ where: { id } });
-    if (!existing) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+    if (!existing) {
+      return jsonError(res, "NOT_FOUND", "Not found", 404);
+    }
     const data = req.validatedBody as any;
     if (data.shortCode) {
       const dup = await prisma.location.findUnique({
         where: { shortCode: data.shortCode },
       });
-      if (dup && dup.id !== id)
-      {return jsonError(res, 'CONFLICT', 'Short code already in use', 409);}
+      if (dup && dup.id !== id) {
+        return jsonError(res, "CONFLICT", "Short code already in use", 409);
+      }
     }
     const updated = await prisma.location.update({ where: { id }, data });
     jsonOk(res, updated);
   },
 );
 
-router.delete('/locations/:id', async (req, res) => {
+router.delete("/locations/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
-  if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+  }
   const location = await prisma.location.findUnique({ where: { id } });
-  if (!location) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+  if (!location) {
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
+  }
   const nodeCount = await prisma.node.count({ where: { locationId: id } });
-  if (nodeCount > 0)
-  {return jsonError(
-    res,
-    'CONFLICT',
-    `Cannot delete location with ${nodeCount} nodes`,
-    409,
-  );}
+  if (nodeCount > 0) {
+    return jsonError(
+      res,
+      "CONFLICT",
+      `Cannot delete location with ${nodeCount} nodes`,
+      409,
+    );
+  }
   await prisma.location.delete({ where: { id } });
   logActivity(
-    (req as any).adminUser?.id,
-    'location.deleted',
+    req.adminUser?.id,
+    "location.deleted",
     undefined,
     { name: location.name },
     req.ip,
@@ -140,20 +163,20 @@ router.delete('/locations/:id', async (req, res) => {
 
 // ======================== MOUNTS ========================
 
-router.get('/mounts', async (_req, res) => {
+router.get("/mounts", async (_req, res) => {
   const mounts = await prisma.mount.findMany({
     include: { _count: { select: { servers: true } } },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
   jsonOk(res, mounts);
 });
 
-router.post('/mounts', parseBody(adminCreateMountBody), async (req, res) => {
+router.post("/mounts", parseBody(adminCreateMountBody), async (req, res) => {
   const data = req.validatedBody as any;
   const mount = await prisma.mount.create({ data });
   logActivity(
-    (req as any).adminUser?.id,
-    'mount.created',
+    req.adminUser?.id,
+    "mount.created",
     undefined,
     { name: mount.name },
     req.ip,
@@ -161,25 +184,30 @@ router.post('/mounts', parseBody(adminCreateMountBody), async (req, res) => {
   jsonOk(res, mount);
 });
 
-router.delete('/mounts/:id', async (req, res) => {
+router.delete("/mounts/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
-  if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+  }
   const mount = await prisma.mount.findUnique({ where: { id } });
-  if (!mount) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+  if (!mount) {
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
+  }
   const serverCount = await prisma.serverMount.count({
     where: { mountId: id },
   });
-  if (serverCount > 0)
-  {return jsonError(
-    res,
-    'CONFLICT',
-    `Cannot delete mount used by ${serverCount} servers`,
-    409,
-  );}
+  if (serverCount > 0) {
+    return jsonError(
+      res,
+      "CONFLICT",
+      `Cannot delete mount used by ${serverCount} servers`,
+      409,
+    );
+  }
   await prisma.mount.delete({ where: { id } });
   logActivity(
-    (req as any).adminUser?.id,
-    'mount.deleted',
+    req.adminUser?.id,
+    "mount.deleted",
     undefined,
     { name: mount.name },
     req.ip,
@@ -189,7 +217,7 @@ router.delete('/mounts/:id', async (req, res) => {
 
 // ======================== API KEYS ========================
 
-router.get('/apikeys', async (_req, res) => {
+router.get("/apikeys", async (_req, res) => {
   const keys = await prisma.apiKey.findMany({
     select: {
       id: true,
@@ -200,15 +228,15 @@ router.get('/apikeys', async (_req, res) => {
       createdAt: true,
       updatedAt: true,
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
   jsonOk(res, keys);
 });
 
-router.post('/apikeys', parseBody(adminCreateApiKeyBody), async (req, res) => {
+router.post("/apikeys", parseBody(adminCreateApiKeyBody), async (req, res) => {
   const data = req.validatedBody as any;
-  const crypto = await import('crypto');
-  const key = crypto.randomBytes(48).toString('base64url');
+  const crypto = await import("crypto");
+  const key = crypto.randomBytes(48).toString("base64url");
   const apiKey = await prisma.apiKey.create({
     data: {
       name: data.name,
@@ -227,8 +255,8 @@ router.post('/apikeys', parseBody(adminCreateApiKeyBody), async (req, res) => {
     },
   });
   logActivity(
-    (req as any).adminUser?.id,
-    'apikey.created',
+    req.adminUser?.id,
+    "apikey.created",
     undefined,
     { name: data.name },
     req.ip,
@@ -237,21 +265,31 @@ router.post('/apikeys', parseBody(adminCreateApiKeyBody), async (req, res) => {
 });
 
 router.put(
-  '/apikeys/:id',
+  "/apikeys/:id",
   parseBody(adminUpdateApiKeyBody),
   async (req, res) => {
     const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+    if (isNaN(id)) {
+      return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+    }
     const existing = await prisma.apiKey.findUnique({ where: { id } });
-    if (!existing) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+    if (!existing) {
+      return jsonError(res, "NOT_FOUND", "Not found", 404);
+    }
     const data = req.validatedBody as any;
     const updateData: Record<string, unknown> = {};
-    if (data.name !== undefined) {updateData.name = data.name;}
-    if (data.description !== undefined)
-    {updateData.description = data.description;}
-    if (data.permissions !== undefined)
-    {updateData.permissions = JSON.stringify(data.permissions);}
-    if (data.active !== undefined) {updateData.active = data.active;}
+    if (data.name !== undefined) {
+      updateData.name = data.name;
+    }
+    if (data.description !== undefined) {
+      updateData.description = data.description;
+    }
+    if (data.permissions !== undefined) {
+      updateData.permissions = JSON.stringify(data.permissions);
+    }
+    if (data.active !== undefined) {
+      updateData.active = data.active;
+    }
     const updated = await prisma.apiKey.update({
       where: { id },
       data: updateData,
@@ -267,15 +305,19 @@ router.put(
   },
 );
 
-router.delete('/apikeys/:id', async (req, res) => {
+router.delete("/apikeys/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
-  if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+  }
   const existing = await prisma.apiKey.findUnique({ where: { id } });
-  if (!existing) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+  if (!existing) {
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
+  }
   await prisma.apiKey.delete({ where: { id } });
   logActivity(
-    (req as any).adminUser?.id,
-    'apikey.deleted',
+    req.adminUser?.id,
+    "apikey.deleted",
     undefined,
     { name: existing.name },
     req.ip,
@@ -283,11 +325,15 @@ router.delete('/apikeys/:id', async (req, res) => {
   jsonOk(res, { deleted: id });
 });
 
-router.post('/apikeys/:id/toggle', async (req, res) => {
+router.post("/apikeys/:id/toggle", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
-  if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+  }
   const existing = await prisma.apiKey.findUnique({ where: { id } });
-  if (!existing) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+  if (!existing) {
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
+  }
   const updated = await prisma.apiKey.update({
     where: { id },
     data: { active: !existing.active },
@@ -298,25 +344,27 @@ router.post('/apikeys/:id/toggle', async (req, res) => {
 
 // ======================== ADDONS ========================
 
-router.get('/addons', async (_req, res) => {
+router.get("/addons", async (_req, res) => {
   const addons = await prisma.addon.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
   jsonOk(res, addons);
 });
 
-router.post('/addons/:slug/toggle', async (req, res) => {
+router.post("/addons/:slug/toggle", async (req, res) => {
   const addon = await prisma.addon.findUnique({
     where: { slug: String(req.params.slug) },
   });
-  if (!addon) {return jsonError(res, 'NOT_FOUND', 'Addon not found', 404);}
+  if (!addon) {
+    return jsonError(res, "NOT_FOUND", "Addon not found", 404);
+  }
   const updated = await prisma.addon.update({
     where: { slug: addon.slug },
     data: { enabled: !addon.enabled },
   });
   logActivity(
-    (req as any).adminUser?.id,
-    'addon.toggled',
+    req.adminUser?.id,
+    "addon.toggled",
     undefined,
     { slug: addon.slug, enabled: updated.enabled },
     req.ip,
@@ -324,14 +372,16 @@ router.post('/addons/:slug/toggle', async (req, res) => {
   jsonOk(res, updated);
 });
 
-router.post('/addons/:slug/reload', async (req, res) => {
+router.post("/addons/:slug/reload", async (req, res) => {
   const addon = await prisma.addon.findUnique({
     where: { slug: String(req.params.slug) },
   });
-  if (!addon) {return jsonError(res, 'NOT_FOUND', 'Addon not found', 404);}
+  if (!addon) {
+    return jsonError(res, "NOT_FOUND", "Addon not found", 404);
+  }
   logActivity(
-    (req as any).adminUser?.id,
-    'addon.reloaded',
+    req.adminUser?.id,
+    "addon.reloaded",
     undefined,
     { slug: addon.slug },
     req.ip,
@@ -339,16 +389,18 @@ router.post('/addons/:slug/reload', async (req, res) => {
   jsonOk(res, { reloaded: addon.slug });
 });
 
-router.post('/addons/:slug/uninstall', async (req, res) => {
+router.post("/addons/:slug/uninstall", async (req, res) => {
   const addon = await prisma.addon.findUnique({
     where: { slug: String(req.params.slug) },
   });
-  if (!addon) {return jsonError(res, 'NOT_FOUND', 'Addon not found', 404);}
+  if (!addon) {
+    return jsonError(res, "NOT_FOUND", "Addon not found", 404);
+  }
   await prisma.addon.delete({ where: { slug: addon.slug } });
   await prisma.addonSetting.deleteMany({ where: { addonSlug: addon.slug } });
   logActivity(
-    (req as any).adminUser?.id,
-    'addon.uninstalled',
+    req.adminUser?.id,
+    "addon.uninstalled",
     undefined,
     { slug: addon.slug },
     req.ip,
@@ -358,21 +410,23 @@ router.post('/addons/:slug/uninstall', async (req, res) => {
 
 // ======================== OVERVIEW ========================
 
-router.get('/overview/check-update', async (_req, res) => {
+router.get("/overview/check-update", async (_req, res) => {
   try {
     const response = await fetch(
-      'https://api.github.com/repos/airlinklabs/panel/releases/latest',
+      "https://api.github.com/repos/airlinklabs/panel/releases/latest",
       {
         signal: AbortSignal.timeout(10000),
       },
     );
-    if (!response.ok) {return jsonOk(res, { updateAvailable: false });}
+    if (!response.ok) {
+      return jsonOk(res, { updateAvailable: false });
+    }
     const release = (await response.json()) as {
       tag_name?: string;
       name?: string;
     };
-    const currentVersion = process.env.AIRLINK_VERSION ?? '2.0.0';
-    const latestVersion = release.tag_name ?? 'unknown';
+    const currentVersion = process.env.AIRLINK_VERSION ?? "2.0.0";
+    const latestVersion = release.tag_name ?? "unknown";
     jsonOk(res, {
       updateAvailable: currentVersion !== latestVersion,
       currentVersion,
@@ -382,52 +436,390 @@ router.get('/overview/check-update', async (_req, res) => {
   } catch {
     jsonOk(res, {
       updateAvailable: false,
-      error: 'Could not check for updates',
+      error: "Could not check for updates",
     });
   }
 });
 
-router.post('/overview/perform-update', async (req, res) => {
+router.post("/overview/perform-update", async (req, res) => {
   try {
-    const { execSync } = await import('child_process');
-    execSync('git pull && npm install && npm run build', {
+    const { execSync } = await import("child_process");
+    execSync("git pull && npm install && npm run build", {
       cwd: process.cwd(),
       timeout: 120000,
     });
-    logActivity(
-      (req as any).adminUser?.id,
-      'system.updated',
-      undefined,
-      {},
-      req.ip,
-    );
+    logActivity(req.adminUser?.id, "system.updated", undefined, {}, req.ip);
     jsonOk(res, { updated: true });
   } catch (err) {
-    jsonError(res, 'UPDATE_FAILED', `Update failed: ${String(err)}`, 500);
+    jsonError(res, "UPDATE_FAILED", `Update failed: ${String(err)}`, 500);
   }
 });
 
 // ======================== RADAR ========================
 
-router.post('/radar/scan/:serverId', async (req, res) => {
+router.post("/radar/scan/:serverId", async (req, res) => {
   const serverId = parseInt(String(req.params.serverId), 10);
-  if (isNaN(serverId))
-  {return jsonError(res, 'BAD_REQUEST', 'Invalid server ID', 400);}
+  if (isNaN(serverId)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid server ID", 400);
+  }
   const server = await prisma.server.findUnique({ where: { id: serverId } });
-  if (!server) {return jsonError(res, 'NOT_FOUND', 'Server not found', 404);}
-  logActivity(
-    (req as any).adminUser?.id,
-    'radar.scan',
-    server.UUID,
-    {},
-    req.ip,
-  );
+  if (!server) {
+    return jsonError(res, "NOT_FOUND", "Server not found", 404);
+  }
+  logActivity(req.adminUser?.id, "radar.scan", server.UUID, {}, req.ip);
   jsonOk(res, { scanRequested: true, serverId });
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/v2/admin/radar/virustotal-enabled — VT status check
+// ---------------------------------------------------------------------------
+router.get("/radar/virustotal-enabled", async (_req, res) => {
+  try {
+    const settings = await getSettings();
+    jsonOk(res, { enabled: !!settings?.virusTotalApiKey });
+  } catch {
+    jsonOk(res, { enabled: false });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/v2/admin/radar/scripts — List radar scan scripts
+// ---------------------------------------------------------------------------
+router.get("/radar/scripts", async (_req, res) => {
+  try {
+    const radarDir = path.join(__dirname, "../../../../storage/radar");
+
+    try {
+      await fs.access(radarDir);
+    } catch {
+      await fs.mkdir(radarDir, { recursive: true });
+    }
+
+    const files = await fs.readdir(radarDir);
+    const scripts = await Promise.all(
+      files
+        .filter((file) => file.endsWith(".json"))
+        .map(async (file) => {
+          const content = await fs.readFile(path.join(radarDir, file), "utf-8");
+          try {
+            const scriptData = JSON.parse(content);
+            return {
+              id: file.replace(".json", ""),
+              name: scriptData.name || file,
+              description: scriptData.description || "",
+              version: scriptData.version || "1.0.0",
+              filename: file,
+            };
+          } catch {
+            return {
+              id: file.replace(".json", ""),
+              name: file,
+              description: "Invalid script format",
+              version: "unknown",
+              filename: file,
+            };
+          }
+        }),
+    );
+
+    jsonOk(res, scripts);
+  } catch (error: unknown) {
+    logger.error("Error fetching radar scripts:", error);
+    jsonError(res, "SCRIPTS_ERROR", "Failed to fetch radar scripts", 500);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/v2/admin/radar/vtscan/:serverId — VT file scan
+// ---------------------------------------------------------------------------
+router.post("/radar/vtscan/:serverId", async (req, res) => {
+  const settings = await getSettings();
+  const apiKey = settings?.virusTotalApiKey;
+
+  if (!apiKey) {
+    return jsonError(
+      res,
+      "VT_NOT_CONFIGURED",
+      "VirusTotal API key is not configured. Add it in Admin Settings.",
+      503,
+    );
+  }
+
+  const serverId = parseInt(String(req.params.serverId), 10);
+  if (isNaN(serverId)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid server ID", 400);
+  }
+
+  const server = await prisma.server.findUnique({
+    where: { id: serverId },
+    include: { node: true },
+  });
+  if (!server) {
+    return jsonError(res, "NOT_FOUND", "Server not found", 404);
+  }
+
+  try {
+    const { default: fsSync } = await import("fs");
+    const { default: pathMod } = await import("path");
+
+    const tmpPath = pathMod.join(
+      "/tmp",
+      `vtscan-${server.UUID}-${Date.now()}.zip`,
+    );
+
+    // Import daemonRequest from the services layer
+    const { daemonRequest } =
+      await import("../../../../services/daemonService");
+
+    const zipResponse = await daemonRequest(server.UUID, "/radar/zip", {
+      method: "POST",
+      body: {
+        id: server.UUID,
+        include: ["plugins", "mods", "config", "addons", "datapacks"],
+        exclude: [
+          "world",
+          "world_nether",
+          "world_the_end",
+          "logs",
+          "cache",
+          "crash-reports",
+        ],
+        maxFileSizeMb: 32,
+      },
+      timeout: 120000,
+    });
+
+    if (!zipResponse.ok) {
+      return jsonError(
+        res,
+        "DAEMON_ERROR",
+        `Daemon returned ${zipResponse.status}`,
+        502,
+      );
+    }
+
+    const buffer = Buffer.from(await zipResponse.arrayBuffer());
+    fsSync.writeFileSync(tmpPath, buffer);
+
+    const stat = fsSync.statSync(tmpPath);
+    if (stat.size > 32 * 1024 * 1024) {
+      fsSync.unlinkSync(tmpPath);
+      return jsonError(
+        res,
+        "FILE_TOO_LARGE",
+        "Zipped server files exceed 32 MB — VT free tier limit.",
+        413,
+      );
+    }
+
+    const fileBuffer = fsSync.readFileSync(tmpPath);
+    const boundary = `----FormBoundary${Math.random().toString(36).slice(2)}`;
+    const fileName = `${server.name}-scan.zip`;
+
+    const formBody = Buffer.concat([
+      Buffer.from(
+        `--${boundary}\r\n` +
+          `Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n` +
+          "Content-Type: application/zip\r\n\r\n",
+      ),
+      fileBuffer,
+      Buffer.from(`\r\n--${boundary}--\r\n`),
+    ]);
+
+    const { httpPost } = await import("../../../../utils/http");
+
+    const uploadResponse = await httpPost<Record<string, unknown>>(
+      "https://www.virustotal.com/api/v3/files",
+      formBody,
+      {
+        headers: {
+          "Content-Type": `multipart/form-data; boundary=${boundary}`,
+          "x-apikey": apiKey,
+        },
+        timeout: 90000,
+      },
+    );
+
+    fsSync.unlinkSync(tmpPath);
+
+    if (uploadResponse.status !== 200 && uploadResponse.status !== 409) {
+      return jsonError(
+        res,
+        "VT_ERROR",
+        `VT returned status ${uploadResponse.status}`,
+        502,
+      );
+    }
+
+    const vtUploadData = uploadResponse.data as {
+      data?: { id?: string };
+    };
+    const analysisId = vtUploadData?.data?.id;
+    if (!analysisId) {
+      return jsonError(
+        res,
+        "VT_ERROR",
+        "VT did not return an analysis ID",
+        502,
+      );
+    }
+
+    // Poll VT up to 8 times, 20s apart
+    let analysisData: Record<string, unknown> | null = null;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      await new Promise((r) => setTimeout(r, 20000));
+
+      const pollResponse = await httpGet<Record<string, unknown>>(
+        `https://www.virustotal.com/api/v3/analyses/${analysisId}`,
+        { headers: { "x-apikey": apiKey }, timeout: 15000 },
+      );
+
+      const pollData = pollResponse.data as Record<string, unknown> | undefined;
+      const status = (
+        (pollData?.data as Record<string, unknown> | undefined)?.attributes as
+          Record<string, unknown> | undefined
+      )?.status;
+      if (status === "completed") {
+        analysisData = pollResponse.data;
+        break;
+      }
+    }
+
+    if (!analysisData) {
+      return jsonOk(res, {
+        pending: true,
+        analysisId,
+        vtLink: "https://www.virustotal.com/gui/home/upload",
+      });
+    }
+
+    const meta = analysisData.meta as Record<string, unknown> | undefined;
+    const fileInfo = meta?.file_info as Record<string, unknown> | undefined;
+    const sha256 = fileInfo?.sha256 as string | undefined;
+    const vtLink = sha256
+      ? `https://www.virustotal.com/gui/file/${sha256}`
+      : "https://www.virustotal.com/gui/home/upload";
+
+    const dataAttrs = (analysisData.data as Record<string, unknown>)
+      ?.attributes as Record<string, unknown> | undefined;
+    const results = (dataAttrs?.results || {}) as Record<
+      string,
+      Record<string, unknown>
+    >;
+    const stats = (dataAttrs?.stats || {}) as Record<string, number>;
+    const maliciousEngines = Object.entries(results)
+      .filter(
+        ([, v]) => v.category === "malicious" || v.category === "suspicious",
+      )
+      .map(([engine, v]) => ({ engine, result: v.result }));
+
+    jsonOk(res, {
+      pending: false,
+      serverName: server.name,
+      maliciousEngines,
+      stats,
+      totalEngines: Object.keys(results).length,
+      vtLink,
+    });
+  } catch (error: unknown) {
+    logger.error(
+      "VT file scan error:",
+      error instanceof Error ? error.message : error,
+    );
+    jsonError(res, "VT_SCAN_FAILED", "File scan failed", 502);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/v2/admin/radar/virustotal — VT hash lookup
+// ---------------------------------------------------------------------------
+router.post("/radar/virustotal", async (req, res) => {
+  const settings = await getSettings();
+  const apiKey = settings?.virusTotalApiKey;
+
+  if (!apiKey) {
+    return jsonError(
+      res,
+      "VT_NOT_CONFIGURED",
+      "VirusTotal API key is not configured. Add it in Admin Settings.",
+      503,
+    );
+  }
+
+  const { hash } = req.body as { hash?: string };
+  if (!hash || !/^[a-fA-F0-9]{32,64}$/.test(hash)) {
+    return jsonError(
+      res,
+      "BAD_REQUEST",
+      "A valid MD5, SHA1, or SHA256 hash is required",
+      400,
+    );
+  }
+
+  try {
+    const vtResponse = await httpGet<Record<string, unknown>>(
+      `https://www.virustotal.com/api/v3/files/${hash}`,
+      {
+        headers: { "x-apikey": apiKey },
+        timeout: 15000,
+      },
+    );
+
+    if (vtResponse.status === 404) {
+      return jsonOk(res, { found: false });
+    }
+
+    if (vtResponse.status !== 200) {
+      logger.error("VirusTotal API error:", `Status ${vtResponse.status}`);
+      return jsonError(
+        res,
+        "VT_ERROR",
+        `VirusTotal request failed — status ${vtResponse.status}`,
+        502,
+      );
+    }
+
+    const vtData = vtResponse.data as Record<string, unknown> | undefined;
+    const attrs = (vtData?.data as Record<string, unknown> | undefined)
+      ?.attributes as Record<string, unknown> | undefined;
+    if (!attrs) {
+      return jsonOk(res, { found: false });
+    }
+
+    const stats = (attrs.last_analysis_stats || {}) as Record<string, number>;
+    const total = Object.values(stats).reduce(
+      (a: number, b: number) => a + b,
+      0,
+    );
+    const malicious = (stats.malicious || 0) + (stats.suspicious || 0);
+
+    jsonOk(res, {
+      found: true,
+      hash,
+      malicious,
+      total,
+      name: String(attrs.meaningful_name || attrs.name || null),
+      type: String(attrs.type_description || null),
+      size: attrs.size || null,
+      firstSeen: attrs.first_submission_date
+        ? new Date(Number(attrs.first_submission_date) * 1000)
+            .toISOString()
+            .split("T")[0]
+        : null,
+      vtLink: `https://www.virustotal.com/gui/file/${hash}`,
+    });
+  } catch (error: unknown) {
+    logger.error(
+      "VirusTotal API error:",
+      error instanceof Error ? error.message : error,
+    );
+    jsonError(res, "VT_FAILED", "VirusTotal scan failed", 502);
+  }
 });
 
 // ======================== ANALYTICS ========================
 
-router.get('/analytics/summary', async (_req, res) => {
+router.get("/analytics/summary", async (_req, res) => {
   const [totalServers, totalUsers, totalNodes, onlineServers] =
     await Promise.all([
       prisma.server.count(),
@@ -438,24 +830,195 @@ router.get('/analytics/summary', async (_req, res) => {
   jsonOk(res, { totalServers, totalUsers, totalNodes, onlineServers });
 });
 
+// ======================== ACTIVITY LOGS ========================
+
+router.get("/activity-logs", async (req, res) => {
+  const page = parseInt(String(req.query.page ?? "1"), 10) || 1;
+  const perPage = Math.min(
+    parseInt(String(req.query.perPage ?? "50"), 10) || 50,
+    100,
+  );
+  const category = (req.query.category as string) || undefined;
+  const severity = (req.query.severity as string) || undefined;
+  const search = (req.query.search as string) || undefined;
+  const startDate = req.query.startDate
+    ? new Date(req.query.startDate as string)
+    : undefined;
+  const endDate = req.query.endDate
+    ? new Date(req.query.endDate as string)
+    : undefined;
+
+  const where: Record<string, unknown> = {};
+  if (category) where.category = category;
+  if (severity) where.severity = severity;
+  if (search) {
+    where.OR = [
+      { event: { contains: search } },
+      { metadata: { contains: search } },
+    ];
+  }
+  if (startDate || endDate) {
+    where.createdAt = {
+      ...(startDate ? { gte: startDate } : {}),
+      ...(endDate ? { lte: endDate } : {}),
+    };
+  }
+
+  const [logs, total] = await Promise.all([
+    prisma.activityLog.findMany({
+      where,
+      include: {
+        actor: { select: { id: true, username: true, email: true } },
+      },
+      skip: (page - 1) * perPage,
+      take: perPage,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.activityLog.count({ where }),
+  ]);
+
+  jsonOk(res, logs, {
+    current_page: page,
+    per_page: perPage,
+    total,
+    last_page: Math.ceil(total / perPage) || 1,
+  });
+});
+
+// Activity logs summary — counts by category and severity for charts
+router.get("/activity-logs/summary", async (_req, res) => {
+  const now = new Date();
+  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const [totalAll, total24h, total7d, byCategory, bySeverity, byDay] =
+    await Promise.all([
+      prisma.activityLog.count(),
+      prisma.activityLog.count({ where: { createdAt: { gte: last24h } } }),
+      prisma.activityLog.count({ where: { createdAt: { gte: last7d } } }),
+      prisma.activityLog.groupBy({
+        by: ["category"],
+        _count: true,
+        orderBy: { _count: { category: "desc" } },
+      }),
+      prisma.activityLog.groupBy({
+        by: ["severity"],
+        _count: true,
+        orderBy: { _count: { severity: "desc" } },
+      }),
+      // Last 30 days grouped by day
+      prisma.$queryRawUnsafe<{ date: string; count: bigint }[]>(
+        `SELECT DATE("createdAt")::text as date, COUNT(*)::int as count
+         FROM "ActivityLog"
+         WHERE "createdAt" >= $1
+         GROUP BY DATE("createdAt")
+         ORDER BY date ASC`,
+        new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
+      ),
+    ]);
+
+  jsonOk(res, {
+    total: totalAll,
+    last24h: total24h,
+    last7d: total7d,
+    byCategory: byCategory.map((r) => ({
+      category: r.category,
+      count: r._count,
+    })),
+    bySeverity: bySeverity.map((r) => ({
+      severity: r.severity,
+      count: r._count,
+    })),
+    byDay: byDay.map((r) => ({ date: r.date, count: Number(r.count) })),
+  });
+});
+
+// ======================== SYSTEM LOGS (owner-only) ========================
+
+router.get("/system-logs", async (req, res) => {
+  // Owner-only check
+  if (req.adminUser?.role !== "owner") {
+    return jsonError(res, "FORBIDDEN", "Owner access required", 403);
+  }
+
+  const page = parseInt(String(req.query.page ?? "1"), 10) || 1;
+  const perPage = Math.min(
+    parseInt(String(req.query.perPage ?? "50"), 10) || 50,
+    100,
+  );
+  const severity = (req.query.severity as string) || undefined;
+  const component = (req.query.component as string) || undefined;
+  const search = (req.query.search as string) || undefined;
+  const startDate = req.query.startDate
+    ? new Date(req.query.startDate as string)
+    : undefined;
+  const endDate = req.query.endDate
+    ? new Date(req.query.endDate as string)
+    : undefined;
+
+  const result = await getSystemLogs({
+    page,
+    perPage,
+    severity,
+    component,
+    startDate,
+    endDate,
+    search,
+  });
+
+  jsonOk(res, result.logs, result.meta);
+});
+
+// System logs summary — counts by severity and component
+router.get("/system-logs/summary", async (req, res) => {
+  if (req.adminUser?.role !== "owner") {
+    return jsonError(res, "FORBIDDEN", "Owner access required", 403);
+  }
+
+  const now = new Date();
+  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  const [totalAll, total24h, bySeverity, byComponent] = await Promise.all([
+    prisma.systemLog.count(),
+    prisma.systemLog.count({ where: { createdAt: { gte: last24h } } }),
+    prisma.systemLog.groupBy({
+      by: ["severity"],
+      _count: true,
+      orderBy: { _count: { severity: "desc" } },
+    }),
+    prisma.systemLog.groupBy({
+      by: ["component"],
+      _count: true,
+      orderBy: { _count: { component: "desc" } },
+    }),
+  ]);
+
+  jsonOk(res, {
+    total: totalAll,
+    last24h: total24h,
+    bySeverity: bySeverity.map((r) => ({
+      severity: r.severity,
+      count: r._count,
+    })),
+    byComponent: byComponent.map((r) => ({
+      component: r.component,
+      count: r._count,
+    })),
+  });
+});
+
 // ======================== PLAYER STATS ========================
 
-router.get('/playerstats', async (_req, res) => {
+router.get("/playerstats", async (_req, res) => {
   const stats = await prisma.playerStats.findMany({
-    orderBy: { timestamp: 'desc' },
+    orderBy: { timestamp: "desc" },
     take: 100,
   });
   jsonOk(res, stats);
 });
 
-router.post('/playerstats/collect', async (req, res) => {
-  logActivity(
-    (req as any).adminUser?.id,
-    'playerstats.collect',
-    undefined,
-    {},
-    req.ip,
-  );
+router.post("/playerstats/collect", async (req, res) => {
+  logActivity(req.adminUser?.id, "playerstats.collect", undefined, {}, req.ip);
   jsonOk(res, { collectRequested: true });
 });
 

@@ -118,7 +118,7 @@ document.getElementById('confirmAddDatabase').addEventListener('click', async ()
   const btn = document.getElementById('confirmAddDatabase');
   btn.disabled = true;
   try {
-    const response = await fetch('/server/' + serverId + '/databases', {
+    const response = await fetch('/api/v2/servers/' + serverId + '/databases', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'csrf-token': csrfToken },
       body: JSON.stringify({ hostId }),

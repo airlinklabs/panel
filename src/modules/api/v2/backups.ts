@@ -11,9 +11,9 @@
  * GET    /api/v2/servers/:id/backups/restore/progress   — Restore progress
  */
 
-import { Router } from 'express';
-import prisma from '../../../db';
-import { parseBody } from '../../../utils/validation';
+import { Router } from "express";
+import prisma from "../../../db";
+import { parseBody } from "../../../utils/validation";
 import {
   jsonOk,
   jsonError,
@@ -21,35 +21,64 @@ import {
   requireSubUserPermission,
   checkSuspended,
   logActivity,
-} from './helpers';
-import { createBackupBody } from './dto';
+  getAuthenticatedUserId,
+  paginateQuery,
+  parsePage,
+  parsePerPage,
+} from "./helpers";
+import { createBackupBody } from "./dto";
+import {
+  daemonRequest,
+  DaemonNodeNotFoundError,
+} from "../../../services/daemonService";
 
 const router = Router();
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups — List backups
 // ---------------------------------------------------------------------------
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-  if (!requireSubUserPermission(res, resolved, 'backups')) {return;}
+  if (!resolved) {
+    return;
+  }
+  if (!requireSubUserPermission(res, resolved, "backups")) {
+    return;
+  }
 
-  const backups = await prisma.backup.findMany({
-    where: { serverId: resolved.server.UUID },
-    orderBy: { createdAt: 'desc' },
-  });
+  const page = parsePage(req.query.page);
+  const perPage = parsePerPage(req.query.perPage);
+  const where = { serverId: resolved.server.UUID };
 
-  jsonOk(res, backups);
+  const { data: backups, meta } = await paginateQuery(
+    (args) =>
+      prisma.backup.findMany({
+        where,
+        ...args,
+        orderBy: { createdAt: "desc" },
+      }),
+    () => prisma.backup.count({ where }),
+    page,
+    perPage,
+  );
+
+  jsonOk(res, backups, meta);
 });
 
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/backups — Create backup
 // ---------------------------------------------------------------------------
-router.post('/', parseBody(createBackupBody), async (req, res) => {
+router.post("/", parseBody(createBackupBody), async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-  if (checkSuspended(res, resolved)) {return;}
-  if (!requireSubUserPermission(res, resolved, 'backups.create')) {return;}
+  if (!resolved) {
+    return;
+  }
+  if (checkSuspended(res, resolved)) {
+    return;
+  }
+  if (!requireSubUserPermission(res, resolved, "backups.create")) {
+    return;
+  }
 
   const { name } = req.validatedBody as { name: string };
 
@@ -61,100 +90,81 @@ router.post('/', parseBody(createBackupBody), async (req, res) => {
     resolved.server.backupLimit > 0 &&
     backupCount >= resolved.server.backupLimit
   ) {
-    return jsonError(res, 'FORBIDDEN', 'Backup limit reached', 403);
-  }
-
-  const node = await prisma.node.findUnique({
-    where: { id: resolved.server.nodeId },
-  });
-  if (!node) {
-    return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
+    return jsonError(res, "FORBIDDEN", "Backup limit reached", 403);
   }
 
   try {
-    const protocol =
-      (req as any).app?.get('env') === 'production' ? 'https' : 'http';
-    const response = await fetch(
-      `${protocol}://${node.address}:${node.port}/servers/${resolved.server.UUID}/backup`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${node.key}`,
-        },
-        body: JSON.stringify({ name }),
-        signal: AbortSignal.timeout(60000),
-      },
+    const response = await daemonRequest(
+      resolved.server.UUID,
+      `/servers/${resolved.server.UUID}/backup`,
+      { method: "POST", body: { name }, timeout: 60000 },
     );
 
     if (!response.ok) {
-      const text = await response.text().catch(() => 'Daemon error');
+      const text = await response.text().catch(() => "Daemon error");
       return jsonError(
         res,
-        'DAEMON_ERROR',
+        "DAEMON_ERROR",
         `Failed to create backup: ${text}`,
         502,
       );
     }
 
     logActivity(
-      (req as any).session?.user?.id ?? (req as any).apiKey?.userId,
-      'backup.created',
+      getAuthenticatedUserId(req),
+      "backup.created",
       resolved.server.UUID,
       { name },
       req.ip,
     );
 
-    jsonOk(res, { name, status: 'creating' });
-  } catch {
-    jsonError(res, 'DAEMON_UNREACHABLE', 'Could not reach daemon', 502);
+    jsonOk(res, { name, status: "creating" });
+  } catch (err) {
+    if (err instanceof DaemonNodeNotFoundError) {
+      return jsonError(res, "NOT_FOUND", "Node not found", 404);
+    }
+    jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
   }
 });
 
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/servers/:id/backups/:backupId — Delete backup
 // ---------------------------------------------------------------------------
-router.delete('/:backupId', async (req, res) => {
+router.delete("/:backupId", async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-  if (!requireSubUserPermission(res, resolved, 'backups.delete')) {return;}
+  if (!resolved) {
+    return;
+  }
+  if (!requireSubUserPermission(res, resolved, "backups.delete")) {
+    return;
+  }
 
   const backup = await prisma.backup.findUnique({
     where: { UUID: req.params.backupId },
   });
   if (!backup || backup.serverId !== resolved.server.UUID) {
-    return jsonError(res, 'NOT_FOUND', 'Backup not found', 404);
+    return jsonError(res, "NOT_FOUND", "Backup not found", 404);
   }
 
   if (backup.locked) {
-    return jsonError(res, 'FORBIDDEN', 'Backup is locked', 403);
+    return jsonError(res, "FORBIDDEN", "Backup is locked", 403);
   }
 
-  const node = await prisma.node.findUnique({
-    where: { id: resolved.server.nodeId },
-  });
-  if (node) {
-    try {
-      const protocol =
-        (req as any).app?.get('env') === 'production' ? 'https' : 'http';
-      await fetch(
-        `${protocol}://${node.address}:${node.port}/servers/${resolved.server.UUID}/backup/${backup.UUID}`,
-        {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${node.key}` },
-          signal: AbortSignal.timeout(30000),
-        },
-      );
-    } catch {
-      // Best effort
-    }
+  try {
+    await daemonRequest(
+      resolved.server.UUID,
+      `/servers/${resolved.server.UUID}/backup/${backup.UUID}`,
+      { method: "DELETE", timeout: 30000 },
+    );
+  } catch {
+    // Best effort
   }
 
   await prisma.backup.delete({ where: { UUID: backup.UUID } });
 
   logActivity(
-    (req as any).session?.user?.id ?? (req as any).apiKey?.userId,
-    'backup.deleted',
+    getAuthenticatedUserId(req),
+    "backup.deleted",
     resolved.server.UUID,
     { backupName: backup.name },
     req.ip,
@@ -166,73 +176,70 @@ router.delete('/:backupId', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/backups/:backupId/restore — Restore backup
 // ---------------------------------------------------------------------------
-router.post('/:backupId/restore', async (req, res) => {
+router.post("/:backupId/restore", async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-  if (checkSuspended(res, resolved)) {return;}
+  if (!resolved) {
+    return;
+  }
+  if (checkSuspended(res, resolved)) {
+    return;
+  }
 
   const backup = await prisma.backup.findUnique({
     where: { UUID: req.params.backupId },
   });
   if (!backup || backup.serverId !== resolved.server.UUID) {
-    return jsonError(res, 'NOT_FOUND', 'Backup not found', 404);
-  }
-
-  const node = await prisma.node.findUnique({
-    where: { id: resolved.server.nodeId },
-  });
-  if (!node) {
-    return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
+    return jsonError(res, "NOT_FOUND", "Backup not found", 404);
   }
 
   try {
-    const protocol =
-      (req as any).app?.get('env') === 'production' ? 'https' : 'http';
-    const response = await fetch(
-      `${protocol}://${node.address}:${node.port}/servers/${resolved.server.UUID}/backup/${backup.UUID}/restore`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${node.key}` },
-        signal: AbortSignal.timeout(120000),
-      },
+    const response = await daemonRequest(
+      resolved.server.UUID,
+      `/servers/${resolved.server.UUID}/backup/${backup.UUID}/restore`,
+      { method: "POST", timeout: 120000 },
     );
 
     if (!response.ok) {
-      const text = await response.text().catch(() => 'Daemon error');
+      const text = await response.text().catch(() => "Daemon error");
       return jsonError(
         res,
-        'DAEMON_ERROR',
+        "DAEMON_ERROR",
         `Failed to restore backup: ${text}`,
         502,
       );
     }
 
     logActivity(
-      (req as any).session?.user?.id ?? (req as any).apiKey?.userId,
-      'backup.restored',
+      getAuthenticatedUserId(req),
+      "backup.restored",
       resolved.server.UUID,
       { backupName: backup.name },
       req.ip,
     );
 
-    jsonOk(res, { backupId: backup.UUID, status: 'restoring' });
-  } catch {
-    jsonError(res, 'DAEMON_UNREACHABLE', 'Could not reach daemon', 502);
+    jsonOk(res, { backupId: backup.UUID, status: "restoring" });
+  } catch (err) {
+    if (err instanceof DaemonNodeNotFoundError) {
+      return jsonError(res, "NOT_FOUND", "Node not found", 404);
+    }
+    jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
   }
 });
 
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/servers/:id/backups/:backupId/lock — Toggle lock
 // ---------------------------------------------------------------------------
-router.patch('/:backupId/lock', async (req, res) => {
+router.patch("/:backupId/lock", async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
+  if (!resolved) {
+    return;
+  }
 
   const backup = await prisma.backup.findUnique({
     where: { UUID: req.params.backupId },
   });
   if (!backup || backup.serverId !== resolved.server.UUID) {
-    return jsonError(res, 'NOT_FOUND', 'Backup not found', 404);
+    return jsonError(res, "NOT_FOUND", "Backup not found", 404);
   }
 
   const updated = await prisma.backup.update({
@@ -246,134 +253,120 @@ router.patch('/:backupId/lock', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups/:backupId/download — Download backup
 // ---------------------------------------------------------------------------
-router.get('/:backupId/download', async (req, res) => {
+router.get("/:backupId/download", async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-  if (!requireSubUserPermission(res, resolved, 'backups')) {return;}
+  if (!resolved) {
+    return;
+  }
+  if (!requireSubUserPermission(res, resolved, "backups")) {
+    return;
+  }
 
   const backup = await prisma.backup.findUnique({
     where: { UUID: req.params.backupId },
   });
   if (!backup || backup.serverId !== resolved.server.UUID) {
-    return jsonError(res, 'NOT_FOUND', 'Backup not found', 404);
-  }
-
-  const node = await prisma.node.findUnique({
-    where: { id: resolved.server.nodeId },
-  });
-  if (!node) {
-    return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
+    return jsonError(res, "NOT_FOUND", "Backup not found", 404);
   }
 
   try {
-    const protocol =
-      (req as any).app?.get('env') === 'production' ? 'https' : 'http';
-    const response = await fetch(
-      `${protocol}://${node.address}:${node.port}/servers/${resolved.server.UUID}/backup/${backup.UUID}/download`,
-      {
-        headers: { Authorization: `Bearer ${node.key}` },
-        signal: AbortSignal.timeout(120000),
-      },
+    const response = await daemonRequest(
+      resolved.server.UUID,
+      `/servers/${resolved.server.UUID}/backup/${backup.UUID}/download`,
+      { timeout: 120000 },
     );
 
     if (!response.ok) {
-      const text = await response.text().catch(() => 'Daemon error');
+      const text = await response.text().catch(() => "Daemon error");
       return jsonError(
         res,
-        'DAEMON_ERROR',
+        "DAEMON_ERROR",
         `Failed to download backup: ${text}`,
         502,
       );
     }
 
-    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader(
-      'Content-Disposition',
+      "Content-Disposition",
       `attachment; filename="${backup.name}.zip"`,
     );
     if (response.body) {
       const reader = response.body.getReader();
       while (true) {
         const { done, value } = await reader.read();
-        if (done) {break;}
+        if (done) {
+          break;
+        }
         res.write(value);
       }
     }
     res.end();
-  } catch {
-    jsonError(res, 'DAEMON_UNREACHABLE', 'Could not reach daemon', 502);
+  } catch (err) {
+    if (err instanceof DaemonNodeNotFoundError) {
+      return jsonError(res, "NOT_FOUND", "Node not found", 404);
+    }
+    jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
   }
 });
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups/progress — Backup progress
 // ---------------------------------------------------------------------------
-router.get('/progress', async (req, res) => {
+router.get("/progress", async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-
-  const node = await prisma.node.findUnique({
-    where: { id: resolved.server.nodeId },
-  });
-  if (!node) {
-    return jsonOk(res, { progress: 0, status: 'unknown' });
+  if (!resolved) {
+    return;
   }
 
   try {
-    const protocol =
-      (req as any).app?.get('env') === 'production' ? 'https' : 'http';
-    const response = await fetch(
-      `${protocol}://${node.address}:${node.port}/servers/${resolved.server.UUID}/backup/progress`,
-      {
-        headers: { Authorization: `Bearer ${node.key}` },
-        signal: AbortSignal.timeout(10000),
-      },
+    const response = await daemonRequest(
+      resolved.server.UUID,
+      `/servers/${resolved.server.UUID}/backup/progress`,
+      { timeout: 10000 },
     );
 
     if (!response.ok) {
-      return jsonOk(res, { progress: 0, status: 'unknown' });
+      return jsonOk(res, { progress: 0, status: "unknown" });
     }
 
     const data = await response.json();
     jsonOk(res, data);
-  } catch {
-    jsonOk(res, { progress: 0, status: 'unreachable' });
+  } catch (err) {
+    if (err instanceof DaemonNodeNotFoundError) {
+      return jsonOk(res, { progress: 0, status: "unknown" });
+    }
+    jsonOk(res, { progress: 0, status: "unreachable" });
   }
 });
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups/restore/progress — Restore progress
 // ---------------------------------------------------------------------------
-router.get('/restore/progress', async (req, res) => {
+router.get("/restore/progress", async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-
-  const node = await prisma.node.findUnique({
-    where: { id: resolved.server.nodeId },
-  });
-  if (!node) {
-    return jsonOk(res, { progress: 0, status: 'unknown' });
+  if (!resolved) {
+    return;
   }
 
   try {
-    const protocol =
-      (req as any).app?.get('env') === 'production' ? 'https' : 'http';
-    const response = await fetch(
-      `${protocol}://${node.address}:${node.port}/servers/${resolved.server.UUID}/backup/restore/progress`,
-      {
-        headers: { Authorization: `Bearer ${node.key}` },
-        signal: AbortSignal.timeout(10000),
-      },
+    const response = await daemonRequest(
+      resolved.server.UUID,
+      `/servers/${resolved.server.UUID}/backup/restore/progress`,
+      { timeout: 10000 },
     );
 
     if (!response.ok) {
-      return jsonOk(res, { progress: 0, status: 'unknown' });
+      return jsonOk(res, { progress: 0, status: "unknown" });
     }
 
     const data = await response.json();
     jsonOk(res, data);
-  } catch {
-    jsonOk(res, { progress: 0, status: 'unreachable' });
+  } catch (err) {
+    if (err instanceof DaemonNodeNotFoundError) {
+      return jsonOk(res, { progress: 0, status: "unknown" });
+    }
+    jsonOk(res, { progress: 0, status: "unreachable" });
   }
 });
 

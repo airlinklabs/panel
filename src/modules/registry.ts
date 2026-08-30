@@ -30,7 +30,6 @@ import admin_uiComponents from "./admin/uiComponents";
 import admin_users from "./admin/users";
 import api_Alternative_api from "./api/Alternative/api";
 import api_client_clientApi from "./api/client/clientApi";
-import api_v1_api from "./api/v1/api";
 import api_v2_module from "./api/v2/index";
 import auth_auth from "./auth/auth";
 import auth_authService from "./auth/authService";
@@ -42,7 +41,6 @@ import user_createServer from "./user/createServer";
 import user_dashboard from "./user/dashboard";
 import user_folderSystem from "./user/folderSystem";
 import user_images from "./user/images";
-import user_onboarding from "./user/onboarding";
 import user_server from "./user/server";
 import user_serverConsole from "./user/serverConsole";
 import user_sftp from "./user/sftp";
@@ -107,7 +105,6 @@ const candidates: { module: unknown; name: string }[] = [
   { module: admin_users, name: "admin/users" },
   { module: api_Alternative_api, name: "api/alternative" },
   { module: api_client_clientApi, name: "api/client" },
-  { module: api_v1_api, name: "api/v1" },
   { module: api_v2_module, name: "api/v2" },
   { module: auth_auth, name: "auth" },
   { module: auth_authService, name: "auth/service" },
@@ -119,7 +116,6 @@ const candidates: { module: unknown; name: string }[] = [
   { module: user_dashboard, name: "user/dashboard" },
   { module: user_folderSystem, name: "user/folderSystem" },
   { module: user_images, name: "user/images" },
-  { module: user_onboarding, name: "user/onboarding" },
   { module: user_server, name: "user/server" },
   { module: user_serverConsole, name: "user/serverConsole" },
   { module: user_sftp, name: "user/sftp" },

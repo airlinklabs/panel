@@ -1,13 +1,34 @@
 /**
  * V2 API — shared helpers.
  *
+ * ## Response contracts
+ *
+ * ### Success
+ * ```json
+ * { "success": true, "data": <T>, "meta": <PaginationMeta?> }
+ * ```
+ *
+ * ### Error
+ * ```json
+ * { "success": false, "error": { "code": "NOT_FOUND", "message": "Resource not found" } }
+ * ```
+ *
+ * ### Pagination meta (snake_case)
+ * ```json
+ * { "total": 100, "per_page": 25, "current_page": 1, "last_page": 4 }
+ * ```
+ *
  * Standardised response envelope, pagination, auth resolution, and error
  * formatting used by every V2 endpoint file.
  */
 
-import type { Request, Response } from 'express';
-import prisma from '../../../db';
-import logger from '../../../handlers/logger';
+import type { Request, Response } from "express";
+import prisma from "../../../db";
+import logger from "../../../handlers/logger";
+import {
+  subUserHasPermission as _subUserHasPermission,
+  parsePermissions as _parsePermissions,
+} from "../../../handlers/utils/auth/authorization";
 
 // Infer types from the Prisma client instance
 type Users = Awaited<ReturnType<typeof prisma.users.findUnique>> &
@@ -37,20 +58,34 @@ export interface V2ErrorResponse {
 }
 
 export interface PaginationMeta {
-  page: number;
-  perPage: number;
+  /** Current page number (1-indexed). */
+  current_page: number;
+  /** Items per page. */
+  per_page: number;
+  /** Total item count across all pages. */
   total: number;
-  totalPages: number;
+  /** Total number of pages. */
+  last_page: number;
 }
 
-/** Send a success response with the standard envelope. */
+/**
+ * Send a success response with the standard V2 envelope.
+ *
+ * Shape: `{ success: true, data: T, meta?: PaginationMeta }`
+ */
 export function jsonOk<T>(res: Response, data: T, meta?: PaginationMeta): void {
   const body: V2SuccessResponse<T> = { success: true, data };
-  if (meta) {body.meta = meta;}
+  if (meta) {
+    body.meta = meta;
+  }
   res.json(body);
 }
 
-/** Send an error response with the standard envelope. */
+/**
+ * Send an error response with the standard V2 envelope.
+ *
+ * Shape: `{ success: false, error: { code: string, message: string, details? } }`
+ */
 export function jsonError(
   res: Response,
   code: string,
@@ -59,7 +94,9 @@ export function jsonError(
   details?: { field: string; message: string }[],
 ): void {
   const body: V2ErrorResponse = { success: false, error: { code, message } };
-  if (details) {body.error.details = details;}
+  if (details) {
+    body.error.details = details;
+  }
   res.status(status).json(body);
 }
 
@@ -78,17 +115,46 @@ export function paginate<T>(
   const start = (safePage - 1) * perPage;
   return {
     data: items.slice(start, start + perPage),
-    meta: { page: safePage, perPage, total, totalPages },
+    meta: {
+      current_page: safePage,
+      per_page: perPage,
+      total,
+      last_page: totalPages,
+    },
+  };
+}
+
+export async function paginateQuery<T>(
+  findManyFn: (args: { skip: number; take: number }) => Promise<T[]>,
+  countFn: () => Promise<number>,
+  page: number,
+  perPage: number,
+): Promise<{ data: T[]; meta: PaginationMeta }> {
+  const total = await countFn();
+  const totalPages = Math.ceil(total / perPage);
+  const safePage = Math.max(1, Math.min(page, totalPages || 1));
+  const data = await findManyFn({
+    skip: (safePage - 1) * perPage,
+    take: perPage,
+  });
+  return {
+    data,
+    meta: {
+      current_page: safePage,
+      per_page: perPage,
+      total,
+      last_page: totalPages,
+    },
   };
 }
 
 export function parsePage(query: unknown): number {
-  const raw = typeof query === 'string' ? parseInt(query, 10) : 1;
+  const raw = typeof query === "string" ? parseInt(query, 10) : 1;
   return Number.isFinite(raw) && raw > 0 ? raw : 1;
 }
 
 export function parsePerPage(query: unknown, defaultVal = 25): number {
-  const raw = typeof query === 'string' ? parseInt(query, 10) : defaultVal;
+  const raw = typeof query === "string" ? parseInt(query, 10) : defaultVal;
   return Number.isFinite(raw) && raw > 0 ? Math.min(raw, 100) : defaultVal;
 }
 
@@ -98,18 +164,72 @@ export function parsePerPage(query: unknown, defaultVal = 25): number {
 
 /** Get the session user ID from the request (set by isAuthenticated middleware). */
 export function getSessionUserId(req: Request): number | undefined {
-  return (req as any).session?.user?.id as number | undefined;
+  // express-session types are available via the module augmentation in
+  // express.d.ts, but req.session requires a narrow cast since Express's
+  // Request type doesn't expose it directly without the session import.
+  try {
+    // Access through the Express app's session middleware — the session
+    // object is always present when isAuthenticated middleware runs.
+    const session = req["session"] as { user?: { id?: number } } | undefined;
+    return session?.user?.id;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Get the API key user ID from the request (set by apiValidator middleware). */
 export function getApiKeyUserId(req: Request): number | undefined {
-  return (req as any).apiKey?.userId as number | undefined;
+  return req.apiKey?.userId as number | undefined;
 }
 
 /** Resolve the authenticated user ID from either session or API key. */
 export function getAuthenticatedUserId(req: Request): number | undefined {
   return getSessionUserId(req) ?? getApiKeyUserId(req);
 }
+
+/** Get the daemon protocol based on the app environment. */
+export function getAppProtocol(req: Request): string {
+  return req.app?.get("env") === "production" ? "https" : "http";
+}
+
+// ---------------------------------------------------------------------------
+// API-key capability constants
+// ---------------------------------------------------------------------------
+
+/**
+ * Well-known capabilities for API-key scope enforcement.
+ * API keys declare a subset of these; session users bypass the check.
+ * Wildcard forms (e.g. "servers.*") grant all sub-capabilities.
+ */
+export const ApiCapabilities = {
+  SERVERS_READ: "servers.read",
+  SERVERS_WRITE: "servers.write",
+  SERVERS_ALL: "servers.*",
+  FILES_READ: "files.read",
+  FILES_WRITE: "files.write",
+  FILES_ALL: "files.*",
+  DATABASES_READ: "databases.read",
+  DATABASES_WRITE: "databases.write",
+  DATABASES_ALL: "databases.*",
+  BACKUPS_READ: "backups.read",
+  BACKUPS_WRITE: "backups.write",
+  BACKUPS_ALL: "backups.*",
+  SCHEDULES_READ: "schedules.read",
+  SCHEDULES_WRITE: "schedules.write",
+  SCHEDULES_ALL: "schedules.*",
+  SUBUSERS_READ: "subusers.read",
+  SUBUSERS_WRITE: "subusers.write",
+  SUBUSERS_ALL: "subusers.*",
+  STARTUP_READ: "startup.read",
+  STARTUP_WRITE: "startup.write",
+  STARTUP_ALL: "startup.*",
+  ACCOUNT_READ: "account.read",
+  ACCOUNT_WRITE: "account.write",
+  ADMIN: "admin.*",
+} as const;
+
+export type ApiCapability =
+  (typeof ApiCapabilities)[keyof typeof ApiCapabilities];
 
 /** Resolve the authenticated user or send 401. Returns null if not authenticated. */
 export async function requireUser(
@@ -118,12 +238,12 @@ export async function requireUser(
 ): Promise<Users | null> {
   const userId = getAuthenticatedUserId(req);
   if (!userId) {
-    jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
+    jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
     return null;
   }
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) {
-    jsonError(res, 'UNAUTHORIZED', 'User not found', 401);
+    jsonError(res, "UNAUTHORIZED", "User not found", 401);
     return null;
   }
   return user;
@@ -135,9 +255,11 @@ export async function requireAdmin(
   res: Response,
 ): Promise<Users | null> {
   const user = await requireUser(req, res);
-  if (!user) {return null;}
+  if (!user) {
+    return null;
+  }
   if (!user.isAdmin) {
-    jsonError(res, 'FORBIDDEN', 'Admin access required', 403);
+    jsonError(res, "FORBIDDEN", "Admin access required", 403);
     return null;
   }
   return user;
@@ -160,17 +282,17 @@ export interface ResolvedServer {
 export async function resolveServer(
   req: Request,
   res: Response,
-  serverIdParam = 'id',
+  serverIdParam = "id",
 ): Promise<ResolvedServer | null> {
   const userId = getAuthenticatedUserId(req);
   if (!userId) {
-    jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
+    jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
     return null;
   }
 
-  const serverUUID = String(req.params[serverIdParam] ?? '');
+  const serverUUID = String(req.params[serverIdParam] ?? "");
   if (!serverUUID) {
-    jsonError(res, 'BAD_REQUEST', 'Server ID is required', 400);
+    jsonError(res, "BAD_REQUEST", "Server ID is required", 400);
     return null;
   }
 
@@ -178,7 +300,7 @@ export async function resolveServer(
     where: { UUID: serverUUID },
   });
   if (!server) {
-    jsonError(res, 'NOT_FOUND', 'Server not found', 404);
+    jsonError(res, "NOT_FOUND", "Server not found", 404);
     return null;
   }
 
@@ -198,7 +320,7 @@ export async function resolveServer(
     where: { serverId_userId: { serverId: server.UUID, userId } },
   });
   if (!subUser) {
-    jsonError(res, 'FORBIDDEN', 'You do not have access to this server', 403);
+    jsonError(res, "FORBIDDEN", "You do not have access to this server", 403);
     return null;
   }
 
@@ -211,7 +333,7 @@ export function checkSuspended(
   resolved: ResolvedServer,
 ): boolean {
   if (resolved.server.Suspended) {
-    jsonError(res, 'FORBIDDEN', 'Server is suspended', 403);
+    jsonError(res, "FORBIDDEN", "Server is suspended", 403);
     return true;
   }
   return false;
@@ -222,49 +344,32 @@ export function checkSuspended(
 // ---------------------------------------------------------------------------
 
 export type SubUserPermission =
-  | 'console'
-  | 'console.send'
-  | 'files'
-  | 'files.read'
-  | 'files.write'
-  | 'backups'
-  | 'backups.create'
-  | 'backups.delete'
-  | 'schedule.read'
-  | 'schedule.create'
-  | 'schedule.delete'
-  | 'databases'
-  | 'databases.create'
-  | 'databases.delete'
-  | 'start'
-  | 'stop'
-  | 'restart'
-  | 'kill'
-  | 'reinstall'
-  | 'websocket.connect';
+  | "console"
+  | "console.send"
+  | "files"
+  | "files.read"
+  | "files.write"
+  | "backups"
+  | "backups.create"
+  | "backups.delete"
+  | "schedule.read"
+  | "schedule.create"
+  | "schedule.delete"
+  | "databases"
+  | "databases.create"
+  | "databases.delete"
+  | "start"
+  | "stop"
+  | "restart"
+  | "kill"
+  | "reinstall"
+  | "websocket.connect";
 
 /** Parse the permissions JSON string from a SubUser record. */
-export function parsePermissions(raw: string): string[] {
-  try {
-    return JSON.parse(raw) as string[];
-  } catch {
-    return [];
-  }
-}
+export const parsePermissions = _parsePermissions;
 
-/** Check if a subuser has a specific permission (supports wildcard `.*`). */
-export function subUserHasPermission(
-  subUser: SubUser | null,
-  permission: SubUserPermission,
-): boolean {
-  if (!subUser) {return false;}
-  const perms = parsePermissions(subUser.permissions);
-  return perms.some((p) => {
-    if (p === permission) {return true;}
-    if (p.endsWith('.*')) {return permission.startsWith(`${p.slice(0, -2)  }.`);}
-    return false;
-  });
-}
+/** Check if a subuser has a specific permission (supports wildcard `.*` and parent groups). */
+export const subUserHasPermission = _subUserHasPermission;
 
 /**
  * Require a specific subuser permission. Sends 403 and returns false if denied.
@@ -275,10 +380,13 @@ export function requireSubUserPermission(
   resolved: ResolvedServer,
   permission: SubUserPermission,
 ): boolean {
-  if (resolved.isOwner) {return true;}
-  if (resolved.subUser && subUserHasPermission(resolved.subUser, permission))
-  {return true;}
-  jsonError(res, 'FORBIDDEN', `Missing permission: ${permission}`, 403);
+  if (resolved.isOwner) {
+    return true;
+  }
+  if (resolved.subUser && subUserHasPermission(resolved.subUser, permission)) {
+    return true;
+  }
+  jsonError(res, "FORBIDDEN", `Missing permission: ${permission}`, 403);
   return false;
 }
 
@@ -292,6 +400,8 @@ export async function logActivity(
   serverId?: string,
   metadata?: Record<string, unknown>,
   ip?: string,
+  category?: string,
+  severity?: string,
 ): Promise<void> {
   try {
     await prisma.activityLog.create({
@@ -299,11 +409,13 @@ export async function logActivity(
         actorId: actorId ?? null,
         serverId: serverId ?? null,
         event,
+        category: category ?? "user_action",
+        severity: severity ?? "info",
         metadata: metadata ? JSON.stringify(metadata) : null,
         ip: ip ?? null,
       },
     });
   } catch (err) {
-    logger.error('Failed to log activity:', err);
+    logger.error("Failed to log activity:", err);
   }
 }

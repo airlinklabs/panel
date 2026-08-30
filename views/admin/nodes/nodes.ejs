@@ -129,7 +129,7 @@
                   if (!this.name || !this.shortCode) return;
                   this.saving = true;
                   try {
-                    const res = await fetch('/admin/locations', {
+                    const res = await fetch('/api/v2/admin/locations', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json', 'HX-Request': 'true' },
                       body: JSON.stringify({ name: this.name, shortCode: this.shortCode }),
@@ -308,7 +308,7 @@ function nodeManager() {
 
     pollNodeStatus() {
       var self = this;
-      fetch('/admin/nodes/list')
+      fetch('/api/v2/admin/nodes/list')
         .then(function(r) { return r.json(); })
         .then(function(nodes) {
           if (!nodes || !nodes.length) return;
@@ -332,7 +332,7 @@ function nodeManager() {
 window.refreshNodeStatuses = function () {
   var banner = document.querySelector('.al-alert-danger');
   if (banner && window.al) al.patchEl(banner, '<div class="flex items-center gap-3">' + alIcon('loader-circle', 'w-4 h-4 animate-spin') + '<p class="font-medium">Reconnecting…</p></div>');
-  fetch('/admin/nodes/list')
+  fetch('/api/v2/admin/nodes/list')
     .then(function(r) { return r.json(); })
     .then(function(nodes) {
       if (!nodes || !nodes.length) return;
@@ -412,7 +412,7 @@ window.refreshNodeStatuses = function () {
       var nameVal = body.querySelector('#editLocName').value.trim();
       var codeVal = body.querySelector('#editLocCode').value.trim().toLowerCase();
       try {
-        var res = await fetch('/admin/location/' + id, {
+        var res = await fetch('/api/v2/admin/locations/' + id, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
           body: JSON.stringify({ name: nameVal, shortCode: codeVal }),
@@ -453,7 +453,7 @@ window.refreshNodeStatuses = function () {
     overlay.querySelector('[data-close-location-nodes]').addEventListener('click', close);
     overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
 
-    fetch('/admin/location/' + id + '/nodes')
+    fetch('/api/v2/admin/nodes?locationId=' + id)
       .then(function(r) { return r.text(); })
       .then(function(html) {
         document.getElementById('location-nodes-body').innerHTML = html;

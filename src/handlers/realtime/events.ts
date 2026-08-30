@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import logger from "../logger";
+import { getRedisClient } from "../redis";
 
 // Real-time event bus — publishes structured events on authoritative state changes.
 // Clients use monotonic seq for reconnect resync; payloads validated with zod at publish time.
+// Redis pub/sub enables multi-instance event broadcasting.
 
 export const REALTIME_EVENT_VERSION = 1;
 
@@ -86,6 +88,58 @@ const subscribers = new Set<(event: RealtimeEventEnvelope) => void>();
 const history: RealtimeEventEnvelope[] = [];
 const HISTORY_LIMIT = 500;
 
+// ── Redis pub/sub for multi-instance broadcasting ──────────────────────────
+const PUBSUB_CHANNEL = "airlink:realtime:events";
+let redisSub: ReturnType<typeof getRedisClient> | null = null;
+
+function ensureRedisSubscriber(): void {
+  if (redisSub) return;
+  try {
+    redisSub = getRedisClient().duplicate();
+    redisSub.on("error", (err: Error) => {
+      logger.warn("[realtime] Redis subscriber error", { error: err.message });
+    });
+    redisSub.subscribe(PUBSUB_CHANNEL);
+    redisSub.on("message", (_ch: string, msg: string) => {
+      try {
+        const envelope = JSON.parse(msg) as RealtimeEventEnvelope;
+        // Skip events originating from this process (already emitted locally)
+        if (envelope.actorId === -1) return;
+        // Assign a local sequence number for the in-process bus
+        envelope.seq = ++sequence;
+        history.push(envelope);
+        if (history.length > HISTORY_LIMIT) history.shift();
+        for (const handler of subscribers) {
+          try {
+            handler(envelope);
+          } catch (error) {
+            logger.warn("[realtime] subscriber error", {
+              error: String(error),
+            });
+          }
+        }
+      } catch {
+        // malformed message — ignore
+      }
+    });
+  } catch (err) {
+    logger.warn("[realtime] Redis pub/sub init failed", { error: String(err) });
+  }
+}
+
+function publishToRedis(envelope: RealtimeEventEnvelope): void {
+  try {
+    const redis = getRedisClient();
+    // Tag with actorId=-1 so other instances skip echo
+    redis.publish(PUBSUB_CHANNEL, JSON.stringify({ ...envelope, actorId: -1 }));
+  } catch {
+    // Redis unavailable — local bus still works
+  }
+}
+
+// Lazy-init: subscribe on first event publish
+let pubsubInitialized = false;
+
 let sequence = 0;
 
 /** Number of events published in this process lifetime. */
@@ -165,6 +219,14 @@ export function emitRealtime(
       logger.warn("[realtime] subscriber error", { error: String(error) });
     }
   }
+
+  // Broadcast to other instances via Redis pub/sub (lazy init)
+  if (!pubsubInitialized) {
+    pubsubInitialized = true;
+    ensureRedisSubscriber();
+  }
+  publishToRedis(envelope);
+
   return envelope;
 }
 

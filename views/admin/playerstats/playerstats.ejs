@@ -250,7 +250,7 @@ function playerStats() {
     async fetchPlayerData() {
       var self = this;
       try {
-        var response = await fetch('/api/admin/playerstats');
+        var response = await fetch('/api/v2/admin/playerstats');
         var data = await response.json();
 
         if (data.error) {
@@ -365,7 +365,7 @@ function playerStats() {
     async triggerDataCollection() {
       var self = this;
       try {
-        var response = await fetch('/api/admin/playerstats/collect', {
+        var response = await fetch('/api/v2/admin/playerstats/collect', {
           method: 'POST',
         });
         var data = await response.json();

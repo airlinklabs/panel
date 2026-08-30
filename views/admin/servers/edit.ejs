@@ -479,7 +479,7 @@ function serverEditPage() {
     });
 
     async function fetchNodesData() {
-      const response = await fetch('/admin/nodes/list');
+      const response = await fetch('/api/v2/admin/nodes/list');
       const nodes = await response.json();
       nodes.forEach(node => {
         let ports = [];
@@ -578,7 +578,7 @@ function serverEditPage() {
 
     async function doSuspend(action, toggle) {
       try {
-        const response = await fetch('/admin/servers/<%= server.id %>/' + action, {
+        const response = await fetch('/api/v2/admin/servers/<%= server.id %>/' + action, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
           body: JSON.stringify({}),
@@ -629,8 +629,8 @@ function serverEditPage() {
       loader.updateProgress(20, 'Sending server configuration...');
 
       try {
-        const response = await fetch('/admin/servers/edit/<%= server.id %>', {
-          method: 'POST',
+        const response = await fetch('/api/v2/admin/servers/<%= server.id %>', {
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '',
@@ -696,7 +696,7 @@ function serverEditPage() {
 
     async function fetchNodesData() {
       try {
-        const response = await fetch('/admin/nodes/list');
+      const response = await fetch('/api/v2/admin/nodes/list');
         const nodes = await response.json();
         nodes.forEach(node => {
           let ports = [];
@@ -869,7 +869,7 @@ function serverEditPage() {
       confirmTransferBtn.textContent = 'Starting transfer...';
 
       try {
-        const response = await fetch('/admin/servers/<%= server.id %>/transfer', {
+        const response = await fetch('/api/v2/admin/servers/<%= server.id %>/transfer', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
           body: JSON.stringify({ targetNodeId: parseInt(nodeId), ports: transferPorts }),
@@ -900,7 +900,7 @@ function serverEditPage() {
 
     async function pollTransferStatus() {
       try {
-        const response = await fetch('/admin/servers/<%= server.id %>/transfer/status');
+        const response = await fetch('/api/v2/admin/servers/<%= server.id %>/transfer/status');
         const state = await response.json();
 
         if (state.status === 'idle') {
@@ -927,7 +927,7 @@ function serverEditPage() {
     }
 
     // Check on page load if a transfer is in progress
-    fetch('/admin/servers/<%= server.id %>/transfer/status')
+    fetch('/api/v2/admin/servers/<%= server.id %>/transfer/status')
       .then(r => r.json())
       .then(state => {
         if (state.status && state.status !== 'idle' && state.status !== 'completed' && state.status !== 'failed') {

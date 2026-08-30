@@ -174,7 +174,7 @@ function imageApprovals() {
               const id = btn.dataset.approveImage;
               const card = btn.closest('.pending-card');
               try {
-                const response = await fetch('/admin/images/approve/' + id, { method: 'POST' });
+                const response = await fetch('/api/v2/admin/images/' + id + '/approve', { method: 'POST' });
                 const data = await response.json();
                 if (data.error) {
                   showToast(data.error, 'error');
@@ -203,7 +203,7 @@ function imageApprovals() {
         const card = document.querySelector('[data-pending-image="' + id + '"]');
         const reason = document.getElementById('rejectReason').value;
         try {
-          const response = await fetch('/admin/images/reject/' + id, {
+          const response = await fetch('/api/v2/admin/images/' + id + '/reject', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ reason }),
