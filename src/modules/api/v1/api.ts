@@ -38,11 +38,13 @@ import {
   NodeError,
 } from "../../../services/nodeService";
 import {
+  listDatabases,
+  getDatabase,
   provisionDatabase,
   deprovisionDatabase,
-} from "../../../handlers/utils/core/postgresProvisioner";
+} from "../../../services/databaseService";
 import { logActivity } from "../../../handlers/utils/activity/activityLogger";
-import { validateVariableRules } from "../../user/server/startup";
+import { getStartup, updateStartup } from "../../../services/startupService";
 import { apiEndpoints } from "./apiDocs";
 import { nextRunFromCron, isValidCron } from "../../../utils/cron";
 import {
@@ -64,6 +66,12 @@ import {
   createBackupRecord,
   deleteBackupRecord,
 } from "../../../services/backupService";
+import {
+  listSchedules,
+  getSchedule,
+  createSchedule,
+  deleteSchedule,
+} from "../../../services/scheduleService";
 import {
   BCRYPT_SALT_ROUNDS,
   DEFAULT_PAGE_SIZE,
@@ -1689,12 +1697,7 @@ const coreModule: Module = {
             return;
           }
 
-          const databases = await prisma.serverDatabase.findMany({
-            where: { serverId: server.UUID },
-            include: { host: { select: { id: true, name: true } } },
-            orderBy: { createdAt: "desc" },
-          });
-
+          const databases = await listDatabases(server.UUID);
           res.json({ data: databases });
         } catch (error) {
           logger.error("Error fetching databases:", error);
@@ -1713,90 +1716,23 @@ const coreModule: Module = {
         const { hostId } = req.body as { hostId?: string | number };
 
         try {
-          const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+          const db = await provisionDatabase(serverId, { hostId: hostId! });
+          await apiAudit(req, "database:create", serverId, {
+            databaseId: db.id,
+            hostId: db.hostId,
           });
-          if (!server) {
-            res.status(404).json({ error: "Server not found" });
-            return;
-          }
-
-          const host = await prisma.databaseHost.findUnique({
-            where: { id: parseInt(String(hostId), 10) },
-          });
-          if (!host) {
-            res.status(400).json({ error: "Invalid database host." });
-            return;
-          }
-          if (host.nodeId !== null && host.nodeId !== server.nodeId) {
-            res.status(403).json({
-              error:
-                "This database host is not available for this server's node.",
-            });
-            return;
-          }
-
-          const databaseLimit = server.databaseLimit ?? 0;
-          if (databaseLimit > 0) {
-            const existing = await prisma.serverDatabase.count({
-              where: { serverId: server.UUID },
-            });
-            if (existing >= databaseLimit) {
-              res
-                .status(400)
-                .json({ error: `Database limit reached (${databaseLimit}).` });
-              return;
-            }
-          }
-
-          const owner = await prisma.users.findUnique({
-            where: { id: server.ownerId },
-          });
-          const settings = await getSettings();
-          const userMaxDatabases =
-            owner?.maxDatabases !== null && owner?.maxDatabases !== undefined
-              ? (owner.maxDatabases ?? 0)
-              : (settings?.defaultMaxDatabases ?? 0);
-          if (userMaxDatabases > 0) {
-            const totalOwnerDatabases = await prisma.serverDatabase.count({
-              where: { server: { ownerId: server.ownerId } },
-            });
-            if (totalOwnerDatabases >= userMaxDatabases) {
-              res.status(400).json({
-                error: `You have reached your database limit of ${userMaxDatabases} across all servers.`,
-              });
-              return;
-            }
-          }
-
-          try {
-            const credentials = await provisionDatabase(host, server.UUID);
-            const db = await prisma.serverDatabase.create({
-              data: {
-                serverId: server.UUID,
-                hostId: host.id,
-                ...credentials,
-              },
-              include: { host: { select: { id: true, name: true } } },
-            });
-            await apiAudit(req, "database:create", server.UUID, {
-              databaseId: db.id,
-              hostId: host.id,
-            });
-            res.status(201).json({ data: db });
-          } catch (error) {
-            logger.error("Failed to provision database:", error);
-            res.status(502).json({
-              error: safeClientMessage(
-                error,
-                "Failed to connect to the database host.",
-              ),
-            });
-            return;
-          }
-        } catch (error) {
+          res.status(201).json({ data: db });
+        } catch (error: unknown) {
+          const msg =
+            error instanceof Error
+              ? error.message
+              : "Failed to create database";
+          const isProvisionError =
+            msg.includes("database host") || msg.includes("limit reached");
           logger.error("Error creating database:", error);
-          res.status(500).json({ error: "Failed to create database" });
+          res
+            .status(isProvisionError ? 502 : 500)
+            .json({ error: safeClientMessage(error, msg) });
           return;
         }
       },
@@ -1811,43 +1747,22 @@ const coreModule: Module = {
         const dbId = parseInt(getParamAsString(req.params.dbId), 10);
 
         try {
-          const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+          await deprovisionDatabase(dbId, serverId);
+          await apiAudit(req, "database:delete", serverId, {
+            databaseId: dbId,
           });
-          if (!server) {
-            res.status(404).json({ error: "Server not found" });
-            return;
-          }
-
-          const db = await prisma.serverDatabase.findUnique({
-            where: { id: dbId },
-            include: { host: true },
-          });
-          if (!db || db.serverId !== server.UUID) {
-            res.status(404).json({ error: "Database not found." });
-            return;
-          }
-
-          try {
-            await deprovisionDatabase(db.host, db);
-            await prisma.serverDatabase.delete({ where: { id: db.id } });
-            await apiAudit(req, "database:delete", serverId, {
-              databaseId: db.id,
-            });
-            res.json({ data: { success: true } });
-          } catch (error) {
-            logger.error("Failed to deprovision database:", error);
-            res.status(502).json({
-              error: safeClientMessage(
-                error,
-                "Failed to remove the database from the host.",
-              ),
-            });
-            return;
-          }
-        } catch (error) {
+          res.json({ data: { success: true } });
+        } catch (error: unknown) {
+          const msg =
+            error instanceof Error
+              ? error.message
+              : "Failed to delete database";
+          const isDeprovisionError =
+            msg.includes("database host") || msg.includes("not found");
           logger.error("Error deleting database:", error);
-          res.status(500).json({ error: "Failed to delete database" });
+          res
+            .status(isDeprovisionError ? 502 : 500)
+            .json({ error: safeClientMessage(error, msg) });
           return;
         }
       },
@@ -2072,39 +1987,12 @@ const coreModule: Module = {
       apiValidator("airlink.api.servers.read"),
       async (req: Request, res: Response) => {
         try {
-          const server = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(req.params.id) },
-            include: { image: true },
-          });
-          if (!server) {
+          const startup = await getStartup(getParamAsString(req.params.id));
+          if (!startup) {
             res.status(404).json({ error: "Server not found" });
             return;
           }
-
-          let variables: unknown[] = [];
-          try {
-            const parsed = JSON.parse(server.Variables || "[]");
-            if (Array.isArray(parsed)) {
-              variables = parsed;
-            }
-          } catch {
-            // ignore malformed variables
-          }
-
-          res.json({
-            data: {
-              startCommand: server.StartCommand,
-              dockerImage: (() => {
-                try {
-                  const d = JSON.parse(server.dockerImage || "{}");
-                  return Object.values(d)[0] ?? null;
-                } catch {
-                  return null;
-                }
-              })(),
-              variables,
-            },
-          });
+          res.json({ data: startup });
         } catch (error) {
           logger.error("Error fetching startup:", error);
           res.status(500).json({ error: "Internal Server Error" });
@@ -2126,87 +2014,15 @@ const coreModule: Module = {
         };
 
         try {
-          const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
-            include: { node: true, image: true },
+          const result = await updateStartup(serverId, {
+            startCommand,
+            dockerImage,
+            variables:
+              variables as import("../../user/server/shared").ServerVariable[],
           });
-          if (!server) {
-            res.status(404).json({ error: "Server not found" });
+          if (result) {
+            res.status(400).json(result);
             return;
-          }
-
-          const data: Record<string, unknown> = {};
-
-          if (startCommand !== undefined) {
-            data.StartCommand = startCommand;
-          }
-
-          if (dockerImage !== undefined) {
-            let valid = false;
-            let imageObj: Record<string, string> = {};
-            let available: string[] = [];
-            try {
-              const arr = JSON.parse(server.image?.dockerImages || "[]");
-              if (Array.isArray(arr)) {
-                for (const obj of arr) {
-                  for (const key of Object.keys(obj)) {
-                    available.push(key);
-                    if (key === dockerImage) {
-                      valid = true;
-                      imageObj = { [key]: obj[key] };
-                    }
-                  }
-                }
-              }
-            } catch {
-              available = [];
-            }
-            if (!valid) {
-              res.status(400).json({ error: "Invalid Docker image selected" });
-              return;
-            }
-            data.dockerImage = JSON.stringify(imageObj);
-          }
-
-          if (variables !== undefined) {
-            if (!Array.isArray(variables)) {
-              res.status(400).json({ error: "Variables must be an array" });
-              return;
-            }
-            // Validate against stored rules before persisting.
-            let defs: {
-              env?: string;
-              rules?: string;
-              rulesMessage?: string;
-            }[] = [];
-            try {
-              defs = JSON.parse(server.Variables || "[]");
-            } catch {
-              defs = [];
-            }
-            const defByEnv = new Map(defs.map((d) => [d.env, d]));
-            for (const v of variables as Record<string, unknown>[]) {
-              const def = defByEnv.get(String(v.env));
-              const rulesSource = def
-                ? { ...def, name: def.env, env: def.env, ...(v as object) }
-                : v;
-              const err = validateVariableRules(
-                rulesSource as unknown as import("../../user/server/shared").ServerVariable,
-                String(v.value ?? ""),
-              );
-              if (err) {
-                res.status(400).json({
-                  error: "Variable validation failed.",
-                  fields: [{ key: v.env, error: err }],
-                });
-                return;
-              }
-            }
-            data.Variables = JSON.stringify(variables);
-          }
-
-          if (Object.keys(data).length > 0) {
-            await prisma.server.update({ where: { UUID: serverId }, data });
           }
 
           await apiAudit(req, "server:update-startup", serverId);
@@ -2235,11 +2051,7 @@ const coreModule: Module = {
             return;
           }
 
-          const schedules = await prisma.schedule.findMany({
-            where: { serverId: server.UUID },
-            include: { tasks: { orderBy: { order: "asc" } } },
-            orderBy: { createdAt: "desc" },
-          });
+          const schedules = await listSchedules(server.UUID);
 
           res.json({
             data: schedules.map((s) => ({
@@ -2297,15 +2109,11 @@ const coreModule: Module = {
             return;
           }
 
-          const schedule = await prisma.schedule.create({
-            data: {
-              serverId: server.UUID,
-              name: name.trim(),
-              cron: cron.trim(),
-              enabled: true,
-              timeOffset: offset,
-              nextRunAt: nextRunFromCron(cron.trim()),
-            },
+          const schedule = await createSchedule(server.UUID, {
+            name: name.trim(),
+            cron: cron.trim(),
+            timeOffset: offset,
+            nextRunAt: nextRunFromCron(cron.trim()),
           });
 
           res.status(201).json({ data: schedule });
@@ -2341,9 +2149,7 @@ const coreModule: Module = {
             return;
           }
 
-          const schedule = await prisma.schedule.findFirst({
-            where: { id: scheduleId, serverId: server.UUID },
-          });
+          const schedule = await getSchedule(scheduleId, server.UUID);
           if (!schedule) {
             res.status(404).json({ error: "Schedule not found" });
             return;
@@ -2398,15 +2204,12 @@ const coreModule: Module = {
             return;
           }
 
-          const schedule = await prisma.schedule.findFirst({
-            where: { id: scheduleId, serverId: server.UUID },
-          });
-          if (!schedule) {
+          const deleted = await deleteSchedule(scheduleId, server.UUID);
+          if (!deleted) {
             res.status(404).json({ error: "Schedule not found" });
             return;
           }
 
-          await prisma.schedule.delete({ where: { id: schedule.id } });
           res.json({ data: { success: true } });
         } catch (error) {
           logger.error("Error deleting schedule:", error);
@@ -2475,9 +2278,7 @@ const coreModule: Module = {
             return;
           }
 
-          const schedule = await prisma.schedule.findFirst({
-            where: { id: scheduleId, serverId: server.UUID },
-          });
+          const schedule = await getSchedule(scheduleId, server.UUID);
           if (!schedule) {
             res.status(404).json({ error: "Schedule not found" });
             return;
@@ -2527,9 +2328,7 @@ const coreModule: Module = {
             return;
           }
 
-          const schedule = await prisma.schedule.findFirst({
-            where: { id: scheduleId, serverId: server.UUID },
-          });
+          const schedule = await getSchedule(scheduleId, server.UUID);
           if (!schedule) {
             res.status(404).json({ error: "Schedule not found" });
             return;

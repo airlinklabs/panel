@@ -15,6 +15,11 @@ import {
   createBackup,
   deleteBackup,
 } from "../../../services/backupService";
+import {
+  listSchedules,
+  createSchedule,
+  deleteSchedule,
+} from "../../../services/scheduleService";
 import { runtimeStartQueue } from "../../../handlers/runtimeQueue";
 import { NodeCapacityExceededError } from "../../../handlers/utils/server/resourceCheck";
 import { logActivity } from "../../../handlers/utils/activity/activityLogger";
@@ -768,24 +773,22 @@ const clientApiModule: Module = {
             return;
           }
 
-          const schedules = await prisma.schedule.findMany({
-            where: { serverId: server.UUID },
-            select: {
-              id: true,
-              name: true,
-              cron: true,
-              enabled: true,
-              nextRunAt: true,
-              lastRunAt: true,
-              createdAt: true,
-              tasks: {
-                orderBy: { order: "asc" },
-                select: { id: true, action: true, payload: true, order: true },
-              },
-            },
-            orderBy: { createdAt: "desc" },
-          });
-          const data = schedules satisfies ClientSchedule[];
+          const allSchedules = await listSchedules(server.UUID);
+          const data = allSchedules.map((s) => ({
+            id: s.id,
+            name: s.name,
+            cron: s.cron,
+            enabled: s.enabled,
+            nextRunAt: s.nextRunAt,
+            lastRunAt: s.lastRunAt,
+            createdAt: s.createdAt,
+            tasks: s.tasks.map((t) => ({
+              id: t.id,
+              action: t.action,
+              payload: t.payload,
+              order: t.order,
+            })),
+          })) satisfies ClientSchedule[];
 
           res.json({ data });
         } catch (err) {
@@ -830,22 +833,17 @@ const clientApiModule: Module = {
           const { name, cron, action, payload } =
             req.validatedBody as CreateScheduleBody;
 
-          const schedule = await prisma.schedule.create({
-            data: {
-              name,
-              cron,
-              enabled: true,
-              nextRunAt: nextRunFromCron(cron.trim()),
-              serverId: server.UUID,
-              tasks: {
-                create: {
-                  order: 0,
-                  action,
-                  payload: payload ?? "{}",
-                },
+          const schedule = await createSchedule(server.UUID, {
+            name,
+            cron,
+            nextRunAt: nextRunFromCron(cron.trim()),
+            tasks: {
+              create: {
+                order: 0,
+                action,
+                payload: payload ?? "{}",
               },
             },
-            include: { tasks: { orderBy: { order: "asc" } } },
           });
 
           await logActivity(
@@ -904,21 +902,17 @@ const clientApiModule: Module = {
             return jsonError(res, "Invalid schedule ID");
           }
 
-          const schedule = await prisma.schedule.findFirst({
-            where: { id: scheduleId, serverId: server.UUID },
-          });
-          if (!schedule) {
+          const deleted = await deleteSchedule(scheduleId, server.UUID);
+          if (!deleted) {
             return jsonError(res, "Schedule not found", 404);
           }
-
-          await prisma.schedule.delete({ where: { id: scheduleId } });
 
           await logActivity(
             req,
             "schedule:delete" as Parameters<typeof logActivity>[1],
             {
               serverId: server.UUID,
-              metadata: { name: schedule.name, source: "client-api" },
+              metadata: { name: deleted.name, source: "client-api" },
             },
           );
 
