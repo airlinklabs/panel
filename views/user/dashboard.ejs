@@ -496,7 +496,7 @@ function dashboard() {
             e.preventDefault();
             var uuid = e.currentTarget.dataset.uuid;
             try {
-              var r = await fetch('/api/folders/servers/' + uuid, { method: 'DELETE' });
+              var r = await fetch('/api/v2/account/folders/servers/' + uuid, { method: 'DELETE' });
               var d = await r.json();
               if (d.success) {
                 showToast('Removed from folder.', 'success');
@@ -570,7 +570,7 @@ function dashboard() {
           if (!dragUUID) return;
           var folderId = card.dataset.folderId;
           try {
-            var r = await fetch('/api/folders/' + folderId + '/servers', {
+            var r = await fetch('/api/v2/account/folders/' + folderId + '/servers', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ serverUUID: dragUUID }),
@@ -656,7 +656,7 @@ function dashboard() {
         if (!name) return;
         confirmNewFolder.disabled = true;
         try {
-          var r = await fetch('/api/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name }) });
+          var r = await fetch('/api/v2/account/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name }) });
           var d = await r.json();
           confirmNewFolder.disabled = false;
           if (d.success) {
@@ -703,7 +703,7 @@ function dashboard() {
         if (!activeFolderId) return;
         confirmDeleteFolder.disabled = true;
         try {
-          var r = await fetch('/api/folders/' + activeFolderId, { method: 'DELETE' });
+          var r = await fetch('/api/v2/account/folders/' + activeFolderId, { method: 'DELETE' });
           var d = await r.json();
           confirmDeleteFolder.disabled = false;
           closeOverlay(deleteFolderOverlay, deleteFolderPanel);
@@ -806,7 +806,7 @@ function dashboard() {
           if (allFolders.length === 0) { showToast('Create a folder first.', 'error'); return; }
           if (allFolders.length === 1) {
             try {
-              var r = await fetch('/api/folders/' + allFolders[0].id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
+              var r = await fetch('/api/v2/account/folders/' + allFolders[0].id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
               var d = await r.json();
               if (d.success) {
                 showToast('Added to folder.', 'success');
@@ -829,7 +829,7 @@ function dashboard() {
         btn.addEventListener('click', async function (e) {
           e.stopPropagation();
           try {
-            var r = await fetch('/api/folders/servers/' + btn.dataset.uuid, { method: 'DELETE' });
+            var r = await fetch('/api/v2/account/folders/servers/' + btn.dataset.uuid, { method: 'DELETE' });
             var d = await r.json();
             if (d.success) {
               showToast('Removed from folder.', 'success');
@@ -856,7 +856,7 @@ function dashboard() {
           btn.innerHTML = alIcon('folder', 'h-4 w-4 text-amber-500 shrink-0') + '<span class="text-sm text-neutral-800 dark:text-white">' + escapeHtml(f.name) + '</span>';
           btn.addEventListener('click', async function () {
             try {
-              var r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: serverUUID }) });
+              var r = await fetch('/api/v2/account/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: serverUUID }) });
               var d = await r.json();
               if (d.success) {
                 showToast('Added to folder.', 'success');
@@ -999,7 +999,7 @@ function dashboard() {
           finishBtn.classList.toggle('hidden', currentStep !== TOTAL_STEPS - 1);
         }
         function setCompleted() {
-          fetch('/onboarding/complete', { method: 'POST' })
+          fetch('/api/v2/account/onboarding/complete', { method: 'POST' })
             .then(function () { onboardingModal.remove(); })
             .catch(function () { onboardingModal.remove(); });
         }
@@ -1007,18 +1007,18 @@ function dashboard() {
         prevBtn.addEventListener('click', function () { if (currentStep > 0) { currentStep--; renderStep(); } });
         finishBtn.addEventListener('click', function (e) {
           e.preventDefault();
-          fetch('/onboarding/skip', { method: 'POST' })
+          fetch('/api/v2/account/onboarding/skip', { method: 'POST' })
             .then(function () { onboardingModal.remove(); })
             .catch(function () { onboardingModal.remove(); });
         });
         skipBtn.addEventListener('click', function () {
-          fetch('/onboarding/skip', { method: 'POST' })
+          fetch('/api/v2/account/onboarding/skip', { method: 'POST' })
             .then(function () { onboardingModal.remove(); })
             .catch(function () { onboardingModal.remove(); });
         });
         onboardingModal.addEventListener('click', function (e) {
           if (e.target === onboardingModal) {
-            fetch('/onboarding/skip', { method: 'POST' })
+            fetch('/api/v2/account/onboarding/skip', { method: 'POST' })
               .then(function () { onboardingModal.remove(); })
               .catch(function () { onboardingModal.remove(); });
           }
