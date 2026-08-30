@@ -65,7 +65,7 @@
                 <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
               </a>
               <button
-                hx-delete="/admin/node/<%= node.id %>"
+                hx-delete="/api/v2/admin/nodes/<%= node.id %>"
                 hx-target="#admin-nodes-table"
                 hx-swap="outerHTML"
                 hx-confirm="This will permanently remove the node. This cannot be undone."

@@ -425,8 +425,8 @@ function imageEditor() {
 
   async function savePayload(payload) {
     try {
-      const r = await fetch('/admin/images/edit/' + imageId, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      const r = await fetch('/api/v2/admin/images/' + imageId, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       });
       const data = await r.json();
       if (data.success) {

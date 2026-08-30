@@ -133,8 +133,8 @@
             loader.updateProgress(20, 'Contacting node...');
             <% if (user && user.isAdmin) { %>
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            fetch('/admin/server/delete/<%= server.id %>', {
-              method: 'POST',
+            fetch('/api/v2/admin/servers/<%= server.id %>', {
+              method: 'DELETE',
               headers: { 'csrf-token': csrfToken },
             })
               .then(r => {

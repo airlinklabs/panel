@@ -9,7 +9,7 @@
       <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);">Add a MySQL host to start provisioning databases.</p>
       <div class="mt-5">
         <button type="button" class="al-btn-primary"
-          hx-post="/admin/databases/auto-host"
+          hx-post="/api/v2/admin/databases/auto-host"
           hx-target="#admin-databases-list"
           hx-swap="outerHTML"
           hx-indicator="#auto-host-status">

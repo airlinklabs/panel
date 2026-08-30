@@ -27,7 +27,7 @@
                 <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.adminDbAutoHostDesc || 'Creates a MySQL host from the panel environment defaults (MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD) when none exists, then verifies the connection.' %></p>
               </div>
               <button type="button" class="al-btn-primary shrink-0" id="autoHostBtn"
-                hx-post="/admin/databases/auto-host"
+                hx-post="/api/v2/admin/databases/auto-host"
                 hx-target="#admin-databases-list"
                 hx-swap="outerHTML"
                 hx-disabled-elt="this"
@@ -45,7 +45,7 @@
                 <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.adminDbAutoBucketDesc || 'Creates the bucket configured in Admin Settings on your S3-compatible endpoint if it does not exist yet.' %></p>
               </div>
               <button type="button" class="al-btn-primary shrink-0" id="autoBucketBtn"
-                hx-post="/admin/databases/auto-bucket"
+                hx-post="/api/v2/admin/databases/auto-bucket"
                 hx-swap="none"
                 hx-disabled-elt="this"
                 hx-indicator="#auto-bucket-card-status">
