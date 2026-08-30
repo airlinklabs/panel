@@ -46,7 +46,7 @@ function requestedOrNull(value: unknown): number | null {
 }
 
 async function countAdmins(): Promise<number> {
-  return prisma.users.count({ where: { isAdmin: true } });
+  return prisma.users.count({ where: { role: { in: ["owner", "admin"] } } });
 }
 
 // ── Shared view-model ─────────────────────────────────────────────────────
@@ -388,15 +388,16 @@ const adminModule: Module = {
                   "The owner cannot be deleted. Transfer ownership first.",
               });
             }
-            res
-              .status(403)
-              .json({
-                error: "The owner cannot be deleted. Transfer ownership first.",
-              });
+            res.status(403).json({
+              error: "The owner cannot be deleted. Transfer ownership first.",
+            });
             return;
           }
 
-          if (dataUser.isAdmin && (await countAdmins()) <= 1) {
+          if (
+            (dataUser.role === "owner" || dataUser.role === "admin") &&
+            (await countAdmins()) <= 1
+          ) {
             if (req.get("HX-Request") === "true") {
               return res.status(400).render("fragments/shared/error-banner", {
                 targetId: "admin-users",
@@ -530,10 +531,12 @@ const adminModule: Module = {
 
           // Handle isAdmin field (convert to boolean)
           const newIsAdmin = isAdmin === true || isAdmin === "true";
+          const targetIsAdmin =
+            targetUser.role === "owner" || targetUser.role === "admin";
           if (
             isAdmin !== undefined &&
             isAdmin !== null &&
-            targetUser.isAdmin &&
+            targetIsAdmin &&
             !newIsAdmin
           ) {
             const isSelf = targetUserId === userId;
@@ -569,11 +572,9 @@ const adminModule: Module = {
           // restricted by anyone — ownership only moves through the explicit
           // owner-transfer flow.
           if (targetUser.role === "owner" && userId !== targetUserId) {
-            res
-              .status(403)
-              .json({
-                error: "The owner cannot be edited by anyone but the owner.",
-              });
+            res.status(403).json({
+              error: "The owner cannot be edited by anyone but the owner.",
+            });
             return;
           }
 
@@ -596,12 +597,10 @@ const adminModule: Module = {
           if (nextRole !== undefined) {
             // Admins must never be able to grant or strip the owner role.
             if (nextRole === "owner") {
-              res
-                .status(403)
-                .json({
-                  error:
-                    "Only the owner-transfer flow can assign the owner role.",
-                });
+              res.status(403).json({
+                error:
+                  "Only the owner-transfer flow can assign the owner role.",
+              });
               return;
             }
             const { role: updatedRole, isAdmin: updatedIsAdmin } =
@@ -683,11 +682,9 @@ const adminModule: Module = {
           // Only the current owner may hand over ownership. This guards the
           // owner role even from a session that has admin permissions.
           if (actor.role !== "owner") {
-            res
-              .status(403)
-              .json({
-                error: "Only the current owner can transfer ownership.",
-              });
+            res.status(403).json({
+              error: "Only the current owner can transfer ownership.",
+            });
             return;
           }
 
@@ -729,11 +726,9 @@ const adminModule: Module = {
             },
           });
 
-          res
-            .status(200)
-            .json({
-              message: `Ownership transferred to ${targetUser.username}.`,
-            });
+          res.status(200).json({
+            message: `Ownership transferred to ${targetUser.username}.`,
+          });
         } catch (error: unknown) {
           logger.error("Error transferring owner role:", error);
           res.status(500).json({ error: "Internal server error" });

@@ -8,6 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Role'
 export type * from './models/Users'
 export type * from './models/PasswordReset'
 export type * from './models/Server'

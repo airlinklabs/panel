@@ -132,7 +132,7 @@ const authServiceModule: Module = {
           req.session.user = {
             id: user.id,
             email: user.email,
-            isAdmin: user.isAdmin,
+            isAdmin: user.role === "owner" || user.role === "admin",
             description: user.description ?? "",
             username: user.username ?? "",
             role: user.role,
@@ -225,7 +225,7 @@ const authServiceModule: Module = {
             req.session.user = {
               id: user.id,
               email: user.email,
-              isAdmin: user.isAdmin,
+              isAdmin: user.role === "owner" || user.role === "admin",
               description: user.description ?? "",
               username: user.username ?? "",
               role: user.role,

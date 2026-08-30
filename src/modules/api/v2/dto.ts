@@ -9,6 +9,7 @@
  */
 
 import { z } from "zod";
+import { SUBUSER_PERMISSIONS } from "../../../handlers/utils/auth/serverAuthUtil";
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -31,6 +32,27 @@ const safeFilename = z
     (v) => !v.includes("/") && !v.includes("\\"),
     "must be a filename, not a path",
   );
+
+const VALID_PERMISSIONS = new Set<string>(SUBUSER_PERMISSIONS);
+
+export const permissionSchema = z.array(z.string()).refine(
+  (perms) =>
+    perms.every((p) => {
+      // Exact match
+      if (VALID_PERMISSIONS.has(p)) return true;
+      // Wildcard: "files.*" → check group exists with read or create
+      if (p.endsWith(".*")) {
+        const group = p.slice(0, -2);
+        return (
+          VALID_PERMISSIONS.has(group + ".read") ||
+          VALID_PERMISSIONS.has(group + ".create")
+        );
+      }
+      // Parent: "files" → check any "files.*" exists
+      return [...VALID_PERMISSIONS].some((v) => v.startsWith(p + "."));
+    }),
+  { message: "Invalid permission string" },
+);
 
 // ---------------------------------------------------------------------------
 // Server
@@ -152,12 +174,12 @@ export type CreateScheduleTaskBody = z.infer<typeof createScheduleTaskBody>;
 
 export const createSubUserBody = z.object({
   userId: z.number().int().positive(),
-  permissions: z.array(z.string()).optional().default([]),
+  permissions: permissionSchema.optional().default([]),
 });
 export type CreateSubUserBody = z.infer<typeof createSubUserBody>;
 
 export const updateSubUserBody = z.object({
-  permissions: z.array(z.string()),
+  permissions: permissionSchema,
 });
 export type UpdateSubUserBody = z.infer<typeof updateSubUserBody>;
 
@@ -436,6 +458,11 @@ export const adminSettingsServerPolicyBody = z.object({
   allowPrivilegedMaxCpu: z.number().int().min(0).optional(),
   allowPrivilegedMaxStorage: z.number().int().min(0).optional(),
   allowPrivilegedMaxDatabases: z.number().int().min(0).optional(),
+  defaultMemory: z.number().int().min(0).optional(),
+  defaultCpu: z.number().int().min(0).optional(),
+  defaultDisk: z.number().int().min(0).optional(),
+  maxServersPerUser: z.number().int().min(0).optional(),
+  onboardingSteps: z.string().optional(),
 });
 export type AdminSettingsServerPolicyBody = z.infer<
   typeof adminSettingsServerPolicyBody
@@ -448,8 +475,25 @@ export const adminSettingsSmtpBody = z.object({
   smtpPassword: z.string().nullable().optional(),
   smtpFrom: z.string().nullable().optional(),
   smtpSecure: z.boolean().optional(),
+  emailCooldown: z.number().int().min(0).optional(),
 });
 export type AdminSettingsSmtpBody = z.infer<typeof adminSettingsSmtpBody>;
+
+export const adminSettingsFeaturesBody = z.object({
+  twoFactorRequired: z.boolean().optional(),
+  sftpEnabled: z.boolean().optional(),
+  backupsEnabled: z.boolean().optional(),
+  schedulesEnabled: z.boolean().optional(),
+  databasesEnabled: z.boolean().optional(),
+  fileManagerEnabled: z.boolean().optional(),
+  consoleEnabled: z.boolean().optional(),
+  playerTrackingEnabled: z.boolean().optional(),
+  scannerEnabled: z.boolean().optional(),
+  airlinkCloudEnabled: z.boolean().optional(),
+});
+export type AdminSettingsFeaturesBody = z.infer<
+  typeof adminSettingsFeaturesBody
+>;
 
 export const adminSettingsS3Body = z.object({
   s3Enabled: z.boolean().optional(),
@@ -573,6 +617,39 @@ export const adminUpdateApiKeyBody = z.object({
   active: z.boolean().optional(),
 });
 export type AdminUpdateApiKeyBody = z.infer<typeof adminUpdateApiKeyBody>;
+
+// ---------------------------------------------------------------------------
+// Admin — Roles
+// ---------------------------------------------------------------------------
+
+export const adminCreateRoleBody = z.object({
+  name: z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[a-zA-Z0-9_-]+$/),
+  displayName: z.string().min(1).max(100),
+  description: z.string().max(500).nullable().optional(),
+  permissions: permissionSchema.optional().default([]),
+  isAdmin: z.boolean().optional().default(false),
+  sortOrder: z.number().int().min(0).optional().default(0),
+});
+export type AdminCreateRoleBody = z.infer<typeof adminCreateRoleBody>;
+
+export const adminUpdateRoleBody = z.object({
+  name: z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[a-zA-Z0-9_-]+$/)
+    .optional(),
+  displayName: z.string().min(1).max(100).optional(),
+  description: z.string().max(500).nullable().optional(),
+  permissions: permissionSchema.optional(),
+  isAdmin: z.boolean().optional(),
+  sortOrder: z.number().int().min(0).optional(),
+});
+export type AdminUpdateRoleBody = z.infer<typeof adminUpdateRoleBody>;
 
 // ---------------------------------------------------------------------------
 // Admin — Allocations

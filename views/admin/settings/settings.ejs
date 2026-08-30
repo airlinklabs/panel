@@ -27,6 +27,7 @@
           <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('palette', { class: 'size-4', strokeWidth: 1.5 }) %>Appearance</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>Servers</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %>Security</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-features" id="tab-features" data-tab="features" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('toggle-left', { class: 'size-4', strokeWidth: 1.5 }) %>Features</button>
         </div>
 
         <!-- ── APPEARANCE ──────────────────────────────────────────────────── -->
@@ -258,7 +259,7 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Show onboarding tutorial</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">New users get a short 3-step tutorial after their first login.</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">New users get a short tutorial after their first login.</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="onboardingEnabled" class="sr-only peer" aria-label="Show onboarding tutorial" <%= settings.onboardingEnabled ? 'checked' : '' %>>
@@ -266,6 +267,23 @@
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
+              </div>
+
+              <div id="onboardingStepsEditor" class="mt-4 pt-4" style="border-top:1px solid var(--theme-border)">
+                <div class="flex items-center justify-between mb-3">
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Onboarding steps</p>
+                  <div class="flex gap-2">
+                    <button type="button" id="onboardingPreviewBtn" class="al-btn-ghost px-3 py-1.5 text-xs font-medium" onclick="previewOnboarding()">
+                      <%- icon('eye', { class: 'size-3.5', strokeWidth: 1.5 }) %> Preview
+                    </button>
+                    <button type="button" id="addOnboardingStep" class="al-btn-ghost px-3 py-1.5 text-xs font-medium" onclick="addOnboardingStep()">
+                      <%- icon('plus', { class: 'size-3.5', strokeWidth: 1.5 }) %> Add step
+                    </button>
+                  </div>
+                </div>
+                <p class="text-xs mb-3" style="color:var(--theme-text-muted)">Define the steps shown to new users. Each step has a title, description, icon (lucide name), and optional CTA link.</p>
+                <div id="onboardingStepList" class="space-y-3"></div>
+                <textarea id="onboardingStepsJson" class="hidden" rows="4"><%= settings.onboardingSteps || '[]' %></textarea>
               </div>
             </div>
           </div>
@@ -530,6 +548,12 @@
                   </div>
                 </label>
               </div>
+              <div>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Email cooldown <span class="font-normal" style="color:var(--theme-text-muted)">(seconds)</span></label>
+                <input type="number" id="emailCooldown" value="<%= settings.emailCooldown ?? 30 %>" min="0" max="3600"
+                  class="al-input w-48">
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Minimum seconds between emails to the same user. 0 = no limit.</p>
+              </div>
             </div>
             <p id="smtpTestResult" class="px-4 pb-4 text-xs hidden"></p>
           </div>
@@ -627,6 +651,186 @@
 
         </div>
 
+        <!-- ── FEATURES ───────────────────────────────────────────────────── -->
+        <div id="panel-features" role="tabpanel" aria-labelledby="tab-features" data-tab-panel="features" class="tab-panel space-y-5" hidden>
+
+          <div class="al-card">
+            <h2 class="al-card-header">Authentication &amp; security</h2>
+            <div class="p-4 space-y-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Require 2FA for all users</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Force every user to enable two-factor authentication before accessing the panel.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="twoFactorRequired" class="sr-only peer" aria-label="Require 2FA for all users" <%= settings.twoFactorRequired ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="al-card">
+            <h2 class="al-card-header">Server features</h2>
+            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">Toggle features on or off for all servers. Changes apply immediately.</p>
+            <div class="p-4 space-y-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">SFTP access</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to connect via SFTP for file transfers.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="sftpEnabled" class="sr-only peer" aria-label="Enable SFTP access" <%= settings.sftpEnabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Backups</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to create and restore server backups.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="backupsEnabled" class="sr-only peer" aria-label="Enable backups" <%= settings.backupsEnabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Scheduled tasks</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to set up cron-based scheduled tasks for their servers.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="schedulesEnabled" class="sr-only peer" aria-label="Enable scheduled tasks" <%= settings.schedulesEnabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Databases</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to create and manage databases for their servers.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="databasesEnabled" class="sr-only peer" aria-label="Enable databases" <%= settings.databasesEnabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">File manager</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to browse and edit server files from the panel.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="fileManagerEnabled" class="sr-only peer" aria-label="Enable file manager" <%= settings.fileManagerEnabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Console access</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to view and interact with the server console.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="consoleEnabled" class="sr-only peer" aria-label="Enable console access" <%= settings.consoleEnabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Player tracking</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Track and display player count statistics per server.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="playerTrackingEnabled" class="sr-only peer" aria-label="Enable player tracking" <%= settings.playerTrackingEnabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Virus scanner</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Scan uploaded files for malware using the Radar engine.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="scannerEnabled" class="sr-only peer" aria-label="Enable virus scanner" <%= settings.scannerEnabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Airlink Cloud backups</p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Offload backups to Airlink Cloud storage.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="airlinkCloudEnabled" class="sr-only peer" aria-label="Enable Airlink Cloud backups" <%= settings.airlinkCloudEnabled ? 'checked' : '' %>>
+                  <div class="al-toggle-track">
+                    <div class="al-toggle-dot"></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="al-card">
+            <h2 class="al-card-header">Server creation defaults</h2>
+            <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)">Default resource allocations assigned to newly created servers.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 p-4">
+              <div>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Default memory</label>
+                <input type="hidden" id="featureDefaultMemory" value="<%= settings.defaultMemory %>">
+                <div class="flex items-stretch gap-0">
+                  <input type="number" id="featureDefaultMemoryDisplay" min="1"
+                    value="<%= settings.defaultMemory >= 1024 ? Math.round(settings.defaultMemory / 1024) : settings.defaultMemory %>"
+                    class="al-input rounded-l-xl flex-1 border-r-0">
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="featureDefaultMemoryDisplay" data-hidden="featureDefaultMemory"
+                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Default CPU <span class="font-normal" style="color:var(--theme-text-muted)">(%)</span></label>
+                <input type="number" id="featureDefaultCpu" value="<%= settings.defaultCpu %>" min="1" max="10000"
+                  class="al-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Default disk</label>
+                <input type="hidden" id="featureDefaultDisk" value="<%= settings.defaultDisk %>">
+                <div class="flex items-stretch gap-0">
+                  <input type="number" id="featureDefaultDiskDisplay" min="1"
+                    value="<%= settings.defaultDisk >= 1024 ? Math.round(settings.defaultDisk / 1024) : settings.defaultDisk %>"
+                    class="al-input rounded-l-xl flex-1 border-r-0">
+                  <button type="button" class="al-format-switcher" data-format-switcher
+                    data-display="featureDefaultDiskDisplay" data-hidden="featureDefaultDisk"
+                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Max servers per user</label>
+                <input type="number" id="maxServersPerUser" value="<%= settings.maxServersPerUser %>" min="0" max="10000"
+                  class="al-input">
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Overrides role-based limits. 0 = unlimited.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </div>
   </div>
@@ -646,6 +850,8 @@ function adminSettings() {
       if (serversPanel) serversPanel.querySelectorAll('input').forEach((input) => { input.addEventListener('change', () => this.saveServers()); });
       var securityPanel = document.getElementById('panel-security');
       if (securityPanel) securityPanel.querySelectorAll('input').forEach((input) => { input.addEventListener('change', () => this.saveSecurity()); });
+      var featuresPanel = document.getElementById('panel-features');
+      if (featuresPanel) featuresPanel.querySelectorAll('input').forEach((input) => { input.addEventListener('change', () => this.saveFeatures()); });
 
       document.getElementById('banIpBtn').addEventListener('click', async () => {
         const ip = document.getElementById('banIpInput').value.trim();
@@ -755,9 +961,11 @@ function adminSettings() {
     },
 
     saveServers() {
+      var stepsJson = document.getElementById('onboardingStepsJson');
       this.post('/api/v2/admin/settings/server-policy', {
         allowUserCreateServer: document.getElementById('allowUserCreateServer').checked, allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
         allowUserCreateImages: document.getElementById('allowUserCreateImages').checked, onboardingEnabled: document.getElementById('onboardingEnabled').checked,
+        onboardingSteps: stepsJson ? stepsJson.value : '[]',
         defaultServerLimit: parseInt(document.getElementById('defaultServerLimit').value, 10) || 0, defaultMaxMemory: parseInt(document.getElementById('defaultMaxMemory').value, 10) || 0,
         defaultMaxCpu: parseInt(document.getElementById('defaultMaxCpu').value, 10) || 0, defaultMaxStorage: parseInt(document.getElementById('defaultMaxStorage').value, 10) || 0,
         defaultMaxDatabases: parseInt(document.getElementById('defaultMaxDatabases').value, 10) || 0, defaultOverallocateMemory: parseInt(document.getElementById('defaultOverallocateMemory').value, 10) || 0,
@@ -780,6 +988,7 @@ function adminSettings() {
           smtpHost: document.getElementById('smtpHost').value.trim() || null, smtpPort: parseInt(document.getElementById('smtpPort').value, 10) || 587,
           smtpUser: document.getElementById('smtpUser').value.trim() || null, smtpPassword: document.getElementById('smtpPassword').value || null,
           smtpFrom: document.getElementById('smtpFrom').value.trim() || null, smtpSecure: document.getElementById('smtpSecure').checked,
+          emailCooldown: parseInt(document.getElementById('emailCooldown').value, 10) || 0,
         }),
         this.post('/api/v2/admin/settings/s3', {
           s3Enabled: document.getElementById('s3Enabled').checked, s3Endpoint: document.getElementById('s3Endpoint').value.trim() || null,
@@ -788,6 +997,27 @@ function adminSettings() {
           s3PathStyle: document.getElementById('s3PathStyle').checked,
         }),
       ]);
+    },
+
+    saveFeatures() {
+      this.post('/api/v2/admin/settings/features', {
+        twoFactorRequired: document.getElementById('twoFactorRequired').checked,
+        sftpEnabled: document.getElementById('sftpEnabled').checked,
+        backupsEnabled: document.getElementById('backupsEnabled').checked,
+        schedulesEnabled: document.getElementById('schedulesEnabled').checked,
+        databasesEnabled: document.getElementById('databasesEnabled').checked,
+        fileManagerEnabled: document.getElementById('fileManagerEnabled').checked,
+        consoleEnabled: document.getElementById('consoleEnabled').checked,
+        playerTrackingEnabled: document.getElementById('playerTrackingEnabled').checked,
+        scannerEnabled: document.getElementById('scannerEnabled').checked,
+        airlinkCloudEnabled: document.getElementById('airlinkCloudEnabled').checked,
+      });
+      this.post('/api/v2/admin/settings/server-policy', {
+        defaultMemory: parseInt(document.getElementById('featureDefaultMemory').value, 10) || 512,
+        defaultCpu: parseInt(document.getElementById('featureDefaultCpu').value, 10) || 100,
+        defaultDisk: parseInt(document.getElementById('featureDefaultDisk').value, 10) || 5120,
+        maxServersPerUser: parseInt(document.getElementById('maxServersPerUser').value, 10) || 10,
+      });
     },
 
     banRowHtml(ip) {
@@ -808,6 +1038,119 @@ function adminSettings() {
     },
   };
 }
+
+/* Onboarding step builder */
+var onbSteps = [];
+try { onbSteps = JSON.parse(document.getElementById('onboardingStepsJson').value || '[]'); } catch(e) { onbSteps = []; }
+
+function syncOnbJson() {
+  var ta = document.getElementById('onboardingStepsJson');
+  if (ta) ta.value = JSON.stringify(onbSteps);
+}
+
+function renderOnbStepList() {
+  var list = document.getElementById('onboardingStepList');
+  if (!list) return;
+  list.innerHTML = '';
+  onbSteps.forEach(function(step, i) {
+    var card = document.createElement('div');
+    card.className = 'rounded-xl p-3 mb-2';
+    card.style.cssText = 'background:var(--theme-bg-secondary);border:1px solid var(--theme-border)';
+    card.innerHTML =
+      '<div class="flex items-center justify-between mb-2">' +
+        '<span class="text-xs font-medium" style="color:var(--theme-text-muted)">Step ' + (i + 1) + '</span>' +
+        '<div class="flex gap-1">' +
+          (i > 0 ? '<button type="button" class="al-btn-ghost p-1 rounded" onclick="moveOnbStep(' + i + ',-1)" title="Move up">&uarr;</button>' : '') +
+          (i < onbSteps.length - 1 ? '<button type="button" class="al-btn-ghost p-1 rounded" onclick="moveOnbStep(' + i + ',1)" title="Move down">&darr;</button>' : '') +
+          '<button type="button" class="al-btn-ghost p-1 rounded" onclick="removeOnbStep(' + i + ')" style="color:var(--theme-danger)" title="Remove">&times;</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
+        '<div><label class="text-xs" style="color:var(--theme-text-muted)">Title</label>' +
+          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.title || '') + '" onchange="onbSteps[' + i + '].title=this.value;syncOnbJson()"></div>' +
+        '<div><label class="text-xs" style="color:var(--theme-text-muted)">Icon (lucide name)</label>' +
+          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.icon || '') + '" placeholder="e.g. server, shield, zap" onchange="onbSteps[' + i + '].icon=this.value;syncOnbJson()"></div>' +
+        '<div class="sm:col-span-2"><label class="text-xs" style="color:var(--theme-text-muted)">Description</label>' +
+          '<textarea rows="2" class="al-input text-xs py-1.5" onchange="onbSteps[' + i + '].text=this.value;syncOnbJson()">' + window.escHtml(step.text || '') + '</textarea></div>' +
+        '<div><label class="text-xs" style="color:var(--theme-text-muted)">CTA text (optional)</label>' +
+          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.cta || '') + '" placeholder="e.g. Get started" onchange="onbSteps[' + i + '].cta=this.value;syncOnbJson()"></div>' +
+        '<div><label class="text-xs" style="color:var(--theme-text-muted)">CTA URL (optional)</label>' +
+          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.ctaUrl || '') + '" placeholder="e.g. /create-server" onchange="onbSteps[' + i + '].ctaUrl=this.value;syncOnbJson()"></div>' +
+      '</div>';
+    list.appendChild(card);
+  });
+  syncOnbJson();
+}
+
+function addOnbStep() {
+  onbSteps.push({ title: '', text: '', icon: 'layout-dashboard', cta: '', ctaUrl: '' });
+  renderOnbStepList();
+}
+
+function removeOnbStep(i) {
+  onbSteps.splice(i, 1);
+  renderOnbStepList();
+}
+
+function moveOnbStep(i, dir) {
+  var j = i + dir;
+  if (j < 0 || j >= onbSteps.length) return;
+  var tmp = onbSteps[i];
+  onbSteps[i] = onbSteps[j];
+  onbSteps[j] = tmp;
+  renderOnbStepList();
+}
+
+function previewOnboarding() {
+  var steps = onbSteps.length > 0 ? onbSteps : [
+    { title: 'Your dashboard', text: 'This is where all your servers live.', icon: 'layout-dashboard' },
+    { title: 'Create your first server', text: 'Pick an image, choose a node, and allocate resources.', icon: 'server' },
+    { title: 'Make it yours', text: 'Set your avatar and profile in Account settings.', icon: 'user' }
+  ];
+  var iconPaths = {
+    'layout-dashboard': '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v-5H3z"/>',
+    'server': '<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>',
+    'user': '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    'settings': '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    'shield': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'
+  };
+  var cur = 0;
+  function svgIcon(n) { return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--theme-text)">' + (iconPaths[n] || iconPaths['layout-dashboard']) + '</svg>'; }
+
+  var overlay = document.createElement('div');
+  overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4';
+  overlay.style.cssText = 'background:rgba(0,0,0,0.5)';
+  var panel = document.createElement('div');
+  panel.className = 'rounded-2xl max-w-md w-full shadow-xl p-6';
+  panel.style.cssText = 'background:var(--theme-bg-card);border:1px solid var(--theme-border)';
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+
+  function renderPreview() {
+    var s = steps[cur];
+    var dots = steps.map(function(_, i) { return '<div class="flex-1 h-1 rounded-full" style="background:' + (i <= cur ? 'var(--theme-text)' : 'var(--theme-border-subtle)') + '"></div>'; }).join('');
+    var ctaHtml = (s.cta && s.ctaUrl) ? '<a href="' + s.ctaUrl + '" class="inline-flex items-center gap-1.5 mt-3 text-sm font-medium" style="color:var(--theme-text)">' + s.cta + ' &rarr;</a>' : '';
+    panel.innerHTML =
+      '<div class="flex items-start justify-between mb-5"><div><h2 class="text-base font-semibold" style="color:var(--theme-text-strong)">Welcome to the panel!</h2><p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">A few quick tips to get you started.</p></div><button type="button" class="al-btn-ghost p-2 rounded-lg" onclick="this.closest(\'.fixed\').remove()">&times;</button></div>' +
+      '<div class="mb-5"><div class="flex gap-2 mb-4">' + dots + '</div>' +
+      '<div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style="background:var(--theme-bg-secondary)">' + svgIcon(s.icon || 'layout-dashboard') + '</div>' +
+      '<h3 class="text-sm font-semibold mb-1.5" style="color:var(--theme-text-strong)">' + window.escHtml(s.title || 'Untitled step') + '</h3>' +
+      '<p class="text-sm leading-relaxed" style="color:var(--theme-text-muted)">' + window.escHtml(s.text || '') + '</p>' + ctaHtml + '</div>' +
+      '<div class="flex items-center justify-between gap-3">' +
+        '<button type="button" class="al-btn-ghost px-3 py-2 text-xs font-medium" ' + (cur === 0 ? 'style="visibility:hidden"' : '') + ' onclick="previewPrev()">&larr; Back</button>' +
+        '<span class="flex-1"></span>' +
+        (cur < steps.length - 1 ? '<button type="button" class="al-btn-primary px-4 py-2 text-sm font-medium" onclick="previewNext()">Next &rarr;</button>' : '<button type="button" class="al-btn-primary px-4 py-2 text-sm font-medium" onclick="this.closest(\'.fixed\').remove()">Done</button>') +
+      '</div>';
+  }
+  window.previewNext = function() { if (cur < steps.length - 1) { cur++; renderPreview(); } };
+  window.previewPrev = function() { if (cur > 0) { cur--; renderPreview(); } };
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+  renderPreview();
+}
+
+/* Init step list on page load */
+document.addEventListener('DOMContentLoaded', function() { renderOnbStepList(); });
 </script>
 
 <%- include('../../components/footer') %>

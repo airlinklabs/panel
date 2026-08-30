@@ -7,6 +7,7 @@ type UserSelect = {
   username: true;
   email: true;
   isAdmin: true;
+  role: true;
   description: true;
 };
 
@@ -15,6 +16,7 @@ const USER_SELECT: UserSelect = {
   username: true,
   email: true,
   isAdmin: true,
+  role: true,
   description: true,
 };
 
@@ -66,9 +68,11 @@ export async function createUser(data: {
   username: string;
   password: string;
   isAdmin?: boolean;
+  role?: string;
   description?: string;
 }) {
   const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS);
+  const role = data.role ?? (data.isAdmin ? "admin" : "user");
 
   return prisma.users.create({
     data: {
@@ -76,6 +80,7 @@ export async function createUser(data: {
       username: data.username,
       password: hashedPassword,
       isAdmin: data.isAdmin ?? false,
+      role,
       description: data.description ?? null,
     },
     select: USER_SELECT,
@@ -89,6 +94,7 @@ export async function updateUser(
     username?: string;
     password?: string;
     isAdmin?: boolean;
+    role?: string;
     description?: string;
   },
 ) {
@@ -97,6 +103,7 @@ export async function updateUser(
   if (data.email !== undefined) updateData.email = data.email;
   if (data.username !== undefined) updateData.username = data.username;
   if (data.isAdmin !== undefined) updateData.isAdmin = data.isAdmin;
+  if (data.role !== undefined) updateData.role = data.role;
   if (data.description !== undefined) updateData.description = data.description;
   if (data.password !== undefined) {
     updateData.password = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS);
@@ -112,12 +119,12 @@ export async function updateUser(
 export async function isLastAdmin(userId: number): Promise<boolean> {
   const user = await prisma.users.findUnique({
     where: { id: userId },
-    select: { isAdmin: true },
+    select: { role: true },
   });
-  if (!user || !user.isAdmin) return false;
+  if (!user || !(user.role === "owner" || user.role === "admin")) return false;
 
   const adminCount = await prisma.users.count({
-    where: { isAdmin: true },
+    where: { role: { in: ["owner", "admin"] } },
   });
   return adminCount <= 1;
 }

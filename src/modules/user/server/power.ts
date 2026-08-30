@@ -203,7 +203,8 @@ export function registerPowerRoutes(router: Router): void {
               serverId: String(serverId),
               userId: user.id,
               priority:
-                user.isAdmin === true ||
+                user.role === "owner" ||
+                user.role === "admin" ||
                 server.ownerId === user.id ||
                 user.role === "privileged",
             });
@@ -249,7 +250,8 @@ export function registerPowerRoutes(router: Router): void {
             serverId: String(serverId),
             userId: user.id,
             priority:
-              user.isAdmin === true ||
+              user.role === "owner" ||
+              user.role === "admin" ||
               server.ownerId === user.id ||
               user.role === "privileged",
           });
@@ -352,7 +354,8 @@ export function registerPowerRoutes(router: Router): void {
           serverId: String(serverId),
           userId: user.id,
           priority:
-            user.isAdmin === true ||
+            user.role === "owner" ||
+            user.role === "admin" ||
             server.ownerId === user.id ||
             user.role === "privileged",
         });
@@ -402,7 +405,10 @@ export function registerPowerRoutes(router: Router): void {
         }
 
         // Only the owning user or an admin may pull a server off the queue.
-        if (server.ownerId !== user.id && !user.isAdmin) {
+        if (
+          server.ownerId !== user.id &&
+          !(user.role === "owner" || user.role === "admin")
+        ) {
           res.status(403).json({ error: "You do not own this server." });
           return;
         }

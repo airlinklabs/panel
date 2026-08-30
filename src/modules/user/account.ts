@@ -106,7 +106,9 @@ const accountModule: Module = {
           }
 
           const allowed =
-            user.isAdmin === true || settings?.allowUserCreateImages === true;
+            user.role === "owner" ||
+            user.role === "admin" ||
+            settings?.allowUserCreateImages === true;
 
           res.render("user/account", {
             errorMessage,

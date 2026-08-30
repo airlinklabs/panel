@@ -227,10 +227,11 @@ const clientApiModule: Module = {
           if (action === "start") {
             const apiUser = await prisma.users.findUnique({
               where: { id: userId },
-              select: { isAdmin: true, role: true },
+              select: { role: true },
             });
             const priority =
-              apiUser?.isAdmin === true ||
+              apiUser?.role === "owner" ||
+              apiUser?.role === "admin" ||
               server.ownerId === userId ||
               apiUser?.role === "privileged";
             const queued = await runtimeStartQueue.enqueueStart({

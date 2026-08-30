@@ -7,6 +7,7 @@
  * PUT    /api/v2/admin/users/:id          — Update user
  * DELETE /api/v2/admin/users/:id          — Delete user
  * POST   /api/v2/admin/users/:id/transfer — Transfer ownership
+ * POST   /api/v2/admin/users/:id/onboarding/reset — Reset onboarding
  */
 
 import { Router } from "express";
@@ -311,6 +312,39 @@ router.delete("/:id", async (req, res) => {
   );
 
   jsonOk(res, { deleted: id });
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/v2/admin/users/:id/onboarding/reset — Reset onboarding state
+// ---------------------------------------------------------------------------
+router.post("/:id/onboarding/reset", async (req, res) => {
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid user ID", 400);
+  }
+
+  const user = await prisma.users.findUnique({ where: { id } });
+  if (!user) {
+    return jsonError(res, "NOT_FOUND", "User not found", 404);
+  }
+
+  await prisma.users.update({
+    where: { id },
+    data: {
+      onboardingCompleted: false,
+      onboardingSkipped: false,
+    },
+  });
+
+  logActivity(
+    req.adminUser?.id,
+    "user.onboarding.reset",
+    undefined,
+    { userId: id },
+    req.ip,
+  );
+
+  jsonOk(res, { reset: true });
 });
 
 // ---------------------------------------------------------------------------

@@ -1,10 +1,25 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  displayName String
+  description String?
+  isAdmin     Boolean  @default(false)
+  permissions String   @default("[]") // JSON array of permission strings
+  isSystem    Boolean  @default(false) // prevent deletion of owner/admin
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       Users[]  @relation("UserRole")
 }
 
 model Users {
@@ -22,6 +37,7 @@ model Users {
   maxStorage         Int?      @default(0)
   maxDatabases       Int?      @default(0)
   role               String    @default("user")
+  roleRelation       Role?     @relation("UserRole", fields: [role], references: [name])
   onboardingCompleted Boolean  @default(false)
   onboardingSkipped  Boolean   @default(false)
   preferredNodeId    Int?
@@ -301,6 +317,21 @@ model settings {
   allowUserCreateImages       Boolean  @default(false)
   onboardingEnabled           Boolean  @default(true)
   onboardingSteps             String   @default("[]") @db.Text
+  twoFactorRequired           Boolean  @default(false)
+  sftpEnabled                 Boolean  @default(true)
+  backupsEnabled              Boolean  @default(true)
+  schedulesEnabled            Boolean  @default(true)
+  databasesEnabled            Boolean  @default(true)
+  fileManagerEnabled          Boolean  @default(true)
+  consoleEnabled              Boolean  @default(true)
+  playerTrackingEnabled       Boolean  @default(false)
+  scannerEnabled              Boolean  @default(true)
+  airlinkCloudEnabled         Boolean  @default(false)
+  defaultMemory               Int      @default(512)
+  defaultCpu                  Int      @default(100)
+  defaultDisk                 Int      @default(5120)
+  maxServersPerUser           Int      @default(10)
+  emailCooldown               Int      @default(30)
 }
 
 model ServerFolder {

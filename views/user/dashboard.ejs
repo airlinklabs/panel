@@ -335,6 +335,10 @@
 </script>
 
 <% if (needsOnboarding && req.session?.user) { %>
+<script nonce="<%- nonce %>">
+  window.__onboardingSteps = <%- JSON.stringify(onboardingSteps || []) %>;
+  window.__canCreateServerForOnboarding = <%= canCreateServerForOnboarding ? 'true' : 'false' %>;
+</script>
 <div id="onboardingModal" class="al-sheet-overlay fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
   <div id="onboardingPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="flex items-start justify-between mb-5">
@@ -342,41 +346,14 @@
         <h2 id="onboardingTitle" class="text-base font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.onboardingWelcome || 'Welcome to the panel!' %></h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= req.translations.onboardingIntro || 'A few quick tips to get you started.' %></p>
       </div>
-      <button type="button" id="onboardingSkip" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" aria-label="Close">
+      <button type="button" id="onboardingDismiss" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
 
     <div class="mb-5">
-      <div class="flex gap-2 mb-4">
-        <% for (let i = 0; i < 3; i++) { %>
-        <div class="flex-1 h-1 rounded-full transition-colors duration-300 onboarding-dot" data-step="<%= i %>" style="background:var(--theme-border-subtle);"></div>
-        <% } %>
-      </div>
-
-      <div class="onboarding-step" data-step="0">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style="background:var(--theme-bg-secondary)">
-          <%- icon('layout-dashboard', { class: 'w-6 h-6', style: 'color:var(--theme-text)' }) %>
-        </div>
-        <h3 class="text-sm font-semibold mb-1.5" style="color:var(--theme-text-strong)"><%= req.translations.onboardingStep1Title || 'Your dashboard' %></h3>
-        <p class="text-sm leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.onboardingStep1Text || 'This is where all your servers live. Start, stop, and manage them from the server view once you create an instance.' %></p>
-      </div>
-
-      <div class="onboarding-step hidden" data-step="1">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style="background:var(--theme-bg-secondary)">
-          <%- icon('server', { class: 'w-6 h-6', style: 'color:var(--theme-text)' }) %>
-        </div>
-        <h3 class="text-sm font-semibold mb-1.5" style="color:var(--theme-text-strong)"><%= req.translations.onboardingStep2Title || 'Create your first server' %></h3>
-        <p class="text-sm leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.onboardingStep2Text || 'Pick an image, choose a node, and allocate resources. Your instance is ready to install in a couple of clicks.' %></p>
-      </div>
-
-      <div class="onboarding-step hidden" data-step="2">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style="background:var(--theme-bg-secondary)">
-          <%- icon('user', { class: 'w-6 h-6', style: 'color:var(--theme-text)' }) %>
-        </div>
-        <h3 class="text-sm font-semibold mb-1.5" style="color:var(--theme-text-strong)"><%= req.translations.onboardingStep3Title || 'Make it yours' %></h3>
-        <p class="text-sm leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.onboardingStep3Text || 'Set your avatar and profile in Account settings so everyone on this panel recognises you.' %></p>
-      </div>
+      <div id="onboardingDots" class="flex gap-2 mb-4"></div>
+      <div id="onboardingStepsContainer"></div>
     </div>
 
     <div class="flex items-center justify-between gap-3">
@@ -385,12 +362,18 @@
         <%= req.translations.back || 'Back' %>
       </button>
       <span class="flex-1"></span>
+      <button type="button" id="onboardingRemindLater" class="al-btn-ghost px-3 py-2 text-xs font-medium hidden" title="<%= req.translations.remindMeLater || 'Remind me later' %>">
+        <%= req.translations.remindMeLater || 'Remind me later' %>
+      </button>
+      <button type="button" id="onboardingDontShow" class="al-btn-ghost px-3 py-2 text-xs font-medium hidden" style="color:var(--theme-danger)" title="<%= req.translations.dontShowAgain || 'Don\'t show again' %>">
+        <%= req.translations.dontShowAgain || "Don't show again" %>
+      </button>
       <button type="button" id="onboardingNext" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5">
         <%= req.translations.next || 'Next' %>
         <%- icon('arrow-right', { class: 'size-4', strokeWidth: 1.5 }) %>
       </button>
-      <a href="<%= canCreateServerForOnboarding ? '/create-server' : '/account' %>" id="onboardingFinish" class="al-btn-primary hidden px-4 py-2 text-sm font-medium">
-        <%= canCreateServerForOnboarding ? (req.translations.createServer || 'Create a server') : (req.translations.getStarted || 'Get started') %>
+      <a href="#" id="onboardingFinish" class="al-btn-primary hidden px-4 py-2 text-sm font-medium">
+        <%= req.translations.getStarted || 'Get started' %>
       </a>
     </div>
   </div>
@@ -983,45 +966,94 @@ function dashboard() {
 
       var onboardingModal = document.getElementById('onboardingModal');
       if (onboardingModal) {
+        var onbSteps = window.__onboardingSteps || [];
         var currentStep = 0;
-        var TOTAL_STEPS = 3;
-        var dots = onboardingModal.querySelectorAll('.onboarding-dot');
-        var steps = onboardingModal.querySelectorAll('.onboarding-step');
+        var TOTAL_STEPS = onbSteps.length;
+        var canCreate = window.__canCreateServerForOnboarding;
+        var dotsContainer = document.getElementById('onboardingDots');
+        var stepsContainer = document.getElementById('onboardingStepsContainer');
         var nextBtn = document.getElementById('onboardingNext');
         var prevBtn = document.getElementById('onboardingPrev');
         var finishBtn = document.getElementById('onboardingFinish');
-        var skipBtn = document.getElementById('onboardingSkip');
+        var dismissBtn = document.getElementById('onboardingDismiss');
+        var remindLaterBtn = document.getElementById('onboardingRemindLater');
+        var dontShowBtn = document.getElementById('onboardingDontShow');
+
+        var iconPaths = {
+          'layout-dashboard': '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v-5H3z"/>',
+          'server': '<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>',
+          'user': '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+          'settings': '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+          'shield': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+          'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+          'globe': '<circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+          'database': '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>'
+        };
+        function renderSvgIcon(name) {
+          var path = iconPaths[name] || iconPaths['layout-dashboard'];
+          return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--theme-text)">' + path + '</svg>';
+        }
+        function buildSteps() {
+          dotsContainer.innerHTML = '';
+          stepsContainer.innerHTML = '';
+          onbSteps.forEach(function(step, i) {
+            var dot = document.createElement('div');
+            dot.className = 'flex-1 h-1 rounded-full transition-colors duration-300 onboarding-dot';
+            dot.dataset.step = i;
+            dot.style.background = 'var(--theme-border-subtle)';
+            dotsContainer.appendChild(dot);
+
+            var stepEl = document.createElement('div');
+            stepEl.className = 'onboarding-step' + (i === 0 ? '' : ' hidden');
+            stepEl.dataset.step = i;
+            var ctaHtml = '';
+            if (step.cta && step.ctaUrl) {
+              ctaHtml = '<a href="' + step.ctaUrl + '" class="inline-flex items-center gap-1.5 mt-3 text-sm font-medium" style="color:var(--theme-text)">' + (step.cta) + ' &rarr;</a>';
+            }
+            stepEl.innerHTML =
+              '<div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style="background:var(--theme-bg-secondary)">' +
+                renderSvgIcon(step.icon || 'layout-dashboard') +
+              '</div>' +
+              '<h3 class="text-sm font-semibold mb-1.5" style="color:var(--theme-text-strong)">' + (step.title || '') + '</h3>' +
+              '<p class="text-sm leading-relaxed" style="color:var(--theme-text-muted)">' + (step.text || '') + '</p>' +
+              ctaHtml;
+            stepsContainer.appendChild(stepEl);
+          });
+        }
         function renderStep() {
+          var dots = onboardingModal.querySelectorAll('.onboarding-dot');
+          var steps = onboardingModal.querySelectorAll('.onboarding-step');
           steps.forEach(function (s) { s.classList.toggle('hidden', Number(s.dataset.step) !== currentStep); });
           dots.forEach(function (d) { d.style.background = Number(d.dataset.step) <= currentStep ? 'var(--theme-text)' : 'var(--theme-border-subtle)'; });
           prevBtn.classList.toggle('hidden', currentStep === 0);
-          nextBtn.classList.toggle('hidden', currentStep === TOTAL_STEPS - 1);
-          finishBtn.classList.toggle('hidden', currentStep !== TOTAL_STEPS - 1);
+          var isLast = currentStep === TOTAL_STEPS - 1;
+          nextBtn.classList.toggle('hidden', isLast);
+          finishBtn.classList.toggle('hidden', !isLast);
+          remindLaterBtn.classList.toggle('hidden', isLast);
+          dontShowBtn.classList.toggle('hidden', isLast);
+          if (isLast) {
+            var lastStep = onbSteps[currentStep];
+            finishBtn.href = (lastStep && lastStep.ctaUrl) || (canCreate ? '/create-server' : '/account');
+          }
         }
-        function setCompleted() {
-          fetch('/api/v2/account/onboarding/complete', { method: 'POST' })
-            .then(function () { onboardingModal.remove(); })
-            .catch(function () { onboardingModal.remove(); });
-        }
+        buildSteps();
         nextBtn.addEventListener('click', function () { if (currentStep < TOTAL_STEPS - 1) { currentStep++; renderStep(); } });
         prevBtn.addEventListener('click', function () { if (currentStep > 0) { currentStep--; renderStep(); } });
         finishBtn.addEventListener('click', function (e) {
           e.preventDefault();
+          fetch('/api/v2/account/onboarding/complete', { method: 'POST' })
+            .then(function () { onboardingModal.remove(); })
+            .catch(function () { onboardingModal.remove(); });
+        });
+        dontShowBtn.addEventListener('click', function () {
           fetch('/api/v2/account/onboarding/skip', { method: 'POST' })
             .then(function () { onboardingModal.remove(); })
             .catch(function () { onboardingModal.remove(); });
         });
-        skipBtn.addEventListener('click', function () {
-          fetch('/api/v2/account/onboarding/skip', { method: 'POST' })
-            .then(function () { onboardingModal.remove(); })
-            .catch(function () { onboardingModal.remove(); });
-        });
+        remindLaterBtn.addEventListener('click', function () { onboardingModal.remove(); });
+        dismissBtn.addEventListener('click', function () { onboardingModal.remove(); });
         onboardingModal.addEventListener('click', function (e) {
-          if (e.target === onboardingModal) {
-            fetch('/api/v2/account/onboarding/skip', { method: 'POST' })
-              .then(function () { onboardingModal.remove(); })
-              .catch(function () { onboardingModal.remove(); });
-          }
+          if (e.target === onboardingModal) { onboardingModal.remove(); }
         });
         renderStep();
       }

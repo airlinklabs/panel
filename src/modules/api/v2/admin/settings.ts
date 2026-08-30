@@ -23,6 +23,7 @@ import {
   adminSettingsServerPolicyBody,
   adminSettingsSmtpBody,
   adminSettingsS3Body,
+  adminSettingsFeaturesBody,
   adminBanIpBody,
 } from "../dto";
 
@@ -126,6 +127,36 @@ router.patch(
     logActivity(
       req.adminUser?.id,
       "settings.server-policy.updated",
+      undefined,
+      { fields: Object.keys(data) },
+      req.ip,
+    );
+
+    jsonOk(res, updated);
+  },
+);
+
+// ---------------------------------------------------------------------------
+// PATCH /api/v2/admin/settings/features — Update feature toggles
+// ---------------------------------------------------------------------------
+router.patch(
+  "/features",
+  parseBody(adminSettingsFeaturesBody),
+  async (req, res) => {
+    const data = req.validatedBody as any;
+    const settings = await prisma.settings.findFirst();
+    if (!settings) {
+      return jsonError(res, "NOT_FOUND", "Settings not found", 404);
+    }
+
+    const updated = await prisma.settings.update({
+      where: { id: settings.id },
+      data,
+    });
+
+    logActivity(
+      req.adminUser?.id,
+      "settings.features.updated",
       undefined,
       { fields: Object.keys(data) },
       req.ip,

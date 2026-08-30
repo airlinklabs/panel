@@ -8,6 +8,7 @@
  */
 
 import prisma from "../../../db";
+import { isRoleAdmin, hasPermission } from "./roles";
 
 // ---------------------------------------------------------------------------
 // Permission parsing
@@ -39,20 +40,7 @@ export function subUserHasPermission(
   permission: string,
 ): boolean {
   const perms = parsePermissions(subUser.permissions);
-  const parent = permission.includes(".")
-    ? permission.slice(0, permission.lastIndexOf("."))
-    : null;
-
-  for (const p of perms) {
-    if (p === permission) return true;
-    if (
-      p.endsWith(".*") &&
-      (permission === p.slice(0, -2) || permission.startsWith(p.slice(0, -1)))
-    )
-      return true;
-    if (parent && p === parent) return true;
-  }
-  return false;
+  return hasPermission(perms, permission);
 }
 
 // ---------------------------------------------------------------------------
@@ -96,7 +84,7 @@ export async function resolveServerAccess(
 
   // Admin bypasses ownership check
   const user = await prisma.users.findUnique({ where: { id: userId } });
-  if (user?.isAdmin) {
+  if (isRoleAdmin(user?.role)) {
     return { server, isOwner: false, isAdmin: true, subUser: null };
   }
 

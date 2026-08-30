@@ -41,7 +41,6 @@ import user_createServer from "./user/createServer";
 import user_dashboard from "./user/dashboard";
 import user_folderSystem from "./user/folderSystem";
 import user_images from "./user/images";
-import user_onboarding from "./user/onboarding";
 import user_server from "./user/server";
 import user_serverConsole from "./user/serverConsole";
 import user_sftp from "./user/sftp";
@@ -117,7 +116,6 @@ const candidates: { module: unknown; name: string }[] = [
   { module: user_dashboard, name: "user/dashboard" },
   { module: user_folderSystem, name: "user/folderSystem" },
   { module: user_images, name: "user/images" },
-  { module: user_onboarding, name: "user/onboarding" },
   { module: user_server, name: "user/server" },
   { module: user_serverConsole, name: "user/serverConsole" },
   { module: user_sftp, name: "user/sftp" },
