@@ -77,6 +77,7 @@ export const ModelName = {
   SftpCredential: 'SftpCredential',
   SubUser: 'SubUser',
   ActivityLog: 'ActivityLog',
+  SystemLog: 'SystemLog',
   WebAuthnCredential: 'WebAuthnCredential'
 } as const
 
@@ -389,7 +390,22 @@ export const SettingsScalarFieldEnum = {
   allowPrivilegedMaxDatabases: 'allowPrivilegedMaxDatabases',
   allowUserCreateImages: 'allowUserCreateImages',
   onboardingEnabled: 'onboardingEnabled',
-  onboardingSteps: 'onboardingSteps'
+  onboardingSteps: 'onboardingSteps',
+  twoFactorRequired: 'twoFactorRequired',
+  sftpEnabled: 'sftpEnabled',
+  backupsEnabled: 'backupsEnabled',
+  schedulesEnabled: 'schedulesEnabled',
+  databasesEnabled: 'databasesEnabled',
+  fileManagerEnabled: 'fileManagerEnabled',
+  consoleEnabled: 'consoleEnabled',
+  playerTrackingEnabled: 'playerTrackingEnabled',
+  scannerEnabled: 'scannerEnabled',
+  airlinkCloudEnabled: 'airlinkCloudEnabled',
+  defaultMemory: 'defaultMemory',
+  defaultCpu: 'defaultCpu',
+  defaultDisk: 'defaultDisk',
+  maxServersPerUser: 'maxServersPerUser',
+  emailCooldown: 'emailCooldown'
 } as const
 
 export type SettingsScalarFieldEnum = (typeof SettingsScalarFieldEnum)[keyof typeof SettingsScalarFieldEnum]
@@ -525,12 +541,27 @@ export const ActivityLogScalarFieldEnum = {
   actorId: 'actorId',
   serverId: 'serverId',
   event: 'event',
+  category: 'category',
+  severity: 'severity',
   metadata: 'metadata',
   ip: 'ip',
   createdAt: 'createdAt'
 } as const
 
 export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
+
+
+export const SystemLogScalarFieldEnum = {
+  id: 'id',
+  message: 'message',
+  stack: 'stack',
+  component: 'component',
+  severity: 'severity',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type SystemLogScalarFieldEnum = (typeof SystemLogScalarFieldEnum)[keyof typeof SystemLogScalarFieldEnum]
 
 
 export const WebAuthnCredentialScalarFieldEnum = {

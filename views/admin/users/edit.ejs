@@ -92,11 +92,14 @@
                         <%= req.translations.roleDescription || 'Owner and admin roles are signaled by isAdmin below. Privileged normally have not admin powers but get expanded settings.' %>
                       </p>
                     </div>
-                    <select x-model="form.role" class="al-input w-44">
+                    <select x-model="form.role" class="al-input w-44" :disabled="form.role === 'owner'">
                       <template x-for="r in roles" :key="r.name">
-                        <option :value="r.name" x-text="r.displayName" :selected="r.name === form.role"></option>
+                        <option :value="r.name" x-text="r.displayName" :selected="r.name === form.role" :disabled="r.name === 'owner' && form.role !== 'owner'"></option>
                       </template>
                     </select>
+                    <% if (dataUser.role === 'owner') { %>
+                      <p class="text-xs mt-2" style="color:var(--theme-text-muted)">Owner role cannot be changed. Use Transfer Ownership to assign a new owner.</p>
+                    <% } %>
                   </div>
                 </div>
               </div>
@@ -112,8 +115,8 @@
                         <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
                       </p>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input type="checkbox" x-model="form.isAdmin" class="sr-only peer">
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0" <% if (dataUser.role === 'owner') { %>title="Owner is always an administrator"<% } %>>
+                      <input type="checkbox" x-model="form.isAdmin" class="sr-only peer" <% if (dataUser.role === 'owner') { %>disabled<% } %>>
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
                       <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-strong)" x-text="form.isAdmin ? '<%= req.translations.enabled || 'Enabled' %>' : '<%= req.translations.disabled || 'Disabled' %>'"></span>
                     </label>

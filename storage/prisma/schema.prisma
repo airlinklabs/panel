@@ -465,6 +465,8 @@ model ActivityLog {
   actorId   Int?
   serverId  String?
   event     String
+  category  String   @default("user_action")
+  severity  String   @default("info")
   metadata  String?  @db.Text
   ip        String?
   createdAt DateTime @default(now())
@@ -473,6 +475,22 @@ model ActivityLog {
 
   @@index([actorId])
   @@index([serverId])
+  @@index([createdAt])
+  @@index([category])
+  @@index([severity])
+}
+
+model SystemLog {
+  id        Int      @id @default(autoincrement())
+  message   String   @db.Text
+  stack     String?  @db.Text
+  component String
+  severity  String
+  metadata  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([component])
+  @@index([severity])
   @@index([createdAt])
 }
 

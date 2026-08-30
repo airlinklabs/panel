@@ -49,34 +49,7 @@ const coreModule: Module = {
       "/admin/api/docs",
       isAuthenticated(true, "airlink.admin.api.docs.view"),
       async (req: Request, res: Response) => {
-        try {
-          const settings = await getSettings();
-          const apiKeys = await prisma.apiKey.findMany({
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  username: true,
-                  email: true,
-                },
-              },
-            },
-          });
-
-          res.render("admin/apikeys/docs", {
-            apiEndpoints: [],
-            apiKeys,
-            settings,
-            user: req.session.user,
-            req,
-          });
-        } catch (error: unknown) {
-          logger.error("Error rendering API documentation:", error);
-          res.status(500).render("errors/error", {
-            error: "Failed to load API documentation",
-            req,
-          });
-        }
+        res.redirect("/docs");
       },
     );
 

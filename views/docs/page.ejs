@@ -1,0 +1,54 @@
+<%- include('../partials/head') %>
+<div class="docs-layout">
+  <aside class="docs-sidebar">
+    <div class="docs-sidebar-header">
+      <h2>Documentation</h2>
+      <input type="text" id="docs-search" placeholder="Search docs..." class="docs-search-input">
+    </div>
+    <nav class="docs-nav">
+      <% sections.forEach(section => { %>
+        <div class="docs-section">
+          <h3 class="docs-section-title"><%= section.name %></h3>
+          <ul class="docs-section-list">
+            <% section.pages.forEach(pg => { %>
+              <li>
+                <a href="/docs/<%= pg.slug %>" class="docs-link<%= currentSlug === pg.slug ? ' active' : '' %>">
+                  <%= pg.title %>
+                </a>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      <% }) %>
+    </nav>
+  </aside>
+  <main class="docs-content">
+    <article class="docs-article">
+      <h1 class="docs-title"><%= page.title %></h1>
+      <div class="docs-body"><%- page.html %></div>
+    </article>
+    <% if (headings.length > 0) { %>
+      <aside class="docs-toc">
+        <h3>On this page</h3>
+        <ul>
+          <% headings.forEach(h => { %>
+            <li class="toc-level-<%= h.level %>">
+              <a href="#<%= h.id %>"><%= h.text %></a>
+            </li>
+          <% }) %>
+        </ul>
+      </aside>
+    <% } %>
+  </main>
+</div>
+<script>
+// Search functionality
+document.getElementById('docs-search')?.addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('.docs-link').forEach(link => {
+    const text = link.textContent.toLowerCase();
+    link.closest('li').style.display = text.includes(q) ? '' : 'none';
+  });
+});
+</script>
+<%- include('../partials/foot') %>

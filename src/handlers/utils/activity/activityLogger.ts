@@ -118,10 +118,19 @@ export function getClientIp(req: Request): string | undefined {
   return req.socket?.remoteAddress;
 }
 
+export interface LogActivityOpts {
+  serverId?: string | null;
+  metadata?: Record<string, unknown>;
+  category?: string;
+  severity?: string;
+  targetId?: number;
+  targetType?: string;
+}
+
 export async function logActivity(
   req: Request,
-  event: ActivityEvent,
-  opts: { serverId?: string | null; metadata?: Record<string, unknown> } = {},
+  event: ActivityEvent | string,
+  opts: LogActivityOpts = {},
 ): Promise<void> {
   try {
     if (await isActivityRateLimited(activityRateLimitKey(req))) {
@@ -132,6 +141,8 @@ export async function logActivity(
         actorId: req.session?.user?.id ?? null,
         serverId: opts.serverId ?? null,
         event,
+        category: opts.category ?? "user_action",
+        severity: opts.severity ?? "info",
         metadata: opts.metadata ? JSON.stringify(opts.metadata) : null,
         ip: getClientIp(req),
       },

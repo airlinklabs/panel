@@ -60,6 +60,7 @@ import logger from "../../../../handlers/logger";
 import fs from "fs/promises";
 import path from "path";
 import { httpGet } from "../../../../utils/http";
+import { getSystemLogs } from "../../../../services/systemLogService";
 
 const router = Router();
 
@@ -827,6 +828,183 @@ router.get("/analytics/summary", async (_req, res) => {
       prisma.server.count({ where: { Running: true } }),
     ]);
   jsonOk(res, { totalServers, totalUsers, totalNodes, onlineServers });
+});
+
+// ======================== ACTIVITY LOGS ========================
+
+router.get("/activity-logs", async (req, res) => {
+  const page = parseInt(String(req.query.page ?? "1"), 10) || 1;
+  const perPage = Math.min(
+    parseInt(String(req.query.perPage ?? "50"), 10) || 50,
+    100,
+  );
+  const category = (req.query.category as string) || undefined;
+  const severity = (req.query.severity as string) || undefined;
+  const search = (req.query.search as string) || undefined;
+  const startDate = req.query.startDate
+    ? new Date(req.query.startDate as string)
+    : undefined;
+  const endDate = req.query.endDate
+    ? new Date(req.query.endDate as string)
+    : undefined;
+
+  const where: Record<string, unknown> = {};
+  if (category) where.category = category;
+  if (severity) where.severity = severity;
+  if (search) {
+    where.OR = [
+      { event: { contains: search } },
+      { metadata: { contains: search } },
+    ];
+  }
+  if (startDate || endDate) {
+    where.createdAt = {
+      ...(startDate ? { gte: startDate } : {}),
+      ...(endDate ? { lte: endDate } : {}),
+    };
+  }
+
+  const [logs, total] = await Promise.all([
+    prisma.activityLog.findMany({
+      where,
+      include: {
+        actor: { select: { id: true, username: true, email: true } },
+      },
+      skip: (page - 1) * perPage,
+      take: perPage,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.activityLog.count({ where }),
+  ]);
+
+  jsonOk(res, logs, {
+    current_page: page,
+    per_page: perPage,
+    total,
+    last_page: Math.ceil(total / perPage) || 1,
+  });
+});
+
+// Activity logs summary — counts by category and severity for charts
+router.get("/activity-logs/summary", async (_req, res) => {
+  const now = new Date();
+  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const [totalAll, total24h, total7d, byCategory, bySeverity, byDay] =
+    await Promise.all([
+      prisma.activityLog.count(),
+      prisma.activityLog.count({ where: { createdAt: { gte: last24h } } }),
+      prisma.activityLog.count({ where: { createdAt: { gte: last7d } } }),
+      prisma.activityLog.groupBy({
+        by: ["category"],
+        _count: true,
+        orderBy: { _count: { category: "desc" } },
+      }),
+      prisma.activityLog.groupBy({
+        by: ["severity"],
+        _count: true,
+        orderBy: { _count: { severity: "desc" } },
+      }),
+      // Last 30 days grouped by day
+      prisma.$queryRawUnsafe<{ date: string; count: bigint }[]>(
+        `SELECT DATE("createdAt")::text as date, COUNT(*)::int as count
+         FROM "ActivityLog"
+         WHERE "createdAt" >= $1
+         GROUP BY DATE("createdAt")
+         ORDER BY date ASC`,
+        new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
+      ),
+    ]);
+
+  jsonOk(res, {
+    total: totalAll,
+    last24h: total24h,
+    last7d: total7d,
+    byCategory: byCategory.map((r) => ({
+      category: r.category,
+      count: r._count,
+    })),
+    bySeverity: bySeverity.map((r) => ({
+      severity: r.severity,
+      count: r._count,
+    })),
+    byDay: byDay.map((r) => ({ date: r.date, count: Number(r.count) })),
+  });
+});
+
+// ======================== SYSTEM LOGS (owner-only) ========================
+
+router.get("/system-logs", async (req, res) => {
+  // Owner-only check
+  if (req.adminUser?.role !== "owner") {
+    return jsonError(res, "FORBIDDEN", "Owner access required", 403);
+  }
+
+  const page = parseInt(String(req.query.page ?? "1"), 10) || 1;
+  const perPage = Math.min(
+    parseInt(String(req.query.perPage ?? "50"), 10) || 50,
+    100,
+  );
+  const severity = (req.query.severity as string) || undefined;
+  const component = (req.query.component as string) || undefined;
+  const search = (req.query.search as string) || undefined;
+  const startDate = req.query.startDate
+    ? new Date(req.query.startDate as string)
+    : undefined;
+  const endDate = req.query.endDate
+    ? new Date(req.query.endDate as string)
+    : undefined;
+
+  const result = await getSystemLogs({
+    page,
+    perPage,
+    severity,
+    component,
+    startDate,
+    endDate,
+    search,
+  });
+
+  jsonOk(res, result.logs, result.meta);
+});
+
+// System logs summary — counts by severity and component
+router.get("/system-logs/summary", async (req, res) => {
+  if (req.adminUser?.role !== "owner") {
+    return jsonError(res, "FORBIDDEN", "Owner access required", 403);
+  }
+
+  const now = new Date();
+  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  const [totalAll, total24h, bySeverity, byComponent] = await Promise.all([
+    prisma.systemLog.count(),
+    prisma.systemLog.count({ where: { createdAt: { gte: last24h } } }),
+    prisma.systemLog.groupBy({
+      by: ["severity"],
+      _count: true,
+      orderBy: { _count: { severity: "desc" } },
+    }),
+    prisma.systemLog.groupBy({
+      by: ["component"],
+      _count: true,
+      orderBy: { _count: { component: "desc" } },
+    }),
+  ]);
+
+  jsonOk(res, {
+    total: totalAll,
+    last24h: total24h,
+    bySeverity: bySeverity.map((r) => ({
+      severity: r.severity,
+      count: r._count,
+    })),
+    byComponent: byComponent.map((r) => ({
+      component: r.component,
+      count: r._count,
+    })),
+  });
 });
 
 // ======================== PLAYER STATS ========================

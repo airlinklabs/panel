@@ -400,6 +400,8 @@ export async function logActivity(
   serverId?: string,
   metadata?: Record<string, unknown>,
   ip?: string,
+  category?: string,
+  severity?: string,
 ): Promise<void> {
   try {
     await prisma.activityLog.create({
@@ -407,6 +409,8 @@ export async function logActivity(
         actorId: actorId ?? null,
         serverId: serverId ?? null,
         event,
+        category: category ?? "user_action",
+        severity: severity ?? "info",
         metadata: metadata ? JSON.stringify(metadata) : null,
         ip: ip ?? null,
       },

@@ -212,6 +212,6 @@ describe("response DTOs", () => {
   });
 
   it("exposes the documented wire version constant", () => {
-    expect(CLIENT_API_VERSION).toBe("client-v1");
+    expect(CLIENT_API_VERSION).toBe("client-v2");
   });
 });

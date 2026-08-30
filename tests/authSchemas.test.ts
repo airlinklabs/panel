@@ -120,6 +120,8 @@ describe("auth route validation boundary", () => {
           findFirst: vi.fn(),
           count: vi.fn().mockResolvedValue(1),
         },
+        loginHistory: { create: vi.fn() },
+        $transaction: vi.fn(),
       },
     }));
     vi.doMock("../src/handlers/logger", () => ({
@@ -129,6 +131,25 @@ describe("auth route validation boundary", () => {
         warn: vi.fn(),
         success: vi.fn(),
       },
+    }));
+    vi.doMock("../src/handlers/redis", () => ({
+      getRedisClient: () => ({
+        zremrangebyscore: vi.fn().mockResolvedValue(0),
+        zcard: vi.fn().mockResolvedValue(0),
+        zadd: vi.fn().mockResolvedValue(1),
+        expire: vi.fn().mockResolvedValue(1),
+      }),
+    }));
+    vi.doMock("../src/handlers/utils/security/redisRateLimit", () => ({
+      createRedisRateLimit:
+        () => (_req: unknown, _res: unknown, next: () => void) =>
+          next(),
+    }));
+    vi.doMock("../src/handlers/settingsCache", () => ({
+      getSettings: vi.fn().mockResolvedValue({}),
+    }));
+    vi.doMock("../src/utils/ip", () => ({
+      getClientIp: () => "127.0.0.1",
     }));
 
     const authServiceModule = (await import("../src/modules/auth/authService"))

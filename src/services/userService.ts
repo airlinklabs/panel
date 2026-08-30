@@ -100,10 +100,21 @@ export async function updateUser(
 ) {
   const updateData: Record<string, unknown> = {};
 
+  if (data.role !== undefined) {
+    // Single-owner constraint: only one user can have the owner role
+    if (data.role === "owner") {
+      const existingOwner = await prisma.users.findFirst({
+        where: { role: "owner", id: { not: id } },
+      });
+      if (existingOwner) {
+        throw new Error("An owner already exists. Transfer ownership first.");
+      }
+    }
+    updateData.role = data.role;
+  }
   if (data.email !== undefined) updateData.email = data.email;
   if (data.username !== undefined) updateData.username = data.username;
   if (data.isAdmin !== undefined) updateData.isAdmin = data.isAdmin;
-  if (data.role !== undefined) updateData.role = data.role;
   if (data.description !== undefined) updateData.description = data.description;
   if (data.password !== undefined) {
     updateData.password = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS);

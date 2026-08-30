@@ -148,6 +148,11 @@ export type SubUser = Prisma.SubUserModel
  */
 export type ActivityLog = Prisma.ActivityLogModel
 /**
+ * Model SystemLog
+ * 
+ */
+export type SystemLog = Prisma.SystemLogModel
+/**
  * Model WebAuthnCredential
  * 
  */

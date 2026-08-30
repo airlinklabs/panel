@@ -7,6 +7,40 @@ import {
   activityRateLimitKey,
 } from "../src/handlers/utils/activity/activityLogger";
 
+function createMockRedis() {
+  const store = new Map<string, { score: number; member: string }[]>();
+  return {
+    zremrangebyscore: vi
+      .fn()
+      .mockImplementation(async (key: string, _min: number, max: number) => {
+        const entries = store.get(key) ?? [];
+        const filtered = entries.filter((e) => e.score > max);
+        store.set(key, filtered);
+        return entries.length - filtered.length;
+      }),
+    zcard: vi.fn().mockImplementation(async (key: string) => {
+      return (store.get(key) ?? []).length;
+    }),
+    zadd: vi
+      .fn()
+      .mockImplementation(
+        async (key: string, score: number, member: string) => {
+          const entries = store.get(key) ?? [];
+          entries.push({ score, member });
+          store.set(key, entries);
+          return 1;
+        },
+      ),
+    expire: vi.fn().mockResolvedValue(1),
+  };
+}
+
+let mockRedis = createMockRedis();
+
+vi.mock("../src/handlers/redis", () => ({
+  getRedisClient: () => mockRedis,
+}));
+
 vi.mock("../src/db", () => ({
   default: {
     activityLog: {
@@ -55,28 +89,28 @@ describe("activity rate limiter", () => {
     resetActivityRateLimitForTests();
   });
 
-  it("allows logs up to the window cap", () => {
+  it("allows logs up to the window cap", async () => {
     const key = "user:1";
-    const capped = Array.from({ length: 120 }, () =>
-      isActivityRateLimited(key),
+    const capped = await Promise.all(
+      Array.from({ length: 120 }, () => isActivityRateLimited(key)),
     );
     expect(capped.filter(Boolean)).toHaveLength(0);
   });
 
-  it("rejects once the cap is exceeded", () => {
+  it("rejects once the cap is exceeded", async () => {
     const key = "user:2";
     for (let i = 0; i < 120; i++) {
-      isActivityRateLimited(key);
+      await isActivityRateLimited(key);
     }
-    expect(isActivityRateLimited(key)).toBe(true);
+    expect(await isActivityRateLimited(key)).toBe(true);
   });
 
-  it("isolates buckets per actor", () => {
+  it("isolates buckets per actor", async () => {
     for (let i = 0; i < 120; i++) {
-      isActivityRateLimited("user:3");
+      await isActivityRateLimited("user:3");
     }
-    expect(isActivityRateLimited("user:3")).toBe(true);
-    expect(isActivityRateLimited("user:4")).toBe(false);
+    expect(await isActivityRateLimited("user:3")).toBe(true);
+    expect(await isActivityRateLimited("user:4")).toBe(false);
   });
 
   it("falls back to IP when unauthenticated", () => {

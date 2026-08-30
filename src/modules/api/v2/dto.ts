@@ -305,6 +305,10 @@ export const adminCreateUserBody = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/)
     .optional(),
   password: z.string().min(8).max(128),
+  role: z
+    .enum(["owner", "admin", "privileged", "user"])
+    .optional()
+    .default("user"),
   isAdmin: z.boolean().optional().default(false),
   serverLimit: z.number().int().min(0).optional(),
   maxMemory: z.number().int().min(0).optional(),
@@ -323,6 +327,7 @@ export const adminUpdateUserBody = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/)
     .optional(),
   password: z.string().min(8).max(128).optional(),
+  role: z.enum(["owner", "admin", "privileged", "user"]).optional(),
   isAdmin: z.boolean().optional(),
   serverLimit: z.number().int().min(0).optional(),
   maxMemory: z.number().int().min(0).optional(),

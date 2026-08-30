@@ -39,6 +39,7 @@ import {
   notFoundHandler,
   renderErrorPage,
 } from "./handlers/errorPages";
+import { logSystemError } from "./services/systemLogService";
 
 import { getConfig } from "./config";
 import { installRenderResolver } from "./handlers/renderResolver";
@@ -362,6 +363,26 @@ app.use(errorPageHandler);
 
     app.use(notFoundHandler);
     app.use(errorPageHandler);
+
+    // Global unhandled error logger — captures errors that slip through middleware
+    process.on("unhandledRejection", (reason: unknown) => {
+      const msg = reason instanceof Error ? reason.message : String(reason);
+      const stack = reason instanceof Error ? reason.stack : undefined;
+      logSystemError({
+        message: `Unhandled rejection: ${msg}`,
+        stack,
+        component: "api",
+        severity: "error",
+      });
+    });
+    process.on("uncaughtException", (err: Error) => {
+      logSystemError({
+        message: `Uncaught exception: ${err.message}`,
+        stack: err.stack,
+        component: "api",
+        severity: "critical",
+      });
+    });
 
     const server = app.listen(port, () => {
       logger.success(`Listening on port ${port}`);

@@ -539,9 +539,8 @@ describe("V2 API Contract", () => {
       ).toBe(true);
     });
 
-    it("exempts V1 / client / application / health mounts (Bearer-only)", () => {
+    it("exempts client / application / health mounts (Bearer-only)", () => {
       const mounts = [
-        "/api/v1/servers",
         "/api/client/test",
         "/api/application/test",
         "/api/health",

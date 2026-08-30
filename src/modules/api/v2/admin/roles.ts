@@ -214,6 +214,9 @@ router.put("/:id", parseBody(adminUpdateRoleBody), async (req, res) => {
   const updateData: Record<string, unknown> = {};
 
   if (data.name !== undefined) {
+    if (existing.name === "owner") {
+      return jsonError(res, "FORBIDDEN", "Cannot rename the owner role", 403);
+    }
     const dup = await prisma.role.findUnique({ where: { name: data.name } });
     if (dup && dup.id !== id) {
       return jsonError(res, "CONFLICT", "Role name already exists", 409);
@@ -296,6 +299,9 @@ router.delete("/:id", async (req, res) => {
 
   if (role.isSystem) {
     return jsonError(res, "FORBIDDEN", "Cannot delete a system role", 403);
+  }
+  if (role.name === "owner") {
+    return jsonError(res, "FORBIDDEN", "Cannot delete the owner role", 403);
   }
 
   if (role._count.users > 0) {

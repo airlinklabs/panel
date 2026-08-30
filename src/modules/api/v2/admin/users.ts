@@ -113,6 +113,22 @@ router.post("/", parseBody(adminCreateUserBody), async (req, res) => {
     }
   }
 
+  // Single-owner constraint: only one user can have the owner role
+  const role = data.role || (data.isAdmin ? "admin" : "user");
+  if (role === "owner") {
+    const existingOwner = await prisma.users.findFirst({
+      where: { role: "owner" },
+    });
+    if (existingOwner) {
+      return jsonError(
+        res,
+        "CONFLICT",
+        "An owner already exists. Transfer ownership first.",
+        409,
+      );
+    }
+  }
+
   const hashedPassword = await bcrypt.hash(data.password, 12);
 
   const user = await prisma.users.create({
@@ -120,7 +136,8 @@ router.post("/", parseBody(adminCreateUserBody), async (req, res) => {
       email: data.email,
       username: data.username,
       password: hashedPassword,
-      isAdmin: data.isAdmin,
+      role,
+      isAdmin: role === "owner" || role === "admin" ? true : data.isAdmin,
       serverLimit: data.serverLimit,
       maxMemory: data.maxMemory,
       maxCpu: data.maxCpu,
@@ -204,6 +221,33 @@ router.put("/:id", parseBody(adminUpdateUserBody), async (req, res) => {
   const data = req.validatedBody as any;
   const updateData: Record<string, unknown> = {};
 
+  // Owner role protections
+  if (
+    existing.role === "owner" &&
+    data.role !== undefined &&
+    data.role !== "owner"
+  ) {
+    return jsonError(
+      res,
+      "FORBIDDEN",
+      "Cannot change the owner's role directly. Use the transfer ownership endpoint.",
+      403,
+    );
+  }
+  if (data.role === "owner" && existing.role !== "owner") {
+    const existingOwner = await prisma.users.findFirst({
+      where: { role: "owner", id: { not: id } },
+    });
+    if (existingOwner) {
+      return jsonError(
+        res,
+        "CONFLICT",
+        "An owner already exists. Transfer ownership first.",
+        409,
+      );
+    }
+  }
+
   if (data.email !== undefined) {
     const dup = await prisma.users.findUnique({ where: { email: data.email } });
     if (dup && dup.id !== id) {
@@ -225,6 +269,13 @@ router.put("/:id", parseBody(adminUpdateUserBody), async (req, res) => {
   }
   if (data.isAdmin !== undefined) {
     updateData.isAdmin = data.isAdmin;
+  }
+  if (data.role !== undefined) {
+    updateData.role = data.role;
+    // Owner must always be admin
+    if (data.role === "owner" && data.isAdmin === undefined) {
+      updateData.isAdmin = true;
+    }
   }
   if (data.serverLimit !== undefined) {
     updateData.serverLimit = data.serverLimit;
@@ -288,6 +339,16 @@ router.delete("/:id", async (req, res) => {
   // Can't delete yourself
   if (req.adminUser?.id === id) {
     return jsonError(res, "BAD_REQUEST", "Cannot delete your own account", 400);
+  }
+
+  // Can't delete the owner
+  if (user.role === "owner") {
+    return jsonError(
+      res,
+      "FORBIDDEN",
+      "Cannot delete the owner. Transfer ownership first.",
+      403,
+    );
   }
 
   // Check for owned servers
@@ -365,6 +426,14 @@ router.post(
     if (!user) {
       return jsonError(res, "NOT_FOUND", "User not found", 404);
     }
+    if (user.role !== "owner") {
+      return jsonError(
+        res,
+        "FORBIDDEN",
+        "Only the current owner can transfer ownership",
+        403,
+      );
+    }
 
     const newOwner = await prisma.users.findUnique({
       where: { id: newOwnerId },
@@ -372,23 +441,68 @@ router.post(
     if (!newOwner) {
       return jsonError(res, "NOT_FOUND", "New owner not found", 404);
     }
+    if (newOwnerId === id) {
+      return jsonError(
+        res,
+        "BAD_REQUEST",
+        "Cannot transfer ownership to yourself",
+        400,
+      );
+    }
 
-    // Transfer all servers
-    const result = await prisma.server.updateMany({
-      where: { ownerId: id },
-      data: { ownerId: newOwnerId },
+    // Atomic transfer: swap roles and reassign servers
+    await prisma.$transaction(async (tx) => {
+      // Set new owner's role to 'owner'
+      await tx.users.update({
+        where: { id: newOwnerId },
+        data: { role: "owner", isAdmin: true },
+      });
+      // Demote old owner to 'admin'
+      await tx.users.update({
+        where: { id },
+        data: { role: "admin", isAdmin: true },
+      });
+      // Transfer all servers
+      await tx.server.updateMany({
+        where: { ownerId: id },
+        data: { ownerId: newOwnerId },
+      });
     });
+
+    // Invalidate old owner's sessions (destroy all sessions for that user)
+    try {
+      const sessionStore = req.sessionStore as any;
+      if (sessionStore && typeof sessionStore.destroy === "function") {
+        await new Promise<void>((resolve) => {
+          sessionStore.all((err: Error | null, sessions: any) => {
+            if (err || !sessions) {
+              resolve();
+              return;
+            }
+            for (const [sid, sess] of Object.entries(sessions)) {
+              const su = (sess as any)?.user;
+              if (su?.id === id) {
+                sessionStore.destroy(sid, () => {});
+              }
+            }
+            resolve();
+          });
+        });
+      }
+    } catch {
+      // Best-effort — session invalidation failure should not block transfer
+    }
 
     logActivity(
       req.adminUser?.id,
       "user.ownership.transferred",
       undefined,
-      { fromUserId: id, toUserId: newOwnerId, serverCount: result.count },
+      { fromUserId: id, toUserId: newOwnerId },
       req.ip,
     );
 
     jsonOk(res, {
-      transferred: result.count,
+      transferred: true,
       fromUserId: id,
       toUserId: newOwnerId,
     });

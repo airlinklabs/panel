@@ -12,6 +12,7 @@ import {
   registerSchema,
   authValidationErrorCode,
 } from "./schemas";
+import { logActivity } from "../../handlers/utils/activity/activityLogger";
 
 // Tight rate limit applied only to auth routes — separate from the global limit.
 // 10 attempts per minute per IP before they get a 429.
@@ -97,6 +98,12 @@ const authServiceModule: Module = {
                 },
               });
             }
+            // Log failed login attempt
+            logActivity(req, "auth.login.failed", {
+              category: "security",
+              severity: "warning",
+              metadata: { identifier, reason: "invalid_credentials" },
+            });
             // Single generic error — never reveal whether the username exists.
             return res.redirect("/login?err=invalid_credentials");
           }
@@ -144,6 +151,13 @@ const authServiceModule: Module = {
               ipAddress: getClientIp(req),
               userAgent: req.headers["user-agent"] || null,
             },
+          });
+
+          // Log successful login
+          logActivity(req, "auth.login.success", {
+            category: "security",
+            severity: "info",
+            metadata: { userId: user.id, rememberMe },
           });
 
           res.redirect("/");
@@ -250,9 +264,18 @@ const authServiceModule: Module = {
     // the duplicate POST handler previously lived in auth.ts and is removed.
     router.get("/logout", (req: Request, res: Response) => {
       if (req.session) {
+        const userId = req.session.user?.id;
         req.session.destroy((err) => {
           if (err) {
             logger.error("Session destruction error", err);
+          }
+          // Log logout
+          if (userId) {
+            logActivity(req, "auth.logout", {
+              category: "security",
+              severity: "info",
+              metadata: { userId },
+            });
           }
           res.clearCookie("connect.sid");
           res.redirect("/login");

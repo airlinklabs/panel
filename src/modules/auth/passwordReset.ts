@@ -9,6 +9,7 @@ import logger from "../../handlers/logger";
 import { sendPasswordReset } from "../../handlers/utils/core/mailer";
 import { getClientIp } from "../../utils/ip";
 import { createRedisRateLimit } from "../../handlers/utils/security/redisRateLimit";
+import { logActivity } from "../../handlers/utils/activity/activityLogger";
 
 // 3 requests per hour per IP — enough for a legitimate user, too few for abuse.
 const forgotRateLimit = createRedisRateLimit({
@@ -87,6 +88,13 @@ const passwordResetModule: Module = {
                 to: user.email,
                 panelName: process.env.NAME || "Airlink",
                 resetUrl,
+              });
+
+              // Log password reset request
+              logActivity(req, "auth.password.reset.requested", {
+                category: "security",
+                severity: "info",
+                metadata: { userId: user.id },
               });
             }
           } catch (error) {
@@ -174,6 +182,13 @@ const passwordResetModule: Module = {
           await prisma.passwordReset.update({
             where: { id: record.id },
             data: { used: true },
+          });
+
+          // Log password reset completed
+          logActivity(req, "auth.password.reset.completed", {
+            category: "security",
+            severity: "info",
+            metadata: { userId: record.userId },
           });
 
           res.redirect("/login?err=password_reset");
