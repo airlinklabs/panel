@@ -51,7 +51,7 @@ export function isCsrfExempt(req: Pick<Request, "path" | "headers">): boolean {
     return true;
   }
   // V2 hybrid auth: Bearer header means API-key auth → no cookie → no CSRF needed
-  const authHeader = req.headers["authorization"];
+  const authHeader = req.headers?.["authorization"];
   if (authHeader?.startsWith("Bearer ")) {
     return true;
   }
