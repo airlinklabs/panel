@@ -30,7 +30,6 @@ import admin_uiComponents from "./admin/uiComponents";
 import admin_users from "./admin/users";
 import api_Alternative_api from "./api/Alternative/api";
 import api_client_clientApi from "./api/client/clientApi";
-import api_v1_api from "./api/v1/api";
 import api_v2_module from "./api/v2/index";
 import auth_auth from "./auth/auth";
 import auth_authService from "./auth/authService";
@@ -107,7 +106,6 @@ const candidates: { module: unknown; name: string }[] = [
   { module: admin_users, name: "admin/users" },
   { module: api_Alternative_api, name: "api/alternative" },
   { module: api_client_clientApi, name: "api/client" },
-  { module: api_v1_api, name: "api/v1" },
   { module: api_v2_module, name: "api/v2" },
   { module: auth_auth, name: "auth" },
   { module: auth_authService, name: "auth/service" },

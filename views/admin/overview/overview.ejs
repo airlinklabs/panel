@@ -255,7 +255,7 @@ function adminOverview() {
     async measureApiLatency() {
       try {
         var start = performance.now();
-        var response = await fetch('/api/v1/ping');
+        var response = await fetch('/api/v2/system/health');
         var latency = Math.round(performance.now() - start);
         if (response.ok) {
           document.getElementById('apiLatency').textContent = latency + ' ms';
