@@ -1,12 +1,12 @@
-import { getSettings } from '../../settingsCache';
-import type { Request, Response, NextFunction } from 'express';
-import prisma from '../../../db';
-import logger from '../../logger';
-import crypto from 'crypto';
+import { getSettings } from "../../settingsCache";
+import type { Request, Response, NextFunction } from "express";
+import prisma from "../../../db";
+import logger from "../../logger";
+import crypto from "crypto";
 
 // SHA-256 is acceptable here: keys are high-entropy random strings (not passwords), lookup is by DB index, and a 200ms delay on invalid keys mitigates timing attacks.
 function sha256(value: string): string {
-  return crypto.createHash('sha256').update(value).digest('hex');
+  return crypto.createHash("sha256").update(value).digest("hex");
 }
 
 async function hashingEnabled(): Promise<boolean> {
@@ -21,20 +21,20 @@ async function hashingEnabled(): Promise<boolean> {
 export const apiValidator = (requiredPermission?: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const authHeader = req.headers['authorization'];
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      const authHeader = req.headers["authorization"];
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
         res.status(401).json({
-          error: 'Unauthorized: Missing or malformed Authorization header',
+          error: "Unauthorized: Missing or malformed Authorization header",
         });
         return;
       }
 
-      const rawKey = authHeader.split(' ')[1];
+      const rawKey = authHeader.split(" ")[1];
 
       // When key hashing is enabled, look up the SHA-256 hash of the submitted
       // key — the raw value is never stored. Fall back to plaintext if not.
       const useHash = await hashingEnabled();
-      const lookupKey = useHash ? sha256(rawKey ?? '') : (rawKey ?? '');
+      const lookupKey = useHash ? sha256(rawKey ?? "") : (rawKey ?? "");
 
       const keyData = await prisma.apiKey.findUnique({
         where: { key: lookupKey },
@@ -42,38 +42,52 @@ export const apiValidator = (requiredPermission?: string) => {
 
       if (!keyData) {
         await new Promise((r) => setTimeout(r, 200));
-        res.status(403).json({ error: 'Invalid API key' });
+        res.status(403).json({ error: "Invalid API key" });
         return;
       }
 
       if (!keyData.active) {
-        res.status(401).json({ error: 'Unauthorized: API Key is inactive' });
+        res.status(401).json({ error: "Unauthorized: API Key is inactive" });
         return;
       }
 
       if (requiredPermission) {
         try {
-          const permissions = JSON.parse(keyData.permissions || '[]');
+          const permissions = JSON.parse(keyData.permissions || "[]");
           const hasPermission = permissions.some((perm: string) => {
+            // Exact match
             if (perm === requiredPermission) {
               return true;
             }
-            if (perm.endsWith('.*')) {
-              return requiredPermission.startsWith(`${perm.slice(0, -2)}.`);
+            // Key has wildcard that covers the required permission
+            // e.g. key="servers.*" required="servers.read" → match
+            if (perm.endsWith(".*")) {
+              const base = perm.slice(0, -2);
+              if (requiredPermission.startsWith(`${base}.`)) {
+                return true;
+              }
+            }
+            // Required is wildcard — check if key's specific perm falls under it
+            // e.g. key="servers.read" required="servers.*" → match
+            if (requiredPermission.endsWith(".*")) {
+              const base = requiredPermission.slice(0, -2);
+              if (perm.startsWith(`${base}.`)) {
+                return true;
+              }
             }
             return false;
           });
 
           if (!hasPermission) {
             res.status(403).json({
-              error: 'Forbidden: API Key does not have the required permission',
+              error: "Forbidden: API Key does not have the required permission",
               requiredPermission,
             });
             return;
           }
         } catch (error) {
-          logger.error('Error parsing API key permissions:', error);
-          res.status(500).json({ error: 'Internal Server Error' });
+          logger.error("Error parsing API key permissions:", error);
+          res.status(500).json({ error: "Internal Server Error" });
           return;
         }
       }
@@ -81,8 +95,8 @@ export const apiValidator = (requiredPermission?: string) => {
       req.apiKey = keyData;
       next();
     } catch (error) {
-      logger.error('Error in API validator middleware:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      logger.error("Error in API validator middleware:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   };
 };

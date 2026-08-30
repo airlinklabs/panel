@@ -7,9 +7,9 @@
  * POST   /api/v2/servers/:id/databases/:dbId/rotate  — Rotate password
  */
 
-import { Router } from 'express';
-import prisma from '../../../db';
-import { parseBody } from '../../../utils/validation';
+import { Router } from "express";
+import prisma from "../../../db";
+import { parseBody } from "../../../utils/validation";
 import {
   jsonOk,
   jsonError,
@@ -17,25 +17,31 @@ import {
   requireSubUserPermission,
   checkSuspended,
   logActivity,
-} from './helpers';
-import { createDatabaseBody } from './dto';
+  getAuthenticatedUserId,
+  getAppProtocol,
+} from "./helpers";
+import { createDatabaseBody } from "./dto";
 
 const router = Router();
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/databases — List databases
 // ---------------------------------------------------------------------------
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-  if (!requireSubUserPermission(res, resolved, 'databases')) {return;}
+  if (!resolved) {
+    return;
+  }
+  if (!requireSubUserPermission(res, resolved, "databases")) {
+    return;
+  }
 
   const databases = await prisma.serverDatabase.findMany({
     where: { serverId: resolved.server.UUID },
     include: {
       host: { select: { id: true, name: true, host: true, port: true } },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
 
   jsonOk(res, databases);
@@ -44,11 +50,17 @@ router.get('/', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/databases — Create database
 // ---------------------------------------------------------------------------
-router.post('/', parseBody(createDatabaseBody), async (req, res) => {
+router.post("/", parseBody(createDatabaseBody), async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-  if (checkSuspended(res, resolved)) {return;}
-  if (!requireSubUserPermission(res, resolved, 'databases.create')) {return;}
+  if (!resolved) {
+    return;
+  }
+  if (checkSuspended(res, resolved)) {
+    return;
+  }
+  if (!requireSubUserPermission(res, resolved, "databases.create")) {
+    return;
+  }
 
   const { hostId } = req.validatedBody as { hostId: number };
 
@@ -60,22 +72,22 @@ router.post('/', parseBody(createDatabaseBody), async (req, res) => {
     resolved.server.databaseLimit > 0 &&
     dbCount >= resolved.server.databaseLimit
   ) {
-    return jsonError(res, 'FORBIDDEN', 'Database limit reached', 403);
+    return jsonError(res, "FORBIDDEN", "Database limit reached", 403);
   }
 
   const host = await prisma.databaseHost.findUnique({ where: { id: hostId } });
   if (!host) {
-    return jsonError(res, 'NOT_FOUND', 'Database host not found', 404);
+    return jsonError(res, "NOT_FOUND", "Database host not found", 404);
   }
 
   // Generate database name/user based on server UUID prefix
-  const prefix = resolved.server.UUID.slice(0, 8).replace(/-/g, '');
+  const prefix = resolved.server.UUID.slice(0, 8).replace(/-/g, "");
   const databaseName = `s${prefix}_db${dbCount + 1}`;
   const databaseUser = `u${prefix}_u${dbCount + 1}`;
 
   // Generate random password
-  const crypto = await import('crypto');
-  const databasePassword = crypto.randomBytes(24).toString('base64url');
+  const crypto = await import("crypto");
+  const databasePassword = crypto.randomBytes(24).toString("base64url");
 
   // Create database on the host via daemon
   const node = await prisma.node.findUnique({
@@ -83,14 +95,13 @@ router.post('/', parseBody(createDatabaseBody), async (req, res) => {
   });
   if (node) {
     try {
-      const protocol =
-        (req as any).app?.get('env') === 'production' ? 'https' : 'http';
+      const protocol = getAppProtocol(req);
       const response = await fetch(
         `${protocol}://${node.address}:${node.port}/databases`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${node.key}`,
           },
           body: JSON.stringify({
@@ -107,10 +118,10 @@ router.post('/', parseBody(createDatabaseBody), async (req, res) => {
       );
 
       if (!response.ok) {
-        const text = await response.text().catch(() => 'Daemon error');
+        const text = await response.text().catch(() => "Daemon error");
         return jsonError(
           res,
-          'DAEMON_ERROR',
+          "DAEMON_ERROR",
           `Failed to create database on host: ${text}`,
           502,
         );
@@ -118,8 +129,8 @@ router.post('/', parseBody(createDatabaseBody), async (req, res) => {
     } catch {
       return jsonError(
         res,
-        'DAEMON_UNREACHABLE',
-        'Could not reach daemon for database creation',
+        "DAEMON_UNREACHABLE",
+        "Could not reach daemon for database creation",
         502,
       );
     }
@@ -139,8 +150,8 @@ router.post('/', parseBody(createDatabaseBody), async (req, res) => {
   });
 
   logActivity(
-    (req as any).session?.user?.id ?? (req as any).apiKey?.userId,
-    'database.created',
+    getAuthenticatedUserId(req),
+    "database.created",
     resolved.server.UUID,
     { databaseName, hostName: host.name },
     req.ip,
@@ -152,14 +163,18 @@ router.post('/', parseBody(createDatabaseBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/servers/:id/databases/:dbId — Delete database
 // ---------------------------------------------------------------------------
-router.delete('/:dbId', async (req, res) => {
+router.delete("/:dbId", async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-  if (!requireSubUserPermission(res, resolved, 'databases.delete')) {return;}
+  if (!resolved) {
+    return;
+  }
+  if (!requireSubUserPermission(res, resolved, "databases.delete")) {
+    return;
+  }
 
   const dbId = parseInt(String(req.params.dbId), 10);
   if (isNaN(dbId)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid database ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid database ID", 400);
   }
 
   const db = await prisma.serverDatabase.findUnique({
@@ -167,7 +182,7 @@ router.delete('/:dbId', async (req, res) => {
     include: { host: true },
   });
   if (!db || db.serverId !== resolved.server.UUID) {
-    return jsonError(res, 'NOT_FOUND', 'Database not found', 404);
+    return jsonError(res, "NOT_FOUND", "Database not found", 404);
   }
 
   // Drop database on the host via daemon
@@ -176,14 +191,13 @@ router.delete('/:dbId', async (req, res) => {
   });
   if (node) {
     try {
-      const protocol =
-        (req as any).app?.get('env') === 'production' ? 'https' : 'http';
+      const protocol = getAppProtocol(req);
       await fetch(
         `${protocol}://${node.address}:${node.port}/databases/${db.databaseName}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${node.key}`,
           },
           body: JSON.stringify({
@@ -203,8 +217,8 @@ router.delete('/:dbId', async (req, res) => {
   await prisma.serverDatabase.delete({ where: { id: dbId } });
 
   logActivity(
-    (req as any).session?.user?.id ?? (req as any).apiKey?.userId,
-    'database.deleted',
+    getAuthenticatedUserId(req),
+    "database.deleted",
     resolved.server.UUID,
     { databaseName: db.databaseName },
     req.ip,
@@ -216,14 +230,18 @@ router.delete('/:dbId', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/databases/:dbId/rotate — Rotate password
 // ---------------------------------------------------------------------------
-router.post('/:dbId/rotate', async (req, res) => {
+router.post("/:dbId/rotate", async (req, res) => {
   const resolved = await resolveServer(req, res);
-  if (!resolved) {return;}
-  if (!requireSubUserPermission(res, resolved, 'databases')) {return;}
+  if (!resolved) {
+    return;
+  }
+  if (!requireSubUserPermission(res, resolved, "databases")) {
+    return;
+  }
 
   const dbId = parseInt(String(req.params.dbId), 10);
   if (isNaN(dbId)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid database ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid database ID", 400);
   }
 
   const db = await prisma.serverDatabase.findUnique({
@@ -231,11 +249,11 @@ router.post('/:dbId/rotate', async (req, res) => {
     include: { host: true },
   });
   if (!db || db.serverId !== resolved.server.UUID) {
-    return jsonError(res, 'NOT_FOUND', 'Database not found', 404);
+    return jsonError(res, "NOT_FOUND", "Database not found", 404);
   }
 
-  const crypto = await import('crypto');
-  const newPassword = crypto.randomBytes(24).toString('base64url');
+  const crypto = await import("crypto");
+  const newPassword = crypto.randomBytes(24).toString("base64url");
 
   // Rotate on host via daemon
   const node = await prisma.node.findUnique({
@@ -243,14 +261,13 @@ router.post('/:dbId/rotate', async (req, res) => {
   });
   if (node) {
     try {
-      const protocol =
-        (req as any).app?.get('env') === 'production' ? 'https' : 'http';
+      const protocol = getAppProtocol(req);
       const response = await fetch(
         `${protocol}://${node.address}:${node.port}/databases/${db.databaseName}/rotate`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${node.key}`,
           },
           body: JSON.stringify({
@@ -266,10 +283,10 @@ router.post('/:dbId/rotate', async (req, res) => {
       );
 
       if (!response.ok) {
-        const text = await response.text().catch(() => 'Daemon error');
+        const text = await response.text().catch(() => "Daemon error");
         return jsonError(
           res,
-          'DAEMON_ERROR',
+          "DAEMON_ERROR",
           `Failed to rotate password: ${text}`,
           502,
         );
@@ -277,8 +294,8 @@ router.post('/:dbId/rotate', async (req, res) => {
     } catch {
       return jsonError(
         res,
-        'DAEMON_UNREACHABLE',
-        'Could not reach daemon',
+        "DAEMON_UNREACHABLE",
+        "Could not reach daemon",
         502,
       );
     }
@@ -290,8 +307,8 @@ router.post('/:dbId/rotate', async (req, res) => {
   });
 
   logActivity(
-    (req as any).session?.user?.id ?? (req as any).apiKey?.userId,
-    'database.password.rotated',
+    getAuthenticatedUserId(req),
+    "database.password.rotated",
     resolved.server.UUID,
     { databaseName: db.databaseName },
     req.ip,

@@ -6,18 +6,20 @@
  * POST /api/v2/system/test-node — Test node connection
  */
 
-import { Router } from 'express';
-import prisma from '../../../db';
-import { jsonOk, jsonError, requireUser } from './helpers';
+import { Router } from "express";
+import prisma from "../../../db";
+import { getAppProtocol, jsonOk, jsonError, requireUser } from "./helpers";
 
 const router = Router();
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/system/status — System status
 // ---------------------------------------------------------------------------
-router.get('/status', async (req, res) => {
+router.get("/status", async (req, res) => {
   const user = await requireUser(req, res);
-  if (!user) {return;}
+  if (!user) {
+    return;
+  }
 
   const [serverCount, nodeCount, userCount] = await Promise.all([
     prisma.server.count(),
@@ -26,7 +28,7 @@ router.get('/status', async (req, res) => {
   ]);
 
   jsonOk(res, {
-    version: process.env.AIRLINK_VERSION ?? '2.0.0',
+    version: process.env.AIRLINK_VERSION ?? "2.0.0",
     servers: serverCount,
     nodes: nodeCount,
     users: userCount,
@@ -37,23 +39,25 @@ router.get('/status', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/system/health — Health check
 // ---------------------------------------------------------------------------
-router.get('/health', async (_req, res) => {
+router.get("/health", async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    jsonOk(res, { status: 'healthy', database: 'connected' });
+    jsonOk(res, { status: "healthy", database: "connected" });
   } catch {
-    jsonOk(res, { status: 'degraded', database: 'disconnected' });
+    jsonOk(res, { status: "degraded", database: "disconnected" });
   }
 });
 
 // ---------------------------------------------------------------------------
 // POST /api/v2/system/test-node — Test node connection
 // ---------------------------------------------------------------------------
-router.post('/test-node', async (req, res) => {
+router.post("/test-node", async (req, res) => {
   const user = await requireUser(req, res);
-  if (!user) {return;}
+  if (!user) {
+    return;
+  }
   if (!user.isAdmin) {
-    return jsonError(res, 'FORBIDDEN', 'Admin access required', 403);
+    return jsonError(res, "FORBIDDEN", "Admin access required", 403);
   }
 
   const { address, port, key } = req.body as {
@@ -64,15 +68,14 @@ router.post('/test-node', async (req, res) => {
   if (!address || !port || !key) {
     return jsonError(
       res,
-      'BAD_REQUEST',
-      'address, port, and key are required',
+      "BAD_REQUEST",
+      "address, port, and key are required",
       400,
     );
   }
 
   try {
-    const protocol =
-      (req as any).app?.get('env') === 'production' ? 'https' : 'http';
+    const protocol = getAppProtocol(req);
     const response = await fetch(`${protocol}://${address}:${port}/`, {
       headers: { Authorization: `Bearer ${key}` },
       signal: AbortSignal.timeout(10000),
@@ -82,7 +85,7 @@ router.post('/test-node', async (req, res) => {
       const data = await response.json().catch(() => ({}));
       jsonOk(res, {
         connected: true,
-        daemonVersion: (data as any).version ?? 'unknown',
+        daemonVersion: (data as any).version ?? "unknown",
       });
     } else {
       jsonOk(res, { connected: false, error: `HTTP ${response.status}` });

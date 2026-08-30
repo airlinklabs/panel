@@ -8,9 +8,9 @@
  * DELETE /api/v2/admin/images/:id    — Delete image
  */
 
-import { Router } from 'express';
-import prisma from '../../../../db';
-import { parseBody } from '../../../../utils/validation';
+import { Router } from "express";
+import prisma from "../../../../db";
+import { parseBody } from "../../../../utils/validation";
 import {
   jsonOk,
   jsonError,
@@ -19,26 +19,28 @@ import {
   paginate,
   parsePage,
   parsePerPage,
-} from '../helpers';
-import { adminCreateImageBody, adminUpdateImageBody } from '../dto';
+} from "../helpers";
+import { adminCreateImageBody, adminUpdateImageBody } from "../dto";
 
 const router = Router();
 
 router.use(async (req, res, next) => {
   const admin = await requireAdmin(req, res);
-  if (!admin) {return;}
-  (req as any).adminUser = admin;
+  if (!admin) {
+    return;
+  }
+  req.adminUser = admin;
   next();
 });
 
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const page = parsePage(req.query.page);
   const perPage = parsePerPage(req.query.perPage);
   const [images, total] = await Promise.all([
     prisma.images.findMany({
       skip: (page - 1) * perPage,
       take: perPage,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     }),
     prisma.images.count(),
   ]);
@@ -50,12 +52,12 @@ router.get('/', async (req, res) => {
   });
 });
 
-router.post('/', parseBody(adminCreateImageBody), async (req, res) => {
+router.post("/", parseBody(adminCreateImageBody), async (req, res) => {
   const data = req.validatedBody as any;
   const image = await prisma.images.create({ data });
   logActivity(
-    (req as any).adminUser?.id,
-    'image.created',
+    req.adminUser?.id,
+    "image.created",
     undefined,
     { name: image.name },
     req.ip,
@@ -63,24 +65,32 @@ router.post('/', parseBody(adminCreateImageBody), async (req, res) => {
   jsonOk(res, image);
 });
 
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
-  if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+  }
   const image = await prisma.images.findUnique({ where: { id } });
-  if (!image) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+  if (!image) {
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
+  }
   jsonOk(res, image);
 });
 
-router.put('/:id', parseBody(adminUpdateImageBody), async (req, res) => {
+router.put("/:id", parseBody(adminUpdateImageBody), async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
-  if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+  }
   const existing = await prisma.images.findUnique({ where: { id } });
-  if (!existing) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+  if (!existing) {
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
+  }
   const data = req.validatedBody as any;
   const updated = await prisma.images.update({ where: { id }, data });
   logActivity(
-    (req as any).adminUser?.id,
-    'image.updated',
+    req.adminUser?.id,
+    "image.updated",
     undefined,
     { id, fields: Object.keys(data) },
     req.ip,
@@ -88,23 +98,28 @@ router.put('/:id', parseBody(adminUpdateImageBody), async (req, res) => {
   jsonOk(res, updated);
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
-  if (isNaN(id)) {return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);}
+  if (isNaN(id)) {
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
+  }
   const image = await prisma.images.findUnique({ where: { id } });
-  if (!image) {return jsonError(res, 'NOT_FOUND', 'Not found', 404);}
+  if (!image) {
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
+  }
   const serverCount = await prisma.server.count({ where: { imageId: id } });
-  if (serverCount > 0)
-  {return jsonError(
-    res,
-    'CONFLICT',
-    `Cannot delete image with ${serverCount} servers`,
-    409,
-  );}
+  if (serverCount > 0) {
+    return jsonError(
+      res,
+      "CONFLICT",
+      `Cannot delete image with ${serverCount} servers`,
+      409,
+    );
+  }
   await prisma.images.delete({ where: { id } });
   logActivity(
-    (req as any).adminUser?.id,
-    'image.deleted',
+    req.adminUser?.id,
+    "image.deleted",
     undefined,
     { name: image.name },
     req.ip,

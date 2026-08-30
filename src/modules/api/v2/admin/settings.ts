@@ -33,7 +33,7 @@ router.use(async (req, res, next) => {
   if (!admin) {
     return;
   }
-  (req as any).adminUser = admin;
+  req.adminUser = admin;
   next();
 });
 
@@ -64,7 +64,7 @@ router.patch(
     });
 
     logActivity(
-      (req as any).adminUser?.id,
+      req.adminUser?.id,
       "settings.general.updated",
       undefined,
       { fields: Object.keys(data) },
@@ -94,7 +94,7 @@ router.patch(
     });
 
     logActivity(
-      (req as any).adminUser?.id,
+      req.adminUser?.id,
       "settings.security.updated",
       undefined,
       { fields: Object.keys(data) },
@@ -124,7 +124,7 @@ router.patch(
     });
 
     logActivity(
-      (req as any).adminUser?.id,
+      req.adminUser?.id,
       "settings.server-policy.updated",
       undefined,
       { fields: Object.keys(data) },
@@ -151,7 +151,7 @@ router.patch("/smtp", parseBody(adminSettingsSmtpBody), async (req, res) => {
   });
 
   logActivity(
-    (req as any).adminUser?.id,
+    req.adminUser?.id,
     "settings.smtp.updated",
     undefined,
     {},
@@ -205,13 +205,7 @@ router.patch("/s3", parseBody(adminSettingsS3Body), async (req, res) => {
     data,
   });
 
-  logActivity(
-    (req as any).adminUser?.id,
-    "settings.s3.updated",
-    undefined,
-    {},
-    req.ip,
-  );
+  logActivity(req.adminUser?.id, "settings.s3.updated", undefined, {}, req.ip);
 
   jsonOk(res, updated);
 });
@@ -272,7 +266,7 @@ router.post("/ban-ip", parseBody(adminBanIpBody), async (req, res) => {
   });
 
   logActivity(
-    (req as any).adminUser?.id,
+    req.adminUser?.id,
     "settings.ip.banned",
     undefined,
     { ip, reason },
@@ -310,7 +304,7 @@ router.post("/unban-ip", parseBody(adminBanIpBody), async (req, res) => {
   });
 
   logActivity(
-    (req as any).adminUser?.id,
+    req.adminUser?.id,
     "settings.ip.unbanned",
     undefined,
     { ip },

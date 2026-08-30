@@ -17,9 +17,11 @@ import { nextRunFromCron } from "../../../utils/cron";
 import { parseBody, validationErrorBoundary } from "../../../utils/validation";
 import { isPathSafe } from "../../../utils/pathSecurity";
 import {
-  parseSubUserPermissions,
-  type SubUserPermission,
-} from "../../../handlers/utils/auth/serverAuthUtil";
+  parsePermissions,
+  subUserHasPermission,
+  resolveServerAccess,
+} from "../../../handlers/utils/auth/authorization";
+import type { SubUserPermission } from "../../../handlers/utils/auth/serverAuthUtil";
 import {
   CLIENT_API_VERSION,
   powerBodySchema,
@@ -54,49 +56,15 @@ type ServerResult = Awaited<ReturnType<typeof prisma.server.findUnique>> & {
 };
 
 async function resolveServerForUser(serverId: string, userId: number) {
+  const result = await resolveServerAccess(serverId, userId);
+  if (!result) return null;
+  // Include node relation for client API responses
   const server = await prisma.server.findUnique({
     where: { UUID: serverId },
     include: { node: true },
   });
-  if (!server) {
-    return null;
-  }
-  if (server.ownerId === userId) {
-    return { server, isOwner: true, subUser: null };
-  }
-  const subUser = await prisma.subUser.findFirst({
-    where: { serverId: server.UUID, userId },
-  });
-  if (!subUser) {
-    return null;
-  }
-  return { server, isOwner: false, subUser };
-}
-
-function subUserHasPermission(
-  subUser: { permissions: string | null | undefined },
-  permission: SubUserPermission,
-): boolean {
-  const perms = parseSubUserPermissions(subUser.permissions);
-  const parent = permission.includes(".")
-    ? permission.slice(0, permission.lastIndexOf("."))
-    : null;
-
-  for (const p of perms) {
-    if (p === permission) {
-      return true;
-    }
-    if (
-      p.endsWith(".*") &&
-      (permission === p.slice(0, -2) || permission.startsWith(p.slice(0, -1)))
-    ) {
-      return true;
-    }
-    if (parent && p === parent) {
-      return true;
-    }
-  }
-  return false;
+  if (!server) return null;
+  return { server, isOwner: result.isOwner, subUser: result.subUser };
 }
 
 function requirePermission(

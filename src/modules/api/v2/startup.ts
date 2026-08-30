@@ -17,6 +17,7 @@ import {
   requireSubUserPermission,
   checkSuspended,
   logActivity,
+  getAuthenticatedUserId,
 } from "./helpers";
 import {
   saveStartupCommandBody,
@@ -111,7 +112,7 @@ router.post("/command", parseBody(saveStartupCommandBody), async (req, res) => {
   });
 
   logActivity(
-    (req as any).session?.user?.id ?? (req as any).apiKey?.userId,
+    getAuthenticatedUserId(req),
     "startup.command.updated",
     resolved.server.UUID,
     { command },
@@ -163,7 +164,7 @@ router.post(
     });
 
     logActivity(
-      (req as any).session?.user?.id ?? (req as any).apiKey?.userId,
+      getAuthenticatedUserId(req),
       "startup.docker.updated",
       resolved.server.UUID,
       { dockerImage },
@@ -206,7 +207,7 @@ router.post("/variables", parseBody(saveVariablesBody), async (req, res) => {
   });
 
   logActivity(
-    (req as any).session?.user?.id ?? (req as any).apiKey?.userId,
+    getAuthenticatedUserId(req),
     "startup.variables.updated",
     resolved.server.UUID,
     { count: variables.length },

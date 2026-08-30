@@ -57,6 +57,8 @@ declare global {
       features?: string[];
       // Set by htmx middleware — true when the request has HX-Request header
       htmx?: boolean;
+      // Attached by admin auth middleware (requireAdmin) — the authenticated admin user record
+      adminUser?: import("../generated/prisma/client").Users;
     }
 
     interface Response {
