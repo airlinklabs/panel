@@ -16,6 +16,10 @@ import path from "path";
 
 const PANEL_ROOT = path.resolve(__dirname, "..");
 const DAEMON_ROOT = path.resolve(PANEL_ROOT, "..", "daemon");
+const daemonExists = fs.existsSync(
+  path.join(DAEMON_ROOT, "src", "security", "hmac.ts"),
+);
+const describeDaemonHmac = daemonExists ? describe : describe.skip;
 
 // ---------------------------------------------------------------------------
 // Shared constants (must match both repos)
@@ -326,7 +330,7 @@ describe("Cross-Repo Contract: Nonce Replay", () => {
 // ---------------------------------------------------------------------------
 // Test Suite: Daemon HMAC Verification (source inspection)
 // ---------------------------------------------------------------------------
-describe("Cross-Repo Contract: Daemon HMAC Verification", () => {
+describeDaemonHmac("Cross-Repo Contract: Daemon HMAC Verification", () => {
   let daemonHmacSrc: string;
 
   beforeAll(() => {

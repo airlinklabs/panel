@@ -52,11 +52,20 @@ describe("CSP configuration in app.ts", () => {
   });
 });
 
-describe("Security headers in daemon hmac.ts", () => {
-  const hmacSrc = fs.readFileSync(
-    path.join(ROOT, "..", "daemon", "src", "security", "hmac.ts"),
-    "utf8",
-  );
+const daemonHmacPath = path.join(
+  ROOT,
+  "..",
+  "daemon",
+  "src",
+  "security",
+  "hmac.ts",
+);
+const describeDaemonHmac = fs.existsSync(daemonHmacPath)
+  ? describe
+  : describe.skip;
+
+describeDaemonHmac("Security headers in daemon hmac.ts", () => {
+  const hmacSrc = fs.readFileSync(daemonHmacPath, "utf8");
 
   it("sets X-Content-Type-Options to nosniff", () => {
     expect(hmacSrc).toContain("'X-Content-Type-Options'");
