@@ -8,7 +8,8 @@
 
 import { Router } from "express";
 import prisma from "../../../db";
-import { getAppProtocol, jsonOk, jsonError, requireUser } from "./helpers";
+import { jsonOk, jsonError, requireUser } from "./helpers";
+import { daemonRequestDirect } from "../../../services/daemonService";
 
 const router = Router();
 
@@ -75,10 +76,8 @@ router.post("/test-node", async (req, res) => {
   }
 
   try {
-    const protocol = getAppProtocol(req);
-    const response = await fetch(`${protocol}://${address}:${port}/`, {
-      headers: { Authorization: `Bearer ${key}` },
-      signal: AbortSignal.timeout(10000),
+    const response = await daemonRequestDirect(address, port, key, "/", {
+      timeout: 10000,
     });
 
     if (response.ok) {

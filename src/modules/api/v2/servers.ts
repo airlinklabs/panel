@@ -25,9 +25,12 @@ import {
   parsePage,
   parsePerPage,
   getAuthenticatedUserId,
-  getAppProtocol,
 } from "./helpers";
 import { updateServerBody, powerBody } from "./dto";
+import {
+  daemonRequest,
+  DaemonNodeNotFoundError,
+} from "../../../services/daemonService";
 
 const router = Router();
 
@@ -204,23 +207,14 @@ router.delete("/:id", async (req, res) => {
 
   // Notify daemon before deleting
   try {
-    const node = await prisma.node.findUnique({
-      where: { id: resolved.server.nodeId },
-    });
-    if (node) {
-      const protocol = getAppProtocol(req);
-      await fetch(
-        `${protocol}://${node.address}:${node.port}/servers/${resolved.server.UUID}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${node.key}`,
-          },
-          signal: AbortSignal.timeout(10000),
-        },
-      );
-    }
+    await daemonRequest(
+      resolved.server.UUID,
+      `/servers/${resolved.server.UUID}`,
+      {
+        method: "DELETE",
+        timeout: 10000,
+      },
+    );
   } catch {
     // Best effort — daemon may be offline
   }
@@ -265,26 +259,11 @@ router.post("/:id/power", parseBody(powerBody), async (req, res) => {
     return;
   }
 
-  const node = await prisma.node.findUnique({
-    where: { id: resolved.server.nodeId },
-  });
-  if (!node) {
-    return jsonError(res, "NOT_FOUND", "Node not found", 404);
-  }
-
   try {
-    const protocol = getAppProtocol(req);
-    const response = await fetch(
-      `${protocol}://${node.address}:${node.port}/server/${resolved.server.UUID}/power`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${node.key}`,
-        },
-        body: JSON.stringify({ action }),
-        signal: AbortSignal.timeout(30000),
-      },
+    const response = await daemonRequest(
+      resolved.server.UUID,
+      `/server/${resolved.server.UUID}/power`,
+      { method: "POST", body: { action }, timeout: 30000 },
     );
 
     if (!response.ok) {
@@ -307,6 +286,9 @@ router.post("/:id/power", parseBody(powerBody), async (req, res) => {
 
     jsonOk(res, { action, status: "sent" });
   } catch (err) {
+    if (err instanceof DaemonNodeNotFoundError) {
+      return jsonError(res, "NOT_FOUND", "Node not found", 404);
+    }
     jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
   }
 });
@@ -327,25 +309,11 @@ router.post("/:id/reinstall", async (req, res) => {
     return;
   }
 
-  const node = await prisma.node.findUnique({
-    where: { id: resolved.server.nodeId },
-  });
-  if (!node) {
-    return jsonError(res, "NOT_FOUND", "Node not found", 404);
-  }
-
   try {
-    const protocol = getAppProtocol(req);
-    const response = await fetch(
-      `${protocol}://${node.address}:${node.port}/server/${resolved.server.UUID}/reinstall`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${node.key}`,
-        },
-        signal: AbortSignal.timeout(30000),
-      },
+    const response = await daemonRequest(
+      resolved.server.UUID,
+      `/server/${resolved.server.UUID}/reinstall`,
+      { method: "POST", timeout: 30000 },
     );
 
     if (!response.ok) {
@@ -372,7 +340,10 @@ router.post("/:id/reinstall", async (req, res) => {
     );
 
     jsonOk(res, { status: "reinstalling" });
-  } catch {
+  } catch (err) {
+    if (err instanceof DaemonNodeNotFoundError) {
+      return jsonError(res, "NOT_FOUND", "Node not found", 404);
+    }
     jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
   }
 });
@@ -386,21 +357,11 @@ router.get("/:id/status", async (req, res) => {
     return;
   }
 
-  const node = await prisma.node.findUnique({
-    where: { id: resolved.server.nodeId },
-  });
-  if (!node) {
-    return jsonOk(res, { online: false, status: "node_not_found" });
-  }
-
   try {
-    const protocol = getAppProtocol(req);
-    const response = await fetch(
-      `${protocol}://${node.address}:${node.port}/containerstatus/${resolved.server.UUID}`,
-      {
-        headers: { Authorization: `Bearer ${node.key}` },
-        signal: AbortSignal.timeout(10000),
-      },
+    const response = await daemonRequest(
+      resolved.server.UUID,
+      `/containerstatus/${resolved.server.UUID}`,
+      { timeout: 10000 },
     );
 
     if (!response.ok) {
@@ -415,7 +376,10 @@ router.get("/:id/status", async (req, res) => {
       online: data.running ?? false,
       status: data.status ?? "unknown",
     });
-  } catch {
+  } catch (err) {
+    if (err instanceof DaemonNodeNotFoundError) {
+      return jsonOk(res, { online: false, status: "node_not_found" });
+    }
     jsonOk(res, { online: false, status: "unreachable" });
   }
 });

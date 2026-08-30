@@ -32,16 +32,18 @@ import { logActivity } from "../../../handlers/utils/activity/activityLogger";
 import { validateVariableRules } from "../../user/server/startup";
 import { apiEndpoints } from "./apiDocs";
 import { nextRunFromCron, isValidCron } from "../../../utils/cron";
+import {
+  BCRYPT_SALT_ROUNDS,
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_MEMORY_MB,
+  DEFAULT_CPU_PERCENT,
+  DEFAULT_STORAGE_MB,
+} from "../../../config/constants";
 
 const POWER_ACTIONS = ["start", "stop", "restart", "kill"] as const;
 const TASK_ACTIONS = ["command", "power", "backup"] as const;
 
-const BCRYPT_SALT_ROUNDS = 10;
-const DEFAULT_PAGE_SIZE = 25;
-const DEFAULT_MEMORY_MB = 512;
 const DEFAULT_SWAP_MB = 0;
-const DEFAULT_CPU_PERCENT = 100;
-const DEFAULT_STORAGE_MB = 5120;
 const DEFAULT_NODE_PORT = 3001;
 const DEFAULT_SFTP_PORT = 3003;
 const MIN_PORT_NUMBER = 1024;

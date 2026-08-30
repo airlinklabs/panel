@@ -63,24 +63,24 @@ interface NodeWithInstances {
 
 async function listNodes(res: Response, includeServers = false) {
   try {
-    const nodes = await prisma.node.findMany({ include: { location: true } });
+    const nodes = await prisma.node.findMany({
+      include: {
+        location: true,
+        servers: true,
+        allocations: { select: { serverId: true } },
+      },
+    });
     const nodesWithStatus = [];
 
     for (const node of nodes) {
-      const instances = await prisma.server.findMany({
-        where: { nodeId: node.id },
-      });
+      const instances = node.servers;
 
       const usedMemory = instances.reduce((sum, s) => sum + s.Memory, 0);
       const usedCpu = instances.reduce((sum, s) => sum + s.Cpu, 0);
       const usedDisk = instances.reduce((sum, s) => sum + s.Storage, 0);
 
-      const [allocationTotal, inUse] = await Promise.all([
-        prisma.allocation.count({ where: { nodeId: node.id } }),
-        prisma.allocation.count({
-          where: { nodeId: node.id, serverId: { not: null } },
-        }),
-      ]);
+      const allocationTotal = node.allocations.length;
+      const inUse = node.allocations.filter((a) => a.serverId !== null).length;
 
       const nodeWithInstances: NodeWithInstances = {
         ...node,
@@ -324,11 +324,9 @@ const adminModule: Module = {
           parseInt(port) <= MIN_PORT_NUMBER ||
           parseInt(port) > MAX_PORT_NUMBER
         ) {
-          res
-            .status(400)
-            .json({
-              message: `Port must be a number between ${MIN_NODE_PORT} and ${MAX_PORT_NUMBER}.`,
-            });
+          res.status(400).json({
+            message: `Port must be a number between ${MIN_NODE_PORT} and ${MAX_PORT_NUMBER}.`,
+          });
           return;
         }
 

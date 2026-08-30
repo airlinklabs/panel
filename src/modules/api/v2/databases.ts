@@ -18,9 +18,9 @@ import {
   checkSuspended,
   logActivity,
   getAuthenticatedUserId,
-  getAppProtocol,
 } from "./helpers";
 import { createDatabaseBody } from "./dto";
+import { daemonRequestByNode } from "../../../services/daemonService";
 
 const router = Router();
 
@@ -90,32 +90,22 @@ router.post("/", parseBody(createDatabaseBody), async (req, res) => {
   const databasePassword = crypto.randomBytes(24).toString("base64url");
 
   // Create database on the host via daemon
-  const node = await prisma.node.findUnique({
-    where: { id: host.nodeId ?? resolved.server.nodeId },
-  });
-  if (node) {
+  const nodeId = host.nodeId ?? resolved.server.nodeId;
+  if (nodeId) {
     try {
-      const protocol = getAppProtocol(req);
-      const response = await fetch(
-        `${protocol}://${node.address}:${node.port}/databases`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${node.key}`,
-          },
-          body: JSON.stringify({
-            host: host.host,
-            port: host.port,
-            username: host.username,
-            password: host.password,
-            database: databaseName,
-            databaseUser,
-            databasePassword,
-          }),
-          signal: AbortSignal.timeout(30000),
+      const response = await daemonRequestByNode(nodeId, "/databases", {
+        method: "POST",
+        body: {
+          host: host.host,
+          port: host.port,
+          username: host.username,
+          password: host.password,
+          database: databaseName,
+          databaseUser,
+          databasePassword,
         },
-      );
+        timeout: 30000,
+      });
 
       if (!response.ok) {
         const text = await response.text().catch(() => "Daemon error");
@@ -186,29 +176,19 @@ router.delete("/:dbId", async (req, res) => {
   }
 
   // Drop database on the host via daemon
-  const node = await prisma.node.findUnique({
-    where: { id: db.host.nodeId ?? resolved.server.nodeId },
-  });
-  if (node) {
+  const nodeId = db.host.nodeId ?? resolved.server.nodeId;
+  if (nodeId) {
     try {
-      const protocol = getAppProtocol(req);
-      await fetch(
-        `${protocol}://${node.address}:${node.port}/databases/${db.databaseName}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${node.key}`,
-          },
-          body: JSON.stringify({
-            host: db.host.host,
-            port: db.host.port,
-            username: db.host.username,
-            password: db.host.password,
-          }),
-          signal: AbortSignal.timeout(30000),
+      await daemonRequestByNode(nodeId, `/databases/${db.databaseName}`, {
+        method: "DELETE",
+        body: {
+          host: db.host.host,
+          port: db.host.port,
+          username: db.host.username,
+          password: db.host.password,
         },
-      );
+        timeout: 30000,
+      });
     } catch {
       // Best effort — daemon may be offline
     }
@@ -256,29 +236,23 @@ router.post("/:dbId/rotate", async (req, res) => {
   const newPassword = crypto.randomBytes(24).toString("base64url");
 
   // Rotate on host via daemon
-  const node = await prisma.node.findUnique({
-    where: { id: db.host.nodeId ?? resolved.server.nodeId },
-  });
-  if (node) {
+  const nodeId = db.host.nodeId ?? resolved.server.nodeId;
+  if (nodeId) {
     try {
-      const protocol = getAppProtocol(req);
-      const response = await fetch(
-        `${protocol}://${node.address}:${node.port}/databases/${db.databaseName}/rotate`,
+      const response = await daemonRequestByNode(
+        nodeId,
+        `/databases/${db.databaseName}/rotate`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${node.key}`,
-          },
-          body: JSON.stringify({
+          body: {
             host: db.host.host,
             port: db.host.port,
             username: db.host.username,
             password: db.host.password,
             databaseUser: db.databaseUser,
             newPassword,
-          }),
-          signal: AbortSignal.timeout(30000),
+          },
+          timeout: 30000,
         },
       );
 

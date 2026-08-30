@@ -21,13 +21,16 @@ import {
   checkSuspended,
   logActivity,
   getAuthenticatedUserId,
-  getAppProtocol,
 } from "./helpers";
 import {
   createScheduleBody,
   updateScheduleBody,
   createScheduleTaskBody,
 } from "./dto";
+import {
+  daemonRequest,
+  DaemonNodeNotFoundError,
+} from "../../../services/daemonService";
 
 const router = Router();
 
@@ -325,26 +328,11 @@ router.post("/:scheduleId/run", async (req, res) => {
     return jsonError(res, "NOT_FOUND", "Schedule not found", 404);
   }
 
-  const node = await prisma.node.findUnique({
-    where: { id: resolved.server.nodeId },
-  });
-  if (!node) {
-    return jsonError(res, "NOT_FOUND", "Node not found", 404);
-  }
-
   try {
-    const protocol = getAppProtocol(req);
-    const response = await fetch(
-      `${protocol}://${node.address}:${node.port}/servers/${resolved.server.UUID}/schedules/${scheduleId}/run`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${node.key}`,
-        },
-        body: JSON.stringify({ tasks: schedule.tasks }),
-        signal: AbortSignal.timeout(30000),
-      },
+    const response = await daemonRequest(
+      resolved.server.UUID,
+      `/servers/${resolved.server.UUID}/schedules/${scheduleId}/run`,
+      { method: "POST", body: { tasks: schedule.tasks }, timeout: 30000 },
     );
 
     if (!response.ok) {
@@ -372,7 +360,10 @@ router.post("/:scheduleId/run", async (req, res) => {
     );
 
     jsonOk(res, { scheduleId, status: "running" });
-  } catch {
+  } catch (err) {
+    if (err instanceof DaemonNodeNotFoundError) {
+      return jsonError(res, "NOT_FOUND", "Node not found", 404);
+    }
     jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
   }
 });
