@@ -11,7 +11,8 @@
  * missing/weak secret aborts startup.
  */
 
-import crypto from "crypto";
+import crypto from 'crypto';
+import logger from './handlers/logger';
 
 export interface PanelConfig {
   /** NODE_ENV ('production' | 'development' | ...). */
@@ -33,11 +34,11 @@ const MIN_SECRET_LENGTH = 32;
 
 /** Well-known placeholder/insecure values that must never be trusted. */
 const KNOWN_INSECURE_SECRETS = new Set([
-  "change_me",
-  "dev-only-insecure-secret-change-me",
-  "secret",
-  "changeme",
-  "insecure",
+  'change_me',
+  'dev-only-insecure-secret-change-me',
+  'secret',
+  'changeme',
+  'insecure',
 ]);
 
 /**
@@ -71,16 +72,16 @@ export function resolveSessionSecret(
 
   if (isProduction) {
     throw new Error(
-      "SESSION_SECRET is missing or insecure. Set a strong value in .env " +
-        "(generate one with `node dist/cli/secret.js`) and restart the panel.",
+      'SESSION_SECRET is missing or insecure. Set a strong value in .env ' +
+        '(generate one with `node dist/cli/secret.js`) and restart the panel.',
     );
   }
 
-  console.warn(
-    "[config] SESSION_SECRET is missing or insecure. Generated an ephemeral secret " +
-      "for this boot — sessions will NOT survive a restart. In production this is fatal.",
+  logger.warn(
+    '[config] SESSION_SECRET is missing or insecure. Generated an ephemeral secret ' +
+      'for this boot — sessions will NOT survive a restart. In production this is fatal.',
   );
-  return crypto.randomBytes(32).toString("hex");
+  return crypto.randomBytes(32).toString('hex');
 }
 
 /** Parses PORT, falling back to 3000 for any out-of-range/non-numeric value. */
@@ -94,24 +95,24 @@ export function parsePort(raw: string | undefined): number {
 
 /** Builds the validated panel configuration from the current process.env. */
 export function getConfig(): PanelConfig {
-  const nodeEnv = process.env.NODE_ENV || "development";
-  const isProduction = nodeEnv === "production";
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  const isProduction = nodeEnv === 'production';
   const url = process.env.URL || `http://localhost:${process.env.PORT || 3000}`;
 
   return {
     nodeEnv,
     isProduction,
-    isHttps: url.startsWith("https://"),
+    isHttps: url.startsWith('https://'),
     url,
     port: parsePort(process.env.PORT),
-    name: process.env.NAME || "AirLink",
+    name: process.env.NAME || 'AirLink',
     sessionSecret: resolveSessionSecret(
       process.env.SESSION_SECRET,
       isProduction,
     ),
     databaseUrl:
       process.env.DATABASE_URL ||
-      "postgresql://airlink:airlink@127.0.0.1:5432/airlink",
-    redisUrl: process.env.REDIS_URL || "redis://127.0.0.1:6379",
+      'postgresql://airlink:airlink@127.0.0.1:5432/airlink',
+    redisUrl: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
   };
 }

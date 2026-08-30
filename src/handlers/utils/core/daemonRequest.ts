@@ -4,8 +4,6 @@ import { createReadStream, createWriteStream, promises as fsp } from 'fs';
 import os from 'os';
 import path from 'path';
 import { Readable } from 'stream';
-import { URL } from 'url';
-import prisma from '../../../db';
 import {
   httpGet,
   httpPost,
@@ -181,7 +179,9 @@ async function spoolStreamToTemp(
   });
 
   if (total > MAX_SPOOL_BYTES) {
-    await fsp.unlink(file).catch(() => {});
+    await fsp.unlink(file).catch(() => {
+      /* noop */
+    });
     throw new Error(`stream exceeds the ${MAX_SPOOL_BYTES}-byte spool cap`);
   }
 

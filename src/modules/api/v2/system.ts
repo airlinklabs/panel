@@ -6,19 +6,19 @@
  * POST /api/v2/system/test-node — Test node connection
  */
 
-import { Router } from "express";
-import prisma from "../../../db";
-import { jsonOk, jsonError, requireUser } from "./helpers";
-import { daemonRequestDirect } from "../../../services/daemonService";
-import { cache } from "../../../handlers/cache";
-import logger from "../../../handlers/logger";
+import { Router } from 'express';
+import prisma from '../../../db';
+import { jsonOk, jsonError, requireUser } from './helpers';
+import { daemonRequestDirect } from '../../../services/daemonService';
+import { cache } from '../../../handlers/cache';
+import logger from '../../../handlers/logger';
 
 const router = Router();
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/system/status — System status
 // ---------------------------------------------------------------------------
-router.get("/status", async (req, res) => {
+router.get('/status', async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -31,7 +31,7 @@ router.get("/status", async (req, res) => {
   ]);
 
   jsonOk(res, {
-    version: process.env.AIRLINK_VERSION ?? "2.0.0",
+    version: process.env.AIRLINK_VERSION ?? '2.0.0',
     servers: serverCount,
     nodes: nodeCount,
     users: userCount,
@@ -42,25 +42,25 @@ router.get("/status", async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/system/health — Health check
 // ---------------------------------------------------------------------------
-router.get("/health", async (_req, res) => {
+router.get('/health', async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    jsonOk(res, { status: "healthy", database: "connected" });
+    jsonOk(res, { status: 'healthy', database: 'connected' });
   } catch {
-    jsonOk(res, { status: "degraded", database: "disconnected" });
+    jsonOk(res, { status: 'degraded', database: 'disconnected' });
   }
 });
 
 // ---------------------------------------------------------------------------
 // POST /api/v2/system/test-node — Test node connection
 // ---------------------------------------------------------------------------
-router.post("/test-node", async (req, res) => {
+router.post('/test-node', async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
   }
   if (!user.isAdmin) {
-    return jsonError(res, "FORBIDDEN", "Admin access required", 403);
+    return jsonError(res, 'FORBIDDEN', 'Admin access required', 403);
   }
 
   const { address, port, key } = req.body as {
@@ -71,14 +71,14 @@ router.post("/test-node", async (req, res) => {
   if (!address || !port || !key) {
     return jsonError(
       res,
-      "BAD_REQUEST",
-      "address, port, and key are required",
+      'BAD_REQUEST',
+      'address, port, and key are required',
       400,
     );
   }
 
   try {
-    const response = await daemonRequestDirect(address, port, key, "/", {
+    const response = await daemonRequestDirect(address, port, key, '/', {
       timeout: 10000,
     });
 
@@ -86,7 +86,7 @@ router.post("/test-node", async (req, res) => {
       const data = await response.json().catch(() => ({}));
       jsonOk(res, {
         connected: true,
-        daemonVersion: (data as any).version ?? "unknown",
+        daemonVersion: (data as any).version ?? 'unknown',
       });
     } else {
       jsonOk(res, { connected: false, error: `HTTP ${response.status}` });
@@ -99,13 +99,13 @@ router.post("/test-node", async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/system/search?q=... — Global search
 // ---------------------------------------------------------------------------
-router.get("/search", async (req, res) => {
+router.get('/search', async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
   }
 
-  const qRaw = String(req.query.q || "")
+  const qRaw = String(req.query.q || '')
     .trim()
     .toLowerCase();
   if (!qRaw) {
@@ -139,14 +139,14 @@ router.get("/search", async (req, res) => {
 
     const normalize = (s: string): string =>
       s
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/[^a-z0-9]+/g, ' ')
         .trim();
 
     const qNorm = normalize(qRaw);
-    const tokens = qNorm.split(" ").filter(Boolean);
+    const tokens = qNorm.split(' ').filter(Boolean);
     if (tokens.length === 0) {
       return jsonOk(res, { results: [] });
     }
@@ -219,11 +219,11 @@ router.get("/search", async (req, res) => {
       tokens.flatMap((t) => fields.map((f) => ({ [f]: { contains: t } })));
 
     const whereClause = user.isAdmin
-      ? { OR: tokenFieldOrs(["name", "description", "UUID"]) }
+      ? { OR: tokenFieldOrs(['name', 'description', 'UUID']) }
       : {
-          ownerId: user.id,
-          OR: tokenFieldOrs(["name", "description", "UUID"]),
-        };
+        ownerId: user.id,
+        OR: tokenFieldOrs(['name', 'description', 'UUID']),
+      };
 
     let servers = await prisma.server.findMany({
       where: whereClause as never,
@@ -235,16 +235,16 @@ router.get("/search", async (req, res) => {
       servers = await prisma.server.findMany({
         where: user.isAdmin ? undefined : { ownerId: user.id },
         select: { UUID: true, name: true, description: true },
-        orderBy: { id: "desc" },
+        orderBy: { id: 'desc' },
         take: 100,
       });
     }
 
     servers.forEach((s) => {
-      const score = scoreFields([s.name, s.description || "", s.UUID]);
+      const score = scoreFields([s.name, s.description || '', s.UUID]);
       if (score > 0) {
         results.push({
-          type: "server",
+          type: 'server',
           label: s.name,
           sub: s.description || s.UUID,
           url: `/server/${s.UUID}`,
@@ -255,35 +255,35 @@ router.get("/search", async (req, res) => {
 
     const serverFeatures = [
       {
-        name: "Console",
-        suffix: "",
-        kw: "console terminal status power start stop restart kill",
+        name: 'Console',
+        suffix: '',
+        kw: 'console terminal status power start stop restart kill',
       },
       {
-        name: "Files",
-        suffix: "/files",
-        kw: "files file manager sftp upload download",
+        name: 'Files',
+        suffix: '/files',
+        kw: 'files file manager sftp upload download',
       },
       {
-        name: "Backups",
-        suffix: "/backups",
-        kw: "backup backups restore snapshot",
+        name: 'Backups',
+        suffix: '/backups',
+        kw: 'backup backups restore snapshot',
       },
       {
-        name: "Players",
-        suffix: "/players",
-        kw: "players player list whitelist",
+        name: 'Players',
+        suffix: '/players',
+        kw: 'players player list whitelist',
       },
-      { name: "Worlds", suffix: "/worlds", kw: "worlds world map save" },
+      { name: 'Worlds', suffix: '/worlds', kw: 'worlds world map save' },
       {
-        name: "Startup",
-        suffix: "/startup",
-        kw: "startup command variables cmd",
+        name: 'Startup',
+        suffix: '/startup',
+        kw: 'startup command variables cmd',
       },
       {
-        name: "Settings",
-        suffix: "/settings",
-        kw: "server settings rename",
+        name: 'Settings',
+        suffix: '/settings',
+        kw: 'server settings rename',
       },
     ];
 
@@ -294,14 +294,14 @@ router.get("/search", async (req, res) => {
       const featServers = await prisma.server.findMany({
         where: user.isAdmin ? undefined : { ownerId: user.id },
         select: { UUID: true, name: true },
-        orderBy: { id: "desc" },
+        orderBy: { id: 'desc' },
         take: 5,
       });
       featureMatches.slice(0, 3).forEach((f) => {
         const score = scoreFields([f.kw]);
         featServers.slice(0, 4).forEach((s) => {
           results.push({
-            type: "feature",
+            type: 'feature',
             label: f.name,
             sub: s.name,
             url: `/server/${s.UUID}${f.suffix}`,
@@ -313,24 +313,24 @@ router.get("/search", async (req, res) => {
 
     if (user.isAdmin) {
       let users = await prisma.users.findMany({
-        where: { OR: tokenFieldOrs(["username", "email"]) },
+        where: { OR: tokenFieldOrs(['username', 'email']) },
         select: { id: true, username: true, email: true },
         take: 20,
       });
       if (users.length === 0) {
         users = await prisma.users.findMany({
           select: { id: true, username: true, email: true },
-          orderBy: { id: "desc" },
+          orderBy: { id: 'desc' },
           take: 50,
         });
       }
       users.forEach((u) => {
-        const score = scoreFields([u.username || "", u.email || ""]);
+        const score = scoreFields([u.username || '', u.email || '']);
         if (score > 0) {
           results.push({
-            type: "user",
-            label: u.username ?? "",
-            sub: u.email ?? "",
+            type: 'user',
+            label: u.username ?? '',
+            sub: u.email ?? '',
             url: `/admin/users/view/${u.id}/`,
             score,
           });
@@ -338,14 +338,14 @@ router.get("/search", async (req, res) => {
       });
 
       let nodes = await prisma.node.findMany({
-        where: { OR: tokenFieldOrs(["name", "address"]) },
+        where: { OR: tokenFieldOrs(['name', 'address']) },
         select: { id: true, name: true, address: true },
         take: 15,
       });
       if (nodes.length === 0) {
         nodes = await prisma.node.findMany({
           select: { id: true, name: true, address: true },
-          orderBy: { id: "desc" },
+          orderBy: { id: 'desc' },
           take: 30,
         });
       }
@@ -353,7 +353,7 @@ router.get("/search", async (req, res) => {
         const score = scoreFields([n.name, n.address]);
         if (score > 0) {
           results.push({
-            type: "node",
+            type: 'node',
             label: n.name,
             sub: n.address,
             url: `/admin/node/${n.id}/stats`,
@@ -368,8 +368,8 @@ router.get("/search", async (req, res) => {
     await cache.set(cacheKey, results, 30);
     return jsonOk(res, { results });
   } catch (err) {
-    logger.error("Search error:", err);
-    return jsonError(res, "INTERNAL", "Search failed", 500);
+    logger.error('Search error:', err);
+    return jsonError(res, 'INTERNAL', 'Search failed', 500);
   }
 });
 

@@ -14,7 +14,7 @@ const SETTINGS_TTL = 300; // 5 minutes
  */
 export async function getSettings() {
   return cache.wrap(SETTINGS_KEY, SETTINGS_TTL, () =>
-    prisma.settings.findUnique({ where: { id: 1 } })
+    prisma.settings.findUnique({ where: { id: 1 } }),
   );
 }
 

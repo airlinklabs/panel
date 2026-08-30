@@ -1,10 +1,10 @@
-import prisma from "../db";
+import prisma from '../db';
 import {
   provisionDatabase as pgProvision,
   deprovisionDatabase as pgDeprovision,
-} from "../handlers/utils/core/postgresProvisioner";
-import { getSettings } from "./settingsService";
-import type { DatabaseHost, ServerDatabase } from "../generated/prisma/client";
+} from '../handlers/utils/core/postgresProvisioner';
+import { getSettings } from './settingsService';
+import type { DatabaseHost, ServerDatabase } from '../generated/prisma/client';
 
 export interface DatabaseListItem {
   id: number;
@@ -26,7 +26,7 @@ export async function listDatabases(
   return prisma.serverDatabase.findMany({
     where: { serverId: serverUUID },
     include: { host: { select: { id: true, name: true } } },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: 'desc' },
   });
 }
 
@@ -54,18 +54,18 @@ export async function provisionDatabase(
     where: { UUID: serverUUID },
   });
   if (!server) {
-    throw new Error("Server not found");
+    throw new Error('Server not found');
   }
 
   const host = await prisma.databaseHost.findUnique({
     where: { id: parseInt(String(data.hostId), 10) },
   });
   if (!host) {
-    throw new Error("Invalid database host.");
+    throw new Error('Invalid database host.');
   }
   if (host.nodeId !== null && host.nodeId !== server.nodeId) {
     throw new Error(
-      "This database host is not available for this server's node.",
+      'This database host is not available for this server\'s node.',
     );
   }
 
@@ -122,7 +122,7 @@ export async function deprovisionDatabase(
     where: { UUID: serverUUID },
   });
   if (!server) {
-    throw new Error("Server not found");
+    throw new Error('Server not found');
   }
 
   const db = await prisma.serverDatabase.findUnique({
@@ -130,7 +130,7 @@ export async function deprovisionDatabase(
     include: { host: true },
   });
   if (!db || db.serverId !== server.UUID) {
-    throw new Error("Database not found.");
+    throw new Error('Database not found.');
   }
 
   await pgDeprovision(db.host, db);

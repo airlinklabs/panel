@@ -9,31 +9,32 @@ export const settingsLoader = async () => {
     if (!settings) {
       await prisma.settings.create({
         data: {
-          title:                 'AirLink',
-          description:           'AirLink is a free and open source project by AirlinkLabs',
-          logo:                  '../assets/logo.png',
-          theme:                 'default',
-          language:              'en',
-          allowRegistration:     false,
-          uploadLimit:           100,
-          rateLimitEnabled:      true,
-          rateLimitRpm:          500,
-          bannedIps:             '[]',
+          title: 'AirLink',
+          description:
+            'AirLink is a free and open source project by AirlinkLabs',
+          logo: '../assets/logo.png',
+          theme: 'default',
+          language: 'en',
+          allowRegistration: false,
+          uploadLimit: 100,
+          rateLimitEnabled: true,
+          rateLimitRpm: 500,
+          bannedIps: '[]',
           allowUserCreateServer: false,
           allowUserDeleteServer: false,
-          defaultServerLimit:    0,
-          defaultMaxMemory:      512,
-          defaultMaxCpu:         100,
-          defaultMaxStorage:     5120,
-          defaultMaxDatabases:   0,
+          defaultServerLimit: 0,
+          defaultMaxMemory: 512,
+          defaultMaxCpu: 100,
+          defaultMaxStorage: 5120,
+          defaultMaxDatabases: 0,
           defaultOverallocateMemory: 0,
-          defaultOverallocateDisk:   0,
-          defaultOverallocateCpu:    0,
-          loginMaxAttempts:      5,
-          loginLockoutMinutes:   15,
-          enforceDaemonHttps:    false,
-          behindReverseProxy:    false,
-          hashApiKeys:           false,
+          defaultOverallocateDisk: 0,
+          defaultOverallocateCpu: 0,
+          loginMaxAttempts: 5,
+          loginLockoutMinutes: 15,
+          enforceDaemonHttps: false,
+          behindReverseProxy: false,
+          hashApiKeys: false,
         },
       });
       logger.info('Settings created');
@@ -41,7 +42,8 @@ export const settingsLoader = async () => {
 
     return prisma;
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error occurred';
+    const message =
+      error instanceof Error ? error.message : 'Unknown error occurred';
     logger.error('settingsLoader', `Database connection error: ${message}`);
     throw error;
   }

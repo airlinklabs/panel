@@ -8,7 +8,8 @@
  */
 
 // lucide exports icons as arrays of [tag, attrs, children?] tuples
- 
+import logger from '../handlers/logger';
+
 const lucideIcons = require('lucide') as Record<string, unknown>;
 
 interface IconOptions {
@@ -51,7 +52,7 @@ function renderNode([tag, attrs, children]: IconNode): string {
 function toPascalCase(name: string): string {
   return name
     .split('-')
-    .map(s => s.charAt(0).toUpperCase() + s.slice(1))
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
     .join('');
 }
 
@@ -61,38 +62,46 @@ export function icon(name: string, opts: IconOptions = {}): string {
 
   if (!iconData || !Array.isArray(iconData)) {
     // Graceful degradation — render an empty placeholder span
-    console.warn(`[icon] Unknown Lucide icon: "${name}" (looked up as "${key}")`);
+    logger.warn(
+      `[icon] Unknown Lucide icon: "${name}" (looked up as "${key}")`,
+    );
     return `<span aria-hidden="true" style="display:inline-block;width:${opts.size ?? 16}px;height:${opts.size ?? 16}px;"></span>`;
   }
 
-  const w = opts.width  ?? opts.size ?? 16;
+  const w = opts.width ?? opts.size ?? 16;
   const h = opts.height ?? opts.size ?? 16;
   const sw = opts.strokeWidth ?? 1.5;
 
   const svgAttrs: Record<string, string | number> = {
-    xmlns:              'http://www.w3.org/2000/svg',
-    width:              w,
-    height:             h,
-    viewBox:            '0 0 24 24',
-    fill:               'none',
-    stroke:             'currentColor',
-    'stroke-width':     sw,
-    'stroke-linecap':   'round',
-    'stroke-linejoin':  'round',
-    'aria-hidden':      'true',
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: w,
+    height: h,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': sw,
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'aria-hidden': 'true',
   };
 
-  if (opts.class)  {svgAttrs['class'] = opts.class;}
-  if (opts.id)     {svgAttrs['id']    = opts.id;}
-  if (opts.style)  {svgAttrs['style'] = opts.style;}
+  if (opts.class) {
+    svgAttrs['class'] = opts.class;
+  }
+  if (opts.id) {
+    svgAttrs['id'] = opts.id;
+  }
+  if (opts.style) {
+    svgAttrs['style'] = opts.style;
+  }
   if (opts.label) {
-    svgAttrs['role']       = 'img';
+    svgAttrs['role'] = 'img';
     svgAttrs['aria-label'] = opts.label;
     delete svgAttrs['aria-hidden'];
   }
 
   const innerSVG = iconData.map(renderNode).join('');
-  const attrStr  = attrsToString(svgAttrs);
+  const attrStr = attrsToString(svgAttrs);
   return `<svg ${attrStr}>${innerSVG}</svg>`;
 }
 

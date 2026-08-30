@@ -928,7 +928,7 @@ function adminSettings() {
       var link = document.getElementById('theme-css');
       if (value && value !== 'default' && value !== 'light' && value !== 'dark') {
         if (!link) { link = document.createElement('link'); link.rel = 'stylesheet'; link.id = 'theme-css'; document.head.appendChild(link); }
-        link.href = value;
+        try { var _u = new URL(value, window.location.origin); if (_u.protocol === 'https:' || _u.protocol === 'http:') link.href = _u.href; } catch(_e) {}
       } else if (link) link.parentNode.removeChild(link);
     },
 

@@ -10,6 +10,7 @@ import path from 'path';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import { httpGet, httpPost } from '../../utils/http';
+import { redisRateLimit } from '../../handlers/utils/security/redisRateLimit';
 
 // In-memory rate limiter respecting VT free tier: 4/min, 500/day
 const vtRateLimit = {
@@ -363,6 +364,7 @@ const radarModule: Module = {
     router.post(
       '/admin/radar/vtscan/:serverId',
       isAuthenticated(true),
+      redisRateLimit,
       async (req: Request, res: Response) => {
         const settings = await getSettings();
         const apiKey = settings?.virusTotalApiKey;
@@ -572,7 +574,9 @@ const radarModule: Module = {
           );
           res.status(502).json({ success: false, error: 'File scan failed' });
         } finally {
-          fs.unlink(tmpPath).catch(() => {});
+          fs.unlink(tmpPath).catch(() => {
+            /* noop */
+          });
         }
       },
     );

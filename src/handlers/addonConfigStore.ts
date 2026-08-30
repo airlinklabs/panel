@@ -20,7 +20,10 @@ function createConfigStore(addonSlug: string): AddonConfigStore {
         });
         return row?.value ?? null;
       } catch (err: any) {
-        logger.error(`Addon config get failed for "${addonSlug}":`, err.message);
+        logger.error(
+          `Addon config get failed for "${addonSlug}":`,
+          err.message,
+        );
         return null;
       }
     },
@@ -33,7 +36,10 @@ function createConfigStore(addonSlug: string): AddonConfigStore {
           update: { value },
         });
       } catch (err: any) {
-        logger.error(`Addon config set failed for "${addonSlug}":`, err.message);
+        logger.error(
+          `Addon config set failed for "${addonSlug}":`,
+          err.message,
+        );
       }
     },
 
@@ -57,7 +63,10 @@ function createConfigStore(addonSlug: string): AddonConfigStore {
           where: { addonSlug, key },
         });
       } catch (err: any) {
-        logger.error(`Addon config delete failed for "${addonSlug}":`, err.message);
+        logger.error(
+          `Addon config delete failed for "${addonSlug}":`,
+          err.message,
+        );
       }
     },
 
@@ -67,7 +76,10 @@ function createConfigStore(addonSlug: string): AddonConfigStore {
           where: { addonSlug },
         });
       } catch (err: any) {
-        logger.error(`Addon config deleteAll failed for "${addonSlug}":`, err.message);
+        logger.error(
+          `Addon config deleteAll failed for "${addonSlug}":`,
+          err.message,
+        );
       }
     },
 
@@ -82,7 +94,10 @@ function createConfigStore(addonSlug: string): AddonConfigStore {
         }
         return result;
       } catch (err: any) {
-        logger.error(`Addon config getAll failed for "${addonSlug}":`, err.message);
+        logger.error(
+          `Addon config getAll failed for "${addonSlug}":`,
+          err.message,
+        );
         return {};
       }
     },

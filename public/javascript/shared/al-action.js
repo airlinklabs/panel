@@ -43,10 +43,10 @@
  */
 (function (root, factory) {
   var api = factory(root);
-  if (typeof window !== 'undefined') window.ALAction = api;
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
-})(typeof window !== 'undefined' ? window : globalThis, function (rootScope) {
-  'use strict';
+  if (typeof window !== "undefined") window.ALAction = api;
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+})(typeof window !== "undefined" ? window : globalThis, function (rootScope) {
+  "use strict";
 
   var currentScope = rootScope;
   var doc = (currentScope && currentScope.document) || null;
@@ -62,7 +62,7 @@
   function saveOriginal(btn) {
     if (!btn.dataset) btn.dataset = {};
     if (btn.dataset.alActionOriginal === undefined) {
-      btn.dataset.alActionOriginal = btn.textContent || '';
+      btn.dataset.alActionOriginal = btn.textContent || "";
     }
   }
 
@@ -78,8 +78,8 @@
     if (label) {
       btn.textContent = label;
     }
-    if (typeof btn.style !== 'undefined' && btn.style) {
-      btn.style.minWidth = btn.offsetWidth ? btn.offsetWidth + 'px' : '';
+    if (typeof btn.style !== "undefined" && btn.style) {
+      btn.style.minWidth = btn.offsetWidth ? btn.offsetWidth + "px" : "";
     }
   }
 
@@ -89,71 +89,98 @@
       saveOriginal(btn);
       setLoadingLabel(btn);
       busyButtons.add(btn);
-      btn.setAttribute('aria-busy', 'true');
-      btn.setAttribute('disabled', '');
-      btn.classList.add('al-action-loading');
+      btn.setAttribute("aria-busy", "true");
+      btn.setAttribute("disabled", "");
+      btn.classList.add("al-action-loading");
     } else {
       restoreLabel(btn);
       busyButtons.delete(btn);
-      btn.removeAttribute('aria-busy');
-      btn.removeAttribute('disabled');
-      btn.classList.remove('al-action-loading');
+      btn.removeAttribute("aria-busy");
+      btn.removeAttribute("disabled");
+      btn.classList.remove("al-action-loading");
     }
   }
 
   function isBusy(btn) {
-    return busyButtons.has(btn) || btn.getAttribute && btn.getAttribute('aria-busy') === 'true';
+    return (
+      busyButtons.has(btn) ||
+      (btn.getAttribute && btn.getAttribute("aria-busy") === "true")
+    );
   }
 
   function setResult(btn, kind, message) {
     if (!btn) return;
-    btn.classList.remove('al-action-success', 'al-action-error');
-    btn.classList.add(kind === 'error' ? 'al-action-error' : 'al-action-success');
+    btn.classList.remove("al-action-success", "al-action-error");
+    btn.classList.add(
+      kind === "error" ? "al-action-error" : "al-action-success",
+    );
     if (message) {
       saveOriginal(btn);
       btn.textContent = message;
     }
-    if (typeof setTimeout === 'function') {
+    if (typeof setTimeout === "function") {
       setTimeout(function () {
         restoreLabel(btn);
-        btn.classList.remove('al-action-success', 'al-action-error');
+        btn.classList.remove("al-action-success", "al-action-error");
       }, 2600);
     } else {
       restoreLabel(btn);
-      btn.classList.remove('al-action-success', 'al-action-error');
+      btn.classList.remove("al-action-success", "al-action-error");
     }
   }
 
   function confirmStep(btn) {
     var msg = btn.dataset && btn.dataset.actionConfirm;
     if (!msg) return Promise.resolve(true);
-    if (typeof ALDialog !== 'undefined' && ALDialog && typeof ALDialog.confirm === 'function') {
-      return ALDialog.confirm({ title: 'Confirm', body: msg, confirmLabel: 'Confirm' });
+    if (
+      typeof ALDialog !== "undefined" &&
+      ALDialog &&
+      typeof ALDialog.confirm === "function"
+    ) {
+      return ALDialog.confirm({
+        title: "Confirm",
+        body: msg,
+        confirmLabel: "Confirm",
+      });
     }
-    return Promise.resolve(Boolean(currentScope.confirm && currentScope.confirm(msg)));
+    return Promise.resolve(
+      Boolean(currentScope.confirm && currentScope.confirm(msg)),
+    );
   }
 
   function runHandler(btn, e) {
     // Prefer a bubbling CustomEvent the page listens for; fall back to an
     // inline data-action-handler function reference.
-    if (currentScope && typeof currentScope.CustomEvent === 'function') {
+    if (currentScope && typeof currentScope.CustomEvent === "function") {
       var detail = { button: btn, originalEvent: e };
       try {
-        btn.dispatchEvent(new currentScope.CustomEvent('al:action', {
-          bubbles: true,
-          detail: detail,
-        }));
-      } catch (err) { /* CustomEvent unavailable */ }
+        btn.dispatchEvent(
+          new currentScope.CustomEvent("al:action", {
+            bubbles: true,
+            detail: detail,
+          }),
+        );
+      } catch (err) {
+        /* CustomEvent unavailable */
+      }
     }
     var handler = btn.dataset && btn.dataset.actionHandler;
-    if (handler && currentScope && typeof currentScope[handler] === 'function') {
+    if (
+      handler &&
+      currentScope &&
+      typeof currentScope[handler] === "function"
+    ) {
       currentScope[handler](btn, e);
     }
   }
 
   function onClick(e) {
-    var btn = e.target && e.target.closest ? e.target.closest('[data-al-action]') : null;
-    if (!btn || !btn.getAttribute || !btn.hasAttribute('data-al-action')) return;
+    var btn =
+      e.target && e.target.closest
+        ? e.target.closest("[data-al-action]")
+        : null;
+    if (!btn || !btn.getAttribute || !btn.hasAttribute("data-al-action"))
+      return;
     if (isBusy(btn)) {
       e.preventDefault();
       e.stopPropagation();
@@ -166,21 +193,29 @@
   }
 
   function controller(btn) {
-    btn.addEventListener('click', onClick, true);
+    btn.addEventListener("click", onClick, true);
     return {
       root: btn,
-      loading: function (on) { loading(btn, on); },
-      setResult: function (kind, message) { setResult(btn, kind, message); },
-      isBusy: function () { return isBusy(btn); },
+      loading: function (on) {
+        loading(btn, on);
+      },
+      setResult: function (kind, message) {
+        setResult(btn, kind, message);
+      },
+      isBusy: function () {
+        return isBusy(btn);
+      },
       destroy: function () {
-        btn.removeEventListener('click', onClick, true);
+        btn.removeEventListener("click", onClick, true);
       },
     };
   }
 
   function enhance(root) {
     if (!root) return [];
-    var buttons = Array.prototype.slice.call(root.querySelectorAll('[data-al-action]'));
+    var buttons = Array.prototype.slice.call(
+      root.querySelectorAll("[data-al-action]"),
+    );
     var out = [];
     buttons.forEach(function (btn) {
       var c = controller(btn);
@@ -198,7 +233,9 @@
   }
 
   function destroyAll() {
-    mounted.slice().forEach(function (c) { c.destroy(); });
+    mounted.slice().forEach(function (c) {
+      c.destroy();
+    });
     mounted = [];
   }
 

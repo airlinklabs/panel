@@ -1,10 +1,17 @@
 import { getSettings } from '../../../handlers/settingsCache';
 import type { Request, Response } from 'express';
-import type { Prisma, Users, settings as PanelSettings } from '../../../generated/prisma/client';
+import type {
+  Prisma,
+  Users,
+  settings as PanelSettings,
+} from '../../../generated/prisma/client';
 import prisma from '../../../db';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
-import { getPrimaryExternalPort, portsToDaemonString } from '../../../handlers/utils/server/ports';
+import {
+  getPrimaryExternalPort,
+  portsToDaemonString,
+} from '../../../handlers/utils/server/ports';
 import { assertNodeCapacity } from '../../../handlers/utils/server/resourceCheck';
 import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
 
@@ -39,14 +46,20 @@ export class ServerStartFailure extends Error {
  * shared by direct starts and queued starts. A host-port bind conflict cannot
  * succeed on retry: an administrator must release or reassign that port.
  */
-export function classifyDaemonStartFailure(rawDetail: string): ServerStartFailure {
+export function classifyDaemonStartFailure(
+  rawDetail: string,
+): ServerStartFailure {
   const portConflict = rawDetail.match(
     /Bind for (?:\[[^\]]+\]|[^:\s]+):(\d+) failed: port is already allocated/i,
   );
   if (portConflict) {
     return new ServerStartFailure(
       `The server cannot start because port ${portConflict[1]} is already in use on this node. Contact an administrator to assign another port.`,
-      { code: 'DAEMON_PORT_CONFLICT', retryable: false, cause: `daemon: ${rawDetail}` },
+      {
+        code: 'DAEMON_PORT_CONFLICT',
+        retryable: false,
+        cause: `daemon: ${rawDetail}`,
+      },
     );
   }
 
@@ -79,7 +92,9 @@ export const serverPageInclude = {
   owner: true,
 } satisfies Prisma.ServerInclude;
 
-export type ServerPageServer = Prisma.ServerGetPayload<{ include: typeof serverPageInclude }>;
+export type ServerPageServer = Prisma.ServerGetPayload<{
+  include: typeof serverPageInclude;
+}>;
 
 export type ServerPageContext =
   | {
@@ -117,12 +132,16 @@ export type AuthenticatedServerContext =
 export function getAuthenticatedUserId(req: Request): number {
   const userId = req.session?.user?.id;
   if (!userId) {
-    throw new Error('Authenticated server request is missing a session user id.');
+    throw new Error(
+      'Authenticated server request is missing a session user id.',
+    );
   }
   return userId;
 }
 
-export async function loadServerPageContext(req: Request): Promise<ServerPageContext> {
+export async function loadServerPageContext(
+  req: Request,
+): Promise<ServerPageContext> {
   const userId = getAuthenticatedUserId(req);
   const serverId = String(req.params?.id);
 
@@ -147,7 +166,9 @@ export async function loadServerPageContext(req: Request): Promise<ServerPageCon
   return { status: 'ready', settings, user, server };
 }
 
-export async function loadAuthenticatedServerContext(req: Request): Promise<AuthenticatedServerContext> {
+export async function loadAuthenticatedServerContext(
+  req: Request,
+): Promise<AuthenticatedServerContext> {
   const userId = getAuthenticatedUserId(req);
   const serverId = getParamAsString(req.params?.id);
 
@@ -185,14 +206,19 @@ export function sendMissingServerContext(
   return false;
 }
 
-export function getServerDaemonAuth(server: Pick<ServerPageServer, 'node'>): { username: string; password: string } {
+export function getServerDaemonAuth(server: Pick<ServerPageServer, 'node'>): {
+  username: string;
+  password: string;
+} {
   return {
     username: DAEMON_AUTH_USERNAME,
     password: server.node.key,
   };
 }
 
-export function getServerStatusInput(server: Pick<ServerPageServer, 'UUID' | 'node'>) {
+export function getServerStatusInput(
+  server: Pick<ServerPageServer, 'UUID' | 'node'>,
+) {
   return {
     nodeAddress: server.node.address,
     nodePort: server.node.port,
@@ -201,25 +227,40 @@ export function getServerStatusInput(server: Pick<ServerPageServer, 'UUID' | 'no
   };
 }
 
-export function getImageFeatures(image: { info?: string | null } | null | undefined): string[] {
-  if (!image) {return [];}
+export function getImageFeatures(
+  image: { info?: string | null } | null | undefined,
+): string[] {
+  if (!image) {
+    return [];
+  }
   try {
-    const info = typeof image.info === 'string' ? JSON.parse(image.info) : image.info;
+    const info =
+      typeof image.info === 'string' ? JSON.parse(image.info) : image.info;
     return Array.isArray(info?.features) ? info.features : [];
   } catch {
     return [];
   }
 }
 
-export function buildEnvVariables(variables: string | null | ServerVariable[]): Record<string, string> {
-  if (!variables) {return {};}
+export function buildEnvVariables(
+  variables: string | null | ServerVariable[],
+): Record<string, string> {
+  if (!variables) {
+    return {};
+  }
   try {
-    const parsed: unknown = Array.isArray(variables) ? variables : JSON.parse(variables);
-    if (!Array.isArray(parsed)) {return {};}
+    const parsed: unknown = Array.isArray(variables)
+      ? variables
+      : JSON.parse(variables);
+    if (!Array.isArray(parsed)) {
+      return {};
+    }
     const env: Record<string, string> = {};
     for (const v of parsed) {
       const key = v.env_variable || v.env;
-      if (!key) {continue;}
+      if (!key) {
+        continue;
+      }
       const raw = v.value !== undefined ? v.value : (v.default_value ?? '');
       env[key] = String(raw);
     }
@@ -258,7 +299,9 @@ export function buildServerRuntimeEnv(
   return envVariables;
 }
 
-export function getConfiguredDockerImage(server: Pick<ServerRuntimeConfig, 'dockerImage'>): string | null {
+export function getConfiguredDockerImage(
+  server: Pick<ServerRuntimeConfig, 'dockerImage'>,
+): string | null {
   if (!server.dockerImage) {
     return null;
   }
@@ -272,7 +315,11 @@ export async function stopServerContainer(
   options: { releaseResources?: boolean } = {},
 ): Promise<void> {
   const releaseResources = options.releaseResources !== false;
-  emitRealtime(serverEvent('server.power.stop.started', serverId, { state: { stopCommand } }));
+  emitRealtime(
+    serverEvent('server.power.stop.started', serverId, {
+      state: { stopCommand },
+    }),
+  );
   try {
     await daemonRequest({
       method: 'POST',
@@ -288,7 +335,10 @@ export async function stopServerContainer(
   } catch (error) {
     emitRealtime(
       serverEvent('server.power.stop.failed', serverId, {
-        error: { message: 'The daemon could not stop the server.', code: 'DAEMON_UNREACHABLE' },
+        error: {
+          message: 'The daemon could not stop the server.',
+          code: 'DAEMON_UNREACHABLE',
+        },
       }),
     );
     throw error;
@@ -297,9 +347,17 @@ export async function stopServerContainer(
     // The container is down — free its reservation so stopped servers stop
     // consuming node capacity. Restart passes releaseResources:false to keep
     // the reservation held across the stop/start cycle.
-    await prisma.server.update({ where: { UUID: serverId }, data: { Running: false } }).catch(() => {});
+    await prisma.server
+      .update({ where: { UUID: serverId }, data: { Running: false } })
+      .catch(() => {
+        /* noop */
+      });
   }
-  emitRealtime(serverEvent('server.power.stopped', serverId, { state: { running: false } }));
+  emitRealtime(
+    serverEvent('server.power.stopped', serverId, {
+      state: { running: false },
+    }),
+  );
 }
 
 export async function startServerContainer(
@@ -329,7 +387,7 @@ export async function startServerContainer(
     { runningOnly: true },
   );
 
-  const mounts = options.mounts ?? await resolveServerMounts(serverId);
+  const mounts = options.mounts ?? (await resolveServerMounts(serverId));
 
   let configFiles: unknown;
   if (server.image?.config_files) {
@@ -357,7 +415,10 @@ export async function startServerContainer(
         Swap: server.Swap ?? 0,
         Cpu: server.Cpu,
         Storage: server.Storage,
-        env: buildServerRuntimeEnv(server, options.variables ?? server.Variables),
+        env: buildServerRuntimeEnv(
+          server,
+          options.variables ?? server.Variables,
+        ),
         StartCommand: options.startCommand ?? server.StartCommand,
         mounts,
         configFiles,
@@ -366,7 +427,10 @@ export async function startServerContainer(
   } catch (error) {
     emitRealtime(
       serverEvent('server.power.start.failed', serverId, {
-        error: { message: 'The daemon could not start the server.', code: 'DAEMON_UNREACHABLE' },
+        error: {
+          message: 'The daemon could not start the server.',
+          code: 'DAEMON_UNREACHABLE',
+        },
       }),
     );
     throw new Error('daemon is unreachable — is it running?', { cause: error });
@@ -377,7 +441,7 @@ export async function startServerContainer(
       typeof startResponse.data === 'object' && startResponse.data !== null
         ? (startResponse.data as { error?: string; detail?: string })
         : {};
-    const rawDetail = `${body.error ?? 'request failed'}${body.detail ? ` — ${  body.detail}` : ''}`;
+    const rawDetail = `${body.error ?? 'request failed'}${body.detail ? ` — ${body.detail}` : ''}`;
     const failure = classifyDaemonStartFailure(rawDetail);
     emitRealtime(
       serverEvent('server.power.start.failed', serverId, {
@@ -390,19 +454,28 @@ export async function startServerContainer(
   }
 
   // The container is up — the server now holds a reservation on its node.
-  await prisma.server.update({ where: { UUID: serverId }, data: { Running: true } }).catch(() => {});
-  emitRealtime(serverEvent('server.power.started', serverId, { state: { running: true } }));
+  await prisma.server
+    .update({ where: { UUID: serverId }, data: { Running: true } })
+    .catch(() => {
+      /* noop */
+    });
+  emitRealtime(
+    serverEvent('server.power.started', serverId, { state: { running: true } }),
+  );
 }
 
 async function resolveServerMounts(
   serverId: string,
-): Promise<{ source: string; target: string; readOnly?: boolean }[] | undefined> {
-  const serverMounts = await prisma.serverMount
-    .findMany({
-      where: { serverId },
-      include: { mount: true },
-    });
-  if (serverMounts.length === 0) {return undefined;}
+): Promise<
+  { source: string; target: string; readOnly?: boolean }[] | undefined
+> {
+  const serverMounts = await prisma.serverMount.findMany({
+    where: { serverId },
+    include: { mount: true },
+  });
+  if (serverMounts.length === 0) {
+    return undefined;
+  }
   return serverMounts.map((sm) => ({
     source: sm.mount.source,
     target: sm.mount.target,
@@ -423,7 +496,9 @@ export async function restartServerContainer(
 ): Promise<void> {
   // releaseResources:false keeps the reservation held across the stop/start
   // cycle — a restart must not free the server's own reserved resources.
-  await stopServerContainer(server, serverId, options.stopCommand, { releaseResources: false });
+  await stopServerContainer(server, serverId, options.stopCommand, {
+    releaseResources: false,
+  });
   await new Promise((resolve) => setTimeout(resolve, 2000));
   await startServerContainer(server, serverId, options);
 }

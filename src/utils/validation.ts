@@ -45,7 +45,11 @@ export class ValidationError extends Error {
 }
 
 /** Serializes an unknown validation error into the standardized boundary body. */
-function boundaryBody(error: ValidationError | ZodError): { message: string; error: string; errors: { field: string; message: string }[] } {
+function boundaryBody(error: ValidationError | ZodError): {
+  message: string;
+  error: string;
+  errors: { field: string; message: string }[];
+} {
   const issues = error instanceof ZodError ? error.issues : error.issues;
   const message = firstIssueMessage(issues);
   return {
@@ -53,7 +57,8 @@ function boundaryBody(error: ValidationError | ZodError): { message: string; err
     error: message,
     errors: issues.map((issue) => ({
       field: issue.path.join('.'),
-      message: typeof issue.message === 'string' ? issue.message : 'Invalid value.',
+      message:
+        typeof issue.message === 'string' ? issue.message : 'Invalid value.',
     })),
   };
 }

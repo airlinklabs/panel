@@ -52,7 +52,11 @@ function validateUrl(urlStr: string): URL {
   return parsed;
 }
 
-function buildUrl(baseUrl: string, path: string, params?: Record<string, string | number | boolean | undefined>): string {
+function buildUrl(
+  baseUrl: string,
+  path: string,
+  params?: Record<string, string | number | boolean | undefined>,
+): string {
   const url = new URL(path, baseUrl);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -65,7 +69,10 @@ function buildUrl(baseUrl: string, path: string, params?: Record<string, string 
 }
 
 function buildBasicAuth(username: string, password: string): string {
-  return BASIC_AUTH_PREFIX + Buffer.from(`${username}:${password}`).toString('base64');
+  return (
+    BASIC_AUTH_PREFIX +
+    Buffer.from(`${username}:${password}`).toString('base64')
+  );
 }
 
 function isStreamLike(body: unknown): body is Readable | ReadableStream {
@@ -89,14 +96,25 @@ async function request<T = unknown>(
   url: string,
   options: HttpRequestOptions = {},
 ): Promise<HttpResponse<T>> {
-  const { body, headers: customHeaders, params, auth, timeout, signal, responseType = 'json' } = options;
+  const {
+    body,
+    headers: customHeaders,
+    params,
+    auth,
+    timeout,
+    signal,
+    responseType = 'json',
+  } = options;
 
   validateUrl(url);
 
   const headers: Record<string, string> = {};
 
   if (auth) {
-    headers[HEADER_AUTHORIZATION] = buildBasicAuth(auth.username, auth.password);
+    headers[HEADER_AUTHORIZATION] = buildBasicAuth(
+      auth.username,
+      auth.password,
+    );
   }
 
   if (body !== undefined && body !== null && responseType !== 'stream') {
@@ -115,10 +133,14 @@ async function request<T = unknown>(
     Object.assign(headers, customHeaders);
   }
 
-  const finalUrl = params ? buildUrl(new URL(url).origin, new URL(url).pathname, params) : url;
+  const finalUrl = params
+    ? buildUrl(new URL(url).origin, new URL(url).pathname, params)
+    : url;
 
   const controller = new AbortController();
-  const timeoutId = timeout ? setTimeout(() => controller.abort(), timeout) : undefined;
+  const timeoutId = timeout
+    ? setTimeout(() => controller.abort(), timeout)
+    : undefined;
 
   try {
     const fetchOptions: RequestInit = {
@@ -127,7 +149,12 @@ async function request<T = unknown>(
       signal: signal ?? controller.signal,
     };
 
-    if (body !== undefined && body !== null && method.toUpperCase() !== 'GET' && method.toUpperCase() !== 'HEAD') {
+    if (
+      body !== undefined &&
+      body !== null &&
+      method.toUpperCase() !== 'GET' &&
+      method.toUpperCase() !== 'HEAD'
+    ) {
       if (typeof body === 'string') {
         fetchOptions.body = body;
       } else if (Buffer.isBuffer(body)) {
@@ -152,7 +179,9 @@ async function request<T = unknown>(
             try {
               while (true) {
                 const { done, value } = await reader.read();
-                if (done) {break;}
+                if (done) {
+                  break;
+                }
                 this.push(Buffer.from(value));
               }
               this.push(null);
@@ -182,7 +211,9 @@ async function request<T = unknown>(
     };
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
-      const abortError = new Error(`Request timed out after ${timeout}ms`) as HttpError;
+      const abortError = new Error(
+        `Request timed out after ${timeout}ms`,
+      ) as HttpError;
       abortError.status = 0;
       abortError.statusText = 'Timeout';
       abortError.body = null;
@@ -190,7 +221,9 @@ async function request<T = unknown>(
     }
     throw error;
   } finally {
-    if (timeoutId) {clearTimeout(timeoutId);}
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
   }
 }
 

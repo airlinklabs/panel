@@ -29,13 +29,18 @@ import {
 } from '../../handlers/utils/server/allocations';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import { sendServerSuspended } from '../../handlers/utils/core/mailer';
-import { startTransfer, getTransferState } from '../../handlers/utils/server/serverTransfer';
+import {
+  startTransfer,
+  getTransferState,
+} from '../../handlers/utils/server/serverTransfer';
 import { runtimeStartQueue } from '../../handlers/runtimeQueue';
-import { emitRealtime, serverEvent, userEvent } from '../../handlers/realtime/events';
+import {
+  emitRealtime,
+  serverEvent,
+  userEvent,
+} from '../../handlers/realtime/events';
 
 const DEFAULT_SERVER_PORT = 25565;
-const DEFAULT_SERVER_PORT_RANGE = `${DEFAULT_SERVER_PORT}:${DEFAULT_SERVER_PORT}`;
-const INSTALL_TIMEOUT_MS = 600_000;
 const DEFAULT_STOP_COMMAND = 'stop';
 const DEFAULT_DATABASE_LIMIT = 5;
 const DEFAULT_BACKUP_LIMIT = 5;
@@ -195,7 +200,15 @@ const adminModule: Module = {
           } = req.body;
 
           // Validate required fields
-          if (!name || !nodeId || !imageId || !Memory || !Cpu || !Storage || !ownerId) {
+          if (
+            !name ||
+            !nodeId ||
+            !imageId ||
+            !Memory ||
+            !Cpu ||
+            !Storage ||
+            !ownerId
+          ) {
             res.status(400).json({ error: 'Missing required fields' });
             return;
           }
@@ -203,13 +216,27 @@ const adminModule: Module = {
           const memInt = parseInt(String(Memory), 10);
           const cpuInt = parseInt(String(Cpu), 10);
           const storageInt = parseInt(String(Storage), 10);
-          const swapInt = Swap !== undefined && Swap !== '' ? Math.max(0, parseInt(String(Swap), 10) || 0) : 0;
-          if (isNaN(memInt) || memInt <= 0 || isNaN(cpuInt) || cpuInt <= 0 || isNaN(storageInt) || storageInt <= 0) {
-            res.status(400).json({ error: 'Memory, CPU, and Storage must be positive integers.' });
+          const swapInt =
+            Swap !== undefined && Swap !== ''
+              ? Math.max(0, parseInt(String(Swap), 10) || 0)
+              : 0;
+          if (
+            isNaN(memInt) ||
+            memInt <= 0 ||
+            isNaN(cpuInt) ||
+            cpuInt <= 0 ||
+            isNaN(storageInt) ||
+            storageInt <= 0
+          ) {
+            res.status(400).json({
+              error: 'Memory, CPU, and Storage must be positive integers.',
+            });
             return;
           }
 
-          const owner = await prisma.users.findUnique({ where: { id: parseInt(String(ownerId), 10) } });
+          const owner = await prisma.users.findUnique({
+            where: { id: parseInt(String(ownerId), 10) },
+          });
           if (!owner) {
             res.status(400).json({ error: 'Owner not found' });
             return;
@@ -220,28 +247,40 @@ const adminModule: Module = {
           const newSuspendedState = Suspended === SUSPENDED_TRUE;
           const suspensionChanged = currentSuspendedState !== newSuspendedState;
 
-          const selectedImage = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
+          const selectedImage = await prisma.images.findUnique({
+            where: { id: parseInt(imageId) },
+          });
           if (!selectedImage) {
             res.status(400).json({ error: 'Image not found' });
             return;
           }
 
           const submittedPorts = normalizeServerPorts(ports);
-          const minPorts = parseImagePortRequirements(selectedImage.portRequirements).length;
+          const minPorts = parseImagePortRequirements(
+            selectedImage.portRequirements,
+          ).length;
           const pool = await getNodePortPool(parseInt(nodeId));
           const existingServers = await prisma.server.findMany({
             where: { nodeId: parseInt(nodeId), NOT: { id: serverId } },
           });
-          const portError = validatePortAssignments(submittedPorts, pool, getUsedExternalPorts(existingServers), minPorts);
+          const portError = validatePortAssignments(
+            submittedPorts,
+            pool,
+            getUsedExternalPorts(existingServers),
+            minPorts,
+          );
           if (portError) {
             res.status(400).json({ error: portError });
             return;
           }
 
           try {
-            const capacityNode = server.nodeId === parseInt(nodeId)
-              ? server.node
-              : await prisma.node.findUnique({ where: { id: parseInt(nodeId) } });
+            const capacityNode =
+              server.nodeId === parseInt(nodeId)
+                ? server.node
+                : await prisma.node.findUnique({
+                  where: { id: parseInt(nodeId) },
+                });
             if (!capacityNode) {
               res.status(400).json({ error: 'Target node not found.' });
               return;
@@ -254,7 +293,12 @@ const adminModule: Module = {
               server.UUID,
             );
           } catch (error: unknown) {
-            res.status(400).json({ error: error instanceof Error ? error.message : 'Node capacity exceeded.' });
+            res.status(400).json({
+              error:
+                error instanceof Error
+                  ? error.message
+                  : 'Node capacity exceeded.',
+            });
             return;
           }
 
@@ -271,16 +315,27 @@ const adminModule: Module = {
               Cpu: cpuInt,
               Storage: storageInt,
               StartCommand,
-              databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : DEFAULT_DATABASE_LIMIT,
-              backupLimit: backupLimit !== undefined && backupLimit !== '' ? Math.max(0, parseInt(backupLimit) || 0) : DEFAULT_BACKUP_LIMIT,
-              backupIgnoreList: typeof backupIgnoreList === 'string' ? backupIgnoreList.trim() : '',
+              databaseLimit:
+                databaseLimit !== undefined && databaseLimit !== ''
+                  ? Math.max(0, parseInt(databaseLimit) || 0)
+                  : DEFAULT_DATABASE_LIMIT,
+              backupLimit:
+                backupLimit !== undefined && backupLimit !== ''
+                  ? Math.max(0, parseInt(backupLimit) || 0)
+                  : DEFAULT_BACKUP_LIMIT,
+              backupIgnoreList:
+                typeof backupIgnoreList === 'string'
+                  ? backupIgnoreList.trim()
+                  : '',
               Ports: serializeServerPorts(submittedPorts),
               Suspended: newSuspendedState,
             },
           });
-          emitRealtime(serverEvent('server.updated', server.UUID, {
-            state: { id: server.id, name, suspended: newSuspendedState },
-          }));
+          emitRealtime(
+            serverEvent('server.updated', server.UUID, {
+              state: { id: server.id, name, suspended: newSuspendedState },
+            }),
+          );
           emitRealtime({
             type: 'admin.servers.updated',
             scope: { admin: true },
@@ -288,7 +343,10 @@ const adminModule: Module = {
           });
 
           // Update allowStartupEdit field
-          await prisma.server.update({ where: { id: serverId }, data: { allowStartupEdit: allowStartupEdit === 'true' } });
+          await prisma.server.update({
+            where: { id: serverId },
+            data: { allowStartupEdit: allowStartupEdit === 'true' },
+          });
 
           // Reconcile port claims: if the node changed, release old claims, then
           // claim the server's new ports (idempotent when nothing changed).
@@ -296,7 +354,11 @@ const adminModule: Module = {
             if (server.nodeId !== parseInt(nodeId)) {
               await releaseServerAllocations(server.UUID);
             }
-            await claimNodePorts(parseInt(nodeId), submittedPorts.map((p) => p.externalPort), server.UUID);
+            await claimNodePorts(
+              parseInt(nodeId),
+              submittedPorts.map((p) => p.externalPort),
+              server.UUID,
+            );
           } catch (err: unknown) {
             logger.error('Error syncing allocation claims:', err);
           }
@@ -318,29 +380,51 @@ const adminModule: Module = {
                 },
               });
 
-              await prisma.server.update({ where: { UUID: String(server.UUID) }, data: { Running: false } }).catch(() => {});
-              logger.info(`Server ${server.UUID} stopped successfully due to suspension`);
+              await prisma.server
+                .update({
+                  where: { UUID: String(server.UUID) },
+                  data: { Running: false },
+                })
+                .catch(() => {
+                  /* noop */
+                });
+              logger.info(
+                `Server ${server.UUID} stopped successfully due to suspension`,
+              );
             } catch (stopError) {
-              logger.error(`Error stopping server ${server.UUID} during suspension:`, stopError);
+              logger.error(
+                `Error stopping server ${server.UUID} during suspension:`,
+                stopError,
+              );
               // Continue with the update even if stopping fails
             }
           }
 
           logger.info(`Server ${serverId} updated successfully`);
-          await logActivity(req, 'server:update', { serverId: String(server.UUID), metadata: { name, suspended: newSuspendedState } });
+          await logActivity(req, 'server:update', {
+            serverId: String(server.UUID),
+            metadata: { name, suspended: newSuspendedState },
+          });
 
           // Reconcile server mounts
           try {
             const rawMountIds = req.body.mountIds;
             const nextMountIds: number[] = Array.isArray(rawMountIds)
-              ? rawMountIds.map((m: unknown) => Number(String(m)).valueOf()).filter((v) => Number.isInteger(v))
+              ? rawMountIds
+                .map((m: unknown) => Number(String(m)).valueOf())
+                .filter((v) => Number.isInteger(v))
               : typeof rawMountIds === 'string'
                 ? [Number(rawMountIds)].filter((v) => Number.isInteger(v))
                 : [];
-            await prisma.serverMount.deleteMany({ where: { serverId: server.UUID } });
+            await prisma.serverMount.deleteMany({
+              where: { serverId: server.UUID },
+            });
             if (nextMountIds.length > 0) {
               await prisma.serverMount.createMany({
-                data: nextMountIds.map((mountId: number) => ({ serverId: server.UUID, mountId })),
+                data: nextMountIds.map((mountId: number) => ({
+                  serverId: server.UUID,
+                  mountId,
+                })),
               });
             }
           } catch (mountError) {
@@ -428,9 +512,21 @@ const adminModule: Module = {
         const memInt = parseInt(String(Memory), 10);
         const cpuInt = parseInt(String(Cpu), 10);
         const storageInt = parseInt(String(Storage), 10);
-        const swapInt = Swap !== undefined && Swap !== '' ? Math.max(0, parseInt(String(Swap), 10) || 0) : 0;
-        if (isNaN(memInt) || memInt <= 0 || isNaN(cpuInt) || cpuInt <= 0 || isNaN(storageInt) || storageInt <= 0) {
-          res.status(400).json({ error: 'Memory, CPU, and Storage must be positive integers.' });
+        const swapInt =
+          Swap !== undefined && Swap !== ''
+            ? Math.max(0, parseInt(String(Swap), 10) || 0)
+            : 0;
+        if (
+          isNaN(memInt) ||
+          memInt <= 0 ||
+          isNaN(cpuInt) ||
+          cpuInt <= 0 ||
+          isNaN(storageInt) ||
+          storageInt <= 0
+        ) {
+          res.status(400).json({
+            error: 'Memory, CPU, and Storage must be positive integers.',
+          });
           return;
         }
 
@@ -444,7 +540,7 @@ const adminModule: Module = {
         let minPorts = 0;
         try {
           const node = await prisma.node.findUnique({
-            where: { id: parseInt(nodeId) }
+            where: { id: parseInt(nodeId) },
           });
 
           if (!node) {
@@ -453,7 +549,9 @@ const adminModule: Module = {
           }
 
           if (node.maintenanceMode) {
-            res.status(400).json({ error: 'Cannot create a server on a node under maintenance' });
+            res.status(400).json({
+              error: 'Cannot create a server on a node under maintenance',
+            });
             return;
           }
 
@@ -461,19 +559,28 @@ const adminModule: Module = {
 
           const existingServers = await prisma.server.findMany({
             where: {
-              nodeId: parseInt(nodeId)
-            }
+              nodeId: parseInt(nodeId),
+            },
           });
 
-          const image = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
+          const image = await prisma.images.findUnique({
+            where: { id: parseInt(imageId) },
+          });
           if (!image) {
             res.status(400).json({ error: 'Image not found' });
             return;
           }
 
-          const submittedPorts = ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`);
+          const submittedPorts = ports
+            ? normalizeServerPorts(ports)
+            : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`);
           minPorts = parseImagePortRequirements(image.portRequirements).length;
-          const portError = validatePortAssignments(submittedPorts, pool, getUsedExternalPorts(existingServers), minPorts);
+          const portError = validatePortAssignments(
+            submittedPorts,
+            pool,
+            getUsedExternalPorts(existingServers),
+            minPorts,
+          );
           if (portError) {
             res.status(400).json({ error: portError });
             return;
@@ -486,13 +593,20 @@ const adminModule: Module = {
             parseInt(Storage) || 20480,
           );
         } catch (error: unknown) {
-          const message = error instanceof Error ? error.message : 'Error validating port allocation';
+          const message =
+            error instanceof Error
+              ? error.message
+              : 'Error validating port allocation';
           logger.error('Error validating server resources:', error);
           res.status(400).json({ error: message });
           return;
         }
 
-        const Port = serializeServerPorts(ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`));
+        const Port = serializeServerPorts(
+          ports
+            ? normalizeServerPorts(ports)
+            : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`),
+        );
 
         try {
           const selectedImage = await prisma.images.findUnique({
@@ -540,60 +654,96 @@ const adminModule: Module = {
           }
 
           const submittedVars = Array.isArray(variables) ? variables : [];
-          const mergedVariables = imageVariables.map((imgVar: Record<string, unknown>) => {
-            const envKey = String(imgVar.env_variable ?? imgVar.env ?? '');
-            const submitted = submittedVars.find(
-              (sv: Record<string, unknown>) => String(sv.env_variable ?? sv.env ?? '') === envKey,
-            );
-            return { ...imgVar, value: submitted?.value ?? imgVar.default_value ?? '' };
-          });
+          const mergedVariables = imageVariables.map(
+            (imgVar: Record<string, unknown>) => {
+              const envKey = String(imgVar.env_variable ?? imgVar.env ?? '');
+              const submitted = submittedVars.find(
+                (sv: Record<string, unknown>) =>
+                  String(sv.env_variable ?? sv.env ?? '') === envKey,
+              );
+              return {
+                ...imgVar,
+                value: submitted?.value ?? imgVar.default_value ?? '',
+              };
+            },
+          );
 
           // Create server — under a per-node lock so the port pool doesn't race
           // with other concurrent creates on the same node.
-          const submittedExternal = (ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`))
-            .map((p) => p.externalPort);
+          const submittedExternal = (
+            ports
+              ? normalizeServerPorts(ports)
+              : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`)
+          ).map((p) => p.externalPort);
 
           let createdServer;
           try {
-            createdServer = await withNodePortLock(parseInt(nodeId), async () => {
-              const livePool = await getNodePortPool(parseInt(nodeId));
-              const liveServers = await prisma.server.findMany({ where: { nodeId: parseInt(nodeId) } });
-              const recheck = validatePortAssignments(
-                ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`),
-                livePool,
-                getUsedExternalPorts(liveServers),
-                minPorts,
-              );
-              if (recheck) {throw new Error(recheck);}
+            createdServer = await withNodePortLock(
+              parseInt(nodeId),
+              async () => {
+                const livePool = await getNodePortPool(parseInt(nodeId));
+                const liveServers = await prisma.server.findMany({
+                  where: { nodeId: parseInt(nodeId) },
+                });
+                const recheck = validatePortAssignments(
+                  ports
+                    ? normalizeServerPorts(ports)
+                    : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`),
+                  livePool,
+                  getUsedExternalPorts(liveServers),
+                  minPorts,
+                );
+                if (recheck) {
+                  throw new Error(recheck);
+                }
 
-              const created = await prisma.server.create({
-                data: {
-                  name,
-                  description,
-                  ownerId: userId,
-                  nodeId: parseInt(nodeId),
-                  imageId: parseInt(imageId),
-                  Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
-                  Memory: memInt,
-                  Swap: swapInt,
-                  Cpu: cpuInt,
-                  databaseLimit: databaseLimit !== undefined && databaseLimit !== '' ? Math.max(0, parseInt(databaseLimit) || 0) : 5,
-                  Storage: storageInt,
-                  Variables: JSON.stringify(mergedVariables),
-                  StartCommand,
-                  dockerImage: JSON.stringify(imageDocker),
-                },
-              });
+                const created = await prisma.server.create({
+                  data: {
+                    name,
+                    description,
+                    ownerId: userId,
+                    nodeId: parseInt(nodeId),
+                    imageId: parseInt(imageId),
+                    Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
+                    Memory: memInt,
+                    Swap: swapInt,
+                    Cpu: cpuInt,
+                    databaseLimit:
+                      databaseLimit !== undefined && databaseLimit !== ''
+                        ? Math.max(0, parseInt(databaseLimit) || 0)
+                        : 5,
+                    Storage: storageInt,
+                    Variables: JSON.stringify(mergedVariables),
+                    StartCommand,
+                    dockerImage: JSON.stringify(imageDocker),
+                  },
+                });
 
-              await prisma.server.update({ where: { id: created.id }, data: { allowStartupEdit: allowStartupEdit === 'true' } });
-              await claimNodePorts(parseInt(nodeId), submittedExternal, created.UUID).catch((err: unknown) => {
-                logger.warn(`Failed to claim ports for server ${created.UUID}: ${err instanceof Error ? err.message : err}`);
-              });
-              return created;
-            });
+                await prisma.server.update({
+                  where: { id: created.id },
+                  data: { allowStartupEdit: allowStartupEdit === 'true' },
+                });
+                await claimNodePorts(
+                  parseInt(nodeId),
+                  submittedExternal,
+                  created.UUID,
+                ).catch((err: unknown) => {
+                  logger.warn(
+                    `Failed to claim ports for server ${created.UUID}: ${err instanceof Error ? err.message : err}`,
+                  );
+                });
+                return created;
+              },
+            );
           } catch (error: unknown) {
             logger.error('Error creating server:', error);
-            res.status(400).send(error instanceof Error ? error.message : 'Failed to create server.');
+            res
+              .status(400)
+              .send(
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to create server.',
+              );
             return;
           }
 
@@ -609,10 +759,12 @@ const adminModule: Module = {
             });
 
             for (const server of servers) {
-              emitRealtime(serverEvent('server.install.started', server.UUID, {
-                operationId: server.UUID,
-                state: { queued: true, installing: true },
-              }));
+              emitRealtime(
+                serverEvent('server.install.started', server.UUID, {
+                  operationId: server.UUID,
+                  state: { queued: true, installing: true },
+                }),
+              );
               if (!server.Variables) {
                 await prisma.server.update({
                   where: { id: server.id },
@@ -631,8 +783,12 @@ const adminModule: Module = {
                   value: v.value ?? v.default_value ?? '',
                 }));
 
-                let serverPort = String(parseServerPorts(Port)[0]?.externalPort ?? '');
-                const primaryExternalPort = getPrimaryExternalPort(server.Ports);
+                let serverPort = String(
+                  parseServerPorts(Port)[0]?.externalPort ?? '',
+                );
+                const primaryExternalPort = getPrimaryExternalPort(
+                  server.Ports,
+                );
                 if (primaryExternalPort) {
                   serverPort = String(primaryExternalPort);
                 }
@@ -649,7 +805,10 @@ const adminModule: Module = {
                   value: String(server.Cpu),
                 });
               } catch (error: unknown) {
-                logger.error(`Error parsing Variables for server ID ${server.id}:`, error);
+                logger.error(
+                  `Error parsing Variables for server ID ${server.id}:`,
+                  error,
+                );
                 await prisma.server.update({
                   where: { id: server.id },
                   data: { Queued: false },
@@ -658,7 +817,9 @@ const adminModule: Module = {
               }
 
               if (!Array.isArray(ServerEnv)) {
-                logger.error(`ServerEnv is not an array for server ID ${server.id}. Skipping...`);
+                logger.error(
+                  `ServerEnv is not an array for server ID ${server.id}. Skipping...`,
+                );
                 await prisma.server.update({
                   where: { id: server.id },
                   data: { Queued: false },
@@ -682,15 +843,27 @@ const adminModule: Module = {
                 try {
                   scripts = JSON.parse(server.image.scripts);
                 } catch (error: unknown) {
-                  logger.error(`Error parsing scripts for server ID ${server.id}:`, error);
-                  await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
+                  logger.error(
+                    `Error parsing scripts for server ID ${server.id}:`,
+                    error,
+                  );
+                  await prisma.server.update({
+                    where: { id: server.id },
+                    data: { Queued: false },
+                  });
                   continue;
                 }
 
                 try {
                   // Pterodactyl egg format: scripts.installation has script, container, entrypoint
-                  if (scripts.installation && typeof scripts.installation === 'object') {
-                    const installation = scripts.installation as Record<string, string>;
+                  if (
+                    scripts.installation &&
+                    typeof scripts.installation === 'object'
+                  ) {
+                    const installation = scripts.installation as Record<
+                      string,
+                      string
+                    >;
 
                     await daemonRequest({
                       nodeAddress: server.node.address,
@@ -708,15 +881,18 @@ const adminModule: Module = {
                       timeout: 600000,
                     });
 
-                  // Legacy ALC format: scripts.install is an array of file downloads
+                    // Legacy ALC format: scripts.install is an array of file downloads
                   } else if (Array.isArray(scripts.install)) {
                     // Resolve the docker image so the daemon pulls it during
                     // install rather than on the first Start click.
                     let dockerImageValue: string | undefined;
                     try {
                       const parsed = JSON.parse(server.dockerImage || '{}');
-                      dockerImageValue = Object.values(parsed)[0] as string | undefined;
-                    } catch { /* leave undefined */ }
+                      dockerImageValue = Object.values(parsed)[0] as
+                        string | undefined;
+                    } catch {
+                      /* leave undefined */
+                    }
 
                     await daemonRequest({
                       nodeAddress: server.node.address,
@@ -728,7 +904,9 @@ const adminModule: Module = {
                         id: server.UUID,
                         image: dockerImageValue,
                         env,
-                        scripts: (scripts.install as Record<string, unknown>[]).map((s) => ({
+                        scripts: (
+                          scripts.install as Record<string, unknown>[]
+                        ).map((s) => ({
                           url: s.url,
                           onStartup: s.onStart,
                           ALVKT: s.ALVKT,
@@ -745,39 +923,77 @@ const adminModule: Module = {
                         nodeKey: server.node.key,
                         method: 'POST',
                         path: '/container/installer',
-                        body: { id: server.UUID, env, script: native.CMD, container: native.container, entrypoint: 'bash' },
+                        body: {
+                          id: server.UUID,
+                          env,
+                          script: native.CMD,
+                          container: native.container,
+                          entrypoint: 'bash',
+                        },
                         timeout: 600000,
                       });
                     }
                   } else {
-                    logger.info(`No install scripts for server ${server.id}, marking as installed`);
+                    logger.info(
+                      `No install scripts for server ${server.id}, marking as installed`,
+                    );
                   }
 
-                  await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
-                  emitRealtime(serverEvent('server.install.completed', server.UUID, {
-                    operationId: server.UUID,
-                    state: { installing: false, queued: false },
-                  }));
+                  await prisma.server.update({
+                    where: { id: server.id },
+                    data: { Queued: false },
+                  });
+                  emitRealtime(
+                    serverEvent('server.install.completed', server.UUID, {
+                      operationId: server.UUID,
+                      state: { installing: false, queued: false },
+                    }),
+                  );
                 } catch (error: unknown) {
-                  logger.error(`Error sending install request for server ID ${server.id}:`, error);
-                  await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
-                  emitRealtime(serverEvent('server.install.failed', server.UUID, {
-                    operationId: server.UUID,
-                    error: { message: error instanceof Error ? error.message : 'Install dispatch failed' },
-                  }));
+                  logger.error(
+                    `Error sending install request for server ID ${server.id}:`,
+                    error,
+                  );
+                  await prisma.server.update({
+                    where: { id: server.id },
+                    data: { Queued: false },
+                  });
+                  emitRealtime(
+                    serverEvent('server.install.failed', server.UUID, {
+                      operationId: server.UUID,
+                      error: {
+                        message:
+                          error instanceof Error
+                            ? error.message
+                            : 'Install dispatch failed',
+                      },
+                    }),
+                  );
                 }
               } else {
-                logger.warn(`No scripts found for server ID ${server.id}, marking as installed`);
-                await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
+                logger.warn(
+                  `No scripts found for server ID ${server.id}, marking as installed`,
+                );
+                await prisma.server.update({
+                  where: { id: server.id },
+                  data: { Queued: false },
+                });
               }
             }
           });
 
-          res.status(200).json({ success: true, message: 'Server created successfully' });
-          await logActivity(req, 'server:create', { serverId: String(createdServer.UUID), metadata: { name, nodeId: createdServer.nodeId } });
-          emitRealtime(serverEvent('server.created', createdServer.UUID, {
-            state: { id: createdServer.id, name, UUID: createdServer.UUID },
-          }));
+          res
+            .status(200)
+            .json({ success: true, message: 'Server created successfully' });
+          await logActivity(req, 'server:create', {
+            serverId: String(createdServer.UUID),
+            metadata: { name, nodeId: createdServer.nodeId },
+          });
+          emitRealtime(
+            serverEvent('server.created', createdServer.UUID, {
+              state: { id: createdServer.id, name, UUID: createdServer.UUID },
+            }),
+          );
           emitRealtime({
             type: 'admin.servers.updated',
             scope: { admin: true },
@@ -824,7 +1040,9 @@ const adminModule: Module = {
 
           try {
             if (!force) {
-              logger.info(`Deleting container ${server.UUID} on node ${server.node.address}:${server.node.port}`);
+              logger.info(
+                `Deleting container ${server.UUID} on node ${server.node.address}:${server.node.port}`,
+              );
 
               try {
                 const response = await daemonRequest({
@@ -839,21 +1057,33 @@ const adminModule: Module = {
                 });
 
                 if (response.status !== 200) {
-                  const responseData = response.data as Record<string, unknown> | undefined;
+                  const responseData = response.data as
+                    Record<string, unknown> | undefined;
                   const isNotFound =
                     response.status === 404 ||
-                    (responseData && typeof responseData === 'object' && 'error' in responseData &&
-                     typeof responseData.error === 'string' &&
-                     responseData.error.includes('not exist'));
+                    (responseData &&
+                      typeof responseData === 'object' &&
+                      'error' in responseData &&
+                      typeof responseData.error === 'string' &&
+                      responseData.error.includes('not exist'));
 
                   if (isNotFound) {
-                    logger.warn(`Container ${server.UUID} not found on daemon, proceeding with database cleanup`);
+                    logger.warn(
+                      `Container ${server.UUID} not found on daemon, proceeding with database cleanup`,
+                    );
                   } else {
-                    logger.error(`Daemon returned unexpected status ${response.status}:`, response.data);
-                    throw new Error(`Daemon returned an unexpected response (status ${response.status})`);
+                    logger.error(
+                      `Daemon returned unexpected status ${response.status}:`,
+                      response.data,
+                    );
+                    throw new Error(
+                      `Daemon returned an unexpected response (status ${response.status})`,
+                    );
                   }
                 } else {
-                  logger.info(`Successfully deleted container ${server.UUID} on daemon`);
+                  logger.info(
+                    `Successfully deleted container ${server.UUID} on daemon`,
+                  );
                 }
               } catch (error: unknown) {
                 logger.error('Error deleting container on daemon:', error);
@@ -880,11 +1110,15 @@ const adminModule: Module = {
               });
               await tx.server.delete({ where: { id: serverId } });
             });
-            await releaseServerAllocations(server.UUID).catch(() => {});
+            await releaseServerAllocations(server.UUID).catch(() => {
+              /* noop */
+            });
 
-            emitRealtime(serverEvent('server.deleted', server.UUID, {
-              state: { id: server.id, name: server.name },
-            }));
+            emitRealtime(
+              serverEvent('server.deleted', server.UUID, {
+                state: { id: server.id, name: server.name },
+              }),
+            );
             emitRealtime({
               type: 'admin.servers.updated',
               scope: { admin: true },
@@ -892,13 +1126,22 @@ const adminModule: Module = {
             });
 
             logger.info(`Server ${serverId} successfully deleted`);
-            await logActivity(req, 'server:delete', { metadata: { name: server.name, nodeId: server.nodeId, serverUUID: server.UUID } });
+            await logActivity(req, 'server:delete', {
+              metadata: {
+                name: server.name,
+                nodeId: server.nodeId,
+                serverUUID: server.UUID,
+              },
+            });
             res.redirect('/admin/servers');
             return;
           } catch (error: unknown) {
             logger.error('Error deleting server:', error);
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            res.status(500).json({ error: `Failed to delete server: ${errorMessage}` });
+            const errorMessage =
+              error instanceof Error ? error.message : String(error);
+            res
+              .status(500)
+              .json({ error: `Failed to delete server: ${errorMessage}` });
             return;
           }
         } catch (error: unknown) {
@@ -950,22 +1193,41 @@ const adminModule: Module = {
               nodeKey: server.node?.key ?? '',
               body: { id: server.UUID },
             });
-            await prisma.server.update({ where: { UUID: String(server.UUID) }, data: { Running: false } }).catch(() => {});
+            await prisma.server
+              .update({
+                where: { UUID: String(server.UUID) },
+                data: { Running: false },
+              })
+              .catch(() => {
+                /* noop */
+              });
           } catch {
             // ignore if already stopped
           }
 
           logger.info(`Server ${serverId} suspended by user ${userId}`);
-          await logActivity(req, 'server:suspend', { serverId: String(server.UUID), metadata: { name: server.name } });
-          emitRealtime(serverEvent('server.updated', server.UUID, {
-            state: { name: server.name, suspended: true },
-          }));
+          await logActivity(req, 'server:suspend', {
+            serverId: String(server.UUID),
+            metadata: { name: server.name },
+          });
+          emitRealtime(
+            serverEvent('server.updated', server.UUID, {
+              state: { name: server.name, suspended: true },
+            }),
+          );
           if (server.ownerId) {
-            emitRealtime(userEvent('account.suspended', Number(server.ownerId), { state: { suspended: true } }));
+            emitRealtime(
+              userEvent('account.suspended', Number(server.ownerId), {
+                state: { suspended: true },
+              }),
+            );
           }
 
           const owner = server.ownerId
-            ? await prisma.users.findUnique({ where: { id: Number(server.ownerId) }, select: { email: true } })
+            ? await prisma.users.findUnique({
+              where: { id: Number(server.ownerId) },
+              select: { email: true },
+            })
             : null;
           if (owner?.email) {
             await sendServerSuspended({
@@ -1017,12 +1279,21 @@ const adminModule: Module = {
           });
 
           logger.info(`Server ${serverId} unsuspended by user ${userId}`);
-          await logActivity(req, 'server:unsuspend', { serverId: String(server.UUID), metadata: { name: server.name } });
-          emitRealtime(serverEvent('server.updated', server.UUID, {
-            state: { name: server.name, suspended: false },
-          }));
+          await logActivity(req, 'server:unsuspend', {
+            serverId: String(server.UUID),
+            metadata: { name: server.name },
+          });
+          emitRealtime(
+            serverEvent('server.updated', server.UUID, {
+              state: { name: server.name, suspended: false },
+            }),
+          );
           if (server.ownerId) {
-            emitRealtime(userEvent('account.suspended', Number(server.ownerId), { state: { suspended: false } }));
+            emitRealtime(
+              userEvent('account.suspended', Number(server.ownerId), {
+                state: { suspended: false },
+              }),
+            );
           }
           res.json({ success: true, message: 'Server unsuspended' });
         } catch (error: unknown) {
@@ -1066,12 +1337,21 @@ const adminModule: Module = {
 
           const normalizedPorts = ports.map((p: Record<string, unknown>) => ({
             name: String(p.name || `Port ${p.externalPort}`),
-            internalPort: parseInt(String(p.internalPort)) || parseInt(String(p.externalPort)) || DEFAULT_SERVER_PORT,
-            externalPort: parseInt(String(p.externalPort)) || DEFAULT_SERVER_PORT,
+            internalPort:
+              parseInt(String(p.internalPort)) ||
+              parseInt(String(p.externalPort)) ||
+              DEFAULT_SERVER_PORT,
+            externalPort:
+              parseInt(String(p.externalPort)) || DEFAULT_SERVER_PORT,
             primary: p.primary === true,
           }));
 
-          const state = await startTransfer(serverId, targetNodeIdNum, normalizedPorts, req);
+          const state = await startTransfer(
+            serverId,
+            targetNodeIdNum,
+            normalizedPorts,
+            req,
+          );
 
           await logActivity(req, 'server:transfer', {
             serverId: String(state.serverUUID),
@@ -1085,7 +1365,9 @@ const adminModule: Module = {
           res.json({ success: true, transferId: serverId });
         } catch (error: unknown) {
           logger.error('Error starting transfer:', error);
-          res.status(400).json({ error: safeClientMessage(error, 'Failed to start transfer') });
+          res.status(400).json({
+            error: safeClientMessage(error, 'Failed to start transfer'),
+          });
         }
       },
     );
@@ -1134,8 +1416,8 @@ const adminModule: Module = {
             return;
           }
 
-          const serverIds = [...new Set(entries.map(e => e.serverId))];
-          const userIds = [...new Set(entries.map(e => e.userId))];
+          const serverIds = [...new Set(entries.map((e) => e.serverId))];
+          const userIds = [...new Set(entries.map((e) => e.userId))];
           const [servers, users] = await Promise.all([
             prisma.server.findMany({
               where: { UUID: { in: serverIds } },
@@ -1193,7 +1475,10 @@ const adminModule: Module = {
             return;
           }
           const minutes = Number(req.body?.minutes) || 30;
-          const removed = await runtimeStartQueue.banUserFromQueue(userId, minutes);
+          const removed = await runtimeStartQueue.banUserFromQueue(
+            userId,
+            minutes,
+          );
           res.json({ removed, banned: true });
         } catch (error: unknown) {
           logger.error('Error banning user from queue:', error);

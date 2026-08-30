@@ -1,6 +1,5 @@
 import { getSettings } from '../../settingsCache';
 import nodemailer from 'nodemailer';
-import prisma from '../../../db';
 import logger from '../../logger';
 
 const DEFAULT_SMTP_PORT = 587;
@@ -8,7 +7,9 @@ const DEFAULT_SMTP_FROM = 'noreply@airlink';
 
 export async function getTransporter() {
   const s = await getSettings();
-  if (!s?.smtpHost) {throw new Error('SMTP not configured');}
+  if (!s?.smtpHost) {
+    throw new Error('SMTP not configured');
+  }
   return nodemailer.createTransport({
     host: s.smtpHost,
     port: s.smtpPort ?? DEFAULT_SMTP_PORT,
@@ -20,7 +21,11 @@ export async function getTransporter() {
   });
 }
 
-export async function sendMail(to: string, subject: string, html: string): Promise<boolean> {
+export async function sendMail(
+  to: string,
+  subject: string,
+  html: string,
+): Promise<boolean> {
   try {
     const s = await getSettings();
     const t = await getTransporter();
@@ -46,11 +51,18 @@ function esc(value: string): string {
     .replace(/'/g, '&#x27;');
 }
 
-function emailShell(input: { title: string; panelName: string; body: string[] }): string {
+function emailShell(input: {
+  title: string;
+  panelName: string;
+  body: string[];
+}): string {
   return [
     '<div style="font-family:Arial,Helvetica,sans-serif;color:#1f2937;max-width:520px;margin:0 auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px">',
     `<h2 style="margin:0 0 12px;font-size:18px">${esc(input.title)}</h2>`,
-    ...input.body.map((p) => `<p style="margin:0 0 16px;font-size:14px;line-height:1.6">${p}</p>`),
+    ...input.body.map(
+      (p) =>
+        `<p style="margin:0 0 16px;font-size:14px;line-height:1.6">${p}</p>`,
+    ),
     `<p style="margin:0;font-size:12px;color:#6b7280">— ${esc(input.panelName)}</p>`,
     '</div>',
   ].join('\n');
@@ -63,16 +75,20 @@ export async function sendServerSuspended(input: {
   panelUrl: string;
 }): Promise<boolean> {
   const subject = `[${input.panelName}] Server suspended`;
-  return sendMail(input.to, subject, emailShell({
-    title: `Server "${input.serverName}" was suspended`,
-    panelName: input.panelName,
-    body: [
-      `The server <strong>${esc(input.serverName)}</strong> has been suspended by an administrator. It will stay offline until the suspension is lifted.`,
-      input.panelUrl
-        ? `If you believe this is a mistake, contact your administrator: <a href="${esc(input.panelUrl)}">${esc(input.panelUrl)}</a>.`
-        : '',
-    ].filter(Boolean),
-  }));
+  return sendMail(
+    input.to,
+    subject,
+    emailShell({
+      title: `Server "${input.serverName}" was suspended`,
+      panelName: input.panelName,
+      body: [
+        `The server <strong>${esc(input.serverName)}</strong> has been suspended by an administrator. It will stay offline until the suspension is lifted.`,
+        input.panelUrl
+          ? `If you believe this is a mistake, contact your administrator: <a href="${esc(input.panelUrl)}">${esc(input.panelUrl)}</a>.`
+          : '',
+      ].filter(Boolean),
+    }),
+  );
 }
 
 export async function sendSubUserInvite(input: {
@@ -82,14 +98,18 @@ export async function sendSubUserInvite(input: {
   inviteUrl: string;
 }): Promise<boolean> {
   const subject = `[${input.panelName}] You were invited to "${input.serverName}"`;
-  return sendMail(input.to, subject, emailShell({
-    title: `Invitation to "${input.serverName}"`,
-    panelName: input.panelName,
-    body: [
-      `You have been added as a subuser to the server <strong>${esc(input.serverName)}</strong>.`,
-      `Open the server to accept: <a href="${esc(input.inviteUrl)}">${esc(input.inviteUrl)}</a>.`,
-    ],
-  }));
+  return sendMail(
+    input.to,
+    subject,
+    emailShell({
+      title: `Invitation to "${input.serverName}"`,
+      panelName: input.panelName,
+      body: [
+        `You have been added as a subuser to the server <strong>${esc(input.serverName)}</strong>.`,
+        `Open the server to accept: <a href="${esc(input.inviteUrl)}">${esc(input.inviteUrl)}</a>.`,
+      ],
+    }),
+  );
 }
 
 export async function sendPasswordReset(input: {
@@ -98,13 +118,17 @@ export async function sendPasswordReset(input: {
   resetUrl: string;
 }): Promise<boolean> {
   const subject = `[${input.panelName}] Password reset request`;
-  return sendMail(input.to, subject, emailShell({
-    title: 'Password reset',
-    panelName: input.panelName,
-    body: [
-      'A password reset was requested for your account. This link expires in 1 hour.',
-      `<a href="${esc(input.resetUrl)}" style="display:inline-block;background:#171717;color:#ffffff;text-decoration:none;padding:11px 22px;border-radius:10px;font-weight:600">Reset password</a>`,
-      'If you did not request this, you can safely ignore this email.',
-    ],
-  }));
+  return sendMail(
+    input.to,
+    subject,
+    emailShell({
+      title: 'Password reset',
+      panelName: input.panelName,
+      body: [
+        'A password reset was requested for your account. This link expires in 1 hour.',
+        `<a href="${esc(input.resetUrl)}" style="display:inline-block;background:#171717;color:#ffffff;text-decoration:none;padding:11px 22px;border-radius:10px;font-weight:600">Reset password</a>`,
+        'If you did not request this, you can safely ignore this email.',
+      ],
+    }),
+  );
 }

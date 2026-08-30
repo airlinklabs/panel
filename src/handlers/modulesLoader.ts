@@ -1,5 +1,5 @@
-import type express from "express";
-import logger from "./logger";
+import type express from 'express';
+import logger from './logger';
 
 export const loadModules = async (
   app: express.Express,
@@ -7,18 +7,18 @@ export const loadModules = async (
   serverPort?: number,
   wsInstance?: { applyTo: (router: express.Router) => void },
 ) => {
-  const { registeredModules } = await import("../modules/registry");
+  const { registeredModules } = await import('../modules/registry');
   const modules = registeredModules();
 
-  logger.info("Initializing — loading core modules and components");
+  logger.info('Initializing — loading core modules and components');
 
-  const panelMajor = airlinkVersion.split(".")[0];
+  const panelMajor = airlinkVersion.split('.')[0];
   let loaded = 0;
   let errors = 0;
 
   for (const entry of modules) {
     const mod = entry.module;
-    const modMajor = mod.info.version.split(".")[0];
+    const modMajor = mod.info.version.split('.')[0];
 
     // Version compatibility is a hard contract: an incompatible module is a
     // misconfiguration that must surface at startup, not a silent skip.

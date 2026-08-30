@@ -20,7 +20,8 @@ export interface ScheduleWithRelations {
   lastRunAt: Date | null;
   nextRunAt: Date | null;
   createdAt: Date;
-  server: ServerRuntimeConfig & Pick<ServerPageServer, 'image' | 'UUID'> & { Suspended: boolean };
+  server: ServerRuntimeConfig &
+    Pick<ServerPageServer, 'image' | 'UUID'> & { Suspended: boolean };
   tasks: { id: number; action: string; payload: string; timeOffset: number }[];
 }
 
@@ -29,10 +30,14 @@ export interface ScheduleRunResult {
   errors: string[];
 }
 
-function describeDaemonError(resp: Pick<HttpResponse, 'status' | 'data'>): string {
+function describeDaemonError(
+  resp: Pick<HttpResponse, 'status' | 'data'>,
+): string {
   if (typeof resp.data === 'object' && resp.data !== null) {
     const data = resp.data as { error?: unknown; detail?: unknown };
-    const parts = [data.error, data.detail].filter((v): v is string => typeof v === 'string' && v.trim() !== '');
+    const parts = [data.error, data.detail].filter(
+      (v): v is string => typeof v === 'string' && v.trim() !== '',
+    );
     if (parts.length > 0) {
       return parts.join(' — ');
     }
@@ -43,7 +48,12 @@ function describeDaemonError(resp: Pick<HttpResponse, 'status' | 'data'>): strin
 function describeThrownError(err: unknown): string {
   if (err instanceof Error) {
     if (err.cause !== undefined) {
-      const cause = typeof err.cause === 'string' ? err.cause : err.cause instanceof Error ? err.cause.message : '';
+      const cause =
+        typeof err.cause === 'string'
+          ? err.cause
+          : err.cause instanceof Error
+            ? err.cause.message
+            : '';
       if (cause) {
         return `${err.message} (${cause})`;
       }
@@ -53,7 +63,9 @@ function describeThrownError(err: unknown): string {
   return String(err);
 }
 
-export async function runSchedule(schedule: ScheduleWithRelations): Promise<ScheduleRunResult> {
+export async function runSchedule(
+  schedule: ScheduleWithRelations,
+): Promise<ScheduleRunResult> {
   const errors: string[] = [];
 
   for (const task of schedule.tasks) {
@@ -66,11 +78,15 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
     }
 
     if (task.timeOffset > 0) {
-      await new Promise((resolve) => setTimeout(resolve, task.timeOffset * 1000));
+      await new Promise((resolve) =>
+        setTimeout(resolve, task.timeOffset * 1000),
+      );
     }
 
     if (schedule.server.Suspended) {
-      logger.warn(`Schedule ${schedule.id} skipped: server ${schedule.server.UUID} is suspended`);
+      logger.warn(
+        `Schedule ${schedule.id} skipped: server ${schedule.server.UUID} is suspended`,
+      );
       return { ok: errors.length === 0, errors };
     }
 
@@ -82,7 +98,10 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
           nodeAddress: schedule.server.node.address,
           nodePort: schedule.server.node.port,
           nodeKey: schedule.server.node.key,
-          body: { id: schedule.server.UUID, command: String(payload.command ?? '') },
+          body: {
+            id: schedule.server.UUID,
+            command: String(payload.command ?? ''),
+          },
         });
         if (resp.status >= 400) {
           errors.push(`task ${task.id}: ${describeDaemonError(resp)}`);
@@ -111,7 +130,14 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
           }
         } else if (action === 'restart') {
           try {
-            await stopServerContainer(schedule.server, schedule.server.UUID, 'stop', { releaseResources: false }).catch(() => {});
+            await stopServerContainer(
+              schedule.server,
+              schedule.server.UUID,
+              'stop',
+              { releaseResources: false },
+            ).catch(() => {
+              /* noop */
+            });
             const ownerRow = await prisma.server.findUnique({
               where: { UUID: schedule.server.UUID },
               select: { ownerId: true },
@@ -126,7 +152,8 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
           }
         } else {
           const method = action === 'kill' ? 'DELETE' : 'POST';
-          const path = action === 'kill' ? '/container/kill' : `/container/${action}`;
+          const path =
+            action === 'kill' ? '/container/kill' : `/container/${action}`;
           const resp = await daemonRequest({
             method,
             path,
@@ -138,7 +165,14 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
           if (resp.status >= 400) {
             errors.push(`task ${task.id}: ${describeDaemonError(resp)}`);
           } else if (action === 'stop' || action === 'kill') {
-            await prisma.server.update({ where: { UUID: schedule.server.UUID }, data: { Running: false } }).catch(() => {});
+            await prisma.server
+              .update({
+                where: { UUID: schedule.server.UUID },
+                data: { Running: false },
+              })
+              .catch(() => {
+                /* noop */
+              });
             runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
           }
         }
@@ -147,7 +181,13 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
         const resp = await daemonRequest<{
           success: boolean;
           error?: string;
-          backup?: { uuid: string; name: string; filePath: string; size: number; checksum?: string };
+          backup?: {
+            uuid: string;
+            name: string;
+            filePath: string;
+            size: number;
+            checksum?: string;
+          };
         }>({
           method: 'POST',
           path: '/container/backup',
@@ -162,7 +202,9 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
         if (resp.status >= 400) {
           errors.push(`task ${task.id}: ${describeDaemonError(resp)}`);
         } else if (resp.data?.success === false) {
-          errors.push(`task ${task.id}: ${typeof resp.data.error === 'string' && resp.data.error.trim() !== '' ? resp.data.error : 'backup failed'}`);
+          errors.push(
+            `task ${task.id}: ${typeof resp.data.error === 'string' && resp.data.error.trim() !== '' ? resp.data.error : 'backup failed'}`,
+          );
         } else if (resp.data?.success && resp.data.backup?.uuid) {
           try {
             await persistBackupRecord({
@@ -171,11 +213,16 @@ export async function runSchedule(schedule: ScheduleWithRelations): Promise<Sche
               serverId: schedule.server.UUID,
               filePath: resp.data.backup.filePath,
               size: BigInt(resp.data.backup.size ?? 0),
-              checksum: typeof resp.data.backup.checksum === 'string' ? resp.data.backup.checksum : null,
+              checksum:
+                typeof resp.data.backup.checksum === 'string'
+                  ? resp.data.backup.checksum
+                  : null,
               airlinkCloudId: null,
             });
           } catch (err) {
-            errors.push(`task ${task.id}: failed to record backup: ${describeThrownError(err)}`);
+            errors.push(
+              `task ${task.id}: failed to record backup: ${describeThrownError(err)}`,
+            );
           }
         }
       } else {
@@ -205,10 +252,16 @@ export function startScheduler(): void {
         try {
           const result = await runSchedule(schedule);
           if (!result.ok) {
-            logger.warn(`Schedule ${schedule.id} completed with task errors`, { errors: result.errors });
+            logger.warn(`Schedule ${schedule.id} completed with task errors`, {
+              errors: result.errors,
+            });
           }
-          const offsetClock = new Date(now.getTime() + (schedule.timeOffset || 0) * 60_000);
-          const interval = CronParser.parse(schedule.cron, { currentDate: offsetClock });
+          const offsetClock = new Date(
+            now.getTime() + (schedule.timeOffset || 0) * 60_000,
+          );
+          const interval = CronParser.parse(schedule.cron, {
+            currentDate: offsetClock,
+          });
           await prisma.schedule.update({
             where: { id: schedule.id },
             data: {

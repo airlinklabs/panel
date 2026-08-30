@@ -1,6 +1,10 @@
 import { getSettings } from '../../../handlers/settingsCache';
 import type { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer, PERMISSION_GROUPS, SUBUSER_PERMISSIONS } from '../../../handlers/utils/auth/serverAuthUtil';
+import {
+  isAuthenticatedForServer,
+  PERMISSION_GROUPS,
+  SUBUSER_PERMISSIONS,
+} from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
@@ -66,12 +70,14 @@ function isValidPermissionSet(permissions: unknown): permissions is string[] {
 }
 
 async function loadOwnedServer(serverId: string, userId: number) {
-  return prisma.server.findUnique({
-    where: { UUID: getParamAsString(serverId) },
-    include: serverPageInclude,
-  }).then((server) => {
-    return server && (server.ownerId === userId) ? server : null;
-  });
+  return prisma.server
+    .findUnique({
+      where: { UUID: getParamAsString(serverId) },
+      include: serverPageInclude,
+    })
+    .then((server) => {
+      return server && server.ownerId === userId ? server : null;
+    });
 }
 
 export function registerSubUserRoutes(router: Router): void {
@@ -91,14 +97,20 @@ export function registerSubUserRoutes(router: Router): void {
 
         const server = await loadOwnedServer(String(serverId), user.id);
         if (!server) {
-          res.status(403).json({ error: 'Only the server owner can manage subusers.' });
+          res
+            .status(403)
+            .json({ error: 'Only the server owner can manage subusers.' });
           return;
         }
 
         const [subUsers, settings] = await Promise.all([
           prisma.subUser.findMany({
             where: { serverId: server.UUID },
-            include: { user: { select: { id: true, username: true, email: true, avatar: true } } },
+            include: {
+              user: {
+                select: { id: true, username: true, email: true, avatar: true },
+              },
+            },
             orderBy: { createdAt: 'asc' },
           }),
           await getSettings(),
@@ -126,7 +138,9 @@ export function registerSubUserRoutes(router: Router): void {
           permissionGroups: PERMISSION_GROUPS,
           settings,
           features: JSON.parse(server.image.info || '{}').features || [],
-          installed: await checkForServerInstallation(getParamAsString(serverId)),
+          installed: await checkForServerInstallation(
+            getParamAsString(serverId),
+          ),
         });
       } catch (error) {
         logger.error('Error fetching subusers:', error);
@@ -141,7 +155,10 @@ export function registerSubUserRoutes(router: Router): void {
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
-      const { email, permissions } = req.body as { email?: string; permissions?: unknown };
+      const { email, permissions } = req.body as {
+        email?: string;
+        permissions?: unknown;
+      };
 
       if (!email || typeof email !== 'string' || email.trim() === '') {
         res.status(400).json({ error: 'Email is required' });
@@ -162,7 +179,9 @@ export function registerSubUserRoutes(router: Router): void {
 
         const server = await loadOwnedServer(String(serverId), user.id);
         if (!server) {
-          res.status(403).json({ error: 'Only the server owner can manage subusers.' });
+          res
+            .status(403)
+            .json({ error: 'Only the server owner can manage subusers.' });
           return;
         }
 
@@ -176,20 +195,28 @@ export function registerSubUserRoutes(router: Router): void {
         }
 
         if (target.id === user.id) {
-          res.status(400).json({ error: 'You cannot add yourself as a subuser.' });
+          res
+            .status(400)
+            .json({ error: 'You cannot add yourself as a subuser.' });
           return;
         }
 
         if (server.ownerId === target.id) {
-          res.status(400).json({ error: 'The server owner is already in full control.' });
+          res
+            .status(400)
+            .json({ error: 'The server owner is already in full control.' });
           return;
         }
 
         const existing = await prisma.subUser.findUnique({
-          where: { serverId_userId: { serverId: server.UUID, userId: target.id } },
+          where: {
+            serverId_userId: { serverId: server.UUID, userId: target.id },
+          },
         });
         if (existing) {
-          res.status(409).json({ error: 'That user is already a subuser of this server.' });
+          res
+            .status(409)
+            .json({ error: 'That user is already a subuser of this server.' });
           return;
         }
 
@@ -201,10 +228,15 @@ export function registerSubUserRoutes(router: Router): void {
           },
         });
 
-        await logActivity(req, 'subuser:create', { serverId: String(server.UUID), metadata: { targetUserId: target.id } });
-        emitRealtime(serverEvent('subuser.created', String(server.UUID), {
-          state: { userId: target.id, username: target.username },
-        }));
+        await logActivity(req, 'subuser:create', {
+          serverId: String(server.UUID),
+          metadata: { targetUserId: target.id },
+        });
+        emitRealtime(
+          serverEvent('subuser.created', String(server.UUID), {
+            state: { userId: target.id, username: target.username },
+          }),
+        );
 
         if (target.email) {
           await sendSubUserInvite({
@@ -215,7 +247,10 @@ export function registerSubUserRoutes(router: Router): void {
           });
         }
 
-        res.json({ success: true, message: `${target.username || target.email} added as a subuser.` });
+        res.json({
+          success: true,
+          message: `${target.username || target.email} added as a subuser.`,
+        });
         return;
       } catch (error) {
         logger.error('Error adding subuser:', error);
@@ -242,12 +277,17 @@ export function registerSubUserRoutes(router: Router): void {
 
         const server = await loadOwnedServer(String(serverId), user.id);
         if (!server) {
-          res.status(403).json({ error: 'Only the server owner can manage subusers.' });
+          res
+            .status(403)
+            .json({ error: 'Only the server owner can manage subusers.' });
           return;
         }
 
         const subUser = await prisma.subUser.findFirst({
-          where: { id: parseInt(getParamAsString(subUserId), 10), serverId: server.UUID },
+          where: {
+            id: parseInt(getParamAsString(subUserId), 10),
+            serverId: server.UUID,
+          },
         });
 
         if (!subUser) {
@@ -257,10 +297,15 @@ export function registerSubUserRoutes(router: Router): void {
 
         await prisma.subUser.delete({ where: { id: subUser.id } });
 
-        await logActivity(req, 'subuser:delete', { serverId: String(server.UUID), metadata: { subUserId: String(subUserId) } });
-        emitRealtime(serverEvent('subuser.deleted', String(server.UUID), {
-          state: { subUserId: subUser.id, userId: subUser.userId },
-        }));
+        await logActivity(req, 'subuser:delete', {
+          serverId: String(server.UUID),
+          metadata: { subUserId: String(subUserId) },
+        });
+        emitRealtime(
+          serverEvent('subuser.deleted', String(server.UUID), {
+            state: { subUserId: subUser.id, userId: subUser.userId },
+          }),
+        );
         res.json({ success: true, message: 'Subuser removed.' });
         return;
       } catch (error) {
@@ -294,12 +339,17 @@ export function registerSubUserRoutes(router: Router): void {
 
         const server = await loadOwnedServer(String(serverId), user.id);
         if (!server) {
-          res.status(403).json({ error: 'Only the server owner can manage subusers.' });
+          res
+            .status(403)
+            .json({ error: 'Only the server owner can manage subusers.' });
           return;
         }
 
         const subUser = await prisma.subUser.findFirst({
-          where: { id: parseInt(getParamAsString(subUserId), 10), serverId: server.UUID },
+          where: {
+            id: parseInt(getParamAsString(subUserId), 10),
+            serverId: server.UUID,
+          },
         });
 
         if (!subUser) {
@@ -312,10 +362,15 @@ export function registerSubUserRoutes(router: Router): void {
           data: { permissions: JSON.stringify(permissions) },
         });
 
-        await logActivity(req, 'subuser:update', { serverId: String(server.UUID), metadata: { subUserId: String(subUserId) } });
-        emitRealtime(serverEvent('subuser.updated', String(server.UUID), {
-          state: { subUserId: subUser.id, userId: subUser.userId },
-        }));
+        await logActivity(req, 'subuser:update', {
+          serverId: String(server.UUID),
+          metadata: { subUserId: String(subUserId) },
+        });
+        emitRealtime(
+          serverEvent('subuser.updated', String(server.UUID), {
+            state: { subUserId: subUser.id, userId: subUser.userId },
+          }),
+        );
         res.json({ success: true, message: 'Subuser permissions updated.' });
         return;
       } catch (error) {

@@ -9,12 +9,18 @@ import { Router } from 'express';
 import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { WebSocket } from 'ws';
-import { isAuthenticatedForServerWS, subUserHasPermission } from '../../handlers/utils/auth/serverAuthUtil';
+import {
+  isAuthenticatedForServerWS,
+  subUserHasPermission,
+} from '../../handlers/utils/auth/serverAuthUtil';
 import { verifyWsToken } from '../../handlers/utils/security/wsToken';
 import { mintCapabilityToken } from '../../handlers/utils/security/capabilityToken';
 import logger from '../../handlers/logger';
 import { getParamAsString } from '../../utils/typeHelpers';
-import { daemonRequest, daemonScheme } from '../../handlers/utils/core/daemonRequest';
+import {
+  daemonRequest,
+  daemonScheme,
+} from '../../handlers/utils/core/daemonRequest';
 
 async function wsScheme(): Promise<'ws' | 'wss'> {
   return (await daemonScheme()) === 'https' ? 'wss' : 'ws';
@@ -49,15 +55,23 @@ function sendSocketError(socket: WebSocket, message: string): void {
 }
 
 function normalizeWsMessage(data: WsMessage): ProxiedMessage {
-  if (typeof data === 'string') {return data;}
-  if (Buffer.isBuffer(data)) {return data;}
-  if (Array.isArray(data)) {return Buffer.concat(data);}
+  if (typeof data === 'string') {
+    return data;
+  }
+  if (Buffer.isBuffer(data)) {
+    return data;
+  }
+  if (Array.isArray(data)) {
+    return Buffer.concat(data);
+  }
   return Buffer.from(data);
 }
 
 function extractConsoleCommand(data: WsMessage): string | null {
   const raw = normalizeWsMessage(data).toString('utf8').trim();
-  if (!raw) {return null;}
+  if (!raw) {
+    return null;
+  }
 
   try {
     const payload = JSON.parse(raw) as {
@@ -85,7 +99,9 @@ function extractConsoleCommand(data: WsMessage): string | null {
     for (const candidate of candidates) {
       if (typeof candidate === 'string') {
         const command = candidate.replace(/\r\n?/g, '\n').trim();
-        if (command) {return command;}
+        if (command) {
+          return command;
+        }
       }
     }
   } catch {
@@ -107,10 +123,15 @@ async function proxyConsole(
   mode: ConsoleProxyMode,
 ) {
   try {
-    const token = new URL(req.url ?? '', 'ws://local').searchParams.get('token');
+    const token = new URL(req.url ?? '', 'ws://local').searchParams.get(
+      'token',
+    );
     const tokenData = verifyWsToken(token);
     if (!tokenData) {
-      sendSocketError(ws, 'Invalid or expired connect token. Refresh the page and try again.');
+      sendSocketError(
+        ws,
+        'Invalid or expired connect token. Refresh the page and try again.',
+      );
       return;
     }
 
@@ -141,18 +162,30 @@ async function proxyConsole(
     }
 
     const { node } = server;
-    const socket = new WebSocket(await daemonPath(node.address, node.port, serverId));
+    const socket = new WebSocket(
+      await daemonPath(node.address, node.port, serverId),
+    );
     const pendingClientMessages: ProxiedMessage[] = [];
     let clientClosed = false;
 
     // Determine which daemon WS routes this connection needs.
-    const daemonRoutes: ('container' | 'containerstatus' | 'containerevents')[] = [];
-    if (daemonPath.toString().includes('/container/')) {daemonRoutes.push('container');}
-    if (daemonPath.toString().includes('/containerstatus')) {daemonRoutes.push('containerstatus');}
-    if (daemonPath.toString().includes('/containerevents')) {daemonRoutes.push('containerevents');}
+    const daemonRoutes: (
+      'container' | 'containerstatus' | 'containerevents'
+    )[] = [];
+    if (daemonPath.toString().includes('/container/')) {
+      daemonRoutes.push('container');
+    }
+    if (daemonPath.toString().includes('/containerstatus')) {
+      daemonRoutes.push('containerstatus');
+    }
+    if (daemonPath.toString().includes('/containerevents')) {
+      daemonRoutes.push('containerevents');
+    }
     // Fallback: if we can't determine the route from the function, grant all
     // routes that this panel module uses. The daemon will reject mismatches.
-    if (daemonRoutes.length === 0) {daemonRoutes.push('container', 'containerstatus', 'containerevents');}
+    if (daemonRoutes.length === 0) {
+      daemonRoutes.push('container', 'containerstatus', 'containerevents');
+    }
 
     // Mint a short-lived capability token instead of sending the raw node key.
     // The daemon verifies this token's signature, expiry, and route match.
@@ -166,12 +199,16 @@ async function proxyConsole(
     function flushPendingClientMessages(): void {
       while (pendingClientMessages.length > 0 && isOpen(socket)) {
         const message = pendingClientMessages.shift();
-        if (message) {socket.send(message);}
+        if (message) {
+          socket.send(message);
+        }
       }
     }
 
     async function forwardToDaemon(data: WsMessage): Promise<void> {
-      if (mode === 'readonly') {return;}
+      if (mode === 'readonly') {
+        return;
+      }
 
       const command = extractConsoleCommand(data);
       if (command) {
@@ -224,7 +261,9 @@ async function proxyConsole(
 
     socket.onclose = () => {
       pendingClientMessages.length = 0;
-      if (!clientClosed && isOpen(ws)) {ws.close();}
+      if (!clientClosed && isOpen(ws)) {
+        ws.close();
+      }
     };
 
     ws.on('message', forwardToDaemon);
@@ -253,7 +292,9 @@ const wsServerConsoleModule: Module = {
 
   router: (applyWs?: (router: Router) => void) => {
     const router = Router();
-    if (applyWs) {applyWs(router);}
+    if (applyWs) {
+      applyWs(router);
+    }
 
     router.ws(
       '/console/:id',
@@ -262,7 +303,11 @@ const wsServerConsoleModule: Module = {
         const userId = req.session?.user?.id;
         const subUser = req.subUser;
         if (subUser && !subUserHasPermission(subUser, 'console')) {
-          ws.send(JSON.stringify({ error: 'You do not have permission to access the console.' }));
+          ws.send(
+            JSON.stringify({
+              error: 'You do not have permission to access the console.',
+            }),
+          );
           ws.close();
           return;
         }
@@ -275,7 +320,8 @@ const wsServerConsoleModule: Module = {
           ws,
           req,
           userId,
-          async (addr, port, id) => `${await wsScheme()}://${addr}:${port}/container/${id}`,
+          async (addr, port, id) =>
+            `${await wsScheme()}://${addr}:${port}/container/${id}`,
           'interactive',
         );
       },

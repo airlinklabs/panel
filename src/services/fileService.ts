@@ -1,8 +1,8 @@
-import prisma from "../db";
-import { daemonRequest } from "../handlers/utils/core/daemonRequest";
-import { fsListSchema, parseDaemonResponse } from "../platform/daemon/dtos";
-import type { FsFileEntry } from "../platform/daemon/dtos";
-import { isPathSafe } from "../utils/pathSecurity";
+import prisma from '../db';
+import { daemonRequest } from '../handlers/utils/core/daemonRequest';
+import { fsListSchema, parseDaemonResponse } from '../platform/daemon/dtos';
+import type { FsFileEntry } from '../platform/daemon/dtos';
+import { isPathSafe } from '../utils/pathSecurity';
 
 const FILE_TIMEOUT_MS = 15_000;
 
@@ -19,7 +19,9 @@ async function resolveServerNode(serverId: string): Promise<ServerNode> {
       node: { select: { address: true, port: true, key: true } },
     },
   });
-  if (!server?.node) throw new Error("Server or node not found");
+  if (!server?.node) {
+    throw new Error('Server or node not found');
+  }
   return server;
 }
 
@@ -32,8 +34,8 @@ export async function listFiles(
     nodeAddress: server.node.address,
     nodePort: server.node.port,
     nodeKey: server.node.key,
-    method: "GET",
-    path: "/fs/list",
+    method: 'GET',
+    path: '/fs/list',
     params: { id: server.UUID, path: dir },
     timeout: FILE_TIMEOUT_MS,
   });
@@ -44,14 +46,16 @@ export async function readFile(
   serverId: string,
   file: string,
 ): Promise<unknown> {
-  if (!isPathSafe(file)) throw new Error("invalid file path");
+  if (!isPathSafe(file)) {
+    throw new Error('invalid file path');
+  }
   const server = await resolveServerNode(serverId);
   const response = await daemonRequest({
     nodeAddress: server.node.address,
     nodePort: server.node.port,
     nodeKey: server.node.key,
-    method: "GET",
-    path: "/fs/file/content",
+    method: 'GET',
+    path: '/fs/file/content',
     params: { id: server.UUID, path: file },
     timeout: FILE_TIMEOUT_MS,
   });
@@ -68,8 +72,8 @@ export async function writeFile(
     nodeAddress: server.node.address,
     nodePort: server.node.port,
     nodeKey: server.node.key,
-    method: "POST",
-    path: "/fs/file/content",
+    method: 'POST',
+    path: '/fs/file/content',
     body: { id: server.UUID, path: file, content },
     timeout: FILE_TIMEOUT_MS,
   });
@@ -84,8 +88,8 @@ export async function deleteFile(
     nodeAddress: server.node.address,
     nodePort: server.node.port,
     nodeKey: server.node.key,
-    method: "DELETE",
-    path: "/fs/rm",
+    method: 'DELETE',
+    path: '/fs/rm',
     body: { id: server.UUID, path: file },
     timeout: FILE_TIMEOUT_MS,
   });
@@ -101,8 +105,8 @@ export async function renameFile(
     nodeAddress: server.node.address,
     nodePort: server.node.port,
     nodeKey: server.node.key,
-    method: "POST",
-    path: "/fs/rename",
+    method: 'POST',
+    path: '/fs/rename',
     body: { id: server.UUID, path: file, newName },
     timeout: FILE_TIMEOUT_MS,
   });

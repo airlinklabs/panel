@@ -48,14 +48,18 @@ class SlotRegistry {
   private slots = new Map<SlotId, SlotContribution[]>();
   private addonSlotRegistry = new Map<string, SlotId[]>();
 
-  register(slotId: SlotId, addonSlug: string, render: SlotContribution['render']): void {
+  register(
+    slotId: SlotId,
+    addonSlug: string,
+    render: SlotContribution['render'],
+  ): void {
     if (!SLOT_IDS.includes(slotId)) {
       logger.warn(`Unknown slot "${slotId}" from addon "${addonSlug}"`);
       return;
     }
 
     const existing = this.slots.get(slotId) ?? [];
-    const idx = existing.findIndex(c => c.addonSlug === addonSlug);
+    const idx = existing.findIndex((c) => c.addonSlug === addonSlug);
     const contribution: SlotContribution = { addonSlug, render };
 
     if (idx !== -1) {
@@ -74,9 +78,11 @@ class SlotRegistry {
 
   unregister(slotId: SlotId, addonSlug: string): void {
     const existing = this.slots.get(slotId);
-    if (!existing) {return;}
+    if (!existing) {
+      return;
+    }
 
-    const filtered = existing.filter(c => c.addonSlug !== addonSlug);
+    const filtered = existing.filter((c) => c.addonSlug !== addonSlug);
     if (filtered.length === 0) {
       this.slots.delete(slotId);
     } else {
@@ -84,17 +90,27 @@ class SlotRegistry {
     }
   }
 
-  async renderSlot(slotId: SlotId, locals: Record<string, unknown>): Promise<string> {
+  async renderSlot(
+    slotId: SlotId,
+    locals: Record<string, unknown>,
+  ): Promise<string> {
     const contributions = this.slots.get(slotId);
-    if (!contributions || contributions.length === 0) {return '';}
+    if (!contributions || contributions.length === 0) {
+      return '';
+    }
 
     const parts: string[] = [];
     for (const contrib of contributions) {
       try {
         const html = await contrib.render(locals);
-        if (html) {parts.push(html);}
+        if (html) {
+          parts.push(html);
+        }
       } catch (err: any) {
-        logger.error(`Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`, err.message);
+        logger.error(
+          `Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`,
+          err.message,
+        );
       }
     }
     return parts.join('\n');
@@ -102,7 +118,9 @@ class SlotRegistry {
 
   renderSlotSync(slotId: SlotId, locals: Record<string, unknown>): string {
     const contributions = this.slots.get(slotId);
-    if (!contributions || contributions.length === 0) {return '';}
+    if (!contributions || contributions.length === 0) {
+      return '';
+    }
 
     const parts: string[] = [];
     for (const contrib of contributions) {
@@ -112,7 +130,10 @@ class SlotRegistry {
           parts.push(result);
         }
       } catch (err: any) {
-        logger.error(`Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`, err.message);
+        logger.error(
+          `Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`,
+          err.message,
+        );
       }
     }
     return parts.join('\n');
@@ -120,7 +141,9 @@ class SlotRegistry {
 
   clearAddonSlots(addonSlug: string): void {
     const slotIds = this.addonSlotRegistry.get(addonSlug);
-    if (!slotIds) {return;}
+    if (!slotIds) {
+      return;
+    }
 
     for (const slotId of slotIds) {
       this.unregister(slotId, addonSlug);
@@ -136,9 +159,12 @@ class SlotRegistry {
     return [...(this.addonSlotRegistry.get(addonSlug) ?? [])];
   }
 
-  getWrapperContribution(slotId: 'layout.dashboard.wrapper' | 'layout.admin.wrapper', addonSlug: string): SlotContribution | undefined {
+  getWrapperContribution(
+    slotId: 'layout.dashboard.wrapper' | 'layout.admin.wrapper',
+    addonSlug: string,
+  ): SlotContribution | undefined {
     const contributions = this.slots.get(slotId);
-    return contributions?.find(c => c.addonSlug === addonSlug);
+    return contributions?.find((c) => c.addonSlug === addonSlug);
   }
 }
 

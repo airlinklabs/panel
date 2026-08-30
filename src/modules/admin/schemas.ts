@@ -40,17 +40,28 @@ export const createUserSchema = z
   })
   .superRefine((value, ctx) => {
     if (!value.email || !value.username || !value.password) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Missing required fields: email, username, or password.' });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Missing required fields: email, username, or password.',
+      });
       return;
     }
     if (typeof value.email !== 'string' || !EMAIL_REGEX.test(value.email)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please provide a valid email address.', path: ['email'] });
-      return;
-    }
-    if (typeof value.username !== 'string' || !USERNAME_REGEX.test(value.username)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Username must be 3–20 characters and contain only letters and numbers.',
+        message: 'Please provide a valid email address.',
+        path: ['email'],
+      });
+      return;
+    }
+    if (
+      typeof value.username !== 'string' ||
+      !USERNAME_REGEX.test(value.username)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'Username must be 3–20 characters and contain only letters and numbers.',
         path: ['username'],
       });
       return;
@@ -63,7 +74,8 @@ export const createUserSchema = z
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Password must be at least 8 characters and contain at least one letter and one number.',
+        message:
+          'Password must be at least 8 characters and contain at least one letter and one number.',
         path: ['password'],
       });
     }
@@ -110,14 +122,26 @@ export const updateUserSchema = z
     maxDatabases: optionalLimit,
   })
   .superRefine((value, ctx) => {
-    if (value.email && (typeof value.email !== 'string' || !EMAIL_REGEX.test(value.email))) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please provide a valid email address.', path: ['email'] });
-      return;
-    }
-    if (value.username && (typeof value.username !== 'string' || !USERNAME_REGEX.test(value.username))) {
+    if (
+      value.email &&
+      (typeof value.email !== 'string' || !EMAIL_REGEX.test(value.email))
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Username must be 3–20 characters and contain only letters and numbers.',
+        message: 'Please provide a valid email address.',
+        path: ['email'],
+      });
+      return;
+    }
+    if (
+      value.username &&
+      (typeof value.username !== 'string' ||
+        !USERNAME_REGEX.test(value.username))
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'Username must be 3–20 characters and contain only letters and numbers.',
         path: ['username'],
       });
       return;
@@ -132,15 +156,18 @@ export const updateUserSchema = z
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Password must be at least 8 characters and contain at least one letter and one number.',
+        message:
+          'Password must be at least 8 characters and contain at least one letter and one number.',
         path: ['password'],
       });
     }
   })
   .transform((value) => {
     const email = typeof value.email === 'string' ? value.email : undefined;
-    const username = typeof value.username === 'string' ? value.username : undefined;
-    const password = typeof value.password === 'string' ? value.password : undefined;
+    const username =
+      typeof value.username === 'string' ? value.username : undefined;
+    const password =
+      typeof value.password === 'string' ? value.password : undefined;
     return {
       email,
       username,

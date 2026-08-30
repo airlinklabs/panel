@@ -7,7 +7,12 @@ import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
-import { getAllAddons, toggleAddonStatus, reloadAddons, loadAddons, uninstallAddon } from '../../handlers/addonHandler';
+import {
+  getAllAddons,
+  toggleAddonStatus,
+  reloadAddons,
+  uninstallAddon,
+} from '../../handlers/addonHandler';
 import { commandRegistry } from '../../handlers/addonCommands';
 import type { Permission } from '../../handlers/permissions';
 import { registerPermission } from '../../handlers/permissions';
@@ -44,7 +49,9 @@ const addonsModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {return res.redirect('/login');}
+          if (!user) {
+            return res.redirect('/login');
+          }
 
           const addons = await getAllAddons();
           const settings = await getSettings();
@@ -56,22 +63,33 @@ const addonsModule: Module = {
             addonTableExists = false;
           }
 
-          const addonsWithMeta = addons.map(addon => {
+          const addonsWithMeta = addons.map((addon) => {
             const addonsDir = path.join(__dirname, '../../../storage/addons');
             const addonDir = path.join(addonsDir, addon.slug);
             const packageJsonPath = path.join(addonDir, 'package.json');
             const result = parseAddonManifest(packageJsonPath, addon.slug);
-            const hasDisabledPh = fs.existsSync(path.join(addonDir, 'disabled.ph'));
-            if (!result.success) {return { ...addon, manifest: null, hasDisabledPh };}
+            const hasDisabledPh = fs.existsSync(
+              path.join(addonDir, 'disabled.ph'),
+            );
+            if (!result.success) {
+              return { ...addon, manifest: null, hasDisabledPh };
+            }
             return { ...addon, manifest: result.manifest, hasDisabledPh };
           });
 
-          res.render('admin/addons/addons', { user, req, settings, addons: addonsWithMeta, addonTableExists, errorMessage: {} });
+          res.render('admin/addons/addons', {
+            user,
+            req,
+            settings,
+            addons: addonsWithMeta,
+            addonTableExists,
+            errorMessage: {},
+          });
         } catch (error: unknown) {
           logger.error('Error fetching addons:', error);
           return res.redirect('/admin/overview');
         }
-      }
+      },
     );
 
     router.get(
@@ -83,9 +101,11 @@ const addonsModule: Module = {
           res.json({ success: true, addons });
         } catch (error: unknown) {
           logger.error('Error fetching addon list:', error);
-          res.status(500).json({ success: false, message: 'Failed to fetch addons' });
+          res
+            .status(500)
+            .json({ success: false, message: 'Failed to fetch addons' });
         }
-      }
+      },
     );
 
     router.get(
@@ -95,35 +115,63 @@ const addonsModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {return res.redirect('/login');}
+          if (!user) {
+            return res.redirect('/login');
+          }
 
           const settings = await getSettings();
           const addons = await getAllAddons();
 
-          res.render('admin/addons/store', { user, req, settings, addons, errorMessage: {} });
+          res.render('admin/addons/store', {
+            user,
+            req,
+            settings,
+            addons,
+            errorMessage: {},
+          });
         } catch (error: unknown) {
           logger.error('Error rendering addon store:', error);
           return res.redirect('/admin/addons');
         }
-      }
+      },
     );
 
     // All store API endpoints disabled — store is coming soon
     router.get('/admin/addons/store/list', (_req: Request, res: Response) => {
-      res.status(410).json({ success: false, message: 'Addon store is not available yet.' });
+      res
+        .status(410)
+        .json({ success: false, message: 'Addon store is not available yet.' });
     });
 
-    router.get('/admin/addons/store/discussions', (_req: Request, res: Response) => {
-      res.status(410).json({ success: false, message: 'Addon store is not available yet.' });
-    });
+    router.get(
+      '/admin/addons/store/discussions',
+      (_req: Request, res: Response) => {
+        res.status(410).json({
+          success: false,
+          message: 'Addon store is not available yet.',
+        });
+      },
+    );
 
-    router.post('/admin/addons/store/install', (_req: Request, res: Response) => {
-      res.status(410).json({ success: false, message: 'Addon store is not available yet.' });
-    });
+    router.post(
+      '/admin/addons/store/install',
+      (_req: Request, res: Response) => {
+        res.status(410).json({
+          success: false,
+          message: 'Addon store is not available yet.',
+        });
+      },
+    );
 
-    router.post('/admin/addons/store/uninstall', (_req: Request, res: Response) => {
-      res.status(410).json({ success: false, message: 'Addon store is not available yet.' });
-    });
+    router.post(
+      '/admin/addons/store/uninstall',
+      (_req: Request, res: Response) => {
+        res.status(410).json({
+          success: false,
+          message: 'Addon store is not available yet.',
+        });
+      },
+    );
 
     router.get(
       '/admin/addons/:slug',
@@ -132,21 +180,33 @@ const addonsModule: Module = {
         try {
           const slug = getParamAsString(req.params.slug);
           const addon = await prisma.addon.findUnique({ where: { slug } });
-          if (!addon) {return res.status(404).json({ success: false, message: 'Addon not found' });}
+          if (!addon) {
+            return res
+              .status(404)
+              .json({ success: false, message: 'Addon not found' });
+          }
 
           const addonsDir = path.join(__dirname, '../../../storage/addons');
           const addonDir = path.join(addonsDir, slug);
           if (!containPath(addonsDir, addonDir)) {
-            return res.status(400).json({ success: false, message: 'Invalid addon slug' });
+            return res
+              .status(400)
+              .json({ success: false, message: 'Invalid addon slug' });
           }
           const packageJsonPath = path.join(addonDir, 'package.json');
           const result = parseAddonManifest(packageJsonPath, slug);
 
-          const commands = commandRegistry.getAddonCommands(slug).map(c => ({ name: c.name, description: c.description }));
+          const commands = commandRegistry
+            .getAddonCommands(slug)
+            .map((c) => ({ name: c.name, description: c.description }));
 
-          const allSettings = await prisma.addonSetting.findMany({ where: { addonSlug: slug } });
+          const allSettings = await prisma.addonSetting.findMany({
+            where: { addonSlug: slug },
+          });
           const settingsMap: Record<string, string> = {};
-          for (const s of allSettings) {settingsMap[s.key] = s.value;}
+          for (const s of allSettings) {
+            settingsMap[s.key] = s.value;
+          }
 
           return res.json({
             success: true,
@@ -157,9 +217,11 @@ const addonsModule: Module = {
           });
         } catch (error: unknown) {
           logger.error('Error fetching addon:', error);
-          return res.status(500).json({ success: false, message: 'Failed to fetch addon' });
+          return res
+            .status(500)
+            .json({ success: false, message: 'Failed to fetch addon' });
         }
-      }
+      },
     );
 
     router.post(
@@ -168,21 +230,29 @@ const addonsModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const slug = getParamAsString(req.params.slug);
-          const enabledBool = req.body.enabled === 'true' || req.body.enabled === true;
+          const enabledBool =
+            req.body.enabled === 'true' || req.body.enabled === true;
           const result = await toggleAddonStatus(slug, enabledBool);
 
           if (result.success) {
             await reloadAddons(req.app);
-            await logActivity(req, 'addon:toggle', { metadata: { slug, enabled: enabledBool } });
+            await logActivity(req, 'addon:toggle', {
+              metadata: { slug, enabled: enabledBool },
+            });
             res.json({ success: true, message: result.message });
           } else {
-            res.status(500).json({ success: false, message: result.message || 'Failed to update addon status' });
+            res.status(500).json({
+              success: false,
+              message: result.message || 'Failed to update addon status',
+            });
           }
         } catch (error: unknown) {
           logger.error('Error toggling addon status:', error);
-          res.status(500).json({ success: false, message: 'Failed to update addon status' });
+          res
+            .status(500)
+            .json({ success: false, message: 'Failed to update addon status' });
         }
-      }
+      },
     );
 
     router.post(
@@ -191,13 +261,17 @@ const addonsModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const result = await reloadAddons(req.app);
-          await logActivity(req, 'addon:reload', { metadata: { success: result.success } });
+          await logActivity(req, 'addon:reload', {
+            metadata: { success: result.success },
+          });
           res.json({ success: result.success, message: result.message });
         } catch (error: unknown) {
           logger.error('Error reloading addons:', error);
-          res.status(500).json({ success: false, message: 'Failed to reload addons' });
+          res
+            .status(500)
+            .json({ success: false, message: 'Failed to reload addons' });
         }
-      }
+      },
     );
 
     router.post(
@@ -207,17 +281,26 @@ const addonsModule: Module = {
         try {
           const slug = getParamAsString(req.params.slug);
           const addon = await prisma.addon.findUnique({ where: { slug } });
-          if (!addon) {return res.status(404).json({ success: false, message: 'Addon not found' });}
+          if (!addon) {
+            return res
+              .status(404)
+              .json({ success: false, message: 'Addon not found' });
+          }
 
           const addonsDir = path.join(__dirname, '../../../storage/addons');
           const addonDir = path.join(addonsDir, slug);
           if (!containPath(addonsDir, addonDir)) {
-            return res.status(400).json({ success: false, message: 'Invalid addon slug' });
+            return res
+              .status(400)
+              .json({ success: false, message: 'Invalid addon slug' });
           }
           const packageJsonPath = path.join(addonDir, 'package.json');
           const result = parseAddonManifest(packageJsonPath, slug);
           if (!result.success || !result.manifest.settingsSchema) {
-            return res.status(400).json({ success: false, message: 'Addon has no settings schema' });
+            return res.status(400).json({
+              success: false,
+              message: 'Addon has no settings schema',
+            });
           }
 
           const schema = result.manifest.settingsSchema;
@@ -230,7 +313,9 @@ const addonsModule: Module = {
                 value = value === 'true' || value === true ? 'true' : 'false';
               } else if (field.type === 'number') {
                 const num = Number(value);
-                if (isNaN(num)) {continue;}
+                if (isNaN(num)) {
+                  continue;
+                }
                 value = String(num);
               } else {
                 value = String(value);
@@ -250,9 +335,11 @@ const addonsModule: Module = {
           return res.json({ success: true, message: 'Settings saved' });
         } catch (error: unknown) {
           logger.error('Error saving addon settings:', error);
-          return res.status(500).json({ success: false, message: 'Failed to save addon settings' });
+          return res
+            .status(500)
+            .json({ success: false, message: 'Failed to save addon settings' });
         }
-      }
+      },
     );
 
     router.post(
@@ -265,13 +352,18 @@ const addonsModule: Module = {
           const args = req.body.args || [];
           const key = `${slug}:${command}`;
           const result = await commandRegistry.execute(key, args);
-          await logActivity(req, 'addon:command', { metadata: { slug, command } });
+          await logActivity(req, 'addon:command', {
+            metadata: { slug, command },
+          });
           res.json({ success: true, output: result });
         } catch (error: unknown) {
           logger.error('Error executing addon command:', error);
-          res.status(500).json({ success: false, message: 'Failed to execute addon command' });
+          res.status(500).json({
+            success: false,
+            message: 'Failed to execute addon command',
+          });
         }
-      }
+      },
     );
 
     router.post(
@@ -282,24 +374,48 @@ const addonsModule: Module = {
           const slug = getParamAsString(req.params.slug);
           const { capability, enabled } = req.body;
 
-          const validCapabilities = ['wrapsDashboard', 'wrapsAdminLayout', 'runsRawSql', 'registersSchedules'];
+          const validCapabilities = [
+            'wrapsDashboard',
+            'wrapsAdminLayout',
+            'runsRawSql',
+            'registersSchedules',
+          ];
           if (!validCapabilities.includes(capability)) {
-            return res.status(400).json({ success: false, message: 'Invalid capability' });
+            return res
+              .status(400)
+              .json({ success: false, message: 'Invalid capability' });
           }
 
           await prisma.addonSetting.upsert({
-            where: { addonSlug_key: { addonSlug: slug, key: `capability.${capability}` } },
-            create: { addonSlug: slug, key: `capability.${capability}`, value: enabled ? 'true' : 'false' },
+            where: {
+              addonSlug_key: {
+                addonSlug: slug,
+                key: `capability.${capability}`,
+              },
+            },
+            create: {
+              addonSlug: slug,
+              key: `capability.${capability}`,
+              value: enabled ? 'true' : 'false',
+            },
             update: { value: enabled ? 'true' : 'false' },
           });
 
-          await logActivity(req, 'addon:capability', { metadata: { slug, capability, enabled } });
-          return res.json({ success: true, message: `Capability "${capability}" ${enabled ? 'enabled' : 'disabled'}` });
+          await logActivity(req, 'addon:capability', {
+            metadata: { slug, capability, enabled },
+          });
+          return res.json({
+            success: true,
+            message: `Capability "${capability}" ${enabled ? 'enabled' : 'disabled'}`,
+          });
         } catch (error: unknown) {
           logger.error('Error updating addon capability:', error);
-          return res.status(500).json({ success: false, message: 'Failed to update addon capability' });
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to update addon capability',
+          });
         }
-      }
+      },
     );
 
     router.post(
@@ -310,26 +426,37 @@ const addonsModule: Module = {
           const slug = getParamAsString(req.params.slug);
           const confirm = req.body.confirm;
           if (!confirm) {
-            return res.status(400).json({ success: false, message: 'Confirmation required. Pass { "confirm": true } to proceed with uninstallation.' });
+            return res.status(400).json({
+              success: false,
+              message:
+                'Confirmation required. Pass { "confirm": true } to proceed with uninstallation.',
+            });
           }
 
           const addonsDir = path.join(__dirname, '../../../storage/addons');
           const targetDir = path.join(addonsDir, slug);
 
           if (!containPath(addonsDir, targetDir) || !fs.existsSync(targetDir)) {
-            return res.status(404).json({ success: false, message: 'Addon not found' });
+            return res
+              .status(404)
+              .json({ success: false, message: 'Addon not found' });
           }
 
           await uninstallAddon(slug, req.app);
           await reloadAddons(req.app);
           await logActivity(req, 'addon:uninstall', { metadata: { slug } });
 
-          return res.json({ success: true, message: `Addon "${slug}" uninstalled` });
+          return res.json({
+            success: true,
+            message: `Addon "${slug}" uninstalled`,
+          });
         } catch (error: unknown) {
           logger.error('Error uninstalling addon:', error);
-          return res.status(500).json({ success: false, message: 'Failed to uninstall addon' });
+          return res
+            .status(500)
+            .json({ success: false, message: 'Failed to uninstall addon' });
         }
-      }
+      },
     );
 
     return router;

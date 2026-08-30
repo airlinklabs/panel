@@ -34,7 +34,7 @@
               </div>
               <div class="flex items-center gap-1 shrink-0">
                 <button
-                  @click="openLocationNodes(<%= loc.id %>, '<%= loc.name.replace(/'/g, "\\'") %>')"
+                  @click="openLocationNodes(<%= loc.id %>, '<%= loc.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>')"
                   type="button"
                   class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
                   style="color:var(--theme-text-muted);"
@@ -42,7 +42,7 @@
                   <%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>
                 </button>
                 <button
-                  @click="openLocationEdit(<%= loc.id %>, '<%= loc.name.replace(/'/g, "\\'") %>', '<%= loc.shortCode %>')"
+                  @click="openLocationEdit(<%= loc.id %>, '<%= loc.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>', '<%= loc.shortCode %>')"
                   type="button"
                   class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
                   style="color:var(--theme-text-muted);"

@@ -17,7 +17,9 @@ interface CheckEulaResult {
   error?: string;
 }
 
-export async function checkEulaStatus(serverId: string): Promise<CheckEulaResult> {
+export async function checkEulaStatus(
+  serverId: string,
+): Promise<CheckEulaResult> {
   try {
     const server = await prisma.server.findUnique({
       where: { UUID: serverId },
@@ -48,23 +50,47 @@ export async function checkEulaStatus(serverId: string): Promise<CheckEulaResult
     if (isHttpError(error) && error.status === 404) {
       return { accepted: false };
     }
-    return { accepted: false, error: 'An error occurred while checking the EULA status.' };
+    return {
+      accepted: false,
+      error: 'An error occurred while checking the EULA status.',
+    };
   }
 }
 
 const EXCLUDED_WORLD_FOLDERS = new Set([
-  'plugins', 'config', 'cache', 'versions', 'logs', 'libraries',
-  'mods', 'bin', 'crash-reports', 'screenshots', 'resourcepacks',
-  'texturepacks', 'server', 'backups', 'airlink',
+  'plugins',
+  'config',
+  'cache',
+  'versions',
+  'logs',
+  'libraries',
+  'mods',
+  'bin',
+  'crash-reports',
+  'screenshots',
+  'resourcepacks',
+  'texturepacks',
+  'server',
+  'backups',
+  'airlink',
 ]);
 
 const REQUIRED_WORLD_FILES = ['uid.dat', 'level.dat'];
 const COMMON_WORLD_FILES = new Set([
-  'session.lock', 'region', 'data', 'playerdata',
-  'stats', 'advancements', 'DIM-1', 'DIM1',
+  'session.lock',
+  'region',
+  'data',
+  'playerdata',
+  'stats',
+  'advancements',
+  'DIM-1',
+  'DIM1',
 ]);
 
-export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promise<boolean> => {
+export const isWorld = async (
+  folderName: string,
+  serverInfo: ServerInfo,
+): Promise<boolean> => {
   if (
     typeof folderName !== 'string' ||
     folderName.length === 0 ||
@@ -96,10 +122,16 @@ export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promi
     if (isHttpError(error)) {
       const ignoredCodes = new Set([0]);
       if (!ignoredCodes.has(error.status)) {
-        logger.error(`Error checking world folder content for ${folderName}:`, error);
+        logger.error(
+          `Error checking world folder content for ${folderName}:`,
+          error,
+        );
       }
     } else {
-      logger.error(`Error checking world folder content for ${folderName}:`, error);
+      logger.error(
+        `Error checking world folder content for ${folderName}:`,
+        error,
+      );
     }
     return false;
   }

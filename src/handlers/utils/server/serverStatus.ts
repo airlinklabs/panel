@@ -1,5 +1,8 @@
 import { isHttpError } from '../../../utils/http';
-import { containerStatusSchema, parseDaemonResponse } from '../../../platform/daemon/dtos';
+import {
+  containerStatusSchema,
+  parseDaemonResponse,
+} from '../../../platform/daemon/dtos';
 import { daemonRequest } from '../core/daemonRequest';
 
 const SERVER_STATUS_TIMEOUT_MS = 3000;
@@ -21,7 +24,9 @@ interface ServerStatus {
   daemonOffline?: boolean;
 }
 
-export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerStatus> {
+export async function getServerStatus(
+  serverInfo: ServerInfo,
+): Promise<ServerStatus> {
   try {
     const response = await daemonRequest<unknown>({
       nodeAddress: serverInfo.nodeAddress,
@@ -46,7 +51,9 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
       status.online = true;
       if (data.startedAt) {
         status.startedAt = data.startedAt;
-        status.uptime = Math.floor((Date.now() - new Date(data.startedAt).getTime()) / 1000);
+        status.uptime = Math.floor(
+          (Date.now() - new Date(data.startedAt).getTime()) / 1000,
+        );
       }
     } else if (data && data.status === 'restarting') {
       status.starting = true;

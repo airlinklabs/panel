@@ -1,5 +1,8 @@
 import { isHttpError } from '../../../utils/http';
-import { daemonInfoSchema, parseDaemonResponse } from '../../../platform/daemon/dtos';
+import {
+  daemonInfoSchema,
+  parseDaemonResponse,
+} from '../../../platform/daemon/dtos';
 import { daemonRequest } from '../core/daemonRequest';
 import { cache } from '../../cache';
 import logger from '../../logger';
@@ -65,10 +68,14 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
           } else if (code === 'ENOTFOUND') {
             node.error = 'Host not found - check address';
           } else {
-            node.error = ((error as unknown as { body?: { message?: string } }).body?.message) || 'Connection failed';
+            node.error =
+              (error as unknown as { body?: { message?: string } }).body
+                ?.message || 'Connection failed';
           }
         } else {
-          node.error = ((error as unknown as { body?: { message?: string } }).body?.message) || 'Connection failed';
+          node.error =
+            (error as unknown as { body?: { message?: string } }).body
+              ?.message || 'Connection failed';
         }
       } else {
         node.error = 'An unexpected error occurred';

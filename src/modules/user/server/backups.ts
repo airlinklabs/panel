@@ -1,15 +1,28 @@
 import { getSettings } from '../../../handlers/settingsCache';
 import type { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
+import type { Readable } from 'stream';
+import {
+  isAuthenticatedForServer,
+  requireSubUserPermission,
+} from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import { safeClientMessage } from '../../../utils/errors';
 import prisma from '../../../db';
-import { daemonRequest, daemonBaseUrl } from '../../../handlers/utils/core/daemonRequest';
+import {
+  daemonRequest,
+  daemonBaseUrl,
+} from '../../../handlers/utils/core/daemonRequest';
 import { AirlinkCloudClient } from '../../../handlers/utils/core/airlinkCloud';
 import { logActivity } from '../../../handlers/utils/activity/activityLogger';
-import { startJob, getJob, isRunning, finishJob, describeJob } from '../../../handlers/jobRegistry';
+import {
+  startJob,
+  getJob,
+  isRunning,
+  finishJob,
+  describeJob,
+} from '../../../handlers/jobRegistry';
 import {
   uploadStreamToS3,
   deleteFromS3,
@@ -85,7 +98,9 @@ export function registerBackupRoutes(router: Router): void {
           backups,
           settings,
           features: JSON.parse(server.image.info || '{}').features || [],
-          installed: await checkForServerInstallation(getParamAsString(serverId)),
+          installed: await checkForServerInstallation(
+            getParamAsString(serverId),
+          ),
         });
       } catch (error) {
         logger.error('Error fetching backups:', error);
@@ -131,11 +146,16 @@ export function registerBackupRoutes(router: Router): void {
         }
 
         const settings = await getSettings();
-        const isCloudBackupEnabled = settings?.airlinkCloudBackupEnabled && settings?.airlinkCloudApiKey;
+        const isCloudBackupEnabled =
+          settings?.airlinkCloudBackupEnabled && settings?.airlinkCloudApiKey;
 
-        const backupCount = await prisma.backup.count({ where: { serverId: getParamAsString(serverId) } });
+        const backupCount = await prisma.backup.count({
+          where: { serverId: getParamAsString(serverId) },
+        });
         if (server.backupLimit > 0 && backupCount >= server.backupLimit) {
-          res.status(400).json({ error: `Backup limit reached (${server.backupLimit}). Delete an existing backup first.` });
+          res.status(400).json({
+            error: `Backup limit reached (${server.backupLimit}). Delete an existing backup first.`,
+          });
           return;
         }
 
@@ -145,14 +165,18 @@ export function registerBackupRoutes(router: Router): void {
         // toast can keep polling across page changes; also prevents two
         // backups from being created for the same server at once.
         if (isRunning('backup', serverKey)) {
-          res.status(409).json({ error: 'A backup is already being created for this server.' });
+          res.status(409).json({
+            error: 'A backup is already being created for this server.',
+          });
           return;
         }
         startJob('backup', serverKey, `Creating backup "${name.trim()}…`);
-        emitRealtime(serverEvent('backup.started', serverKey, {
-          operationId: serverKey,
-          state: { name: name.trim(), uuid: null },
-        }));
+        emitRealtime(
+          serverEvent('backup.started', serverKey, {
+            operationId: serverKey,
+            state: { name: name.trim(), uuid: null },
+          }),
+        );
 
         let ignoreList: string[] = [];
         if (server.backupIgnoreList) {
@@ -160,13 +184,21 @@ export function registerBackupRoutes(router: Router): void {
             const parsed = JSON.parse(server.backupIgnoreList);
             ignoreList = Array.isArray(parsed) ? parsed : [];
           } catch {
-            ignoreList = server.backupIgnoreList.split('\n').map((l) => l.trim()).filter(Boolean);
+            ignoreList = server.backupIgnoreList
+              .split('\n')
+              .map((l) => l.trim())
+              .filter(Boolean);
           }
         }
 
         const response = await daemonRequest<{
           success: boolean;
-          backup?: { filePath: string; uuid: string; size: number; checksum?: string };
+          backup?: {
+            filePath: string;
+            uuid: string;
+            size: number;
+            checksum?: string;
+          };
         }>({
           method: 'POST',
           path: '/container/backup',
@@ -189,9 +221,11 @@ export function registerBackupRoutes(router: Router): void {
 
           if (isCloudBackupEnabled) {
             try {
-              const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey!);
+              const cloudClient = new AirlinkCloudClient(
+                settings.airlinkCloudApiKey!,
+              );
 
-              const downloadResponse = await daemonRequest<import('stream').Readable>({
+              const downloadResponse = await daemonRequest<Readable>({
                 method: 'GET',
                 path: '/container/backup/download',
                 nodeAddress: server.node.address,
@@ -204,10 +238,11 @@ export function registerBackupRoutes(router: Router): void {
               const uniqueCloudFileName = `${getParamAsString(serverId)}_${response.data.backup!.uuid}_${Date.now()}.tar.gz`;
               const uploadResult = await cloudClient.uploadFile(
                 downloadResponse.data,
-                uniqueCloudFileName
+                uniqueCloudFileName,
               );
 
-              const remoteId = (uploadResult as Record<string, unknown>)?.id as string | undefined;
+              const remoteId = (uploadResult as Record<string, unknown>)?.id as
+                string | undefined;
               if (!remoteId) {
                 throw new Error('Airlink Cloud upload returned no file id');
               }
@@ -223,14 +258,19 @@ export function registerBackupRoutes(router: Router): void {
                 nodePort: server.node.port,
                 nodeKey: server.node.key,
                 body: { backupPath: daemonFilePath },
-              }).catch(e => logger.warn(`Failed to delete temporary local backup: ${e}`));
+              }).catch((e) =>
+                logger.warn(`Failed to delete temporary local backup: ${e}`),
+              );
             } catch (cloudError) {
-              logger.error('Failed to redirect backup to Airlink Cloud:', cloudError);
+              logger.error(
+                'Failed to redirect backup to Airlink Cloud:',
+                cloudError,
+              );
               remoteRedirect = 'failed';
             }
           } else if (settings?.s3Enabled) {
             try {
-              const downloadResponse = await daemonRequest<import('stream').Readable>({
+              const downloadResponse = await daemonRequest<Readable>({
                 method: 'GET',
                 path: '/container/backup/download',
                 nodeAddress: server.node.address,
@@ -240,9 +280,12 @@ export function registerBackupRoutes(router: Router): void {
                 responseType: 'stream',
               });
 
-              const s3Key = s3KeyFor(getParamAsString(serverId), response.data.backup!.uuid);
+              const s3Key = s3KeyFor(
+                getParamAsString(serverId),
+                response.data.backup!.uuid,
+              );
 
-              const stream = downloadResponse.data as import('stream').Readable;
+              const stream = downloadResponse.data as Readable;
               await uploadStreamToS3(stream, s3Key);
 
               filePath = `${S3_KEY_PREFIX}${s3Key}`;
@@ -255,7 +298,9 @@ export function registerBackupRoutes(router: Router): void {
                 nodePort: server.node.port,
                 nodeKey: server.node.key,
                 body: { backupPath: daemonFilePath },
-              }).catch(e => logger.warn(`Failed to delete temporary local backup: ${e}`));
+              }).catch((e) =>
+                logger.warn(`Failed to delete temporary local backup: ${e}`),
+              );
             } catch (s3Error) {
               logger.error('Failed to redirect backup to S3:', s3Error);
               remoteRedirect = 'failed';
@@ -268,21 +313,36 @@ export function registerBackupRoutes(router: Router): void {
             serverId: getParamAsString(serverId),
             filePath,
             size: BigInt(response.data.backup!.size),
-            checksum: typeof response.data.backup!.checksum === 'string' ? response.data.backup!.checksum : null,
+            checksum:
+              typeof response.data.backup!.checksum === 'string'
+                ? response.data.backup!.checksum
+                : null,
             airlinkCloudId,
           });
 
-          await logActivity(req, 'backup:create', { serverId: getParamAsString(serverId), metadata: { name: name.trim(), uuid: backup.UUID } });
-          emitRealtime(serverEvent('backup.completed', getParamAsString(serverId), {
-            operationId: getParamAsString(serverId),
-            state: { uuid: backup.UUID, name: name.trim(), size: response.data.backup!.size },
-          }));
+          await logActivity(req, 'backup:create', {
+            serverId: getParamAsString(serverId),
+            metadata: { name: name.trim(), uuid: backup.UUID },
+          });
+          emitRealtime(
+            serverEvent('backup.completed', getParamAsString(serverId), {
+              operationId: getParamAsString(serverId),
+              state: {
+                uuid: backup.UUID,
+                name: name.trim(),
+                size: response.data.backup!.size,
+              },
+            }),
+          );
 
           let message: string;
           if (remoteRedirect === 'ok') {
-            message = isCloudBackupEnabled ? 'Backup created and uploaded to Airlink Cloud' : 'Backup created successfully';
+            message = isCloudBackupEnabled
+              ? 'Backup created and uploaded to Airlink Cloud'
+              : 'Backup created successfully';
           } else if (remoteRedirect === 'failed') {
-            message = 'Backup created on the node, but the remote upload failed.';
+            message =
+              'Backup created on the node, but the remote upload failed.';
           } else {
             message = 'Backup created successfully';
           }
@@ -301,23 +361,43 @@ export function registerBackupRoutes(router: Router): void {
             },
           });
         } else {
-          finishJob('backup', serverKey, false, 'Backup creation failed.', 'Backup creation failed.');
-          emitRealtime(serverEvent('backup.failed', getParamAsString(serverId), {
-            operationId: getParamAsString(serverId),
-            error: { message: 'Failed to create backup on daemon' },
-          }));
-          res
-            .status(500)
-            .json({ error: 'Failed to create backup on daemon' });
+          finishJob(
+            'backup',
+            serverKey,
+            false,
+            'Backup creation failed.',
+            'Backup creation failed.',
+          );
+          emitRealtime(
+            serverEvent('backup.failed', getParamAsString(serverId), {
+              operationId: getParamAsString(serverId),
+              error: { message: 'Failed to create backup on daemon' },
+            }),
+          );
+          res.status(500).json({ error: 'Failed to create backup on daemon' });
         }
       } catch (error: unknown) {
-        if (jobKey) {finishJob('backup', jobKey, false, 'Backup creation failed.', 'Backup creation failed.');}
-        emitRealtime(serverEvent('backup.failed', getParamAsString(serverId), {
-          operationId: getParamAsString(serverId),
-          error: { message: safeClientMessage(error, 'Failed to create backup') },
-        }));
+        if (jobKey) {
+          finishJob(
+            'backup',
+            jobKey,
+            false,
+            'Backup creation failed.',
+            'Backup creation failed.',
+          );
+        }
+        emitRealtime(
+          serverEvent('backup.failed', getParamAsString(serverId), {
+            operationId: getParamAsString(serverId),
+            error: {
+              message: safeClientMessage(error, 'Failed to create backup'),
+            },
+          }),
+        );
         logger.error('Error creating backup:', error);
-        res.status(500).json({ error: safeClientMessage(error, 'Failed to create backup') });
+        res
+          .status(500)
+          .json({ error: safeClientMessage(error, 'Failed to create backup') });
       }
     },
   );
@@ -369,7 +449,10 @@ export function registerBackupRoutes(router: Router): void {
         }
 
         const backup = await prisma.backup.findUnique({
-          where: { UUID: getParamAsString(backupId), serverId: getParamAsString(serverId) },
+          where: {
+            UUID: getParamAsString(backupId),
+            serverId: getParamAsString(serverId),
+          },
         });
 
         if (!backup) {
@@ -379,32 +462,45 @@ export function registerBackupRoutes(router: Router): void {
 
         const serverKey = getParamAsString(serverId);
         if (isRunning('restore', serverKey)) {
-          res.status(409).json({ error: 'A restore is already in progress for this server.' });
+          res.status(409).json({
+            error: 'A restore is already in progress for this server.',
+          });
           return;
         }
         // Track the restore in the job registry so the persisted progress
         // toast can keep polling across page changes; settled on every exit
         // path below (success, daemon failure, and unexpected error).
         startJob('restore', serverKey, 'Restoring backup…');
-        emitRealtime(serverEvent('restore.started', serverKey, {
-          operationId: getParamAsString(backupId),
-          state: { uuid: backup.UUID },
-        }));
+        emitRealtime(
+          serverEvent('restore.started', serverKey, {
+            operationId: getParamAsString(backupId),
+            state: { uuid: backup.UUID },
+          }),
+        );
 
         let backupPath = backup.filePath;
 
         if (backup.airlinkCloudId) {
           const settings = await getSettings();
           if (!settings?.airlinkCloudApiKey) {
-            res.status(500).json({ error: 'Airlink Cloud API key not configured' });
+            res
+              .status(500)
+              .json({ error: 'Airlink Cloud API key not configured' });
             return;
           }
 
           try {
-            const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
-            const cloudDownloadResponse = await cloudClient.getDownloadStream(backup.airlinkCloudId);
+            const cloudClient = new AirlinkCloudClient(
+              settings.airlinkCloudApiKey,
+            );
+            const cloudDownloadResponse = await cloudClient.getDownloadStream(
+              backup.airlinkCloudId,
+            );
 
-            const uploadResponse = await daemonRequest<{ success: boolean; filePath?: string }>({
+            const uploadResponse = await daemonRequest<{
+              success: boolean;
+              filePath?: string;
+            }>({
               method: 'POST',
               path: '/container/backup/upload',
               nodeAddress: server.node.address,
@@ -412,7 +508,7 @@ export function registerBackupRoutes(router: Router): void {
               nodeKey: server.node.key,
               params: {
                 id: getParamAsString(serverId),
-                backupUuid: backup.UUID
+                backupUuid: backup.UUID,
               },
               body: cloudDownloadResponse.data,
               timeout: 300000,
@@ -424,17 +520,27 @@ export function registerBackupRoutes(router: Router): void {
               throw new Error('Failed to upload cloud backup to daemon');
             }
           } catch (err) {
-            logger.error('Failed to prepare Airlink Cloud backup for restore:', err);
-            res.status(500).json({ error: 'Failed to prepare cloud backup for restore' });
+            logger.error(
+              'Failed to prepare Airlink Cloud backup for restore:',
+              err,
+            );
+            res
+              .status(500)
+              .json({ error: 'Failed to prepare cloud backup for restore' });
             return;
           }
         } else if (isS3Backup(backup.filePath)) {
           try {
             const s3Key = backup.filePath.slice(S3_KEY_PREFIX.length);
             const stream = await getS3ObjectStream(s3Key);
-            if (!stream) {throw new Error('S3 object not found');}
+            if (!stream) {
+              throw new Error('S3 object not found');
+            }
 
-            const uploadResponse = await daemonRequest<{ success: boolean; filePath?: string }>({
+            const uploadResponse = await daemonRequest<{
+              success: boolean;
+              filePath?: string;
+            }>({
               method: 'POST',
               path: '/container/backup/upload',
               nodeAddress: server.node.address,
@@ -442,7 +548,7 @@ export function registerBackupRoutes(router: Router): void {
               nodeKey: server.node.key,
               params: {
                 id: getParamAsString(serverId),
-                backupUuid: backup.UUID
+                backupUuid: backup.UUID,
               },
               body: stream,
               timeout: 300000,
@@ -455,7 +561,9 @@ export function registerBackupRoutes(router: Router): void {
             }
           } catch (err) {
             logger.error('Failed to prepare S3 backup for restore:', err);
-            res.status(500).json({ error: 'Failed to prepare S3 backup for restore' });
+            res
+              .status(500)
+              .json({ error: 'Failed to prepare S3 backup for restore' });
             return;
           }
         }
@@ -482,7 +590,9 @@ export function registerBackupRoutes(router: Router): void {
             nodePort: server.node.port,
             nodeKey: server.node.key,
             body: { backupPath },
-          }).catch(e => logger.warn(`Failed to delete temporary restore file: ${e}`));
+          }).catch((e) =>
+            logger.warn(`Failed to delete temporary restore file: ${e}`),
+          );
         } else if (isS3Backup(backup.filePath)) {
           daemonRequest({
             method: 'DELETE',
@@ -491,38 +601,61 @@ export function registerBackupRoutes(router: Router): void {
             nodePort: server.node.port,
             nodeKey: server.node.key,
             body: { backupPath },
-          }).catch(e => logger.warn(`Failed to delete temporary restore file: ${e}`));
+          }).catch((e) =>
+            logger.warn(`Failed to delete temporary restore file: ${e}`),
+          );
         }
 
         if (response.data.success) {
-          await logActivity(req, 'backup:restore', { serverId: getParamAsString(serverId), metadata: { name: backup.name, uuid: backup.UUID } });
+          await logActivity(req, 'backup:restore', {
+            serverId: getParamAsString(serverId),
+            metadata: { name: backup.name, uuid: backup.UUID },
+          });
           finishJob('restore', serverKey, true, undefined, 'Backup restored.');
-          emitRealtime(serverEvent('restore.completed', serverKey, {
-            operationId: getParamAsString(backupId),
-            state: { uuid: backup.UUID },
-          }));
+          emitRealtime(
+            serverEvent('restore.completed', serverKey, {
+              operationId: getParamAsString(backupId),
+              state: { uuid: backup.UUID },
+            }),
+          );
           res.json({
             success: true,
             message: 'Backup restored successfully',
           });
         } else {
-          finishJob('restore', serverKey, false, 'Restore failed.', 'Restore failed.');
-          emitRealtime(serverEvent('restore.failed', serverKey, {
-            operationId: getParamAsString(backupId),
-            error: { message: 'Failed to restore backup on daemon' },
-          }));
-          res
-            .status(500)
-            .json({ error: 'Failed to restore backup on daemon' });
+          finishJob(
+            'restore',
+            serverKey,
+            false,
+            'Restore failed.',
+            'Restore failed.',
+          );
+          emitRealtime(
+            serverEvent('restore.failed', serverKey, {
+              operationId: getParamAsString(backupId),
+              error: { message: 'Failed to restore backup on daemon' },
+            }),
+          );
+          res.status(500).json({ error: 'Failed to restore backup on daemon' });
         }
       } catch (error: unknown) {
-        finishJob('restore', getParamAsString(serverId), false, 'Restore failed.', 'Restore failed.');
-        emitRealtime(serverEvent('restore.failed', getParamAsString(serverId), {
-          operationId: getParamAsString(backupId),
-          error: { message: safeClientMessage(error, 'Restore failed') },
-        }));
+        finishJob(
+          'restore',
+          getParamAsString(serverId),
+          false,
+          'Restore failed.',
+          'Restore failed.',
+        );
+        emitRealtime(
+          serverEvent('restore.failed', getParamAsString(serverId), {
+            operationId: getParamAsString(backupId),
+            error: { message: safeClientMessage(error, 'Restore failed') },
+          }),
+        );
         logger.error('Error restoring backup:', error);
-        res.status(500).json({ error: safeClientMessage(error, 'Failed to restore backup') });
+        res.status(500).json({
+          error: safeClientMessage(error, 'Failed to restore backup'),
+        });
       }
     },
   );
@@ -554,7 +687,10 @@ export function registerBackupRoutes(router: Router): void {
         }
 
         const backup = await prisma.backup.findUnique({
-          where: { UUID: getParamAsString(backupId), serverId: getParamAsString(serverId) },
+          where: {
+            UUID: getParamAsString(backupId),
+            serverId: getParamAsString(serverId),
+          },
         });
 
         if (!backup) {
@@ -565,12 +701,18 @@ export function registerBackupRoutes(router: Router): void {
         if (backup.airlinkCloudId) {
           const settings = await getSettings();
           if (!settings?.airlinkCloudApiKey) {
-            res.status(500).json({ error: 'Airlink Cloud API key not configured' });
+            res
+              .status(500)
+              .json({ error: 'Airlink Cloud API key not configured' });
             return;
           }
 
-          const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
-          const downloadResponse = await cloudClient.getDownloadStream(backup.airlinkCloudId);
+          const cloudClient = new AirlinkCloudClient(
+            settings.airlinkCloudApiKey,
+          );
+          const downloadResponse = await cloudClient.getDownloadStream(
+            backup.airlinkCloudId,
+          );
 
           const fileName = `${backup.name}_${backup.createdAt.toISOString().split('T')[0]}.tar.gz`;
           res.setHeader(
@@ -579,12 +721,14 @@ export function registerBackupRoutes(router: Router): void {
           );
           res.setHeader('Content-Type', 'application/gzip');
 
-          (downloadResponse.data as import('stream').Readable).pipe(res);
+          (downloadResponse.data as Readable).pipe(res);
           return;
         }
 
         if (isS3Backup(backup.filePath)) {
-          const stream = await getS3ObjectStream(backup.filePath.slice(S3_KEY_PREFIX.length));
+          const stream = await getS3ObjectStream(
+            backup.filePath.slice(S3_KEY_PREFIX.length),
+          );
           if (!stream) {
             res.status(404).json({ error: 'S3 backup not found' });
             return;
@@ -603,7 +747,10 @@ export function registerBackupRoutes(router: Router): void {
 
         // Local backup on the daemon node: mint a one-time token and 302 the
         // browser straight at the daemon — no file bytes flow through the panel.
-        const downloadResponse = await daemonRequest<{ token?: string; url?: string }>({
+        const downloadResponse = await daemonRequest<{
+          token?: string;
+          url?: string;
+        }>({
           method: 'POST',
           path: '/container/backup/download-token',
           nodeAddress: server.node.address,
@@ -615,8 +762,14 @@ export function registerBackupRoutes(router: Router): void {
           timeout: 15000,
         });
 
-        if (downloadResponse.status !== 200 || !downloadResponse.data?.token || !downloadResponse.data?.url) {
-          res.status(downloadResponse.status || 500).json({ error: 'Failed to start download' });
+        if (
+          downloadResponse.status !== 200 ||
+          !downloadResponse.data?.token ||
+          !downloadResponse.data?.url
+        ) {
+          res
+            .status(downloadResponse.status || 500)
+            .json({ error: 'Failed to start download' });
           return;
         }
 
@@ -628,7 +781,9 @@ export function registerBackupRoutes(router: Router): void {
         res.redirect(302, `${base}${downloadResponse.data.url}`);
       } catch (error: unknown) {
         logger.error('Error downloading backup:', error);
-        res.status(500).json({ error: safeClientMessage(error, 'Failed to download backup') });
+        res.status(500).json({
+          error: safeClientMessage(error, 'Failed to download backup'),
+        });
       }
     },
   );
@@ -660,7 +815,10 @@ export function registerBackupRoutes(router: Router): void {
         }
 
         const backup = await prisma.backup.findUnique({
-          where: { UUID: getParamAsString(backupId), serverId: getParamAsString(serverId) },
+          where: {
+            UUID: getParamAsString(backupId),
+            serverId: getParamAsString(serverId),
+          },
         });
 
         if (!backup) {
@@ -669,15 +827,23 @@ export function registerBackupRoutes(router: Router): void {
         }
 
         if (backup.locked) {
-          res.status(403).json({ error: 'This backup is locked. Unlock it before deleting.' });
+          res.status(403).json({
+            error: 'This backup is locked. Unlock it before deleting.',
+          });
           return;
         }
 
         if (backup.airlinkCloudId) {
           const settings = await getSettings();
           if (settings?.airlinkCloudApiKey) {
-            const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
-            await cloudClient.deleteFile(backup.airlinkCloudId).catch(e => logger.warn(`Failed to delete backup from Airlink Cloud: ${e}`));
+            const cloudClient = new AirlinkCloudClient(
+              settings.airlinkCloudApiKey,
+            );
+            await cloudClient
+              .deleteFile(backup.airlinkCloudId)
+              .catch((e) =>
+                logger.warn(`Failed to delete backup from Airlink Cloud: ${e}`),
+              );
           }
         } else if (isS3Backup(backup.filePath)) {
           try {
@@ -705,11 +871,16 @@ export function registerBackupRoutes(router: Router): void {
         await prisma.backup.delete({
           where: { UUID: getParamAsString(backupId) },
         });
-        emitRealtime(serverEvent('backup.deleted', getParamAsString(serverId), {
-          state: { uuid: backup.UUID, name: backup.name },
-        }));
+        emitRealtime(
+          serverEvent('backup.deleted', getParamAsString(serverId), {
+            state: { uuid: backup.UUID, name: backup.name },
+          }),
+        );
 
-        await logActivity(req, 'backup:delete', { serverId: getParamAsString(serverId), metadata: { name: backup.name, uuid: backup.UUID } });
+        await logActivity(req, 'backup:delete', {
+          serverId: getParamAsString(serverId),
+          metadata: { name: backup.name, uuid: backup.UUID },
+        });
         res.json({
           success: true,
           message: 'Backup deleted successfully',
@@ -748,7 +919,10 @@ export function registerBackupRoutes(router: Router): void {
         }
 
         const backup = await prisma.backup.findUnique({
-          where: { UUID: getParamAsString(backupId), serverId: getParamAsString(serverId) },
+          where: {
+            UUID: getParamAsString(backupId),
+            serverId: getParamAsString(serverId),
+          },
         });
 
         if (!backup) {

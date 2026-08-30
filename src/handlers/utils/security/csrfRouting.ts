@@ -10,13 +10,13 @@
  * used, CSRF protection applies normally.
  */
 
-import type { Request } from "express";
+import type { Request } from 'express';
 
 /** API mounts authenticated exclusively via API-key headers, never cookies. */
 const BEARER_ONLY_MOUNTS = [
-  "/api/client",
-  "/api/application",
-  "/api/health",
+  '/api/client',
+  '/api/application',
+  '/api/health',
 ] as const;
 
 function isMount(path: string, mount: string): boolean {
@@ -25,7 +25,7 @@ function isMount(path: string, mount: string): boolean {
 
 /** True for the realtime websocket upgrade paths. */
 export function isWsUpgrade(path: string): boolean {
-  return path === "/ws" || path.startsWith("/ws/");
+  return path === '/ws' || path.startsWith('/ws/');
 }
 
 /** True when the path belongs to a bearer-only (API-key) mount. */
@@ -42,7 +42,7 @@ export function isBearerOnlyApi(path: string): boolean {
  *   2. Bearer-only mounts (client, application, health)
  *   3. Any request with Authorization: Bearer header (API-key auth, no cookie)
  */
-export function isCsrfExempt(req: Pick<Request, "path" | "headers">): boolean {
+export function isCsrfExempt(req: Pick<Request, 'path' | 'headers'>): boolean {
   if (isWsUpgrade(req.path)) {
     return true;
   }
@@ -50,8 +50,8 @@ export function isCsrfExempt(req: Pick<Request, "path" | "headers">): boolean {
     return true;
   }
   // V2 hybrid auth: Bearer header means API-key auth → no cookie → no CSRF needed
-  const authHeader = req.headers?.["authorization"];
-  if (authHeader?.startsWith("Bearer ")) {
+  const authHeader = req.headers?.['authorization'];
+  if (authHeader?.startsWith('Bearer ')) {
     return true;
   }
   return false;

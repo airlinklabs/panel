@@ -7,7 +7,9 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 
 async function buildMountsViewModel() {
-  const mounts = await prisma.mount.findMany({ include: { _count: { select: { servers: true } } } });
+  const mounts = await prisma.mount.findMany({
+    include: { _count: { select: { servers: true } } },
+  });
   return { mounts };
 }
 
@@ -30,7 +32,9 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {return res.redirect('/login');}
+        if (!user) {
+          return res.redirect('/login');
+        }
         const settings = await getSettings();
         const vm = await buildMountsViewModel();
 
@@ -55,7 +59,10 @@ const adminModule: Module = {
       '/admin/mounts',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const { name, source, target, readOnly } = req.body as Record<string, unknown>;
+        const { name, source, target, readOnly } = req.body as Record<
+          string,
+          unknown
+        >;
         if (!name || typeof name !== 'string' || !name.trim()) {
           if (req.get('HX-Request') === 'true') {
             return res.status(400).render('fragments/shared/error-banner', {
@@ -64,7 +71,9 @@ const adminModule: Module = {
               hint: null,
             });
           }
-          return res.status(400).json({ success: false, error: 'Mount name is required.' });
+          return res
+            .status(400)
+            .json({ success: false, error: 'Mount name is required.' });
         }
         if (!source || typeof source !== 'string' || !source.trim()) {
           if (req.get('HX-Request') === 'true') {
@@ -74,7 +83,9 @@ const adminModule: Module = {
               hint: null,
             });
           }
-          return res.status(400).json({ success: false, error: 'Host source path is required.' });
+          return res
+            .status(400)
+            .json({ success: false, error: 'Host source path is required.' });
         }
         if (!target || typeof target !== 'string' || !target.trim()) {
           if (req.get('HX-Request') === 'true') {
@@ -84,7 +95,12 @@ const adminModule: Module = {
               hint: null,
             });
           }
-          return res.status(400).json({ success: false, error: 'Container target path is required.' });
+          return res
+            .status(400)
+            .json({
+              success: false,
+              error: 'Container target path is required.',
+            });
         }
 
         try {
@@ -99,7 +115,15 @@ const adminModule: Module = {
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildMountsViewModel();
-            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Mount created.' }, 'close-mount-modal': true } }));
+            res.setHeader(
+              'HX-Trigger',
+              JSON.stringify({
+                al: {
+                  toast: { type: 'success', message: 'Mount created.' },
+                  'close-mount-modal': true,
+                },
+              }),
+            );
             return res.render('fragments/admin/mounts/mount-list', vm);
           }
           return res.status(200).json({ success: true });
@@ -112,7 +136,9 @@ const adminModule: Module = {
               hint: null,
             });
           }
-          return res.status(500).json({ success: false, error: 'Failed to create mount.' });
+          return res
+            .status(500)
+            .json({ success: false, error: 'Failed to create mount.' });
         }
       },
     );
@@ -130,14 +156,21 @@ const adminModule: Module = {
               hint: null,
             });
           }
-          return res.status(400).json({ success: false, error: 'Invalid mount id.' });
+          return res
+            .status(400)
+            .json({ success: false, error: 'Invalid mount id.' });
         }
         try {
           await prisma.mount.delete({ where: { id } });
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildMountsViewModel();
-            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Mount deleted.' } } }));
+            res.setHeader(
+              'HX-Trigger',
+              JSON.stringify({
+                al: { toast: { type: 'success', message: 'Mount deleted.' } },
+              }),
+            );
             return res.render('fragments/admin/mounts/mount-list', vm);
           }
           return res.status(200).json({ success: true });
@@ -150,7 +183,9 @@ const adminModule: Module = {
               hint: null,
             });
           }
-          return res.status(500).json({ success: false, error: 'Failed to delete mount.' });
+          return res
+            .status(500)
+            .json({ success: false, error: 'Failed to delete mount.' });
         }
       },
     );

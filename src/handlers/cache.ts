@@ -1,6 +1,6 @@
-import { getRedisClient } from "./redis";
+import { getRedisClient } from './redis';
 
-const CACHE_PREFIX = "airlink:cache:";
+const CACHE_PREFIX = 'airlink:cache:';
 
 /**
  * Generic Redis cache helper with TTL support.
@@ -33,7 +33,7 @@ export const cache = {
       await redis.set(
         `${CACHE_PREFIX}${key}`,
         JSON.stringify(value),
-        "EX",
+        'EX',
         ttlSec,
       );
     } catch {

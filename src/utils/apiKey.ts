@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 
-const API_KEY_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const API_KEY_CHARS =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 /**
  * Generate a cryptographically secure random API key of the given length.

@@ -77,10 +77,15 @@ export function registerPermission(permission: Permission): void {
   }
 }
 
-export function registerAddonPermission(addonSlug: string, permission: string): boolean {
+export function registerAddonPermission(
+  addonSlug: string,
+  permission: string,
+): boolean {
   const expectedNs = `addon.${addonSlug}.`;
   if (!permission.startsWith(expectedNs)) {
-    logger.warn(`Addon "${addonSlug}" tried to register permission outside its namespace: "${permission}"`);
+    logger.warn(
+      `Addon "${addonSlug}" tried to register permission outside its namespace: "${permission}"`,
+    );
     return false;
   }
 
@@ -100,19 +105,28 @@ export function registerAddonPermission(addonSlug: string, permission: string): 
 
 export function clearAddonPermissions(addonSlug: string): void {
   const perms = addonPermissionRegistry.get(addonSlug);
-  if (!perms) {return;}
+  if (!perms) {
+    return;
+  }
 
   for (const perm of perms) {
     const idx = permissions.indexOf(perm as Permission);
-    if (idx !== -1) {permissions.splice(idx, 1);}
+    if (idx !== -1) {
+      permissions.splice(idx, 1);
+    }
   }
 
   addonPermissionRegistry.delete(addonSlug);
 }
 
-export function hasPermission(userPerms: Permission[], required: Permission): boolean {
+export function hasPermission(
+  userPerms: Permission[],
+  required: Permission,
+): boolean {
   return userPerms.some((perm) => {
-    if (perm === required) {return true;}
+    if (perm === required) {
+      return true;
+    }
     if (perm.endsWith('.*')) {
       const base = perm.slice(0, -2);
       return required.startsWith(`${base}.`);

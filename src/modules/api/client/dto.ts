@@ -14,17 +14,17 @@
  * than re-validated on the hot path.
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 /** Wire version reported by `GET /api/client` and enforced by the version plan. */
-export const CLIENT_API_VERSION = "client-v2";
+export const CLIENT_API_VERSION = 'client-v2';
 
 // --- Request bodies ---
 
-export const POWER_ACTIONS = ["start", "stop", "restart", "kill"] as const;
+export const POWER_ACTIONS = ['start', 'stop', 'restart', 'kill'] as const;
 export type PowerAction = (typeof POWER_ACTIONS)[number];
 
-export const SCHEDULE_ACTIONS = ["command", "power", "backup"] as const;
+export const SCHEDULE_ACTIONS = ['command', 'power', 'backup'] as const;
 export type ScheduleAction = (typeof SCHEDULE_ACTIONS)[number];
 
 /** POST /api/client/servers/:id/power */
@@ -35,11 +35,11 @@ export type PowerBody = z.infer<typeof powerBodySchema>;
 export const writeFileBodySchema = z
   .object({ file: z.string().min(1).max(4096), content: z.string() })
   .superRefine((data, ctx) => {
-    if (data.file.includes("\0")) {
-      ctx.addIssue({ code: "custom", message: "file path contains null byte" });
+    if (data.file.includes('\0')) {
+      ctx.addIssue({ code: 'custom', message: 'file path contains null byte' });
     }
-    if (data.file.includes("..")) {
-      ctx.addIssue({ code: "custom", message: "file path contains traversal" });
+    if (data.file.includes('..')) {
+      ctx.addIssue({ code: 'custom', message: 'file path contains traversal' });
     }
   });
 export type WriteFileBody = z.infer<typeof writeFileBodySchema>;
@@ -48,11 +48,11 @@ export type WriteFileBody = z.infer<typeof writeFileBodySchema>;
 export const deleteFileBodySchema = z
   .object({ file: z.string().min(1).max(4096) })
   .superRefine((data, ctx) => {
-    if (data.file.includes("\0")) {
-      ctx.addIssue({ code: "custom", message: "file path contains null byte" });
+    if (data.file.includes('\0')) {
+      ctx.addIssue({ code: 'custom', message: 'file path contains null byte' });
     }
-    if (data.file.includes("..")) {
-      ctx.addIssue({ code: "custom", message: "file path contains traversal" });
+    if (data.file.includes('..')) {
+      ctx.addIssue({ code: 'custom', message: 'file path contains traversal' });
     }
   });
 export type DeleteFileBody = z.infer<typeof deleteFileBodySchema>;
@@ -64,16 +64,16 @@ export const renameFileBodySchema = z
     newname: z.string().min(1).max(255),
   })
   .superRefine((data, ctx) => {
-    if (data.file.includes("\0") || data.newname.includes("\0")) {
-      ctx.addIssue({ code: "custom", message: "path contains null byte" });
+    if (data.file.includes('\0') || data.newname.includes('\0')) {
+      ctx.addIssue({ code: 'custom', message: 'path contains null byte' });
     }
-    if (data.file.includes("..") || data.newname.includes("..")) {
-      ctx.addIssue({ code: "custom", message: "path contains traversal" });
+    if (data.file.includes('..') || data.newname.includes('..')) {
+      ctx.addIssue({ code: 'custom', message: 'path contains traversal' });
     }
-    if (data.newname.includes("/") || data.newname.includes("\\")) {
+    if (data.newname.includes('/') || data.newname.includes('\\')) {
       ctx.addIssue({
-        code: "custom",
-        message: "newname must be a filename, not a path",
+        code: 'custom',
+        message: 'newname must be a filename, not a path',
       });
     }
   });
@@ -94,10 +94,10 @@ export const createScheduleBodySchema = z
     payload: z.string().max(8192).optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.action === "power") {
+    if (data.action === 'power') {
       let parsed: { action?: string };
       try {
-        parsed = JSON.parse(data.payload ?? "{}") as { action?: string };
+        parsed = JSON.parse(data.payload ?? '{}') as { action?: string };
       } catch {
         parsed = {};
       }
@@ -106,8 +106,8 @@ export const createScheduleBodySchema = z
         !POWER_ACTIONS.includes(parsed.action as PowerAction)
       ) {
         ctx.addIssue({
-          code: "custom",
-          message: "power payload must include a valid action",
+          code: 'custom',
+          message: 'power payload must include a valid action',
         });
       }
     }

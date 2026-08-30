@@ -5,14 +5,18 @@ import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
-import { getActivityEventMeta, type ActivityCategory } from '../../handlers/utils/activity/activityEvents';
+import {
+  getActivityEventMeta,
+  type ActivityCategory,
+} from '../../handlers/utils/activity/activityEvents';
 
 const ACTIVITY_PAGE_SIZE = 50;
 
 const activityModule: Module = {
   info: {
     name: 'Admin Activity Log Module',
-    description: 'Audit log of panel actions (servers, files, backups, subusers, databases).',
+    description:
+      'Audit log of panel actions (servers, files, backups, subusers, databases).',
     version: '2.1.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -27,21 +31,46 @@ const activityModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
-          const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
-          if (!user) {return res.redirect('/login');}
+          const user = await prisma.users.findUnique({
+            where: { id: req.session?.user?.id },
+          });
+          if (!user) {
+            return res.redirect('/login');
+          }
 
-          const page = Math.max(parseInt(String(req.query.page ?? '1'), 10) || 1, 1);
-          const eventFilter = typeof req.query.event === 'string' ? req.query.event : undefined;
-          const serverFilter = typeof req.query.server === 'string' ? req.query.server.trim() : undefined;
-          const actorFilter = typeof req.query.actor === 'string' ? req.query.actor.trim() : undefined;
-          const categoryFilter = typeof req.query.category === 'string' ? req.query.category.trim() : undefined;
-          const fromRaw = typeof req.query.from === 'string' ? req.query.from.trim() : undefined;
-          const toRaw = typeof req.query.to === 'string' ? req.query.to.trim() : undefined;
+          const page = Math.max(
+            parseInt(String(req.query.page ?? '1'), 10) || 1,
+            1,
+          );
+          const eventFilter =
+            typeof req.query.event === 'string' ? req.query.event : undefined;
+          const serverFilter =
+            typeof req.query.server === 'string'
+              ? req.query.server.trim()
+              : undefined;
+          const actorFilter =
+            typeof req.query.actor === 'string'
+              ? req.query.actor.trim()
+              : undefined;
+          const categoryFilter =
+            typeof req.query.category === 'string'
+              ? req.query.category.trim()
+              : undefined;
+          const fromRaw =
+            typeof req.query.from === 'string'
+              ? req.query.from.trim()
+              : undefined;
+          const toRaw =
+            typeof req.query.to === 'string' ? req.query.to.trim() : undefined;
 
           const where: Record<string, unknown> = {};
 
-          if (eventFilter) {where.event = eventFilter;}
-          if (serverFilter) {where.serverId = serverFilter;}
+          if (eventFilter) {
+            where.event = eventFilter;
+          }
+          if (serverFilter) {
+            where.serverId = serverFilter;
+          }
           if (categoryFilter && !eventFilter) {
             const events = await prisma.activityLog.findMany({
               where: { event: { not: '' } },
@@ -50,7 +79,11 @@ const activityModule: Module = {
             });
             const matching = events
               .map((e) => e.event)
-              .filter((e) => getActivityEventMeta(e).category === (categoryFilter as ActivityCategory));
+              .filter(
+                (e) =>
+                  getActivityEventMeta(e).category ===
+                  (categoryFilter as ActivityCategory),
+              );
             where.event = matching.length > 0 ? { in: matching } : '__none__';
           }
           if (actorFilter) {
@@ -95,7 +128,11 @@ const activityModule: Module = {
                 server: { select: { UUID: true, name: true } },
               },
             }),
-            prisma.activityLog.groupBy({ by: ['event'], _count: { _all: true }, orderBy: { event: 'asc' } }),
+            prisma.activityLog.groupBy({
+              by: ['event'],
+              _count: { _all: true },
+              orderBy: { event: 'asc' },
+            }),
             prisma.users.findMany({
               select: { id: true, username: true, email: true },
               orderBy: { username: 'asc' },
@@ -114,12 +151,19 @@ const activityModule: Module = {
             user,
             req,
             settings,
-            logs: logs.map((log: { metadata: string | null; event: string }) => ({
-              ...log,
-              metadata: log.metadata ? JSON.parse(log.metadata) : null,
-              meta: getActivityEventMeta(log.event),
-            })),
-            events: events.map((e: { event: string; _count: { _all: number } }) => ({ event: e.event, count: e._count._all })),
+            logs: logs.map(
+              (log: { metadata: string | null; event: string }) => ({
+                ...log,
+                metadata: log.metadata ? JSON.parse(log.metadata) : null,
+                meta: getActivityEventMeta(log.event),
+              }),
+            ),
+            events: events.map(
+              (e: { event: string; _count: { _all: number } }) => ({
+                event: e.event,
+                count: e._count._all,
+              }),
+            ),
             actors,
             servers,
             filters: {

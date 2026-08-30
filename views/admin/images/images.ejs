@@ -222,7 +222,7 @@ function imageManager() {
       '<td class="whitespace-nowrap px-3 py-4 text-sm"><div class="flex gap-2">' +
       '<a href="/admin/images/edit/' + image.id + '" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">' + (window.alIcon ? alIcon("pencil", "size-4") : "") + 'Edit</a>' +
       '<a href="/admin/images/export/' + image.id + '" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">' + (window.alIcon ? alIcon("download", "size-4") : "") + 'Export</a>' +
-      '<button onclick="event.stopPropagation(); openDelete(\'' + image.id + '\', \'' + esc(image.name).replace(/'/g, "\\'") + '\')" type="button" class="al-btn-danger" aria-label="Delete image ' + esc(image.name) + '">' + (window.alIcon ? alIcon("trash-2", "size-4") : "") + '</button>' +
+      '<button onclick="event.stopPropagation(); openDelete(\'' + image.id + '\', \'' + esc(image.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" type="button" class="al-btn-danger" aria-label="Delete image ' + esc(image.name) + '">' + (window.alIcon ? alIcon("trash-2", "size-4") : "") + '</button>' +
       '</div></td></tr>';
   }
 

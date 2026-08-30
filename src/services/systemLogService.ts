@@ -1,11 +1,11 @@
-import prisma from "../db";
-import logger from "../handlers/logger";
+import prisma from '../db';
+import logger from '../handlers/logger';
 
 export interface LogSystemErrorOpts {
   message: string;
   stack?: string;
   component: string; // "api" | "daemon" | "database" | "redis" | "scheduler"
-  severity: "warning" | "error" | "critical";
+  severity: 'warning' | 'error' | 'critical';
   metadata?: Record<string, unknown>;
 }
 
@@ -22,7 +22,7 @@ export async function logSystemError(error: LogSystemErrorOpts): Promise<void> {
     });
   } catch (err) {
     // system logging must never crash the process
-    logger.error("[system-log] failed to write system log", err);
+    logger.error('[system-log] failed to write system log', err);
   }
 }
 
@@ -60,7 +60,7 @@ export async function getSystemLogs(params: GetSystemLogsParams) {
       where,
       skip: (params.page - 1) * params.perPage,
       take: params.perPage,
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     }),
     prisma.systemLog.count({ where }),
   ]);

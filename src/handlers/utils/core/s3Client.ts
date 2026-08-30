@@ -1,8 +1,14 @@
 import { getSettings } from '../../settingsCache';
-import { S3Client, CreateBucketCommand, DeleteObjectCommand, ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  CreateBucketCommand,
+  DeleteObjectCommand,
+  ListObjectsV2Command,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { createReadStream } from 'node:fs';
-import prisma from '../../../db';
+import type { Readable } from 'node:stream';
 
 export const S3_KEY_PREFIX = 's3:';
 
@@ -15,14 +21,20 @@ export async function getS3Config() {
     client: new S3Client({
       endpoint: s.s3Endpoint ?? undefined,
       region: s.s3Region ?? 'us-east-1',
-      credentials: { accessKeyId: s.s3AccessKey, secretAccessKey: s.s3SecretKey },
+      credentials: {
+        accessKeyId: s.s3AccessKey,
+        secretAccessKey: s.s3SecretKey,
+      },
       forcePathStyle: s.s3PathStyle,
     }),
     bucket: s.s3Bucket,
   };
 }
 
-export async function uploadToS3(localPath: string, key: string): Promise<string> {
+export async function uploadToS3(
+  localPath: string,
+  key: string,
+): Promise<string> {
   const { client, bucket } = await getS3Config();
   const upload = new Upload({
     client,
@@ -32,7 +44,10 @@ export async function uploadToS3(localPath: string, key: string): Promise<string
   return key;
 }
 
-export async function uploadStreamToS3(stream: import('node:stream').Readable, key: string): Promise<string> {
+export async function uploadStreamToS3(
+  stream: Readable,
+  key: string,
+): Promise<string> {
   const { client, bucket } = await getS3Config();
   const upload = new Upload({
     client,
@@ -49,11 +64,17 @@ export async function deleteFromS3(key: string): Promise<void> {
 
 export async function getS3ObjectStream(key: string) {
   const { client, bucket } = await getS3Config();
-  const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
-  return response.Body as import('node:stream').Readable | undefined;
+  const response = await client.send(
+    new GetObjectCommand({ Bucket: bucket, Key: key }),
+  );
+  return response.Body as Readable | undefined;
 }
 
-export async function testS3Connection(): Promise<{ success: boolean; latency?: number; error?: string }> {
+export async function testS3Connection(): Promise<{
+  success: boolean;
+  latency?: number;
+  error?: string;
+}> {
   const start = Date.now();
   try {
     const { client, bucket } = await getS3Config();
@@ -73,7 +94,8 @@ export async function ensureS3Bucket(): Promise<{ created: boolean }> {
     await client.send(new ListObjectsV2Command({ Bucket: bucket, MaxKeys: 1 }));
     return { created: false };
   } catch (error) {
-    const status = (error as { $metadata?: { httpStatusCode?: number } })?.$metadata?.httpStatusCode;
+    const status = (error as { $metadata?: { httpStatusCode?: number } })
+      ?.$metadata?.httpStatusCode;
     const name = (error as { name?: string })?.name;
     if (status !== 404 && name !== 'NotFound' && name !== 'NoSuchBucket') {
       throw error;

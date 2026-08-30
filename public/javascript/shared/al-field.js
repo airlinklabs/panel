@@ -42,10 +42,10 @@
  */
 (function (root, factory) {
   var api = factory(root);
-  if (typeof window !== 'undefined') window.ALField = api;
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
-})(typeof window !== 'undefined' ? window : globalThis, function (rootScope) {
-  'use strict';
+  if (typeof window !== "undefined") window.ALField = api;
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+})(typeof window !== "undefined" ? window : globalThis, function (rootScope) {
+  "use strict";
 
   var currentScope = rootScope;
   var doc = (currentScope && currentScope.document) || null;
@@ -58,7 +58,7 @@
   var mounted = [];
 
   function qsAll(rootEl, sel) {
-    if (!rootEl || typeof rootEl.querySelectorAll !== 'function') return [];
+    if (!rootEl || typeof rootEl.querySelectorAll !== "function") return [];
     return Array.prototype.slice.call(rootEl.querySelectorAll(sel));
   }
 
@@ -67,97 +67,118 @@
   }
 
   function fieldFor(input) {
-    return input && input.closest ? input.closest('[data-al-field]') : null;
+    return input && input.closest ? input.closest("[data-al-field]") : null;
   }
 
   function messageElFor(input) {
     var field = fieldFor(input);
     if (!field) return null;
-    return one(field, '[data-al-field-message]');
+    return one(field, "[data-al-field-message]");
   }
 
   function setMessage(input, message, kind) {
     var field = fieldFor(input);
     var msgEl = messageElFor(input);
     if (field) {
-      field.classList.remove('al-field-invalid', 'al-field-success');
-      field.classList.add(kind === 'error' ? 'al-field-invalid' : 'al-field-success');
+      field.classList.remove("al-field-invalid", "al-field-success");
+      field.classList.add(
+        kind === "error" ? "al-field-invalid" : "al-field-success",
+      );
     }
     if (msgEl) {
-      msgEl.textContent = message || '';
-      if (message) msgEl.removeAttribute('hidden');
-      else msgEl.setAttribute('hidden', '');
+      msgEl.textContent = message || "";
+      if (message) msgEl.removeAttribute("hidden");
+      else msgEl.setAttribute("hidden", "");
     }
     if (message) {
-      input.setAttribute('aria-invalid', kind === 'error' ? 'true' : 'false');
-      if (msgEl && msgEl.id) input.setAttribute('aria-describedby', msgEl.id);
+      input.setAttribute("aria-invalid", kind === "error" ? "true" : "false");
+      if (msgEl && msgEl.id) input.setAttribute("aria-describedby", msgEl.id);
     } else {
-      input.removeAttribute('aria-invalid');
-      if (msgEl && input.getAttribute('aria-describedby') === msgEl.id) {
-        input.removeAttribute('aria-describedby');
+      input.removeAttribute("aria-invalid");
+      if (msgEl && input.getAttribute("aria-describedby") === msgEl.id) {
+        input.removeAttribute("aria-describedby");
       }
     }
-    emit(input, kind === 'error' ? 'al:field-error' : 'al:field-clear', { message: message });
+    emit(input, kind === "error" ? "al:field-error" : "al:field-clear", {
+      message: message,
+    });
   }
 
   function setError(input, message) {
-    setMessage(input, message, 'error');
+    setMessage(input, message, "error");
   }
 
   function setSuccess(input, message) {
-    setMessage(input, message, 'success');
+    setMessage(input, message, "success");
   }
 
   function clear(input) {
-    setMessage(input, '', null);
+    setMessage(input, "", null);
   }
 
   function emit(input, type, detail) {
-    if (!currentScope || typeof currentScope.CustomEvent !== 'function') return;
+    if (!currentScope || typeof currentScope.CustomEvent !== "function") return;
     try {
-      input.dispatchEvent(new currentScope.CustomEvent(type, { bubbles: true, detail: detail }));
-    } catch (e) { /* CustomEvent unavailable */ }
+      input.dispatchEvent(
+        new currentScope.CustomEvent(type, { bubbles: true, detail: detail }),
+      );
+    } catch (e) {
+      /* CustomEvent unavailable */
+    }
   }
 
   /* Password visibility toggle. */
   function togglePassword(toggleBtn) {
-    var field = toggleBtn.closest('[data-al-field]');
-    var input = field ? one(field, 'input[data-al-field-input]') : null;
+    var field = toggleBtn.closest("[data-al-field]");
+    var input = field ? one(field, "input[data-al-field-input]") : null;
     if (!input) return;
-    var showing = input.getAttribute('type') === 'text';
-    input.setAttribute('type', showing ? 'password' : 'text');
+    var showing = input.getAttribute("type") === "text";
+    input.setAttribute("type", showing ? "password" : "text");
     var pressed = !showing;
-    toggleBtn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
-    if (toggleBtn.dataset && toggleBtn.dataset.labelShow && toggleBtn.dataset.labelHide) {
-      toggleBtn.textContent = pressed ? toggleBtn.dataset.labelHide : toggleBtn.dataset.labelShow;
+    toggleBtn.setAttribute("aria-pressed", pressed ? "true" : "false");
+    if (
+      toggleBtn.dataset &&
+      toggleBtn.dataset.labelShow &&
+      toggleBtn.dataset.labelHide
+    ) {
+      toggleBtn.textContent = pressed
+        ? toggleBtn.dataset.labelHide
+        : toggleBtn.dataset.labelShow;
     }
     if (toggleBtn.setAttribute) {
-      toggleBtn.setAttribute('aria-label', pressed ? 'Hide password' : 'Show password');
+      toggleBtn.setAttribute(
+        "aria-label",
+        pressed ? "Hide password" : "Show password",
+      );
     }
     input.focus();
   }
 
   function onClickToggle(e) {
-    var btn = e.target && e.target.closest ? e.target.closest('[data-al-field-toggle]') : null;
+    var btn =
+      e.target && e.target.closest
+        ? e.target.closest("[data-al-field-toggle]")
+        : null;
     if (!btn) return;
     e.preventDefault();
     togglePassword(btn);
   }
 
   function controller(field) {
-    field.addEventListener('click', onClickToggle, true);
+    field.addEventListener("click", onClickToggle, true);
     return {
       root: field,
       destroy: function () {
-        field.removeEventListener('click', onClickToggle, true);
+        field.removeEventListener("click", onClickToggle, true);
       },
     };
   }
 
   function enhance(root) {
     if (!root) return [];
-    var fields = qsAll(root, '[data-al-field]');
-    if (root.hasAttribute && root.hasAttribute('data-al-field')) fields.unshift(root);
+    var fields = qsAll(root, "[data-al-field]");
+    if (root.hasAttribute && root.hasAttribute("data-al-field"))
+      fields.unshift(root);
     var out = [];
     fields.forEach(function (field) {
       var c = controller(field);
@@ -168,7 +189,9 @@
   }
 
   function destroyAll() {
-    mounted.slice().forEach(function (c) { c.destroy(); });
+    mounted.slice().forEach(function (c) {
+      c.destroy();
+    });
     mounted = [];
   }
 

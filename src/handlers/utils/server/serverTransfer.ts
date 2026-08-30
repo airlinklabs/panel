@@ -11,9 +11,7 @@ import {
 import { assertNodeCapacity } from './resourceCheck';
 import { safeClientMessage } from '../../../utils/errors';
 import {
-  normalizeServerPorts,
   parseImagePortRequirements,
-  parseServerPorts,
   serializeServerPorts,
   validatePortAssignments,
   getUsedExternalPorts,
@@ -50,7 +48,11 @@ export function getTransferState(serverId: number): TransferState | undefined {
   return transferStates.get(serverId);
 }
 
-function updateStatus(serverId: number, status: TransferStatus, error?: string): void {
+function updateStatus(
+  serverId: number,
+  status: TransferStatus,
+  error?: string,
+): void {
   const state = transferStates.get(serverId);
   if (state) {
     state.status = status;
@@ -65,7 +67,11 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function waitForInstall(daemon: { address: string; port: number; key: string }, serverUUID: string, maxWaitMs = 600_000): Promise<void> {
+async function waitForInstall(
+  daemon: { address: string; port: number; key: string },
+  serverUUID: string,
+  maxWaitMs = 600_000,
+): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < maxWaitMs) {
     try {
@@ -78,8 +84,12 @@ async function waitForInstall(daemon: { address: string; port: number; key: stri
         timeout: 10_000,
       });
       const st = res.data?.status;
-      if (st === 'installed' || st === 'exited' || st === 'running') {return;}
-      if (st === 'failed') {throw new Error('Install failed on destination daemon');}
+      if (st === 'installed' || st === 'exited' || st === 'running') {
+        return;
+      }
+      if (st === 'failed') {
+        throw new Error('Install failed on destination daemon');
+      }
     } catch {
       // daemon might not know the container yet — keep polling
     }
@@ -91,31 +101,65 @@ async function waitForInstall(daemon: { address: string; port: number; key: stri
 export async function startTransfer(
   serverId: number,
   targetNodeId: number,
-  targetPorts: { externalPort: number; internalPort: number; primary: boolean; name: string }[],
+  targetPorts: {
+    externalPort: number;
+    internalPort: number;
+    primary: boolean;
+    name: string;
+  }[],
   req: { session?: { user?: { id?: number } } },
 ): Promise<TransferState> {
   const server = await prisma.server.findUnique({
     where: { id: serverId },
     include: { node: true, image: true },
   });
-  if (!server) {throw new Error('Server not found');}
-  if (server.Installing) {throw new Error('Server is currently installing');}
-  if (server.Suspended) {throw new Error('Suspended servers cannot be transferred');}
-  if (server.nodeId === targetNodeId) {throw new Error('Server is already on this node');}
+  if (!server) {
+    throw new Error('Server not found');
+  }
+  if (server.Installing) {
+    throw new Error('Server is currently installing');
+  }
+  if (server.Suspended) {
+    throw new Error('Suspended servers cannot be transferred');
+  }
+  if (server.nodeId === targetNodeId) {
+    throw new Error('Server is already on this node');
+  }
 
-  const targetNode = await prisma.node.findUnique({ where: { id: targetNodeId } });
-  if (!targetNode) {throw new Error('Target node not found');}
+  const targetNode = await prisma.node.findUnique({
+    where: { id: targetNodeId },
+  });
+  if (!targetNode) {
+    throw new Error('Target node not found');
+  }
 
   // Validate target ports are available
   const pool = await getNodePortPool(targetNodeId);
-  const otherServers = await prisma.server.findMany({ where: { nodeId: targetNodeId } });
+  const otherServers = await prisma.server.findMany({
+    where: { nodeId: targetNodeId },
+  });
   const image = server.image;
-  const minPorts = image ? parseImagePortRequirements(image.portRequirements).length : 0;
-  const portError = validatePortAssignments(targetPorts, pool, getUsedExternalPorts(otherServers), minPorts);
-  if (portError) {throw new Error(portError);}
+  const minPorts = image
+    ? parseImagePortRequirements(image.portRequirements).length
+    : 0;
+  const portError = validatePortAssignments(
+    targetPorts,
+    pool,
+    getUsedExternalPorts(otherServers),
+    minPorts,
+  );
+  if (portError) {
+    throw new Error(portError);
+  }
 
   // Check capacity on target
-  await assertNodeCapacity(targetNode, server.Memory, server.Cpu, server.Storage, server.UUID);
+  await assertNodeCapacity(
+    targetNode,
+    server.Memory,
+    server.Cpu,
+    server.Storage,
+    server.UUID,
+  );
 
   const state: TransferState = {
     serverId: server.id,
@@ -131,20 +175,31 @@ export async function startTransfer(
   // Run the transfer in background — the UI polls /transfer/status
   runTransfer(server, targetNode, targetPorts, state, req).catch((err) => {
     logger.error(`Transfer failed for server ${server.UUID}:`, err);
-    updateStatus(serverId, 'failed', safeClientMessage(err, 'The transfer failed.'));
+    updateStatus(
+      serverId,
+      'failed',
+      safeClientMessage(err, 'The transfer failed.'),
+    );
   });
 
   return state;
 }
 
-type ServerWithRelations = Prisma.ServerGetPayload<{ include: { node: true; image: true } }>;
+type ServerWithRelations = Prisma.ServerGetPayload<{
+  include: { node: true; image: true };
+}>;
 
 async function runTransfer(
   server: ServerWithRelations,
   targetNode: { id: number; address: string; port: number; key: string },
-  targetPorts: { externalPort: number; internalPort: number; primary: boolean; name: string }[],
+  targetPorts: {
+    externalPort: number;
+    internalPort: number;
+    primary: boolean;
+    name: string;
+  }[],
   state: TransferState,
-  req: { session?: { user?: { id?: number } } },
+  _req: { session?: { user?: { id?: number } } },
 ): Promise<void> {
   const srcDaemon = server.node;
   let backupFilePath: string | undefined;
@@ -165,14 +220,23 @@ async function runTransfer(
     } catch {
       // Container might already be stopped — continue
     }
-    await prisma.server.update({ where: { UUID: server.UUID }, data: { Running: false } }).catch(() => {});
+    await prisma.server
+      .update({ where: { UUID: server.UUID }, data: { Running: false } })
+      .catch(() => {
+        /* noop */
+      });
     await sleep(2000); // Wait for container to fully stop
 
     // ── Step 2: Create backup on source daemon ─────────────────────────────
     updateStatus(state.serverId, 'archiving');
     const backupRes = await daemonRequest<{
       success?: boolean;
-      backup?: { uuid: string; filePath: string; size: number; checksum: string };
+      backup?: {
+        uuid: string;
+        filePath: string;
+        size: number;
+        checksum: string;
+      };
       error?: string;
     }>({
       nodeAddress: srcDaemon.address,
@@ -186,7 +250,10 @@ async function runTransfer(
 
     if (!backupRes.data?.backup?.filePath) {
       throw new Error(
-        safeClientMessage(backupRes.data?.error, 'The backup could not be created on the source node.'),
+        safeClientMessage(
+          backupRes.data?.error,
+          'The backup could not be created on the source node.',
+        ),
       );
     }
     backupFilePath = backupRes.data.backup.filePath;
@@ -214,7 +281,11 @@ async function runTransfer(
     }
 
     // Upload to destination daemon
-    const uploadRes = await daemonRequest<{ success?: boolean; filePath?: string; error?: string }>({
+    const uploadRes = await daemonRequest<{
+      success?: boolean;
+      filePath?: string;
+      error?: string;
+    }>({
       nodeAddress: targetNode.address,
       nodePort: targetNode.port,
       nodeKey: targetNode.key,
@@ -228,13 +299,19 @@ async function runTransfer(
 
     if (!uploadRes.data?.success) {
       throw new Error(
-        safeClientMessage(uploadRes.data?.error, 'The backup could not be uploaded to the destination node.'),
+        safeClientMessage(
+          uploadRes.data?.error,
+          'The backup could not be uploaded to the destination node.',
+        ),
       );
     }
 
     // ── Step 5: Restore backup on destination daemon ───────────────────────
     updateStatus(state.serverId, 'restoring');
-    const restoreRes = await daemonRequest<{ success?: boolean; error?: string }>({
+    const restoreRes = await daemonRequest<{
+      success?: boolean;
+      error?: string;
+    }>({
       nodeAddress: targetNode.address,
       nodePort: targetNode.port,
       nodeKey: targetNode.key,
@@ -250,7 +327,10 @@ async function runTransfer(
 
     if (!restoreRes.data?.success) {
       throw new Error(
-        safeClientMessage(restoreRes.data?.error, 'The backup could not be restored on the destination node.'),
+        safeClientMessage(
+          restoreRes.data?.error,
+          'The backup could not be restored on the destination node.',
+        ),
       );
     }
 
@@ -266,7 +346,12 @@ async function runTransfer(
           env: String(v.env_variable ?? v.env ?? ''),
           value: v.value ?? v.default_value ?? '',
         }));
-        env = Object.fromEntries(normalized.map((v: { env: string; value: unknown }) => [v.env, String(v.value)]));
+        env = Object.fromEntries(
+          normalized.map((v: { env: string; value: unknown }) => [
+            v.env,
+            String(v.value),
+          ]),
+        );
 
         // Add SERVER_PORT from ports
         try {
@@ -274,26 +359,40 @@ async function runTransfer(
           if (primaryExternalPort) {
             env['SERVER_PORT'] = String(primaryExternalPort);
           }
-        } catch { /* keep fallback */ }
+        } catch {
+          /* keep fallback */
+        }
         env['SERVER_MEMORY'] = String(server.Memory);
         env['SERVER_CPU'] = String(server.Cpu);
-      } catch { /* keep empty env */ }
+      } catch {
+        /* keep empty env */
+      }
     }
 
     let dockerImageValue: string | undefined;
     try {
       const parsed = JSON.parse(server.dockerImage || '{}');
       dockerImageValue = Object.values(parsed)[0] as string | undefined;
-    } catch { /* leave undefined */ }
+    } catch {
+      /* leave undefined */
+    }
 
     // Determine install method from image scripts
     const image = server.image;
     if (image?.scripts) {
       let scripts: Record<string, unknown>;
-      try { scripts = JSON.parse(image.scripts); } catch { scripts = {}; }
+      try {
+        scripts = JSON.parse(image.scripts);
+      } catch {
+        scripts = {};
+      }
 
       if (scripts.installation && typeof scripts.installation === 'object') {
-        const installation = scripts.installation as { script: string; container: string; entrypoint: string };
+        const installation = scripts.installation as {
+          script: string;
+          container: string;
+          entrypoint: string;
+        };
         await daemonRequest({
           nodeAddress: targetNode.address,
           nodePort: targetNode.port,
@@ -320,7 +419,14 @@ async function runTransfer(
             id: server.UUID,
             image: dockerImageValue,
             env,
-            scripts: (scripts.install as { url?: string; onStart?: string; ALVKT?: string; fileName?: string }[]).map((s) => ({
+            scripts: (
+              scripts.install as {
+                url?: string;
+                onStart?: string;
+                ALVKT?: string;
+                fileName?: string;
+              }[]
+            ).map((s) => ({
               url: s.url,
               onStartup: s.onStart,
               ALVKT: s.ALVKT,
@@ -353,7 +459,11 @@ async function runTransfer(
       });
 
       // Claim new ports
-      await claimNodePorts(targetNode.id, targetPorts.map((p) => p.externalPort), server.UUID);
+      await claimNodePorts(
+        targetNode.id,
+        targetPorts.map((p) => p.externalPort),
+        server.UUID,
+      );
     });
 
     // ── Step 8: Start server on destination ────────────────────────────────
@@ -387,7 +497,11 @@ async function runTransfer(
         },
         timeout: 60_000,
       });
-      await prisma.server.update({ where: { UUID: server.UUID }, data: { Running: true } }).catch(() => {});
+      await prisma.server
+        .update({ where: { UUID: server.UUID }, data: { Running: true } })
+        .catch(() => {
+          /* noop */
+        });
     } catch (startErr) {
       logger.warn(`Failed to start server after transfer: ${startErr}`);
       // Don't fail the transfer — server is migrated, just not running
@@ -411,7 +525,9 @@ async function runTransfer(
     }
 
     updateStatus(state.serverId, 'completed');
-    logger.info(`Server ${server.UUID} transferred from node ${srcDaemon.id} to node ${targetNode.id}`);
+    logger.info(
+      `Server ${server.UUID} transferred from node ${srcDaemon.id} to node ${targetNode.id}`,
+    );
   } catch (err) {
     const msg = safeClientMessage(err, 'The transfer failed.');
     updateStatus(state.serverId, 'failed', msg);
@@ -429,7 +545,9 @@ async function runTransfer(
           body: { backupPath: backupFilePath },
           timeout: 30_000,
         });
-      } catch { /* best effort */ }
+      } catch {
+        /* best effort */
+      }
     }
   }
 }

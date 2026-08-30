@@ -19,7 +19,15 @@ export interface NodeCapacityOptions {
 // Node ram/disk are stored in GB; server Memory/Storage are in MB. CPU is a
 // percentage on both (100 = 1 core).
 export async function assertNodeCapacity(
-  node: { id: number; ram: number; cpu: number; disk: number; overallocateMemory: number; overallocateDisk: number; overallocateCpu: number },
+  node: {
+    id: number;
+    ram: number;
+    cpu: number;
+    disk: number;
+    overallocateMemory: number;
+    overallocateDisk: number;
+    overallocateCpu: number;
+  },
   newMemory: number,
   newCpu: number,
   newStorage: number,
@@ -39,7 +47,9 @@ export async function assertNodeCapacity(
   const usedStorageMb = servers.reduce((sum, s) => sum + s.Storage, 0);
 
   if (node.ram > 0) {
-    const capMb = Math.round(node.ram * 1024 * (1 + node.overallocateMemory / 100));
+    const capMb = Math.round(
+      node.ram * 1024 * (1 + node.overallocateMemory / 100),
+    );
     const totalRequestedMb = usedMemoryMb + newMemory;
     if (totalRequestedMb > capMb) {
       const requestedGb = (totalRequestedMb / 1024).toFixed(1);
@@ -60,7 +70,9 @@ export async function assertNodeCapacity(
   }
 
   if (node.disk > 0) {
-    const capMb = Math.round(node.disk * 1024 * (1 + node.overallocateDisk / 100));
+    const capMb = Math.round(
+      node.disk * 1024 * (1 + node.overallocateDisk / 100),
+    );
     const totalRequestedMb = usedStorageMb + newStorage;
     if (totalRequestedMb > capMb) {
       const requestedGb = (totalRequestedMb / 1024).toFixed(1);

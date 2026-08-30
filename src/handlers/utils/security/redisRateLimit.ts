@@ -1,5 +1,5 @@
-import { getRedisClient } from "../../redis";
-import type { Request, Response, NextFunction } from "express";
+import { getRedisClient } from '../../redis';
+import type { Request, Response, NextFunction } from 'express';
 
 /**
  * Redis-backed sliding-window rate limiter using sorted sets.
@@ -30,8 +30,8 @@ export function createRedisRateLimit(opts: {
 
     try {
       const redis = getRedisClient();
-      const keyGen = opts.keyGenerator ?? ((r: Request) => r.ip ?? "unknown");
-      const key = `${opts.keyPrefix ?? "rl:"}:${keyGen(req)}`;
+      const keyGen = opts.keyGenerator ?? ((r: Request) => r.ip ?? 'unknown');
+      const key = `${opts.keyPrefix ?? 'rl:'}:${keyGen(req)}`;
       const now = Date.now();
       const windowStart = now - opts.windowMs;
 
@@ -40,12 +40,12 @@ export function createRedisRateLimit(opts: {
       const count = await redis.zcard(key);
 
       if (count >= opts.max) {
-        res.setHeader("Retry-After", String(Math.ceil(opts.windowMs / 1000)));
+        res.setHeader('Retry-After', String(Math.ceil(opts.windowMs / 1000)));
         if (opts.handler) {
           opts.handler(req, res);
           return;
         }
-        res.status(429).json(opts.message ?? { error: "Too many requests" });
+        res.status(429).json(opts.message ?? { error: 'Too many requests' });
         return;
       }
 
@@ -55,18 +55,18 @@ export function createRedisRateLimit(opts: {
       await redis.expire(key, Math.ceil(opts.windowMs / 1000));
 
       if (opts.standardHeaders) {
-        res.setHeader("RateLimit-Limit", String(opts.max));
-        res.setHeader("RateLimit-Remaining", String(opts.max - count - 1));
+        res.setHeader('RateLimit-Limit', String(opts.max));
+        res.setHeader('RateLimit-Remaining', String(opts.max - count - 1));
         res.setHeader(
-          "RateLimit-Reset",
+          'RateLimit-Reset',
           String(Math.ceil((now + opts.windowMs) / 1000)),
         );
       }
       if (opts.legacyHeaders) {
-        res.setHeader("X-RateLimit-Limit", String(opts.max));
-        res.setHeader("X-RateLimit-Remaining", String(opts.max - count - 1));
+        res.setHeader('X-RateLimit-Limit', String(opts.max));
+        res.setHeader('X-RateLimit-Remaining', String(opts.max - count - 1));
         res.setHeader(
-          "X-RateLimit-Reset",
+          'X-RateLimit-Reset',
           String(Math.ceil((now + opts.windowMs) / 1000)),
         );
       }
@@ -78,3 +78,11 @@ export function createRedisRateLimit(opts: {
     }
   };
 }
+
+/** Default rate limiter: 100 req/min/IP. For stricter limits, use createRedisRateLimit directly. */
+export const redisRateLimit = createRedisRateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});

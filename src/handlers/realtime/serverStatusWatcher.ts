@@ -1,8 +1,8 @@
-import { WebSocket } from "ws";
-import logger from "../logger";
-import { daemonBaseUrl } from "../utils/core/daemonRequest";
-import { emitRealtime } from "./events";
-import type { WatchHandle } from "../../types/realtime";
+import { WebSocket } from 'ws';
+import logger from '../logger';
+import { daemonBaseUrl } from '../utils/core/daemonRequest';
+import { emitRealtime } from './events';
+import type { WatchHandle } from '../../types/realtime';
 
 // ── Per-server daemon status watcher ──────────────────────────────────────────
 // The daemon already streams `state` + `stats` on a single `/containerstatus`
@@ -15,7 +15,7 @@ import type { WatchHandle } from "../../types/realtime";
 // The daemon is authoritative here. The panel only relays what the daemon
 // says — it never invents a running/stopped state.
 
-export type { WatchHandle } from "../../types/realtime";
+export type { WatchHandle } from '../../types/realtime';
 
 interface WatcherState {
   refs: number;
@@ -43,12 +43,12 @@ async function daemonWsUrl(node: {
   port: number | string;
 }): Promise<string> {
   const scheme = (await daemonBaseUrl(node.address, node.port)).startsWith(
-    "https",
+    'https',
   )
-    ? "wss"
-    : "ws";
+    ? 'wss'
+    : 'ws';
   const host =
-    node.address.includes(":") && !node.address.startsWith("[")
+    node.address.includes(':') && !node.address.startsWith('[')
       ? `[${node.address}]`
       : node.address;
   return `${scheme}://${host}:${node.port}`;
@@ -80,55 +80,55 @@ function openSocket(state: WatcherState, serverId: string): void {
       const authTimer = setTimeout(() => {
         if (socket.readyState === WebSocket.OPEN && !state.authed) {
           logger.debug(`status watcher auth timeout for ${serverId}`);
-          socket.close(1008, "auth timeout");
+          socket.close(1008, 'auth timeout');
         }
       }, 10_000);
 
-      socket.on("open", () => {
+      socket.on('open', () => {
         if (!isCurrent()) {
           return;
         }
         state.authed = false;
         state.reconnectAttempts = 0;
-        socket.send(JSON.stringify({ event: "auth", args: [state.node.key] }));
+        socket.send(JSON.stringify({ event: 'auth', args: [state.node.key] }));
         clearTimeout(authTimer);
       });
 
-      socket.on("message", (raw) => {
+      socket.on('message', (raw) => {
         let msg: { event?: string; data?: unknown };
         try {
           msg = JSON.parse(String(raw));
         } catch {
           return;
         }
-        if (!msg || typeof msg !== "object") {
+        if (!msg || typeof msg !== 'object') {
           return;
         }
 
-        if (msg.event === "state" && msg.data !== undefined) {
+        if (msg.event === 'state' && msg.data !== undefined) {
           state.status = msg.data;
           emitRealtime({
-            type: "server.status.changed",
-            resource: { type: "server", id: serverId },
+            type: 'server.status.changed',
+            resource: { type: 'server', id: serverId },
             scope: { serverId },
             state: msg.data,
           });
-        } else if (msg.event === "stats" && msg.data !== undefined) {
+        } else if (msg.event === 'stats' && msg.data !== undefined) {
           state.stats = msg.data;
           emitRealtime({
-            type: "server.stats.changed",
-            resource: { type: "server", id: serverId },
+            type: 'server.stats.changed',
+            resource: { type: 'server', id: serverId },
             scope: { serverId },
             state: msg.data,
           });
-        } else if (msg.event === "error") {
+        } else if (msg.event === 'error') {
           logger.warn(`status watcher error for ${serverId}:`, {
             data: msg.data,
           });
         }
       });
 
-      socket.on("error", () => {
+      socket.on('error', () => {
         if (!isCurrent()) {
           return;
         }
@@ -137,7 +137,7 @@ function openSocket(state: WatcherState, serverId: string): void {
         scheduleReconnect(state, serverId);
       });
 
-      socket.on("close", () => {
+      socket.on('close', () => {
         if (!isCurrent()) {
           return;
         }
@@ -200,7 +200,7 @@ function cleanup(serverId: string): void {
   }
   if (state.socket) {
     try {
-      state.socket.close(1000, "no watchers");
+      state.socket.close(1000, 'no watchers');
     } catch {
       /* already closed */
     }

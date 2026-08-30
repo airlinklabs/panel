@@ -1,4 +1,4 @@
-import type { ApiKey, SubUser } from "../generated/prisma/client";
+import type { ApiKey, SubUser, Users } from '../generated/prisma/client';
 
 export interface PanelSessionUser {
   id: number;
@@ -11,7 +11,7 @@ export interface PanelSessionUser {
   onboardingSkipped?: boolean;
 }
 
-declare module "express-session" {
+declare module 'express-session' {
   interface SessionData {
     user: PanelSessionUser;
     pendingUserId?: number;
@@ -58,7 +58,7 @@ declare global {
       // Set by htmx middleware — true when the request has HX-Request header
       htmx?: boolean;
       // Attached by admin auth middleware (requireAdmin) — the authenticated admin user record
-      adminUser?: import("../generated/prisma/client").Users;
+      adminUser?: Users;
     }
 
     interface Response {

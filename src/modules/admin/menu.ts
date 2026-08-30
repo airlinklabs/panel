@@ -26,7 +26,9 @@ const adminMenuModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {return res.redirect('/login');}
+          if (!user) {
+            return res.redirect('/login');
+          }
           const settings = await getSettings();
           res.render('admin/menu/menu', { user, req, settings });
         } catch (error: unknown) {
@@ -43,7 +45,9 @@ const adminMenuModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {return res.redirect('/login');}
+          if (!user) {
+            return res.redirect('/login');
+          }
           const settings = await getSettings();
           res.render('admin/menu/menu', { user, req, settings });
         } catch (error: unknown) {

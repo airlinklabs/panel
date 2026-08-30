@@ -3,7 +3,7 @@
   x-data="{
     saving: false,
     lastSaved: null,
-    command: '<%= (server.StartCommand || "").replace(/'/g, "\\'").replace(/\n/g, "\\n") %>',
+    command: '<%= (server.StartCommand || "").replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, "\\n") %>',
     async save() {
       if (!this.command.trim()) return;
       this.saving = true;

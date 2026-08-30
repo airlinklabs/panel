@@ -10,9 +10,9 @@
  * GET    /api/v2/servers/:id/status   — Get server status
  */
 
-import { Router } from "express";
-import prisma from "../../../db";
-import { parseBody } from "../../../utils/validation";
+import { Router } from 'express';
+import prisma from '../../../db';
+import { parseBody } from '../../../utils/validation';
 import {
   jsonOk,
   jsonError,
@@ -25,19 +25,19 @@ import {
   parsePage,
   parsePerPage,
   getAuthenticatedUserId,
-} from "./helpers";
-import { updateServerBody, powerBody } from "./dto";
+} from './helpers';
+import { updateServerBody, powerBody } from './dto';
 import {
   daemonRequest,
   DaemonNodeNotFoundError,
-} from "../../../services/daemonService";
+} from '../../../services/daemonService';
 
 const router = Router();
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers — List user's servers
 // ---------------------------------------------------------------------------
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -49,8 +49,8 @@ router.get("/", async (req, res) => {
   const where = user.isAdmin
     ? {}
     : {
-        OR: [{ ownerId: user.id }, { subUsers: { some: { userId: user.id } } }],
-      };
+      OR: [{ ownerId: user.id }, { subUsers: { some: { userId: user.id } } }],
+    };
 
   const { data: servers, meta } = await paginateQuery(
     (args) =>
@@ -65,7 +65,7 @@ router.get("/", async (req, res) => {
           },
         },
         ...args,
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
       }),
     () => prisma.server.count({ where }),
     page,
@@ -78,7 +78,7 @@ router.get("/", async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id — Get server details
 // ---------------------------------------------------------------------------
-router.get("/:id", async (req, res) => {
+router.get('/:id', async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -109,7 +109,7 @@ router.get("/:id", async (req, res) => {
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/servers/:id — Update server
 // ---------------------------------------------------------------------------
-router.patch("/:id", parseBody(updateServerBody), async (req, res) => {
+router.patch('/:id', parseBody(updateServerBody), async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -125,8 +125,8 @@ router.patch("/:id", parseBody(updateServerBody), async (req, res) => {
     if (!user?.isAdmin) {
       return jsonError(
         res,
-        "FORBIDDEN",
-        "Only the server owner can update settings",
+        'FORBIDDEN',
+        'Only the server owner can update settings',
         403,
       );
     }
@@ -164,7 +164,7 @@ router.patch("/:id", parseBody(updateServerBody), async (req, res) => {
   }
 
   if (Object.keys(updateData).length === 0) {
-    return jsonError(res, "BAD_REQUEST", "No fields to update", 400);
+    return jsonError(res, 'BAD_REQUEST', 'No fields to update', 400);
   }
 
   const updated = await prisma.server.update({
@@ -174,7 +174,7 @@ router.patch("/:id", parseBody(updateServerBody), async (req, res) => {
 
   logActivity(
     getAuthenticatedUserId(req),
-    "server.updated",
+    'server.updated',
     resolved.server.UUID,
     { fields: Object.keys(updateData) },
     req.ip,
@@ -186,7 +186,7 @@ router.patch("/:id", parseBody(updateServerBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/servers/:id — Delete server
 // ---------------------------------------------------------------------------
-router.delete("/:id", async (req, res) => {
+router.delete('/:id', async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -201,8 +201,8 @@ router.delete("/:id", async (req, res) => {
     if (!user?.isAdmin) {
       return jsonError(
         res,
-        "FORBIDDEN",
-        "Only the server owner can delete the server",
+        'FORBIDDEN',
+        'Only the server owner can delete the server',
         403,
       );
     }
@@ -214,7 +214,7 @@ router.delete("/:id", async (req, res) => {
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}`,
       {
-        method: "DELETE",
+        method: 'DELETE',
         timeout: 10000,
       },
     );
@@ -226,7 +226,7 @@ router.delete("/:id", async (req, res) => {
 
   logActivity(
     getAuthenticatedUserId(req),
-    "server.deleted",
+    'server.deleted',
     resolved.server.UUID,
     { name: resolved.server.name },
     req.ip,
@@ -238,7 +238,7 @@ router.delete("/:id", async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/power — Power action
 // ---------------------------------------------------------------------------
-router.post("/:id/power", parseBody(powerBody), async (req, res) => {
+router.post('/:id/power', parseBody(powerBody), async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -250,10 +250,10 @@ router.post("/:id/power", parseBody(powerBody), async (req, res) => {
   // Permission check for sub-users
   const { action } = req.validatedBody as { action: string };
   const permMap: Record<string, string> = {
-    start: "start",
-    stop: "stop",
-    restart: "restart",
-    kill: "kill",
+    start: 'start',
+    stop: 'stop',
+    restart: 'restart',
+    kill: 'kill',
   };
   if (
     permMap[action] &&
@@ -266,14 +266,14 @@ router.post("/:id/power", parseBody(powerBody), async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/server/${resolved.server.UUID}/power`,
-      { method: "POST", body: { action }, timeout: 30000 },
+      { method: 'POST', body: { action }, timeout: 30000 },
     );
 
     if (!response.ok) {
-      const text = await response.text().catch(() => "Daemon error");
+      const text = await response.text().catch(() => 'Daemon error');
       return jsonError(
         res,
-        "DAEMON_ERROR",
+        'DAEMON_ERROR',
         `Daemon returned ${response.status}: ${text}`,
         502,
       );
@@ -287,19 +287,19 @@ router.post("/:id/power", parseBody(powerBody), async (req, res) => {
       req.ip,
     );
 
-    jsonOk(res, { action, status: "sent" });
+    jsonOk(res, { action, status: 'sent' });
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
-      return jsonError(res, "NOT_FOUND", "Node not found", 404);
+      return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
     }
-    jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
+    jsonError(res, 'DAEMON_UNREACHABLE', 'Could not reach daemon', 502);
   }
 });
 
 // ---------------------------------------------------------------------------
 // POST /api/v2/servers/:id/reinstall — Reinstall server
 // ---------------------------------------------------------------------------
-router.post("/:id/reinstall", async (req, res) => {
+router.post('/:id/reinstall', async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -308,7 +308,7 @@ router.post("/:id/reinstall", async (req, res) => {
     return;
   }
 
-  if (!requireSubUserPermission(res, resolved, "reinstall")) {
+  if (!requireSubUserPermission(res, resolved, 'reinstall')) {
     return;
   }
 
@@ -316,14 +316,14 @@ router.post("/:id/reinstall", async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/server/${resolved.server.UUID}/reinstall`,
-      { method: "POST", timeout: 30000 },
+      { method: 'POST', timeout: 30000 },
     );
 
     if (!response.ok) {
-      const text = await response.text().catch(() => "Daemon error");
+      const text = await response.text().catch(() => 'Daemon error');
       return jsonError(
         res,
-        "DAEMON_ERROR",
+        'DAEMON_ERROR',
         `Daemon returned ${response.status}: ${text}`,
         502,
       );
@@ -336,25 +336,25 @@ router.post("/:id/reinstall", async (req, res) => {
 
     logActivity(
       getAuthenticatedUserId(req),
-      "server.reinstall",
+      'server.reinstall',
       resolved.server.UUID,
       {},
       req.ip,
     );
 
-    jsonOk(res, { status: "reinstalling" });
+    jsonOk(res, { status: 'reinstalling' });
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
-      return jsonError(res, "NOT_FOUND", "Node not found", 404);
+      return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
     }
-    jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
+    jsonError(res, 'DAEMON_UNREACHABLE', 'Could not reach daemon', 502);
   }
 });
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/status — Get server status
 // ---------------------------------------------------------------------------
-router.get("/:id/status", async (req, res) => {
+router.get('/:id/status', async (req, res) => {
   const resolved = await resolveServer(req, res);
   if (!resolved) {
     return;
@@ -368,7 +368,7 @@ router.get("/:id/status", async (req, res) => {
     );
 
     if (!response.ok) {
-      return jsonOk(res, { online: false, status: "unknown" });
+      return jsonOk(res, { online: false, status: 'unknown' });
     }
 
     const data = (await response.json()) as {
@@ -377,13 +377,13 @@ router.get("/:id/status", async (req, res) => {
     };
     jsonOk(res, {
       online: data.running ?? false,
-      status: data.status ?? "unknown",
+      status: data.status ?? 'unknown',
     });
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
-      return jsonOk(res, { online: false, status: "node_not_found" });
+      return jsonOk(res, { online: false, status: 'node_not_found' });
     }
-    jsonOk(res, { online: false, status: "unreachable" });
+    jsonOk(res, { online: false, status: 'unreachable' });
   }
 });
 

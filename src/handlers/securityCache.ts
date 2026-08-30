@@ -3,7 +3,6 @@
  * Refreshed periodically from DB and also on-demand after admin changes.
  */
 import { getSettings } from './settingsCache';
-import prisma from '../db';
 
 const securityCache = {
   bannedIps: [] as string[],

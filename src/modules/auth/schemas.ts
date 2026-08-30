@@ -37,29 +37,53 @@ export const registerSchema = z
     password: z.string({ error: 'missing' }).min(1, { error: 'missing' }),
   })
   .superRefine((value, ctx) => {
-    if (!EMAIL_REGEX.test(value.email) || !PASSWORD_REGEX.test(value.password)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'invalid_input', path: ['email'] });
+    if (
+      !EMAIL_REGEX.test(value.email) ||
+      !PASSWORD_REGEX.test(value.password)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'invalid_input',
+        path: ['email'],
+      });
     }
     if (!USERNAME_REGEX.test(value.username)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'invalid_username', path: ['username'] });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'invalid_username',
+        path: ['username'],
+      });
     }
   });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 
-export type AuthValidationError = 'missing' | 'invalid_input' | 'invalid_username';
+export type AuthValidationError =
+  'missing' | 'invalid_input' | 'invalid_username';
 
 /**
  * Normalizes a schema failure into the panel's redirect error parameter.
  * Presence errors win over format errors; format errors preserve their
  * historical distinct codes.
  */
-export function authValidationErrorCode(issues: z.ZodIssue[]): AuthValidationError {
+export function authValidationErrorCode(
+  issues: z.ZodIssue[],
+): AuthValidationError {
   const missing = issues.some((issue) => issue.message === 'missing');
-  if (missing) {return 'missing';}
-  const invalidInput = issues.some((issue) => issue.message === 'invalid_input');
-  const invalidUsername = issues.some((issue) => issue.message === 'invalid_username');
-  if (invalidInput) {return 'invalid_input';}
-  if (invalidUsername) {return 'invalid_username';}
+  if (missing) {
+    return 'missing';
+  }
+  const invalidInput = issues.some(
+    (issue) => issue.message === 'invalid_input',
+  );
+  const invalidUsername = issues.some(
+    (issue) => issue.message === 'invalid_username',
+  );
+  if (invalidInput) {
+    return 'invalid_input';
+  }
+  if (invalidUsername) {
+    return 'invalid_username';
+  }
   return 'invalid_input';
 }

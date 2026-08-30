@@ -1,14 +1,14 @@
 import { getSettings } from '../../../handlers/settingsCache';
 import type { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
+import {
+  isAuthenticatedForServer,
+  requireSubUserPermission,
+} from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
-import {
-  type ErrorMessage,
-  getImageFeatures,
-} from './shared';
+import { type ErrorMessage, getImageFeatures } from './shared';
 
 export function registerSettingsRoutes(router: Router): void {
   router.get(
@@ -56,7 +56,9 @@ export function registerSettingsRoutes(router: Router): void {
         return res.render('user/server/settings', {
           errorMessage,
           features,
-          installed: await checkForServerInstallation(getParamAsString(serverId)),
+          installed: await checkForServerInstallation(
+            getParamAsString(serverId),
+          ),
           user,
           req,
           server,

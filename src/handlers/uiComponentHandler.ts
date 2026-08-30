@@ -80,8 +80,9 @@ export class UIComponentStore {
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.sidebarIds.includes(resolved.id))
-      {reg.sidebarIds.push(resolved.id);}
+      if (!reg.sidebarIds.includes(resolved.id)) {
+        reg.sidebarIds.push(resolved.id);
+      }
     }
   }
 
@@ -110,7 +111,9 @@ export class UIComponentStore {
   public getAddonSidebarIds(): Set<string> {
     const ids = new Set<string>();
     for (const reg of this.addonItemRegistry.values()) {
-      for (const id of reg.sidebarIds) {ids.add(id);}
+      for (const id of reg.sidebarIds) {
+        ids.add(id);
+      }
     }
     return ids;
   }
@@ -136,7 +139,9 @@ export class UIComponentStore {
     const grouped = new Map<string, SidebarItem[]>();
     for (const item of items) {
       const s = item.section || 'core';
-      if (!grouped.has(s)) {grouped.set(s, []);}
+      if (!grouped.has(s)) {
+        grouped.set(s, []);
+      }
       grouped.get(s)!.push(item);
     }
     return sectionOrder
@@ -159,7 +164,9 @@ export class UIComponentStore {
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.menuIds.includes(item.id)) {reg.menuIds.push(item.id);}
+      if (!reg.menuIds.includes(item.id)) {
+        reg.menuIds.push(item.id);
+      }
     }
   }
 
@@ -197,13 +204,17 @@ export class UIComponentStore {
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.sectionIds.includes(section.id)) {reg.sectionIds.push(section.id);}
+      if (!reg.sectionIds.includes(section.id)) {
+        reg.sectionIds.push(section.id);
+      }
     }
   }
 
   public clearAddonItems(addonSlug: string): void {
     const reg = this.addonItemRegistry.get(addonSlug);
-    if (!reg) {return;}
+    if (!reg) {
+      return;
+    }
     reg.sidebarIds.forEach((id) => this.removeSidebarItem(id));
     reg.menuIds.forEach((id) => this.removeServerMenuItem(id));
     reg.sectionIds.forEach((id) => this.removeServerSection(id));
@@ -254,7 +265,7 @@ export class UIComponentStore {
 
   public renderComponent(
     name: string,
-    locals: Record<string, unknown> = {},
+    _locals: Record<string, unknown> = {},
   ): string {
     return `components/ui/${name}`;
   }

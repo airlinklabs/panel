@@ -7,8 +7,8 @@
  *   - Server auth middleware (src/handlers/utils/auth/serverAuthUtil.ts)
  */
 
-import prisma from "../../../db";
-import { isRoleAdmin, hasPermission } from "./roles";
+import prisma from '../../../db';
+import { isRoleAdmin, hasPermission } from './roles';
 
 // ---------------------------------------------------------------------------
 // Permission parsing
@@ -16,11 +16,13 @@ import { isRoleAdmin, hasPermission } from "./roles";
 
 /** Parse a JSON permissions string into a string array. */
 export function parsePermissions(raw: string | null | undefined): string[] {
-  if (!raw) return [];
+  if (!raw) {
+    return [];
+  }
   try {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed)
-      ? parsed.filter((p): p is string => typeof p === "string")
+      ? parsed.filter((p): p is string => typeof p === 'string')
       : [];
   } catch {
     return [];
@@ -80,7 +82,9 @@ export async function resolveServerAccess(
   const server = await prisma.server.findUnique({
     where: { UUID: serverUUID },
   });
-  if (!server) return null;
+  if (!server) {
+    return null;
+  }
 
   // Admin bypasses ownership check
   const user = await prisma.users.findUnique({ where: { id: userId } });

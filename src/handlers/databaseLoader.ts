@@ -8,7 +8,8 @@ export const databaseLoader = async () => {
     await prisma.$queryRaw`SELECT 1`;
     return prisma;
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error occurred';
+    const message =
+      error instanceof Error ? error.message : 'Unknown error occurred';
     logger.error('databaseLoader', `Database connection error: ${message}`);
     throw error;
   }

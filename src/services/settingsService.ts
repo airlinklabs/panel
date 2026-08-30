@@ -1,8 +1,8 @@
 import {
   getSettings as getCachedSettings,
   invalidateSettingsCache,
-} from "../handlers/settingsCache";
-import prisma from "../db";
+} from '../handlers/settingsCache';
+import prisma from '../db';
 
 export interface SettingsUpdate {
   title?: string;

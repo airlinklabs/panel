@@ -1,14 +1,14 @@
-import { getRedisClient } from "../handlers/redis";
+import { getRedisClient } from '../handlers/redis';
 
-const QUEUE_KEY = "airlink:queue:jobs";
-const QUEUE_PENDING_KEY = "airlink:queue:jobs:pending";
+const QUEUE_KEY = 'airlink:queue:jobs';
+const QUEUE_PENDING_KEY = 'airlink:queue:jobs:pending';
 
 export interface Job {
   id: string;
   type: string;
   payload: unknown;
   createdAt: number;
-  status: "pending" | "processing" | "completed" | "failed";
+  status: 'pending' | 'processing' | 'completed' | 'failed';
   result?: unknown;
   error?: string;
 }
@@ -24,7 +24,7 @@ export async function enqueueJob(
     type,
     payload,
     createdAt: Date.now(),
-    status: "pending",
+    status: 'pending',
   };
   await redis.hset(QUEUE_KEY, id, JSON.stringify(job));
   await redis.zadd(QUEUE_PENDING_KEY, Date.now(), id);
@@ -36,20 +36,26 @@ export async function processNextJob(
 ): Promise<Job | null> {
   const redis = getRedisClient();
   const result = await redis.zpopmin(QUEUE_PENDING_KEY);
-  if (!result || result.length === 0) return null;
+  if (!result || result.length === 0) {
+    return null;
+  }
   const first = result[0];
-  if (!first) return null;
+  if (!first) {
+    return null;
+  }
   const id = first[0] as string;
   const raw = await redis.hget(QUEUE_KEY, id);
-  if (!raw) return null;
+  if (!raw) {
+    return null;
+  }
   const job: Job = JSON.parse(raw) as Job;
-  job.status = "processing";
+  job.status = 'processing';
   await redis.hset(QUEUE_KEY, id, JSON.stringify(job));
   try {
     job.result = await processor(job);
-    job.status = "completed";
+    job.status = 'completed';
   } catch (err) {
-    job.status = "failed";
+    job.status = 'failed';
     job.error = err instanceof Error ? err.message : String(err);
   }
   await redis.hset(QUEUE_KEY, id, JSON.stringify(job));
@@ -59,7 +65,9 @@ export async function processNextJob(
 export async function getJob(id: string): Promise<Job | null> {
   const redis = getRedisClient();
   const raw = await redis.hget(QUEUE_KEY, id);
-  if (!raw) return null;
+  if (!raw) {
+    return null;
+  }
   return JSON.parse(raw) as Job;
 }
 

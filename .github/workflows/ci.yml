@@ -133,7 +133,7 @@ jobs:
       - run: pnpm install --ignore-scripts
       - run: pnpm exec prisma generate
       # db push: sync schema to test DB (no committed migrations yet)
-      - run: pnpm exec prisma db push --skip-generate
+      - run: pnpm exec prisma db push
       - run: pnpm test
 
   # ── Build ───────────────────────────────────────────────────────────────────

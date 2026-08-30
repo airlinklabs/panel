@@ -54,14 +54,23 @@ function now(): number {
 function prune(): void {
   const cutoff = now() - TTL_MS;
   for (const [key, job] of jobs) {
-    if (job.updatedAt < cutoff) {jobs.delete(key);}
+    if (job.updatedAt < cutoff) {
+      jobs.delete(key);
+    }
   }
 }
 
-export function startJob(kind: JobKind, key: string, message: string, jobId?: string): ProgressJob {
+export function startJob(
+  kind: JobKind,
+  key: string,
+  message: string,
+  jobId?: string,
+): ProgressJob {
   prune();
   const existing = getJob(kind, key);
-  if (existing) {return existing;}
+  if (existing) {
+    return existing;
+  }
   const job: ProgressJob = {
     id: jobId ?? randomUUID(),
     kind,
@@ -86,7 +95,13 @@ export function isRunning(kind: JobKind, key: string): boolean {
   return job !== undefined && job.status === 'running';
 }
 
-export function finishJob(kind: JobKind, key: string, success: boolean, error?: string, message?: string): void {
+export function finishJob(
+  kind: JobKind,
+  key: string,
+  success: boolean,
+  error?: string,
+  message?: string,
+): void {
   const job = getJob(kind, key);
   if (!job) {
     return;
@@ -94,13 +109,16 @@ export function finishJob(kind: JobKind, key: string, success: boolean, error?: 
   job.status = 'done';
   job.success = success;
   job.error = error;
-  job.message = message ?? (success ? 'Task completed.' : error ?? 'Task failed.');
+  job.message =
+    message ?? (success ? 'Task completed.' : (error ?? 'Task failed.'));
   job.updatedAt = now();
 }
 
 export function clearJob(kind: JobKind, key: string): void {
   const job = getJob(kind, key);
-  if (job) {jobs.delete(key);}
+  if (job) {
+    jobs.delete(key);
+  }
 }
 
 /**

@@ -17,7 +17,9 @@ import type { createAvatar as CreateAvatarFn, Style } from '@dicebear/core';
 // @dicebear styles accept arbitrary option/seed objects; `Record<string, unknown>`
 // satisfies the `O extends {}` constraint without resorting to `any`.
 type DiceStyle = Style<Record<string, unknown>>;
-interface DiceModule { createAvatar: typeof CreateAvatarFn }
+interface DiceModule {
+  createAvatar: typeof CreateAvatarFn;
+}
 
 let avatarLibsPromise: Promise<{
   createAvatar: typeof CreateAvatarFn;

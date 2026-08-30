@@ -657,22 +657,22 @@ describe("V2 API Contract", () => {
     });
 
     it("mounts servers under /api/v2/servers with servers.* capability", () => {
-      expect(indexSrc).toContain('"/servers"');
-      expect(indexSrc).toContain('"servers.*"');
+      expect(indexSrc).toContain("'/servers'");
+      expect(indexSrc).toContain("'servers.*'");
     });
 
     it("mounts files under /api/v2/files with files.* capability", () => {
-      expect(indexSrc).toContain('"/files"');
-      expect(indexSrc).toContain('"files.*"');
+      expect(indexSrc).toContain("'/files'");
+      expect(indexSrc).toContain("'files.*'");
     });
 
     it("mounts backups under /api/v2/backups with backups.* capability", () => {
-      expect(indexSrc).toContain('"/backups"');
-      expect(indexSrc).toContain('"backups.*"');
+      expect(indexSrc).toContain("'/backups'");
+      expect(indexSrc).toContain("'backups.*'");
     });
 
     it("mounts admin routes with admin-only session auth", () => {
-      expect(indexSrc).toContain('"/admin"');
+      expect(indexSrc).toContain("'/admin'");
       expect(indexSrc).toContain("isAuthenticated(true)");
     });
 
@@ -681,16 +681,16 @@ describe("V2 API Contract", () => {
     });
 
     it("mounts account routes with session-only auth (no API key)", () => {
-      expect(indexSrc).toContain('"/account"');
+      expect(indexSrc).toContain("'/account'");
       // account uses isAuthenticated() without capability check
       const accountLine = indexSrc
         .split("\n")
-        .find((l) => l.includes('"/account"') && !l.includes("passkey"));
+        .find((l) => l.includes("'/account'") && !l.includes("passkey"));
       expect(accountLine).toContain("isAuthenticated()");
     });
 
     it("scopes everything under /api/v2 prefix", () => {
-      expect(indexSrc).toContain('"/api/v2"');
+      expect(indexSrc).toContain("'/api/v2'");
     });
   });
 });

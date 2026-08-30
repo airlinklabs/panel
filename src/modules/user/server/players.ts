@@ -1,13 +1,19 @@
 import { getSettings } from '../../../handlers/settingsCache';
 import type { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
+import {
+  isAuthenticatedForServer,
+  requireSubUserPermission,
+} from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
-import { daemonPlayerListSchema, parseDaemonResponse } from '../../../platform/daemon/dtos';
+import {
+  daemonPlayerListSchema,
+  parseDaemonResponse,
+} from '../../../platform/daemon/dtos';
 import {
   type ServerPageServer,
   getServerStatusInput,
@@ -52,11 +58,16 @@ export function registerPlayersRoutes(router: Router): void {
         timeout: 8000,
       });
 
-      const playersData = parseDaemonResponse(daemonPlayerListSchema, playersResponse.data);
+      const playersData = parseDaemonResponse(
+        daemonPlayerListSchema,
+        playersResponse.data,
+      );
 
       if (playersData) {
         serverIsOnline =
-          typeof playersData.online === 'boolean' ? playersData.online : !!playersData.version;
+          typeof playersData.online === 'boolean'
+            ? playersData.online
+            : !!playersData.version;
 
         if (Array.isArray(playersData.players)) {
           players = playersData.players;
@@ -80,7 +91,10 @@ export function registerPlayersRoutes(router: Router): void {
         hadFetchError = true;
       }
     } catch (error: unknown) {
-      const errCode = error && typeof error === 'object' && 'code' in error ? String((error as { code: unknown }).code) : undefined;
+      const errCode =
+        error && typeof error === 'object' && 'code' in error
+          ? String((error as { code: unknown }).code)
+          : undefined;
       if (
         errCode !== 'ECONNREFUSED' &&
         errCode !== 'ETIMEDOUT' &&
@@ -118,7 +132,12 @@ export function registerPlayersRoutes(router: Router): void {
         const primaryPort = getPrimaryPort(server.Ports);
 
         if (!primaryPort) {
-          res.json({ serverInfo: null, players: [], serverIsOnline: false, error: 'No primary port found' });
+          res.json({
+            serverInfo: null,
+            players: [],
+            serverIsOnline: false,
+            error: 'No primary port found',
+          });
           return;
         }
 
@@ -172,7 +191,9 @@ export function registerPlayersRoutes(router: Router): void {
             errorMessage: { message: 'No primary port found' },
             user,
             features,
-            installed: await checkForServerInstallation(getParamAsString(serverId)),
+            installed: await checkForServerInstallation(
+              getParamAsString(serverId),
+            ),
             players: [],
             server,
             req,
@@ -185,7 +206,9 @@ export function registerPlayersRoutes(router: Router): void {
 
         const settings = await getSettings();
         const hasError = hadFetchError && !serverIsOnline;
-        const serverStatus = await getServerStatus(getServerStatusInput(server));
+        const serverStatus = await getServerStatus(
+          getServerStatusInput(server),
+        );
 
         return res.render('user/server/players', {
           errorMessage: hasError
@@ -199,7 +222,9 @@ export function registerPlayersRoutes(router: Router): void {
           players,
           serverInfo,
           features,
-          installed: await checkForServerInstallation(getParamAsString(serverId)),
+          installed: await checkForServerInstallation(
+            getParamAsString(serverId),
+          ),
           server,
           serverStatus,
           req,

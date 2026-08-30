@@ -13,7 +13,7 @@ export async function getNodesWithAllocations() {
   return cache.wrap(NODES_KEY, NODES_TTL, () =>
     prisma.node.findMany({
       include: { allocations: true, location: true },
-    })
+    }),
   );
 }
 
@@ -25,7 +25,7 @@ export async function getLocationsWithCounts() {
     prisma.location.findMany({
       include: { _count: { select: { nodes: true } } },
       orderBy: { id: 'asc' },
-    })
+    }),
   );
 }
 

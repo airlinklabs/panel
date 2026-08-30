@@ -22,13 +22,13 @@
  * formatting used by every V2 endpoint file.
  */
 
-import type { Request, Response } from "express";
-import prisma from "../../../db";
-import logger from "../../../handlers/logger";
+import type { Request, Response } from 'express';
+import prisma from '../../../db';
+import logger from '../../../handlers/logger';
 import {
   subUserHasPermission as _subUserHasPermission,
   parsePermissions as _parsePermissions,
-} from "../../../handlers/utils/auth/authorization";
+} from '../../../handlers/utils/auth/authorization';
 
 // Infer types from the Prisma client instance
 type Users = Awaited<ReturnType<typeof prisma.users.findUnique>> &
@@ -149,12 +149,12 @@ export async function paginateQuery<T>(
 }
 
 export function parsePage(query: unknown): number {
-  const raw = typeof query === "string" ? parseInt(query, 10) : 1;
+  const raw = typeof query === 'string' ? parseInt(query, 10) : 1;
   return Number.isFinite(raw) && raw > 0 ? raw : 1;
 }
 
 export function parsePerPage(query: unknown, defaultVal = 25): number {
-  const raw = typeof query === "string" ? parseInt(query, 10) : defaultVal;
+  const raw = typeof query === 'string' ? parseInt(query, 10) : defaultVal;
   return Number.isFinite(raw) && raw > 0 ? Math.min(raw, 100) : defaultVal;
 }
 
@@ -170,7 +170,7 @@ export function getSessionUserId(req: Request): number | undefined {
   try {
     // Access through the Express app's session middleware — the session
     // object is always present when isAuthenticated middleware runs.
-    const session = req["session"] as { user?: { id?: number } } | undefined;
+    const session = req['session'] as { user?: { id?: number } } | undefined;
     return session?.user?.id;
   } catch {
     return undefined;
@@ -189,7 +189,7 @@ export function getAuthenticatedUserId(req: Request): number | undefined {
 
 /** Get the daemon protocol based on the app environment. */
 export function getAppProtocol(req: Request): string {
-  return req.app?.get("env") === "production" ? "https" : "http";
+  return req.app?.get('env') === 'production' ? 'https' : 'http';
 }
 
 // ---------------------------------------------------------------------------
@@ -202,30 +202,30 @@ export function getAppProtocol(req: Request): string {
  * Wildcard forms (e.g. "servers.*") grant all sub-capabilities.
  */
 export const ApiCapabilities = {
-  SERVERS_READ: "servers.read",
-  SERVERS_WRITE: "servers.write",
-  SERVERS_ALL: "servers.*",
-  FILES_READ: "files.read",
-  FILES_WRITE: "files.write",
-  FILES_ALL: "files.*",
-  DATABASES_READ: "databases.read",
-  DATABASES_WRITE: "databases.write",
-  DATABASES_ALL: "databases.*",
-  BACKUPS_READ: "backups.read",
-  BACKUPS_WRITE: "backups.write",
-  BACKUPS_ALL: "backups.*",
-  SCHEDULES_READ: "schedules.read",
-  SCHEDULES_WRITE: "schedules.write",
-  SCHEDULES_ALL: "schedules.*",
-  SUBUSERS_READ: "subusers.read",
-  SUBUSERS_WRITE: "subusers.write",
-  SUBUSERS_ALL: "subusers.*",
-  STARTUP_READ: "startup.read",
-  STARTUP_WRITE: "startup.write",
-  STARTUP_ALL: "startup.*",
-  ACCOUNT_READ: "account.read",
-  ACCOUNT_WRITE: "account.write",
-  ADMIN: "admin.*",
+  SERVERS_READ: 'servers.read',
+  SERVERS_WRITE: 'servers.write',
+  SERVERS_ALL: 'servers.*',
+  FILES_READ: 'files.read',
+  FILES_WRITE: 'files.write',
+  FILES_ALL: 'files.*',
+  DATABASES_READ: 'databases.read',
+  DATABASES_WRITE: 'databases.write',
+  DATABASES_ALL: 'databases.*',
+  BACKUPS_READ: 'backups.read',
+  BACKUPS_WRITE: 'backups.write',
+  BACKUPS_ALL: 'backups.*',
+  SCHEDULES_READ: 'schedules.read',
+  SCHEDULES_WRITE: 'schedules.write',
+  SCHEDULES_ALL: 'schedules.*',
+  SUBUSERS_READ: 'subusers.read',
+  SUBUSERS_WRITE: 'subusers.write',
+  SUBUSERS_ALL: 'subusers.*',
+  STARTUP_READ: 'startup.read',
+  STARTUP_WRITE: 'startup.write',
+  STARTUP_ALL: 'startup.*',
+  ACCOUNT_READ: 'account.read',
+  ACCOUNT_WRITE: 'account.write',
+  ADMIN: 'admin.*',
 } as const;
 
 export type ApiCapability =
@@ -238,12 +238,12 @@ export async function requireUser(
 ): Promise<Users | null> {
   const userId = getAuthenticatedUserId(req);
   if (!userId) {
-    jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+    jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
     return null;
   }
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) {
-    jsonError(res, "UNAUTHORIZED", "User not found", 401);
+    jsonError(res, 'UNAUTHORIZED', 'User not found', 401);
     return null;
   }
   return user;
@@ -259,7 +259,7 @@ export async function requireAdmin(
     return null;
   }
   if (!user.isAdmin) {
-    jsonError(res, "FORBIDDEN", "Admin access required", 403);
+    jsonError(res, 'FORBIDDEN', 'Admin access required', 403);
     return null;
   }
   return user;
@@ -282,17 +282,17 @@ export interface ResolvedServer {
 export async function resolveServer(
   req: Request,
   res: Response,
-  serverIdParam = "id",
+  serverIdParam = 'id',
 ): Promise<ResolvedServer | null> {
   const userId = getAuthenticatedUserId(req);
   if (!userId) {
-    jsonError(res, "UNAUTHORIZED", "Authentication required", 401);
+    jsonError(res, 'UNAUTHORIZED', 'Authentication required', 401);
     return null;
   }
 
-  const serverUUID = String(req.params[serverIdParam] ?? "");
+  const serverUUID = String(req.params[serverIdParam] ?? '');
   if (!serverUUID) {
-    jsonError(res, "BAD_REQUEST", "Server ID is required", 400);
+    jsonError(res, 'BAD_REQUEST', 'Server ID is required', 400);
     return null;
   }
 
@@ -300,7 +300,7 @@ export async function resolveServer(
     where: { UUID: serverUUID },
   });
   if (!server) {
-    jsonError(res, "NOT_FOUND", "Server not found", 404);
+    jsonError(res, 'NOT_FOUND', 'Server not found', 404);
     return null;
   }
 
@@ -320,7 +320,7 @@ export async function resolveServer(
     where: { serverId_userId: { serverId: server.UUID, userId } },
   });
   if (!subUser) {
-    jsonError(res, "FORBIDDEN", "You do not have access to this server", 403);
+    jsonError(res, 'FORBIDDEN', 'You do not have access to this server', 403);
     return null;
   }
 
@@ -333,7 +333,7 @@ export function checkSuspended(
   resolved: ResolvedServer,
 ): boolean {
   if (resolved.server.Suspended) {
-    jsonError(res, "FORBIDDEN", "Server is suspended", 403);
+    jsonError(res, 'FORBIDDEN', 'Server is suspended', 403);
     return true;
   }
   return false;
@@ -344,26 +344,26 @@ export function checkSuspended(
 // ---------------------------------------------------------------------------
 
 export type SubUserPermission =
-  | "console"
-  | "console.send"
-  | "files"
-  | "files.read"
-  | "files.write"
-  | "backups"
-  | "backups.create"
-  | "backups.delete"
-  | "schedule.read"
-  | "schedule.create"
-  | "schedule.delete"
-  | "databases"
-  | "databases.create"
-  | "databases.delete"
-  | "start"
-  | "stop"
-  | "restart"
-  | "kill"
-  | "reinstall"
-  | "websocket.connect";
+  | 'console'
+  | 'console.send'
+  | 'files'
+  | 'files.read'
+  | 'files.write'
+  | 'backups'
+  | 'backups.create'
+  | 'backups.delete'
+  | 'schedule.read'
+  | 'schedule.create'
+  | 'schedule.delete'
+  | 'databases'
+  | 'databases.create'
+  | 'databases.delete'
+  | 'start'
+  | 'stop'
+  | 'restart'
+  | 'kill'
+  | 'reinstall'
+  | 'websocket.connect';
 
 /** Parse the permissions JSON string from a SubUser record. */
 export const parsePermissions = _parsePermissions;
@@ -386,7 +386,7 @@ export function requireSubUserPermission(
   if (resolved.subUser && subUserHasPermission(resolved.subUser, permission)) {
     return true;
   }
-  jsonError(res, "FORBIDDEN", `Missing permission: ${permission}`, 403);
+  jsonError(res, 'FORBIDDEN', `Missing permission: ${permission}`, 403);
   return false;
 }
 
@@ -409,13 +409,13 @@ export async function logActivity(
         actorId: actorId ?? null,
         serverId: serverId ?? null,
         event,
-        category: category ?? "user_action",
-        severity: severity ?? "info",
+        category: category ?? 'user_action',
+        severity: severity ?? 'info',
         metadata: metadata ? JSON.stringify(metadata) : null,
         ip: ip ?? null,
       },
     });
   } catch (err) {
-    logger.error("Failed to log activity:", err);
+    logger.error('Failed to log activity:', err);
   }
 }

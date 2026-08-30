@@ -1,4 +1,7 @@
-import type { SidebarItem, UIComponentStore } from '../handlers/uiComponentHandler';
+import type {
+  SidebarItem,
+  UIComponentStore,
+} from '../handlers/uiComponentHandler';
 
 interface AdminSidebarGroup {
   section: string;

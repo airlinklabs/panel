@@ -1,8 +1,8 @@
-import { getRedisClient } from "../handlers/redis";
-import type Redis from "ioredis";
-import logger from "../handlers/logger";
+import { getRedisClient } from '../handlers/redis';
+import type Redis from 'ioredis';
+import logger from '../handlers/logger';
 
-const CHANNEL = "airlink:realtime";
+const CHANNEL = 'airlink:realtime';
 
 let subscriber: Redis | null = null;
 
@@ -15,7 +15,7 @@ export function publishEvent(event: {
     const redis = getRedisClient();
     redis.publish(CHANNEL, JSON.stringify(event));
   } catch (err) {
-    logger.warn("[realtime-pubsub] publish failed", { error: String(err) });
+    logger.warn('[realtime-pubsub] publish failed', { error: String(err) });
   }
 }
 
@@ -25,8 +25,8 @@ export function subscribeToEvents(
   try {
     if (!subscriber) {
       subscriber = getRedisClient().duplicate();
-      subscriber.on("error", (err: Error) => {
-        logger.warn("[realtime-pubsub] subscriber error", {
+      subscriber.on('error', (err: Error) => {
+        logger.warn('[realtime-pubsub] subscriber error', {
           error: err.message,
         });
       });
@@ -41,13 +41,15 @@ export function subscribeToEvents(
         // malformed message — ignore
       }
     };
-    subscriber.on("message", handler);
+    subscriber.on('message', handler);
     return () => {
-      subscriber?.off("message", handler);
+      subscriber?.off('message', handler);
       subscriber?.unsubscribe(CHANNEL);
     };
   } catch (err) {
-    logger.warn("[realtime-pubsub] subscribe failed", { error: String(err) });
-    return () => {};
+    logger.warn('[realtime-pubsub] subscribe failed', { error: String(err) });
+    return () => {
+      /* noop */
+    };
   }
 }

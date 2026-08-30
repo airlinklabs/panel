@@ -32,7 +32,10 @@ export function getParamAsNumber(param: string | string[] | undefined): number {
  * Converts Express param to a NonEmptyString brand.
  * Throws if the result would be empty.
  */
-export function getRequiredParam(param: string | string[] | undefined, paramName: string): NonEmptyString {
+export function getRequiredParam(
+  param: string | string[] | undefined,
+  paramName: string,
+): NonEmptyString {
   const value = getParamAsString(param);
   if (!value) {
     throw new Error(`Missing required parameter: ${paramName}`);

@@ -1,13 +1,13 @@
-import prisma from "../db";
-import { validateVariableRules } from "../modules/user/server/startup";
-import type { ServerVariable } from "../modules/user/server/shared";
+import prisma from '../db';
+import { validateVariableRules } from '../modules/user/server/startup';
+import type { ServerVariable } from '../modules/user/server/shared';
 
 /**
  * Parse dockerImage JSON from a server record, returning the first value or null.
  */
 function parseDockerImage(raw: string | null): string | null {
   try {
-    const d = JSON.parse(raw || "{}");
+    const d = JSON.parse(raw || '{}');
     return (Object.values(d)[0] as string) ?? null;
   } catch {
     return null;
@@ -19,7 +19,7 @@ function parseDockerImage(raw: string | null): string | null {
  */
 function parseVariables(raw: string | null): ServerVariable[] {
   try {
-    const parsed = JSON.parse(raw || "[]");
+    const parsed = JSON.parse(raw || '[]');
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -42,7 +42,9 @@ export async function getStartup(
     where: { UUID: serverId },
     include: { image: true },
   });
-  if (!server) return null;
+  if (!server) {
+    return null;
+  }
 
   return {
     startCommand: server.StartCommand,
@@ -73,7 +75,9 @@ export async function updateStartup(
     where: { UUID: serverId },
     include: { node: true, image: true },
   });
-  if (!server) return { error: "Server not found" };
+  if (!server) {
+    return { error: 'Server not found' };
+  }
 
   const updateData: Record<string, unknown> = {};
 
@@ -85,7 +89,7 @@ export async function updateStartup(
     let valid = false;
     let imageObj: Record<string, string> = {};
     try {
-      const arr = JSON.parse(server.image?.dockerImages || "[]");
+      const arr = JSON.parse(server.image?.dockerImages || '[]');
       if (Array.isArray(arr)) {
         for (const obj of arr) {
           for (const key of Object.keys(obj)) {
@@ -100,19 +104,19 @@ export async function updateStartup(
       // invalid docker images config
     }
     if (!valid) {
-      return { error: "Invalid Docker image selected" };
+      return { error: 'Invalid Docker image selected' };
     }
     updateData.dockerImage = JSON.stringify(imageObj);
   }
 
   if (data.variables !== undefined) {
     if (!Array.isArray(data.variables)) {
-      return { error: "Variables must be an array" };
+      return { error: 'Variables must be an array' };
     }
 
-    let defs: { env?: string; rules?: string; rulesMessage?: string }[] = [];
+    let defs: { env?: string; rules?: string; rulesMessage?: string }[];
     try {
-      defs = JSON.parse(server.Variables || "[]");
+      defs = JSON.parse(server.Variables || '[]');
     } catch {
       defs = [];
     }
@@ -125,11 +129,11 @@ export async function updateStartup(
         : v;
       const err = validateVariableRules(
         rulesSource as ServerVariable,
-        String(v.value ?? ""),
+        String(v.value ?? ''),
       );
       if (err) {
         return {
-          error: "Variable validation failed.",
+          error: 'Variable validation failed.',
           fields: [{ key: String(v.env), error: err }],
         };
       }

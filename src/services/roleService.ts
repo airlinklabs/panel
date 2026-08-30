@@ -1,44 +1,44 @@
-import prisma from "../db";
+import prisma from '../db';
 
 export async function seedDefaultRoles() {
   const defaults = [
     {
-      name: "owner",
-      displayName: "Owner",
+      name: 'owner',
+      displayName: 'Owner',
       isAdmin: true,
       isSystem: true,
-      permissions: JSON.stringify(["*"]),
+      permissions: JSON.stringify(['*']),
       sortOrder: 0,
     },
     {
-      name: "admin",
-      displayName: "Administrator",
+      name: 'admin',
+      displayName: 'Administrator',
       isAdmin: true,
       isSystem: true,
-      permissions: JSON.stringify(["*"]),
+      permissions: JSON.stringify(['*']),
       sortOrder: 1,
     },
     {
-      name: "privileged",
-      displayName: "Privileged User",
+      name: 'privileged',
+      displayName: 'Privileged User',
       isAdmin: false,
       isSystem: true,
       permissions: JSON.stringify([
-        "servers.create",
-        "servers.view",
-        "backups.*",
-        "files.*",
-        "schedules.*",
-        "databases.*",
+        'servers.create',
+        'servers.view',
+        'backups.*',
+        'files.*',
+        'schedules.*',
+        'databases.*',
       ]),
       sortOrder: 2,
     },
     {
-      name: "user",
-      displayName: "User",
+      name: 'user',
+      displayName: 'User',
       isAdmin: false,
       isSystem: true,
-      permissions: JSON.stringify(["servers.create", "servers.view"]),
+      permissions: JSON.stringify(['servers.create', 'servers.view']),
       sortOrder: 3,
     },
   ];

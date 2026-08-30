@@ -56,10 +56,10 @@
  */
 (function (root, factory) {
   var api = factory(root);
-  if (typeof window !== 'undefined') window.ALTabSystem = api;
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
-})(typeof window !== 'undefined' ? window : globalThis, function (rootScope) {
-  'use strict';
+  if (typeof window !== "undefined") window.ALTabSystem = api;
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+})(typeof window !== "undefined" ? window : globalThis, function (rootScope) {
+  "use strict";
 
   /* The root scope (window in the browser) is read from `currentScope` at
      call time so tests can inject a shim via `ALTabSystem.setScope()`; in the
@@ -78,51 +78,63 @@
   var registered = []; // every live controller, in mount order
 
   function tabName(btn) {
-    return btn ? btn.getAttribute('data-tab') : null;
+    return btn ? btn.getAttribute("data-tab") : null;
   }
 
   function readTabButtons(root) {
-    return Array.prototype.slice.call(root.querySelectorAll('[role="tab"][data-tab]'));
+    return Array.prototype.slice.call(
+      root.querySelectorAll('[role="tab"][data-tab]'),
+    );
   }
 
   function readTabPanels(root) {
-    return Array.prototype.slice.call(root.querySelectorAll('[role="tabpanel"][data-tab-panel]'));
+    return Array.prototype.slice.call(
+      root.querySelectorAll('[role="tabpanel"][data-tab-panel]'),
+    );
   }
 
   function currentHashName() {
-    if (!currentScope || typeof currentScope.location === 'undefined') return null;
-    var h = String(currentScope.location.hash || '');
-    return h ? h.replace(/^#/, '') : null;
+    if (!currentScope || typeof currentScope.location === "undefined")
+      return null;
+    var h = String(currentScope.location.hash || "");
+    return h ? h.replace(/^#/, "") : null;
   }
 
   function setHash(name, method) {
-    if (!hist || !currentScope || typeof currentScope.location === 'undefined') return;
-    var url = currentScope.location.pathname + currentScope.location.search + '#' + name;
+    if (!hist || !currentScope || typeof currentScope.location === "undefined")
+      return;
+    var url =
+      currentScope.location.pathname +
+      currentScope.location.search +
+      "#" +
+      name;
     try {
-      if (method === 'replace') hist.replaceState(null, '', url);
-      else hist.pushState(null, '', url);
+      if (method === "replace") hist.replaceState(null, "", url);
+      else hist.pushState(null, "", url);
     } catch (e) {
       /* some sandboxes block history; local tab state still works */
     }
   }
 
   function controller(root) {
-    var defaultName = root.getAttribute('data-tabs-default') || '';
-    var hashMode = root.hasAttribute('data-tabs-hash');
+    var defaultName = root.getAttribute("data-tabs-default") || "";
+    var hashMode = root.hasAttribute("data-tabs-hash");
     var current = defaultName;
     var buttons = readTabButtons(root);
     var panels = readTabPanels(root);
-    var lazy = {};    // name -> AbortController while a lazy load is in flight
-    var loaded = {};  // name -> true once content has been fetched
+    var lazy = {}; // name -> AbortController while a lazy load is in flight
+    var loaded = {}; // name -> true once content has been fetched
     var destroyed = false;
 
     function knownName(name) {
-      return buttons.some(function (b) { return tabName(b) === name; });
+      return buttons.some(function (b) {
+        return tabName(b) === name;
+      });
     }
 
     function panelFor(name) {
       for (var i = 0; i < panels.length; i++) {
-        if (panels[i].getAttribute('data-tab-panel') === name) return panels[i];
+        if (panels[i].getAttribute("data-tab-panel") === name) return panels[i];
       }
       return null;
     }
@@ -134,32 +146,32 @@
       current = name;
       buttons.forEach(function (btn) {
         var on = tabName(btn) === name;
-        btn.setAttribute('aria-selected', on ? 'true' : 'false');
-        btn.setAttribute('tabindex', on ? '0' : '-1');
+        btn.setAttribute("aria-selected", on ? "true" : "false");
+        btn.setAttribute("tabindex", on ? "0" : "-1");
       });
       panels.forEach(function (p) {
-        var on = p.getAttribute('data-tab-panel') === name;
+        var on = p.getAttribute("data-tab-panel") === name;
         if (on) {
-          p.removeAttribute('hidden');
+          p.removeAttribute("hidden");
           if (p.classList) {
-            p.classList.remove('tab-panel');
+            p.classList.remove("tab-panel");
             void p.offsetHeight;
-            p.classList.add('tab-panel');
+            p.classList.add("tab-panel");
           }
         } else {
-          p.setAttribute('hidden', '');
+          p.setAttribute("hidden", "");
         }
       });
       if (hashMode) {
-        if (source === 'user') setHash(name, 'push');
-        else if (source === 'corrective') setHash(name, 'replace');
+        if (source === "user") setHash(name, "push");
+        else if (source === "corrective") setHash(name, "replace");
       }
       activateLazy(name);
       emit(name);
     }
 
     function select(name, source) {
-      applySelection(name, source || 'user');
+      applySelection(name, source || "user");
     }
 
     function currentName() {
@@ -169,9 +181,9 @@
     function selectFromHash(notify) {
       var name = currentHashName();
       if (name && knownName(name)) {
-        applySelection(name, notify ? 'hash' : 'hash');
+        applySelection(name, notify ? "hash" : "hash");
       } else if (hashMode) {
-        applySelection(defaultName, 'corrective');
+        applySelection(defaultName, "corrective");
       }
     }
 
@@ -180,12 +192,16 @@
       var panel = panelFor(name);
       var detail = { root: root, name: name, panel: panel };
       try {
-        root.dispatchEvent(new currentScope.CustomEvent('al:tabs-change', {
-          bubbles: true,
-          detail: detail,
-        }));
+        root.dispatchEvent(
+          new currentScope.CustomEvent("al:tabs-change", {
+            bubbles: true,
+            detail: detail,
+          }),
+        );
         if (currentScope.document && currentScope.document.dispatchEvent) {
-          currentScope.document.dispatchEvent(new currentScope.CustomEvent('al:tabs-change', { detail: detail }));
+          currentScope.document.dispatchEvent(
+            new currentScope.CustomEvent("al:tabs-change", { detail: detail }),
+          );
         }
       } catch (e) {
         /* CustomEvent unavailable */
@@ -195,23 +211,30 @@
     function activateLazy(name) {
       var panel = panelFor(name);
       if (!panel) return;
-      var src = panel.getAttribute('data-tab-src');
+      var src = panel.getAttribute("data-tab-src");
       if (!src || loaded[name] || lazy[name]) return;
       loaded[name] = true;
       var controller = new AbortController();
       lazy[name] = controller;
 
-      var loading = (doc || (currentScope && currentScope.document)).createElement('div');
-      loading.className = 'al-tab-loading';
-      loading.setAttribute('aria-busy', 'true');
-      loading.textContent = 'Loading\u2026';
-      panel.textContent = '';
+      var loading = (
+        doc ||
+        (currentScope && currentScope.document)
+      ).createElement("div");
+      loading.className = "al-tab-loading";
+      loading.setAttribute("aria-busy", "true");
+      loading.textContent = "Loading\u2026";
+      panel.textContent = "";
       panel.appendChild(loading);
 
       var fetcher = (currentScope && currentScope.fetch) || fetch;
-      fetcher(src, { signal: controller.signal, credentials: 'same-origin', headers: { Accept: 'text/html' } })
+      fetcher(src, {
+        signal: controller.signal,
+        credentials: "same-origin",
+        headers: { Accept: "text/html" },
+      })
         .then(function (res) {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
+          if (!res.ok) throw new Error("HTTP " + res.status);
           return res.text();
         })
         .then(function (html) {
@@ -219,19 +242,24 @@
           panel.innerHTML = html;
           delete lazy[name];
           if (currentScope && currentScope.CustomEvent) {
-            root.dispatchEvent(new currentScope.CustomEvent('al:tabs-loaded', {
-              bubbles: true,
-              detail: { root: root, name: name, panel: panel },
-            }));
+            root.dispatchEvent(
+              new currentScope.CustomEvent("al:tabs-loaded", {
+                bubbles: true,
+                detail: { root: root, name: name, panel: panel },
+              }),
+            );
           }
         })
         .catch(function (err) {
           if (destroyed) return;
-          if (err && err.name === 'AbortError') return;
-          panel.textContent = '';
-          var msg = (doc || (currentScope && currentScope.document)).createElement('p');
-          msg.className = 'al-tab-error';
-          msg.textContent = 'Could not load this section.';
+          if (err && err.name === "AbortError") return;
+          panel.textContent = "";
+          var msg = (
+            doc ||
+            (currentScope && currentScope.document)
+          ).createElement("p");
+          msg.className = "al-tab-error";
+          msg.textContent = "Could not load this section.";
           panel.appendChild(msg);
           delete lazy[name];
           loaded[name] = false; // allow retry
@@ -239,39 +267,44 @@
     }
 
     function onClick(e) {
-      var btn = e.target && e.target.closest ? e.target.closest('[role="tab"][data-tab]') : null;
+      var btn =
+        e.target && e.target.closest
+          ? e.target.closest('[role="tab"][data-tab]')
+          : null;
       if (!btn || !root.contains(btn)) return;
       var list = root.querySelector('[role="tablist"]');
       if (list && !list.contains(btn)) return;
       var name = tabName(btn);
       if (!name || !knownName(name)) return;
       e.preventDefault();
-      applySelection(name, 'user');
+      applySelection(name, "user");
       btn.focus();
     }
 
     function onKeydown(e) {
       var tablist = root.querySelector('[role="tablist"]');
       if (!tablist || !tablist.contains(e.target)) return;
-      var btn = e.target.closest ? e.target.closest('[role="tab"][data-tab]') : null;
+      var btn = e.target.closest
+        ? e.target.closest('[role="tab"][data-tab]')
+        : null;
       var idx = buttons.indexOf(btn);
       if (idx === -1) return;
       var next = null;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
         next = buttons[(idx + 1) % buttons.length];
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
         next = buttons[(idx - 1 + buttons.length) % buttons.length];
-      } else if (e.key === 'Home') {
+      } else if (e.key === "Home") {
         e.preventDefault();
         next = buttons[0];
-      } else if (e.key === 'End') {
+      } else if (e.key === "End") {
         e.preventDefault();
         next = buttons[buttons.length - 1];
       }
       if (next) {
-        applySelection(tabName(next), 'user');
+        applySelection(tabName(next), "user");
         next.focus();
       }
     }
@@ -283,13 +316,17 @@
 
     function destroy() {
       destroyed = true;
-      root.removeEventListener('click', onClick, true);
-      root.removeEventListener('keydown', onKeydown, true);
-      if (hashMode && typeof currentScope.removeEventListener === 'function') {
-        currentScope.removeEventListener('hashchange', onHashChange);
+      root.removeEventListener("click", onClick, true);
+      root.removeEventListener("keydown", onKeydown, true);
+      if (hashMode && typeof currentScope.removeEventListener === "function") {
+        currentScope.removeEventListener("hashchange", onHashChange);
       }
       Object.keys(lazy).forEach(function (name) {
-        try { lazy[name].abort(); } catch (e) { /* already aborted */ }
+        try {
+          lazy[name].abort();
+        } catch (e) {
+          /* already aborted */
+        }
       });
       lazy = {};
       var idx = registered.indexOf(ctrl);
@@ -301,17 +338,19 @@
       select: select,
       current: currentName,
       destroy: destroy,
-      get defaultName() { return defaultName; },
+      get defaultName() {
+        return defaultName;
+      },
     };
 
     bind();
     registered.push(ctrl);
 
     function bind() {
-      root.addEventListener('click', onClick, true);
-      root.addEventListener('keydown', onKeydown, true);
-      if (hashMode && typeof currentScope.addEventListener === 'function') {
-        currentScope.addEventListener('hashchange', onHashChange);
+      root.addEventListener("click", onClick, true);
+      root.addEventListener("keydown", onKeydown, true);
+      if (hashMode && typeof currentScope.addEventListener === "function") {
+        currentScope.addEventListener("hashchange", onHashChange);
       }
     }
 
@@ -326,9 +365,12 @@
      inner tablist nested inside another `[data-al-tabs]` is owned by the
      outer controller, not scanned twice. */
   function insideTabsRoot(el) {
-    var n = el && (el.parentElement || (el.parentNode && el.parentNode.nodeType === 1 ? el.parentNode : null));
+    var n =
+      el &&
+      (el.parentElement ||
+        (el.parentNode && el.parentNode.nodeType === 1 ? el.parentNode : null));
     while (n) {
-      if (n.hasAttribute && n.hasAttribute('data-al-tabs')) return n;
+      if (n.hasAttribute && n.hasAttribute("data-al-tabs")) return n;
       n = n.parentElement;
     }
     return null;
@@ -341,20 +383,21 @@
     if (!root) return null;
     if (insideTabsRoot(root)) return null; // inner tablist: parent owns it
     var c = controller(root);
-    if (options && typeof options.onReady === 'function') options.onReady(c);
+    if (options && typeof options.onReady === "function") options.onReady(c);
     return c;
   }
 
   /* Scan the document for top-level tab containers and mount them. */
   function scan(options) {
     if (!doc) return [];
-    var roots = doc.querySelectorAll('[data-al-tabs]');
+    var roots = doc.querySelectorAll("[data-al-tabs]");
     var out = [];
     for (var i = 0; i < roots.length; i++) {
       if (insideTabsRoot(roots[i])) continue; // nested root: parent owns it
       var c = controller(roots[i]);
       if (c) {
-        if (options && typeof options.onReady === 'function') options.onReady(c);
+        if (options && typeof options.onReady === "function")
+          options.onReady(c);
         out.push(c);
       }
     }
@@ -362,7 +405,9 @@
   }
 
   function destroyAll() {
-    registered.slice().forEach(function (c) { c.destroy(); });
+    registered.slice().forEach(function (c) {
+      c.destroy();
+    });
   }
 
   return {

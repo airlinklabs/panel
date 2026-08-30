@@ -10,6 +10,7 @@ import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { redisRateLimit } from '../../../handlers/utils/security/redisRateLimit';
 import {
   loadAuthenticatedServerContext,
   sendMissingServerContext,
@@ -137,6 +138,7 @@ export function registerFileDetailRoutes(router: Router): void {
     '/server/:id/files/{*path}',
     isAuthenticatedForServer('id'),
     requireSubUserPermission('files'),
+    redisRateLimit,
     async (req: Request, res: Response) => {
       let filePath = Array.isArray(req.params?.path)
         ? req.params.path.join('/')

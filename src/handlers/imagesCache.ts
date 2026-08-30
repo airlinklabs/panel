@@ -10,7 +10,7 @@ const IMAGES_TTL = 120; // 2 minutes
  */
 export async function getApprovedImages() {
   return cache.wrap(IMAGES_LIST_KEY, IMAGES_TTL, () =>
-    prisma.images.findMany({ where: { status: 'approved' } })
+    prisma.images.findMany({ where: { status: 'approved' } }),
   );
 }
 
@@ -18,9 +18,7 @@ export async function getApprovedImages() {
  * Get all images (admin-facing) with Redis cache.
  */
 export async function getAllImages() {
-  return cache.wrap(IMAGES_ALL_KEY, IMAGES_TTL, () =>
-    prisma.images.findMany()
-  );
+  return cache.wrap(IMAGES_ALL_KEY, IMAGES_TTL, () => prisma.images.findMany());
 }
 
 /**

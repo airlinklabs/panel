@@ -22,13 +22,17 @@ function generateSecret(): string {
 }
 
 function ensureEnvFile(): void {
-  if (fs.existsSync(ENV_PATH)) {return;}
+  if (fs.existsSync(ENV_PATH)) {
+    return;
+  }
   if (fs.existsSync(EXAMPLE_PATH)) {
     fs.copyFileSync(EXAMPLE_PATH, ENV_PATH);
+    // eslint-disable-next-line no-console -- CLI tool, logger unavailable
     console.log(`Created .env from example.env (${ENV_PATH})`);
     return;
   }
   fs.writeFileSync(ENV_PATH, '');
+  // eslint-disable-next-line no-console -- CLI tool, logger unavailable
   console.log(`Created empty .env (${ENV_PATH})`);
 }
 
@@ -45,9 +49,11 @@ function setSecret(envPath: string, secret: string): void {
     return line;
   });
 
-  if (!found) {out.push(`SESSION_SECRET="${secret}"`);}
+  if (!found) {
+    out.push(`SESSION_SECRET="${secret}"`);
+  }
 
-  fs.writeFileSync(envPath, `${out.join('\n').replace(/\n+$/, '\n')  }\n`);
+  fs.writeFileSync(envPath, `${out.join('\n').replace(/\n+$/, '\n')}\n`);
 }
 
 function main(): void {
@@ -62,8 +68,11 @@ function main(): void {
     // chmod may fail on some filesystems; not fatal.
   }
 
+  // eslint-disable-next-line no-console -- CLI tool, logger unavailable
   console.log('Generated a new SESSION_SECRET and wrote it to .env');
+  // eslint-disable-next-line no-console -- CLI tool, logger unavailable
   console.log(`  .env  -> ${ENV_PATH}`);
+  // eslint-disable-next-line no-console -- CLI tool, logger unavailable
   console.log('Restart the panel for the new secret to take effect.');
 }
 

@@ -1,6 +1,9 @@
 import { isHttpError } from '../utils/http';
 import prisma from '../db';
-import { daemonStateSchema, parseDaemonResponse } from '../platform/daemon/dtos';
+import {
+  daemonStateSchema,
+  parseDaemonResponse,
+} from '../platform/daemon/dtos';
 import { checkNodeStatus } from './utils/node/nodeStatus';
 import { daemonRequest } from './utils/core/daemonRequest';
 
@@ -13,7 +16,10 @@ interface CheckInstallationResult {
 
 // In-memory cache so repeated calls within the same request cycle or across
 // rapid page navigations don't all hit the daemon independently.
-const cache = new Map<string, { state: string; error?: string; timestamp: number }>();
+const cache = new Map<
+  string,
+  { state: string; error?: string; timestamp: number }
+>();
 const CACHE_TTL_MS = 8000;
 
 export async function checkForServerInstallation(
@@ -65,7 +71,11 @@ export async function checkForServerInstallation(
     const installError = data.error;
     const isInstalled = state === 'installed';
 
-    cache.set(serverId, { state: state ?? '', error: installError, timestamp: now });
+    cache.set(serverId, {
+      state: state ?? '',
+      error: installError,
+      timestamp: now,
+    });
 
     // Keep the DB in sync so next page load hits the fast path above.
     await prisma.server.update({
@@ -73,7 +83,12 @@ export async function checkForServerInstallation(
       data: { Installing: !isInstalled },
     });
 
-    return { installed: isInstalled, state, failed: state === 'failed', error: installError };
+    return {
+      installed: isInstalled,
+      state,
+      failed: state === 'failed',
+      error: installError,
+    };
   } catch (error: any) {
     if (isHttpError(error) && error.status === 404) {
       return { installed: false, state: 'not_found' };

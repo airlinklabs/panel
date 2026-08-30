@@ -1,4 +1,3 @@
-import logger from '../../logger';
 import { fetchPublic } from '../../../utils/ssrf';
 
 export interface EggVariable {
@@ -60,10 +59,13 @@ export function isPterodactylEgg(data: Record<string, unknown>): boolean {
 
 export function parseEgg(raw: Record<string, unknown>): ParsedEgg {
   if (!isPterodactylEgg(raw)) {
-    throw new Error('Not a valid Pterodactyl egg (expected meta.version = PTDL_v2)');
+    throw new Error(
+      'Not a valid Pterodactyl egg (expected meta.version = PTDL_v2)',
+    );
   }
 
-  const dockerImagesRaw = raw.docker_images as Record<string, string> | undefined;
+  const dockerImagesRaw = raw.docker_images as
+    Record<string, string> | undefined;
   const dockerImages: Record<string, string> = {};
 
   if (dockerImagesRaw && typeof dockerImagesRaw === 'object') {
@@ -76,7 +78,9 @@ export function parseEgg(raw: Record<string, unknown>): ParsedEgg {
 
   const rawVariables = (raw.variables as unknown[]) || [];
   const variables: EggVariable[] = rawVariables
-    .filter((v): v is Record<string, unknown> => typeof v === 'object' && v !== null)
+    .filter(
+      (v): v is Record<string, unknown> => typeof v === 'object' && v !== null,
+    )
     .map((v) => ({
       name: String(v.name ?? ''),
       description: String(v.description ?? ''),
@@ -89,7 +93,8 @@ export function parseEgg(raw: Record<string, unknown>): ParsedEgg {
     }));
 
   const scripts = (raw.scripts as Record<string, unknown>) || {};
-  const installationRaw = scripts.installation as Record<string, unknown> | undefined;
+  const installationRaw = scripts.installation as
+    Record<string, unknown> | undefined;
 
   let installScript: EggInstallScript | null = null;
   if (installationRaw) {
@@ -120,20 +125,27 @@ export function parseEgg(raw: Record<string, unknown>): ParsedEgg {
     startup: String(raw.startup ?? ''),
     stopCommand,
     startupDone,
-    configFiles: typeof config.files === 'string' ? config.files : JSON.stringify(config.files ?? {}),
+    configFiles:
+      typeof config.files === 'string'
+        ? config.files
+        : JSON.stringify(config.files ?? {}),
     dockerImages,
     variables,
     installScript,
     features: featuresRaw.filter((f) => typeof f === 'string'),
-    fileDenylist: ((raw.file_denylist as string[]) || []).filter((f) => typeof f === 'string'),
+    fileDenylist: ((raw.file_denylist as string[]) || []).filter(
+      (f) => typeof f === 'string',
+    ),
     rawMeta: (raw.meta as Record<string, unknown>) || {},
   };
 }
 
 export function normalizeEggForDb(egg: ParsedEgg): NormalizedImageData {
-  const dockerImagesArray = Object.entries(egg.dockerImages).map(([label, image]) => ({
-    [label]: image,
-  }));
+  const dockerImagesArray = Object.entries(egg.dockerImages).map(
+    ([label, image]) => ({
+      [label]: image,
+    }),
+  );
 
   const scripts = egg.installScript
     ? {
@@ -167,11 +179,18 @@ export function normalizeEggForDb(egg: ParsedEgg): NormalizedImageData {
   };
 }
 
-export function validateEggData(data: Record<string, unknown>): { valid: boolean; errors: string[] } {
+export function validateEggData(data: Record<string, unknown>): {
+  valid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
 
-  if (!data.name) {errors.push('name is required');}
-  if (!data.startup) {errors.push('startup command is required');}
+  if (!data.name) {
+    errors.push('name is required');
+  }
+  if (!data.startup) {
+    errors.push('startup command is required');
+  }
 
   if (isPterodactylEgg(data)) {
     if (!data.docker_images || typeof data.docker_images !== 'object') {
@@ -193,17 +212,24 @@ export function validateEggData(data: Record<string, unknown>): { valid: boolean
  */
 export async function fetchEggFromUrl(
   url: string,
-): Promise<{ ok: true; payload: Record<string, unknown> } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; payload: Record<string, unknown> } | { ok: false; error: string }
+> {
   const result = await fetchPublic(url, {
     allowHttp: true,
     timeoutMs: 15_000,
     maxBytes: 2_000_000,
   });
 
-  if (!result.ok) {return { ok: false, error: result.error };}
+  if (!result.ok) {
+    return { ok: false, error: result.error };
+  }
 
   try {
-    return { ok: true, payload: JSON.parse(result.body) as Record<string, unknown> };
+    return {
+      ok: true,
+      payload: JSON.parse(result.body) as Record<string, unknown>,
+    };
   } catch {
     return { ok: false, error: 'Remote response is not valid JSON' };
   }

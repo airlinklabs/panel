@@ -61,7 +61,10 @@ const EVENT_META: Record<string, ActivityEventMeta> = {
   'node:create': { label: 'Node Created', category: 'node' },
   'node:update': { label: 'Node Updated', category: 'node' },
   'node:delete': { label: 'Node Deleted', category: 'node' },
-  'node:delete-allocation': { label: 'Allocation Deleted', category: 'allocation' },
+  'node:delete-allocation': {
+    label: 'Allocation Deleted',
+    category: 'allocation',
+  },
   'allocation:create': { label: 'Allocation Created', category: 'allocation' },
   'location:create': { label: 'Location Created', category: 'location' },
   'api:key': { label: 'API Key Used', category: 'apikey' },
@@ -92,7 +95,12 @@ const CATEGORY_LABELS: Record<ActivityCategory, string> = {
 };
 
 export function getActivityEventMeta(event: string): ActivityEventMeta {
-  return EVENT_META[event] ?? { label: event.replace(/[:-]+/g, ' '), category: 'other' };
+  return (
+    EVENT_META[event] ?? {
+      label: event.replace(/[:-]+/g, ' '),
+      category: 'other',
+    }
+  );
 }
 
 export function getCategoryLabel(category: ActivityCategory): string {

@@ -29,7 +29,9 @@ class AddonCommandRegistry {
 
   async execute(commandKey: string, args: string[] = []): Promise<string> {
     const cmd = this.commands.get(commandKey);
-    if (!cmd) {return `Command not found: ${commandKey}`;}
+    if (!cmd) {
+      return `Command not found: ${commandKey}`;
+    }
 
     try {
       const result = await cmd.handler(args);
@@ -41,7 +43,8 @@ class AddonCommandRegistry {
   }
 
   getAllCommands(): (RegisteredCommand & { addonSlug: string; key: string })[] {
-    const result: (RegisteredCommand & { addonSlug: string; key: string })[] = [];
+    const result: (RegisteredCommand & { addonSlug: string; key: string })[] =
+      [];
     for (const [key, cmd] of this.commands) {
       const addonSlug = key.split(':')[0] ?? '';
       result.push({ ...cmd, addonSlug, key });
@@ -51,7 +54,9 @@ class AddonCommandRegistry {
 
   getAddonCommands(addonSlug: string): RegisteredCommand[] {
     const names = this.addonCommands.get(addonSlug) ?? [];
-    return names.map(name => this.commands.get(`${addonSlug}:${name}`)).filter(Boolean) as RegisteredCommand[];
+    return names
+      .map((name) => this.commands.get(`${addonSlug}:${name}`))
+      .filter(Boolean) as RegisteredCommand[];
   }
 
   clearAddonCommands(addonSlug: string): void {

@@ -41,7 +41,9 @@ const locationsModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
-          const user = await prisma.users.findUnique({ where: { id: req.session?.user?.id } });
+          const user = await prisma.users.findUnique({
+            where: { id: req.session?.user?.id },
+          });
           if (!user) {
             if (req.get('HX-Request') === 'true') {
               return res.status(403).render('fragments/shared/error-banner', {
@@ -54,9 +56,12 @@ const locationsModule: Module = {
             return;
           }
 
-          const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+          const name =
+            typeof req.body.name === 'string' ? req.body.name.trim() : '';
           const shortCode =
-            typeof req.body.shortCode === 'string' ? req.body.shortCode.trim().toLowerCase() : '';
+            typeof req.body.shortCode === 'string'
+              ? req.body.shortCode.trim().toLowerCase()
+              : '';
 
           if (name.length < 2 || name.length > 50) {
             if (req.get('HX-Request') === 'true') {
@@ -66,22 +71,32 @@ const locationsModule: Module = {
                 hint: null,
               });
             }
-            res.status(400).json({ message: 'Name must be between 2 and 50 characters.' });
+            res
+              .status(400)
+              .json({ message: 'Name must be between 2 and 50 characters.' });
             return;
           }
           if (!/^[a-z0-9-]{2,32}$/.test(shortCode)) {
             if (req.get('HX-Request') === 'true') {
               return res.status(400).render('fragments/shared/error-banner', {
                 targetId: 'admin-locations',
-                message: 'Short code must be 2-32 chars: lowercase letters, numbers, dashes.',
+                message:
+                  'Short code must be 2-32 chars: lowercase letters, numbers, dashes.',
                 hint: null,
               });
             }
-            res.status(400).json({ message: 'Short code must be 2-32 chars: lowercase letters, numbers, dashes.' });
+            res
+              .status(400)
+              .json({
+                message:
+                  'Short code must be 2-32 chars: lowercase letters, numbers, dashes.',
+              });
             return;
           }
 
-          const existing = await prisma.location.findUnique({ where: { shortCode } });
+          const existing = await prisma.location.findUnique({
+            where: { shortCode },
+          });
           if (existing) {
             if (req.get('HX-Request') === 'true') {
               return res.status(400).render('fragments/shared/error-banner', {
@@ -90,7 +105,11 @@ const locationsModule: Module = {
                 hint: null,
               });
             }
-            res.status(400).json({ message: 'A location with this short code already exists.' });
+            res
+              .status(400)
+              .json({
+                message: 'A location with this short code already exists.',
+              });
             return;
           }
 
@@ -102,10 +121,19 @@ const locationsModule: Module = {
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildLocationsViewModel();
-            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Location created.' } } }));
+            res.setHeader(
+              'HX-Trigger',
+              JSON.stringify({
+                al: {
+                  toast: { type: 'success', message: 'Location created.' },
+                },
+              }),
+            );
             return res.render('fragments/admin/locations/location-list', vm);
           }
-          res.status(200).json({ message: 'Location created successfully.', location });
+          res
+            .status(200)
+            .json({ message: 'Location created successfully.', location });
         } catch (error: unknown) {
           logger.error('Error creating location:', error);
           if (req.get('HX-Request') === 'true') {
@@ -158,7 +186,14 @@ const locationsModule: Module = {
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildLocationsViewModel();
-            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Location deleted.' } } }));
+            res.setHeader(
+              'HX-Trigger',
+              JSON.stringify({
+                al: {
+                  toast: { type: 'success', message: 'Location deleted.' },
+                },
+              }),
+            );
             return res.render('fragments/admin/locations/location-list', vm);
           }
           res.status(200).json({ message: 'Location deleted successfully.' });
@@ -186,22 +221,36 @@ const locationsModule: Module = {
             return res.status(400).json({ message: 'Invalid location ID.' });
           }
 
-          const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+          const name =
+            typeof req.body.name === 'string' ? req.body.name.trim() : '';
           const shortCode =
-            typeof req.body.shortCode === 'string' ? req.body.shortCode.trim().toLowerCase() : '';
+            typeof req.body.shortCode === 'string'
+              ? req.body.shortCode.trim().toLowerCase()
+              : '';
 
           if (name.length < 2 || name.length > 50) {
-            return res.status(400).json({ message: 'Name must be between 2 and 50 characters.' });
+            return res
+              .status(400)
+              .json({ message: 'Name must be between 2 and 50 characters.' });
           }
           if (!/^[a-z0-9-]{2,32}$/.test(shortCode)) {
-            return res.status(400).json({ message: 'Short code must be 2-32 chars: lowercase letters, numbers, dashes.' });
+            return res
+              .status(400)
+              .json({
+                message:
+                  'Short code must be 2-32 chars: lowercase letters, numbers, dashes.',
+              });
           }
 
           const existing = await prisma.location.findFirst({
             where: { shortCode, id: { not: locationId } },
           });
           if (existing) {
-            return res.status(400).json({ message: 'A location with this short code already exists.' });
+            return res
+              .status(400)
+              .json({
+                message: 'A location with this short code already exists.',
+              });
           }
 
           const location = await prisma.location.update({
@@ -213,7 +262,14 @@ const locationsModule: Module = {
 
           if (req.get('HX-Request') === 'true') {
             const vm = await buildLocationsViewModel();
-            res.setHeader('HX-Trigger', JSON.stringify({ al: { toast: { type: 'success', message: 'Location updated.' } } }));
+            res.setHeader(
+              'HX-Trigger',
+              JSON.stringify({
+                al: {
+                  toast: { type: 'success', message: 'Location updated.' },
+                },
+              }),
+            );
             return res.render('fragments/admin/locations/location-list', vm);
           }
           res.status(200).json({ message: 'Location updated.', location });
@@ -238,7 +294,9 @@ const locationsModule: Module = {
             });
           }
 
-          const location = await prisma.location.findUnique({ where: { id: locationId } });
+          const location = await prisma.location.findUnique({
+            where: { id: locationId },
+          });
           if (!location) {
             return res.status(404).render('fragments/shared/error-banner', {
               targetId: 'admin-locations',
@@ -253,7 +311,10 @@ const locationsModule: Module = {
             orderBy: { name: 'asc' },
           });
 
-          res.render('fragments/admin/locations/location-nodes', { location, nodes: locationNodes });
+          res.render('fragments/admin/locations/location-nodes', {
+            location,
+            nodes: locationNodes,
+          });
         } catch (error: unknown) {
           logger.error('Error fetching location nodes:', error);
           res.status(500).render('fragments/shared/error-banner', {

@@ -17,10 +17,15 @@
   const ROUND_PRECISION = 100;
 
   function parseUnits(str) {
-    return str.split(',').map(function (pair) {
-      const parts = pair.split(':');
-      return { multiplier: parseFloat(parts[0]), label: parts[1].trim() };
-    }).sort(function (a, b) { return a.multiplier - b.multiplier; });
+    return str
+      .split(",")
+      .map(function (pair) {
+        const parts = pair.split(":");
+        return { multiplier: parseFloat(parts[0]), label: parts[1].trim() };
+      })
+      .sort(function (a, b) {
+        return a.multiplier - b.multiplier;
+      });
   }
 
   function roundDisplay(v) {
@@ -30,8 +35,8 @@
 
   function initSwitcher(btn) {
     const display = document.getElementById(btn.dataset.display);
-    const hidden  = document.getElementById(btn.dataset.hidden);
-    const units   = parseUnits(btn.dataset.units);
+    const hidden = document.getElementById(btn.dataset.hidden);
+    const units = parseUnits(btn.dataset.units);
     if (!display || !hidden || units.length === 0) return;
 
     function pickUnit() {
@@ -54,21 +59,27 @@
 
     function syncDisplay() {
       const v = parseFloat(hidden.value);
-      if (!isFinite(v)) { display.value = ''; return; }
+      if (!isFinite(v)) {
+        display.value = "";
+        return;
+      }
       display.value = roundDisplay(v / current.multiplier);
     }
 
     function syncHidden() {
       const v = parseFloat(display.value);
-      if (!isFinite(v)) { hidden.value = ''; return; }
-      hidden.value = '' + Math.round(v * current.multiplier);
+      if (!isFinite(v)) {
+        hidden.value = "";
+        return;
+      }
+      hidden.value = "" + Math.round(v * current.multiplier);
     }
 
     function render() {
       btn.textContent = current.label;
     }
 
-    btn.addEventListener('click', function () {
+    btn.addEventListener("click", function () {
       syncHidden();
       const idx = units.indexOf(current);
       current = units[(idx + 1) % units.length];
@@ -76,25 +87,25 @@
       render();
     });
 
-    display.addEventListener('input', syncHidden);
+    display.addEventListener("input", syncHidden);
 
     syncDisplay();
     render();
   }
 
   function initAll() {
-    document.querySelectorAll('[data-format-switcher]').forEach(initSwitcher);
+    document.querySelectorAll("[data-format-switcher]").forEach(initSwitcher);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAll);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initAll);
   } else {
     initAll();
   }
 
   // Turbo swaps the body without re-firing DOMContentLoaded — rescan the
   // fresh initialisers/selects after every navigation.
-  document.addEventListener('al:navigated', function () {
+  document.addEventListener("al:navigated", function () {
     initAll();
   });
 })();

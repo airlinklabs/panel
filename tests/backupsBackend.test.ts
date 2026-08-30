@@ -189,9 +189,7 @@ describe("backups backend create state machine", () => {
   });
 
   it("create with remote redirect SUCCESS (cloud): deletes local temp, sets cloud id & filePath=airlink-cloud, persisted, remoteRedirect ok", async () => {
-    mockGetSettings.mockResolvedValue(
-      defaultCloudSettings as any,
-    );
+    mockGetSettings.mockResolvedValue(defaultCloudSettings as any);
     vi.spyOn(AirlinkCloudClient.prototype, "uploadFile").mockResolvedValue({
       id: "cloud-file-1",
     } as any);
@@ -249,9 +247,7 @@ describe("backups backend create state machine", () => {
   });
 
   it("create with remote redirect FAILURE (cloud upload throws): temp NOT deleted, persists daemon-local path + null cloud id, remoteRedirect failed with explicit message", async () => {
-    mockGetSettings.mockResolvedValue(
-      defaultCloudSettings as any,
-    );
+    mockGetSettings.mockResolvedValue(defaultCloudSettings as any);
     vi.spyOn(AirlinkCloudClient.prototype, "uploadFile").mockRejectedValue(
       new Error("cloud down"),
     );
@@ -279,9 +275,7 @@ describe("backups backend create state machine", () => {
   });
 
   it("create with remote redirect FAILURE (cloud returns no id): local kept, persisted with null cloud id, remoteRedirect failed", async () => {
-    mockGetSettings.mockResolvedValue(
-      defaultCloudSettings as any,
-    );
+    mockGetSettings.mockResolvedValue(defaultCloudSettings as any);
     vi.spyOn(AirlinkCloudClient.prototype, "uploadFile").mockResolvedValue(
       {} as any,
     );

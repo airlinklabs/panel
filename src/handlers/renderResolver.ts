@@ -37,11 +37,15 @@ function renderFileDirect(
 ): void {
   ejs.renderFile(filePath, data, {}, (err: Error | null, html: string) => {
     if (err) {
-      if (callback) {return callback(err);}
+      if (callback) {
+        return callback(err);
+      }
       logger.error('View render error:', err);
       return res.status(500).send('View render error');
     }
-    if (callback) {return callback(null, html);}
+    if (callback) {
+      return callback(null, html);
+    }
     res.send(html);
   });
 }
@@ -58,7 +62,11 @@ export interface RenderResolverOptions {
  * Mount before any route handlers; views resolve lazily at render time.
  */
 export function installRenderResolver(options: RenderResolverOptions) {
-  const { viewsPath, addonViewsDir, getAddonDirs: listAddonDirs = () => getAddonDirs(addonViewsDir) } = options;
+  const {
+    viewsPath,
+    addonViewsDir,
+    getAddonDirs: listAddonDirs = () => getAddonDirs(addonViewsDir),
+  } = options;
 
   return (req: Request, res: Response, next: NextFunction): void => {
     const originalRenderBase = res.render.bind(res);
@@ -79,7 +87,9 @@ export function installRenderResolver(options: RenderResolverOptions) {
       const data = { ...res.locals, ...opts };
 
       const isAbsolutePath = path.isAbsolute(view);
-      const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
+      const isAddonView =
+        view.includes('/storage/addons/') ||
+        view.includes('\\storage\\addons\\');
 
       if (isAbsolutePath || isAddonView) {
         renderFileDirect(res, view, data, callback);
@@ -89,29 +99,55 @@ export function installRenderResolver(options: RenderResolverOptions) {
       const viewPath = path.join(viewsPath, `${view}.ejs`);
       if (!fs.existsSync(viewPath)) {
         const tryRenderAddonView = (addonSlug: string): boolean => {
-          const addonFallbackPath = resolveAddonViewPath(addonViewsDir, addonSlug, `${view}.ejs`);
-          if (!addonFallbackPath) {return false;}
-          ejs.renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
-            if (err) {
-              if (callback) {return callback(err);}
-              return res.status(500).send(
-                isProductionPosture() ? 'View render error' : `View render error: ${err.message}`,
-              );
-            }
-            if (callback) {return callback(null, html);}
-            res.send(html);
-          });
+          const addonFallbackPath = resolveAddonViewPath(
+            addonViewsDir,
+            addonSlug,
+            `${view}.ejs`,
+          );
+          if (!addonFallbackPath) {
+            return false;
+          }
+          ejs.renderFile(
+            addonFallbackPath,
+            data,
+            {},
+            (err: Error | null, html: string) => {
+              if (err) {
+                if (callback) {
+                  return callback(err);
+                }
+                return res
+                  .status(500)
+                  .send(
+                    isProductionPosture()
+                      ? 'View render error'
+                      : `View render error: ${err.message}`,
+                  );
+              }
+              if (callback) {
+                return callback(null, html);
+              }
+              res.send(html);
+            },
+          );
           return true;
         };
 
         const requestedSlug = (opts as { addonSlug?: unknown }).addonSlug;
-        if (isValidAddonSlug(requestedSlug) && tryRenderAddonView(requestedSlug)) {
+        if (
+          isValidAddonSlug(requestedSlug) &&
+          tryRenderAddonView(requestedSlug)
+        ) {
           return;
         }
 
         for (const addonDir of listAddonDirs()) {
-          if (requestedSlug === addonDir) {continue;}
-          if (tryRenderAddonView(addonDir)) {return;}
+          if (requestedSlug === addonDir) {
+            continue;
+          }
+          if (tryRenderAddonView(addonDir)) {
+            return;
+          }
         }
       }
 

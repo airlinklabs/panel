@@ -1,8 +1,8 @@
-import { WebSocket } from "ws";
-import logger from "../logger";
-import { daemonBaseUrl } from "../utils/core/daemonRequest";
-import { emitRealtime, serverEvent } from "./events";
-import type { WatchHandle } from "../../types/realtime";
+import { WebSocket } from 'ws';
+import logger from '../logger';
+import { daemonBaseUrl } from '../utils/core/daemonRequest';
+import { emitRealtime, serverEvent } from './events';
+import type { WatchHandle } from '../../types/realtime';
 
 // ── Per-server daemon event watcher ──────────────────────────────────────────
 // The daemon streams container lifecycle events on `/containerevents/:id`
@@ -15,7 +15,7 @@ import type { WatchHandle } from "../../types/realtime";
 // The browser never opens `/events/:id` directly — it subscribes to the
 // `server.lifecycle.changed` bus event instead.
 
-export type { WatchHandle } from "../../types/realtime";
+export type { WatchHandle } from '../../types/realtime';
 
 interface WatcherState {
   refs: number;
@@ -40,12 +40,12 @@ async function daemonWsUrl(node: {
   port: number | string;
 }): Promise<string> {
   const scheme = (await daemonBaseUrl(node.address, node.port)).startsWith(
-    "https",
+    'https',
   )
-    ? "wss"
-    : "ws";
+    ? 'wss'
+    : 'ws';
   const host =
-    node.address.includes(":") && !node.address.startsWith("[")
+    node.address.includes(':') && !node.address.startsWith('[')
       ? `[${node.address}]`
       : node.address;
   return `${scheme}://${host}:${node.port}`;
@@ -77,52 +77,52 @@ function openSocket(state: WatcherState, serverId: string): void {
       const authTimer = setTimeout(() => {
         if (socket.readyState === WebSocket.OPEN && !state.authed) {
           logger.debug(`event watcher auth timeout for ${serverId}`);
-          socket.close(1008, "auth timeout");
+          socket.close(1008, 'auth timeout');
         }
       }, 10_000);
 
-      socket.on("open", () => {
+      socket.on('open', () => {
         if (!isCurrent()) {
           return;
         }
         state.authed = false;
         state.reconnectAttempts = 0;
-        socket.send(JSON.stringify({ event: "auth", args: [state.node.key] }));
+        socket.send(JSON.stringify({ event: 'auth', args: [state.node.key] }));
         clearTimeout(authTimer);
       });
 
-      socket.on("message", (raw) => {
+      socket.on('message', (raw) => {
         let msg: { event?: string; data?: unknown };
         try {
           msg = JSON.parse(String(raw));
         } catch {
           return;
         }
-        if (!msg || typeof msg !== "object") {
+        if (!msg || typeof msg !== 'object') {
           return;
         }
 
         if (
-          msg.event === "lifecycle" &&
+          msg.event === 'lifecycle' &&
           msg.data &&
-          typeof msg.data === "object"
+          typeof msg.data === 'object'
         ) {
           const data = msg.data as { type?: string; message?: string };
-          if (typeof data.type === "string") {
+          if (typeof data.type === 'string') {
             emitRealtime(
-              serverEvent("server.lifecycle.changed", serverId, {
+              serverEvent('server.lifecycle.changed', serverId, {
                 state: { type: data.type, message: data.message ?? null },
               }),
             );
           }
-        } else if (msg.event === "error") {
+        } else if (msg.event === 'error') {
           logger.warn(`event watcher error for ${serverId}:`, {
             data: msg.data,
           });
         }
       });
 
-      socket.on("error", () => {
+      socket.on('error', () => {
         if (!isCurrent()) {
           return;
         }
@@ -131,7 +131,7 @@ function openSocket(state: WatcherState, serverId: string): void {
         scheduleReconnect(state, serverId);
       });
 
-      socket.on("close", () => {
+      socket.on('close', () => {
         if (!isCurrent()) {
           return;
         }
@@ -192,7 +192,7 @@ function cleanup(serverId: string): void {
   }
   if (state.socket) {
     try {
-      state.socket.close(1000, "no watchers");
+      state.socket.close(1000, 'no watchers');
     } catch {
       /* already closed */
     }

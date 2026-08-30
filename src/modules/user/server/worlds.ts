@@ -1,18 +1,21 @@
 import { getSettings } from '../../../handlers/settingsCache';
 import type { Router, Request, Response } from 'express';
-import { isAuthenticatedForServer, requireSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
+import {
+  isAuthenticatedForServer,
+  requireSubUserPermission,
+} from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { isWorld } from '../../../handlers/features';
-import { fsListSchema, parseDaemonResponse } from '../../../platform/daemon/dtos';
+import {
+  fsListSchema,
+  parseDaemonResponse,
+} from '../../../platform/daemon/dtos';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
-import {
-  getServerStatusInput,
-  getImageFeatures,
-} from './shared';
+import { getServerStatusInput, getImageFeatures } from './shared';
 
 export function registerWorldsRoutes(router: Router): void {
   router.get(
@@ -50,7 +53,8 @@ export function registerWorldsRoutes(router: Router): void {
             nodeKey: server.node.key,
             params: { id: server.UUID },
           });
-          const Folders = parseDaemonResponse(fsListSchema, response.data) ?? [];
+          const Folders =
+            parseDaemonResponse(fsListSchema, response.data) ?? [];
 
           const worlds = [];
           for (const folder of Folders) {
@@ -71,16 +75,21 @@ export function registerWorldsRoutes(router: Router): void {
             user,
             worlds,
             features,
-            installed: await checkForServerInstallation(getParamAsString(serverId)),
+            installed: await checkForServerInstallation(
+              getParamAsString(serverId),
+            ),
             server,
             serverStatus,
             req,
             settings,
           });
         } catch (fileRequestError: unknown) {
-          const errCode = fileRequestError && typeof fileRequestError === 'object' && 'code' in fileRequestError
-            ? String((fileRequestError as { code: unknown }).code)
-            : undefined;
+          const errCode =
+            fileRequestError &&
+            typeof fileRequestError === 'object' &&
+            'code' in fileRequestError
+              ? String((fileRequestError as { code: unknown }).code)
+              : undefined;
           if (
             errCode !== 'ECONNREFUSED' &&
             errCode !== 'ETIMEDOUT' &&
@@ -105,7 +114,9 @@ export function registerWorldsRoutes(router: Router): void {
             user,
             worlds: [],
             features: [],
-            installed: await checkForServerInstallation(getParamAsString(serverId)),
+            installed: await checkForServerInstallation(
+              getParamAsString(serverId),
+            ),
             server,
             serverStatus,
             req,

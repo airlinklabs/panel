@@ -1,18 +1,18 @@
-import { getSettings } from "../../handlers/settingsCache";
-import type { Request, Response } from "express";
-import { Router } from "express";
-import prisma from "../../db";
-import type { Module } from "../../handlers/moduleInit";
-import { isAuthenticated } from "../../handlers/utils/auth/authUtil";
-import logger from "../../handlers/logger";
+import { getSettings } from '../../handlers/settingsCache';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import prisma from '../../db';
+import type { Module } from '../../handlers/moduleInit';
+import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
+import logger from '../../handlers/logger';
 import {
   isPterodactylEgg,
   parseEgg,
   normalizeEggForDb,
   validateEggData,
   fetchEggFromUrl,
-} from "../../handlers/utils/egg/eggParser";
-import { logActivity } from "../../handlers/utils/activity/activityLogger";
+} from '../../handlers/utils/egg/eggParser';
+import { logActivity } from '../../handlers/utils/activity/activityLogger';
 
 function normalizeImageData(raw: Record<string, unknown>) {
   if (isPterodactylEgg(raw)) {
@@ -29,21 +29,21 @@ function normalizeImageData(raw: Record<string, unknown>) {
   const dockerImages = raw.docker_images || raw.dockerImages;
   const dockerImagesArray = Array.isArray(dockerImages)
     ? dockerImages
-    : typeof dockerImages === "object" && dockerImages !== null
+    : typeof dockerImages === 'object' && dockerImages !== null
       ? Object.entries(dockerImages as Record<string, string>).map(
-          ([k, v]) => ({ [k]: v }),
-        )
+        ([k, v]) => ({ [k]: v }),
+      )
       : [];
 
   return {
-    name: String(raw.name ?? ""),
-    description: String(raw.description ?? ""),
-    author: String(raw.author ?? ""),
-    authorName: String(raw.authorName ?? ""),
-    startup: String(raw.startup ?? ""),
-    stop: String(raw.stop ?? ""),
-    startup_done: String(raw.startup_done ?? ""),
-    config_files: String(raw.config_files ?? ""),
+    name: String(raw.name ?? ''),
+    description: String(raw.description ?? ''),
+    author: String(raw.author ?? ''),
+    authorName: String(raw.authorName ?? ''),
+    startup: String(raw.startup ?? ''),
+    stop: String(raw.stop ?? ''),
+    startup_done: String(raw.startup_done ?? ''),
+    config_files: String(raw.config_files ?? ''),
     meta: JSON.stringify(raw.meta ?? {}),
     dockerImages: JSON.stringify(dockerImagesArray),
     info: JSON.stringify(raw.info ?? {}),
@@ -60,7 +60,7 @@ async function canSubmitImages(user: {
   isAdmin?: boolean;
   role?: string;
 }): Promise<boolean> {
-  if (user.isAdmin || user.role === "owner" || user.role === "admin") {
+  if (user.isAdmin || user.role === 'owner' || user.role === 'admin') {
     return true;
   }
   const settings = await getSettings();
@@ -69,45 +69,45 @@ async function canSubmitImages(user: {
 
 const userImagesModule: Module = {
   info: {
-    name: "User Images Module",
+    name: 'User Images Module',
     description:
-      "Lets users submit and manage custom images for admin approval.",
-    version: "2.0.0",
-    moduleVersion: "1.0.0",
-    author: "AirLinkLab",
-    license: "MIT",
+      'Lets users submit and manage custom images for admin approval.',
+    version: '2.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
   },
 
   router: () => {
     const router = Router();
 
     // Legacy /my-images pages redirect to Account #images (Phase 12)
-    router.get("/my-images", isAuthenticated(), (_req, res) => {
-      res.redirect("/account#images");
+    router.get('/my-images', isAuthenticated(), (_req, res) => {
+      res.redirect('/account#images');
     });
-    router.get("/my-images/new", isAuthenticated(), (_req, res) => {
-      res.redirect("/account#images");
+    router.get('/my-images/new', isAuthenticated(), (_req, res) => {
+      res.redirect('/account#images');
     });
-    router.get("/my-images/edit/:id", isAuthenticated(), (_req, res) => {
-      res.redirect("/account#images");
+    router.get('/my-images/edit/:id', isAuthenticated(), (_req, res) => {
+      res.redirect('/account#images');
     });
 
     router.post(
-      "/my-images/create",
+      '/my-images/create',
       isAuthenticated(),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            res.status(401).json({ error: "Unauthorized" });
+            res.status(401).json({ error: 'Unauthorized' });
             return;
           }
           const allowed = await canSubmitImages(user);
           if (!allowed) {
             res
               .status(403)
-              .json({ error: "Image submissions are not enabled." });
+              .json({ error: 'Image submissions are not enabled.' });
             return;
           }
 
@@ -124,18 +124,18 @@ const userImagesModule: Module = {
           if (!name || !startup) {
             res
               .status(400)
-              .json({ error: "Name and startup command are required." });
+              .json({ error: 'Name and startup command are required.' });
             return;
           }
 
           let parsedDockerImages: unknown = dockerImages;
-          if (typeof dockerImages === "string" && dockerImages.trim()) {
+          if (typeof dockerImages === 'string' && dockerImages.trim()) {
             try {
               parsedDockerImages = JSON.parse(dockerImages);
             } catch {
               res
                 .status(400)
-                .json({ error: "Docker images must be valid JSON." });
+                .json({ error: 'Docker images must be valid JSON.' });
               return;
             }
           }
@@ -143,12 +143,12 @@ const userImagesModule: Module = {
           const raw = {
             name,
             startup,
-            description: description || "",
-            author: author || "",
-            authorName: authorName || "",
+            description: description || '',
+            author: author || '',
+            authorName: authorName || '',
             docker_images: parsedDockerImages,
             variables:
-              typeof variables === "string" && variables.trim()
+              typeof variables === 'string' && variables.trim()
                 ? JSON.parse(variables)
                 : variables || [],
           };
@@ -157,7 +157,7 @@ const userImagesModule: Module = {
           if (!valid) {
             res
               .status(400)
-              .json({ error: "Invalid image configuration", details: errors });
+              .json({ error: 'Invalid image configuration', details: errors });
             return;
           }
 
@@ -169,56 +169,54 @@ const userImagesModule: Module = {
           if (existing) {
             res
               .status(409)
-              .json({ error: "An image with that name already exists." });
+              .json({ error: 'An image with that name already exists.' });
             return;
           }
 
           const image = await prisma.images.create({
             data: {
               ...data,
-              status: "pending",
+              status: 'pending',
               createdById: user.id,
             },
           });
-          await logActivity(req, "image:submit", {
+          await logActivity(req, 'image:submit', {
             metadata: { imageId: image.id, name: image.name },
           });
-          res
-            .status(200)
-            .json({
-              success: true,
-              message: "Image submitted for review.",
-              id: image.id,
-            });
+          res.status(200).json({
+            success: true,
+            message: 'Image submitted for review.',
+            id: image.id,
+          });
         } catch (error: unknown) {
-          logger.error("Error submitting image:", error);
-          res.status(500).json({ error: "Failed to submit image." });
+          logger.error('Error submitting image:', error);
+          res.status(500).json({ error: 'Failed to submit image.' });
         }
       },
     );
 
     router.post(
-      "/my-images/import-url",
+      '/my-images/import-url',
       isAuthenticated(),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            res.status(401).json({ error: "Unauthorized" });
+            res.status(401).json({ error: 'Unauthorized' });
             return;
           }
           const allowed = await canSubmitImages(user);
           if (!allowed) {
             res
               .status(403)
-              .json({ error: "Image submissions are not enabled." });
+              .json({ error: 'Image submissions are not enabled.' });
             return;
           }
 
-          const url = String(req.body?.url ?? "").trim();
+          const url = String(req.body?.url ?? '').trim();
           if (!url) {
-            res.status(400).json({ error: "URL is required." });
+            res.status(400).json({ error: 'URL is required.' });
             return;
           }
 
@@ -232,7 +230,7 @@ const userImagesModule: Module = {
           if (!valid) {
             res
               .status(400)
-              .json({ error: "Invalid egg configuration", details: errors });
+              .json({ error: 'Invalid egg configuration', details: errors });
             return;
           }
 
@@ -243,37 +241,35 @@ const userImagesModule: Module = {
           if (existing) {
             res
               .status(409)
-              .json({ error: "An image with that name already exists." });
+              .json({ error: 'An image with that name already exists.' });
             return;
           }
 
           const image = await prisma.images.create({
             data: {
               ...data,
-              status: "pending",
+              status: 'pending',
               createdById: user.id,
             },
           });
 
-          await logActivity(req, "image:submit", {
-            metadata: { imageId: image.id, name: image.name, source: "url" },
+          await logActivity(req, 'image:submit', {
+            metadata: { imageId: image.id, name: image.name, source: 'url' },
           });
-          res
-            .status(200)
-            .json({
-              success: true,
-              message: "Image imported and submitted for review.",
-              id: image.id,
-            });
+          res.status(200).json({
+            success: true,
+            message: 'Image imported and submitted for review.',
+            id: image.id,
+          });
         } catch (error: unknown) {
-          logger.error("Failed to import image from URL:", error);
-          res.status(500).json({ error: "Failed to import image from URL." });
+          logger.error('Failed to import image from URL:', error);
+          res.status(500).json({ error: 'Failed to import image from URL.' });
         }
       },
     );
 
     router.post(
-      "/my-images/update/:id/:state",
+      '/my-images/update/:id/:state',
       isAuthenticated(),
       async (req: Request, res: Response) => {
         try {
@@ -283,17 +279,17 @@ const userImagesModule: Module = {
           });
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            res.status(401).json({ error: "Unauthorized" });
+            res.status(401).json({ error: 'Unauthorized' });
             return;
           }
           if (!targetImage) {
-            res.status(404).json({ error: "Image not found." });
+            res.status(404).json({ error: 'Image not found.' });
             return;
           }
           if (targetImage.createdById !== user.id) {
             res
               .status(403)
-              .json({ error: "You can only edit images you submitted." });
+              .json({ error: 'You can only edit images you submitted.' });
             return;
           }
 
@@ -302,8 +298,8 @@ const userImagesModule: Module = {
 
           // The edit form posts dockerImages/variables as JSON strings.
           const raw: Record<string, unknown> = { ...body };
-          for (const key of ["docker_images", "dockerImages", "variables"]) {
-            if (typeof raw[key] === "string" && (raw[key] as string).trim()) {
+          for (const key of ['docker_images', 'dockerImages', 'variables']) {
+            if (typeof raw[key] === 'string' && (raw[key] as string).trim()) {
               try {
                 raw[key] = JSON.parse(raw[key] as string);
               } catch {
@@ -316,8 +312,8 @@ const userImagesModule: Module = {
           const normalized = normalizeImageData(raw);
 
           const data: Record<string, unknown> = { ...normalized };
-          if (state === "published") {
-            data.status = "pending";
+          if (state === 'published') {
+            data.status = 'pending';
             data.rejectionReason = null;
           }
 
@@ -326,16 +322,16 @@ const userImagesModule: Module = {
             data,
           });
 
-          res.json({ success: true, message: "Image updated." });
+          res.json({ success: true, message: 'Image updated.' });
         } catch (error: unknown) {
-          logger.error("Failed to update image:", error);
-          res.status(500).json({ error: "Failed to update image." });
+          logger.error('Failed to update image:', error);
+          res.status(500).json({ error: 'Failed to update image.' });
         }
       },
     );
 
     router.delete(
-      "/my-images/:id",
+      '/my-images/:id',
       isAuthenticated(),
       async (req: Request, res: Response) => {
         try {
@@ -344,13 +340,13 @@ const userImagesModule: Module = {
             where: { id: Number(req.params.id) },
           });
           if (!image) {
-            res.status(404).json({ error: "Image not found." });
+            res.status(404).json({ error: 'Image not found.' });
             return;
           }
           if (image.createdById !== userId) {
             res
               .status(403)
-              .json({ error: "You can only delete images you submitted." });
+              .json({ error: 'You can only delete images you submitted.' });
             return;
           }
 
@@ -358,20 +354,17 @@ const userImagesModule: Module = {
             where: { imageId: image.id },
           });
           if (inUse > 0) {
-            res
-              .status(400)
-              .json({
-                error:
-                  "This image is in use by a server and cannot be deleted.",
-              });
+            res.status(400).json({
+              error: 'This image is in use by a server and cannot be deleted.',
+            });
             return;
           }
 
           await prisma.images.delete({ where: { id: image.id } });
-          res.json({ success: true, message: "Image deleted." });
+          res.json({ success: true, message: 'Image deleted.' });
         } catch (error: unknown) {
-          logger.error("Failed to delete image:", error);
-          res.status(500).json({ error: "Failed to delete image." });
+          logger.error('Failed to delete image:', error);
+          res.status(500).json({ error: 'Failed to delete image.' });
         }
       },
     );

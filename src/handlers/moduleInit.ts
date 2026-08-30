@@ -1,4 +1,3 @@
-
 import type { Router } from 'express';
 
 interface ModuleInfo {

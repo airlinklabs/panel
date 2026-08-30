@@ -18,10 +18,10 @@
  */
 (function (root, factory) {
   var api = factory(root);
-  if (typeof window !== 'undefined') window.Islands = api;
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
-})(typeof window !== 'undefined' ? window : globalThis, function (rootScope) {
-  'use strict';
+  if (typeof window !== "undefined") window.Islands = api;
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+})(typeof window !== "undefined" ? window : globalThis, function (rootScope) {
+  "use strict";
 
   var doc = (rootScope && rootScope.document) || null;
 
@@ -59,7 +59,11 @@
       }
       // Check if the controller's root is inside the target (or is the target)
       if (target.contains && target.contains(ctrl.root)) {
-        try { ctrl.destroy(); } catch (e) { /* isolate */ }
+        try {
+          ctrl.destroy();
+        } catch (e) {
+          /* isolate */
+        }
         mountedControllers.splice(i, 1);
       }
     }
@@ -70,7 +74,11 @@
    */
   function destroyAll() {
     for (var i = 0; i < mountedControllers.length; i++) {
-      try { mountedControllers[i].destroy(); } catch (e) { /* isolate */ }
+      try {
+        mountedControllers[i].destroy();
+      } catch (e) {
+        /* isolate */
+      }
     }
     mountedControllers = [];
   }
@@ -87,10 +95,10 @@
     for (var i = 0; i < systems.length; i++) {
       var sys = systems[i];
       var api = window[sys.key];
-      if (typeof api !== 'object' || api === null) continue;
+      if (typeof api !== "object" || api === null) continue;
 
       var method = api[sys.scanMethod];
-      if (typeof method !== 'function') continue;
+      if (typeof method !== "function") continue;
 
       try {
         if (sys.rootFn) {
@@ -107,7 +115,9 @@
           var controllers = method.call(api);
           trackControllers(controllers, sys.key);
         }
-      } catch (e) { /* isolate */ }
+      } catch (e) {
+        /* isolate */
+      }
     }
   }
 
@@ -118,7 +128,7 @@
     if (!controllers || !Array.isArray(controllers)) return;
     for (var i = 0; i < controllers.length; i++) {
       var ctrl = controllers[i];
-      if (ctrl && ctrl.root && typeof ctrl.destroy === 'function') {
+      if (ctrl && ctrl.root && typeof ctrl.destroy === "function") {
         // Avoid duplicates
         var exists = false;
         for (var j = 0; j < mountedControllers.length; j++) {
@@ -149,10 +159,10 @@
     for (var i = 0; i < systems.length; i++) {
       var sys = systems[i];
       var api = window[sys.key];
-      if (typeof api !== 'object' || api === null) continue;
+      if (typeof api !== "object" || api === null) continue;
 
       var method = api[sys.scanMethod];
-      if (typeof method !== 'function') continue;
+      if (typeof method !== "function") continue;
 
       try {
         var controllers;
@@ -162,7 +172,9 @@
           controllers = method.call(api);
         }
         trackControllers(controllers, sys.key);
-      } catch (e) { /* isolate */ }
+      } catch (e) {
+        /* isolate */
+      }
     }
   }
 
@@ -188,16 +200,20 @@
     if (!target || !target.querySelectorAll) return;
     for (var i = 0; i < specialistRegistry.length; i++) {
       var island = specialistRegistry[i];
-      var roots = target.querySelectorAll('[data-island="' + island.name + '"]');
+      var roots = target.querySelectorAll(
+        '[data-island="' + island.name + '"]',
+      );
       for (var j = 0; j < roots.length; j++) {
         var root = roots[j];
         // Skip if already mounted
         if (root.__islandCleanup) continue;
         try {
           var cleanup = island.mountFn(root, {
-            nonce: root.dataset.nonce || (doc && doc.querySelector('meta[name="csrf-token"]')?.content),
+            nonce:
+              root.dataset.nonce ||
+              (doc && doc.querySelector('meta[name="csrf-token"]')?.content),
           });
-          if (typeof cleanup === 'function') {
+          if (typeof cleanup === "function") {
             root.__islandCleanup = cleanup;
             mountedControllers.push({
               root: root,
@@ -207,10 +223,12 @@
                   root.__islandCleanup = null;
                 }
               },
-              systemKey: 'island:' + island.name,
+              systemKey: "island:" + island.name,
             });
           }
-        } catch (e) { /* isolate */ }
+        } catch (e) {
+          /* isolate */
+        }
       }
     }
   }
@@ -218,17 +236,19 @@
   // ── Initialize default al-* systems ──────────────────────────────────
 
   function init() {
-    register('ALTabSystem', 'scan');
-    register('ALDialog', 'scan');
-    register('ALField', 'enhance', function () { return doc ? doc.body : null; });
-    register('ALStateView', 'scan');
+    register("ALTabSystem", "scan");
+    register("ALDialog", "scan");
+    register("ALField", "enhance", function () {
+      return doc ? doc.body : null;
+    });
+    register("ALStateView", "scan");
     sync();
   }
 
-  if (doc && doc.readyState !== 'loading') {
+  if (doc && doc.readyState !== "loading") {
     init();
   } else if (doc) {
-    doc.addEventListener('DOMContentLoaded', init);
+    doc.addEventListener("DOMContentLoaded", init);
   }
 
   return {
@@ -246,8 +266,12 @@
     registerIsland: registerIsland,
 
     // Diagnostics
-    get mounted() { return mountedControllers.slice(); },
-    get systems() { return systems.slice(); },
+    get mounted() {
+      return mountedControllers.slice();
+    },
+    get systems() {
+      return systems.slice();
+    },
     VERSION: 1,
   };
 });

@@ -64,17 +64,22 @@ export function mintCapabilityToken(options: MintOptions): string {
   };
 
   const payload = b64url(Buffer.from(JSON.stringify(claims)));
-  const sig = crypto.createHmac('sha256', nodeKey).update(payload).digest('base64url');
+  const sig = crypto
+    .createHmac('sha256', nodeKey)
+    .update(payload)
+    .digest('base64url');
   return `${payload}.${sig}`;
 }
 
-export type VerifyResult = {
-  ok: true;
-  claims: CapabilityClaims;
-} | {
-  ok: false;
-  error: string;
-};
+export type VerifyResult =
+  | {
+      ok: true;
+      claims: CapabilityClaims;
+    }
+  | {
+      ok: false;
+      error: string;
+    };
 
 /**
  * Verifies a capability token on the daemon side.
@@ -98,7 +103,10 @@ export function verifyCapabilityToken(
   const [payload, sig] = [parts[0]!, parts[1]!];
 
   // Verify signature
-  const expected = crypto.createHmac('sha256', expectedKey).update(payload).digest('base64url');
+  const expected = crypto
+    .createHmac('sha256', expectedKey)
+    .update(payload)
+    .digest('base64url');
   const a = Buffer.from(sig, 'base64url');
   const b = Buffer.from(expected, 'base64url');
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
@@ -108,7 +116,9 @@ export function verifyCapabilityToken(
   // Decode and validate claims
   let claims: CapabilityClaims;
   try {
-    claims = JSON.parse(b64urlDecode(payload).toString('utf8')) as CapabilityClaims;
+    claims = JSON.parse(
+      b64urlDecode(payload).toString('utf8'),
+    ) as CapabilityClaims;
   } catch {
     return { ok: false, error: 'invalid payload' };
   }
@@ -117,11 +127,17 @@ export function verifyCapabilityToken(
     return { ok: false, error: 'unsupported version' };
   }
 
-  if (typeof claims.serverId !== 'string' || claims.serverId !== expectedServerId) {
+  if (
+    typeof claims.serverId !== 'string' ||
+    claims.serverId !== expectedServerId
+  ) {
     return { ok: false, error: 'server ID mismatch' };
   }
 
-  if (!Array.isArray(claims.routes) || !(claims.routes as string[]).includes(expectedRoute)) {
+  if (
+    !Array.isArray(claims.routes) ||
+    !(claims.routes as string[]).includes(expectedRoute)
+  ) {
     return { ok: false, error: 'route not permitted' };
   }
 

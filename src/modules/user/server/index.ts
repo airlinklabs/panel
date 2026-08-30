@@ -15,7 +15,8 @@ import { registerDatabaseRoutes } from './databases';
 const dashboardModule: Module = {
   info: {
     name: 'Server Module',
-    description: 'Server management routes: console, files, backups, settings, startup, players, and worlds.',
+    description:
+      'Server management routes: console, files, backups, settings, startup, players, and worlds.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',

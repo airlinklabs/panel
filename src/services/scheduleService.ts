@@ -1,4 +1,4 @@
-import prisma from "../db";
+import prisma from '../db';
 
 /**
  * List schedules for a server, newest first, with tasks ordered by `order`.
@@ -6,8 +6,8 @@ import prisma from "../db";
 export async function listSchedules(serverId: string) {
   return prisma.schedule.findMany({
     where: { serverId },
-    include: { tasks: { orderBy: { order: "asc" } } },
-    orderBy: { createdAt: "desc" },
+    include: { tasks: { orderBy: { order: 'asc' } } },
+    orderBy: { createdAt: 'desc' },
   });
 }
 
@@ -18,7 +18,7 @@ export async function listSchedules(serverId: string) {
 export async function getSchedule(scheduleId: number, serverId?: string) {
   return prisma.schedule.findFirst({
     where: { id: scheduleId, ...(serverId ? { serverId } : {}) },
-    include: { tasks: { orderBy: { order: "asc" } } },
+    include: { tasks: { orderBy: { order: 'asc' } } },
   });
 }
 
@@ -61,7 +61,7 @@ export async function createSchedule(
       nextRunAt: data.nextRunAt ?? null,
       ...(data.tasks ? { tasks: data.tasks } : {}),
     },
-    include: { tasks: { orderBy: { order: "asc" } } },
+    include: { tasks: { orderBy: { order: 'asc' } } },
   });
 }
 
@@ -73,7 +73,9 @@ export async function deleteSchedule(scheduleId: number, serverId: string) {
   const schedule = await prisma.schedule.findFirst({
     where: { id: scheduleId, serverId },
   });
-  if (!schedule) return null;
+  if (!schedule) {
+    return null;
+  }
   await prisma.schedule.delete({ where: { id: schedule.id } });
   return schedule;
 }

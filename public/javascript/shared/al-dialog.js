@@ -53,10 +53,10 @@
  */
 (function (root, factory) {
   var api = factory(root);
-  if (typeof window !== 'undefined') window.ALDialog = api;
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
-})(typeof window !== 'undefined' ? window : globalThis, function (rootScope) {
-  'use strict';
+  if (typeof window !== "undefined") window.ALDialog = api;
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+})(typeof window !== "undefined" ? window : globalThis, function (rootScope) {
+  "use strict";
 
   /* The root scope (window in the browser) is read from `currentScope` at
      call time so tests can inject a shim via `ALDialog.setScope()`. */
@@ -69,7 +69,7 @@
   }
 
   function qsAll(rootEl, sel) {
-    if (!rootEl || typeof rootEl.querySelectorAll !== 'function') return [];
+    if (!rootEl || typeof rootEl.querySelectorAll !== "function") return [];
     return Array.prototype.slice.call(rootEl.querySelectorAll(sel));
   }
 
@@ -81,49 +81,61 @@
      on every use so a test scope swap picks up the right element. */
   var globalDialogEl = null;
 
-  var stack = [];          // currently open dialogs, innermost last
-  var lastFocused = null;  // element to return focus to on close
+  var stack = []; // currently open dialogs, innermost last
+  var lastFocused = null; // element to return focus to on close
   var pendingResolve = null; // Promise resolver for the active confirm
   var onCloseHook = null;
-  var bodyOrigins = typeof WeakMap === 'function' ? new WeakMap() : null;
+  var bodyOrigins = typeof WeakMap === "function" ? new WeakMap() : null;
 
   function activeDialog() {
     return stack.length ? stack[stack.length - 1] : null;
   }
 
   function isOpen(el) {
-    return !!el && (el.open === true || el.hasAttribute && el.hasAttribute('open'));
+    return (
+      !!el && (el.open === true || (el.hasAttribute && el.hasAttribute("open")))
+    );
   }
 
   function focusableIn(el) {
-    return qsAll(el, 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
-      .filter(function (el2) { return !el2.disabled; });
+    return qsAll(
+      el,
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    ).filter(function (el2) {
+      return !el2.disabled;
+    });
   }
 
   function lockScroll() {
     if (doc && doc.documentElement) {
-      doc.documentElement.setAttribute('data-modal-open', '');
+      doc.documentElement.setAttribute("data-modal-open", "");
     }
     if (doc && doc.body) {
-      doc.body.classList.add('no-scroll');
+      doc.body.classList.add("no-scroll");
     }
   }
 
   function unlockScroll() {
     if (stack.length) return; // a nested dialog is still open
     if (doc && doc.documentElement) {
-      doc.documentElement.removeAttribute('data-modal-open');
+      doc.documentElement.removeAttribute("data-modal-open");
     }
     if (doc && doc.body) {
-      doc.body.classList.remove('no-scroll');
+      doc.body.classList.remove("no-scroll");
     }
   }
 
   function restoreFocus() {
-    if (!stack.length && lastFocused && typeof lastFocused.focus === 'function') {
+    if (
+      !stack.length &&
+      lastFocused &&
+      typeof lastFocused.focus === "function"
+    ) {
       try {
         lastFocused.focus();
-      } catch (e) { /* element detached */ }
+      } catch (e) {
+        /* element detached */
+      }
     }
     lastFocused = null;
   }
@@ -136,7 +148,7 @@
     if (!bodyNode) return;
     var o = bodyOrigins && bodyOrigins.get(bodyNode);
     if (o && o.parent && o.parent.parentNode) {
-      bodyNode.style.display = 'none';
+      bodyNode.style.display = "none";
       o.parent.insertBefore(bodyNode, o.ref || null);
     }
     bodyNode = null;
@@ -144,8 +156,13 @@
 
   function closeDialog(el, opts) {
     if (isOpen(el)) {
-      try { el.close(); } catch (e) { /* shim may not implement close() */ }
-      if (el.hasAttribute && el.hasAttribute('open')) el.removeAttribute('open');
+      try {
+        el.close();
+      } catch (e) {
+        /* shim may not implement close() */
+      }
+      if (el.hasAttribute && el.hasAttribute("open"))
+        el.removeAttribute("open");
     }
     var idx = stack.indexOf(el);
     if (idx !== -1) stack.splice(idx, 1);
@@ -153,17 +170,25 @@
     restoreFocus();
     if (opts && opts.hook) {
       var hook = opts.hook;
-      try { hook(); } catch (e) { /* isolate */ }
+      try {
+        hook();
+      } catch (e) {
+        /* isolate */
+      }
     }
   }
 
   function openDialog(el) {
     if (isOpen(el)) return;
     lastFocused = (doc && doc.activeElement) || null;
-    if (typeof el.showModal === 'function') {
-      try { el.showModal(); } catch (e) { /* already open or unsupported */ }
+    if (typeof el.showModal === "function") {
+      try {
+        el.showModal();
+      } catch (e) {
+        /* already open or unsupported */
+      }
     }
-    if (!isOpen(el) && el.setAttribute) el.setAttribute('open', '');
+    if (!isOpen(el) && el.setAttribute) el.setAttribute("open", "");
     stack.push(el);
     lockScroll();
   }
@@ -172,9 +197,13 @@
      button — mirroring the old modal's "focus close" affordance. */
   function focusDialog(el) {
     var focusable = focusableIn(el);
-    var target = focusable[0] || one(el, '[data-al-dialog-close]') || el;
-    if (target && typeof target.focus === 'function') {
-      try { target.focus(); } catch (e) { /* noop */ }
+    var target = focusable[0] || one(el, "[data-al-dialog-close]") || el;
+    if (target && typeof target.focus === "function") {
+      try {
+        target.focus();
+      } catch (e) {
+        /* noop */
+      }
     }
   }
 
@@ -182,23 +211,21 @@
 
   function currentEl() {
     if (!doc) return null;
-    globalDialogEl = doc.getElementById('globalModal');
+    globalDialogEl = doc.getElementById("globalModal");
     return globalDialogEl;
   }
 
   function fill(opts) {
     var el = currentEl();
     if (!el) return null;
-    var title = one(el, '[data-al-dialog-title], #globalModalTitle');
-    var body = one(el, '[data-al-dialog-body], #globalModalBody');
-    var confirmBtn = one(el, '[data-al-dialog-confirm], #globalModalConfirm');
-    if (title) title.textContent = opts.title || '';
-    if (body) body.textContent = opts.body || '';
+    var title = one(el, "[data-al-dialog-title], #globalModalTitle");
+    var body = one(el, "[data-al-dialog-body], #globalModalBody");
+    var confirmBtn = one(el, "[data-al-dialog-confirm], #globalModalConfirm");
+    if (title) title.textContent = opts.title || "";
+    if (body) body.textContent = opts.body || "";
     if (confirmBtn) {
-      confirmBtn.textContent = opts.confirmLabel || 'Confirm';
-      confirmBtn.className = opts.danger
-        ? 'al-btn-danger'
-        : 'al-btn-primary';
+      confirmBtn.textContent = opts.confirmLabel || "Confirm";
+      confirmBtn.className = opts.danger ? "al-btn-danger" : "al-btn-primary";
     }
     return el;
   }
@@ -211,7 +238,7 @@
     onCloseHook = null;
     return new Promise(function (resolve) {
       pendingResolve = resolve;
-      if (typeof opts.onConfirm === 'function') {
+      if (typeof opts.onConfirm === "function") {
         // Legacy callers pass onConfirm; keep them working.
         var fn = opts.onConfirm;
         pendingResolve = function (v) {
@@ -225,8 +252,10 @@
   }
 
   function alert(opts) {
-    if (typeof opts === 'string' || opts == null) opts = { title: 'Error', body: String(opts || '') };
-    if (opts && opts.confirmLabel === undefined) opts = Object.assign({}, opts, { confirmLabel: 'Close' });
+    if (typeof opts === "string" || opts == null)
+      opts = { title: "Error", body: String(opts || "") };
+    if (opts && opts.confirmLabel === undefined)
+      opts = Object.assign({}, opts, { confirmLabel: "Close" });
     return confirm(opts);
   }
 
@@ -234,16 +263,19 @@
     opts = opts || {};
     var el = currentEl();
     if (!el) return;
-    var content = one(el, '[data-al-dialog-content], #globalModalContent');
-    var title = one(el, '[data-al-dialog-title], #globalModalTitle');
-    if (title) title.textContent = opts.title || '';
+    var content = one(el, "[data-al-dialog-content], #globalModalContent");
+    var title = one(el, "[data-al-dialog-title], #globalModalTitle");
+    if (title) title.textContent = opts.title || "";
     if (content && opts.bodyNode) {
       if (bodyOrigins && !bodyOrigins.has(opts.bodyNode)) {
-        bodyOrigins.set(opts.bodyNode, { parent: opts.bodyNode.parentNode, ref: opts.bodyNode.nextSibling });
+        bodyOrigins.set(opts.bodyNode, {
+          parent: opts.bodyNode.parentNode,
+          ref: opts.bodyNode.nextSibling,
+        });
       }
-      content.innerHTML = '';
+      content.innerHTML = "";
       content.appendChild(opts.bodyNode);
-      opts.bodyNode.style.display = '';
+      opts.bodyNode.style.display = "";
       bodyNode = opts.bodyNode;
     }
     onCloseHook = opts.onClose || null;
@@ -276,15 +308,21 @@
 
     function onCancel(e) {
       // Native Escape: only the topmost dialog cancels.
-      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      if (e && typeof e.preventDefault === "function") e.preventDefault();
       resolve(false);
       closeDialog(el);
     }
 
     function onClick(e) {
       var target = e && e.target;
-      var closeBtn = target && target.closest ? target.closest('[data-al-dialog-close], [data-al-dialog-dismiss]') : null;
-      var confirmBtn = target && target.closest ? target.closest('[data-al-dialog-confirm]') : null;
+      var closeBtn =
+        target && target.closest
+          ? target.closest("[data-al-dialog-close], [data-al-dialog-dismiss]")
+          : null;
+      var confirmBtn =
+        target && target.closest
+          ? target.closest("[data-al-dialog-confirm]")
+          : null;
       if (closeBtn) {
         e.preventDefault();
         resolve(false);
@@ -300,7 +338,7 @@
 
     function onKeydown(e) {
       if (!isOpen(el)) return;
-      if (e.key === 'Tab') {
+      if (e.key === "Tab") {
         var focusable = focusableIn(el);
         if (!focusable.length) {
           e.preventDefault();
@@ -328,16 +366,16 @@
       }
     }
 
-    el.addEventListener('cancel', onCancel);
-    el.addEventListener('click', onClick);
-    el.addEventListener('keydown', onKeydown);
+    el.addEventListener("cancel", onCancel);
+    el.addEventListener("click", onClick);
+    el.addEventListener("keydown", onKeydown);
 
     function destroy() {
       if (destroyed) return;
       destroyed = true;
-      el.removeEventListener('cancel', onCancel);
-      el.removeEventListener('click', onClick);
-      el.removeEventListener('keydown', onKeydown);
+      el.removeEventListener("cancel", onCancel);
+      el.removeEventListener("click", onClick);
+      el.removeEventListener("keydown", onKeydown);
       var idx = mounted.indexOf(ctrl);
       if (idx !== -1) mounted.splice(idx, 1);
     }
@@ -351,24 +389,26 @@
   function mount(rootEl, options) {
     if (!rootEl) return null;
     var c = controller(rootEl);
-    if (options && typeof options.onReady === 'function') options.onReady(c);
+    if (options && typeof options.onReady === "function") options.onReady(c);
     return c;
   }
 
   function scan(options) {
     if (!doc) return [];
-    var roots = qsAll(doc, 'dialog[data-al-dialog]');
+    var roots = qsAll(doc, "dialog[data-al-dialog]");
     var out = [];
     roots.forEach(function (el) {
       var c = controller(el);
-      if (options && typeof options.onReady === 'function') options.onReady(c);
+      if (options && typeof options.onReady === "function") options.onReady(c);
       out.push(c);
     });
     return out;
   }
 
   function destroyAll() {
-    mounted.slice().forEach(function (c) { c.destroy(); });
+    mounted.slice().forEach(function (c) {
+      c.destroy();
+    });
   }
 
   /* Full lifecycle reset: closes nothing but clears every piece of module
@@ -380,11 +420,18 @@
     onCloseHook = null;
     bodyNode = null;
     if (doc) {
-      if (doc.documentElement && typeof doc.documentElement.removeAttribute === 'function') {
-        doc.documentElement.removeAttribute('data-modal-open');
+      if (
+        doc.documentElement &&
+        typeof doc.documentElement.removeAttribute === "function"
+      ) {
+        doc.documentElement.removeAttribute("data-modal-open");
       }
-      if (doc.body && doc.body.classList && typeof doc.body.classList.remove === 'function') {
-        doc.body.classList.remove('no-scroll');
+      if (
+        doc.body &&
+        doc.body.classList &&
+        typeof doc.body.classList.remove === "function"
+      ) {
+        doc.body.classList.remove("no-scroll");
       }
     }
   }

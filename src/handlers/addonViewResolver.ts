@@ -31,9 +31,16 @@ export function resolveAddonViewPath(
   slug: string,
   viewName: string,
 ): string | null {
-  if (!isValidAddonSlug(slug)) {return null;}
-  if (typeof viewName !== 'string' || viewName.length === 0) {return null;}
-  if (viewName.includes('\0') || viewName.split(/[\\/]/).some((seg) => seg === '..')) {
+  if (!isValidAddonSlug(slug)) {
+    return null;
+  }
+  if (typeof viewName !== 'string' || viewName.length === 0) {
+    return null;
+  }
+  if (
+    viewName.includes('\0') ||
+    viewName.split(/[\\/]/).some((seg) => seg === '..')
+  ) {
     return null;
   }
 
@@ -45,7 +52,9 @@ export function resolveAddonViewPath(
   }
 
   try {
-    if (!fs.existsSync(target) || !fs.statSync(target).isFile()) {return null;}
+    if (!fs.existsSync(target) || !fs.statSync(target).isFile()) {
+      return null;
+    }
   } catch {
     return null;
   }
@@ -58,7 +67,9 @@ export function resolveAddonViewPath(
  * resolver never trusts request-derived names.
  */
 export function getAddonDirs(addonsRoot: string): string[] {
-  if (!fs.existsSync(addonsRoot)) {return [];}
+  if (!fs.existsSync(addonsRoot)) {
+    return [];
+  }
   return fs
     .readdirSync(addonsRoot, { withFileTypes: true })
     .filter((d) => d.isDirectory() && isValidAddonSlug(d.name))

@@ -25,11 +25,15 @@ export class AirlinkCloudClient {
     form.append('file', new Blob([new Uint8Array(buffer)]), fileName);
 
     try {
-      const response = await httpPost(`${AIRLINK_CLOUD_URL}/storage/upload`, form, {
-        headers: {
-          'X-API-Key': this.apiKey,
+      const response = await httpPost(
+        `${AIRLINK_CLOUD_URL}/storage/upload`,
+        form,
+        {
+          headers: {
+            'X-API-Key': this.apiKey,
+          },
         },
-      });
+      );
 
       return response.data;
     } catch (error) {
@@ -40,11 +44,15 @@ export class AirlinkCloudClient {
 
   async deleteFile(fileId: string) {
     try {
-      const response = await httpDelete(`${AIRLINK_CLOUD_URL}/storage/files/${fileId}`, undefined, {
-        headers: {
-          'X-API-Key': this.apiKey,
+      const response = await httpDelete(
+        `${AIRLINK_CLOUD_URL}/storage/files/${fileId}`,
+        undefined,
+        {
+          headers: {
+            'X-API-Key': this.apiKey,
+          },
         },
-      });
+      );
 
       return response.data;
     } catch (error) {
@@ -55,12 +63,15 @@ export class AirlinkCloudClient {
 
   async getDownloadStream(fileId: string) {
     try {
-      const response = await httpGet(`${AIRLINK_CLOUD_URL}/storage/download/${fileId}`, {
-        headers: {
-          'X-API-Key': this.apiKey,
+      const response = await httpGet(
+        `${AIRLINK_CLOUD_URL}/storage/download/${fileId}`,
+        {
+          headers: {
+            'X-API-Key': this.apiKey,
+          },
+          responseType: 'stream',
         },
-        responseType: 'stream',
-      });
+      );
 
       return response;
     } catch (error) {

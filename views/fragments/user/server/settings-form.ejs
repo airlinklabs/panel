@@ -3,8 +3,8 @@
   x-data="{
     saving: false,
     lastSaved: null,
-    name: '<%= server.name.replace(/'/g, "\\'") %>',
-    description: '<%= (server.description || "").replace(/'/g, "\\'") %>',
+    name: '<%= server.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>',
+    description: '<%= (server.description || "").replace(/\\/g, '\\\\').replace(/'/g, "\\'") %>',
     async save() {
       this.saving = true;
       try {

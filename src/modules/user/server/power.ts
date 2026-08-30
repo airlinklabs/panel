@@ -1,28 +1,28 @@
-import type { Router, Request, Response } from "express";
+import type { Router, Request, Response } from 'express';
 import {
   isAuthenticatedForServer,
   requireSubUserPermission,
-} from "../../../handlers/utils/auth/serverAuthUtil";
-import logger from "../../../handlers/logger";
-import { getParamAsString } from "../../../utils/typeHelpers";
-import { safeClientMessage } from "../../../utils/errors";
-import prisma from "../../../db";
-import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
-import { logActivity } from "../../../handlers/utils/activity/activityLogger";
-import { type ErrorMessage, stopServerContainer } from "./shared";
+} from '../../../handlers/utils/auth/serverAuthUtil';
+import logger from '../../../handlers/logger';
+import { getParamAsString } from '../../../utils/typeHelpers';
+import { safeClientMessage } from '../../../utils/errors';
+import prisma from '../../../db';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { logActivity } from '../../../handlers/utils/activity/activityLogger';
+import { type ErrorMessage, stopServerContainer } from './shared';
 import {
   runtimeStartQueue,
   QueueBannedError,
-} from "../../../handlers/runtimeQueue";
+} from '../../../handlers/runtimeQueue';
 
 const STOP_STATE_TTL_MS = 120_000;
 const RESTART_DELAY_MS = 2_000;
 
 export function registerPowerRoutes(router: Router): void {
   router.post(
-    "/server/:id/power/:poweraction",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("console"),
+    '/server/:id/power/:poweraction',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
     async (req: Request, res: Response): Promise<void> => {
       const errorMessage: ErrorMessage = {};
       const userId = req.session?.user?.id;
@@ -32,8 +32,8 @@ export function registerPowerRoutes(router: Router): void {
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
-          errorMessage.message = "User not found.";
-          return res.render("user/account", { errorMessage, user, req });
+          errorMessage.message = 'User not found.';
+          return res.render('user/account', { errorMessage, user, req });
         }
 
         const server = await prisma.server.findUnique({
@@ -42,8 +42,8 @@ export function registerPowerRoutes(router: Router): void {
         });
 
         if (!server) {
-          errorMessage.message = "Server not found.";
-          return res.render("user/server/manage", {
+          errorMessage.message = 'Server not found.';
+          return res.render('user/server/manage', {
             errorMessage,
             features: [],
             user,
@@ -53,33 +53,33 @@ export function registerPowerRoutes(router: Router): void {
 
         if (
           server.Suspended &&
-          (powerAction === "start" || powerAction === "restart")
+          (powerAction === 'start' || powerAction === 'restart')
         ) {
           logger.warn(
             `Attempt to start suspended server ${serverId} by user ${userId}`,
           );
           res.status(403).json({
             error:
-              "This server is suspended. Please contact an administrator for assistance.",
+              'This server is suspended. Please contact an administrator for assistance.',
           });
           return;
         }
 
         if (
           server.node?.maintenanceMode &&
-          (powerAction === "start" || powerAction === "restart")
+          (powerAction === 'start' || powerAction === 'restart')
         ) {
           logger.warn(
             `Attempt to start server ${serverId} on node ${server.node.id} in maintenance mode by user ${userId}`,
           );
           res.status(403).json({
             error:
-              "This server is on a node under maintenance. Please try again later.",
+              'This server is on a node under maintenance. Please try again later.',
           });
           return;
         }
 
-        if (powerAction === "stop") {
+        if (powerAction === 'stop') {
           try {
             const stoppingStatus = {
               online: true,
@@ -109,19 +109,19 @@ export function registerPowerRoutes(router: Router): void {
 
             res.status(200).json({
               success: true,
-              message: "Server is stopping...",
+              message: 'Server is stopping...',
               status: stoppingStatus,
             });
 
             await daemonRequest({
-              method: "POST",
-              path: "/container/stop",
+              method: 'POST',
+              path: '/container/stop',
               nodeAddress: server.node.address,
               nodePort: server.node.port,
               nodeKey: server.node.key,
               body: {
                 id: String(serverId),
-                stopCmd: server.image?.stop || "stop",
+                stopCmd: server.image?.stop || 'stop',
               },
             });
             logger.info(`Container stopped successfully: ${serverId}`);
@@ -130,9 +130,11 @@ export function registerPowerRoutes(router: Router): void {
                 where: { UUID: String(serverId) },
                 data: { Running: false },
               })
-              .catch(() => {});
+              .catch(() => {
+                /* noop */
+              });
             runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
-            await logActivity(req, "server:stop", {
+            await logActivity(req, 'server:stop', {
               serverId: String(serverId),
             });
             return;
@@ -148,7 +150,9 @@ export function registerPowerRoutes(router: Router): void {
                   where: { UUID: String(serverId) },
                   data: { Running: false },
                 })
-                .catch(() => {});
+                .catch(() => {
+                  /* noop */
+                });
               runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
 
               const cacheKey = `server_stopping_${serverId}`;
@@ -160,9 +164,9 @@ export function registerPowerRoutes(router: Router): void {
                 delete global.serverStoppingStates[cacheKey];
               }
             } else {
-              logger.warn("Failed to stop container", {
+              logger.warn('Failed to stop container', {
                 serverId: String(serverId),
-                action: "stop",
+                action: 'stop',
                 error: stopError,
               });
             }
@@ -171,20 +175,20 @@ export function registerPowerRoutes(router: Router): void {
         }
 
         if (
-          powerAction !== "start" &&
-          powerAction !== "stop" &&
-          powerAction !== "restart"
+          powerAction !== 'start' &&
+          powerAction !== 'stop' &&
+          powerAction !== 'restart'
         ) {
-          logger.error("Invalid power action:", powerAction);
+          logger.error('Invalid power action:', powerAction);
           res
             .status(400)
             .json({ error: `Invalid power action: ${powerAction}` });
           return;
         }
 
-        if (powerAction === "restart") {
+        if (powerAction === 'restart') {
           try {
-            await stopServerContainer(server, String(serverId), "stop", {
+            await stopServerContainer(server, String(serverId), 'stop', {
               releaseResources: false,
             });
           } catch {
@@ -203,10 +207,10 @@ export function registerPowerRoutes(router: Router): void {
               serverId: String(serverId),
               userId: user.id,
               priority:
-                user.role === "owner" ||
-                user.role === "admin" ||
+                user.role === 'owner' ||
+                user.role === 'admin' ||
                 server.ownerId === user.id ||
-                user.role === "privileged",
+                user.role === 'privileged',
             });
             if (q.queued) {
               res.status(202).json({
@@ -223,21 +227,21 @@ export function registerPowerRoutes(router: Router): void {
             }
             if (
               error instanceof Error &&
-              error.message === "Server not found."
+              error.message === 'Server not found.'
             ) {
-              res.status(404).json({ error: "Server not found." });
+              res.status(404).json({ error: 'Server not found.' });
               return;
             }
             throw error;
           }
 
           logger.info(`Container restart queued successfully: ${serverId}`);
-          await logActivity(req, "server:restart", {
+          await logActivity(req, 'server:restart', {
             serverId: String(serverId),
           });
           res
             .status(200)
-            .json({ success: true, message: "Server restarted successfully" });
+            .json({ success: true, message: 'Server restarted successfully' });
           return;
         }
 
@@ -250,13 +254,13 @@ export function registerPowerRoutes(router: Router): void {
             serverId: String(serverId),
             userId: user.id,
             priority:
-              user.role === "owner" ||
-              user.role === "admin" ||
+              user.role === 'owner' ||
+              user.role === 'admin' ||
               server.ownerId === user.id ||
-              user.role === "privileged",
+              user.role === 'privileged',
           });
           if (q.queued) {
-            await logActivity(req, "server:start", {
+            await logActivity(req, 'server:start', {
               serverId: String(serverId),
               metadata: { queued: true, position: q.position },
             });
@@ -267,38 +271,38 @@ export function registerPowerRoutes(router: Router): void {
             });
             return;
           }
-          await logActivity(req, "server:start", {
+          await logActivity(req, 'server:start', {
             serverId: String(serverId),
           });
-          res.status(200).json({ message: "Container is starting." });
+          res.status(200).json({ message: 'Container is starting.' });
           return;
         } catch (error) {
           if (error instanceof QueueBannedError) {
             res.status(403).json({ error: error.message });
             return;
           }
-          if (error instanceof Error && error.message === "Server not found.") {
-            res.status(404).json({ error: "Server not found." });
+          if (error instanceof Error && error.message === 'Server not found.') {
+            res.status(404).json({ error: 'Server not found.' });
             return;
           }
           throw error;
         }
       } catch (error) {
-        logger.error("Failed to process power action", error, {
+        logger.error('Failed to process power action', error, {
           serverId: String(serverId),
           action: String(powerAction),
         });
         res.status(500).json({
-          error: safeClientMessage(error, "Failed to process power action."),
+          error: safeClientMessage(error, 'Failed to process power action.'),
         });
       }
     },
   );
 
   router.post(
-    "/server/:id/power/restart",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("console"),
+    '/server/:id/power/restart',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -306,7 +310,7 @@ export function registerPowerRoutes(router: Router): void {
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
-          res.status(404).json({ error: "User not found" });
+          res.status(404).json({ error: 'User not found' });
           return;
         }
 
@@ -316,7 +320,7 @@ export function registerPowerRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
@@ -326,7 +330,7 @@ export function registerPowerRoutes(router: Router): void {
           );
           res.status(403).json({
             error:
-              "This server is suspended. Please contact an administrator for assistance.",
+              'This server is suspended. Please contact an administrator for assistance.',
           });
           return;
         }
@@ -337,27 +341,29 @@ export function registerPowerRoutes(router: Router): void {
           );
           res.status(403).json({
             error:
-              "This server is on a node under maintenance. Please try again later.",
+              'This server is on a node under maintenance. Please try again later.',
           });
           return;
         }
 
         if (!server.dockerImage) {
-          res.status(400).json({ error: "Docker image not found." });
+          res.status(400).json({ error: 'Docker image not found.' });
           return;
         }
 
-        await stopServerContainer(server, String(serverId), "stop", {
+        await stopServerContainer(server, String(serverId), 'stop', {
           releaseResources: false,
-        }).catch(() => {});
+        }).catch(() => {
+          /* noop */
+        });
         const q = await runtimeStartQueue.enqueueStart({
           serverId: String(serverId),
           userId: user.id,
           priority:
-            user.role === "owner" ||
-            user.role === "admin" ||
+            user.role === 'owner' ||
+            user.role === 'admin' ||
             server.ownerId === user.id ||
-            user.role === "privileged",
+            user.role === 'privileged',
         });
         logger.info(`Container restart queued successfully: ${serverId}`);
 
@@ -372,18 +378,18 @@ export function registerPowerRoutes(router: Router): void {
 
         res
           .status(200)
-          .json({ success: true, message: "Server restarted successfully" });
+          .json({ success: true, message: 'Server restarted successfully' });
       } catch (error) {
-        logger.error("Error restarting server:", error);
-        res.status(500).json({ error: "Failed to restart server" });
+        logger.error('Error restarting server:', error);
+        res.status(500).json({ error: 'Failed to restart server' });
       }
     },
   );
 
   router.post(
-    "/server/:id/power/queue/cancel",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("console"),
+    '/server/:id/power/queue/cancel',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('console'),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
       try {
@@ -391,7 +397,7 @@ export function registerPowerRoutes(router: Router): void {
           where: { id: req.session?.user?.id },
         });
         if (!user) {
-          res.status(404).json({ error: "User not found" });
+          res.status(404).json({ error: 'User not found' });
           return;
         }
 
@@ -400,24 +406,24 @@ export function registerPowerRoutes(router: Router): void {
           select: { UUID: true, ownerId: true },
         });
         if (!server) {
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
         // Only the owning user or an admin may pull a server off the queue.
         if (
           server.ownerId !== user.id &&
-          !(user.role === "owner" || user.role === "admin")
+          !(user.role === 'owner' || user.role === 'admin')
         ) {
-          res.status(403).json({ error: "You do not own this server." });
+          res.status(403).json({ error: 'You do not own this server.' });
           return;
         }
 
         const removed = await runtimeStartQueue.cancelQueuedStart(server.UUID);
         res.json({ success: true, wasQueued: removed });
       } catch (error) {
-        logger.error("Error cancelling queued start:", error);
-        res.status(500).json({ error: "Failed to cancel queued start." });
+        logger.error('Error cancelling queued start:', error);
+        res.status(500).json({ error: 'Failed to cancel queued start.' });
       }
     },
   );

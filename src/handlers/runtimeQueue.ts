@@ -1,12 +1,12 @@
-import prisma from "../db";
-import logger from "./logger";
-import { assertNodeCapacity } from "./utils/server/resourceCheck";
+import prisma from '../db';
+import logger from './logger';
+import { assertNodeCapacity } from './utils/server/resourceCheck';
 import {
   ServerStartFailure,
   startServerContainer,
-} from "../modules/user/server/shared";
-import { emitRealtime, serverEvent } from "./realtime/events";
-import { getRedisClient } from "./redis";
+} from '../modules/user/server/shared';
+import { emitRealtime, serverEvent } from './realtime/events';
+import { getRedisClient } from './redis';
 
 // ── Runtime start queue ───────────────────────────────────────────────────────
 // A capacity-aware admission queue for *runtime container starts*. Installs and
@@ -42,14 +42,14 @@ interface QueueEntry {
 export class QueueBlockedError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "QueueBlockedError";
+    this.name = 'QueueBlockedError';
   }
 }
 
 export class QueueBannedError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "QueueBannedError";
+    this.name = 'QueueBannedError';
   }
 }
 
@@ -71,9 +71,9 @@ const processing = new Set<number>();
 
 // ── Redis persistence ──────────────────────────────────────────────────────
 // Backs the in-memory Maps to Redis for durability across process restarts.
-const REDIS_QUEUES_KEY = "airlink:runtime:queues";
-const REDIS_SERVER_NODE_KEY = "airlink:runtime:serverNode";
-const REDIS_BANNED_KEY = "airlink:runtime:banned";
+const REDIS_QUEUES_KEY = 'airlink:runtime:queues';
+const REDIS_SERVER_NODE_KEY = 'airlink:runtime:serverNode';
+const REDIS_BANNED_KEY = 'airlink:runtime:banned';
 
 async function persistQueues(): Promise<void> {
   try {
@@ -157,12 +157,16 @@ async function restoreFromRedis(): Promise<void> {
 }
 
 // Restore on module load
-restoreFromRedis().catch(() => {});
+restoreFromRedis().catch(() => {
+  /* noop */
+});
 
 /** Persist all Maps to Redis after a mutation. Fire-and-forget. */
 function persistAll(): void {
   Promise.all([persistQueues(), persistServerNode(), persistBanned()]).catch(
-    () => {},
+    () => {
+      /* noop */
+    },
   );
 }
 
@@ -272,7 +276,7 @@ async function capacityAllows(
     return false;
   }
   if (server.Suspended) {
-    throw new QueueBlockedError("The server is suspended.");
+    throw new QueueBlockedError('The server is suspended.');
   }
   try {
     await assertNodeCapacity(
@@ -285,8 +289,8 @@ async function capacityAllows(
     );
     return true;
   } catch (error) {
-    if (error instanceof Error && error.name === "NodeCapacityExceededError") {
-      throw new QueueBlockedError("Node is at capacity.");
+    if (error instanceof Error && error.name === 'NodeCapacityExceededError') {
+      throw new QueueBlockedError('Node is at capacity.');
     }
     throw error;
   }
@@ -294,27 +298,27 @@ async function capacityAllows(
 
 async function attemptStart(
   serverId: string,
-): Promise<"started" | "gone" | "failed" | "permanent-failure"> {
+): Promise<'started' | 'gone' | 'failed' | 'permanent-failure'> {
   const server = await prisma.server.findUnique({
     where: { UUID: serverId },
     include: { node: true, image: true },
   });
   if (!server) {
-    return "gone";
+    return 'gone';
   }
   if (server.Suspended) {
-    return "failed";
+    return 'failed';
   }
 
   try {
     await startServerContainer(server, serverId);
-    return "started";
+    return 'started';
   } catch (error) {
     logger.error(`Queued start failed for server ${serverId}:`, error);
     if (error instanceof ServerStartFailure && !error.retryable) {
-      return "permanent-failure";
+      return 'permanent-failure';
     }
-    return "failed";
+    return 'failed';
   }
 }
 
@@ -351,13 +355,13 @@ async function processNode(nodeId: number): Promise<void> {
 
       const outcome = await attemptStart(head.serverId);
       if (
-        outcome === "started" ||
-        outcome === "gone" ||
-        outcome === "permanent-failure"
+        outcome === 'started' ||
+        outcome === 'gone' ||
+        outcome === 'permanent-failure'
       ) {
         removeEntry(list, head.serverId);
         broadcastNodeQueue(nodeId);
-        if (outcome === "permanent-failure") {
+        if (outcome === 'permanent-failure') {
           logger.warn(
             `Dropped queued start for ${head.serverId}: its daemon start error cannot succeed on retry.`,
           );
@@ -372,11 +376,11 @@ async function processNode(nodeId: number): Promise<void> {
       if (head.failures >= MAX_GRANT_FAILURES) {
         removeEntry(list, head.serverId);
         emitRealtime(
-          serverEvent("server.start.failed", head.serverId, {
+          serverEvent('server.start.failed', head.serverId, {
             error: {
               message:
-                "The server could not be started after several attempts.",
-              code: "QUEUE_GRANT_FAILED",
+                'The server could not be started after several attempts.',
+              code: 'QUEUE_GRANT_FAILED',
             },
           }),
         );
@@ -403,7 +407,7 @@ function scheduleRetry(nodeId: number): void {
   setTimeout(() => {
     pendingRetries.delete(nodeId);
     processNode(nodeId).catch((err) =>
-      logger.error("Queued start retry failed:", err),
+      logger.error('Queued start retry failed:', err),
     );
   }, RETRY_DELAY_MS);
 }
@@ -420,7 +424,7 @@ function broadcastNodeQueue(nodeId: number): void {
   const list = nodeQueue(nodeId);
   list.forEach((entry, index) => {
     emitRealtime(
-      serverEvent("server.start.queue.changed", entry.serverId, {
+      serverEvent('server.start.queue.changed', entry.serverId, {
         state: { queued: true, position: index + 1, total: list.length },
       }),
     );
@@ -451,10 +455,10 @@ export async function enqueueStart(params: {
       select: { nodeId: true, Running: true, Suspended: true },
     });
     if (!server) {
-      throw new Error("Server not found.");
+      throw new Error('Server not found.');
     }
     if (server.Suspended) {
-      throw new Error("This server is suspended.");
+      throw new Error('This server is suspended.');
     }
     if (server.Running) {
       return { queued: false, position: 0, total: 0 };
@@ -476,14 +480,14 @@ export async function enqueueStart(params: {
         ? 0
         : Array.from(queues.values()).reduce((sum, q) => sum + q.length, 0);
     if (globalCount >= MAX_GLOBAL_QUEUE) {
-      throw new Error("The start queue is full. Please try again in a moment.");
+      throw new Error('The start queue is full. Please try again in a moment.');
     }
     const userCount = Array.from(queues.values()).reduce(
       (sum, q) => sum + q.filter((e) => e.userId === userId).length,
       0,
     );
     if (userCount >= MAX_PER_USER) {
-      throw new Error("You already have too many servers waiting to start.");
+      throw new Error('You already have too many servers waiting to start.');
     }
 
     const list = nodeQueue(server.nodeId);
@@ -498,13 +502,13 @@ export async function enqueueStart(params: {
     serverNode.set(serverId, server.nodeId);
 
     emitRealtime(
-      serverEvent("server.start.queued", serverId, {
+      serverEvent('server.start.queued', serverId, {
         state: { queued: true, position: index + 1, total: list.length },
       }),
     );
 
     processNode(server.nodeId).catch((err) =>
-      logger.error("Queued start processor failed:", err),
+      logger.error('Queued start processor failed:', err),
     );
     persistAll();
     return { queued: true, position: index + 1, total: list.length };
@@ -519,10 +523,10 @@ export async function cancelQueuedStart(serverId: string): Promise<boolean> {
       return false;
     }
     removeEntry(nodeQueue(nodeId), serverId);
-    emitRealtime(serverEvent("server.start.cancelled", serverId));
+    emitRealtime(serverEvent('server.start.cancelled', serverId));
     broadcastNodeQueue(nodeId);
     processNode(nodeId).catch((err) =>
-      logger.error("Queued start processor failed:", err),
+      logger.error('Queued start processor failed:', err),
     );
     persistAll();
     return true;
@@ -557,7 +561,7 @@ export async function banUserFromQueue(
     for (const nodeId of affected) {
       broadcastNodeQueue(nodeId);
       processNode(nodeId).catch((err) =>
-        logger.error("Queued start processor failed:", err),
+        logger.error('Queued start processor failed:', err),
       );
     }
     persistAll();
@@ -569,7 +573,9 @@ export async function unbanUserFromQueue(userId: number): Promise<boolean> {
   return withQueueLock(async () => {
     pruneBans();
     const deleted = bannedUsers.delete(userId);
-    if (deleted) persistAll();
+    if (deleted) {
+      persistAll();
+    }
     return deleted;
   });
 }
@@ -586,7 +592,7 @@ export async function cleanCapacityFreed(): Promise<void> {
   for (const nodeId of queues.keys()) {
     if (nodeQueue(nodeId).length > 0) {
       processNode(nodeId).catch((err) =>
-        logger.error("Queued start processor failed:", err),
+        logger.error('Queued start processor failed:', err),
       );
     }
   }

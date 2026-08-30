@@ -1,8 +1,8 @@
-import session from "express-session";
-import { getRedisClient } from "./redis";
+import session from 'express-session';
+import { getRedisClient } from './redis';
 
-const SESSION_PREFIX = "airlink:sess:";
-const USER_INDEX_PREFIX = "airlink:usr:";
+const SESSION_PREFIX = 'airlink:sess:';
+const USER_INDEX_PREFIX = 'airlink:usr:';
 const DEFAULT_TTL_SEC = 7 * 24 * 60 * 60; // 7 days
 
 /**
@@ -56,7 +56,7 @@ class RedisSessionStore extends session.Store {
     const data = JSON.stringify(sess);
 
     this.redis
-      .set(`${this.prefix}${sid}`, data, "EX", ttlSec)
+      .set(`${this.prefix}${sid}`, data, 'EX', ttlSec)
       .then(() => {
         // Track user → session mapping for admin session revocation.
         try {
@@ -68,7 +68,9 @@ class RedisSessionStore extends session.Store {
               .sadd(key, sid)
               .expire(key, ttlSec)
               .exec()
-              .catch(() => {});
+              .catch(() => {
+                /* noop */
+              });
           }
         } catch {
           // Non-critical — index is best-effort.
@@ -206,7 +208,7 @@ class RedisSessionStore extends session.Store {
 
   private getTTL(sess: session.SessionData): number {
     const maxAge = sess.cookie?.maxAge;
-    if (typeof maxAge === "number") {
+    if (typeof maxAge === 'number') {
       return Math.ceil(maxAge / 1000);
     }
     return this.defaultTtl;
@@ -214,18 +216,18 @@ class RedisSessionStore extends session.Store {
 
   private async getAllKeys(): Promise<string[]> {
     const keys: string[] = [];
-    let cursor = "0";
+    let cursor = '0';
     do {
       const [nextCursor, batch] = await this.redis.scan(
         cursor,
-        "MATCH",
+        'MATCH',
         `${this.prefix}*`,
-        "COUNT",
+        'COUNT',
         200,
       );
       cursor = nextCursor;
       keys.push(...batch);
-    } while (cursor !== "0");
+    } while (cursor !== '0');
     return keys;
   }
 }

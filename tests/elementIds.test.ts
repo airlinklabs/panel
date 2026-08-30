@@ -63,16 +63,18 @@ describe("element id integrity", () => {
     contents.set(file, content);
     for (const m of content.matchAll(/id="([^"]+)"/g)) staticIds.add(m[1]);
     // icon('name', { id: 'x', ... }) renders id="x" server-side
-    for (const m of content.matchAll(/icon\(\s*'[^']+'\s*,\s*\{([^}]*)\}/g)) {
+    for (const m of content.matchAll(
+      /(?:al)?icon\(\s*['"][^'"]+['"]\s*,\s*\{([^}]*)\}/g,
+    )) {
       const opts = m[1];
-      const idMatch = opts.match(/\bid:\s*'([^']+)'/);
+      const idMatch = opts.match(/\bid:\s*['"]([^'"]+)['"]/);
       if (idMatch) dynamicIds.add(idMatch[1]);
     }
     // element.id = 'x' or id:'x' inside template literals
-    for (const m of content.matchAll(/\bid\s*[=:]\s*'([^']+)'/g))
+    for (const m of content.matchAll(/\bid\s*[=:]\s*['"]([^'"]+)['"]/g))
       dynamicIds.add(m[1]);
     for (const m of content.matchAll(
-      /setAttribute\(\s*'id'\s*,\s*'([^']+)'\)/g,
+      /setAttribute\(\s*['"]id['"]\s*,\s*['"]([^'"]+)['"]\)/g,
     ))
       dynamicIds.add(m[1]);
   }

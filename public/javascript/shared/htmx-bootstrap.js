@@ -28,52 +28,60 @@
   function injectCsrfToken(event) {
     var meta = document.querySelector('meta[name="csrf-token"]');
     if (!meta) return;
-    var token = meta.getAttribute('content');
+    var token = meta.getAttribute("content");
     if (!token) return;
 
-    var method = (event.detail.verb || 'get').toUpperCase();
-    if (method === 'GET') return;
+    var method = (event.detail.verb || "get").toUpperCase();
+    if (method === "GET") return;
 
     // Header — primary path for XHR
     if (!event.detail.headers) event.detail.headers = {};
-    event.detail.headers['X-CSRF-Token'] = token;
+    event.detail.headers["X-CSRF-Token"] = token;
 
     // For form-encoded requests, inject a hidden _csrf field into the form
     var elt = event.detail.elt;
-    if (elt && elt.tagName === 'FORM' && !elt.querySelector('input[name="_csrf"]')) {
-      var hidden = document.createElement('input');
-      hidden.type = 'hidden';
-      hidden.name = '_csrf';
+    if (
+      elt &&
+      elt.tagName === "FORM" &&
+      !elt.querySelector('input[name="_csrf"]')
+    ) {
+      var hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = "_csrf";
       hidden.value = token;
       elt.appendChild(hidden);
     }
   }
-  document.addEventListener('htmx:configRequest', injectCsrfToken);
+  document.addEventListener("htmx:configRequest", injectCsrfToken);
 
   // ── Session expiry handling ──────────────────────────────────────────
-  document.addEventListener('htmx:beforeSend', function (event) {
+  document.addEventListener("htmx:beforeSend", function (event) {
     var xhr = event.detail.xhr;
     if (!xhr) return;
 
     var originalOnReadyStateChange = xhr.onreadystatechange;
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4 && xhr.status === 401) {
-        var url = event.detail.requestConfig?.path || event.detail.requestConfig?.url || '';
+        var url =
+          event.detail.requestConfig?.path ||
+          event.detail.requestConfig?.url ||
+          "";
         // Skip API routes (bad API key is a real auth error, not expired session)
-        if (url.startsWith('/api/')) return;
+        if (url.startsWith("/api/")) return;
         // Skip if this is the current page (avoid redirect loop)
         if (url === window.location.pathname) return;
 
         if (window.showToast) {
           showToast(
-            window.__sessionExpiredMsg || 'Your session expired. Please sign in again.',
-            'error'
+            window.__sessionExpiredMsg ||
+              "Your session expired. Please sign in again.",
+            "error",
           );
         }
         if (!window.__sessionExpiryRedirecting) {
           window.__sessionExpiryRedirecting = true;
           setTimeout(function () {
-            window.location.href = '/login';
+            window.location.href = "/login";
           }, 1500);
         }
       }
@@ -84,11 +92,11 @@
   });
 
   // ── HX-Trigger event → toast wiring ──────────────────────────────────
-  document.addEventListener('htmx:beforeSwap', function (event) {
+  document.addEventListener("htmx:beforeSwap", function (event) {
     var xhr = event.detail.xhr;
     if (!xhr) return;
 
-    var triggerHeader = xhr.getResponseHeader('HX-Trigger');
+    var triggerHeader = xhr.getResponseHeader("HX-Trigger");
     if (!triggerHeader) return;
 
     try {
@@ -98,23 +106,22 @@
 
       if (triggers.al && triggers.al.toast) {
         toastData = triggers.al.toast;
-      } else if (triggers['al:toast']) {
-        toastData = triggers['al:toast'];
+      } else if (triggers["al:toast"]) {
+        toastData = triggers["al:toast"];
       }
 
       if (toastData && window.showToast) {
-        showToast(
-          toastData.message || '',
-          toastData.type || 'info'
-        );
+        showToast(toastData.message || "", toastData.type || "info");
       }
 
       // Dispatch custom events from HX-Trigger (e.g. closeMountModal)
       if (triggers.al) {
         for (var key in triggers.al) {
-          if (key === 'toast') continue;
+          if (key === "toast") continue;
           if (triggers.al[key]) {
-            document.dispatchEvent(new CustomEvent('al:' + key, { detail: triggers.al[key] }));
+            document.dispatchEvent(
+              new CustomEvent("al:" + key, { detail: triggers.al[key] }),
+            );
           }
         }
       }
@@ -124,18 +131,22 @@
   });
 
   // ── HTMX swap lifecycle — destroy/initialize islands ──────────────────
-  document.addEventListener('htmx:beforeSwap', function (event) {
-    if (event.detail.target && window.Islands && typeof Islands.destroyWithin === 'function') {
+  document.addEventListener("htmx:beforeSwap", function (event) {
+    if (
+      event.detail.target &&
+      window.Islands &&
+      typeof Islands.destroyWithin === "function"
+    ) {
       Islands.destroyWithin(event.detail.target);
     }
   });
 
-  document.addEventListener('htmx:afterSettle', function (event) {
+  document.addEventListener("htmx:afterSettle", function (event) {
     var target = event.detail.target;
     if (!target) return;
 
     // Mount component systems and specialist islands within the swapped target
-    if (window.Islands && typeof Islands.mountWithin === 'function') {
+    if (window.Islands && typeof Islands.mountWithin === "function") {
       Islands.mountWithin(target);
     }
 
@@ -155,7 +166,7 @@
     }
 
     // If the target has role="alert", focus it (error/success message)
-    if (target.getAttribute && target.getAttribute('role') === 'alert') {
+    if (target.getAttribute && target.getAttribute("role") === "alert") {
       target.focus();
       return;
     }
@@ -163,11 +174,11 @@
 
   // HTMX requests are partial updates, so they need activity feedback without
   // triggering the hard-navigation fade owned by page-loader.js.
-  document.addEventListener('htmx:beforeRequest', function () {
+  document.addEventListener("htmx:beforeRequest", function () {
     if (window.ALPageActivity) window.ALPageActivity.start();
   });
 
-  document.addEventListener('htmx:afterRequest', function () {
+  document.addEventListener("htmx:afterRequest", function () {
     if (window.ALPageActivity) window.ALPageActivity.stop();
   });
 })();

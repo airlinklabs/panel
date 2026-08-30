@@ -11,7 +11,9 @@ const CSRF_TOKEN_SIZE = 32;
 // `loadEnv()` runs after static imports in app.ts, so this must remain a pure
 // environment read rather than calling getConfig() at module evaluation time.
 
-function firstHeaderValue(value: string | string[] | undefined): string | undefined {
+function firstHeaderValue(
+  value: string | string[] | undefined,
+): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
@@ -34,7 +36,9 @@ export function getRequestCsrfToken(req: Request): string | undefined {
 function ensureCsrfSessionId(req: Request): string {
   const session = req.session as { csrfSessionId?: string } | undefined;
 
-  if (!session) {return '';}
+  if (!session) {
+    return '';
+  }
 
   if (!session.csrfSessionId) {
     session.csrfSessionId = crypto.randomBytes(16).toString('hex');
@@ -51,13 +55,17 @@ let csrfUtilities: CsrfUtilities | undefined;
  * lazily so URL is available before choosing the Secure cookie attribute.
  */
 function getCsrfUtilities(): CsrfUtilities {
-  if (csrfUtilities) {return csrfUtilities;}
+  if (csrfUtilities) {
+    return csrfUtilities;
+  }
 
   const secure = (process.env.URL || '').startsWith('https://');
   csrfUtilities = doubleCsrf({
     getSecret: () => {
       const secret = process.env.SESSION_SECRET;
-      if (!secret) {throw new Error('SESSION_SECRET is required but not set');}
+      if (!secret) {
+        throw new Error('SESSION_SECRET is required but not set');
+      }
       return secret;
     },
     getSessionIdentifier: (req: Request) => ensureCsrfSessionId(req),
@@ -73,16 +81,27 @@ function getCsrfUtilities(): CsrfUtilities {
   return csrfUtilities;
 }
 
-export const csrfProtection = (req: Request, res: Response, next: NextFunction): void => {
+export const csrfProtection = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   getCsrfUtilities().doubleCsrfProtection(req, res, next);
 };
 
-export const handleCsrfError = (err: unknown, req: Request, res: Response, next: NextFunction) => {
+export const handleCsrfError = (
+  err: unknown,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const csrfError = err as { code?: string };
   if (csrfError.code !== 'EBADCSRFTOKEN') {
     return next(err);
   }
-  logger.warn(`CSRF attack detected: IP=${getClientIp(req)}, Path=${req.path}, Method=${req.method}`);
+  logger.warn(
+    `CSRF attack detected: IP=${getClientIp(req)}, Path=${req.path}, Method=${req.method}`,
+  );
   const wantsJson =
     req.get('HX-Request') === 'true' ||
     req.xhr ||
@@ -96,7 +115,8 @@ export const handleCsrfError = (err: unknown, req: Request, res: Response, next:
           al: {
             toast: {
               type: 'error',
-              message: 'Your security token expired. Refresh the page and try again.',
+              message:
+                'Your security token expired. Refresh the page and try again.',
             },
           },
         }),
@@ -108,7 +128,11 @@ export const handleCsrfError = (err: unknown, req: Request, res: Response, next:
   }
 };
 
-export const addCsrfTokenToLocals = (req: Request, res: Response, next: NextFunction) => {
+export const addCsrfTokenToLocals = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     ensureCsrfSessionId(req);
     res.locals.csrfToken = getCsrfUtilities().generateCsrfToken(req, res);

@@ -16,33 +16,34 @@
  *   /api/v2/system     — System status, health, test node
  */
 
-import { Router } from "express";
-import type { Request, Response, NextFunction } from "express";
-import type { Module } from "../../../handlers/moduleInit";
-import { apiValidator } from "../../../handlers/utils/api/apiValidator";
-import { isAuthenticated } from "../../../handlers/utils/auth/authUtil";
-import type { ApiCapability } from "./helpers";
+import { Router } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import type { Module } from '../../../handlers/moduleInit';
+import { apiValidator } from '../../../handlers/utils/api/apiValidator';
+import { isAuthenticated } from '../../../handlers/utils/auth/authUtil';
+import { redisRateLimit } from '../../../handlers/utils/security/redisRateLimit';
+import type { ApiCapability } from './helpers';
 
-import serversRouter from "./servers";
-import filesRouter from "./files";
-import databasesRouter from "./databases";
-import backupsRouter from "./backups";
-import schedulesRouter from "./schedules";
-import subusersRouter from "./subusers";
-import startupRouter from "./startup";
-import accountRouter from "./account";
-import passkeyRouter from "./passkey";
-import systemRouter from "./system";
-import adminRouter from "./admin";
+import serversRouter from './servers';
+import filesRouter from './files';
+import databasesRouter from './databases';
+import backupsRouter from './backups';
+import schedulesRouter from './schedules';
+import subusersRouter from './subusers';
+import startupRouter from './startup';
+import accountRouter from './account';
+import passkeyRouter from './passkey';
+import systemRouter from './system';
+import adminRouter from './admin';
 
 const v2Module: Module = {
   info: {
-    name: "V2 API Module",
-    description: "RESTful API v2 for Airlink panel",
-    version: "2.0.0",
-    moduleVersion: "2.0.0",
-    author: "AirlinkLabs",
-    license: "MIT",
+    name: 'V2 API Module',
+    description: 'RESTful API v2 for Airlink panel',
+    version: '2.0.0',
+    moduleVersion: '2.0.0',
+    author: 'AirlinkLabs',
+    license: 'MIT',
   },
   router: () => {
     // Outer router — mounted at root by the module loader. All V2 endpoints
@@ -67,48 +68,83 @@ const v2Module: Module = {
     // -----------------------------------------------------------------------
     const apiKeyOrSessionAuth =
       (requiredCapability?: ApiCapability) =>
-      async (req: Request, res: Response, next: NextFunction) => {
-        const authHeader = req.headers["authorization"];
-        if (authHeader?.startsWith("Bearer ")) {
-          return apiValidator(requiredCapability)(req, res, next);
-        }
-        return isAuthenticated()(req, res, next);
-      };
+        async (req: Request, res: Response, next: NextFunction) => {
+          const authHeader = req.headers['authorization'];
+          if (authHeader?.startsWith('Bearer ')) {
+            return apiValidator(requiredCapability)(req, res, next);
+          }
+          return isAuthenticated()(req, res, next);
+        };
 
-    v2.use("/servers", apiKeyOrSessionAuth("servers.*"), serversRouter);
-    v2.use("/files", apiKeyOrSessionAuth("files.*"), filesRouter);
-    v2.use("/databases", apiKeyOrSessionAuth("databases.*"), databasesRouter);
-    v2.use("/backups", apiKeyOrSessionAuth("backups.*"), backupsRouter);
-    v2.use("/schedules", apiKeyOrSessionAuth("schedules.*"), schedulesRouter);
-    v2.use("/subusers", apiKeyOrSessionAuth("subusers.*"), subusersRouter);
-    v2.use("/startup", apiKeyOrSessionAuth("startup.*"), startupRouter);
+    v2.use(
+      '/servers',
+      apiKeyOrSessionAuth('servers.*'),
+      redisRateLimit,
+      serversRouter,
+    );
+    v2.use(
+      '/files',
+      apiKeyOrSessionAuth('files.*'),
+      redisRateLimit,
+      filesRouter,
+    );
+    v2.use(
+      '/databases',
+      apiKeyOrSessionAuth('databases.*'),
+      redisRateLimit,
+      databasesRouter,
+    );
+    v2.use(
+      '/backups',
+      apiKeyOrSessionAuth('backups.*'),
+      redisRateLimit,
+      backupsRouter,
+    );
+    v2.use(
+      '/schedules',
+      apiKeyOrSessionAuth('schedules.*'),
+      redisRateLimit,
+      schedulesRouter,
+    );
+    v2.use(
+      '/subusers',
+      apiKeyOrSessionAuth('subusers.*'),
+      redisRateLimit,
+      subusersRouter,
+    );
+    v2.use(
+      '/startup',
+      apiKeyOrSessionAuth('startup.*'),
+      redisRateLimit,
+      startupRouter,
+    );
 
     // -----------------------------------------------------------------------
     // Account endpoints: session auth only (browser-facing)
     // -----------------------------------------------------------------------
-    v2.use("/account", isAuthenticated(), accountRouter);
+    v2.use('/account', isAuthenticated(), accountRouter);
 
     // -----------------------------------------------------------------------
     // Passkey endpoints: two sub-groups —
     //   /api/v2/account/passkey/*  — authenticated (list, delete, register)
     //   /api/v2/passkey/auth/*     — pending session (auth verify during login)
     // -----------------------------------------------------------------------
-    v2.use("/account/passkey", isAuthenticated(), passkeyRouter);
-    v2.use("/passkey", passkeyRouter);
+    v2.use('/account/passkey', isAuthenticated(), passkeyRouter);
+    v2.use('/passkey', passkeyRouter);
 
     // -----------------------------------------------------------------------
     // System endpoints: session auth
     // -----------------------------------------------------------------------
-    v2.use("/system", isAuthenticated(), systemRouter);
+    v2.use('/system', isAuthenticated(), systemRouter);
 
     // -----------------------------------------------------------------------
     // Admin endpoints: admin-only session auth
     // -----------------------------------------------------------------------
-    v2.use("/admin", isAuthenticated(true), adminRouter);
+    v2.use('/admin', isAuthenticated(true), adminRouter);
 
     // Scope everything under /api/v2 so page routes (/account, /admin/*, etc.)
     // are not shadowed by API endpoints.
-    router.use("/api/v2", v2);
+    router.use('/api/v2', v2);
 
     return router;
   },

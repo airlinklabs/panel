@@ -8,12 +8,17 @@ import logger from '../../handlers/logger';
 import { registerPermission } from '../../handlers/permissions';
 import { collectPlayerStats } from '../../handlers/playerStatsCollector';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
-import { daemonPlayerListSchema, parseDaemonResponse } from '../../platform/daemon/dtos';
+import {
+  daemonPlayerListSchema,
+  parseDaemonResponse,
+} from '../../platform/daemon/dtos';
 import { getPrimaryExternalPort } from '../../handlers/utils/server/ports';
 
 registerPermission('airlink.admin.playerstats.view');
 
-interface ErrorMessage { message?: string }
+interface ErrorMessage {
+  message?: string;
+}
 
 const adminModule: Module = {
   info: {
@@ -64,7 +69,7 @@ const adminModule: Module = {
             settings,
           });
         }
-      }
+      },
     );
 
     router.get(
@@ -91,7 +96,7 @@ const adminModule: Module = {
                     playerCount: 0,
                     maxPlayers: 0,
                     online: false,
-                    error: 'No primary port found'
+                    error: 'No primary port found',
                   };
                 }
 
@@ -104,12 +109,14 @@ const adminModule: Module = {
                   params: {
                     id: server.UUID,
                     host: server.node.address,
-                    port: primaryPort
+                    port: primaryPort,
                   },
-                  timeout: 5000
+                  timeout: 5000,
                 });
 
-                const playersData = parseDaemonResponse(daemonPlayerListSchema, response.data) ?? {};
+                const playersData =
+                  parseDaemonResponse(daemonPlayerListSchema, response.data) ??
+                  {};
 
                 return {
                   serverId: server.UUID,
@@ -117,7 +124,7 @@ const adminModule: Module = {
                   playerCount: playersData.onlinePlayers || 0,
                   maxPlayers: playersData.maxPlayers || 0,
                   online: playersData.online || false,
-                  version: playersData.version || 'Unknown'
+                  version: playersData.version || 'Unknown',
                 };
               } catch {
                 return {
@@ -126,21 +133,29 @@ const adminModule: Module = {
                   playerCount: 0,
                   maxPlayers: 0,
                   online: false,
-                  error: 'Failed to fetch player data'
+                  error: 'Failed to fetch player data',
                 };
               }
-            })
+            }),
           );
 
-          const totalPlayers = playerData.reduce((sum, server) => sum + server.playerCount, 0);
-          const totalMaxPlayers = playerData.reduce((sum, server) => sum + server.maxPlayers, 0);
-          const onlineServers = playerData.filter(server => server.online).length;
+          const totalPlayers = playerData.reduce(
+            (sum, server) => sum + server.playerCount,
+            0,
+          );
+          const totalMaxPlayers = playerData.reduce(
+            (sum, server) => sum + server.maxPlayers,
+            0,
+          );
+          const onlineServers = playerData.filter(
+            (server) => server.online,
+          ).length;
 
           const historicalData = await prisma.playerStats.findMany({
             orderBy: {
-              timestamp: 'asc'
+              timestamp: 'asc',
             },
-            take: 576 // 48 hours of data at 5-minute intervals (12 data points per hour * 48 hours)
+            take: 576, // 48 hours of data at 5-minute intervals (12 data points per hour * 48 hours)
           });
 
           res.json({
@@ -149,13 +164,13 @@ const adminModule: Module = {
             totalMaxPlayers,
             onlineServers,
             totalServers: servers.length,
-            historicalData
+            historicalData,
           });
         } catch (error: unknown) {
           logger.error('Failed to fetch player statistics:', error);
           res.status(500).json({ error: 'Failed to fetch player statistics' });
         }
-      }
+      },
     );
 
     router.post(
@@ -164,12 +179,17 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           await collectPlayerStats();
-          res.json({ success: true, message: 'Player statistics collected successfully' });
+          res.json({
+            success: true,
+            message: 'Player statistics collected successfully',
+          });
         } catch (error: unknown) {
           logger.error('Failed to collect player statistics:', error);
-          res.status(500).json({ error: 'Failed to collect player statistics' });
+          res
+            .status(500)
+            .json({ error: 'Failed to collect player statistics' });
         }
-      }
+      },
     );
 
     return router;

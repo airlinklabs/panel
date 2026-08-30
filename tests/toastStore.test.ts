@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from "vitest";
 // The shared toast store is a plain CJS module with no browser dependencies,
 // so it can be unit-tested directly in the Node environment.
-import ToastStore from '../public/javascript/shared/toast-store.js';
+import ToastStore from "../public/javascript/shared/toast-store.js";
 
 function memoryStorage() {
   const map = new Map<string, string>();
@@ -17,9 +17,9 @@ function activeRecord(overrides: Record<string, unknown> = {}) {
   return Object.assign(
     {
       id: ToastStore.uid(),
-      mode: 'active',
-      message: 'Working…',
-      type: 'loading',
+      mode: "active",
+      message: "Working…",
+      type: "loading",
       startedAt: Date.now(),
       finished: false,
       success: null,
@@ -29,10 +29,10 @@ function activeRecord(overrides: Record<string, unknown> = {}) {
   );
 }
 
-describe('toast-store', () => {
+describe("toast-store", () => {
   beforeEach(() => vi.useRealTimers());
 
-  it('round-trips records through the injected storage', () => {
+  it("round-trips records through the injected storage", () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
     const rec = activeRecord();
@@ -43,17 +43,17 @@ describe('toast-store', () => {
     expect(loaded[0].id).toBe(rec.id);
   });
 
-  it('upserts by id and updates existing records in place', () => {
+  it("upserts by id and updates existing records in place", () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
     const rec = activeRecord();
     store.upsert(rec);
-    store.upsert(Object.assign({}, rec, { message: 'Still working…' }));
+    store.upsert(Object.assign({}, rec, { message: "Still working…" }));
     expect(store.load()).toHaveLength(1);
-    expect(store.load()[0].message).toBe('Still working…');
+    expect(store.load()[0].message).toBe("Still working…");
   });
 
-  it('removes a record by id', () => {
+  it("removes a record by id", () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
     const a = activeRecord();
@@ -63,37 +63,49 @@ describe('toast-store', () => {
     expect(store.load().map((r) => r.id)).toEqual([b.id]);
   });
 
-  it('drops finished success toasts after their visibility window', () => {
+  it("drops finished success toasts after their visibility window", () => {
     const now = 1_000_000;
     vi.setSystemTime(now);
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const done = activeRecord({ finished: true, success: true, finishedAt: now - 10_000 });
+    const done = activeRecord({
+      finished: true,
+      success: true,
+      finishedAt: now - 10_000,
+    });
     store.save([done]);
     expect(store.load()).toHaveLength(0);
   });
 
-  it('keeps finished error toasts visible noticeably longer', () => {
+  it("keeps finished error toasts visible noticeably longer", () => {
     const now = 1_000_000;
     vi.setSystemTime(now);
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const done = activeRecord({ finished: true, success: false, finishedAt: now - 3_000 });
+    const done = activeRecord({
+      finished: true,
+      success: false,
+      finishedAt: now - 3_000,
+    });
     store.save([done]);
     expect(store.load()).toHaveLength(1);
   });
 
-  it('expires plain toasts once their dismiss duration has passed', () => {
+  it("expires plain toasts once their dismiss duration has passed", () => {
     const now = 2_000_000;
     vi.setSystemTime(now);
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const toast = activeRecord({ mode: 'toast', startedAt: now - 6_000, duration: 5_000 });
+    const toast = activeRecord({
+      mode: "toast",
+      startedAt: now - 6_000,
+      duration: 5_000,
+    });
     store.save([toast]);
     expect(store.load()).toHaveLength(0);
   });
 
-  it('never expires a running active job on its own', () => {
+  it("never expires a running active job on its own", () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
     const rec = activeRecord({ finished: false });
@@ -101,15 +113,23 @@ describe('toast-store', () => {
     expect(store.load()).toHaveLength(1);
   });
 
-  it('remainingMs returns 0 once the record cannot be shown anymore', () => {
+  it("remainingMs returns 0 once the record cannot be shown anymore", () => {
     const now = 3_000_000;
-    const toast = activeRecord({ mode: 'toast', startedAt: now - 10_000, duration: 5_000 });
+    const toast = activeRecord({
+      mode: "toast",
+      startedAt: now - 10_000,
+      duration: 5_000,
+    });
     expect(ToastStore.remainingMs(toast, now)).toBe(0);
-    const live = activeRecord({ mode: 'toast', startedAt: now - 1_000, duration: 5_000 });
+    const live = activeRecord({
+      mode: "toast",
+      startedAt: now - 1_000,
+      duration: 5_000,
+    });
     expect(ToastStore.remainingMs(live, now)).toBe(4_000);
   });
 
-  it('caps the number of persisted records', () => {
+  it("caps the number of persisted records", () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
     const many = Array.from({ length: 30 }, () => activeRecord());
@@ -117,24 +137,24 @@ describe('toast-store', () => {
     expect(store.load().length).toBeLessThanOrEqual(20);
   });
 
-  it('finds records by group', () => {
+  it("finds records by group", () => {
     const storage = memoryStorage();
     const store = ToastStore.createStore(storage);
-    const g = activeRecord({ group: 'backup:abc' });
+    const g = activeRecord({ group: "backup:abc" });
     const other = activeRecord({ group: null });
     store.save([g, other]);
-    const found = store.byGroup('backup:abc');
+    const found = store.byGroup("backup:abc");
     expect(found).toHaveLength(1);
-    expect(found[0].group).toBe('backup:abc');
+    expect(found[0].group).toBe("backup:abc");
   });
 
-  it('degrades gracefully when storage is unavailable', () => {
+  it("degrades gracefully when storage is unavailable", () => {
     const throwing = {
       getItem: () => {
-        throw new Error('blocked');
+        throw new Error("blocked");
       },
       setItem: () => {
-        throw new Error('blocked');
+        throw new Error("blocked");
       },
     } as Storage;
     const store = ToastStore.createStore(throwing);
@@ -143,9 +163,9 @@ describe('toast-store', () => {
     expect(store.load()).toEqual([]);
   });
 
-  it('ignores corrupted payloads instead of throwing', () => {
+  it("ignores corrupted payloads instead of throwing", () => {
     const storage = memoryStorage();
-    storage.setItem(ToastStore.KEY, 'not json{{{');
+    storage.setItem(ToastStore.KEY, "not json{{{");
     const store = ToastStore.createStore(storage);
     expect(store.load()).toEqual([]);
   });

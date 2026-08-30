@@ -1,15 +1,15 @@
-import { getSettings } from "../../handlers/settingsCache";
-import type { Request, Response } from "express";
-import { Router } from "express";
-import bcrypt from "bcryptjs";
-import crypto from "crypto";
-import type { Module } from "../../handlers/moduleInit";
-import prisma from "../../db";
-import logger from "../../handlers/logger";
-import { sendPasswordReset } from "../../handlers/utils/core/mailer";
-import { getClientIp } from "../../utils/ip";
-import { createRedisRateLimit } from "../../handlers/utils/security/redisRateLimit";
-import { logActivity } from "../../handlers/utils/activity/activityLogger";
+import { getSettings } from '../../handlers/settingsCache';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import type { Module } from '../../handlers/moduleInit';
+import prisma from '../../db';
+import logger from '../../handlers/logger';
+import { sendPasswordReset } from '../../handlers/utils/core/mailer';
+import { getClientIp } from '../../utils/ip';
+import { createRedisRateLimit } from '../../handlers/utils/security/redisRateLimit';
+import { logActivity } from '../../handlers/utils/activity/activityLogger';
 
 // 3 requests per hour per IP — enough for a legitimate user, too few for abuse.
 const forgotRateLimit = createRedisRateLimit({
@@ -17,9 +17,9 @@ const forgotRateLimit = createRedisRateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getClientIp(req) ?? "unknown",
+  keyGenerator: (req) => getClientIp(req) ?? 'unknown',
   handler: (_req, res) => {
-    res.redirect("/forgot-password?err=rate_limited");
+    res.redirect('/forgot-password?err=rate_limited');
   },
 });
 
@@ -32,47 +32,47 @@ const resetRateLimit = createRedisRateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getClientIp(req) ?? "unknown",
+  keyGenerator: (req) => getClientIp(req) ?? 'unknown',
   handler: (_req, res) => {
-    res.status(429).json({ error: "Too many attempts. Try again later." });
+    res.status(429).json({ error: 'Too many attempts. Try again later.' });
   },
 });
 
 const passwordResetModule: Module = {
   info: {
-    name: "Password Reset Module",
-    description: "Forgot password flow with email delivery and secure tokens.",
-    version: "2.0.0",
-    moduleVersion: "1.0.0",
-    author: "AirLinkLab",
-    license: "MIT",
+    name: 'Password Reset Module',
+    description: 'Forgot password flow with email delivery and secure tokens.',
+    version: '2.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
   },
 
   router: () => {
     const router = Router();
 
     // ── GET /forgot-password ────────────────────────────────────────────────
-    router.get("/forgot-password", async (req: Request, res: Response) => {
+    router.get('/forgot-password', async (req: Request, res: Response) => {
       const settings = await getSettings();
-      res.render("auth/forgot-password", { req, settings });
+      res.render('auth/forgot-password', { req, settings });
     });
 
     // ── POST /forgot-password ───────────────────────────────────────────────
     // Always responds the same way — never reveals whether the email exists.
     router.post(
-      "/forgot-password",
+      '/forgot-password',
       forgotRateLimit,
       async (req: Request, res: Response) => {
         const { email } = req.body as { email?: string };
 
-        if (typeof email === "string" && email.trim() !== "") {
+        if (typeof email === 'string' && email.trim() !== '') {
           try {
             const user = await prisma.users.findUnique({
               where: { email: email.trim().toLowerCase() },
             });
 
             if (user) {
-              const token = crypto.randomBytes(32).toString("hex");
+              const token = crypto.randomBytes(32).toString('hex');
 
               await prisma.passwordReset.create({
                 data: {
@@ -82,32 +82,32 @@ const passwordResetModule: Module = {
                 },
               });
 
-              const resetUrl = `${req.protocol}://${req.get("host")}/reset-password?token=${token}`;
+              const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${token}`;
 
               await sendPasswordReset({
                 to: user.email,
-                panelName: process.env.NAME || "Airlink",
+                panelName: process.env.NAME || 'Airlink',
                 resetUrl,
               });
 
               // Log password reset request
-              logActivity(req, "auth.password.reset.requested", {
-                category: "security",
-                severity: "info",
+              logActivity(req, 'auth.password.reset.requested', {
+                category: 'security',
+                severity: 'info',
                 metadata: { userId: user.id },
               });
             }
           } catch (error) {
-            logger.error("Password reset request error:", error);
+            logger.error('Password reset request error:', error);
           }
         }
 
-        res.redirect("/login?err=reset_email_sent");
+        res.redirect('/login?err=reset_email_sent');
       },
     );
 
     // ── GET /reset-password ─────────────────────────────────────────────────
-    router.get("/reset-password", async (req: Request, res: Response) => {
+    router.get('/reset-password', async (req: Request, res: Response) => {
       const { token } = req.query as { token?: string };
       const settings = await getSettings();
 
@@ -120,11 +120,11 @@ const passwordResetModule: Module = {
           validToken =
             !!record && !record.used && record.expiresAt > new Date();
         } catch (error) {
-          logger.error("Reset token lookup error:", error);
+          logger.error('Reset token lookup error:', error);
         }
       }
 
-      res.render("auth/reset-password", {
+      res.render('auth/reset-password', {
         req,
         settings,
         token: validToken ? token : null,
@@ -134,7 +134,7 @@ const passwordResetModule: Module = {
 
     // ── POST /reset-password ────────────────────────────────────────────────
     router.post(
-      "/reset-password",
+      '/reset-password',
       resetRateLimit,
       async (req: Request, res: Response) => {
         const { token, password, confirmPassword } = req.body as {
@@ -145,20 +145,20 @@ const passwordResetModule: Module = {
 
         const back = (err: string) =>
           res.redirect(
-            `/reset-password?token=${encodeURIComponent(token ?? "")}&err=${err}`,
+            `/reset-password?token=${encodeURIComponent(token ?? '')}&err=${err}`,
           );
 
         if (!token || !password || !confirmPassword) {
-          return back("missing");
+          return back('missing');
         }
 
         if (password !== confirmPassword) {
-          return back("mismatch");
+          return back('mismatch');
         }
 
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
         if (!passwordRegex.test(password)) {
-          return back("weak");
+          return back('weak');
         }
 
         try {
@@ -167,7 +167,7 @@ const passwordResetModule: Module = {
           });
 
           if (!record || record.used || record.expiresAt <= new Date()) {
-            return res.redirect("/reset-password?err=expired");
+            return res.redirect('/reset-password?err=expired');
           }
 
           await prisma.users.update({
@@ -185,16 +185,16 @@ const passwordResetModule: Module = {
           });
 
           // Log password reset completed
-          logActivity(req, "auth.password.reset.completed", {
-            category: "security",
-            severity: "info",
+          logActivity(req, 'auth.password.reset.completed', {
+            category: 'security',
+            severity: 'info',
             metadata: { userId: record.userId },
           });
 
-          res.redirect("/login?err=password_reset");
+          res.redirect('/login?err=password_reset');
         } catch (error) {
-          logger.error("Password reset error:", error);
-          return back("error");
+          logger.error('Password reset error:', error);
+          return back('error');
         }
       },
     );

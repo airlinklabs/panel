@@ -1,19 +1,19 @@
-import crypto from "crypto";
-import prisma from "../db";
-import { daemonRequest } from "../handlers/utils/core/daemonRequest";
-import logger from "../handlers/logger";
+import crypto from 'crypto';
+import prisma from '../db';
+import { daemonRequest } from '../handlers/utils/core/daemonRequest';
+import logger from '../handlers/logger';
 import {
   DEFAULT_MEMORY_MB,
   DEFAULT_CPU_PERCENT,
   DEFAULT_STORAGE_MB,
-} from "../config/constants";
+} from '../config/constants';
 
 const DEFAULT_SWAP_MB = 0;
 
-type ServerInclude = {
+interface ServerInclude {
   owner: { select: { id: true; username: true; email: true } };
   node: { select: { id: true; name: true; address: true } };
-};
+}
 
 const SERVER_INCLUDE_OWNER_NODE = {
   owner: { select: { id: true, username: true, email: true } },
@@ -75,13 +75,13 @@ export async function createServer(data: CreateServerData) {
       ownerId: data.ownerId,
       nodeId: data.nodeId,
       imageId: data.imageId,
-      Ports: data.Ports ?? "[]",
+      Ports: data.Ports ?? '[]',
       Memory: data.Memory ?? DEFAULT_MEMORY_MB,
       Swap: data.Swap ?? DEFAULT_SWAP_MB,
       Cpu: data.Cpu ?? DEFAULT_CPU_PERCENT,
       Storage: data.Storage ?? DEFAULT_STORAGE_MB,
       Variables: data.Variables ?? null,
-      StartCommand: data.StartCommand ?? "",
+      StartCommand: data.StartCommand ?? '',
       dockerImage: data.dockerImage ?? null,
       Installing: false,
       Queued: false,
@@ -97,7 +97,9 @@ export async function deleteServer(uuid: string): Promise<boolean> {
     where: { UUID: uuid },
     include: { node: true },
   });
-  if (!existing) return false;
+  if (!existing) {
+    return false;
+  }
 
   if (existing.node) {
     try {
@@ -105,8 +107,8 @@ export async function deleteServer(uuid: string): Promise<boolean> {
         nodeAddress: existing.node.address,
         nodePort: existing.node.port,
         nodeKey: existing.node.key,
-        method: "DELETE",
-        path: "/container",
+        method: 'DELETE',
+        path: '/container',
         body: { id: existing.UUID },
       });
     } catch (err: unknown) {
@@ -116,7 +118,7 @@ export async function deleteServer(uuid: string): Promise<boolean> {
       };
       const isGone =
         daemonErr.status === 404 ||
-        daemonErr.body?.error?.includes("not exist");
+        daemonErr.body?.error?.includes('not exist');
       if (!isGone) {
         logger.warn(`Could not delete container on daemon: ${err}`);
       }
@@ -131,8 +133,12 @@ export async function suspendServer(uuid: string) {
   const existing = await prisma.server.findUnique({
     where: { UUID: uuid },
   });
-  if (!existing) return null;
-  if (existing.Suspended) return "already_suspended";
+  if (!existing) {
+    return null;
+  }
+  if (existing.Suspended) {
+    return 'already_suspended';
+  }
 
   const server = await prisma.server.update({
     where: { UUID: uuid },
@@ -145,8 +151,12 @@ export async function unsuspendServer(uuid: string) {
   const existing = await prisma.server.findUnique({
     where: { UUID: uuid },
   });
-  if (!existing) return null;
-  if (!existing.Suspended) return "not_suspended";
+  if (!existing) {
+    return null;
+  }
+  if (!existing.Suspended) {
+    return 'not_suspended';
+  }
 
   const server = await prisma.server.update({
     where: { UUID: uuid },

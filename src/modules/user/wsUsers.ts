@@ -29,7 +29,9 @@ const wsUsersModule: Module = {
 
   router: (applyWs?: (router: Router) => void) => {
     const router = Router();
-    if (applyWs) {applyWs(router);}
+    if (applyWs) {
+      applyWs(router);
+    }
 
     router.ws('/online-check', async (ws: WebSocket, req: Request) => {
       const userId = req.session?.user?.id;
@@ -60,7 +62,9 @@ const wsUsersModule: Module = {
 
         ws.on('close', () => {
           const conns = onlineConnections.get(username);
-          if (!conns) {return;}
+          if (!conns) {
+            return;
+          }
           conns.delete(connectionId);
           if (conns.size === 0) {
             onlineConnections.delete(username);

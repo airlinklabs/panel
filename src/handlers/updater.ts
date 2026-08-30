@@ -39,7 +39,11 @@ function isGitRepo(): boolean {
   return fs.existsSync(path.join(process.cwd(), '.git'));
 }
 
-function spawnSyncSafe(command: string, args: string[] = [], options: { stdio?: 'inherit' | 'pipe' | 'ignore' } = {}): { success: boolean; output?: string; error?: string } {
+function spawnSyncSafe(
+  command: string,
+  args: string[] = [],
+  options: { stdio?: 'inherit' | 'pipe' | 'ignore' } = {},
+): { success: boolean; output?: string; error?: string } {
   try {
     const result = spawnSync(command, args, {
       shell: false,
@@ -52,7 +56,10 @@ function spawnSyncSafe(command: string, args: string[] = [], options: { stdio?: 
       return { success: false, error: 'Update failed' };
     }
     if (result.status !== 0) {
-      return { success: false, error: result.stderr ?? `Command exited with status ${result.status}` };
+      return {
+        success: false,
+        error: result.stderr ?? `Command exited with status ${result.status}`,
+      };
     }
     return { success: true, output: result.stdout };
   } catch (error) {
@@ -61,7 +68,9 @@ function spawnSyncSafe(command: string, args: string[] = [], options: { stdio?: 
   }
 }
 
-export async function checkForUpdates(): Promise<Result<UpdateInfo, UpdateError>> {
+export async function checkForUpdates(): Promise<
+  Result<UpdateInfo, UpdateError>
+  > {
   try {
     const configPath = path.join(process.cwd(), 'storage', 'config.json');
     if (!fs.existsSync(configPath)) {
@@ -137,7 +146,11 @@ export async function performUpdate(): Promise<Result<void, UpdateError>> {
         return err('GIT_COMMAND_FAILED');
       }
 
-      const resetResult = spawnSyncSafe('git', ['reset', '--hard', 'origin/main']);
+      const resetResult = spawnSyncSafe('git', [
+        'reset',
+        '--hard',
+        'origin/main',
+      ]);
       if (!resetResult.success) {
         return err('GIT_COMMAND_FAILED');
       }
@@ -152,7 +165,10 @@ export async function performUpdate(): Promise<Result<void, UpdateError>> {
         return err('GIT_COMMAND_FAILED');
       }
 
-      const checkoutResult = spawnSyncSafe('git', ['checkout', latestRelease.tag_name]);
+      const checkoutResult = spawnSyncSafe('git', [
+        'checkout',
+        latestRelease.tag_name,
+      ]);
       if (!checkoutResult.success) {
         return err('GIT_COMMAND_FAILED');
       }

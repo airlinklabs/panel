@@ -36,7 +36,9 @@ export function invalidateMembershipForUser(userId: number): void {
   membershipCache.delete(userId);
 }
 
-export function invalidateMembershipForEvents(eventTypes: string | string[]): void {
+export function invalidateMembershipForEvents(
+  eventTypes: string | string[],
+): void {
   const types = Array.isArray(eventTypes) ? eventTypes : [eventTypes];
   if (types.some((t) => MEMBERSHIP_EVENT_TYPES.has(t))) {
     membershipCache.clear();
@@ -51,7 +53,9 @@ export async function getUserServerIds(
   userId: number,
   isAdmin: boolean,
 ): Promise<Set<string> | 'all'> {
-  if (isAdmin) {return 'all';}
+  if (isAdmin) {
+    return 'all';
+  }
 
   const cached = membershipCache.get(userId);
   if (cached && Date.now() - cached.fetchedAt < SERVER_SET_TTL_MS) {
@@ -76,7 +80,9 @@ export async function getUserServerIds(
     membershipCache.set(userId, { serverIds: set, fetchedAt: Date.now() });
     return set;
   } catch (error) {
-    logger.warn(`Failed to resolve realtime membership for user ${userId}:`, { error: String(error) });
+    logger.warn(`Failed to resolve realtime membership for user ${userId}:`, {
+      error: String(error),
+    });
     return new Set<string>();
   }
 }
@@ -94,7 +100,9 @@ export async function canObserve(
   },
 ): Promise<boolean> {
   if (scope.serverId) {
-    if (serverIds === 'all') {return true;}
+    if (serverIds === 'all') {
+      return true;
+    }
     return serverIds.has(scope.serverId);
   }
   if (scope.userId !== undefined) {

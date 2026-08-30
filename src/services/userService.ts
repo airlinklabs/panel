@@ -1,15 +1,15 @@
-import prisma from "../db";
-import bcrypt from "bcryptjs";
-import { BCRYPT_SALT_ROUNDS } from "../config/constants";
+import prisma from '../db';
+import bcrypt from 'bcryptjs';
+import { BCRYPT_SALT_ROUNDS } from '../config/constants';
 
-type UserSelect = {
+interface UserSelect {
   id: true;
   username: true;
   email: true;
   isAdmin: true;
   role: true;
   description: true;
-};
+}
 
 const USER_SELECT: UserSelect = {
   id: true,
@@ -34,7 +34,7 @@ export async function listUsers(params: ListUsersParams) {
   });
 
   let servers: Awaited<ReturnType<typeof prisma.server.findMany>> = [];
-  if (params.include?.includes("servers")) {
+  if (params.include?.includes('servers')) {
     servers = await prisma.server.findMany({
       where: { ownerId: { in: users.map((u) => u.id) } },
       include: { node: true, owner: true },
@@ -72,7 +72,7 @@ export async function createUser(data: {
   description?: string;
 }) {
   const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS);
-  const role = data.role ?? (data.isAdmin ? "admin" : "user");
+  const role = data.role ?? (data.isAdmin ? 'admin' : 'user');
 
   return prisma.users.create({
     data: {
@@ -102,20 +102,28 @@ export async function updateUser(
 
   if (data.role !== undefined) {
     // Single-owner constraint: only one user can have the owner role
-    if (data.role === "owner") {
+    if (data.role === 'owner') {
       const existingOwner = await prisma.users.findFirst({
-        where: { role: "owner", id: { not: id } },
+        where: { role: 'owner', id: { not: id } },
       });
       if (existingOwner) {
-        throw new Error("An owner already exists. Transfer ownership first.");
+        throw new Error('An owner already exists. Transfer ownership first.');
       }
     }
     updateData.role = data.role;
   }
-  if (data.email !== undefined) updateData.email = data.email;
-  if (data.username !== undefined) updateData.username = data.username;
-  if (data.isAdmin !== undefined) updateData.isAdmin = data.isAdmin;
-  if (data.description !== undefined) updateData.description = data.description;
+  if (data.email !== undefined) {
+    updateData.email = data.email;
+  }
+  if (data.username !== undefined) {
+    updateData.username = data.username;
+  }
+  if (data.isAdmin !== undefined) {
+    updateData.isAdmin = data.isAdmin;
+  }
+  if (data.description !== undefined) {
+    updateData.description = data.description;
+  }
   if (data.password !== undefined) {
     updateData.password = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS);
   }
@@ -132,10 +140,12 @@ export async function isLastAdmin(userId: number): Promise<boolean> {
     where: { id: userId },
     select: { role: true },
   });
-  if (!user || !(user.role === "owner" || user.role === "admin")) return false;
+  if (!user || !(user.role === 'owner' || user.role === 'admin')) {
+    return false;
+  }
 
   const adminCount = await prisma.users.count({
-    where: { role: { in: ["owner", "admin"] } },
+    where: { role: { in: ['owner', 'admin'] } },
   });
   return adminCount <= 1;
 }
