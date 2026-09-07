@@ -65,7 +65,10 @@ const describeDaemonHmac = fs.existsSync(daemonHmacPath)
   : describe.skip;
 
 describeDaemonHmac("Security headers in daemon hmac.ts", () => {
-  const hmacSrc = fs.readFileSync(daemonHmacPath, "utf8");
+  let hmacSrc: string;
+  beforeAll(() => {
+    hmacSrc = fs.readFileSync(daemonHmacPath, "utf8");
+  });
 
   it("sets X-Content-Type-Options to nosniff", () => {
     expect(hmacSrc).toContain("'X-Content-Type-Options'");

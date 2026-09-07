@@ -12,6 +12,16 @@ vi.mock("../src/db", () => ({
   },
 }));
 
+vi.mock("../src/handlers/redis", () => ({
+  getRedisClient: vi.fn(() => ({
+    pipeline: vi.fn(() => ({
+      exec: vi.fn(async () => []),
+    })),
+    set: vi.fn(async () => "OK"),
+    get: vi.fn(async () => null),
+  })),
+}));
+
 vi.mock("../src/handlers/logger", () => ({
   default: {
     error: vi.fn(),
