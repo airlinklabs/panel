@@ -39,12 +39,8 @@ permissions:
   security-events: write
   pull-requests: read
 
-# ── Shared setup ─────────────────────────────────────────────────────────────
-# Reusable setup steps to avoid duplication across jobs.
-
 jobs:
   # ── Path filter ──────────────────────────────────────────────────────────────
-  # Single job that determines which groups actually need to run.
 
   changes:
     name: Detect changes
@@ -126,11 +122,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: 11
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: pnpm
-      # Audit only needs package resolution — skip postinstall entirely
+          node-version: 22
+      - uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store/v10
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm audit --audit-level=critical
         continue-on-error: true
@@ -145,11 +146,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: 11
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: pnpm
-      # ESLint doesn't need Prisma types — skip postinstall
+          node-version: 22
+      - uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store/v10
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec eslint src
 
@@ -177,11 +183,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: 11
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: pnpm
-      # Skip postinstall, run generate explicitly after install
+          node-version: 22
+      - uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store/v10
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec prisma generate
       - run: pnpm run typecheck
@@ -212,10 +223,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: 11
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: pnpm
+          node-version: 22
+      - uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store/v10
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec prisma generate
       - run: pnpm exec prisma db push --skip-generate
@@ -247,10 +264,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: 11
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: pnpm
+          node-version: 22
+      - uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store/v10
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec prisma generate
       - run: pnpm run migrate:deploy
@@ -264,7 +287,6 @@ jobs:
           if-no-files-found: error
 
   # ── CI Gate ─────────────────────────────────────────────────────────────────
-  # Single status check for branch protection rules. Add this to required checks.
 
   ci-gate:
     name: CI
@@ -289,7 +311,6 @@ jobs:
           echo "Test:       ${{ needs.test.result }}"
           echo "Build:      ${{ needs.build.result }}"
 
-          # Fail if any non-skipped job failed
           for result in \
             "${{ needs.semgrep.result }}" \
             "${{ needs.dependency-review.result }}" \
