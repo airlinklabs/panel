@@ -32,6 +32,7 @@ import prisma from "../../../db";
 import bcrypt from "bcryptjs";
 import multer from "multer";
 import { parseBody } from "../../../utils/validation";
+import { fetchPublic } from "../../../utils/ssrf";
 import { jsonOk, jsonError, requireUser, logActivity } from "./helpers";
 import {
   updateUsernameBody,
@@ -45,7 +46,7 @@ import {
   importImageUrlBody,
   createFolderBody,
   addServerToFolderBody,
-} from './dto';
+} from "./dto";
 
 const router = Router();
 
@@ -166,6 +167,11 @@ router.patch("/password", parseBody(updatePasswordBody), async (req, res) => {
   await prisma.users.update({
     where: { id: user.id },
     data: { password: hashed },
+  });
+
+  // Invalidate all outstanding password reset tokens for this user
+  await prisma.passwordReset.deleteMany({
+    where: { userId: user.id, used: false },
   });
 
   logActivity(user.id, "account.password.updated", undefined, {}, req.ip);
@@ -337,10 +343,6 @@ router.get("/2fa/setup", async (req, res) => {
   }
 
   if (user.totpEnabled) {
-    return jsonError(res, 'BAD_REQUEST', '2FA is already enabled', 400);
-  }
-
-  if (user.totpEnabled) {
     return jsonError(res, "BAD_REQUEST", "2FA is already enabled", 400);
   }
 
@@ -498,13 +500,13 @@ router.post("/2fa/disable", async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/account/check-username — Check if username is available
 // ---------------------------------------------------------------------------
-router.get('/check-username', async (req, res) => {
+router.get("/check-username", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
   }
 
-  const username = String(req.query.username ?? '');
+  const username = String(req.query.username ?? "");
   if (username.length < 3 || username.length > 32) {
     return jsonOk(res, { available: false });
   }
@@ -517,7 +519,7 @@ router.get('/check-username', async (req, res) => {
 // POST /api/v2/account/validate-password — Validate password strength
 // ---------------------------------------------------------------------------
 router.post(
-  '/validate-password',
+  "/validate-password",
   parseBody(validatePasswordBody),
   async (req, res) => {
     const user = await requireUser(req, res);
@@ -529,19 +531,19 @@ router.post(
     const errors: string[] = [];
 
     if (password.length < 8) {
-      errors.push('Password must be at least 8 characters');
+      errors.push("Password must be at least 8 characters");
     }
     if (password.length > 128) {
-      errors.push('Password must be at most 128 characters');
+      errors.push("Password must be at most 128 characters");
     }
     if (!/[A-Z]/.test(password)) {
-      errors.push('Password must contain an uppercase letter');
+      errors.push("Password must contain an uppercase letter");
     }
     if (!/[a-z]/.test(password)) {
-      errors.push('Password must contain a lowercase letter');
+      errors.push("Password must contain a lowercase letter");
     }
     if (!/[0-9]/.test(password)) {
-      errors.push('Password must contain a number');
+      errors.push("Password must contain a number");
     }
 
     jsonOk(res, { valid: errors.length === 0, errors });
@@ -551,7 +553,7 @@ router.post(
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/images — Create user image
 // ---------------------------------------------------------------------------
-router.post('/images', parseBody(createImageBody), async (req, res) => {
+router.post("/images", parseBody(createImageBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -576,14 +578,14 @@ router.post('/images', parseBody(createImageBody), async (req, res) => {
       variables: data.variables ?? null,
       info: data.info ?? null,
       config_files: data.config_files ?? null,
-      status: 'pending',
+      status: "pending",
       createdById: user.id,
     },
   });
 
   logActivity(
     user.id,
-    'account.images.created',
+    "account.images.created",
     undefined,
     { imageId: image.id },
     req.ip,
@@ -596,7 +598,7 @@ router.post('/images', parseBody(createImageBody), async (req, res) => {
 // POST /api/v2/account/images/import-url — Import image from URL
 // ---------------------------------------------------------------------------
 router.post(
-  '/images/import-url',
+  "/images/import-url",
   parseBody(importImageUrlBody),
   async (req, res) => {
     const user = await requireUser(req, res);
@@ -608,23 +610,27 @@ router.post(
 
     let imageJson: Record<string, unknown>;
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
+      const result = await fetchPublic(url, {
+        allowHttp: true,
+        timeoutMs: 15_000,
+        maxBytes: 1_000_000,
+      });
+      if (!result.ok) {
         return jsonError(
           res,
-          'BAD_REQUEST',
-          'Failed to fetch image from URL',
+          "BAD_REQUEST",
+          result.error || "Failed to fetch image from URL",
           400,
         );
       }
-      imageJson = (await response.json()) as Record<string, unknown>;
+      imageJson = JSON.parse(result.body) as Record<string, unknown>;
     } catch {
-      return jsonError(res, 'BAD_REQUEST', 'Invalid image URL', 400);
+      return jsonError(res, "BAD_REQUEST", "Invalid image URL", 400);
     }
 
     const image = await prisma.images.create({
       data: {
-        name: (imageJson.name as string) ?? 'Imported Image',
+        name: (imageJson.name as string) ?? "Imported Image",
         description: (imageJson.description as string) ?? null,
         dockerImages: (imageJson.dockerImages as string) ?? null,
         startup: (imageJson.startup as string) ?? null,
@@ -632,14 +638,14 @@ router.post(
         variables: (imageJson.variables as string) ?? null,
         info: (imageJson.info as string) ?? null,
         config_files: (imageJson.config_files as string) ?? null,
-        status: 'pending',
+        status: "pending",
         createdById: user.id,
       },
     });
 
     logActivity(
       user.id,
-      'account.images.imported',
+      "account.images.imported",
       undefined,
       { imageId: image.id },
       req.ip,
@@ -652,7 +658,7 @@ router.post(
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/account/images/:id — Delete user image
 // ---------------------------------------------------------------------------
-router.delete('/images/:id', async (req, res) => {
+router.delete("/images/:id", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -660,18 +666,18 @@ router.delete('/images/:id', async (req, res) => {
 
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid image ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid image ID", 400);
   }
 
   const image = await prisma.images.findUnique({ where: { id } });
   if (!image) {
-    return jsonError(res, 'NOT_FOUND', 'Image not found', 404);
+    return jsonError(res, "NOT_FOUND", "Image not found", 404);
   }
   if (image.createdById !== user.id) {
     return jsonError(
       res,
-      'FORBIDDEN',
-      'You can only delete your own images',
+      "FORBIDDEN",
+      "You can only delete your own images",
       403,
     );
   }
@@ -680,7 +686,7 @@ router.delete('/images/:id', async (req, res) => {
 
   logActivity(
     user.id,
-    'account.images.deleted',
+    "account.images.deleted",
     undefined,
     { imageId: id },
     req.ip,
@@ -692,7 +698,7 @@ router.delete('/images/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/account/folders — List folders
 // ---------------------------------------------------------------------------
-router.get('/folders', async (req, res) => {
+router.get("/folders", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -705,7 +711,7 @@ router.get('/folders', async (req, res) => {
         include: { server: { select: { UUID: true, name: true } } },
       },
     },
-    orderBy: { name: 'asc' },
+    orderBy: { name: "asc" },
   });
 
   jsonOk(res, folders);
@@ -714,7 +720,7 @@ router.get('/folders', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/folders — Create folder
 // ---------------------------------------------------------------------------
-router.post('/folders', parseBody(createFolderBody), async (req, res) => {
+router.post("/folders", parseBody(createFolderBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -731,7 +737,7 @@ router.post('/folders', parseBody(createFolderBody), async (req, res) => {
 
   logActivity(
     user.id,
-    'account.folders.created',
+    "account.folders.created",
     undefined,
     { folderId: folder.id },
     req.ip,
@@ -743,7 +749,7 @@ router.post('/folders', parseBody(createFolderBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/account/folders/:id — Delete folder
 // ---------------------------------------------------------------------------
-router.delete('/folders/:id', async (req, res) => {
+router.delete("/folders/:id", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -751,18 +757,18 @@ router.delete('/folders/:id', async (req, res) => {
 
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid folder ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid folder ID", 400);
   }
 
   const folder = await prisma.serverFolder.findUnique({ where: { id } });
   if (!folder) {
-    return jsonError(res, 'NOT_FOUND', 'Folder not found', 404);
+    return jsonError(res, "NOT_FOUND", "Folder not found", 404);
   }
   if (folder.ownerId !== user.id) {
     return jsonError(
       res,
-      'FORBIDDEN',
-      'You can only delete your own folders',
+      "FORBIDDEN",
+      "You can only delete your own folders",
       403,
     );
   }
@@ -771,7 +777,7 @@ router.delete('/folders/:id', async (req, res) => {
 
   logActivity(
     user.id,
-    'account.folders.deleted',
+    "account.folders.deleted",
     undefined,
     { folderId: id },
     req.ip,
@@ -784,7 +790,7 @@ router.delete('/folders/:id', async (req, res) => {
 // POST /api/v2/account/folders/:id/servers — Add server to folder
 // ---------------------------------------------------------------------------
 router.post(
-  '/folders/:id/servers',
+  "/folders/:id/servers",
   parseBody(addServerToFolderBody),
   async (req, res) => {
     const user = await requireUser(req, res);
@@ -794,20 +800,20 @@ router.post(
 
     const folderId = Number(req.params.id);
     if (!Number.isFinite(folderId)) {
-      return jsonError(res, 'BAD_REQUEST', 'Invalid folder ID', 400);
+      return jsonError(res, "BAD_REQUEST", "Invalid folder ID", 400);
     }
 
     const folder = await prisma.serverFolder.findUnique({
       where: { id: folderId },
     });
     if (!folder) {
-      return jsonError(res, 'NOT_FOUND', 'Folder not found', 404);
+      return jsonError(res, "NOT_FOUND", "Folder not found", 404);
     }
     if (folder.ownerId !== user.id) {
       return jsonError(
         res,
-        'FORBIDDEN',
-        'You can only modify your own folders',
+        "FORBIDDEN",
+        "You can only modify your own folders",
         403,
       );
     }
@@ -819,13 +825,13 @@ router.post(
       where: { UUID: serverUUID },
     });
     if (!server) {
-      return jsonError(res, 'NOT_FOUND', 'Server not found', 404);
+      return jsonError(res, "NOT_FOUND", "Server not found", 404);
     }
     if (server.ownerId !== user.id) {
       return jsonError(
         res,
-        'FORBIDDEN',
-        'You can only add your own servers',
+        "FORBIDDEN",
+        "You can only add your own servers",
         403,
       );
     }
@@ -835,7 +841,7 @@ router.post(
       where: { serverUUID },
     });
     if (existing) {
-      return jsonError(res, 'CONFLICT', 'Server is already in a folder', 409);
+      return jsonError(res, "CONFLICT", "Server is already in a folder", 409);
     }
 
     const member = await prisma.serverFolderMember.create({
@@ -847,7 +853,7 @@ router.post(
 
     logActivity(
       user.id,
-      'account.folders.serverAdded',
+      "account.folders.serverAdded",
       undefined,
       { folderId, serverUUID },
       req.ip,
@@ -860,7 +866,7 @@ router.post(
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/account/folders/servers/:uuid — Remove server from folder
 // ---------------------------------------------------------------------------
-router.delete('/folders/servers/:uuid', async (req, res) => {
+router.delete("/folders/servers/:uuid", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -868,14 +874,14 @@ router.delete('/folders/servers/:uuid', async (req, res) => {
 
   const serverUUID = req.params.uuid;
   if (!serverUUID) {
-    return jsonError(res, 'BAD_REQUEST', 'Server UUID is required', 400);
+    return jsonError(res, "BAD_REQUEST", "Server UUID is required", 400);
   }
 
   const member = await prisma.serverFolderMember.findUnique({
     where: { serverUUID },
   });
   if (!member) {
-    return jsonError(res, 'NOT_FOUND', 'Server is not in any folder', 404);
+    return jsonError(res, "NOT_FOUND", "Server is not in any folder", 404);
   }
 
   // Verify ownership of the folder
@@ -885,8 +891,8 @@ router.delete('/folders/servers/:uuid', async (req, res) => {
   if (!folder || folder.ownerId !== user.id) {
     return jsonError(
       res,
-      'FORBIDDEN',
-      'You can only modify your own folders',
+      "FORBIDDEN",
+      "You can only modify your own folders",
       403,
     );
   }
@@ -895,7 +901,7 @@ router.delete('/folders/servers/:uuid', async (req, res) => {
 
   logActivity(
     user.id,
-    'account.folders.serverRemoved',
+    "account.folders.serverRemoved",
     undefined,
     { folderId: folder.id, serverUUID },
     req.ip,
@@ -907,7 +913,7 @@ router.delete('/folders/servers/:uuid', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/onboarding/complete — Complete onboarding
 // ---------------------------------------------------------------------------
-router.post('/onboarding/complete', async (req, res) => {
+router.post("/onboarding/complete", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -921,7 +927,7 @@ router.post('/onboarding/complete', async (req, res) => {
     },
   });
 
-  logActivity(user.id, 'account.onboarding.completed', undefined, {}, req.ip);
+  logActivity(user.id, "account.onboarding.completed", undefined, {}, req.ip);
 
   jsonOk(res, { completed: true });
 });
@@ -929,7 +935,7 @@ router.post('/onboarding/complete', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/onboarding/skip — Skip onboarding
 // ---------------------------------------------------------------------------
-router.post('/onboarding/skip', async (req, res) => {
+router.post("/onboarding/skip", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -942,7 +948,7 @@ router.post('/onboarding/skip', async (req, res) => {
     },
   });
 
-  logActivity(user.id, 'account.onboarding.skipped', undefined, {}, req.ip);
+  logActivity(user.id, "account.onboarding.skipped", undefined, {}, req.ip);
 
   jsonOk(res, { skipped: true });
 });

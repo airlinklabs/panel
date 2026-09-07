@@ -3,24 +3,95 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - "src/**"
+      - "views/**"
+      - "public/**"
+      - "storage/prisma/**"
+      - "tests/**"
+      - "tsconfig*.json"
+      - "tailwind.config.*"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/ci.yml"
+      - ".github/.semgrep.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "src/**"
+      - "views/**"
+      - "public/**"
+      - "storage/prisma/**"
+      - "tests/**"
+      - "tsconfig*.json"
+      - "tailwind.config.*"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/ci.yml"
+      - ".github/.semgrep.yml"
 
-# Cancel in-progress runs on the same branch/PR to avoid wasting minutes on stale pushes
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
   security-events: write
-  pull-requests: read # needed for dependency-review
+  pull-requests: read
+
+# ── Shared setup ─────────────────────────────────────────────────────────────
+# Reusable setup steps to avoid duplication across jobs.
 
 jobs:
+  # ── Path filter ──────────────────────────────────────────────────────────────
+  # Single job that determines which groups actually need to run.
+
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      security: ${{ steps.filter.outputs.security }}
+      quality: ${{ steps.filter.outputs.quality }}
+      test: ${{ steps.filter.outputs.test }}
+      build: ${{ steps.filter.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            security:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'src/**'
+              - '.github/.semgrep.yml'
+            quality:
+              - 'src/**'
+              - 'tsconfig*.json'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+            test:
+              - 'src/**'
+              - 'tests/**'
+              - 'storage/prisma/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+            build:
+              - 'src/**'
+              - 'views/**'
+              - 'public/**'
+              - 'storage/prisma/**'
+              - 'tsconfig*.json'
+              - 'tailwind.config.*'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+
   # ── Security ────────────────────────────────────────────────────────────────
 
   semgrep:
-    name: Semgrep SAST
+    name: SAST
+    needs: changes
+    if: needs.changes.outputs.security == 'true'
     runs-on: ubuntu-latest
     container:
       image: semgrep/semgrep
@@ -33,13 +104,14 @@ jobs:
           else
             semgrep ci --config auto --verbose
           fi
-        # semgrep ci exits non-zero on findings by default; --error is not a valid flag
 
   dependency-review:
     name: Dependency Review
+    needs: changes
+    if: >
+      needs.changes.outputs.security == 'true' &&
+      github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    # Only meaningful on PRs — compares base vs head for newly added vulns
-    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/dependency-review-action@v4
@@ -47,7 +119,9 @@ jobs:
           fail-on-severity: high
 
   audit:
-    name: Dependency Audit
+    name: Audit
+    needs: changes
+    if: needs.changes.outputs.security == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -55,9 +129,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      # --ignore-scripts skips postinstall (prisma generate), which requires
-      # DATABASE_URL — audit doesn't need generated types at all
-      - run: pnpm install --ignore-scripts
+          cache: pnpm
+      # Audit only needs package resolution — skip postinstall entirely
+      - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm audit --audit-level=critical
         continue-on-error: true
 
@@ -65,6 +139,8 @@ jobs:
 
   lint:
     name: Lint
+    needs: changes
+    if: needs.changes.outputs.quality == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -72,13 +148,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      # --ignore-scripts skips postinstall; ESLint doesn't need Prisma types
-      - run: pnpm install --ignore-scripts
-      # --fix is for local dev only; CI must only check, never mutate files
+          cache: pnpm
+      # ESLint doesn't need Prisma types — skip postinstall
+      - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec eslint src
 
   typecheck:
     name: Typecheck
+    needs: changes
+    if: needs.changes.outputs.quality == 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -102,13 +180,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      # --ignore-scripts so postinstall doesn't race with our explicit generate below
-      - run: pnpm install --ignore-scripts
+          cache: pnpm
+      # Skip postinstall, run generate explicitly after install
+      - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec prisma generate
       - run: pnpm run typecheck
 
+  # ── Test ────────────────────────────────────────────────────────────────────
+
   test:
     name: Test
+    needs: changes
+    if: needs.changes.outputs.test == 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -132,18 +215,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: pnpm install --ignore-scripts
+          cache: pnpm
+      - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec prisma generate
-      # db push: sync schema to test DB (no committed migrations yet)
-      - run: pnpm exec prisma db push
+      - run: pnpm exec prisma db push --skip-generate
       - run: pnpm test
 
   # ── Build ───────────────────────────────────────────────────────────────────
 
   build:
     name: Build
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     runs-on: ubuntu-latest
-    needs: [semgrep, lint, typecheck, test, audit]
     services:
       postgres:
         image: postgres:16
@@ -166,11 +250,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: pnpm install --ignore-scripts
-      # migrate:deploy: applies migrations and regenerates the Prisma client
-      # with DATABASE_URL in scope — this is what postinstall was trying to do
+          cache: pnpm
+      - run: pnpm install --ignore-scripts --frozen-lockfile
+      - run: pnpm exec prisma generate
       - run: pnpm run migrate:deploy
-      # build = tsc (main) + tsc (prisma tsconfig) + tailwindcss
       - run: pnpm run build
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -179,3 +262,46 @@ jobs:
           path: dist/
           retention-days: 7
           if-no-files-found: error
+
+  # ── CI Gate ─────────────────────────────────────────────────────────────────
+  # Single status check for branch protection rules. Add this to required checks.
+
+  ci-gate:
+    name: CI
+    if: always()
+    needs:
+      - semgrep
+      - dependency-review
+      - audit
+      - lint
+      - typecheck
+      - test
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate results
+        run: |
+          echo "SAST:       ${{ needs.semgrep.result }}"
+          echo "Dep Review: ${{ needs.dependency-review.result }}"
+          echo "Audit:      ${{ needs.audit.result }}"
+          echo "Lint:       ${{ needs.lint.result }}"
+          echo "Typecheck:  ${{ needs.typecheck.result }}"
+          echo "Test:       ${{ needs.test.result }}"
+          echo "Build:      ${{ needs.build.result }}"
+
+          # Fail if any non-skipped job failed
+          for result in \
+            "${{ needs.semgrep.result }}" \
+            "${{ needs.dependency-review.result }}" \
+            "${{ needs.audit.result }}" \
+            "${{ needs.lint.result }}" \
+            "${{ needs.typecheck.result }}" \
+            "${{ needs.test.result }}" \
+            "${{ needs.build.result }}"; do
+            if [ "$result" = "failure" ]; then
+              echo "::error::One or more CI jobs failed"
+              exit 1
+            fi
+          done
+
+          echo "All checks passed or were skipped (no relevant changes)."
