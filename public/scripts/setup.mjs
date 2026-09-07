@@ -213,7 +213,7 @@ function showHelp() {
 ${chalk.bold("Flags")}
   --yes, -y           Accept all prompts (non-interactive / CI mode).
   --skip-services     Don't install or start Redis / PostgreSQL.
-  --skip-build        Don't run pnpm install, tsc, or tailwindcss.
+  --skip-build        Don't run package install, tsc, or tailwindcss.
   --db-host HOST      PostgreSQL host      [default: 127.0.0.1]
   --db-port PORT      PostgreSQL port      [default: 5432]
   --db-name NAME      Database name        [default: airlink]
@@ -453,8 +453,10 @@ function buildInstallCmd(pkgMgr, packageMap) {
 }
 
 // ---
-// Pre-flight: Node version and pnpm
+// Pre-flight: Node version and package manager
 // ---
+
+let PKG_MGR = "npm"; // fallback; set by checkPkgMgr()
 
 function checkNode() {
   section("Pre-flight checks");
@@ -470,19 +472,28 @@ function checkNode() {
   ok(`Node.js ${process.version} (need >= ${minMajor})`);
 }
 
-function checkPnpm() {
-  const ver = run("pnpm --version");
-  if (!ver) {
-    warn("pnpm not found - installing it now via npm...");
-    const installed = run("npm install -g pnpm", { stdio: "inherit" });
-    if (!which("pnpm")) {
-      fail("Could not install pnpm. Run:  npm install -g pnpm");
-      process.exit(1);
-    }
-    ok(`pnpm ${run("pnpm --version")}`);
-  } else {
-    ok(`pnpm ${ver}`);
+/** Detect pnpm or fall back to npm. Sets PKG_MGR globally. */
+function checkPkgMgr() {
+  const pnpmVer = run("pnpm --version");
+  if (pnpmVer) {
+    PKG_MGR = "pnpm";
+    ok(`pnpm ${pnpmVer}`);
+    return;
   }
+
+  warn("pnpm not found - attempting install via npm...");
+  run("npm install -g pnpm", { stdio: "inherit" });
+
+  if (which("pnpm")) {
+    PKG_MGR = "pnpm";
+    ok(`pnpm ${run("pnpm --version")} (just installed)`);
+    return;
+  }
+
+  // pnpm still unavailable — fall back to npm
+  warn("Could not install pnpm. Falling back to npm.");
+  PKG_MGR = "npm";
+  ok(`Using npm ${run("npm --version")}`);
 }
 
 // ---
@@ -842,8 +853,15 @@ async function setupDatabase() {
   }
 
   // Grant privileges
+  // PostgreSQL 15+ removed CREATE from GRANT ALL ON SCHEMA public,
+  // so we must grant it explicitly or Prisma db push will fail.
   psql(`GRANT ALL PRIVILEGES ON DATABASE "${dbName}" TO "${dbUser}"`);
   psql(`GRANT ALL ON SCHEMA public TO "${dbUser}"`);
+  psql(`GRANT CREATE ON SCHEMA public TO "${dbUser}"`);
+  // Also cover any objects that already exist in the schema.
+  psql(`GRANT ALL ON ALL TABLES IN SCHEMA public TO "${dbUser}"`);
+  psql(`GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "${dbUser}"`);
+  // Future objects created by the owner.
   psql(
     `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "${dbUser}"`,
   );
@@ -928,10 +946,12 @@ function generateEnv(creds) {
 function runPrisma() {
   section("Prisma");
 
-  runLive("pnpm exec prisma generate", "Generating Prisma client...");
+  const exec = PKG_MGR === "pnpm" ? "pnpm exec" : "npx";
+
+  runLive(`${exec} prisma generate`, "Generating Prisma client...");
   ok("prisma generate");
 
-  runLive("pnpm exec prisma db push", "Pushing schema to database...");
+  runLive(`${exec} prisma db push`, "Pushing schema to database...");
   ok("prisma db push");
 }
 
@@ -942,11 +962,14 @@ function runPrisma() {
 function runBuild() {
   section("Build");
 
-  runLive("pnpm install", "Installing dependencies...");
-  ok("pnpm install");
+  const installCmd = PKG_MGR === "pnpm" ? "pnpm install" : "npm install";
+  const exec = PKG_MGR === "pnpm" ? "pnpm exec" : "npx";
+
+  runLive(installCmd, "Installing dependencies...");
+  ok(installCmd);
 
   info("Compiling TypeScript (main)...");
-  const tsc1 = run("pnpm exec tsc 2>&1");
+  const tsc1 = run(`${exec} tsc 2>&1`);
   if (tsc1 === null) {
     warn(
       "tsc (main) reported errors - the build may still work. Check manually.",
@@ -956,7 +979,7 @@ function runBuild() {
   }
 
   info("Compiling TypeScript (prisma tsconfig)...");
-  const tsc2 = run("pnpm exec tsc -p tsconfig.prisma.json 2>&1");
+  const tsc2 = run(`${exec} tsc -p tsconfig.prisma.json 2>&1`);
   if (tsc2 === null) {
     warn("tsc (prisma) reported errors - check manually.");
   } else {
@@ -965,11 +988,11 @@ function runBuild() {
 
   info("Building CSS with Tailwind...");
   const css = run(
-    "pnpm exec tailwindcss -i ./public/styles/tw.css -o ./public/styles.css 2>&1",
+    `${exec} tailwindcss -i ./public/styles/tw.css -o ./public/styles.css 2>&1`,
   );
   if (css === null) {
     warn(
-      "Tailwind CSS build failed - styles may be stale. Run: pnpm run build:css",
+      "Tailwind CSS build failed - styles may be stale. Run: npm run build:css",
     );
   } else {
     ok("Tailwind CSS compiled");
@@ -1022,7 +1045,7 @@ async function main() {
   banner();
 
   checkNode();
-  checkPnpm();
+  checkPkgMgr();
 
   if (opts.skipServices) {
     section("Services");
