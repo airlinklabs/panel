@@ -227,7 +227,7 @@ jobs:
           restore-keys: pnpm-${{ runner.os }}-
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec prisma generate
-      - run: pnpm exec prisma db push --skip-generate
+      - run: pnpm exec prisma db push
       - run: pnpm test
 
   # ── Build ───────────────────────────────────────────────────────────────────
