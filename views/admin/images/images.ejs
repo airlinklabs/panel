@@ -65,7 +65,7 @@
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('rejectImage') %></h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" x-text="rejectName"></p>
       </div>
-      <button type="button" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" @click="close()" aria-label="Close">
+      <button type="button" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" @click="close()" aria-label="<%= t('ariaClose') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
@@ -109,8 +109,8 @@ function imageReject() {
         const data = await res.json();
         this.close();
         if (data.error) { showToast(data.error, 'error'); }
-        else { showToast(data.message || 'Image rejected.', 'success'); window.location.reload(); }
-      } catch (e) { this.close(); showToast('Something went wrong.', 'error'); }
+        else { showToast(data.message || req.translations.imageRejected || 'Image rejected.', 'success'); window.location.reload(); }
+      } catch (e) { this.close(); showToast(req.translations.somethingWentWrong || 'Something went wrong.', 'error'); }
       finally { this.submitting = false; }
     }
   };
@@ -132,7 +132,7 @@ function imageReject() {
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('uploadImage') %></h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('uploadImageDesc') %></p>
       </div>
-      <button type="button" @click="closeUploadImageModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+      <button type="button" @click="closeUploadImageModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('ariaClose') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
@@ -156,7 +156,7 @@ function imageReject() {
             <p id="imageSelectedFileName" class="font-medium truncate" style="color:var(--theme-text-strong)"></p>
             <p id="imageSelectedFileSize" class="text-sm" style="color:var(--theme-text-muted)"></p>
           </div>
-          <button type="button" @click="removeSelectedImageFile()" class="ml-2" aria-label="Remove selected file" style="color:var(--theme-text-muted)">
+          <button type="button" @click="removeSelectedImageFile()" class="ml-2" aria-label="<%= t('ariaRemoveSelectedFile') %>" style="color:var(--theme-text-muted)">
             <%- icon('x', { class: 'w-5 h-5' }) %>
           </button>
         </div>
@@ -220,9 +220,9 @@ function imageManager() {
       '<td class="al-table-td whitespace-nowrap px-3 py-4 col-hide">' + esc(image.author || "—") + '</td>' +
       '<td class="al-table-td whitespace-nowrap px-3 py-4 col-hide">' + esc(new Date(image.createdAt).toLocaleDateString()) + '</td>' +
       '<td class="whitespace-nowrap px-3 py-4 text-sm"><div class="flex gap-2">' +
-      '<a href="/admin/images/edit/' + image.id + '" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">' + (window.alIcon ? alIcon("pencil", "size-4") : "") + 'Edit</a>' +
-      '<a href="/admin/images/export/' + image.id + '" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">' + (window.alIcon ? alIcon("download", "size-4") : "") + 'Export</a>' +
-      '<button onclick="event.stopPropagation(); openDelete(\'' + image.id + '\', \'' + esc(image.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" type="button" class="al-btn-danger" aria-label="Delete image ' + esc(image.name) + '">' + (window.alIcon ? alIcon("trash-2", "size-4") : "") + '</button>' +
+      '<a href="/admin/images/edit/' + image.id + '" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">' + (window.alIcon ? alIcon("pencil", "size-4") : "") + (req.translations.edit || 'Edit') + '</a>' +
+      '<a href="/admin/images/export/' + image.id + '" onclick="event.stopPropagation()" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition inline-flex items-center gap-1.5">' + (window.alIcon ? alIcon("download", "size-4") : "") + (req.translations.export || 'Export') + '</a>' +
+      '<button onclick="event.stopPropagation(); openDelete(\'' + image.id + '\', \'' + esc(image.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" type="button" class="al-btn-danger" aria-label="' + (req.translations.deleteImage || 'Delete image') + ' ' + esc(image.name) + '">' + (window.alIcon ? alIcon("trash-2", "size-4") : "") + '</button>' +
       '</div></td></tr>';
   }
 
@@ -291,7 +291,7 @@ function imageManager() {
       if (importUrlSubmit) {
         importUrlSubmit.addEventListener("click", async () => {
           const url = document.getElementById("importUrlInput").value.trim();
-          if (!url) { showToast("Enter a URL.", "error"); return; }
+          if (!url) { showToast(req.translations.enterUrl || "Enter a URL.", "error"); return; }
           const btn = importUrlSubmit;
           btn.disabled = true; btn.classList.add("opacity-60");
           try {
@@ -300,11 +300,11 @@ function imageManager() {
             });
             const d = await r.json();
             if (r.ok && d.success) {
-              showToast(d.message || "Image imported.", "success");
+              showToast(d.message || (req.translations.imageImported || "Image imported."), "success");
               this.renderImageTable();
               this.closeUploadImageModal();
-            } else { showToast(d.error || "Import failed.", "error"); }
-          } catch { showToast("Import failed.", "error"); }
+            } else { showToast(d.error || (req.translations.importFailed || "Import failed."), "error"); }
+          } catch { showToast(req.translations.importFailed || "Import failed.", "error"); }
           finally { btn.disabled = false; btn.classList.remove("opacity-60"); }
         });
       }
@@ -319,7 +319,7 @@ function imageManager() {
     },
     openCreate() {
       window.modal.show({
-        title: "New Image",
+        title: req.translations.newImage || "New Image",
         bodyNode: document.getElementById("createContent"),
         panelClass: "max-w-xl",
       });
@@ -328,9 +328,9 @@ function imageManager() {
     openDelete(id, name) {
       _deleteId = id;
       window.modal.confirm({
-        title: "Delete image?",
-        body: '"' + name + '" will be permanently removed.',
-        danger: true, confirmLabel: "Delete",
+        title: req.translations.deleteImageConfirm || "Delete image?",
+        body: '"' + name + '" ' + (req.translations.willBePermanentlyRemoved || 'will be permanently removed.'),
+        danger: true, confirmLabel: req.translations.delete || "Delete",
         onConfirm: () => this.deleteImage(),
       });
     },
@@ -364,8 +364,8 @@ function imageManager() {
     async deleteImage() {
       if (!_deleteId) return;
       const res = await fetch("/api/v2/admin/images/" + _deleteId, { method: "DELETE" });
-      if (res.ok) { showToast("Image deleted.", "success"); await this.renderImageTable(); }
-      else { showToast("Failed.", "error"); }
+      if (res.ok) { showToast(req.translations.imageDeleted || "Image deleted.", "success"); await this.renderImageTable(); }
+      else { showToast(req.translations.failed || "Failed.", "error"); }
     },
     openUploadImageModal() {
       setUploadMode("file");
@@ -403,21 +403,21 @@ function imageManager() {
       document.getElementById("imageUploadButton").disabled = false;
     },
     confirmImageUpload() {
-      if (!window.selectedImageFile) { showToast("Select a JSON file to upload.", "error"); return; }
+      if (!window.selectedImageFile) { showToast(req.translations.selectJsonFile || "Select a JSON file to upload.", "error"); return; }
       const file = window.selectedImageFile;
       this.closeUploadImageModal();
       const self = this;
       const r = new FileReader();
       r.onload = function (e) {
-        try { JSON.parse(e.target.result); } catch { showToast("Invalid JSON.", "error"); return; }
+        try { JSON.parse(e.target.result); } catch { showToast(req.translations.invalidJson || "Invalid JSON.", "error"); return; }
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/admin/images/upload", true);
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.onload = () => {
-          if (xhr.status === 200) { showToast("Image uploaded.", "success"); self.renderImageTable(); }
-          else { showToast("Upload failed.", "error"); }
+          if (xhr.status === 200) { showToast(req.translations.imageUploaded || "Image uploaded.", "success"); self.renderImageTable(); }
+          else { showToast(req.translations.uploadFailed || "Upload failed.", "error"); }
         };
-        xhr.onerror = () => showToast("Upload failed.", "error");
+        xhr.onerror = () => showToast(req.translations.uploadFailed || "Upload failed.", "error");
         xhr.send(e.target.result);
       };
       r.readAsText(file);
@@ -425,7 +425,7 @@ function imageManager() {
     submitCreateImage(e) {
       const form = e.target;
       const data = Object.fromEntries(new FormData(form));
-      if (!data.name || !data.startup) { showToast("Name and startup command are required.", "error"); return; }
+      if (!data.name || !data.startup) { showToast(req.translations.nameStartupRequired || "Name and startup command are required.", "error"); return; }
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
       fetch("/api/v2/admin/images", {
         method: "POST",
@@ -433,11 +433,11 @@ function imageManager() {
         body: JSON.stringify(data),
       }).then(r => r.json()).then(result => {
         if (result.success !== false) {
-          showToast("Image created.", "success");
+          showToast(req.translations.imageCreated || "Image created.", "success");
           this.closeCreate();
           this.renderImageTable();
-        } else { showToast(result.error || result.message || "Failed to create image.", "error"); }
-      }).catch(() => { showToast("Network error.", "error"); });
+        } else { showToast(result.error || result.message || (req.translations.imageCreateFailed || "Failed to create image."), "error"); }
+      }).catch(() => { showToast(req.translations.networkError || "Network error.", "error"); });
     }
   };
 }

@@ -3,9 +3,9 @@
  * Replaces scattered fetch() calls across V2 route handlers.
  */
 
-import prisma from "../db";
-import { daemonScheme } from "../handlers/utils/core/daemonRequest";
-import { DEFAULT_DAEMON_TIMEOUT_MS } from "../config/timeouts";
+import prisma from '../db';
+import { daemonScheme } from '../handlers/utils/core/daemonRequest';
+import { DEFAULT_DAEMON_TIMEOUT_MS } from '../config/timeouts';
 
 interface DaemonRequestOpts {
   method?: string;
@@ -15,14 +15,14 @@ interface DaemonRequestOpts {
 
 /** Thrown when the target node cannot be found in the database. */
 export class DaemonNodeNotFoundError extends Error {
-  constructor(message = "Node not found") {
+  constructor(message = 'Node not found') {
     super(message);
-    this.name = "DaemonNodeNotFoundError";
+    this.name = 'DaemonNodeNotFoundError';
   }
 }
 
 function getProtocol(): string {
-  return process.env.NODE_ENV === "production" ? "https" : "http";
+  return process.env.NODE_ENV === 'production' ? 'https' : 'http';
 }
 
 /**
@@ -50,10 +50,10 @@ async function fetchDaemon(
     Authorization: `Bearer ${node.key}`,
   };
   if (opts?.body !== null && opts?.body !== undefined) {
-    headers["Content-Type"] = "application/json";
+    headers['Content-Type'] = 'application/json';
   }
   return fetch(`${protocol}://${node.address}:${node.port}${path}`, {
-    method: opts?.method ?? "GET",
+    method: opts?.method ?? 'GET',
     headers,
     body:
       opts?.body !== null && opts?.body !== undefined
@@ -77,7 +77,7 @@ export async function daemonRequest(
     where: { UUID: serverUUID },
   });
   if (!server) {
-    throw new Error("Server not found");
+    throw new Error('Server not found');
   }
   const node = await prisma.node.findUnique({ where: { id: server.nodeId } });
   if (!node) {

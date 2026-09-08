@@ -4,9 +4,9 @@
  */
 
 export const HSTS_MAX_AGE_S = 31_536_000;
-export const JSON_BODY_LIMIT = "512kb";
+export const JSON_BODY_LIMIT = '512kb';
 export const URLENCODED_LIMIT = 1000;
-export const RAW_BODY_LIMIT = "1mb";
+export const RAW_BODY_LIMIT = '1mb';
 export const SETTINGS_UPLOAD_LIMIT_BYTES = 10 * 1024 * 1024;
 export const IMAGE_UPLOAD_LIMIT_BYTES = 10 * 1024 * 1024;
 export const AVATAR_UPLOAD_LIMIT_BYTES = 2 * 1024 * 1024;
@@ -27,6 +27,6 @@ export const DASHBOARD_PER_PAGE = 8;
 export const CLIENT_API_MAX_PAGE = 10_000;
 
 /** Content types */
-export const CONTENT_TYPE_JSON = "application/json";
-export const CONTENT_TYPE_TEXT = "text/plain";
-export const CONTENT_TYPE_SVG = "image/svg+xml";
+export const CONTENT_TYPE_JSON = 'application/json';
+export const CONTENT_TYPE_TEXT = 'text/plain';
+export const CONTENT_TYPE_SVG = 'image/svg+xml';

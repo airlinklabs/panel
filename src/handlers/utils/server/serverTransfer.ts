@@ -1,35 +1,35 @@
-import prisma from "../../../db";
-import type { Prisma } from "../../../generated/prisma/client";
-import logger from "../../logger";
-import { daemonRequest } from "../core/daemonRequest";
+import prisma from '../../../db';
+import type { Prisma } from '../../../generated/prisma/client';
+import logger from '../../logger';
+import { daemonRequest } from '../core/daemonRequest';
 import {
   claimNodePorts,
   getNodePortPool,
   releaseServerAllocations,
   withNodePortLock,
-} from "./allocations";
-import { assertNodeCapacity } from "./resourceCheck";
-import { safeClientMessage } from "../../../utils/errors";
+} from './allocations';
+import { assertNodeCapacity } from './resourceCheck';
+import { safeClientMessage } from '../../../utils/errors';
 import {
   parseImagePortRequirements,
   serializeServerPorts,
   validatePortAssignments,
   getUsedExternalPorts,
   getPrimaryExternalPort,
-} from "./ports";
-import { logT } from "../../../services/i18n";
+} from './ports';
+import { logT } from '../../../services/i18n';
 
 export type TransferStatus =
-  | "pending"
-  | "stopping"
-  | "archiving"
-  | "transferring"
-  | "restoring"
-  | "installing"
-  | "updating-db"
-  | "starting"
-  | "completed"
-  | "failed";
+  | 'pending'
+  | 'stopping'
+  | 'archiving'
+  | 'transferring'
+  | 'restoring'
+  | 'installing'
+  | 'updating-db'
+  | 'starting'
+  | 'completed'
+  | 'failed';
 
 export interface TransferState {
   serverId: number;
@@ -58,7 +58,7 @@ function updateStatus(
   if (state) {
     state.status = status;
     state.error = error;
-    if (status === "completed" || status === "failed") {
+    if (status === 'completed' || status === 'failed') {
       state.completedAt = new Date();
     }
   }
@@ -80,23 +80,23 @@ async function waitForInstall(
         nodeAddress: daemon.address,
         nodePort: daemon.port,
         nodeKey: daemon.key,
-        method: "GET",
+        method: 'GET',
         path: `/container/status/${serverUUID}`,
         timeout: 10_000,
       });
       const st = res.data?.status;
-      if (st === "installed" || st === "exited" || st === "running") {
+      if (st === 'installed' || st === 'exited' || st === 'running') {
         return;
       }
-      if (st === "failed") {
-        throw new Error("Install failed on destination daemon");
+      if (st === 'failed') {
+        throw new Error(logT('log.installFailedOnDestination'));
       }
     } catch {
       // daemon might not know the container yet — keep polling
     }
     await sleep(3000);
   }
-  throw new Error("Install timed out on destination daemon");
+  throw new Error('Install timed out on destination daemon');
 }
 
 export async function startTransfer(
@@ -115,23 +115,23 @@ export async function startTransfer(
     include: { node: true, image: true },
   });
   if (!server) {
-    throw new Error("Server not found");
+    throw new Error('Server not found');
   }
   if (server.Installing) {
-    throw new Error("Server is currently installing");
+    throw new Error('Server is currently installing');
   }
   if (server.Suspended) {
-    throw new Error("Suspended servers cannot be transferred");
+    throw new Error('Suspended servers cannot be transferred');
   }
   if (server.nodeId === targetNodeId) {
-    throw new Error("Server is already on this node");
+    throw new Error('Server is already on this node');
   }
 
   const targetNode = await prisma.node.findUnique({
     where: { id: targetNodeId },
   });
   if (!targetNode) {
-    throw new Error("Target node not found");
+    throw new Error('Target node not found');
   }
 
   // Validate target ports are available
@@ -168,18 +168,18 @@ export async function startTransfer(
     serverName: server.name,
     sourceNodeId: server.nodeId,
     targetNodeId,
-    status: "pending",
+    status: 'pending',
     startedAt: new Date(),
   };
   transferStates.set(serverId, state);
 
   // Run the transfer in background — the UI polls /transfer/status
   runTransfer(server, targetNode, targetPorts, state, req).catch((err) => {
-    logger.error(logT("log.transferFailed", { uuid: server.UUID }), err);
+    logger.error(logT('log.transferFailed', { uuid: server.UUID }), err);
     updateStatus(
       serverId,
-      "failed",
-      safeClientMessage(err, "The transfer failed."),
+      'failed',
+      safeClientMessage(err, 'The transfer failed.'),
     );
   });
 
@@ -207,15 +207,15 @@ async function runTransfer(
 
   try {
     // ── Step 1: Stop source container ──────────────────────────────────────
-    updateStatus(state.serverId, "stopping");
+    updateStatus(state.serverId, 'stopping');
     try {
       await daemonRequest({
         nodeAddress: srcDaemon.address,
         nodePort: srcDaemon.port,
         nodeKey: srcDaemon.key,
-        method: "POST",
-        path: "/container/stop",
-        body: { id: server.UUID, stopCmd: "stop" },
+        method: 'POST',
+        path: '/container/stop',
+        body: { id: server.UUID, stopCmd: 'stop' },
         timeout: 30_000,
       });
     } catch {
@@ -229,7 +229,7 @@ async function runTransfer(
     await sleep(2000); // Wait for container to fully stop
 
     // ── Step 2: Create backup on source daemon ─────────────────────────────
-    updateStatus(state.serverId, "archiving");
+    updateStatus(state.serverId, 'archiving');
     const backupRes = await daemonRequest<{
       success?: boolean;
       backup?: {
@@ -243,8 +243,8 @@ async function runTransfer(
       nodeAddress: srcDaemon.address,
       nodePort: srcDaemon.port,
       nodeKey: srcDaemon.key,
-      method: "POST",
-      path: "/container/backup",
+      method: 'POST',
+      path: '/container/backup',
       body: { id: server.UUID, name: `transfer-${Date.now()}` },
       timeout: 300_000,
     });
@@ -253,7 +253,7 @@ async function runTransfer(
       throw new Error(
         safeClientMessage(
           backupRes.data?.error,
-          "The backup could not be created on the source node.",
+          'The backup could not be created on the source node.',
         ),
       );
     }
@@ -262,7 +262,7 @@ async function runTransfer(
 
     // ── Step 3: Download from source daemon ────────────────────────────────
     // ── Step 4: Upload to destination daemon ───────────────────────────────
-    updateStatus(state.serverId, "transferring");
+    updateStatus(state.serverId, 'transferring');
     const backupUuid = backupRes.data.backup.uuid;
 
     // Stream backup from source
@@ -270,15 +270,15 @@ async function runTransfer(
       nodeAddress: srcDaemon.address,
       nodePort: srcDaemon.port,
       nodeKey: srcDaemon.key,
-      method: "GET",
-      path: "/container/backup/download",
+      method: 'GET',
+      path: '/container/backup/download',
       params: { backupPath: backupFilePath },
-      responseType: "stream",
+      responseType: 'stream',
       timeout: 600_000,
     });
 
     if (!downloadRes.data) {
-      throw new Error("Failed to download backup from source daemon");
+      throw new Error('Failed to download backup from source daemon');
     }
 
     // Upload to destination daemon
@@ -290,8 +290,8 @@ async function runTransfer(
       nodeAddress: targetNode.address,
       nodePort: targetNode.port,
       nodeKey: targetNode.key,
-      method: "POST",
-      path: "/container/backup/upload",
+      method: 'POST',
+      path: '/container/backup/upload',
       params: { id: server.UUID, backupUuid },
       body: downloadRes.data,
       contentDigest: backupChecksum,
@@ -302,13 +302,13 @@ async function runTransfer(
       throw new Error(
         safeClientMessage(
           uploadRes.data?.error,
-          "The backup could not be uploaded to the destination node.",
+          'The backup could not be uploaded to the destination node.',
         ),
       );
     }
 
     // ── Step 5: Restore backup on destination daemon ───────────────────────
-    updateStatus(state.serverId, "restoring");
+    updateStatus(state.serverId, 'restoring');
     const restoreRes = await daemonRequest<{
       success?: boolean;
       error?: string;
@@ -316,8 +316,8 @@ async function runTransfer(
       nodeAddress: targetNode.address,
       nodePort: targetNode.port,
       nodeKey: targetNode.key,
-      method: "POST",
-      path: "/container/restore",
+      method: 'POST',
+      path: '/container/restore',
       body: {
         id: server.UUID,
         backupPath: uploadRes.data.filePath,
@@ -330,13 +330,13 @@ async function runTransfer(
       throw new Error(
         safeClientMessage(
           restoreRes.data?.error,
-          "The backup could not be restored on the destination node.",
+          'The backup could not be restored on the destination node.',
         ),
       );
     }
 
     // ── Step 6: Install server on destination (pull image + scripts) ───────
-    updateStatus(state.serverId, "installing");
+    updateStatus(state.serverId, 'installing');
 
     // Parse variables for env
     let env: Record<string, string> = {};
@@ -344,8 +344,8 @@ async function runTransfer(
       try {
         const vars = JSON.parse(server.Variables);
         const normalized = vars.map((v: Record<string, unknown>) => ({
-          env: String(v.env_variable ?? v.env ?? ""),
-          value: v.value ?? v.default_value ?? "",
+          env: String(v.env_variable ?? v.env ?? ''),
+          value: v.value ?? v.default_value ?? '',
         }));
         env = Object.fromEntries(
           normalized.map((v: { env: string; value: unknown }) => [
@@ -358,13 +358,13 @@ async function runTransfer(
         try {
           const primaryExternalPort = getPrimaryExternalPort(server.Ports);
           if (primaryExternalPort) {
-            env["SERVER_PORT"] = String(primaryExternalPort);
+            env['SERVER_PORT'] = String(primaryExternalPort);
           }
         } catch {
           /* keep fallback */
         }
-        env["SERVER_MEMORY"] = String(server.Memory);
-        env["SERVER_CPU"] = String(server.Cpu);
+        env['SERVER_MEMORY'] = String(server.Memory);
+        env['SERVER_CPU'] = String(server.Cpu);
       } catch {
         /* keep empty env */
       }
@@ -372,7 +372,7 @@ async function runTransfer(
 
     let dockerImageValue: string | undefined;
     try {
-      const parsed = JSON.parse(server.dockerImage || "{}");
+      const parsed = JSON.parse(server.dockerImage || '{}');
       dockerImageValue = Object.values(parsed)[0] as string | undefined;
     } catch {
       /* leave undefined */
@@ -388,7 +388,7 @@ async function runTransfer(
         scripts = {};
       }
 
-      if (scripts.installation && typeof scripts.installation === "object") {
+      if (scripts.installation && typeof scripts.installation === 'object') {
         const installation = scripts.installation as {
           script: string;
           container: string;
@@ -398,13 +398,13 @@ async function runTransfer(
           nodeAddress: targetNode.address,
           nodePort: targetNode.port,
           nodeKey: targetNode.key,
-          method: "POST",
-          path: "/container/installer",
+          method: 'POST',
+          path: '/container/installer',
           body: {
             id: server.UUID,
             script: installation.script,
             container: installation.container,
-            entrypoint: installation.entrypoint || "bash",
+            entrypoint: installation.entrypoint || 'bash',
             env,
           },
           timeout: 600_000,
@@ -414,8 +414,8 @@ async function runTransfer(
           nodeAddress: targetNode.address,
           nodePort: targetNode.port,
           nodeKey: targetNode.key,
-          method: "POST",
-          path: "/container/install",
+          method: 'POST',
+          path: '/container/install',
           body: {
             id: server.UUID,
             image: dockerImageValue,
@@ -443,7 +443,7 @@ async function runTransfer(
     await waitForInstall(targetNode, server.UUID);
 
     // ── Step 7: Update database ────────────────────────────────────────────
-    updateStatus(state.serverId, "updating-db");
+    updateStatus(state.serverId, 'updating-db');
     const newPorts = serializeServerPorts(targetPorts);
 
     await withNodePortLock(targetNode.id, async () => {
@@ -468,7 +468,7 @@ async function runTransfer(
     });
 
     // ── Step 8: Start server on destination ────────────────────────────────
-    updateStatus(state.serverId, "starting");
+    updateStatus(state.serverId, 'starting');
     try {
       let configFiles: unknown;
       if (server.image?.config_files) {
@@ -482,8 +482,8 @@ async function runTransfer(
         nodeAddress: targetNode.address,
         nodePort: targetNode.port,
         nodeKey: targetNode.key,
-        method: "POST",
-        path: "/container/start",
+        method: 'POST',
+        path: '/container/start',
         body: {
           id: server.UUID,
           image: dockerImageValue,
@@ -504,7 +504,10 @@ async function runTransfer(
           /* noop */
         });
     } catch (startErr) {
-      logger.warn(`Failed to start server after transfer: ${startErr}`);
+      logger.warn(
+        logT('log.failedToStartServerAfterTransfer'),
+        startErr as Record<string, unknown>,
+      );
       // Don't fail the transfer — server is migrated, just not running
     }
 
@@ -515,8 +518,8 @@ async function runTransfer(
           nodeAddress: srcDaemon.address,
           nodePort: srcDaemon.port,
           nodeKey: srcDaemon.key,
-          method: "DELETE",
-          path: "/container/backup",
+          method: 'DELETE',
+          path: '/container/backup',
           body: { backupPath: backupFilePath },
           timeout: 30_000,
         });
@@ -525,14 +528,18 @@ async function runTransfer(
       }
     }
 
-    updateStatus(state.serverId, "completed");
+    updateStatus(state.serverId, 'completed');
     logger.info(
-      `Server ${server.UUID} transferred from node ${srcDaemon.id} to node ${targetNode.id}`,
+      logT('log.serverTransferred', {
+        uuid: server.UUID,
+        srcNode: String(srcDaemon.id),
+        targetNode: String(targetNode.id),
+      }),
     );
   } catch (err) {
-    const msg = safeClientMessage(err, "The transfer failed.");
-    updateStatus(state.serverId, "failed", msg);
-    logger.error(`Transfer failed for ${server.UUID}:`, err);
+    const msg = safeClientMessage(err, 'The transfer failed.');
+    updateStatus(state.serverId, 'failed', msg);
+    logger.error(logT('log.transferFailed', { uuid: server.UUID }), err);
 
     // Attempt cleanup: delete backup on source if it was created
     if (backupFilePath) {
@@ -541,8 +548,8 @@ async function runTransfer(
           nodeAddress: srcDaemon.address,
           nodePort: srcDaemon.port,
           nodeKey: srcDaemon.key,
-          method: "DELETE",
-          path: "/container/backup",
+          method: 'DELETE',
+          path: '/container/backup',
           body: { backupPath: backupFilePath },
           timeout: 30_000,
         });

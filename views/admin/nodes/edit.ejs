@@ -8,8 +8,8 @@
     <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="nodeEditor()">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Nodes', href: '/admin/nodes' },
+        { label: t('admin') },
+        { label: t('navNodes'), href: '/admin/nodes' },
         { label: node.name }
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
@@ -54,8 +54,8 @@
 
               <div>
                 <label for="nodeKey" class="al-label"><%= t('daemonKey') %></label>
-                <input id="nodeKey" value="" class="al-input" placeholder="Use CLI to retrieve key" disabled>
-                <p class="text-xs mt-1" style="color:var(--theme-text-muted)">Key is redacted for security. Use the configure command to view.</p>
+                <input id="nodeKey" value="" class="al-input" placeholder="<%= t('useCliToRetrieveKey') %>" disabled>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('keyRedactedDesc') %></p>
               </div>
             </div>
           </div>
@@ -69,11 +69,11 @@
                   <%= t('ram') %>
                 </label>
                 <% if (node.ram && isNaN(parseFloat(node.ram))) { %>
-                  <input id="nodeRam" value="<%= node.ram %>" class="al-input" placeholder="Informational only">
+                  <input id="nodeRam" value="<%= node.ram %>" class="al-input" placeholder="<%= t('informationalOnly') %>">
                 <% } else { %>
                   <input type="hidden" id="nodeRamValue" value="<%= node.ram ? Math.round(parseFloat(node.ram) * 1024) : '' %>">
                   <div class="flex items-stretch gap-0">
-                    <input id="nodeRam" value="<%= node.ram %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+                    <input id="nodeRam" value="<%= node.ram %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
                     <button type="button" class="al-format-switcher" data-format-switcher
                       data-display="nodeRam" data-hidden="nodeRamValue"
                       data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
@@ -87,11 +87,11 @@
                   <%= t('disk') %>
                 </label>
                 <% if (node.disk && isNaN(parseFloat(node.disk))) { %>
-                  <input id="nodeDisk" value="<%= node.disk %>" class="al-input" placeholder="Informational only">
+                  <input id="nodeDisk" value="<%= node.disk %>" class="al-input" placeholder="<%= t('informationalOnly') %>">
                 <% } else { %>
                   <input type="hidden" id="nodeDiskValue" value="<%= node.disk ? Math.round(parseFloat(node.disk) * 1024) : '' %>">
                   <div class="flex items-stretch gap-0">
-                    <input id="nodeDisk" value="<%= node.disk %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+                    <input id="nodeDisk" value="<%= node.disk %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
                     <button type="button" class="al-format-switcher" data-format-switcher
                       data-display="nodeDisk" data-hidden="nodeDiskValue"
                       data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
@@ -106,12 +106,12 @@
                 </label>
                 <input type="hidden" id="nodeCpuValue" value="<%= node.cpu %>">
                 <div class="flex items-stretch gap-0">
-                  <input id="nodeProcessor" value="" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+                  <input id="nodeProcessor" value="" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="nodeProcessor" data-hidden="nodeCpuValue"
                     data-units="1:%,100:Cores" data-default-unit="Cores">Cores</button>
                 </div>
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">1 core = 100%</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('coreHint') %></p>
               </div>
             </div>
           </div>
@@ -123,21 +123,21 @@
               <div>
                 <label for="nodeOverallocateMemory" class="al-label flex items-center gap-1.5">
                   <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  Memory %
+                  <%= t('memory') %> %
                 </label>
                 <input id="nodeOverallocateMemory" type="number" min="0" value="<%= node.overallocateMemory || 0 %>" class="al-input">
               </div>
               <div>
                 <label for="nodeOverallocateDisk" class="al-label flex items-center gap-1.5">
                   <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  Disk %
+                  <%= t('disk') %> %
                 </label>
                 <input id="nodeOverallocateDisk" type="number" min="0" value="<%= node.overallocateDisk || 0 %>" class="al-input">
               </div>
               <div>
                 <label for="nodeOverallocateCpu" class="al-label flex items-center gap-1.5">
                   <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  CPU %
+                  <%= t('cpu') %> %
                 </label>
                 <input id="nodeOverallocateCpu" type="number" min="0" value="<%= node.overallocateCpu || 0 %>" class="al-input">
               </div>
@@ -145,10 +145,10 @@
             <div class="mt-4">
               <label for="nodeLocation" class="al-label flex items-center gap-1.5">
                 <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                Location
+                <%= t('location') %>
               </label>
               <select id="nodeLocation" class="al-input">
-                <option value="">No location</option>
+                <option value=""><%= t('noLocation') %></option>
                 <% (locations || []).forEach(loc => { %>
                   <option value="<%= loc.id %>" <%= node.locationId === loc.id ? 'selected' : '' %>><%= loc.name %> (<%= loc.shortCode %>)</option>
                 <% }); %>
@@ -157,7 +157,7 @@
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Allocated Ports</h2>
+            <h2 class="al-card-header"><%= t('allocatedPorts') %></h2>
             <div class="space-y-2">
               <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
                 <!-- Port tags will be inserted here -->
@@ -166,21 +166,21 @@
                 <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1" @keypress.enter.prevent="addPortFromInput()">
                 <button id="addPortBtn" type="button" class="al-btn-primary" @click="addPortFromInput()">
                   <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-                  Add Port
+                  <%= t('addPort') %>
                 </button>
               </div>
             </div>
           </div>
           <div class="al-card">
-            <h2 class="al-card-header">Maintenance Mode</h2>
+            <h2 class="al-card-header"><%= t('maintenanceMode') %></h2>
             <div class="p-4 rounded-xl border" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
               <div class="flex items-center justify-between gap-4">
                 <div>
-                  <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Put node into maintenance mode</h3>
-                  <p class="text-xs mt-1" style="color:var(--theme-text-muted)">While enabled, no new servers may be created on this node and existing servers cannot be started or restarted.</p>
+                  <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('putNodeMaintenanceMode') %></h3>
+                  <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('maintenanceModeDesc') %></p>
                 </div>
                 <label for="nodeMaintenanceMode" class="relative inline-flex items-center cursor-pointer shrink-0">
-                  <input id="nodeMaintenanceMode" type="checkbox" class="sr-only peer" <%= node.maintenanceMode ? 'checked' : '' %> aria-label="Put node into maintenance mode">
+                  <input id="nodeMaintenanceMode" type="checkbox" class="sr-only peer" <%= node.maintenanceMode ? 'checked' : '' %> aria-label="<%= t('putNodeMaintenanceMode') %>">
                   <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
                 </label>
               </div>
@@ -248,7 +248,7 @@ function nodeEditor() {
       const portText = document.createElement('span');
       portText.className = isUsed ? 'text-amber-600 dark:text-amber-400 flex items-center' : 'text-neutral-800 dark:text-neutral-300';
       if (isUsed) {
-        portText.innerHTML = port + ' <span class="ml-2 text-xs bg-amber-600/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">In use</span>';
+      portText.innerHTML = port + ' <span class="ml-2 text-xs bg-amber-600/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">' + (req.translations.inUse || 'In use') + '</span>';
       } else {
         portText.textContent = port;
       }
@@ -259,7 +259,7 @@ function nodeEditor() {
 
       if (isUsed) {
         deleteBtn.disabled = true;
-        deleteBtn.title = 'Cannot remove port that is in use by a server';
+        deleteBtn.title = req.translations.cannotRemovePortInUse || 'Cannot remove port that is in use by a server';
         deleteBtn.className += ' opacity-50 cursor-not-allowed';
       } else {
         deleteBtn.onclick = (e) => {
@@ -296,7 +296,7 @@ function nodeEditor() {
       if (input.includes('-')) {
         const [start, end] = input.split('-').map(p => parseInt(p.trim()));
         if (isNaN(start) || isNaN(end) || start >= end || start < this.PORT_MIN || end > this.PORT_MAX) {
-          showToast('Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between ' + this.PORT_MIN + ' and ' + this.PORT_MAX + '.', 'error');
+          showToast((req.translations.invalidPortRange || 'Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between ') + this.PORT_MIN + (req.translations.and || ' and ') + this.PORT_MAX + '.', 'error');
           return;
         }
         for (let port = start; port <= end; port++) {
@@ -305,7 +305,7 @@ function nodeEditor() {
       } else {
         const port = parseInt(input.trim());
         if (isNaN(port) || port < this.PORT_MIN || port > this.PORT_MAX) {
-          showToast('Invalid port. Port must be between ' + this.PORT_MIN + ' and ' + this.PORT_MAX + '.', 'error');
+          showToast((req.translations.invalidPort || 'Invalid port. Port must be between ') + this.PORT_MIN + (req.translations.and || ' and ') + this.PORT_MAX + '.', 'error');
           return;
         }
         if (!this.allocatedPorts.includes(port)) this.allocatedPorts.push(port);
@@ -325,7 +325,7 @@ function nodeEditor() {
     removePort(port) {
       const usedPorts = this.usedPortsSet;
       if (usedPorts.has(port)) {
-        showToast('Cannot remove port that is in use by a server', 'error');
+        showToast(req.translations.cannotRemovePortInUse || 'Cannot remove port that is in use by a server', 'error');
         return;
       }
 
@@ -335,7 +335,7 @@ function nodeEditor() {
       if (this.allocatedPorts.length === 0) {
         const emptyMessage = document.createElement('div');
         emptyMessage.className = 'col-span-4 text-sm text-neutral-500 italic';
-        emptyMessage.textContent = 'No ports allocated yet. Add ports that will be available for servers.';
+        emptyMessage.textContent = req.translations.noPortsAllocated || 'No ports allocated yet. Add ports that will be available for servers.';
         portsList.appendChild(emptyMessage);
         return;
       }
@@ -362,7 +362,7 @@ function nodeEditor() {
       if (this.allocatedPorts.length === 0) {
         const emptyMessage = document.createElement('div');
         emptyMessage.className = 'col-span-4 text-sm text-neutral-500 italic';
-        emptyMessage.textContent = 'No ports allocated yet. Add ports that will be available for servers.';
+        emptyMessage.textContent = req.translations.noPortsAllocated || 'No ports allocated yet. Add ports that will be available for servers.';
         portsList.appendChild(emptyMessage);
         return;
       }
@@ -379,7 +379,7 @@ function nodeEditor() {
       if (hidden) {
         const v = parseFloat(hidden.value);
         if (hidden.value.trim() === '' || isNaN(v)) {
-          showToast('Value is required.', 'error');
+          showToast(req.translations.valueIsRequired || 'Value is required.', 'error');
           return '';
         }
         return isFinite(v) ? String(Math.round(v / 1024 * 100) / 100) : '';
@@ -401,7 +401,7 @@ function nodeEditor() {
           });
         } catch (err) {
           console.error('Failed to save maintenance mode:', err);
-          showToast('Failed to save maintenance mode.', 'error');
+          showToast(req.translations.failedToSaveMaintenanceMode || 'Failed to save maintenance mode.', 'error');
         }
       }
 
@@ -419,8 +419,8 @@ function nodeEditor() {
         locationId: document.getElementById('nodeLocation').value
       };
 
-      if (!nodeData.ram) { showToast('RAM is required.', 'error'); return; }
-      if (!nodeData.disk) { showToast('Disk is required.', 'error'); return; }
+      if (!nodeData.ram) { showToast(req.translations.ramRequired || 'RAM is required.', 'error'); return; }
+      if (!nodeData.disk) { showToast(req.translations.diskRequired || 'Disk is required.', 'error'); return; }
 
       try {
         const response = await fetch('/api/v2/admin/nodes/' + pd.nodeId, {
@@ -430,7 +430,7 @@ function nodeEditor() {
         });
 
         if (response.ok) {
-          showToast('Node updated. Looking good.', 'success');
+          showToast(req.translations.nodeUpdated || 'Node updated. Looking good.', 'success');
           setTimeout(() => {
             window.location.href = '/admin/nodes?err=none';
           }, 1000);
@@ -438,7 +438,7 @@ function nodeEditor() {
           throw new Error('Failed to update node');
         }
       } catch (error) {
-        showToast('Error updating node: ' + error, 'error');
+        showToast((req.translations.errorUpdatingNode || 'Error updating node: ') + error, 'error');
       }
     }
   };

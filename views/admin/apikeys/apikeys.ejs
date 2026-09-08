@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'API Keys Management' }) %>
+<%- include('../../components/header', { title: t('apiKeysManagement') }) %>
 
 <style>
   .category-panel {
@@ -25,17 +25,17 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'API Keys' }
+        { label: t('admin') },
+        { label: t('breadcrumbApiKeys') }
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title"><%= req.translations.apiKeysManagement || 'API Keys Management' %></h1>
-          <p class="al-page-desc"><%= req.translations.apiKeysDesc || 'Create and manage API keys with specific permissions' %></p>
+          <h1 class="al-page-title"><%= t('apiKeysManagement') %></h1>
+          <p class="al-page-desc"><%= t('apiKeysDesc') %></p>
         </div>
         <div class="flex gap-2 shrink-0">
-          <button @click="showCreateModal = true" type="button" class="al-btn-primary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.createApiKey || 'Create API Key' %></button>
-          <a href="/admin/api/docs" class="al-btn-secondary"><%= req.translations.apiDocs || 'API Documentation' %></a>
+          <button @click="showCreateModal = true" type="button" class="al-btn-primary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('createApiKey') %></button>
+          <a href="/admin/api/docs" class="al-btn-secondary"><%= t('apiDocs') %></a>
         </div>
       </div>
       <div class="al-page-body space-y-3" id="admin-apikeys-list">
@@ -54,10 +54,10 @@
 
       <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
         <div>
-          <h3 id="createApiKeyTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= req.translations.createNewApiKey || 'Create API Key' %></h3>
-          <p id="createApiKeyDescription" class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Set a name and choose what this key is allowed to do.</p>
+          <h3 id="createApiKeyTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('createApiKeyModal') %></h3>
+          <p id="createApiKeyDescription" class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= t('apiKeySetNameDesc') %></p>
         </div>
-        <button type="button" @click="showCreateModal = false" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="Close">
+        <button type="button" @click="showCreateModal = false" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="<%= t('ariaClose') %>">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
@@ -67,47 +67,47 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label for="name" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyName || 'Name' %></label>
+            <label for="name" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);"><%= t('apiKeyName') %></label>
             <input type="text" name="name" id="name" required
               class="block w-full rounded-xl px-3 py-2 text-sm border transition focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-accent)]"
               style="background:var(--theme-bg-input);border-color:var(--theme-border);color:var(--theme-text-strong);"
-              placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
+              placeholder="<%= t('apiKeyNamePlaceholder') %>">
           </div>
           <div>
-            <label for="description" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyDescriptionLabel || 'Description' %> <span style="color:var(--theme-text-placeholder);" class="font-normal">(optional)</span></label>
+            <label for="description" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);"><%= t('apiKeyDescriptionLabel') %> <span style="color:var(--theme-text-placeholder);" class="font-normal"><%= t('apiKeyOptionalLabel') %></span></label>
             <input type="text" name="description" id="description"
               class="block w-full rounded-xl px-3 py-2 text-sm border transition focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-accent)]"
               style="background:var(--theme-bg-input);border-color:var(--theme-border);color:var(--theme-text-strong);"
-              placeholder="What is this key used for?">
+              placeholder="<%= t('apiKeyPlaceholderDesc') %>">
           </div>
         </div>
 
         <div>
-          <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);">Presets</p>
+          <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);"><%= t('apiKeyPresets') %></p>
         <div class="flex gap-2">
           <button type="button" @click="applyPreset('full-admin')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'full-admin' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
-            <%- icon('shield', { class: 'size-3', strokeWidth: 1.5 }) %>Full Admin
+            <%- icon('shield', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyFullAdmin') %>
           </button>
           <button type="button" @click="applyPreset('read-only')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'read-only' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
-            <%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %>Read-Only
+            <%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyReadOnlyPreset') %>
           </button>
           <button type="button" @click="applyPreset('server-manager')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'server-manager' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
-            <%- icon('server', { class: 'size-3', strokeWidth: 1.5 }) %>Server Manager
+            <%- icon('server', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyServerManager') %>
           </button>
           <button type="button" @click="applyPreset('user-manager')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'user-manager' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
-            <%- icon('user', { class: 'size-3', strokeWidth: 1.5 }) %>User Manager
+            <%- icon('user', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyUserManager') %>
           </button>
           <button type="button" @click="applyPreset('node-monitor')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'node-monitor' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
-            <%- icon('monitor', { class: 'size-3', strokeWidth: 1.5 }) %>Node Monitor
+            <%- icon('monitor', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyNodeMonitor') %>
           </button>
           <button type="button" @click="applyPreset('none')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 active:scale-95 inline-flex items-center gap-1.5 hover:border-[var(--theme-border-accent)] hover:bg-[var(--theme-bg-hover)]" :style="activePreset === 'none' ? 'background:var(--theme-primary);color:var(--theme-accent-text);border-color:var(--theme-primary)' : 'border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text)'">
-            <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Clear All
+            <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('apiKeyClearAll') %>
           </button>
         </div>
         </div>
 
         <div>
-          <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);">Permissions</p>
+          <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);"><%= t('apiKeyPermissions') %></p>
           <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
             <% ['servers', 'users', 'nodes', 'settings'].forEach(category => { %>
               <div class="rounded-xl border overflow-hidden" style="border-color:var(--theme-border);">
@@ -157,13 +157,13 @@
             class="px-4 py-2 text-xs font-medium rounded-xl border transition active:scale-95 inline-flex items-center gap-2 hover:bg-[var(--theme-bg-hover)]"
             style="border-color:var(--theme-border);background:var(--theme-bg-card);color:var(--theme-text);">
             <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-            Cancel
+            <%= t('cancel') %>
           </button>
           <button type="submit"
             class="px-4 py-2 text-xs font-medium rounded-xl transition active:scale-95 inline-flex items-center gap-2 hover:bg-[var(--theme-bg-hover)]"
             style="background:var(--theme-primary);color:var(--theme-accent-text);">
             <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
-            Create API key
+            <%= t('createApiKey') %>
           </button>
         </div>
 
@@ -179,8 +179,8 @@
     <!-- Header -->
     <div class="flex justify-between items-center px-6 py-4 border-b shrink-0" style="border-color:var(--theme-border);">
       <div>
-        <p id="editApiKeyTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= req.translations.editApiKey || 'Edit API Key' %></p>
-        <p id="editApiKeyDescription" class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Update name, description, and permissions.</p>
+        <p id="editApiKeyTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('editApiKey') %></p>
+        <p id="editApiKeyDescription" class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= t('apiKeyEditDesc') %></p>
       </div>
       <button type="button" @click="showEditModal = false" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
@@ -195,26 +195,26 @@
         <!-- Name + description -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-medium mb-1" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyName || 'Name' %></label>
+            <label class="block text-xs font-medium mb-1" style="color:var(--theme-text-muted);"><%= t('apiKeyName') %></label>
             <input type="text" name="name" id="edit-name" required
               class="w-full rounded-xl border text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-accent)] transition"
               style="border-color:var(--theme-border);background:var(--theme-bg-secondary);color:var(--theme-text-strong);"
-              placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
+              placeholder="<%= t('apiKeyNamePlaceholder') %>">
           </div>
           <div>
-            <label class="block text-xs font-medium mb-1" style="color:var(--theme-text-muted);"><%= req.translations.apiKeyDescriptionLabel || 'Description' %></label>
+            <label class="block text-xs font-medium mb-1" style="color:var(--theme-text-muted);"><%= t('apiKeyDescriptionLabel') %></label>
             <input type="text" name="description" id="edit-description"
               class="w-full rounded-xl border text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-accent)] transition"
               style="border-color:var(--theme-border);background:var(--theme-bg-secondary);color:var(--theme-text-strong);"
-              placeholder="<%= req.translations.apiKeyDescriptionPlaceholder || 'Used for server management' %>">
+              placeholder="<%= t('apiKeyPlaceholderDesc') %>">
           </div>
         </div>
 
         <!-- Quick select -->
         <div class="flex gap-2">
-          <button type="button" id="editSelectAllBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %> Select all</button>
-          <button type="button" id="editSelectNoneBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> Clear all</button>
-          <button type="button" id="editSelectReadOnlyBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %> Read only</button>
+          <button type="button" id="editSelectAllBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('check-check', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('selectAll') %></button>
+          <button type="button" id="editSelectNoneBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('clearAll') %></button>
+          <button type="button" id="editSelectReadOnlyBtn" class="text-xs px-3 py-1.5 rounded-lg border transition inline-flex items-center gap-1.5 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted);"><%- icon('eye', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('apiKeyReadOnlyPerm') %></button>
         </div>
 
         <!-- Permissions grid -->
@@ -223,7 +223,7 @@
           <div class="rounded-xl border overflow-hidden" style="border-color:var(--theme-border);">
             <div class="flex items-center justify-between px-4 py-2.5" style="background:var(--theme-bg-secondary);">
               <p class="text-xs font-semibold capitalize" style="color:var(--theme-text-muted);"><%= cat %></p>
-              <button type="button" class="edit-select-category text-xs transition hover:text-[var(--theme-text)]" style="color:var(--theme-text-muted);" data-category="<%= cat %>">Select all</button>
+              <button type="button" class="edit-select-category text-xs transition hover:text-[var(--theme-text)]" style="color:var(--theme-text-muted);" data-category="<%= cat %>"><%= t('selectAll') %></button>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 px-4 py-3">
               <% allPermissions.filter(p => p.value.includes(cat)).forEach(permission => { %>
@@ -244,8 +244,8 @@
 
       <!-- Footer -->
       <div class="flex gap-2 px-6 py-4 border-t justify-end shrink-0" style="border-color:var(--theme-border);">
-         <button type="button" @click="showEditModal = false" class="px-4 py-2 text-xs font-medium rounded-xl transition inline-flex items-center gap-2 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);color:var(--theme-text);"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> Cancel</button>
-        <button type="submit" class="px-4 py-2 text-xs font-medium rounded-xl transition inline-flex items-center gap-2 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-primary);color:var(--theme-accent-text);"><%- icon('save', { class: 'size-3', strokeWidth: 1.5 }) %> Save changes</button>
+         <button type="button" @click="showEditModal = false" class="px-4 py-2 text-xs font-medium rounded-xl transition inline-flex items-center gap-2 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-bg-secondary);color:var(--theme-text);"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('cancel') %></button>
+        <button type="submit" class="px-4 py-2 text-xs font-medium rounded-xl transition inline-flex items-center gap-2 hover:bg-[var(--theme-bg-hover)]" style="background:var(--theme-primary);color:var(--theme-accent-text);"><%- icon('save', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('apiKeySaveChanges') %></button>
       </div>
     </form>
   </div>
@@ -256,20 +256,20 @@
   <div class="absolute inset-0 bg-transparent" @click="showCreatedModal = false"></div>
   <div id="createdKeyPanel" role="dialog" aria-modal="true" aria-labelledby="createdKeyTitle" tabindex="-1" class="al-sheet-panel relative rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
-      <h3 id="createdKeyTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);">API key created</h3>
+      <h3 id="createdKeyTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('apiKeyCreatedTitle') %></h3>
       <button type="button" @click="showCreatedModal = false" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
     <div class="px-6 py-4">
-      <p class="text-xs mb-4" style="color:var(--theme-text-muted);">Copy it now — for security, this is the only time the full key is shown.</p>
+      <p class="text-xs mb-4" style="color:var(--theme-text-muted);"><%= t('apiKeyCopyNotice') %></p>
       <div class="flex items-center gap-2 rounded-xl px-3 py-2.5" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
         <code class="flex-1 text-xs font-mono break-all" style="color:var(--theme-text-strong)"><%= created %></code>
       </div>
     </div>
     <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
-      <button type="button" @click="showCreatedModal = false" class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %> Close</button>
-      <button type="button" @click="copyToClipboard(createdKey)" class="al-btn-primary"><%- icon('copy', { class: 'size-4', strokeWidth: 1.5 }) %> Copy key</button>
+      <button type="button" @click="showCreatedModal = false" class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('close') %></button>
+      <button type="button" @click="copyToClipboard(createdKey)" class="al-btn-primary"><%- icon('copy', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('apiKeyCopyKeyBtn') %></button>
     </div>
   </div>
 </div>
@@ -313,8 +313,8 @@ function apikeyPage() {
       };
       window.confirmDeleteApiKey = (keyId) => {
         window.modal.confirm({
-          title: 'Delete API key', body: 'This will permanently revoke the key. Any integrations using it will stop working.',
-          danger: true, confirmLabel: 'Yeah, delete it',
+          title: req.translations.apiKeyDeleteTitle || 'Delete API key', body: req.translations.apiKeyDeleteConfirm || 'This will permanently revoke the key. Any integrations using it will stop working.',
+          danger: true, confirmLabel: req.translations.apiKeyDeleteAction || 'Yeah, delete it',
           onConfirm: () => this.deleteKey(keyId)
         });
       };
@@ -359,14 +359,14 @@ function apikeyPage() {
           body: params,
         });
         if (res.ok) {
-          showToast('API key created', 'success');
+          showToast(req.translations.apiKeyCreated || 'API key created', 'success');
           this.showCreateModal = false;
           window.location.href = res.url || '/admin/apikeys';
         } else {
           const data = await res.json().catch(() => ({}));
-          showToast(data.error || 'Failed to create key.', 'error');
+          showToast(data.error || (req.translations.apiKeyCreateFailed || 'Failed to create key.'), 'error');
         }
-      } catch (e) { showToast('Network error.', 'error'); }
+      } catch (e) { showToast(req.translations.networkError || 'Network error.', 'error'); }
     },
 
     async submitEdit() {
@@ -383,14 +383,14 @@ function apikeyPage() {
           body: params,
         });
         if (res.ok) {
-          showToast('API key updated', 'success');
+          showToast(req.translations.apiKeyUpdated || 'API key updated', 'success');
           this.showEditModal = false;
           window.location.reload();
         } else {
           const data = await res.json().catch(() => ({}));
-          showToast(data.error || 'Failed to update key.', 'error');
+          showToast(data.error || (req.translations.apiKeyUpdateFailed || 'Failed to update key.'), 'error');
         }
-      } catch (e) { showToast('Network error.', 'error'); }
+      } catch (e) { showToast(req.translations.networkError || 'Network error.', 'error'); }
     },
 
     async deleteKey(keyId) {
@@ -399,15 +399,15 @@ function apikeyPage() {
       try {
         const res = await fetch(form.action, { method: 'POST', headers: { 'Accept': 'application/json' }, body: new URLSearchParams(new FormData(form)) });
         if (res.ok) {
-          showToast('API key deleted', 'success');
+          showToast(req.translations.apiKeyDeleted || 'API key deleted', 'success');
           const card = document.querySelector('[data-api-key-id="' + keyId + '"]');
           if (card && window.al) al.removeRow(card);
           else if (card) card.remove();
         } else {
           const data = await res.json().catch(() => ({}));
-          showToast(data.error || 'Failed to delete key.', 'error');
+          showToast(data.error || (req.translations.apiKeyDeleteFailed || 'Failed to delete key.'), 'error');
         }
-      } catch (e) { showToast('Network error.', 'error'); }
+      } catch (e) { showToast(req.translations.networkError || 'Network error.', 'error'); }
     },
 
     async toggleKey(keyId, enabling) {
@@ -416,10 +416,10 @@ function apikeyPage() {
       try {
         const res = await fetch(form.action, { method: 'POST', headers: { 'Accept': 'application/json' }, body: new URLSearchParams(new FormData(form)) });
         if (res.ok) {
-          showToast(enabling ? 'API key enabled' : 'API key disabled', 'success');
+          showToast(enabling ? (req.translations.apiKeyEnabled || 'API key enabled') : (req.translations.apiKeyDisabled || 'API key disabled'), 'success');
           window.location.reload();
         }
-      } catch (e) { showToast('Network error.', 'error'); }
+      } catch (e) { showToast(req.translations.networkError || 'Network error.', 'error'); }
     },
 
     get createCatCounts() {
@@ -445,7 +445,7 @@ function apikeyPage() {
 }
 
 function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => showToast('API key copied to clipboard', 'success')).catch(() => showToast('Failed to copy', 'error'));
+  navigator.clipboard.writeText(text).then(() => showToast(req.translations.apiKeyCopied || 'API key copied to clipboard', 'success')).catch(() => showToast(req.translations.apiKeyCopyFailed || 'Failed to copy', 'error'));
 }
 </script>
 

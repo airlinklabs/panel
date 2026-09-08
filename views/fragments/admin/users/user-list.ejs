@@ -5,18 +5,18 @@
   Swap: outerHTML
 -->
 <section id="admin-users-list" aria-labelledby="admin-users-list-heading">
-  <h2 id="admin-users-list-heading" class="sr-only">Users</h2>
+  <h2 id="admin-users-list-heading" class="sr-only"><%= t('users') %></h2>
 
   <% if (users.length === 0) { %>
     <div class="al-card p-8 text-center">
       <%- icon('users', { class: 'mx-auto h-12 w-12 mb-4', style: 'color:var(--theme-text-muted)' }) %>
-      <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-strong);">No users yet</h3>
-      <p class="text-xs mb-4" style="color:var(--theme-text-muted);">Create your first user to get started.</p>
+      <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-strong);"><%= t('noUsersYet') %></h3>
+      <p class="text-xs mb-4" style="color:var(--theme-text-muted);"><%= t('createYourFirstUser') %></p>
       <button type="button" class="al-btn-primary"
               hx-get="/api/v2/admin/users/new"
               hx-target="#admin-users-create-form"
               hx-swap="outerHTML">
-        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> Create user
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('createUserBtn') %>
       </button>
     </div>
   <% } else { %>
@@ -40,13 +40,13 @@
             <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= u.username %></p>
             <p class="text-xs truncate" style="color:var(--theme-text-muted);">
               <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset"
-                style="<%= u.isAdmin ? 'background:var(--theme-accent);color:var(--theme-accent-text)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>"><%= u.isAdmin ? 'Admin' : 'User' %></span>
+                style="<%= u.isAdmin ? 'background:var(--theme-accent);color:var(--theme-accent-text)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>"><%= u.isAdmin ? t('adminRole') : t('userRole') %></span>
             </p>
           </div>
           <div class="flex items-center gap-2">
-            <a href="/admin/users/view/<%= u.id %>/" class="al-btn-ghost" aria-label="View user"><%- icon('external-link', { size: 16 }) %></a>
-            <a href="/admin/users/edit/<%= u.id %>/" class="al-btn-ghost" aria-label="Edit user"><%- icon('pencil', { size: 16 }) %></a>
-            <button type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user"
+            <a href="/admin/users/view/<%= u.id %>/" class="al-btn-ghost" aria-label="<%= t('viewUser') %>"><%- icon('external-link', { size: 16 }) %></a>
+            <a href="/admin/users/edit/<%= u.id %>/" class="al-btn-ghost" aria-label="<%= t('editUserBtn') %>"><%- icon('pencil', { size: 16 }) %></a>
+            <button type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= t('deleteUserBtn') %>"
                     hx-delete="/api/v2/admin/users/<%= u.id %>"
                     hx-confirm="Are you sure you want to delete this user?"
                     hx-target="closest [data-user-id]"
@@ -69,10 +69,10 @@
         </colgroup>
         <thead class="al-table-head">
           <tr>
-            <th scope="col" class="al-table-th sm:pl-6">Name</th>
-            <th scope="col" class="al-table-th sm:pl-6">Role</th>
-            <th scope="col" class="al-table-th sm:pl-6">Servers</th>
-            <th scope="col" class="al-table-th sm:pl-6">Actions</th>
+            <th scope="col" class="al-table-th sm:pl-6"><%= t('name') %></th>
+            <th scope="col" class="al-table-th sm:pl-6"><%= t('role') %></th>
+            <th scope="col" class="al-table-th sm:pl-6"><%= t('userServersLabel') %></th>
+            <th scope="col" class="al-table-th sm:pl-6"><%= t('actions') %></th>
           </tr>
         </thead>
         <tbody>
@@ -99,15 +99,15 @@
                 <div class="mt-1 ml-2 inline-flex items-center rounded-md
                 px-2 py-1 text-xs font-medium ring-1 ring-inset"
                 style="<%= u.isAdmin ? 'background:var(--theme-success-bg);color:var(--theme-success)' : 'background:var(--theme-warning-bg);color:var(--theme-warning)' %>">
-                  <%= u.isAdmin ? 'Admin' : 'User' %>
+                  <%= u.isAdmin ? t('adminRole') : t('userRole') %>
                 </div>
               </td>
               <td class="al-table-td"><%= u.servers ? u.servers.length : 0 %></td>
               <td class="al-table-td">
                 <div class="flex gap-3 whitespace-nowrap">
-                  <a href="/admin/users/view/<%= u.id %>/" class="al-btn-secondary text-xs">View</a>
-                  <a href="/admin/users/edit/<%= u.id %>/" class="al-btn-primary text-xs">Edit</a>
-                  <button type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user"
+                  <a href="/admin/users/view/<%= u.id %>/" class="al-btn-secondary text-xs"><%= t('viewBtn') %></a>
+                  <a href="/admin/users/edit/<%= u.id %>/" class="al-btn-primary text-xs"><%= t('editUserBtn') %></a>
+                  <button type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= t('deleteUserBtn') %>"
                           hx-delete="/api/v2/admin/users/<%= u.id %>"
                           hx-confirm="Are you sure you want to delete this user?"
                           hx-target="closest tr[data-user-id]"

@@ -5,7 +5,7 @@
     <%- icon('x', { class: 'h-4 w-4', style: 'color:var(--theme-danger)', strokeWidth: 2 }) %>
   </div>
   <div class="flex-1 min-w-0">
-    <p class="text-sm font-medium" style="color:var(--theme-danger)">Installation failed</p>
+    <p class="text-sm font-medium" style="color:var(--theme-danger)"><%= req.translations.installationFailed || 'Installation failed' %></p>
     <p id="installFailReason" class="text-xs mt-0.5 break-words" style="color:var(--theme-text-muted)"><%= installed.error || 'Check the server logs or contact an administrator.' %></p>
   </div>
 </div>
@@ -16,13 +16,13 @@
   </div>
   <div class="flex-1 min-w-0">
     <div class="flex items-center gap-2">
-      <p class="text-sm font-medium shrink-0" style="color:var(--theme-info)">Installing server</p>
+      <p class="text-sm font-medium shrink-0" style="color:var(--theme-info)"><%= req.translations.installingServer || 'Installing server' %></p>
       <span style="color:var(--theme-text-muted)">·</span>
-      <p id="installStateText" class="text-xs truncate" style="color:var(--theme-text-muted)" aria-live="polite">Waiting for daemon…</p>
+      <p id="installStateText" class="text-xs truncate" style="color:var(--theme-text-muted)" aria-live="polite"><%= req.translations.waitingForDaemon || 'Waiting for daemon…' %></p>
     </div>
   </div>
   <button id="installRetryBtn" class="hidden shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 active:scale-95" style="background:var(--theme-accent);color:var(--theme-accent-text);">
-    Retry install
+    <%= req.translations.retryInstall || 'Retry install' %>
   </button>
 </div>
 
@@ -90,7 +90,7 @@
   function markDone() {
     if (finished) return;
     finished = true;
-    stateText.textContent = 'Installation complete';
+    stateText.textContent = req.translations.installationComplete || 'Installation complete';
     setIcon('done');
     if (poller) clearInterval(poller);
     if (window.retryDaemonConnection) {
@@ -115,10 +115,10 @@
   function markFailed(reason) {
     if (finished) return;
     finished = true;
-    stateText.textContent = 'Installation failed';
+    stateText.textContent = req.translations.installationFailed || 'Installation failed';
     setIcon('fail');
     if (reason) {
-      stateText.textContent = 'Installation failed: ' + reason;
+      stateText.textContent = (req.translations.installationFailed || 'Installation failed') + ': ' + reason;
       stateText.classList.remove('truncate');
       stateText.classList.add('whitespace-normal', 'break-words');
     }
@@ -126,31 +126,31 @@
   }
 
   // Graduated heartbeat: reassure, then nudge once an install runs long.
-  const lastMessage = 'Waiting for daemon…';
+  const lastMessage = req.translations.waitingForDaemon || 'Waiting for daemon…';
   function heartbeat() {
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
     let text;
-    if (elapsed > 120)      text = 'Taking longer than expected — large images can take a while.';
-    else if (elapsed > 30)  text = 'Still installing — most servers are ready in under two minutes.';
+    if (elapsed > 120)      text = req.translations.takingLonger || 'Taking longer than expected — large images can take a while.';
+    else if (elapsed > 30)  text = req.translations.stillInstalling || 'Still installing — most servers are ready in under two minutes.';
     else                    text = lastMessage;
     stateText.textContent = text;
   }
 
   retryBtn.addEventListener('click', function() {
     retryBtn.disabled = true;
-    retryBtn.textContent = 'Retrying…';
+    retryBtn.textContent = req.translations.retrying || 'Retrying…';
     fetch('/api/v2/servers/' + encodeURIComponent(serverUUID) + '/reinstall', { method: 'POST', credentials: 'same-origin', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
       .then(function(r) {
-        if (!r.ok) { return r.json().then(function(d) { throw new Error(d.error || 'Reinstall failed'); }); }
+        if (!r.ok) { return r.json().then(function(d) { throw new Error(d.error || (req.translations.reinstallFailed || 'Reinstall failed')); }); }
         if (window.retryDaemonConnection) {
           // Re-arm the banner for the new install pass without a reload.
           finished = false;
-          stateText.textContent = 'Waiting for daemon…';
+          stateText.textContent = req.translations.waitingForDaemon || 'Waiting for daemon…';
           stateText.classList.add('truncate');
           stateText.classList.remove('whitespace-normal', 'break-words');
           retryBtn.classList.add('hidden');
           retryBtn.disabled = false;
-          retryBtn.textContent = 'Retry install';
+          retryBtn.textContent = req.translations.retryInstall || 'Retry install';
           if (banner) banner.classList.remove('hidden');
           resetIcon();
           if (poller) clearInterval(poller);
@@ -158,13 +158,13 @@
         } else {
           // State transition (reinstall re-arms the install banner). Reload
           // re-renders the install-gated page with the fresh state.
-          if (window.showToast) showToast('Reinstalling server…', 'info');
+          if (window.showToast) showToast(req.translations.reinstallingServer || 'Reinstalling server…', 'info');
           window.location.reload();
         }
       })
       .catch(function(err) {
         retryBtn.disabled = false;
-        retryBtn.textContent = 'Retry install';
+        retryBtn.textContent = req.translations.retryInstall || 'Retry install';
         if (window.modal && window.modal.alert) window.modal.alert(String(err.message || err));
       });
   });
@@ -246,7 +246,7 @@
   // whatever page the user lands on until the server is installed or the
   // install fails. Group dedupe stops every server page from stacking one.
   if (window.showProgressToast) {
-    window.showProgressToast('Installing server…', {
+    window.showProgressToast(req.translations.installingServer || 'Installing server…', {
       indeterminate: true,
       group: 'install:' + serverUUID,
       job: { url: '/api/v2/servers/' + serverUUID + '/status', intervalMs: POLL_INTERVAL },

@@ -1,32 +1,32 @@
-import fs from "fs";
-import path from "path";
-import { exec, spawnSync } from "child_process";
-import { promisify } from "util";
-import logger from "./logger";
-import { EGG_CATALOGUE_REFRESH_MS } from "../config/timeouts";
-import { EGG_REPO_URL } from "../config/urls";
-import { DAEMON_TIMEOUT_SHORT_MS } from "../config/daemonTimeouts";
-import { logT } from "../services/i18n";
+import fs from 'fs';
+import path from 'path';
+import { exec, spawnSync } from 'child_process';
+import { promisify } from 'util';
+import logger from './logger';
+import { EGG_CATALOGUE_REFRESH_MS } from '../config/timeouts';
+import { EGG_REPO_URL } from '../config/urls';
+import { DAEMON_TIMEOUT_SHORT_MS } from '../config/daemonTimeouts';
+import { logT } from '../services/i18n';
 
 const execAsync = promisify(exec);
 
-const EGGS_DIR = path.resolve("storage/eggs");
+const EGGS_DIR = path.resolve('storage/eggs');
 
 const REPOS = [
   {
-    id: "game",
-    dir: "game-eggs",
+    id: 'game',
+    dir: 'game-eggs',
     url: EGG_REPO_URL,
   },
   {
-    id: "application",
-    dir: "application-eggs",
-    url: "https://github.com/pterodactyl/application-eggs.git",
+    id: 'application',
+    dir: 'application-eggs',
+    url: 'https://github.com/pterodactyl/application-eggs.git',
   },
   {
-    id: "generic",
-    dir: "generic-eggs",
-    url: "https://github.com/pterodactyl/generic-eggs.git",
+    id: 'generic',
+    dir: 'generic-eggs',
+    url: 'https://github.com/pterodactyl/generic-eggs.git',
   },
 ];
 
@@ -51,9 +51,9 @@ let updateTimer: NodeJS.Timeout | null = null;
 
 function isGitAvailable(): boolean {
   try {
-    const result = spawnSync("git", ["--version"], {
+    const result = spawnSync('git', ['--version'], {
       shell: false,
-      stdio: "ignore",
+      stdio: 'ignore',
       timeout: DAEMON_TIMEOUT_SHORT_MS,
     });
     return result.status === 0;
@@ -64,7 +64,7 @@ function isGitAvailable(): boolean {
 
 function isGitRepo(dir: string): boolean {
   try {
-    return fs.existsSync(path.join(dir, ".git"));
+    return fs.existsSync(path.join(dir, '.git'));
   } catch {
     return false;
   }
@@ -76,21 +76,21 @@ async function cloneOrPullRepo(
 ): Promise<void> {
   const env = {
     ...process.env,
-    GIT_TERMINAL_PROMPT: "0",
+    GIT_TERMINAL_PROMPT: '0',
   };
 
   if (!fs.existsSync(targetDir) || !isGitRepo(targetDir)) {
     if (fs.existsSync(targetDir)) {
-      logger.info(logT("log.storeRemovingBrokenDir", { dir: targetDir }));
+      logger.info(logT('log.storeRemovingBrokenDir', { dir: targetDir }));
       fs.rmSync(targetDir, { recursive: true, force: true });
     }
-    logger.info(logT("log.storeCloning", { url: repoUrl }));
+    logger.info(logT('log.storeCloning', { url: repoUrl }));
     await execAsync(`git clone --depth=1 "${repoUrl}" "${targetDir}"`, { env });
     return;
   }
 
   logger.info(
-    logT("log.storePullingLatest", { dir: path.basename(targetDir) }),
+    logT('log.storePullingLatest', { dir: path.basename(targetDir) }),
   );
   await execAsync(`git -C "${targetDir}" pull`, { env });
 }
@@ -98,42 +98,42 @@ async function cloneOrPullRepo(
 // -- README parser ------------------------------------------------------------
 
 function extractReadmeSummary(md: string): string {
-  const lines = md.split("\n").map((l) => l.trim());
+  const lines = md.split('\n').map((l) => l.trim());
   for (const line of lines) {
     if (!line) {
       continue;
     }
-    if (line.startsWith("#")) {
+    if (line.startsWith('#')) {
       continue;
     }
-    if (line.startsWith("![") || line.startsWith("[![")) {
+    if (line.startsWith('![') || line.startsWith('[![')) {
       continue;
     }
-    if (line.startsWith("|")) {
+    if (line.startsWith('|')) {
       continue;
     }
-    if (line.startsWith("```") || line.startsWith("~~~")) {
+    if (line.startsWith('```') || line.startsWith('~~~')) {
       continue;
     }
-    if (line.startsWith("---") || line.startsWith("===")) {
+    if (line.startsWith('---') || line.startsWith('===')) {
       continue;
     }
-    if (line.startsWith("<")) {
+    if (line.startsWith('<')) {
       continue;
     }
     if (line.length < 15) {
       continue;
     }
     const clean = line
-      .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
-      .replace(/[*_`~]/g, "")
-      .replace(/<[^>]+>/g, "")
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/[*_`~]/g, '')
+      .replace(/<[^>]+>/g, '')
       .trim();
     if (clean.length >= 15) {
       return clean;
     }
   }
-  return "";
+  return '';
 }
 
 // -- Catalogue builder --------------------------------------------------------
@@ -155,24 +155,24 @@ function buildCatalogueFromDisk(): StoreImage[] {
         return;
       }
 
-      let readmeContent = "";
+      let readmeContent = '';
       const readmeFile = entries.find(
-        (e) => e.isFile() && e.name.toLowerCase() === "readme.md",
+        (e) => e.isFile() && e.name.toLowerCase() === 'readme.md',
       );
       if (readmeFile) {
         try {
           readmeContent = fs.readFileSync(
             path.join(dir, readmeFile.name),
-            "utf8",
+            'utf8',
           );
         } catch {
-          readmeContent = "";
+          readmeContent = '';
         }
       }
 
       for (const entry of entries) {
         if (entry.isDirectory()) {
-          if (!entry.name.startsWith(".")) {
+          if (!entry.name.startsWith('.')) {
             walk(path.join(dir, entry.name));
           }
           continue;
@@ -181,14 +181,14 @@ function buildCatalogueFromDisk(): StoreImage[] {
         if (!entry.isFile()) {
           continue;
         }
-        if (!entry.name.startsWith("egg-") || !entry.name.endsWith(".json")) {
+        if (!entry.name.startsWith('egg-') || !entry.name.endsWith('.json')) {
           continue;
         }
 
         const filePath = path.join(dir, entry.name);
         let raw: Record<string, unknown>;
         try {
-          raw = JSON.parse(fs.readFileSync(filePath, "utf8"));
+          raw = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         } catch {
           continue;
         }
@@ -197,21 +197,21 @@ function buildCatalogueFromDisk(): StoreImage[] {
           continue;
         }
 
-        const relDir = path.relative(repoDir, dir).replace(/\\/g, "/");
-        const parts = relDir.split("/").filter(Boolean);
-        const group = parts[0] || "other";
-        const subGroup = parts.join("/") || group;
+        const relDir = path.relative(repoDir, dir).replace(/\\/g, '/');
+        const parts = relDir.split('/').filter(Boolean);
+        const group = parts[0] || 'other';
+        const subGroup = parts.join('/') || group;
 
         images.push({
           name: String(raw.name),
-          description: String(raw.description || "")
-            .replace(/\r\n/g, " ")
-            .replace(/\r/g, " ")
+          description: String(raw.description || '')
+            .replace(/\r\n/g, ' ')
+            .replace(/\r/g, ' ')
             .slice(0, 300),
           readme: extractReadmeSummary(readmeContent),
           fullReadme: readmeContent,
-          groupReadme: "",
-          author: String(raw.author || ""),
+          groupReadme: '',
+          author: String(raw.author || ''),
           group,
           subGroup,
           category: repo.id,
@@ -225,15 +225,15 @@ function buildCatalogueFromDisk(): StoreImage[] {
     const groupReadmeMap = new Map<string, string>();
     try {
       for (const entry of fs.readdirSync(repoDir, { withFileTypes: true })) {
-        if (!entry.isDirectory() || entry.name.startsWith(".")) {
+        if (!entry.isDirectory() || entry.name.startsWith('.')) {
           continue;
         }
-        const groupReadmePath = path.join(repoDir, entry.name, "README.md");
+        const groupReadmePath = path.join(repoDir, entry.name, 'README.md');
         if (fs.existsSync(groupReadmePath)) {
           try {
             groupReadmeMap.set(
               entry.name,
-              fs.readFileSync(groupReadmePath, "utf8"),
+              fs.readFileSync(groupReadmePath, 'utf8'),
             );
           } catch {
             /* skip */
@@ -246,7 +246,7 @@ function buildCatalogueFromDisk(): StoreImage[] {
 
     for (const img of images) {
       if (img.category === repo.id && !img.groupReadme) {
-        img.groupReadme = groupReadmeMap.get(img.group) || "";
+        img.groupReadme = groupReadmeMap.get(img.group) || '';
       }
     }
   }
@@ -258,7 +258,7 @@ function buildCatalogueFromDisk(): StoreImage[] {
 
 async function updateRepos(): Promise<void> {
   if (!isGitAvailable()) {
-    logger.warn(logT("log.storeGitNotFound"));
+    logger.warn(logT('log.storeGitNotFound'));
     return;
   }
 
@@ -271,9 +271,9 @@ async function updateRepos(): Promise<void> {
   );
 
   results.forEach((r, i) => {
-    if (r.status === "rejected") {
+    if (r.status === 'rejected') {
       logger.warn(
-        logT("log.storeRepoFailed", {
+        logT('log.storeRepoFailed', {
           repo: REPOS[i]?.dir ?? String(i),
           reason: String(r.reason?.message || r.reason),
         }),
@@ -285,7 +285,7 @@ async function updateRepos(): Promise<void> {
 function rebuildCatalogue(): void {
   catalogue = buildCatalogueFromDisk();
   lastBuilt = Date.now();
-  logger.info(logT("log.storeCatalogueBuilt", { count: catalogue.length }));
+  logger.info(logT('log.storeCatalogueBuilt', { count: catalogue.length }));
 }
 
 function scheduleAutoUpdate(): void {
@@ -293,7 +293,7 @@ function scheduleAutoUpdate(): void {
     clearInterval(updateTimer);
   }
   updateTimer = setInterval(async () => {
-    logger.info(logT("log.storeAutoUpdating"));
+    logger.info(logT('log.storeAutoUpdating'));
     await updateRepos();
     rebuildCatalogue();
   }, EGG_CATALOGUE_REFRESH_MS);

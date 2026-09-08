@@ -1,10 +1,10 @@
-import { isHttpError } from "../../../utils/http";
+import { isHttpError } from '../../../utils/http';
 import {
   containerStatusSchema,
   parseDaemonResponse,
-} from "../../../types/daemon";
-import { daemonRequest } from "../core/daemonRequest";
-import { SERVER_STATUS_TIMEOUT_MS } from "../../../config/timeouts";
+} from '../../../types/daemon';
+import { daemonRequest } from '../core/daemonRequest';
+import { SERVER_STATUS_TIMEOUT_MS } from '../../../config/timeouts';
 
 interface ServerInfo {
   nodeAddress: string;
@@ -31,8 +31,8 @@ export async function getServerStatus(
       nodeAddress: serverInfo.nodeAddress,
       nodePort: serverInfo.nodePort,
       nodeKey: serverInfo.nodeKey,
-      method: "GET",
-      path: "/container/status",
+      method: 'GET',
+      path: '/container/status',
       params: { id: serverInfo.serverUUID },
       timeout: SERVER_STATUS_TIMEOUT_MS,
     });
@@ -54,7 +54,7 @@ export async function getServerStatus(
           (Date.now() - new Date(data.startedAt).getTime()) / 1000,
         );
       }
-    } else if (data && data.status === "restarting") {
+    } else if (data && data.status === 'restarting') {
       status.starting = true;
     }
 
@@ -72,21 +72,21 @@ export async function getServerStatus(
     if (isHttpError(error)) {
       if (error.status === 0) {
         const code = (error as unknown as { code?: string }).code;
-        if (code === "ECONNREFUSED") {
-          errorStatus.error = "Connection refused — daemon may be offline";
-        } else if (code === "ETIMEDOUT" || code === "ECONNABORTED") {
-          errorStatus.error = "Connection timed out";
-        } else if (code === "ENOTFOUND") {
-          errorStatus.error = "Host not found — check node address";
+        if (code === 'ECONNREFUSED') {
+          errorStatus.error = 'Connection refused — daemon may be offline';
+        } else if (code === 'ETIMEDOUT' || code === 'ECONNABORTED') {
+          errorStatus.error = 'Connection timed out';
+        } else if (code === 'ENOTFOUND') {
+          errorStatus.error = 'Host not found — check node address';
         } else {
-          errorStatus.error = "Connection failed";
+          errorStatus.error = 'Connection failed';
         }
       } else {
         errorStatus.error = `Daemon responded with ${error.status}`;
         errorStatus.daemonOffline = false;
       }
     } else {
-      errorStatus.error = "An unexpected error occurred";
+      errorStatus.error = 'An unexpected error occurred';
     }
 
     return errorStatus;

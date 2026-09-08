@@ -15,7 +15,7 @@ export interface DaemonContainerState {
 }
 
 export interface DaemonInstallStatus {
-  state: "installing" | "installed" | "failed";
+  state: 'installing' | 'installed' | 'failed';
   message?: string;
 }
 
@@ -77,13 +77,13 @@ export interface DaemonImage {
 // Callers must validate the parsed payload with these schemas before trusting
 // field values — types alone never validate network responses.
 
-import { z } from "zod";
+import { z } from 'zod';
 
 // ── GET /container/status ──────────────────────────────────────────────────
 export const containerStatusSchema = z.object({
   running: z.boolean().optional(),
   exists: z.boolean().optional(),
-  source: z.enum(["cache", "inspect"]).optional(),
+  source: z.enum(['cache', 'inspect']).optional(),
   status: z.string().optional(),
   exitCode: z.number().nullable().optional(),
   startedAt: z.string().optional(),
@@ -105,7 +105,7 @@ export type DaemonInfo = z.infer<typeof daemonInfoSchema>;
 // ── GET /fs/list ───────────────────────────────────────────────────────────
 export const fsFileEntrySchema = z.object({
   name: z.string(),
-  type: z.enum(["file", "directory"]),
+  type: z.enum(['file', 'directory']),
   extension: z.string().nullable().optional(),
   category: z.string().nullable().optional(),
   size: z.number().optional(),
@@ -161,7 +161,7 @@ export function parseDaemonResponse<T>(
   schema: z.ZodType<T>,
   raw: unknown,
 ): T | null {
-  if (typeof raw === "string") {
+  if (typeof raw === 'string') {
     try {
       const parsed = JSON.parse(raw) as unknown;
       const result = schema.safeParse(parsed);

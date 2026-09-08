@@ -4,6 +4,7 @@ import { Router } from 'express';
 import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import logger from '../../handlers/logger';
+import { logT } from '../../services/i18n';
 
 const authModule: Module = {
   info: {
@@ -31,7 +32,7 @@ const authModule: Module = {
 
         res.render('auth/login', { req, settings });
       } catch (error) {
-        logger.error('Error rendering login page:', error);
+        logger.error(logT('log.authErrorRenderingLogin'), error);
         res.status(500).render('auth/login', { req, settings: null });
       }
     });
@@ -50,7 +51,7 @@ const authModule: Module = {
 
         res.render('auth/register', { req, settings });
       } catch (error) {
-        logger.error('Error rendering register page:', error);
+        logger.error(logT('log.authErrorRenderingRegister'), error);
         res.status(500).render('auth/register', { req, settings: null });
       }
     });

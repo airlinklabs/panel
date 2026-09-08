@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto";
-import { JOB_TTL_MS } from "../config/timeouts";
+import { randomUUID } from 'node:crypto';
+import { JOB_TTL_MS } from '../config/timeouts';
 
 /**
  * jobRegistry — in-memory tracker for long-running panel jobs.
@@ -15,7 +15,7 @@ import { JOB_TTL_MS } from "../config/timeouts";
  * forgets the jobs, which is acceptable for an at-a-glance progress layer.
  */
 
-export type JobKind = "backup" | "restore";
+export type JobKind = 'backup' | 'restore';
 
 export interface ProgressJob {
   id: string;
@@ -24,7 +24,7 @@ export interface ProgressJob {
   key: string;
   startedAt: number;
   updatedAt: number;
-  status: "running" | "done";
+  status: 'running' | 'done';
   success?: boolean;
   error?: string;
   message: string;
@@ -77,7 +77,7 @@ export function startJob(
     key,
     startedAt: now(),
     updatedAt: now(),
-    status: "running",
+    status: 'running',
     message,
   };
   jobs.set(key, job);
@@ -92,7 +92,7 @@ export function getJob(kind: JobKind, key: string): ProgressJob | undefined {
 
 export function isRunning(kind: JobKind, key: string): boolean {
   const job = getJob(kind, key);
-  return job !== undefined && job.status === "running";
+  return job !== undefined && job.status === 'running';
 }
 
 export function finishJob(
@@ -106,11 +106,11 @@ export function finishJob(
   if (!job) {
     return;
   }
-  job.status = "done";
+  job.status = 'done';
   job.success = success;
   job.error = error;
   job.message =
-    message ?? (success ? "Task completed." : (error ?? "Task failed."));
+    message ?? (success ? 'Task completed.' : (error ?? 'Task failed.'));
   job.updatedAt = now();
 }
 
@@ -130,17 +130,17 @@ export function clearJob(kind: JobKind, key: string): void {
 export function describeJob(job: ProgressJob | undefined): JobProgressView {
   if (!job) {
     return {
-      id: "",
-      kind: "backup",
+      id: '',
+      kind: 'backup',
       running: false,
       progress: 0,
-      message: "No task is running.",
+      message: 'No task is running.',
       done: false,
       success: undefined,
       error: undefined,
     };
   }
-  if (job.status === "done") {
+  if (job.status === 'done') {
     return {
       id: job.id,
       kind: job.kind,

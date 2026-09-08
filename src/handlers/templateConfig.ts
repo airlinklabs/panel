@@ -1,12 +1,12 @@
-import type { Request, Response, NextFunction } from "express";
-import * as timeouts from "../config/timeouts";
-import * as limits from "../config/limits";
-import * as auth from "../config/auth";
-import * as server from "../config/server";
-import * as daemonTimeouts from "../config/daemonTimeouts";
-import * as urls from "../config/urls";
-import * as mime from "../config/mime";
-import * as ui from "../config/ui";
+import type { Request, Response, NextFunction } from 'express';
+import * as timeouts from '../config/timeouts';
+import * as limits from '../config/limits';
+import * as auth from '../config/auth';
+import * as server from '../config/server';
+import * as daemonTimeouts from '../config/daemonTimeouts';
+import * as urls from '../config/urls';
+import * as mime from '../config/mime';
+import * as ui from '../config/ui';
 
 /**
  * Makes all config constants available to EJS templates via res.locals.

@@ -1,13 +1,13 @@
-import prisma from "../db";
-import logger from "./logger";
-import { daemonRequest } from "./utils/core/daemonRequest";
-import { daemonPlayerListSchema, parseDaemonResponse } from "../types/daemon";
-import { parseServerPorts } from "./utils/server/ports";
-import { emitRealtime } from "./realtime/events";
-import { PLAYER_STATS_INTERVAL_MS } from "../config/timeouts";
-import { PLAYER_STATS_PLAYER_STATS_MAX_DATA_POINTS } from "../config/ui";
-import { DAEMON_TIMEOUT_SHORT_MS } from "../config/daemonTimeouts";
-import { logT } from "../services/i18n";
+import prisma from '../db';
+import logger from './logger';
+import { daemonRequest } from './utils/core/daemonRequest';
+import { daemonPlayerListSchema, parseDaemonResponse } from '../types/daemon';
+import { parseServerPorts } from './utils/server/ports';
+import { emitRealtime } from './realtime/events';
+import { PLAYER_STATS_INTERVAL_MS } from '../config/timeouts';
+import { PLAYER_STATS_MAX_DATA_POINTS } from '../config/ui';
+import { DAEMON_TIMEOUT_SHORT_MS } from '../config/daemonTimeouts';
+import { logT } from '../services/i18n';
 
 // Interval in milliseconds (5 minutes)
 // Maximum number of data points to keep (48 hours worth of data at 5-minute intervals)
@@ -48,8 +48,8 @@ export async function collectPlayerStats(): Promise<void> {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
-            method: "GET",
-            path: "/minecraft/players",
+            method: 'GET',
+            path: '/minecraft/players',
             params: {
               id: server.UUID,
               host: server.node.address,
@@ -103,7 +103,7 @@ export async function collectPlayerStats(): Promise<void> {
     // Clean up old data
     const oldestToKeep = await prisma.playerStats.findMany({
       orderBy: {
-        timestamp: "desc",
+        timestamp: 'desc',
       },
       take: PLAYER_STATS_MAX_DATA_POINTS,
     });
@@ -124,12 +124,12 @@ export async function collectPlayerStats(): Promise<void> {
     // Player stats were just collected — tell any admin playerstats page to
     // re-fetch instead of waiting out its own poll interval.
     emitRealtime({
-      type: "player.stats.updated",
+      type: 'player.stats.updated',
       scope: { admin: true },
       state: {},
     });
   } catch (error) {
-    logger.warn(logT("log.playerStatsCollectionFailed"), { error });
+    logger.warn(logT('log.playerStatsCollectionFailed'), { error });
   }
 }
 
@@ -152,7 +152,7 @@ export function startPlayerStatsCollection(): void {
     PLAYER_STATS_INTERVAL_MS,
   );
   logger.info(
-    logT("log.playerStatsCollectionStarted", {
+    logT('log.playerStatsCollectionStarted', {
       interval: PLAYER_STATS_INTERVAL_MS / 1000,
     }),
   );
@@ -165,6 +165,6 @@ export function stopPlayerStatsCollection(): void {
   if (statsCollectionInterval) {
     clearInterval(statsCollectionInterval);
     statsCollectionInterval = null;
-    logger.info(logT("log.playerStatsCollectionStopped"));
+    logger.info(logT('log.playerStatsCollectionStopped'));
   }
 }

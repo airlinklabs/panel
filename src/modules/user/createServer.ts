@@ -1,28 +1,28 @@
-import { getSettings } from "../../handlers/settingsCache";
-import type { Request, Response } from "express";
-import { Router } from "express";
-import type { Module } from "../../handlers/moduleInit";
-import prisma from "../../db";
-import { isAuthenticated } from "../../handlers/utils/auth/authUtil";
-import logger from "../../handlers/logger";
-import { queueer } from "../../handlers/queueer";
-import { daemonRequest } from "../../handlers/utils/core/daemonRequest";
-import { processQueuedServerInstalls } from "../../handlers/installQueue";
-import { assertNodeCapacity } from "../../handlers/utils/server/resourceCheck";
+import { getSettings } from '../../handlers/settingsCache';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
+import prisma from '../../db';
+import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
+import logger from '../../handlers/logger';
+import { queueer } from '../../handlers/queueer';
+import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { processQueuedServerInstalls } from '../../handlers/installQueue';
+import { assertNodeCapacity } from '../../handlers/utils/server/resourceCheck';
 import {
   claimNodePorts,
   getNodePortPool,
   releaseServerAllocations,
   withNodePortLock,
-} from "../../handlers/utils/server/allocations";
+} from '../../handlers/utils/server/allocations';
 import {
   getUsedExternalPorts,
   isValidPort,
   parseImagePortRequirements,
   pickRandomFreePorts,
   serializeServerPorts,
-} from "../../handlers/utils/server/ports";
-import type { ServerVariable } from "./server/shared";
+} from '../../handlers/utils/server/ports';
+import type { ServerVariable } from './server/shared';
 import {
   DEFAULT_MAX_MEMORY_MB,
   DEFAULT_MAX_CPU_PERCENT,
@@ -32,7 +32,7 @@ import {
   MIN_STORAGE_MB,
   DEFAULT_BACKUP_LIMIT,
   DEFAULT_DATABASE_LIMIT,
-} from "../../config/server";
+} from '../../config/server';
 
 interface ClientPort {
   name: string;
@@ -50,9 +50,9 @@ function parseClientPorts(raw: unknown): ClientPort[] | null {
   const out: ClientPort[] = [];
   for (const item of raw) {
     const obj =
-      item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+      item && typeof item === 'object' ? (item as Record<string, unknown>) : {};
     const internalPort = Number(obj.internalPort ?? obj.port);
-    const name = typeof obj.name === "string" ? obj.name.trim() : "";
+    const name = typeof obj.name === 'string' ? obj.name.trim() : '';
     if (
       !Number.isInteger(internalPort) ||
       !isValidPort(internalPort) ||
@@ -82,13 +82,13 @@ async function resolveUserServerLimit(
     return 0;
   }
   // Owner and admins are not subject to per-user server limits.
-  if (user.role === "owner" || user.role === "admin") {
+  if (user.role === 'owner' || user.role === 'admin') {
     return Number.MAX_SAFE_INTEGER;
   }
   if (user.serverLimit !== null && user.serverLimit !== undefined) {
     return user.serverLimit;
   }
-  if (user.role === "privileged") {
+  if (user.role === 'privileged') {
     return settings?.allowPrivilegedServerLimit ?? 5;
   }
   return settings?.defaultServerLimit ?? 0;
@@ -106,24 +106,24 @@ async function resolveUserResourceLimits(
   } | null,
 ) {
   const user = await prisma.users.findUnique({ where: { id: userId } });
-  const isPrivilegedRole = user?.role === "privileged";
+  const isPrivilegedRole = user?.role === 'privileged';
   return {
     maxMemory:
       user?.maxMemory ??
       settings?.[
-        isPrivilegedRole ? "allowPrivilegedMaxMemory" : "defaultMaxMemory"
+        isPrivilegedRole ? 'allowPrivilegedMaxMemory' : 'defaultMaxMemory'
       ] ??
       DEFAULT_MAX_MEMORY_MB,
     maxCpu:
       user?.maxCpu ??
       settings?.[
-        isPrivilegedRole ? "allowPrivilegedMaxCpu" : "defaultMaxCpu"
+        isPrivilegedRole ? 'allowPrivilegedMaxCpu' : 'defaultMaxCpu'
       ] ??
       DEFAULT_MAX_CPU_PERCENT,
     maxStorage:
       user?.maxStorage ??
       settings?.[
-        isPrivilegedRole ? "allowPrivilegedMaxStorage" : "defaultMaxStorage"
+        isPrivilegedRole ? 'allowPrivilegedMaxStorage' : 'defaultMaxStorage'
       ] ??
       DEFAULT_MAX_STORAGE_MB,
   };
@@ -131,45 +131,45 @@ async function resolveUserResourceLimits(
 
 const userCreateServerModule: Module = {
   info: {
-    name: "User Create Server Module",
+    name: 'User Create Server Module',
     description:
-      "Allows users to create their own servers within admin-defined limits.",
-    version: "2.0.0",
-    moduleVersion: "1.0.0",
-    author: "AirlinkLab",
-    license: "MIT",
+      'Allows users to create their own servers within admin-defined limits.',
+    version: '2.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirlinkLab',
+    license: 'MIT',
   },
 
   router: () => {
     const router = Router();
 
     router.get(
-      "/create-server",
+      '/create-server',
       isAuthenticated(),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect("/login");
+            return res.redirect('/login');
           }
 
           const settings = await getSettings();
 
           if (!settings?.allowUserCreateServer) {
-            return res.redirect("/");
+            return res.redirect('/');
           }
 
           const serverLimit = await resolveUserServerLimit(userId!, settings);
           if (serverLimit === 0) {
-            return res.redirect("/");
+            return res.redirect('/');
           }
 
           const currentCount = await prisma.server.count({
             where: { ownerId: userId },
           });
           if (currentCount >= serverLimit) {
-            return res.redirect("/?err=SERVER_LIMIT_REACHED");
+            return res.redirect('/?err=SERVER_LIMIT_REACHED');
           }
 
           const resourceLimits = await resolveUserResourceLimits(
@@ -178,7 +178,7 @@ const userCreateServerModule: Module = {
           );
           const nodes = await prisma.node.findMany();
           const images = await prisma.images.findMany({
-            where: { status: "approved" },
+            where: { status: 'approved' },
           });
 
           const nodeHeadroom: Record<number, unknown> = {};
@@ -239,7 +239,7 @@ const userCreateServerModule: Module = {
             recommendedNodeId = user.preferredNodeId;
           }
 
-          res.render("user/create-server", {
+          res.render('user/create-server', {
             user,
             req,
             settings,
@@ -252,21 +252,21 @@ const userCreateServerModule: Module = {
             recommendedNodeId,
           });
         } catch (error) {
-          logger.error("Error loading user create server page:", error);
-          return res.redirect("/");
+          logger.error('Error loading user create server page:', error);
+          return res.redirect('/');
         }
       },
     );
 
     router.post(
-      "/create-server",
+      '/create-server',
       isAuthenticated(),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.status(401).json({ error: "Unauthorized" });
+            return res.status(401).json({ error: 'Unauthorized' });
           }
 
           const settings = await getSettings();
@@ -274,14 +274,14 @@ const userCreateServerModule: Module = {
           if (!settings?.allowUserCreateServer) {
             return res
               .status(403)
-              .json({ error: "Server creation is not enabled." });
+              .json({ error: 'Server creation is not enabled.' });
           }
 
           const serverLimit = await resolveUserServerLimit(userId!, settings);
           if (serverLimit === 0) {
             return res
               .status(403)
-              .json({ error: "You are not allowed to create servers." });
+              .json({ error: 'You are not allowed to create servers.' });
           }
 
           const currentCount = await prisma.server.count({
@@ -319,13 +319,13 @@ const userCreateServerModule: Module = {
             !Cpu ||
             !Storage
           ) {
-            return res.status(400).json({ error: "Missing required fields." });
+            return res.status(400).json({ error: 'Missing required fields.' });
           }
 
           const memory = parseInt(Memory);
           const cpu = parseInt(Cpu);
           const storage = parseInt(Storage);
-          const swap = Swap !== undefined && Swap !== "" ? parseInt(Swap) : 0;
+          const swap = Swap !== undefined && Swap !== '' ? parseInt(Swap) : 0;
 
           if (
             isNaN(memory) ||
@@ -381,7 +381,7 @@ const userCreateServerModule: Module = {
           if (isNaN(swap) || swap < -1) {
             return res.status(400).json({
               error:
-                "Swap must be -1 (unlimited), 0 (disabled), or a positive MB value.",
+                'Swap must be -1 (unlimited), 0 (disabled), or a positive MB value.',
             });
           }
 
@@ -389,7 +389,7 @@ const userCreateServerModule: Module = {
             where: { id: parseInt(nodeId) },
           });
           if (!node) {
-            return res.status(400).json({ error: "Node not found." });
+            return res.status(400).json({ error: 'Node not found.' });
           }
 
           try {
@@ -399,7 +399,7 @@ const userCreateServerModule: Module = {
               error:
                 error instanceof Error
                   ? error.message
-                  : "Node capacity exceeded.",
+                  : 'Node capacity exceeded.',
             });
           }
 
@@ -407,12 +407,12 @@ const userCreateServerModule: Module = {
             where: { id: parseInt(imageId) },
           });
           if (!image) {
-            return res.status(400).json({ error: "Image not found." });
+            return res.status(400).json({ error: 'Image not found.' });
           }
-          if (image.status !== "approved") {
+          if (image.status !== 'approved') {
             return res
               .status(400)
-              .json({ error: "This image is not approved yet." });
+              .json({ error: 'This image is not approved yet.' });
           }
 
           const portRequirements = parseImagePortRequirements(
@@ -433,12 +433,12 @@ const userCreateServerModule: Module = {
             if (!parsed) {
               return res
                 .status(400)
-                .json({ error: "Invalid port configuration." });
+                .json({ error: 'Invalid port configuration.' });
             }
             if (parsed.length > 20) {
               return res
                 .status(400)
-                .json({ error: "Too many ports (max 20)." });
+                .json({ error: 'Too many ports (max 20).' });
             }
             portSpecs = parsed;
           }
@@ -446,14 +446,14 @@ const userCreateServerModule: Module = {
 
           let dockerImages: Record<string, string>[] = [];
           try {
-            const parsed: unknown = JSON.parse(image.dockerImages || "[]");
+            const parsed: unknown = JSON.parse(image.dockerImages || '[]');
             if (Array.isArray(parsed)) {
               dockerImages = parsed;
             }
           } catch {
             return res
               .status(500)
-              .json({ error: "Image docker configuration is invalid." });
+              .json({ error: 'Image docker configuration is invalid.' });
           }
 
           const imageDocker = dockerImages.find((img) =>
@@ -462,19 +462,19 @@ const userCreateServerModule: Module = {
           if (!imageDocker) {
             return res
               .status(400)
-              .json({ error: "Docker image variant not found." });
+              .json({ error: 'Docker image variant not found.' });
           }
 
           const startCommand = image.startup;
           if (!startCommand) {
             return res
               .status(500)
-              .json({ error: "Image has no startup command." });
+              .json({ error: 'Image has no startup command.' });
           }
 
           let imageVariables: ServerVariable[] = [];
           try {
-            const parsed: unknown = JSON.parse(image.variables || "[]");
+            const parsed: unknown = JSON.parse(image.variables || '[]');
             if (Array.isArray(parsed)) {
               imageVariables = parsed;
             }
@@ -548,34 +548,34 @@ const userCreateServerModule: Module = {
         } catch (error) {
           if (
             error instanceof Error &&
-            error.message.startsWith("No available ports on the selected node.")
+            error.message.startsWith('No available ports on the selected node.')
           ) {
             res.status(503).json({ error: error.message });
             return;
           }
-          logger.error("Error creating user server:", error);
-          res.status(500).json({ error: "Failed to create server." });
+          logger.error('Error creating user server:', error);
+          res.status(500).json({ error: 'Failed to create server.' });
           return;
         }
       },
     );
 
     router.delete(
-      "/user/server/:uuid",
+      '/user/server/:uuid',
       isAuthenticated(),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.status(401).json({ error: "Unauthorized" });
+            return res.status(401).json({ error: 'Unauthorized' });
           }
 
           const settings = await getSettings();
           if (!settings?.allowUserDeleteServer) {
             return res
               .status(403)
-              .json({ error: "Server deletion is not enabled for users." });
+              .json({ error: 'Server deletion is not enabled for users.' });
           }
 
           const server = await prisma.server.findUnique({
@@ -584,13 +584,13 @@ const userCreateServerModule: Module = {
           });
 
           if (!server) {
-            return res.status(404).json({ error: "Server not found." });
+            return res.status(404).json({ error: 'Server not found.' });
           }
           if (server.ownerId !== userId) {
-            return res.status(403).json({ error: "This is not your server." });
+            return res.status(403).json({ error: 'This is not your server.' });
           }
 
-          const force = req.query.force === "true";
+          const force = req.query.force === 'true';
 
           if (!force) {
             try {
@@ -598,28 +598,28 @@ const userCreateServerModule: Module = {
                 nodeAddress: server.node.address,
                 nodePort: server.node.port,
                 nodeKey: server.node.key,
-                method: "DELETE",
-                path: "/container",
+                method: 'DELETE',
+                path: '/container',
                 body: { id: server.UUID },
               });
             } catch (err: unknown) {
               const errObj =
-                err && typeof err === "object"
+                err && typeof err === 'object'
                   ? (err as Record<string, unknown>)
                   : {};
               const errBody =
-                errObj.body && typeof errObj.body === "object"
+                errObj.body && typeof errObj.body === 'object'
                   ? (errObj.body as Record<string, unknown>)
                   : undefined;
               const isGone =
                 errObj.status === 404 ||
-                (errBody?.error as string)?.includes("not exist");
+                (errBody?.error as string)?.includes('not exist');
 
               if (!isGone) {
-                logger.error("Error deleting container from daemon:", err);
+                logger.error('Error deleting container from daemon:', err);
                 return res.status(502).json({
                   error:
-                    "Could not delete the server on the node. Try again, or use force delete to remove it from the panel only.",
+                    'Could not delete the server on the node. Try again, or use force delete to remove it from the panel only.',
                 });
               }
             }
@@ -631,8 +631,8 @@ const userCreateServerModule: Module = {
           await prisma.server.delete({ where: { UUID: server.UUID } });
           return res.json({ success: true });
         } catch (error) {
-          logger.error("Error deleting user server:", error);
-          res.status(500).json({ error: "Failed to delete server." });
+          logger.error('Error deleting user server:', error);
+          res.status(500).json({ error: 'Failed to delete server.' });
           return;
         }
       },

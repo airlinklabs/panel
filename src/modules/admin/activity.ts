@@ -1,32 +1,32 @@
-import { getSettings } from "../../handlers/settingsCache";
-import type { Request, Response } from "express";
-import { Router } from "express";
-import type { Module } from "../../handlers/moduleInit";
-import prisma from "../../db";
-import { isAuthenticated } from "../../handlers/utils/auth/authUtil";
-import logger from "../../handlers/logger";
+import { getSettings } from '../../handlers/settingsCache';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../handlers/moduleInit';
+import prisma from '../../db';
+import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
+import logger from '../../handlers/logger';
 import {
   getActivityEventMeta,
   type ActivityCategory,
-} from "../../handlers/utils/activity/activityEvents";
-import { ACTIVITY_PAGE_SIZE } from "../../config/limits";
+} from '../../handlers/utils/activity/activityEvents';
+import { ACTIVITY_PAGE_SIZE } from '../../config/limits';
 
 const activityModule: Module = {
   info: {
-    name: "Admin Activity Log Module",
+    name: 'Admin Activity Log Module',
     description:
-      "Audit log of panel actions (servers, files, backups, subusers, databases).",
-    version: "2.1.0",
-    moduleVersion: "1.0.0",
-    author: "AirLinkLab",
-    license: "MIT",
+      'Audit log of panel actions (servers, files, backups, subusers, databases).',
+    version: '2.1.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
   },
 
   router: () => {
     const router = Router();
 
     router.get(
-      "/admin/activity",
+      '/admin/activity',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
@@ -34,33 +34,33 @@ const activityModule: Module = {
             where: { id: req.session?.user?.id },
           });
           if (!user) {
-            return res.redirect("/login");
+            return res.redirect('/login');
           }
 
           const page = Math.max(
-            parseInt(String(req.query.page ?? "1"), 10) || 1,
+            parseInt(String(req.query.page ?? '1'), 10) || 1,
             1,
           );
           const eventFilter =
-            typeof req.query.event === "string" ? req.query.event : undefined;
+            typeof req.query.event === 'string' ? req.query.event : undefined;
           const serverFilter =
-            typeof req.query.server === "string"
+            typeof req.query.server === 'string'
               ? req.query.server.trim()
               : undefined;
           const actorFilter =
-            typeof req.query.actor === "string"
+            typeof req.query.actor === 'string'
               ? req.query.actor.trim()
               : undefined;
           const categoryFilter =
-            typeof req.query.category === "string"
+            typeof req.query.category === 'string'
               ? req.query.category.trim()
               : undefined;
           const fromRaw =
-            typeof req.query.from === "string"
+            typeof req.query.from === 'string'
               ? req.query.from.trim()
               : undefined;
           const toRaw =
-            typeof req.query.to === "string" ? req.query.to.trim() : undefined;
+            typeof req.query.to === 'string' ? req.query.to.trim() : undefined;
 
           const where: Record<string, unknown> = {};
 
@@ -72,9 +72,9 @@ const activityModule: Module = {
           }
           if (categoryFilter && !eventFilter) {
             const events = await prisma.activityLog.findMany({
-              where: { event: { not: "" } },
+              where: { event: { not: '' } },
               select: { event: true },
-              distinct: ["event"],
+              distinct: ['event'],
             });
             const matching = events
               .map((e) => e.event)
@@ -83,7 +83,7 @@ const activityModule: Module = {
                   getActivityEventMeta(e).category ===
                   (categoryFilter as ActivityCategory),
               );
-            where.event = matching.length > 0 ? { in: matching } : "__none__";
+            where.event = matching.length > 0 ? { in: matching } : '__none__';
           }
           if (actorFilter) {
             const actors = await prisma.users.findMany({
@@ -119,7 +119,7 @@ const activityModule: Module = {
             prisma.activityLog.count({ where }),
             prisma.activityLog.findMany({
               where,
-              orderBy: { createdAt: "desc" },
+              orderBy: { createdAt: 'desc' },
               skip: (page - 1) * ACTIVITY_PAGE_SIZE,
               take: ACTIVITY_PAGE_SIZE,
               include: {
@@ -128,25 +128,25 @@ const activityModule: Module = {
               },
             }),
             prisma.activityLog.groupBy({
-              by: ["event"],
+              by: ['event'],
               _count: { _all: true },
-              orderBy: { event: "asc" },
+              orderBy: { event: 'asc' },
             }),
             prisma.users.findMany({
               select: { id: true, username: true, email: true },
-              orderBy: { username: "asc" },
+              orderBy: { username: 'asc' },
               take: 500,
             }),
             prisma.server.findMany({
               select: { UUID: true, name: true },
-              orderBy: { name: "asc" },
+              orderBy: { name: 'asc' },
               take: 500,
             }),
           ]);
 
           const settings = await getSettings();
 
-          res.render("admin/activity/activity", {
+          res.render('admin/activity/activity', {
             user,
             req,
             settings,
@@ -166,20 +166,20 @@ const activityModule: Module = {
             actors,
             servers,
             filters: {
-              event: eventFilter ?? "",
-              server: serverFilter ?? "",
-              actor: actorFilter ?? "",
-              category: categoryFilter ?? "",
-              from: fromRaw ?? "",
-              to: toRaw ?? "",
+              event: eventFilter ?? '',
+              server: serverFilter ?? '',
+              actor: actorFilter ?? '',
+              category: categoryFilter ?? '',
+              from: fromRaw ?? '',
+              to: toRaw ?? '',
             },
             page,
             totalPages: Math.max(Math.ceil(total / ACTIVITY_PAGE_SIZE), 1),
             total,
           });
         } catch (error: unknown) {
-          logger.error("Error fetching activity log:", error);
-          res.status(500).json({ message: "Error fetching activity log." });
+          logger.error('Error fetching activity log:', error);
+          res.status(500).json({ message: 'Error fetching activity log.' });
         }
       },
     );

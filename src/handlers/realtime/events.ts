@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import logger from '../logger';
 import { getRedisClient } from '../redis';
+import { logT } from '../../services/i18n';
 
 // Real-time event bus — publishes structured events on authoritative state changes.
 // Clients use monotonic seq for reconnect resync; payloads validated with zod at publish time.
@@ -99,7 +100,9 @@ function ensureRedisSubscriber(): void {
   try {
     redisSub = getRedisClient().duplicate();
     redisSub.on('error', (err: Error) => {
-      logger.warn('[realtime] Redis subscriber error', { error: err.message });
+      logger.warn(logT('log.realtimeRedisSubscriberError'), {
+        error: err.message,
+      });
     });
     redisSub.subscribe(PUBSUB_CHANNEL);
     redisSub.on('message', (_ch: string, msg: string) => {
@@ -119,7 +122,7 @@ function ensureRedisSubscriber(): void {
           try {
             handler(envelope);
           } catch (error) {
-            logger.warn('[realtime] subscriber error', {
+            logger.warn(logT('log.realtimeSubscriberError'), {
               error: String(error),
             });
           }
@@ -129,7 +132,9 @@ function ensureRedisSubscriber(): void {
       }
     });
   } catch (err) {
-    logger.warn('[realtime] Redis pub/sub init failed', { error: String(err) });
+    logger.warn(logT('log.realtimeRedisPubsubInitFailed'), {
+      error: String(err),
+    });
   }
 }
 
@@ -199,7 +204,7 @@ export function emitRealtime(
 ): RealtimeEventEnvelope | null {
   const parsed = realtimeEventSchema.safeParse(input);
   if (!parsed.success) {
-    logger.warn('[realtime] dropped invalid event', {
+    logger.warn(logT('log.realtimeInvalidEvent'), {
       details: JSON.stringify(parsed.error.flatten()),
     });
     return null;
@@ -222,7 +227,9 @@ export function emitRealtime(
     try {
       handler(envelope);
     } catch (error) {
-      logger.warn('[realtime] subscriber error', { error: String(error) });
+      logger.warn(logT('log.realtimeSubscriberError'), {
+        error: String(error),
+      });
     }
   }
 

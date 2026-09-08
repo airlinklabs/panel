@@ -9,6 +9,7 @@
 
 // lucide exports icons as arrays of [tag, attrs, children?] tuples
 import logger from '../handlers/logger';
+import { logT } from '../services/i18n';
 
 const lucideIcons = require('lucide') as Record<string, unknown>;
 
@@ -62,9 +63,7 @@ export function icon(name: string, opts: IconOptions = {}): string {
 
   if (!iconData || !Array.isArray(iconData)) {
     // Graceful degradation — render an empty placeholder span
-    logger.warn(
-      `[icon] Unknown Lucide icon: "${name}" (looked up as "${key}")`,
-    );
+    logger.warn(logT('log.iconUnknownLucide', { name, key }));
     return `<span aria-hidden="true" style="display:inline-block;width:${opts.size ?? 16}px;height:${opts.size ?? 16}px;"></span>`;
   }
 

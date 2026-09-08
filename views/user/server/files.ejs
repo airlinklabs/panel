@@ -260,7 +260,7 @@ function escJS(val) {
        <button type="button" id="dismissSelectionBtn"
          class="inline-flex items-center justify-center w-7 h-7 rounded-lg transition ml-1"
          style="color:var(--theme-text-muted);"
-         title="Deselect all">
+         title="<%= t('deselectAll') %>">
          <%- icon('x', { size: 13 }) %>
        </button>
      </div>
@@ -274,7 +274,7 @@ function escJS(val) {
           <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('moveFile') %></h2>
           <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('moveFileDesc') %></p>
         </div>
-        <button type="button" onclick="closeMoveModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <button type="button" onclick="closeMoveModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
@@ -304,7 +304,7 @@ function escJS(val) {
         <div>
           <p class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('confirmMassDeletion') %></p>
         </div>
-        <button type="button" onclick="closeMassDeleteModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <button type="button" onclick="closeMassDeleteModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
@@ -331,7 +331,7 @@ function escJS(val) {
           <h2 id="createModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('newFile') %></h2>
           <p id="createModalHint" class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('newFileDesc') %></p>
         </div>
-        <button type="button" onclick="closeCreateFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <button type="button" onclick="closeCreateFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
@@ -365,7 +365,7 @@ function escJS(val) {
           <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('pullFileFromUrl') %></h2>
           <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('pullFileDesc') %></p>
         </div>
-        <button type="button" onclick="closePullFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <button type="button" onclick="closePullFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
@@ -406,7 +406,7 @@ function escJS(val) {
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('rename') %></h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('renameDesc') %></p>
       </div>
-      <button type="button" onclick="closeRenameModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+      <button type="button" onclick="closeRenameModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
@@ -522,28 +522,28 @@ function escJS(val) {
 
   function deletefile(fileName, filePath) {
     window.modal.confirm({
-      title: 'Delete File',
-      body: `Are you sure you want to delete "${fileName}"? This cannot be undone.`,
+      title: '<%= req.translations.deleteFileTitle || "Delete File" %>',
+      body: '<%= req.translations.deleteFileBody || "Are you sure you want to delete \\"{fileName}\\"? This cannot be undone." %>'.replace('{fileName}', fileName),
       danger: true,
-      confirmLabel: 'Delete',
+      confirmLabel: '<%= req.translations.delete || "Delete" %>',
       onConfirm: () => {
-      const loader = showLoadingPopup('Deleting File', 'Removing file from server...');
+      const loader = showLoadingPopup('<%= req.translations.deletingFile || "Deleting File" %>', '<%= req.translations.removingFileFromServer || "Removing file from server..." %>');
       fetch('/api/v2/servers/<%= server.UUID %>/files?path=' + encodeURIComponent(filePath), {
         method: 'DELETE'
       })
       .then(response => {
         loader.close();
         if (response.ok) {
-           showToast(`File ${fileName} deleted.`, 'success');
+           showToast(fileName + '<%= req.translations.fileDeletedSuffix || " deleted." %>', 'success');
           refreshFileList();
         } else {
-          showToast('Failed to delete file', 'error');
+          showToast('<%= req.translations.failedToDeleteFile || "Failed to delete file" %>', 'error');
         }
       })
       .catch(error => {
         loader.close();
         console.error('Error:', error);
-        showToast('Something went wrong.', 'error');
+        showToast('<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error');
       });
       }
     });
@@ -587,7 +587,7 @@ function escJS(val) {
       const row = checkbox.closest('tr');
       if (row) row.classList.toggle('is-selected', checkbox.checked);
     });
-    document.getElementById('selectedFilesCount').innerText = `${selectedCount} file${selectedCount !== 1 ? 's' : ''} selected`;
+    document.getElementById('selectedFilesCount').innerText = selectedCount + ' <%= req.translations.filesCountSuffix || "file(s) selected" %>';
 
     document.getElementById('massDeleteBtn').disabled = selectedCount === 0;
     document.getElementById('massArchiveBtn').disabled = selectedCount === 0;
@@ -596,10 +596,10 @@ function escJS(val) {
 document.getElementById('massArchiveBtn').addEventListener('click', () => {
     if (selectedFiles.length > 0) {
         window.modal.confirm({
-          title: 'Confirm Archive',
-          body: `Archive ${selectedFiles.length} selected file${selectedFiles.length !== 1 ? 's' : ''}?`,
+          title: '<%= req.translations.confirmArchiveTitle || "Confirm Archive" %>',
+          body: '<%= req.translations.confirmArchiveBody || "Archive {count} selected file(s)?" %>'.replace('{count}', selectedFiles.length),
           danger: false,
-          confirmLabel: 'Archive',
+          confirmLabel: '<%= req.translations.archiveLabel || "Archive" %>',
           onConfirm: () => archiveFiles(selectedFiles)
         });
     }
@@ -653,8 +653,8 @@ document.querySelectorAll('.file-checkbox').forEach(checkbox => {
 });
 
 function archiveFiles(files) {
-    const loader = showLoadingPopup('Creating Archive', 'Preparing files for archiving...');
-    loader.updateProgress(20, 'Compressing files...');
+    const loader = showLoadingPopup('<%= req.translations.creatingArchive || "Creating Archive" %>', '<%= req.translations.preparingFilesForArchive || "Preparing files for archiving..." %>');
+    loader.updateProgress(20, '<%= req.translations.compressingFiles || "Compressing files..." %>');
 
     fetch('/api/v2/servers/<%= server.UUID %>/files/zip', {
         method: 'POST',
@@ -668,28 +668,28 @@ function archiveFiles(files) {
     })
     .then(response => response.json())
     .then(data => {
-        loader.updateProgress(100, 'Archive created!');
+        loader.updateProgress(100, '<%= req.translations.archiveCreated || "Archive created!" %>');
         setTimeout(() => {
             loader.close();
             if (data.success) {
-                showToast('Files archived.', 'success');
+                showToast('<%= req.translations.filesArchived || "Files archived." %>', 'success');
                 selectedFiles = [];
                 updateSelectedFiles();
                 refreshFileList();
             } else {
-                showToast('Failed to archive files', 'error');
+                showToast('<%= req.translations.failedToArchiveFiles || "Failed to archive files" %>', 'error');
             }
         }, 500);
     })
     .catch(error => {
         loader.close();
         console.error('Error:', error);
-        showToast('Something went wrong.', 'error');
+        showToast('<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error');
     });
 }
 
 massDeleteBtn.addEventListener('click', function() {
-  massDeleteMessage.textContent = `Are you sure you want to delete ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}? This is a permanent action and cannot be reversed.`;
+  massDeleteMessage.textContent = '<%= req.translations.massDeleteBody || "Are you sure you want to delete {count} file(s)? This is a permanent action and cannot be reversed." %>'.replace('{count}', selectedFiles.length);
   const panel = document.getElementById('massDeleteModalPanel');
   massDeleteModal.classList.remove('opacity-0', 'pointer-events-none');
   Animate.openModal(massDeleteModal, panel);
@@ -706,8 +706,8 @@ function closeMassDeleteModal() {
 confirmMassDeleteBtn.addEventListener('click', async function() {
   closeMassDeleteModal();
 
-  const loader = showLoadingPopup('Deleting Files', `Removing ${selectedFiles.length} files...`);
-  loader.updateProgress(10, 'Processing deletion requests...');
+  const loader = showLoadingPopup('<%= req.translations.deletingFiles || "Deleting Files" %>', '<%= req.translations.removingFilesCount || "Removing {count} files..." %>'.replace('{count}', selectedFiles.length));
+  loader.updateProgress(10, '<%= req.translations.processingDeletionRequests || "Processing deletion requests..." %>');
 
   const deletePromises = selectedFiles.map(fileName =>
     fetch('/api/v2/servers/<%= server.UUID %>/files?path=' + encodeURIComponent(fileName), {
@@ -717,16 +717,16 @@ confirmMassDeleteBtn.addEventListener('click', async function() {
 
   try {
     await Promise.all(deletePromises);
-    loader.updateProgress(100, 'Files deleted.');
+    loader.updateProgress(100, '<%= req.translations.filesDeleted || "Files deleted." %>');
     setTimeout(() => {
       loader.close();
-      showToast(`${selectedFiles.length} files deleted.`, 'success');
+      showToast(selectedFiles.length + '<%= req.translations.filesDeletedCountSuffix || " files deleted." %>', 'success');
       refreshFileList();
     }, 500);
   } catch (error) {
     loader.close();
     console.error('Error deleting files:', error);
-    showToast('Failed to delete files', 'error');
+    showToast('<%= req.translations.failedToDeleteFiles || "Failed to delete files" %>', 'error');
   }
 });
 
@@ -800,8 +800,8 @@ function openCreateFileModal() {
 
   async function extractZip(fileName, filePath) {
     try {
-        const loader = showLoadingPopup('Extracting Archive', 'Preparing to extract files...');
-        loader.updateProgress(20, 'Extracting files...');
+        const loader = showLoadingPopup('<%= req.translations.extractingArchive || "Extracting Archive" %>', '<%= req.translations.preparingToExtract || "Preparing to extract files..." %>');
+        loader.updateProgress(20, '<%= req.translations.extractingFiles || "Extracting files..." %>');
 
         const parentPath = filePath.substring(0, filePath.lastIndexOf('/'));
 
@@ -817,27 +817,27 @@ function openCreateFileModal() {
         });
 
         if (response.ok) {
-            loader.updateProgress(100, 'Files extracted successfully!');
+            loader.updateProgress(100, '<%= req.translations.filesExtractedSuccess || "Files extracted successfully!" %>');
             setTimeout(() => {
                 loader.close();
-                showToast('File extracted.', 'success');
+                showToast('<%= req.translations.fileExtracted || "File extracted." %>', 'success');
                 refreshFileList();
             }, 500);
         } else {
             loader.close();
             const error = await response.json();
-            showToast(error.error || 'Failed to extract file', 'error');
+            showToast(error.error || '<%= req.translations.failedToExtractFile || "Failed to extract file" %>', 'error');
         }
     } catch (error) {
         console.error('Error extracting file:', error);
-        showToast('Failed to extract file', 'error');
+        showToast('<%= req.translations.failedToExtractFile || "Failed to extract file" %>', 'error');
     }
   }
 
   // File Upload Functions — uses shared upload modal from footer
   function openUploadFileModal() {
     openUploadModal({
-      title: 'Upload file',
+      title: '<%= req.translations.uploadFile || "Upload file" %>',
       onFile: confirmFileUpload,
     });
   }
@@ -848,7 +848,7 @@ function openCreateFileModal() {
 
   async function confirmFileUpload(file) {
     if (!(file instanceof File)) {
-      showToast('Invalid file selected', 'error');
+      showToast('<%= req.translations.invalidFileSelected || "Invalid file selected" %>', 'error');
       return;
     }
 
@@ -873,7 +873,7 @@ function openCreateFileModal() {
       if (fileSize > MAX_FILE_SIZE) {
         uploadToast.close();
         uploadToast = null;
-        showToast('File is too large. Maximum size is 100MB', 'error');
+        showToast('<%= req.translations.fileTooLarge || "File is too large. Maximum size is 100MB" %>', 'error');
         return;
       }
 
@@ -913,7 +913,7 @@ function openCreateFileModal() {
               const errorData = JSON.parse(xhr.responseText);
               console.error('Upload error response:', errorData);
 
-              let errorMessage = 'Failed to upload file';
+              let errorMessage = '<%= req.translations.failedToUploadFile || "Failed to upload file" %>';
               if (errorData.error) {
                 errorMessage = errorData.error;
               } else if (errorData.details && errorData.details.error) {
@@ -927,7 +927,7 @@ function openCreateFileModal() {
               console.error('Error parsing error response:', e);
               uploadFailToast.close();
               uploadFailToast = null;
-              showToast(`Failed to upload file: ${xhr.status} ${xhr.statusText}`, 'error');
+              showToast(`<%= req.translations.failedToUploadFileStatus || "Failed to upload file" %>: ${xhr.status} ${xhr.statusText}`, 'error');
             }
           }
         };
@@ -938,7 +938,7 @@ function openCreateFileModal() {
             uploadToast = null;
           }
           console.error('XHR error during upload');
-          showToast('Connection error during file upload', 'error');
+          showToast('<%= req.translations.connectionErrorUpload || "Connection error during file upload" %>', 'error');
         };
 
         xhr.ontimeout = function() {
@@ -947,7 +947,7 @@ function openCreateFileModal() {
             uploadToast = null;
           }
           console.error('XHR timeout during upload');
-          showToast('Upload timed out. Try a smaller file.', 'error');
+          showToast('<%= req.translations.uploadTimedOut || "Upload timed out. Try a smaller file." %>', 'error');
         };
 
         xhr.timeout = <%= fileUploadTimeoutMs %>;
@@ -959,7 +959,7 @@ function openCreateFileModal() {
           uploadToast = null;
         }
         console.error('Error uploading file:', error);
-         showToast('Something went wrong.', 'error');
+         showToast('<%= req.translations.errorOccurred || "Something went wrong." %>', 'error');
       }
     } catch (error) {
       if (uploadToast) {
@@ -967,7 +967,7 @@ function openCreateFileModal() {
         uploadToast = null;
       }
       console.error('Error uploading file:', error);
-      showToast('An error occurred while uploading the file', 'error');
+      showToast('<%= req.translations.errorUploadingFile || "An error occurred while uploading the file" %>', 'error');
     }
   }
 
@@ -977,8 +977,8 @@ function openCreateFileModal() {
     document.getElementById('FileName').value = '';
     document.getElementById('fileNamePreview').textContent = '';
     document.getElementById('fileNamePreview').classList.add('hidden');
-    document.getElementById('createModalTitle').textContent = 'New Folder';
-    document.getElementById('createModalHint').textContent = 'Folder name. Use / to create nested folders.';
+    document.getElementById('createModalTitle').textContent = '<%= req.translations.newFolder || "New Folder" %>';
+    document.getElementById('createModalHint').textContent = '<%= req.translations.folderNameHint || "Folder name. Use / to create nested folders." %>';
     document.getElementById('FileName').setAttribute('data-mode', 'folder');
     openCreateFileModal();
   }
@@ -997,7 +997,7 @@ function openCreateFileModal() {
     previewEl.textContent = '';
     const span1 = document.createElement('span');
     span1.style.color = 'var(--theme-text-muted)';
-    span1.textContent = 'Will create: ';
+    span1.textContent = '<%= req.translations.willCreate || "Will create: " %>';
     const span2 = document.createElement('span');
     span2.style.color = 'var(--theme-accent)';
     span2.textContent = folders + '/';
@@ -1076,7 +1076,7 @@ function openCreateFileModal() {
           body: JSON.stringify({ content: '' }),
         });
         if (res.ok) {
-          loader.updateProgress(100, 'Done!');
+          loader.updateProgress(100, '<%= req.translations.done || "Done!" %>');
           setTimeout(() => { loader.close(); showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success'); refreshFileList(); }, 400);
         } else {
           loader.close(); showToast('<%= req.translations.fileCreateFailed || "Failed to create file" %>', 'error');
@@ -1106,7 +1106,7 @@ function openCreateFileModal() {
         body: JSON.stringify({ path: tempPath, newName: finalPath }),
       });
       if (res2.ok) {
-        loader.updateProgress(100, 'Done!');
+        loader.updateProgress(100, '<%= req.translations.done || "Done!" %>');
         setTimeout(() => { loader.close(); showToast(raw + '<%= req.translations.createdSuffix || " created" %>', 'success'); refreshFileList(); }, 400);
       } else {
         loader.close(); showToast('<%= req.translations.moveToTargetFailed || "Failed to move to target path" %>', 'error');
@@ -1142,7 +1142,7 @@ function openCreateFileModal() {
     if (!newPath || newPath === filePath) { closeRenameModal(); return; }
 
     closeRenameModal();
-    const loader = showLoadingPopup('Renaming', 'Processing...');
+    const loader = showLoadingPopup('<%= req.translations.renamingFile || "Renaming" %>', '<%= req.translations.processingEllipsis || "Processing..." %>');
 
     try {
       const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/rename', {
@@ -1152,17 +1152,17 @@ function openCreateFileModal() {
       });
       loader.close();
       if (res.ok) {
-        showToast('Renamed.', 'success');
+        showToast('<%= req.translations.renamedSuccess || "Renamed." %>', 'success');
         refreshFileList();
       } else {
-        showToast('Failed to rename', 'error');
+        showToast('<%= req.translations.failedToRename || "Failed to rename" %>', 'error');
       }
-    } catch { loader.close(); showToast('Failed to rename', 'error'); }
+    } catch { loader.close(); showToast('<%= req.translations.failedToRename || "Failed to rename" %>', 'error'); }
   }
 
   // ── Copy path ─────────────────────────────────────────────────────────────
   function copyFilePath(path) {
-    navigator.clipboard.writeText(path).then(() => showToast('Copied!', 'success'));
+    navigator.clipboard.writeText(path).then(() => showToast('<%= req.translations.copiedExcl || "Copied!" %>', 'success'));
   }
 
   // ── Dismiss selection ────────────────────────────────────────────────────
@@ -1259,7 +1259,7 @@ function openCreateFileModal() {
   async function confirmMove() {
     const src  = document.getElementById('moveSourcePath').value;
     const dest = document.getElementById('moveDestPath').value.trim();
-    if (!dest) { showToast('Enter a destination path.', 'error'); return; }
+    if (!dest) { showToast('<%= req.translations.enterDestinationPath || "Enter a destination path." %>', 'error'); return; }
     try {
       const res = await fetch(`/api/v2/servers/<%- server.UUID %>/files/move`, {
         method:  'POST',
@@ -1268,10 +1268,10 @@ function openCreateFileModal() {
       });
       if (!res.ok) throw new Error('Move failed');
       closeMoveModal();
-      showToast('File moved.', 'success');
+      showToast('<%= req.translations.fileMoved || "File moved." %>', 'success');
       refreshFileList();
     } catch {
-      showToast('Move failed — check the destination path.', 'error');
+      showToast('<%= req.translations.moveFailedCheckPath || "Move failed — check the destination path." %>', 'error');
     }
   }
 
@@ -1287,10 +1287,10 @@ function openCreateFileModal() {
         body:    JSON.stringify({ location: path }),
       });
       if (!res.ok) throw new Error('Copy failed');
-      showToast(`Duplicated as ${name.split('/').pop()}.`, 'success');
+      showToast('<%= req.translations.duplicatedAs || "Duplicated as" %> ' + name.split('/').pop() + '.', 'success');
       refreshFileList();
     } catch {
-      showToast('Duplicate failed.', 'error');
+      showToast('<%= req.translations.duplicateFailed || "Duplicate failed." %>', 'error');
     }
   }
 
@@ -1301,7 +1301,7 @@ function openCreateFileModal() {
   // Rename from action bar — only works when exactly 1 file selected
   document.getElementById('massRenameBtn').addEventListener('click', () => {
     if (selectedFiles.length !== 1) {
-      showToast('Select exactly one file to rename', 'error');
+      showToast('<%= req.translations.selectOneFileToRename || "Select exactly one file to rename" %>', 'error');
       return;
     }
     const fullPath = selectedFiles[0];
@@ -1367,7 +1367,7 @@ function openCreateFileModal() {
       } catch (e) { /* invalid URL, skip preview */ }
       if (!name) { preview.classList.add('hidden'); return; }
       const base = '<%= currentPath ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
-      preview.textContent = 'Will save as: ' + (base ? base + '/' : '/') + name;
+      preview.textContent = '<%= req.translations.willSaveAs || "Will save as: " %>' + (base ? base + '/' : '/') + name;
       preview.classList.remove('hidden');
     });
     pullUrlInput.addEventListener('keydown', (e) => {
@@ -1377,16 +1377,16 @@ function openCreateFileModal() {
 
   document.getElementById('pullButton')?.addEventListener('click', async () => {
     const url = document.getElementById('pullUrlInput').value.trim();
-    if (!url) { showToast('Enter a file URL.', 'error'); return; }
+    if (!url) { showToast('<%= req.translations.enterFileUrl || "Enter a file URL." %>', 'error'); return; }
     let parsed;
-    try { parsed = new URL(url); } catch { showToast('Invalid URL.', 'error'); return; }
+    try { parsed = new URL(url); } catch { showToast('<%= req.translations.invalidUrl || "Invalid URL." %>', 'error'); return; }
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      showToast('Only http(s) URLs are allowed.', 'error');
+      showToast('<%= req.translations.onlyHttpAllowed || "Only http(s) URLs are allowed." %>', 'error');
       return;
     }
 
     closePullFileModal();
-    const loader = showLoadingPopup('Pulling File', 'Downloading from URL...');
+    const loader = showLoadingPopup('<%= req.translations.pullingFile || "Pulling File" %>', '<%= req.translations.downloadingFromUrl || "Downloading from URL..." %>');
     try {
       const res = await fetch('/api/v2/servers/<%= server.UUID %>/files/pull', {
         method: 'POST',
@@ -1396,14 +1396,14 @@ function openCreateFileModal() {
       const data = await res.json();
       loader.close();
       if (res.ok && data.success) {
-        showToast(data.message || 'File pulled.', 'success');
+        showToast(data.message || '<%= req.translations.filePulled || "File pulled." %>', 'success');
         refreshFileList();
       } else {
-        showToast(data.error || 'Failed to pull file.', 'error');
+        showToast(data.error || '<%= req.translations.failedToPullFile || "Failed to pull file." %>', 'error');
       }
     } catch {
       loader.close();
-      showToast('Failed to pull file — check the URL and try again.', 'error');
+      showToast('<%= req.translations.failedToPullFileCheckUrl || "Failed to pull file — check the URL and try again." %>', 'error');
     }
   });
 

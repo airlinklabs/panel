@@ -98,7 +98,7 @@
                       </template>
                     </select>
                     <% if (dataUser.role === 'owner') { %>
-                      <p class="text-xs mt-2" style="color:var(--theme-text-muted)">Owner role cannot be changed. Use Transfer Ownership to assign a new owner.</p>
+                      <p class="text-xs mt-2" style="color:var(--theme-text-muted)"><%= t('ownerRoleCannotBeChanged') %></p>
                     <% } %>
                   </div>
                 </div>
@@ -115,7 +115,7 @@
                         <%= t('adminDescription') %>
                       </p>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer shrink-0" <% if (dataUser.role === 'owner') { %>title="Owner is always an administrator"<% } %>>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0" <% if (dataUser.role === 'owner') { %>title="<%= t('adminDescription') %>"<% } %>>
                       <input type="checkbox" x-model="form.isAdmin" class="sr-only peer" <% if (dataUser.role === 'owner') { %>disabled<% } %>>
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
                       <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-strong)" x-text="form.isAdmin ? '<%= t('enabled') %>' : '<%= t('disabled') %>'"></span>
@@ -131,15 +131,15 @@
             <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('leaveBlankForDefaults') %></p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
-                <input type="number" x-model.number="form.serverLimit" min="0" max="100" placeholder="Use global default" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Max servers this user can create. 0 = cannot create.</p>
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> <%= t('serverLimit') %></label>
+                <input type="number" x-model.number="form.serverLimit" min="0" max="100" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('maxServersThisUserCanCreate') %></p>
               </div>
               <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory</label>
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> <%= t('maxMemory') %></label>
                 <input type="hidden" :value="form.maxMemory">
                 <div class="flex items-stretch gap-0">
-                  <input type="number" x-model.number="form.maxMemoryDisplay" min="128" max="65536" placeholder="Use global default"
+                  <input type="number" x-model.number="form.maxMemoryDisplay" min="128" max="65536" placeholder="<%= t('useGlobalDefault') %>"
                     class="al-input rounded-l-xl flex-1 border-r-0">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="maxMemoryDisplay" data-hidden="maxMemory"
@@ -147,14 +147,14 @@
                 </div>
               </div>
               <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="font-normal text-xs" style="color:var(--theme-text-muted)">(%)</span></label>
-                <input type="number" x-model.number="form.maxCpu" min="10" max="10000" placeholder="Use global default" class="al-input">
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> <%= t('maxCpu') %> <span class="font-normal text-xs" style="color:var(--theme-text-muted)">(%)</span></label>
+                <input type="number" x-model.number="form.maxCpu" min="10" max="10000" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
               </div>
               <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage</label>
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> <%= t('maxStorage') %></label>
                 <input type="hidden" :value="form.maxStorage">
                 <div class="flex items-stretch gap-0">
-                  <input type="number" x-model.number="form.maxStorageDisplay" min="1" max="10000" placeholder="Use global default"
+                  <input type="number" x-model.number="form.maxStorageDisplay" min="1" max="10000" placeholder="<%= t('useGlobalDefault') %>"
                     class="al-input rounded-l-xl flex-1 border-r-0">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="maxStorageDisplay" data-hidden="maxStorage"
@@ -162,33 +162,33 @@
                 </div>
               </div>
               <div>
-                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('server', { size: 14, class: 'shrink-0' }) %> Max databases</label>
-                <input type="number" x-model.number="form.maxDatabases" min="0" max="100000" placeholder="Use global default" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Total databases across all servers. 0 = unlimited.</p>
+                <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('server', { size: 14, class: 'shrink-0' }) %> <%= t('maxDatabases') %></label>
+                <input type="number" x-model.number="form.maxDatabases" min="0" max="100000" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('totalDatabasesAcrossAllServers') %></p>
               </div>
             </div>
           </div>
 
           <% if (canTransferOwner) { %>
           <div class="al-card border-red-600/20">
-            <h2 class="al-card-header" style="color:#ef4444">Transfer Ownership</h2>
-            <p class="text-xs mb-4" style="color:var(--theme-text-muted)">You are the owner. Hand over ownership of this panel to <%= dataUser.username %>. The current owner becomes an admin.</p>
+            <h2 class="al-card-header" style="color:#ef4444"><%= t('transferOwnership') %></h2>
+            <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('transferOwnershipDesc', { name: dataUser.username }) %></p>
             <div class="flex items-center gap-3">
               <button type="button" @click="transferOwner()" class="al-btn-danger">
                 <%- icon('shield-alert', { size: 16 }) %>
-                Transfer ownership to <%= dataUser.username %>
+                <%= t('transferOwnershipTo', { name: dataUser.username }) %>
               </button>
-              <span class="text-xs" style="color:var(--theme-text-muted)">This cannot be undone without transferring back.</span>
+              <span class="text-xs" style="color:var(--theme-text-muted)"><%= t('cannotBeUndoneWithoutTransferringBack') %></span>
             </div>
           </div>
           <% } %>
 
           <div class="al-card">
-            <h2 class="al-card-header">Onboarding</h2>
+            <h2 class="al-card-header"><%= t('onboarding') %></h2>
             <div class="p-4">
-              <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Reset this user's onboarding state so they see the tutorial again on next login.</p>
+              <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('resetOnboardingDesc') %></p>
               <button type="button" @click="resetOnboarding()" class="al-btn-secondary">
-                <%- icon('rotate-ccw', { size: 16 }) %> Reset Onboarding
+                <%- icon('rotate-ccw', { size: 16 }) %> <%= t('resetOnboarding') %>
               </button>
             </div>
           </div>
@@ -237,10 +237,10 @@ function adminUserEdit() {
         }
       } catch (e) {
         this.roles = [
-          { name: 'user', displayName: 'User' },
-          { name: 'privileged', displayName: 'Privileged User' },
-          { name: 'admin', displayName: 'Administrator' },
-          { name: 'owner', displayName: 'Owner' },
+          { name: 'user', displayName: '<%= t('roleDisplayNameUser') %>' },
+          { name: 'privileged', displayName: '<%= t('roleDisplayNamePrivileged') %>' },
+          { name: 'admin', displayName: '<%= t('roleDisplayNameAdmin') %>' },
+          { name: 'owner', displayName: '<%= t('roleDisplayNameOwner') %>' },
         ];
       }
     },
@@ -329,12 +329,12 @@ function adminUserEdit() {
     },
     async resetOnboarding() {
       window.modal.confirm({
-        title: 'Reset onboarding?',
-        body: 'This user will see the onboarding tutorial again on their next login.',
+        title: '<%= t('resetOnboardingTitle') %>',
+        body: '<%= t('resetOnboardingBody') %>',
         danger: false,
         confirmLabel: 'Reset',
         onConfirm: async () => {
-          const loader = showLoadingPopup('Resetting onboarding...', '');
+          const loader = showLoadingPopup('<%= t('resetOnboardingLoading') %>', '');
           try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
             const res = await fetch('/api/v2/admin/users/' + this.userId + '/onboarding/reset', {
@@ -346,11 +346,11 @@ function adminUserEdit() {
             if (result.error) {
               showToast(result.error, 'error');
             } else {
-              showToast('Onboarding reset successfully.', 'success');
+              showToast('<%= t('resetOnboardingSuccess') %>', 'success');
             }
           } catch (e) {
             loader.close();
-            showToast('Error resetting onboarding.', 'error');
+            showToast('<%= t('resetOnboardingError') %>', 'error');
           }
         }
       });

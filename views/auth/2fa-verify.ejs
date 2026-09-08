@@ -99,8 +99,8 @@
       tokenInput.autocomplete = 'off';
       tokenInput.placeholder = 'XXXX-XXXX-XXXX';
       tokenInput.value = '';
-      tokenLabel.textContent = 'Recovery code';
-      toggleBtn.textContent = 'Use the 6-digit code instead';
+      tokenLabel.textContent = '<%= req.translations.recoveryCodeLabel || "Recovery code" %>';
+      toggleBtn.textContent = '<%= req.translations.use6DigitCodeInstead || "Use the 6-digit code instead" %>';
     } else {
       tokenInput.type = 'text';
       tokenInput.setAttribute('inputmode', 'numeric');
@@ -109,8 +109,8 @@
       tokenInput.autocomplete = 'one-time-code';
       tokenInput.placeholder = '••••••';
       tokenInput.value = '';
-      tokenLabel.textContent = '6-digit code';
-      toggleBtn.textContent = 'Use a recovery code instead';
+      tokenLabel.textContent = '<%= req.translations.twoFactorCodeLabel || "6-digit code" %>';
+      toggleBtn.textContent = '<%= req.translations.useRecoveryCode || "Use a recovery code instead" %>';
     }
     tokenInput.focus();
   });
@@ -140,7 +140,7 @@
 
     btn.addEventListener('click', async function () {
       btn.disabled = true;
-      btn.querySelector('.btn-label').textContent = 'Waiting for passkey…';
+      btn.querySelector('.btn-label').textContent = '<%= req.translations.waitingForPasskey || "Waiting for passkey\u2026" %>';
       statusEl.innerHTML = '';
 
       try {
@@ -150,7 +150,7 @@
         });
         if (!optionsRes.ok) {
           var errData = await optionsRes.json().catch(function () { return {}; });
-          throw new Error(errData.error || 'Failed to get passkey options');
+          throw new Error(errData.error || '<%= req.translations.failedToGetPasskeyOptions || "Failed to get passkey options" %>');
         }
         var options = await optionsRes.json();
 
@@ -165,13 +165,13 @@
         if (verifyRes.ok && verifyData.redirect) {
           window.location.href = verifyData.redirect;
         } else {
-          throw new Error(verifyData.error || 'Passkey verification failed');
+          throw new Error(verifyData.error || '<%= req.translations.passkeyVerificationFailed || "Passkey verification failed" %>');
         }
       } catch (err) {
-        statusEl.innerHTML = '<div class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)"><p class="text-sm font-medium" style="color:var(--theme-danger)">' + (err.message || 'Passkey sign-in failed') + '</p></div>';
+        statusEl.innerHTML = '<div class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)"><p class="text-sm font-medium" style="color:var(--theme-danger)">' + (err.message || '<%= req.translations.passkeySignInFailed || "Passkey sign-in failed" %>') + '</p></div>';
       } finally {
         btn.disabled = false;
-        btn.querySelector('.btn-label').textContent = 'Sign in with passkey';
+        btn.querySelector('.btn-label').textContent = '<%= req.translations.loginPasskeyButton || "Sign in with passkey" %>';
       }
     });
   })();

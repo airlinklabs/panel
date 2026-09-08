@@ -104,7 +104,7 @@
                       hx-delete="/api/v2/servers/<%= server.UUID %>/databases/<%= db.id %>"
                       hx-target="#server-db-list"
                       hx-swap="outerHTML"
-                      hx-confirm="This will permanently delete the database and its user from the host. This cannot be undone. (<%= db.databaseName %>)"
+                      hx-confirm="<%= t('deleteDatabaseConfirm') %> (<%= db.databaseName %>)"
                       type="button"
                       style="background:transparent;border:none;padding:0.5rem;color:var(--theme-danger);cursor:pointer;border-radius:0.5rem"
                       aria-label="<%= t('deleteDatabaseAria') %>">

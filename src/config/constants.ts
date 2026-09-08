@@ -8,14 +8,14 @@ export {
   DEFAULT_MAX_MEMORY_MB,
   DEFAULT_MAX_CPU_PERCENT,
   DEFAULT_MAX_STORAGE_MB,
-} from "./defaults";
+} from './defaults';
 
 // Legacy aliases — used by Alternative/api.ts
 import {
   DEFAULT_MAX_MEMORY_MB,
   DEFAULT_MAX_CPU_PERCENT,
   DEFAULT_MAX_STORAGE_MB,
-} from "./defaults";
+} from './defaults';
 export const DEFAULT_MEMORY_MB = DEFAULT_MAX_MEMORY_MB;
 export const DEFAULT_CPU_PERCENT = DEFAULT_MAX_CPU_PERCENT;
 export const DEFAULT_STORAGE_MB = DEFAULT_MAX_STORAGE_MB;

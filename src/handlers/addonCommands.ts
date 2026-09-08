@@ -1,4 +1,5 @@
 import logger from './logger';
+import { logT } from '../services/i18n';
 
 export interface RegisteredCommand {
   name: string;
@@ -37,7 +38,7 @@ class AddonCommandRegistry {
       const result = await cmd.handler(args);
       return result;
     } catch (err: any) {
-      logger.error(`Command "${commandKey}" failed:`, err.message);
+      logger.error(logT('log.addonCommandFailed', { commandKey }), err.message);
       return `Command failed: ${err.message}`;
     }
   }
@@ -83,7 +84,10 @@ class AddonScheduler {
       try {
         await task.handler();
       } catch (err: any) {
-        logger.error(`Scheduled task "${key}" failed:`, err.message);
+        logger.error(
+          logT('log.addonScheduledTaskFailed', { key }),
+          err.message,
+        );
       }
     }, task.intervalMs);
 

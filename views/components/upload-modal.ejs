@@ -89,8 +89,8 @@
   window.clearUploadModalSelection = clearUploadModalSelection;
 
   function openUploadModal(opts) {
-    titleEl.textContent = opts.title || 'Upload file';
-    acceptHint.textContent = opts.accept ? 'Accepted: ' + opts.accept : '';
+    titleEl.textContent = opts.title || '<%= (req.translations && req.translations.uploadFile) || "Upload file" %>';
+    acceptHint.textContent = opts.accept ? '<%= (req.translations && req.translations.accepted) || "Accepted: " %>' + opts.accept : '';
     fileInput.accept = opts.accept || '';
     currentOnFile = opts.onFile || null;
     clearUploadModalSelection();
@@ -141,14 +141,14 @@
   confirmBtn.addEventListener('click', async function() {
     if (!currentFile || !currentOnFile) return;
     confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Uploading...';
+    confirmBtn.textContent = '<%= (req.translations && req.translations.uploading) || "Uploading..." %>';
     try {
       await currentOnFile(currentFile);
       closeUploadModal();
     } catch (err) {
       console.error('Upload failed:', err);
       confirmBtn.disabled = false;
-      confirmBtn.textContent = 'Upload';
+      confirmBtn.textContent = '<%= (req.translations && req.translations.uploadBtn) || "Upload" %>';
     }
   });
 

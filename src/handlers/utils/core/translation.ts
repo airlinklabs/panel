@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import logger from '../../logger';
+import { logT } from '../../../services/i18n';
 
 const translationCache = new Map<string, Record<string, unknown>>();
 
@@ -29,16 +30,13 @@ function loadTranslations(lang: string): Record<string, unknown> {
     translationCache.set(lang, fallback);
     return fallback;
   } catch (error) {
-    logger.error(`Error loading translations for ${lang}:`, error);
+    logger.error(logT('log.translationLoadError', { lang }), error);
     try {
       const fallback = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
       translationCache.set(lang, fallback);
       return fallback;
     } catch (fallbackError) {
-      logger.error(
-        'Error loading default English translations:',
-        fallbackError,
-      );
+      logger.error(logT('log.translationLoadDefaultFailed'), fallbackError);
       return {};
     }
   }

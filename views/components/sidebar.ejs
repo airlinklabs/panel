@@ -6,7 +6,7 @@
     <!-- Static top: logo -->
     <div id="sidebar-logo-block" class="pl-5 pt-3 pb-3 flex min-w-0 shrink-0">
       <a href="/" id="sidebar-logo-link" class="flex items-center min-w-0">
-        <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo"
+        <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="<%= t('logoAlt') %>"
           class="logo-bg p-1 h-[34px] w-[34px] rounded-xl mr-2.5 shrink-0 inline-flex"
           style="background:var(--theme-logo-bg);">
         <h1 class="sidebar-label font-medium tracking-tight text-[15px] truncate min-w-0"
@@ -27,7 +27,7 @@
         class="sidebar-special-link flex items-center space-x-3 py-3 px-3.5 border-y shrink-0 transition-colors group"
         style="border-color:var(--theme-nav-border);">
         <img loading="lazy" decoding="async" class="h-7 w-7 rounded-xl shrink-0"
-          src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="User avatar">
+          src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= t('userAvatarAlt') %>">
         <div class="min-w-0">
           <p class="text-[13px] font-medium truncate transition-colors" style="color:var(--theme-text-strong);">
             <span id="sidebar-username">
@@ -498,7 +498,7 @@
         const isCollapsed = sidebar.classList.toggle('collapsed');
         localStorage.setItem(COLLAPSED_KEY, String(isCollapsed));
         collapseBtn.setAttribute('aria-expanded', String(!isCollapsed));
-        const label = isCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+        const label = isCollapsed ? '<%= (req.translations && req.translations.expandSidebar) || "Expand sidebar" %>' : '<%= (req.translations && req.translations.collapseSidebar) || "Collapse sidebar" %>';
         collapseBtn.setAttribute('aria-label', label);
         updateContentPadding(isCollapsed);
       });

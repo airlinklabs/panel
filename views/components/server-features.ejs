@@ -4,17 +4,17 @@
 <% if (typeof features !== 'undefined' && features && features.includes('eula')) { %>
 <script nonce="<%- nonce %>">
   window.modal.confirm({
-    title: "Accept Minecraft's EULA",
-    body: "By clicking Accept you agree to the Mojang End User License Agreement (EULA). The server will not start until you accept.",
+    title: '<%= (req.translations && req.translations.acceptMinecraftEula) || "Accept Minecraft\'s EULA" %>',
+    body: '<%= (req.translations && req.translations.eulaModalBody) || "By clicking Accept you agree to the Mojang End User License Agreement (EULA). The server will not start until you accept." %>',
     danger: false,
-    confirmLabel: 'Accept EULA',
+    confirmLabel: '<%= (req.translations && req.translations.acceptEula) || "Accept EULA" %>',
     onConfirm: () => {
       fetch('/api/v2/servers/<%= req.params.id %>/features/eula', { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } })
         .then(() => {})
         .catch(error => {
           console.error('There was an error!', error);
           if (typeof showToast === 'function') {
-            showToast('Could not accept the EULA. Please try again.', 'error');
+            showToast('<%= (req.translations && req.translations.couldNotAcceptEula) || "Could not accept the EULA. Please try again." %>', 'error');
           }
         });
     }

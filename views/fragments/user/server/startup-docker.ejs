@@ -32,7 +32,7 @@
     <div class="flex items-center">
       <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-info-bg);color:var(--theme-info);--tw-ring-color:color-mix(in srgb, var(--theme-info) 25%, transparent);">
         <%- icon('info', { class: 'mr-1.5 h-3 w-3', style: 'color:var(--theme-info)', strokeWidth: 2 }) %>
-        Requires Restart
+        <%= req.translations.requiresRestart || 'Requires Restart' %>
       </span>
     </div>
   </div>

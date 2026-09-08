@@ -1,2 +1,2 @@
-export * from "./activityEvents";
-export * from "./activityLogger";
+export * from './activityEvents';
+export * from './activityLogger';

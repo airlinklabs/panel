@@ -5,8 +5,8 @@
       <div class="mx-auto mb-3 w-12 h-12 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-border) 35%, transparent); color:var(--theme-text-muted);">
         <%- icon('map-pin', { class: 'size-6', strokeWidth: 1.5 }) %>
       </div>
-      <p class="text-sm font-medium" style="color:var(--theme-text-strong);">No locations yet</p>
-      <p class="text-xs mt-1" style="color:var(--theme-text-muted);">Create your first location above to start grouping nodes by region.</p>
+      <p class="text-sm font-medium" style="color:var(--theme-text-strong);"><%= t('noLocationsYet') %></p>
+      <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= t('noLocationsYetDesc') %></p>
     </div>
   <% } else { %>
     <% const byRegion = new Map(); locations.forEach(loc => {
@@ -30,7 +30,7 @@
                   <p class="font-medium text-sm truncate" style="color:var(--theme-text-strong);"><%= loc.name %></p>
                 </div>
                 <p class="text-xs mt-1.5 font-mono" style="color:var(--theme-text-muted);"><%= loc.shortCode %></p>
-                <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= (loc._count && loc._count.nodes) || 0 %> node(s)</p>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= (loc._count && loc._count.nodes) || 0 %> <%= (loc._count && loc._count.nodes) === 1 ? t('nodeSingular') : t('nodePlural') %></p>
               </div>
               <div class="flex items-center gap-1 shrink-0">
                 <button
@@ -38,7 +38,7 @@
                   type="button"
                   class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
                   style="color:var(--theme-text-muted);"
-                  aria-label="View nodes in <%= loc.name %>">
+                  aria-label="<%= t('viewNodesIn', { name: loc.name }) %>">
                   <%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>
                 </button>
                 <button
@@ -46,17 +46,17 @@
                   type="button"
                   class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
                   style="color:var(--theme-text-muted);"
-                  aria-label="Edit <%= loc.name %>">
+                  aria-label="<%= t('editLocation', { name: loc.name }) %>">
                   <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>
                 </button>
                 <button
                   hx-delete="/api/v2/admin/locations/<%= loc.id %>"
                   hx-target="#admin-locations-list"
                   hx-swap="outerHTML"
-                  hx-confirm="Delete &quot;<%= loc.name %>&quot;? Servers in it will lose their grouping."
+                  hx-confirm="<%= t('deleteLocationConfirm', { name: loc.name }) %>"
                   type="button"
                   class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-75"
-                  aria-label="Delete location <%= loc.name %>">
+                  aria-label="<%= t('deleteLocation', { name: loc.name }) %>">
                   <%- icon('trash', { class: 'size-4', strokeWidth: 1.5, style: 'color:var(--theme-danger);' }) %>
                 </button>
               </div>

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import logger from './logger';
 import { isValidAddonSlug } from './addonViewResolver';
+import { logT } from '../services/i18n';
 
 const RESERVED_IDENTIFIER_WORDS = [
   'admin',
@@ -262,7 +263,7 @@ export function parseAddonManifest(
 
     return { success: true, manifest, filePath };
   } catch (error: any) {
-    logger.error('Failed to parse manifest:', error);
+    logger.error(logT('log.addonManifestParseFailed'), error);
     return {
       success: false,
       error: 'Failed to parse manifest',

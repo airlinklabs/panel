@@ -8,8 +8,8 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: req.translations.admin || 'Admin' },
-        { label: req.translations.adminDatabasesTitle || 'Databases' }
+        { label: t('admin') },
+        { label: t('adminDatabasesTitle') }
       ] }) %>
       <%- include('../../components/ui/page-header', {
         title: t('adminDatabasesTitle'),
@@ -33,10 +33,10 @@
                 hx-disabled-elt="this"
                 hx-indicator="#auto-host-card-status">
                 <%- icon('zap', { size: 15 }) %>
-                <span class="ml-1.5"><%= req.translations.autoGenerate || 'Auto-generate' %></span>
+                <span class="ml-1.5"><%= t('autoGenerate') %></span>
               </button>
             </div>
-            <p id="auto-host-card-status" class="htmx-indicator text-xs mt-2" style="color:var(--theme-text-muted)">Working…</p>
+            <p id="auto-host-card-status" class="htmx-indicator text-xs mt-2" style="color:var(--theme-text-muted)"><%= t('adminDbWorking') %></p>
           </div>
           <div class="al-card rounded-xl p-5">
             <div class="flex items-start justify-between gap-3">
@@ -50,10 +50,10 @@
                 hx-disabled-elt="this"
                 hx-indicator="#auto-bucket-card-status">
                 <%- icon('zap', { size: 15 }) %>
-                <span class="ml-1.5"><%= req.translations.autoGenerate || 'Auto-generate' %></span>
+                <span class="ml-1.5"><%= t('autoGenerate') %></span>
               </button>
             </div>
-            <p id="auto-bucket-card-status" class="htmx-indicator text-xs mt-2" style="color:var(--theme-text-muted)">Working…</p>
+            <p id="auto-bucket-card-status" class="htmx-indicator text-xs mt-2" style="color:var(--theme-text-muted)"><%= t('adminDbWorking') %></p>
           </div>
         </div>
 

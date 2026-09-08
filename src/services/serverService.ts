@@ -7,6 +7,7 @@ import {
   DEFAULT_CPU_PERCENT,
   DEFAULT_STORAGE_MB,
 } from '../config/constants';
+import { logT } from './i18n';
 
 const DEFAULT_SWAP_MB = 0;
 
@@ -120,7 +121,10 @@ export async function deleteServer(uuid: string): Promise<boolean> {
         daemonErr.status === 404 ||
         daemonErr.body?.error?.includes('not exist');
       if (!isGone) {
-        logger.warn(`Could not delete container on daemon: ${err}`);
+        logger.warn(
+          logT('log.couldNotDeleteContainerOnDaemon'),
+          err as Record<string, unknown>,
+        );
       }
     }
   }

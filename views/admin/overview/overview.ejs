@@ -55,7 +55,7 @@
         <div class="al-card p-4 mb-5">
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2.5">
-              <img src="/assets/logo.svg" class="h-8 w-8 rounded-xl shrink-0" alt="Airlink" style="background:var(--theme-logo-bg);">
+              <img src="/assets/logo.svg" class="h-8 w-8 rounded-xl shrink-0" alt="<%= t('airlinkPanel') %>" style="background:var(--theme-logo-bg);">
               <div>
                 <p class="text-[13px] font-medium" style="color:var(--theme-text-strong);"><%= t('airlinkPanel') %> <span class="font-bold"><%= airlinkCodename %></span></p>
                 <div class="flex items-center gap-1.5 mt-0.5">
@@ -193,7 +193,7 @@ function adminOverview() {
     async checkUpdate() {
       var self = this;
       var statusDiv = document.getElementById('updateStatus');
-      statusDiv.innerHTML = '<span class="text-neutral-500">Checking...</span>';
+      statusDiv.innerHTML = '<span class="text-neutral-500">' + (req.translations.checking || 'Checking...') + '</span>';
       statusDiv.classList.remove('hidden');
 
       try {
@@ -203,7 +203,7 @@ function adminOverview() {
         var updateInfo = document.getElementById('updateInfo');
 
         if (data.hasUpdate) {
-          statusDiv.innerHTML = '<span class="text-amber-600 dark:text-amber-400">Update available — v' + data.latestVersion + '</span>';
+          statusDiv.innerHTML = '<span class="text-amber-600 dark:text-amber-400">' + (req.translations.updateAvailable || 'Update available') + ' — v' + data.latestVersion + '</span>';
           self.fadeIn(statusDiv);
           updateBtn.classList.remove('hidden');
           updateBtn.classList.add('inline-flex');
@@ -220,7 +220,7 @@ function adminOverview() {
           updateInfo.classList.add('hidden');
         }
       } catch (error) {
-        statusDiv.innerHTML = '<span class="text-red-500">Failed to check for updates.</span>';
+        statusDiv.innerHTML = '<span class="text-red-500">' + (req.translations.failedToCheckUpdates || 'Failed to check for updates.') + '</span>';
         self.fadeIn(statusDiv);
       }
     },
@@ -228,25 +228,25 @@ function adminOverview() {
     performUpdate() {
       var self = this;
       window.modal.confirm({
-        title: 'Install Update',
-        body: 'The panel will perform the update and restart the server.',
-        confirmLabel: 'Install',
+        title: req.translations.installUpdate || 'Install Update',
+        body: req.translations.panelWillUpdate || 'The panel will perform the update and restart the server.',
+        confirmLabel: req.translations.install || 'Install',
         danger: false,
         onConfirm: async () => {
           var statusDiv = document.getElementById('updateStatus');
-          statusDiv.innerHTML = '<span class="text-neutral-500">Installing...</span>';
+          statusDiv.innerHTML = '<span class="text-neutral-500">' + (req.translations.installing || 'Installing...') + '</span>';
           self.fadeIn(statusDiv);
           try {
             var response = await fetch('/api/v2/admin/overview/perform-update', { method: 'POST', headers: { 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
             var data = await response.json();
-            showToast(data.message || 'Update complete. Restarting.', 'success');
-            statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';
+            showToast(data.message || (req.translations.updateCompleteRestarting || 'Update complete. Restarting.'), 'success');
+            statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">' + (req.translations.updateSuccessfulRestarting || 'Update successful. Restarting...') + '</span>';
             self.fadeIn(statusDiv);
             setTimeout(() => window.location.reload(), self.UPDATE_RELOAD_DELAY_MS);
           } catch (error) {
-            statusDiv.innerHTML = '<span class="text-red-500">Update failed.</span>';
+            statusDiv.innerHTML = '<span class="text-red-500">' + (req.translations.updateFailed || 'Update failed.') + '</span>';
             self.fadeIn(statusDiv);
-            showToast('Update failed. Check the logs.', 'error');
+            showToast(req.translations.updateFailedCheckLogs || 'Update failed. Check the logs.', 'error');
           }
         }
       });

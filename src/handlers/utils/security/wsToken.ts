@@ -1,22 +1,22 @@
-import crypto from "node:crypto";
-import { WS_WS_TOKEN_TTL_MS } from "../../../config/timeouts";
+import crypto from 'node:crypto';
+import { WS_TOKEN_TTL_MS } from '../../../config/timeouts';
 
 const VERSION = 1;
 
 function secret(): string {
   const s = process.env.SESSION_SECRET;
   if (!s) {
-    throw new Error("SESSION_SECRET environment variable is required");
+    throw new Error('SESSION_SECRET environment variable is required');
   }
   return s;
 }
 
 function b64url(input: Buffer): string {
-  return input.toString("base64url");
+  return input.toString('base64url');
 }
 
 function b64urlDecode(input: string): Buffer {
-  return Buffer.from(input, "base64url");
+  return Buffer.from(input, 'base64url');
 }
 
 export function issueWsToken(serverId: string, userId: number): string {
@@ -31,9 +31,9 @@ export function issueWsToken(serverId: string, userId: number): string {
     ),
   );
   const sig = crypto
-    .createHmac("sha256", secret())
+    .createHmac('sha256', secret())
     .update(payload)
-    .digest("base64url");
+    .digest('base64url');
   return `${payload}.${sig}`;
 }
 
@@ -45,19 +45,19 @@ export interface WsTokenPayload {
 export function verifyWsToken(
   token: string | null | undefined,
 ): WsTokenPayload | null {
-  if (!token || typeof token !== "string") {
+  if (!token || typeof token !== 'string') {
     return null;
   }
-  const parts = token.split(".");
+  const parts = token.split('.');
   if (parts.length !== 2) {
     return null;
   }
 
   const [payload, sig] = [parts[0]!, parts[1]!];
   const expected = crypto
-    .createHmac("sha256", secret())
+    .createHmac('sha256', secret())
     .update(payload)
-    .digest("base64url");
+    .digest('base64url');
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
   if (a.length !== b.length) {
@@ -68,7 +68,7 @@ export function verifyWsToken(
   }
 
   try {
-    const decoded = JSON.parse(b64urlDecode(payload).toString("utf8")) as {
+    const decoded = JSON.parse(b64urlDecode(payload).toString('utf8')) as {
       v?: number;
       srv?: string;
       usr?: number;
@@ -76,12 +76,12 @@ export function verifyWsToken(
     };
     if (
       decoded.v !== VERSION ||
-      typeof decoded.srv !== "string" ||
-      typeof decoded.usr !== "number"
+      typeof decoded.srv !== 'string' ||
+      typeof decoded.usr !== 'number'
     ) {
       return null;
     }
-    if (typeof decoded.exp !== "number" || decoded.exp < Date.now()) {
+    if (typeof decoded.exp !== 'number' || decoded.exp < Date.now()) {
       return null;
     }
     return { serverId: decoded.srv, userId: decoded.usr };

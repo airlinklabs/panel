@@ -22,7 +22,8 @@
 
 import fs from "fs";
 import path from "path";
-import logger from "../logger";
+import type { Request, Response, NextFunction } from "express";
+import logger from "../handlers/logger";
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ interface LangBundle {
 const bundleCache = new Map<string, LangBundle>();
 let initialized = false;
 
-const LANG_DIR = path.join(__dirname, "../../../storage/lang");
+const LANG_DIR = path.join(__dirname, "../../storage/lang");
 
 // ─── Loading ──────────────────────────────────────────────────
 
@@ -57,7 +58,9 @@ function loadBundle(lang: string): LangBundle {
   const plurals: PluralMap = {};
 
   for (const [key, value] of Object.entries(raw)) {
-    if (key.startsWith("_")) continue; // skip commentary keys
+    if (key.startsWith("_")) {
+      continue;
+    } // skip commentary keys
     if (
       typeof value === "object" &&
       value !== null &&
@@ -77,7 +80,9 @@ function loadBundle(lang: string): LangBundle {
 
 function readJson(filePath: string): Record<string, unknown> | null {
   try {
-    if (!fs.existsSync(filePath)) return null;
+    if (!fs.existsSync(filePath)) {
+      return null;
+    }
     return JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch {
     return null;
@@ -91,7 +96,9 @@ function readJson(filePath: string): Record<string, unknown> | null {
  * Called once from app.ts — subsequent loadBundle() calls are instant.
  */
 export function initI18n(): void {
-  if (initialized) return;
+  if (initialized) {
+    return;
+  }
 
   try {
     const langs = fs.readdirSync(LANG_DIR).filter((entry) => {
@@ -104,10 +111,13 @@ export function initI18n(): void {
     }
 
     logger.info(
-      `[i18n] Loaded ${bundleCache.size} language(s): ${langs.join(", ")}`,
+      logT("log.i18nLoadedLanguages", {
+        count: bundleCache.size,
+        langs: langs.join(", "),
+      }),
     );
   } catch (error) {
-    logger.error("[i18n] Failed to initialize:", error);
+    logger.error(logT("log.i18nFailedToInitialize"), error);
     loadBundle("en"); // ensure at least English works
   }
 
@@ -125,7 +135,9 @@ function interpolate(
   template: string,
   vars: Record<string, string | number>,
 ): string {
-  if (!vars || Object.keys(vars).length === 0) return template;
+  if (!vars || Object.keys(vars).length === 0) {
+    return template;
+  }
   return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
     return key in vars ? String(vars[key]) : `{{${key}}}`;
   });
@@ -164,7 +176,9 @@ export function tn(
 ): string {
   const bundle = loadBundle(lang);
   const plural = bundle.plurals[key];
-  if (!plural) return key;
+  if (!plural) {
+    return key;
+  }
 
   const form = count === 1 ? plural.one : plural.other;
   return interpolate(form, { count, ...vars });
@@ -198,30 +212,35 @@ export function logT(
  * - res.locals.tn         — same as req.tn, available in EJS
  */
 export function i18nMiddleware(
-  req: {
-    lang?: string;
-    cookies?: Record<string, string>;
-    t: Function;
-    tn: Function;
-  },
-  res: { locals: Record<string, unknown> },
-  next: () => void,
+  req: Request,
+  res: Response,
+  next: NextFunction,
 ): void {
-  const lang = req.cookies?.lang || "en";
-  req.lang = lang;
+  const lang = (req.cookies?.lang as string) || "en";
+  (req as any).lang = lang;
 
   // Bind req.t / req.tn with user's language
-  req.t = (key: string, vars?: Record<string, string | number>) =>
+  (req as any).t = (key: string, vars?: Record<string, string | number>) =>
     t(lang, key, vars);
-  req.tn = (
+  (req as any).tn = (
     key: string,
     count: number,
     vars?: Record<string, string | number>,
   ) => tn(lang, key, count, vars);
 
+  // Proxy so req.translations.someKey works in EJS templates
+  (req as any).translations = new Proxy(
+    {},
+    {
+      get(_target, prop: string) {
+        return t(lang, prop);
+      },
+    },
+  );
+
   // Expose to EJS templates
-  res.locals.t = req.t;
-  res.locals.tn = req.tn;
+  res.locals.t = (req as any).t;
+  res.locals.tn = (req as any).tn;
   res.locals.lang = lang;
 
   next();

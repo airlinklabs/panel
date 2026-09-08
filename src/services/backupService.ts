@@ -1,7 +1,8 @@
-import prisma from "../db";
-import { daemonRequest } from "../handlers/utils/core/daemonRequest";
-import logger from "../handlers/logger";
-import { DAEMON_TIMEOUT_BACKUP_MS } from "../config/daemonTimeouts";
+import prisma from '../db';
+import { daemonRequest } from '../handlers/utils/core/daemonRequest';
+import logger from '../handlers/logger';
+import { DAEMON_TIMEOUT_BACKUP_MS } from '../config/daemonTimeouts';
+import { logT } from './i18n';
 
 export interface BackupListItem {
   UUID: string;
@@ -28,7 +29,7 @@ export interface DaemonBackupResult {
 export async function listBackups(serverId: string): Promise<BackupListItem[]> {
   return prisma.backup.findMany({
     where: { serverId },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: 'desc' },
     select: {
       UUID: true,
       name: true,
@@ -70,8 +71,8 @@ export async function createBackupOnDaemon(
   name: string,
 ): Promise<DaemonBackupResult> {
   const response = await daemonRequest<DaemonBackupResult>({
-    method: "POST",
-    path: "/container/backup",
+    method: 'POST',
+    path: '/container/backup',
     nodeAddress,
     nodePort,
     nodeKey,
@@ -91,8 +92,8 @@ export async function deleteBackupFileOnDaemon(
   filePath: string,
 ): Promise<void> {
   await daemonRequest({
-    method: "DELETE",
-    path: "/container/backup",
+    method: 'DELETE',
+    path: '/container/backup',
     nodeAddress,
     nodePort,
     nodeKey,
@@ -155,10 +156,10 @@ export async function createBackup(
     include: { node: true },
   });
   if (!server) {
-    throw new Error("Server not found");
+    throw new Error('Server not found');
   }
   if (!server.node) {
-    throw new Error("Server node not found");
+    throw new Error('Server node not found');
   }
 
   const count = await countBackups(serverId);
@@ -175,7 +176,7 @@ export async function createBackup(
   );
 
   if (!result.success || !result.backup) {
-    throw new Error("Failed to create backup on daemon");
+    throw new Error('Failed to create backup on daemon');
   }
 
   return createBackupRecord({
@@ -199,10 +200,10 @@ export async function deleteBackup(
 ): Promise<void> {
   const backup = await getBackup(uuid, serverId);
   if (!backup) {
-    throw new Error("Backup not found");
+    throw new Error('Backup not found');
   }
   if (backup.locked) {
-    throw new Error("Backup is locked");
+    throw new Error('Backup is locked');
   }
 
   const server = await prisma.server.findUnique({
@@ -210,7 +211,7 @@ export async function deleteBackup(
     include: { node: true },
   });
   if (!server?.node) {
-    throw new Error("Server node not found");
+    throw new Error('Server node not found');
   }
 
   // Delete file from daemon (best-effort for local files)
@@ -227,7 +228,10 @@ export async function deleteBackup(
       );
     }
   } catch (err) {
-    logger.warn(`Failed to delete backup file from daemon: ${err}`);
+    logger.warn(
+      logT('log.failedToDeleteBackupFileFromDaemonService'),
+      err as Record<string, unknown>,
+    );
   }
 
   await deleteBackupRecord(uuid);

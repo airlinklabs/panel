@@ -4,30 +4,30 @@
     <div x-show="error" x-text="error" class="rounded-xl px-4 py-3 mb-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)"></div>
     <div class="space-y-4">
       <div>
-        <label for="mountName" class="al-label">Name</label>
+        <label for="mountName" class="al-label"><%= t('name') %></label>
         <input id="mountName" x-model="form.name" class="al-input w-full" placeholder="Shared plugins" required>
       </div>
       <div>
-        <label for="mountSource" class="al-label">Source (host path)</label>
+        <label for="mountSource" class="al-label"><%= t('mountSourceLabel') %></label>
         <input id="mountSource" x-model="form.source" class="al-input w-full font-mono text-xs" placeholder="/data/shared/plugins" required>
       </div>
       <div>
-        <label for="mountTarget" class="al-label">Target (container path)</label>
+        <label for="mountTarget" class="al-label"><%= t('mountTargetLabel') %></label>
         <input id="mountTarget" x-model="form.target" class="al-input w-full font-mono text-xs" placeholder="/home/container/plugins" required>
       </div>
       <label class="flex items-center gap-2.5 text-sm cursor-pointer select-none" style="color:var(--theme-text-strong)">
         <input x-model="form.readOnly" type="checkbox" class="h-4 w-4 rounded" style="border-color:var(--theme-border-input);accent-color:var(--theme-accent);">
-        Read-only
+        <%= t('mountReadOnlyLabel') %>
       </label>
     </div>
     <div class="flex gap-2 pt-4">
       <button type="button" @click="$dispatch('mount-modal-close')" class="al-btn-secondary flex-1 inline-flex items-center gap-1.5">
         <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-        Cancel
+        <%= t('cancel') %>
       </button>
       <button type="submit" class="al-btn-primary flex-1 inline-flex items-center gap-1.5" :disabled="saving">
         <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <span x-text="saving ? 'Creating…' : 'Create mount'">Create mount</span>
+        <span x-text="saving ? '<%= t('mountCreating') %>' : '<%= t('mountCreateBtn') %>'"><%= t('mountCreateBtn') %></span>
       </button>
     </div>
   </form>

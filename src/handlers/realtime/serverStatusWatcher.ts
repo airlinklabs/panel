@@ -3,6 +3,7 @@ import logger from '../logger';
 import { daemonBaseUrl } from '../utils/core/daemonRequest';
 import { emitRealtime } from './events';
 import type { WatchHandle } from '../../types/realtime';
+import { logT } from '../../services/i18n';
 
 // ── Per-server daemon status watcher ──────────────────────────────────────────
 // The daemon already streams `state` + `stats` on a single `/containerstatus`
@@ -79,7 +80,7 @@ function openSocket(state: WatcherState, serverId: string): void {
 
       const authTimer = setTimeout(() => {
         if (socket.readyState === WebSocket.OPEN && !state.authed) {
-          logger.debug(`status watcher auth timeout for ${serverId}`);
+          logger.debug(logT('log.statusWatcherAuthTimeout', { serverId }));
           socket.close(1008, 'auth timeout');
         }
       }, 10_000);
@@ -122,7 +123,7 @@ function openSocket(state: WatcherState, serverId: string): void {
             state: msg.data,
           });
         } else if (msg.event === 'error') {
-          logger.warn(`status watcher error for ${serverId}:`, {
+          logger.warn(logT('log.statusWatcherError', { serverId }), {
             data: msg.data,
           });
         }
@@ -148,7 +149,10 @@ function openSocket(state: WatcherState, serverId: string): void {
     })
     .catch((error) => {
       logger.debug(
-        `status watcher failed to resolve daemon URL for ${serverId}: ${String(error)}`,
+        logT('log.statusWatcherUrlResolveFailed', {
+          serverId,
+          error: String(error),
+        }),
       );
       state.connecting = false;
       scheduleReconnect(state, serverId);
@@ -162,9 +166,7 @@ function scheduleReconnect(state: WatcherState, serverId: string): void {
   }
 
   if (state.reconnectAttempts >= MAX_RETRY_ATTEMPTS) {
-    logger.warn(
-      `Status watcher gave up reconnecting to daemon for ${serverId}`,
-    );
+    logger.warn(logT('log.statusWatcherReconnectGaveUp', { serverId }));
     return;
   }
 
@@ -200,7 +202,7 @@ function cleanup(serverId: string): void {
   }
   if (state.socket) {
     try {
-      state.socket.close(1000, "no watchers");
+      state.socket.close(1000, 'no watchers');
     } catch {
       /* already closed */
     }

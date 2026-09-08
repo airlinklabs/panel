@@ -84,7 +84,7 @@
           (active ? '' : ' hover:bg-[var(--theme-bg-hover)]');
         b.style.color = active ? 'var(--theme-accent-text)' : 'var(--theme-text-muted)';
         if (active) b.style.background = 'var(--theme-accent)';
-        b.setAttribute('aria-label', 'Page ' + target);
+        b.setAttribute('aria-label', '<%= (req.translations && req.translations.pageTarget) || "Page {target}" %>'.replace('{target}', target));
         if (active) b.setAttribute('aria-current', 'page');
         windowEl.appendChild(b);
       }

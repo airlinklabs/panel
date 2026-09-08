@@ -100,10 +100,10 @@
     const v = pwInput.value;
     const score = [v.length >= 8, /[A-Za-z]/.test(v), /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)].filter(Boolean).length;
     const colors = ['var(--theme-danger)','var(--theme-warning)','var(--theme-info)','var(--theme-success)'];
-    const labels = ['Too short','Weak','Fair','Strong'];
+    const labels = ['<%= req.translations.pwStrengthTooShort || "Too short" %>','<%= req.translations.pwStrengthWeak || "Weak" %>','<%= req.translations.pwStrengthFair || "Fair" %>','<%= req.translations.pwStrengthStrong || "Strong" %>'];
     const bar  = document.getElementById('pwBar');
     const hint = document.getElementById('pwHint');
-    if (!v) { bar.style.transform = 'scaleX(0)'; hint.textContent = '8+ characters, one letter, one number.'; hint.style.color = ''; return; }
+    if (!v) { bar.style.transform = 'scaleX(0)'; hint.textContent = '<%= req.translations.pwHint || "8+ characters, one letter, one number." %>'; hint.style.color = ''; return; }
     const idx = Math.max(0, score - 1);
     bar.style.transform = 'scaleX(' + (['0.25','0.5','0.75','1'][idx]) + ')'; bar.style.background = colors[idx];
     hint.textContent = labels[idx]; hint.style.color = colors[idx];
@@ -123,19 +123,19 @@
     if (username.length < 3 || !/^[A-Za-z0-9]+$/.test(username)) {
       document.getElementById('username').classList.add('invalid');
       document.getElementById('username').setAttribute('aria-invalid', 'true');
-      var e = document.getElementById('username-error'); e.textContent = 'Username must be 3+ alphanumeric characters.'; e.classList.remove('hidden');
+      var e = document.getElementById('username-error'); e.textContent = '<%= req.translations.registerUsernameError || "Username must be 3+ alphanumeric characters." %>'; e.classList.remove('hidden');
       ok = false;
     }
     if (!email.includes('@') || !email.includes('.')) {
       document.getElementById('email').classList.add('invalid');
       document.getElementById('email').setAttribute('aria-invalid', 'true');
-      var e = document.getElementById('email-error'); e.textContent = 'Please enter a valid email address.'; e.classList.remove('hidden');
+      var e = document.getElementById('email-error'); e.textContent = '<%= req.translations.registerEmailError || "Please enter a valid email address." %>'; e.classList.remove('hidden');
       ok = false;
     }
     if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
       document.getElementById('password').classList.add('invalid');
       document.getElementById('password').setAttribute('aria-invalid', 'true');
-      var e = document.getElementById('password-error'); e.textContent = 'Password must be 8+ characters with at least one letter and one number.'; e.classList.remove('hidden');
+      var e = document.getElementById('password-error'); e.textContent = '<%= req.translations.registerPasswordError || "Password must be 8+ characters with at least one letter and one number." %>'; e.classList.remove('hidden');
       ok = false;
     }
     if (!ok) { e.preventDefault(); return; }

@@ -99,7 +99,7 @@
           <div id="contributors-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             <div class="col-span-full flex items-center gap-2 py-2">
               <div class="h-4 w-4 border-2 rounded-full animate-spin" style="border-color:var(--theme-border);border-top-color:var(--theme-text)"></div>
-              <span class="text-sm" style="color:var(--theme-text-muted);">Loading contributors…</span>
+              <span class="text-sm" style="color:var(--theme-text-muted);"><%= t('loadingContributors') %></span>
             </div>
           </div>
         </section>
@@ -282,7 +282,7 @@
     const el = document.getElementById('contrib-cache-label');
     if (!el) return;
     const mins = Math.round((Date.now() - ts) / 60000);
-    el.textContent = mins < 2 ? 'Just updated' : 'Updated ' + mins + 'm ago';
+    el.textContent = mins < 2 ? '<%= req.translations.justUpdated || "Just updated" %>' : '<%= req.translations.updatedAgo || "Updated" %> ' + mins + 'm <%= req.translations.ago || "ago" %>';
   }
 
   function renderContributors(list) {
@@ -292,7 +292,7 @@
       return !LEADS.includes(c.login) && c.type !== 'Bot';
     });
     if (!others.length) {
-      grid.innerHTML = '<p class="col-span-full text-sm" style="color:var(--theme-text-muted);">No other contributors found.</p>';
+      grid.innerHTML = '<p class="col-span-full text-sm" style="color:var(--theme-text-muted);"><%= req.translations.noOtherContributors || "No other contributors found." %></p>';
       return;
     }
     grid.innerHTML = others.map(function (c) {
@@ -303,7 +303,7 @@
         ' class="al-card flex items-center gap-3 px-3 py-3 hover:border-[var(--theme-border-accent)] transition-colors min-w-0">' +
         '<img loading="lazy" src="' + safeAvatar + '&s=48" alt="' + safeLogin + '" class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-white/10 object-cover shrink-0" onerror="this.src=\'' + CREDITS_CONFIG.avatarFallback + '\'">' +
         '<div class="min-w-0 flex-1"><p class="text-xs font-medium truncate" style="color:var(--theme-text-strong);">' + safeLogin + '</p>' +
-        '<p class="text-[10px]" style="color:var(--theme-text-muted);">' + c.contributions + ' commit' + (c.contributions !== 1 ? 's' : '') + '</p></div></a>';
+        '<p class="text-[10px]" style="color:var(--theme-text-muted);">' + c.contributions + ' <%= req.translations.commit || "commit" %>' + (c.contributions !== 1 ? 's' : '') + '</p></div></a>';
     }).join('');
   }
 
@@ -332,7 +332,7 @@
       })
       .catch(function () {
         const grid = document.getElementById('contributors-grid');
-        if (grid) grid.innerHTML = '<p class="col-span-full text-sm" style="color:var(--theme-text-muted);">Could not load contributors. GitHub may be rate limiting — try again later.</p>';
+        if (grid) grid.innerHTML = '<p class="col-span-full text-sm" style="color:var(--theme-text-muted);"><%= req.translations.failedToLoadContributors || "Could not load contributors. GitHub may be rate limiting — try again later." %></p>';
       });
   }
 })();

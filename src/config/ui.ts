@@ -2,15 +2,15 @@
  * UI, admin defaults, and paths.
  */
 
-export const DEFAULT_LOGO_PATH = "../assets/logo.png";
-export const DEFAULT_FAVICON_PATH = "../assets/favicon.ico";
-export const DEFAULT_THEME = "default";
-export const DEFAULT_LANGUAGE = "en";
+export const DEFAULT_LOGO_PATH = '../assets/logo.png';
+export const DEFAULT_FAVICON_PATH = '../assets/favicon.ico';
+export const DEFAULT_THEME = 'default';
+export const DEFAULT_LANGUAGE = 'en';
 export const DEFAULT_UPLOAD_LIMIT_MB = 100;
 export const DEFAULT_RATE_LIMIT_RPM = 500;
-export const DOCKER_INSTALL_PATH = "/var/lib/docker";
-export const LOG_COMBINED_FILE = "combined.log";
-export const LOG_ERROR_FILE = "error.log";
+export const DOCKER_INSTALL_PATH = '/var/lib/docker';
+export const LOG_COMBINED_FILE = 'combined.log';
+export const LOG_ERROR_FILE = 'error.log';
 export const PLAYER_STATS_MAX_DATA_POINTS = 288;
 export const SMTP_DEFAULT_PORT = 587;
 export const EMAIL_COOLDOWN_DEFAULT = 30;

@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from 'express';
 import prisma from '../db';
 import logger from './logger';
 import { isProductionPosture } from '../utils/errors';
+import { logT } from '../services/i18n';
 
 interface ErrorPageInfo {
   title: string;
@@ -157,7 +158,7 @@ export async function renderErrorPage(
     const data = await getErrorRenderData(req, normalizedStatus, detail);
     return res.status(normalizedStatus).render(getErrorView(req), data);
   } catch (renderError) {
-    logger.error('Failed to render error page:', renderError);
+    logger.error(logT('log.errorPageRenderFailed'), renderError);
     return res
       .status(normalizedStatus)
       .send(`${normalizedStatus} ${info.title}`);
@@ -179,7 +180,7 @@ export function errorPageHandler(
   }
 
   const statusCode = normalizeStatus(err.status || err.statusCode);
-  logger.error('Unhandled error:', err);
+  logger.error(logT('log.unhandledError'), err);
   // Only an explicit development/debug env exposes internal detail. An unset
   // NODE_ENV is treated as production-safe so a missing .env cannot leak.
   const detail = isProductionPosture() ? undefined : err.message;

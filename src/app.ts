@@ -204,7 +204,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
             objectSrc: ["'none'"],
             baseUri: ["'self'"],
             formAction: ["'self'"],
-            upgradeInsecureRequests: [],
+            ...(isHttps ? { upgradeInsecureRequests: [] } : {}),
           },
         }
       : false,
@@ -223,7 +223,7 @@ app.use((req, res, next) => {
       req,
       res,
       403,
-      "Your IP address is blocked from this panel.",
+      "You're blocked so shoo you are not welcome here...",
     );
     return;
   }

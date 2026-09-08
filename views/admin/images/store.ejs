@@ -37,7 +37,7 @@
 function imageStore() {
   var _rootStyle = getComputedStyle(document.documentElement);
   var CAT_CLS = { game: "cat-game", application: "cat-application", generic: "cat-generic" };
-  var CAT_LABEL = { game: "Game", application: "App", generic: "Generic" };
+  var CAT_LABEL = { game: req.translations.categoryGame || "Game", application: req.translations.categoryApp || "App", generic: req.translations.categoryGeneric || "Generic" };
   var CAT_COLOR = {
     game: _rootStyle.getPropertyValue("--theme-accent-purple").trim() || "#7c3aed",
     application: _rootStyle.getPropertyValue("--theme-accent-blue").trim() || "#0284c7",
@@ -117,14 +117,14 @@ function imageStore() {
       allImages=data.images||[];
       hide("loadingEl");
       var age=data.builtAt?Math.round((Date.now()-data.builtAt)/60000):0;
-      if(st) st.textContent=allImages.length+" images \u00B7 "+(age<1?"fresh":age+"m old");
+      if(st) st.textContent=allImages.length+" " + (req.translations.imagesCount || "images") + " \u00B7 "+(age<1?(req.translations.fresh || "fresh"):age+(req.translations.minutesOld || "m old"));
       updateCount(); render();
     } catch(e) { console.error("Failed to load catalogue:",e); hide("loadingEl"); show("errorEl"); }
   }
 
   async function doRefresh() {
     document.getElementById("refreshBtnLoad").disabled=true;
-    var st=document.getElementById("statusText"); if(st)st.textContent="Refreshing\u2026";
+    var st=document.getElementById("statusText"); if(st)st.textContent=(req.translations.refreshing || "Refreshing")+"\u2026";
     var before=0;
     try { before=(await(await fetch("/api/v2/admin/images/store/catalogue")).json()).builtAt||0; } catch(e) {}
     try {
@@ -133,7 +133,7 @@ function imageStore() {
     } catch(e) {
       document.getElementById("refreshBtnLoad").disabled=false;
       if(st)st.textContent="";
-      if(typeof showToast==="function") showToast("Could not refresh the catalogue","error");
+      if(typeof showToast==="function") showToast(req.translations.couldNotRefresh || "Could not refresh the catalogue","error");
       return;
     }
     var REFRESH_POLL_INTERVAL_MS = 1000;
@@ -156,7 +156,7 @@ function imageStore() {
     var groups=groupData();
     hide("listEl"); hide("emptyEl"); updateCount();
     if(!groups.length) {
-      document.getElementById("emptyTxt").textContent=allImages.length?"No apps match your search.":"The image catalogue is empty.";
+      document.getElementById("emptyTxt").textContent=allImages.length?(req.translations.noAppsMatchSearch || "No apps match your search."):(req.translations.imageCatalogueEmpty || "The image catalogue is empty.");
       show("emptyEl"); return;
     }
     var body=document.getElementById("listBody"); body.innerHTML="";
@@ -167,7 +167,7 @@ function imageStore() {
   function makeGroupRow(g) {
     var tr=document.createElement("tr");
     tr.className="al-table-tr transition-colors cursor-pointer group-hdr-tr";
-    tr.innerHTML='<td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3"><div class="flex items-center gap-2.5">'+catDot(g.domCat)+'<span class="text-sm font-medium truncate" style="color:var(--theme-text-strong)">'+esc(cap(g.group))+'</span></div></td><td class="al-table-td whitespace-nowrap px-3 py-4">'+catBadge(g.domCat)+'</td><td class="al-table-td whitespace-nowrap px-3 py-4 text-sm" style="color:var(--theme-text-muted)">'+g.imgs.length+" image"+(g.imgs.length!==1?"s":"")+'</td><td class="al-table-td px-3 py-4 text-sm" style="color:var(--theme-text-muted)">'+(g.readme?esc(g.readme.replace(/[#*`\[\]]/g,"")):esc(g.desc||""))+"</td>";
+    tr.innerHTML='<td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3"><div class="flex items-center gap-2.5">'+catDot(g.domCat)+'<span class="text-sm font-medium truncate" style="color:var(--theme-text-strong)">'+esc(cap(g.group))+'</span></div></td><td class="al-table-td whitespace-nowrap px-3 py-4">'+catBadge(g.domCat)+'</td><td class="al-table-td whitespace-nowrap px-3 py-4 text-sm" style="color:var(--theme-text-muted)">'+g.imgs.length+" " + (req.translations.image || "image") + (g.imgs.length!==1?(req.translations.imagesPlural || "s"):"")+'</td><td class="al-table-td px-3 py-4 text-sm" style="color:var(--theme-text-muted)">'+(g.readme?esc(g.readme.replace(/[#*`\[\]]/g,"")):esc(g.desc||""))+"</td>";
     tr.addEventListener("click",function(){openGroup(g.group,g.imgs);});
     return tr;
   }
@@ -181,12 +181,12 @@ function imageStore() {
   function openGroup(group,imgs) {
     var s=imgs.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
     stageBody("groupTpl",cap(group),"max-w-3xl");
-    document.getElementById("grpCount").textContent=s.length+" image"+(s.length!==1?"s":"");
+    document.getElementById("grpCount").textContent=s.length+" " + (req.translations.image || "image") + (s.length!==1?(req.translations.imagesPlural || "s"):"");
     var list=document.getElementById("grpSubList"); list.innerHTML="";
     s.forEach(function(img,i){
       var row=document.createElement("div"); row.className="grp-img-row";
       var subLabel=img.subGroup&&img.subGroup!==img.group?img.subGroup.replace(img.group+"/",""):"";
-      row.innerHTML='<div class="flex items-center gap-2 min-w-0">'+catDot(img.category)+'<div class="min-w-0"><p class="text-xs font-medium truncate" style="color:var(--theme-text-strong)">'+esc(img.name)+"</p>"+(subLabel?'<p class="text-[11px] font-mono truncate" style="color:var(--theme-text-muted)">'+esc(subLabel)+"</p>":"")+"</div></div>"+'<button type="button" class="al-btn-secondary px-2 py-1 text-xs font-medium shrink-0">Install</button>';
+      row.innerHTML='<div class="flex items-center gap-2 min-w-0">'+catDot(img.category)+'<div class="min-w-0"><p class="text-xs font-medium truncate" style="color:var(--theme-text-strong)">'+esc(img.name)+"</p>"+(subLabel?'<p class="text-[11px] font-mono truncate" style="color:var(--theme-text-muted)">'+esc(subLabel)+"</p>":"")+"</div></div>"+'<button type="button" class="al-btn-secondary px-2 py-1 text-xs font-medium shrink-0">'+(req.translations.install || "Install")+'</button>';
       row.style.animationDelay=Math.min(i*20,300)+"ms";
       row.addEventListener("click",function(){openEgg(img);});
       row.querySelector("button").addEventListener("click",function(e){e.stopPropagation();openEgg(img);});
@@ -205,8 +205,8 @@ function imageStore() {
   }
 
   async function renderMd(md,el) {
-    el.innerHTML='<p class="text-xs" style="color:var(--theme-text-muted);font-style:italic">Rendering\u2026</p>';
-    try { var m=await getMd(); el.innerHTML='<div class="md-body">'+(md?m.parse(md):'<p style="font-style:italic;color:#a3a3a3;font-size:12px;">No readme available.</p>')+"</div>"; }
+    el.innerHTML='<p class="text-xs" style="color:var(--theme-text-muted);font-style:italic">' + (req.translations.rendering || "Rendering") + '\u2026</p>';
+    try { var m=await getMd(); el.innerHTML='<div class="md-body">'+(md?m.parse(md):'<p style="font-style:italic;color:#a3a3a3;font-size:12px;">'+ (req.translations.noReadmeAvailable || "No readme available.") + '</p>')+"</div>"; }
     catch(e) { el.innerHTML='<div class="md-body">'+esc(md||"")+"</div>"; }
   }
 
@@ -217,11 +217,11 @@ function imageStore() {
     catEl.className="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 ring-1 ring-inset "+(CAT_CLS[img.category]||"");
     catEl.innerHTML=catDot(img.category,6)+(CAT_LABEL[img.category]||img.category);
     document.getElementById("eggDesc").textContent=img.description||"";
-    document.getElementById("eggAuthor").textContent=img.author?"by "+img.author:"";
+    document.getElementById("eggAuthor").textContent=img.author?(req.translations.by || "by ")+" "+img.author:"";
     renderMd(img.fullReadme||img.readme||"",document.getElementById("eggReadme"));
     hide("eggErr");
     var btn=document.getElementById("eggInstallBtn");
-    btn.innerHTML="Install"; btn.disabled=false; btn.style.background=""; btn.style.borderColor=""; btn.style.pointerEvents="";
+    btn.innerHTML=(req.translations.install || "Install"); btn.disabled=false; btn.style.background=""; btn.style.borderColor=""; btn.style.pointerEvents="";
   }
 
   function closeEgg() { window.modal.close(); pendingEgg=null; }
@@ -229,20 +229,20 @@ function imageStore() {
   async function confirmInstall() {
     if(!pendingEgg) return;
     var btn=document.getElementById("eggInstallBtn");
-    btn.disabled=true; btn.textContent="Installing\u2026"; hide("eggErr");
+    btn.disabled=true; btn.textContent=(req.translations.installing || "Installing")+"\u2026"; hide("eggErr");
     try {
       var res=await fetch("/api/v2/admin/images/store/install",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(pendingEgg.egg)});
       var body=await res.json();
-      if(!res.ok){document.getElementById("eggErrTxt").textContent=body.error||"Installation failed.";show("eggErr");btn.disabled=false;btn.innerHTML="Install";return;}
+      if(!res.ok){document.getElementById("eggErrTxt").textContent=body.error||(req.translations.installationFailed || "Installation failed.");show("eggErr");btn.disabled=false;btn.innerHTML=(req.translations.install || "Install");return;}
       var installedName=pendingEgg.name;
-      btn.innerHTML='<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Installed';
+      btn.innerHTML='<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> ' + (req.translations.installed || "Installed");
       btn.style.background="var(--theme-success, #16a34a)"; btn.style.borderColor="var(--theme-success, #16a34a)"; btn.style.pointerEvents="none";
-      if(typeof showToast==="function") showToast('"'+installedName+'" installed successfully.',"success");
+      if(typeof showToast==="function") showToast('"'+installedName+'" ' + (req.translations.installedSuccessfully || "installed successfully."), "success");
       setTimeout(function(){closeEgg();},1500);
     } catch(err) {
       console.error("Image install error:",err);
-      document.getElementById("eggErrTxt").textContent="Installation failed. Try again.";
-      show("eggErr"); btn.disabled=false; btn.innerHTML="Install";
+      document.getElementById("eggErrTxt").textContent=(req.translations.installationFailedTryAgain || "Installation failed. Try again.");
+      show("eggErr"); btn.disabled=false; btn.innerHTML=(req.translations.install || "Install");
     }
   }
 

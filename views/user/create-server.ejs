@@ -81,14 +81,14 @@ function createServerPage() {
 
       function updateRequiredPorts() {
         assignPortsLabel.textContent = portsState.length
-          ? 'Ports (' + portsState.length + ')'
-          : 'Assign ports';
+          ? '<%= req.translations.portsCount || "Ports" %> (' + portsState.length + ')'
+          : '<%= req.translations.assignPorts || "Assign ports" %>';
       }
 
       function renderPortRows() {
         requiredPortsList.innerHTML = '';
         if (!portsState.length) {
-          requiredPortsList.innerHTML = '<p class="text-xs text-neutral-500 dark:text-neutral-400">No ports yet. Add one below, or leave empty for a single auto-assigned port.</p>';
+          requiredPortsList.innerHTML = '<p class="text-xs text-neutral-500 dark:text-neutral-400"><%= req.translations.noPortsYet || "No ports yet. Add one below, or leave empty for a single auto-assigned port." %></p>';
           return;
         }
         portsState.forEach(function (port, index) {
@@ -96,7 +96,7 @@ function createServerPage() {
           row.className = 'grid grid-cols-[1fr_auto_auto] gap-2 items-center';
           const nameInput = document.createElement('input');
           nameInput.type = 'text';
-          nameInput.placeholder = 'Name';
+          nameInput.placeholder = '<%= req.translations.name || "Name" %>';
           nameInput.maxLength = 32;
           nameInput.value = port.name || '';
           nameInput.className = 'al-input';
@@ -109,15 +109,15 @@ function createServerPage() {
           internalInput.max = '65535';
           internalInput.value = port.internalPort;
           internalInput.className = 'al-input font-mono';
-          internalInput.title = 'Internal (container) port';
+          internalInput.title = '<%= req.translations.internalPort || "Internal (container) port" %>';
           internalInput.addEventListener('input', function () {
             portsState[index].internalPort = parseInt(internalInput.value, 10);
           });
           const removeBtn = document.createElement('button');
           removeBtn.type = 'button';
           removeBtn.className = 'px-2 py-2 rounded-lg text-neutral-500 hover:text-red-500 hover:bg-red-500/10 transition';
-          removeBtn.title = 'Remove port';
-          removeBtn.setAttribute('aria-label', 'Remove port');
+          removeBtn.title = '<%= req.translations.removePort || "Remove port" %>';
+          removeBtn.setAttribute('aria-label', '<%= req.translations.removePort || "Remove port" %>');
           removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 4.5v9A6 6 0 0 1 6 21a6 6 0 0 1-3-5.2V6.5A6 6 0 0 0 12 3"/></svg>'.replace(/<svg/g, '<svg ');
           removeBtn.addEventListener('click', function () {
             portsState.splice(index, 1);
@@ -131,7 +131,7 @@ function createServerPage() {
       }
 
       document.getElementById('addPortBtn').addEventListener('click', function () {
-        portsState.push({ name: 'Port ' + (portsState.length + 1), internalPort: <%= defaultServerPort %> });
+        portsState.push({ name: '<%= req.translations.port || "Port" %> ' + (portsState.length + 1), internalPort: <%= defaultServerPort %> });
         renderPortRows();
       });
 
@@ -141,7 +141,7 @@ function createServerPage() {
         dockerSelect.innerHTML = '';
         const ph = document.createElement('option');
         ph.value = '';
-        ph.textContent = 'Select variant';
+        ph.textContent = '<%= req.translations.selectVariant || "Select variant" %>';
         ph.disabled = true;
         ph.selected = true;
         dockerSelect.appendChild(ph);
@@ -165,7 +165,7 @@ function createServerPage() {
 
       assignPortsBtn.addEventListener('click', function () {
         renderPortRows();
-        window.modal.show({ title: 'Assign ports', bodyNode: document.getElementById('portsContent'), panelClass: 'max-w-lg' });
+        window.modal.show({ title: '<%= req.translations.assignPorts || "Assign ports" %>', bodyNode: document.getElementById('portsContent'), panelClass: 'max-w-lg' });
       });
 
       portsOkBtn.addEventListener('click', function () {
@@ -246,7 +246,7 @@ function createServerPage() {
 
       function showConfirm(title, body) {
         return new Promise(function (resolve) {
-          window.modal.confirm({ title: title, body: body, confirmLabel: 'Create', onConfirm: resolve });
+          window.modal.confirm({ title: title, body: body, confirmLabel: '<%= req.translations.create || "Create" %>', onConfirm: resolve });
         });
       }
 
@@ -254,7 +254,7 @@ function createServerPage() {
         var btn = this;
         var origText = btn.textContent;
         btn.disabled = true;
-        btn.textContent = 'Creating...';
+        btn.textContent = '<%= req.translations.creating || "Creating..." %>';
         var name = serverNameInput.value.trim();
         var description = document.getElementById('serverDescription').value.trim();
         var nodeId = nodeIdSelect.value;
@@ -266,16 +266,16 @@ function createServerPage() {
         var swap = parseInt(swapInput.value);
         document.querySelectorAll('.form-input').forEach(function (el) { el.classList.remove('invalid'); });
         var validationErrors = [];
-        if (!name) { validationErrors.push('Server name is required.'); serverNameInput.classList.add('invalid'); }
-        else if (name.length < 3) { validationErrors.push('Server name must be at least 3 characters.'); serverNameInput.classList.add('invalid'); }
-        if (!nodeId) validationErrors.push('Select a node.');
-        if (!imageId) validationErrors.push('Select an image.');
-        if (!dockerImage) validationErrors.push('Select a docker variant.');
-        if (mem < MIN_MEMORY) validationErrors.push('Memory must be at least ' + MIN_MEMORY + ' MB.');
-        if (storage < MIN_STORAGE) validationErrors.push('Storage must be at least ' + MIN_STORAGE + ' MB.');
-        if (cpu < MIN_CPU) validationErrors.push('CPU must be at least ' + MIN_CPU + '%.');
+        if (!name) { validationErrors.push('<%= req.translations.serverNameRequired || "Server name is required." %>'); serverNameInput.classList.add('invalid'); }
+        else if (name.length < 3) { validationErrors.push('<%= req.translations.serverNameMinLength || "Server name must be at least 3 characters." %>'); serverNameInput.classList.add('invalid'); }
+        if (!nodeId) validationErrors.push('<%= req.translations.selectNodeError || "Select a node." %>');
+        if (!imageId) validationErrors.push('<%= req.translations.selectImageError || "Select an image." %>');
+        if (!dockerImage) validationErrors.push('<%= req.translations.selectDockerVariant || "Select a docker variant." %>');
+        if (mem < MIN_MEMORY) validationErrors.push('<%= req.translations.memoryMustBeAtLeast || "Memory must be at least" %> ' + MIN_MEMORY + ' MB.');
+        if (storage < MIN_STORAGE) validationErrors.push('<%= req.translations.storageMustBeAtLeast || "Storage must be at least" %> ' + MIN_STORAGE + ' MB.');
+        if (cpu < MIN_CPU) validationErrors.push('<%= req.translations.cpuMustBeAtLeast || "CPU must be at least" %> ' + MIN_CPU + '%.');
         if (portsState.some(function (entry) { return !entry.name || !Number.isInteger(entry.internalPort) || entry.internalPort < 1 || entry.internalPort > 65535; })) {
-          validationErrors.push('Every port needs a name and a valid internal port (1-65535).');
+          validationErrors.push('<%= req.translations.portValidation || "Every port needs a name and a valid internal port (1-65535)." %>');
         }
         if (validationErrors.length > 0) {
           btn.disabled = false;
@@ -283,7 +283,7 @@ function createServerPage() {
           self.error = validationErrors.join('\n');
           return;
         }
-        var ok = await showConfirm('Create server?', '"' + name + '" will be created and queued for installation. This may take a moment.');
+        var ok = await showConfirm('<%= req.translations.createServerConfirm || "Create server?" %>', '"' + name + '" <%= req.translations.willBeCreated || "will be created and queued for installation. This may take a moment." %>');
         if (!ok) { btn.disabled = false; btn.textContent = origText; return; }
         try {
           var r = await fetch('/api/v2/servers', {
@@ -296,7 +296,7 @@ function createServerPage() {
             if (toastContainer) {
               var toast = document.createElement('div');
               toast.className = 'al-toast al-toast-success';
-              toast.innerHTML = '<span class="al-toast-icon">' + alIcon('circle-check', 'w-4 h-4', { strokeWidth: 2 }) + '</span><span class="al-toast-text">Server created successfully!</span>';
+              toast.innerHTML = '<span class="al-toast-icon">' + alIcon('circle-check', 'w-4 h-4', { strokeWidth: 2 }) + '</span><span class="al-toast-text"><%= req.translations.serverCreatedSuccess || "Server created successfully!" %></span>';
               toastContainer.appendChild(toast);
               setTimeout(function () { toast.classList.add('show'); }, TOAST_SHOW_DELAY);
               setTimeout(function () { toast.classList.remove('show'); setTimeout(function () { toast.remove(); }, TOAST_REMOVE_DELAY); }, TOAST_HIDE_DELAY);
@@ -305,13 +305,13 @@ function createServerPage() {
           } else {
             btn.disabled = false;
             btn.textContent = origText;
-            self.error = d.error || 'Something went wrong.';
+            self.error = d.error || '<%= req.translations.errorOccurred || "Something went wrong." %>';
           }
         } catch (err) {
           console.error('Failed to create server:', err);
           btn.disabled = false;
           btn.textContent = origText;
-          self.error = 'Network error. Try again.';
+          self.error = '<%= req.translations.networkErrorRetry || "Network error. Try again." %>';
         }
       });
     }
@@ -394,7 +394,7 @@ function createServerPage() {
                 <div>
                   <label class="al-label" for="dockerImage"><%= t('dockerVariant') %></label>
                   <select id="dockerImage" class="hidden">
-                    <option value="" disabled selected>Select an image first</option>
+                    <option value="" disabled selected><%= req.translations.selectImageFirst || "Select an image first" %></option>
                   </select>
                   <div class="custom-select" data-for="dockerImage"></div>
                 </div>

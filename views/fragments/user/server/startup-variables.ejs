@@ -42,7 +42,7 @@
                 <label class="relative inline-flex items-center cursor-pointer" for="toggle_<%= variable.env %>">
                   <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %> @change="dirty = true">
                   <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                  <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-muted)" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'Enabled' : 'Disabled' %></span>
+                  <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-muted)" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
                 </label>
                 <script nonce="<%- nonce %>">
                   document.getElementById('toggle_<%= variable.env %>').addEventListener('change', function() {

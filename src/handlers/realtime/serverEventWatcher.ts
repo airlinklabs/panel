@@ -3,6 +3,7 @@ import logger from '../logger';
 import { daemonBaseUrl } from '../utils/core/daemonRequest';
 import { emitRealtime, serverEvent } from './events';
 import type { WatchHandle } from '../../types/realtime';
+import { logT } from '../../services/i18n';
 
 // ── Per-server daemon event watcher ──────────────────────────────────────────
 // The daemon streams container lifecycle events on `/containerevents/:id`
@@ -76,7 +77,7 @@ function openSocket(state: WatcherState, serverId: string): void {
 
       const authTimer = setTimeout(() => {
         if (socket.readyState === WebSocket.OPEN && !state.authed) {
-          logger.debug(`event watcher auth timeout for ${serverId}`);
+          logger.debug(logT('log.eventWatcherAuthTimeout', { serverId }));
           socket.close(1008, 'auth timeout');
         }
       }, 10_000);
@@ -116,7 +117,7 @@ function openSocket(state: WatcherState, serverId: string): void {
             );
           }
         } else if (msg.event === 'error') {
-          logger.warn(`event watcher error for ${serverId}:`, {
+          logger.warn(logT('log.eventWatcherError', { serverId }), {
             data: msg.data,
           });
         }
@@ -142,7 +143,10 @@ function openSocket(state: WatcherState, serverId: string): void {
     })
     .catch((error) => {
       logger.debug(
-        `event watcher failed to resolve daemon URL for ${serverId}: ${String(error)}`,
+        logT('log.eventWatcherUrlResolveFailed', {
+          serverId,
+          error: String(error),
+        }),
       );
       state.connecting = false;
       scheduleReconnect(state, serverId);
@@ -156,7 +160,7 @@ function scheduleReconnect(state: WatcherState, serverId: string): void {
   }
 
   if (state.reconnectAttempts >= MAX_RETRY_ATTEMPTS) {
-    logger.warn(`Event watcher gave up reconnecting to daemon for ${serverId}`);
+    logger.warn(logT('log.eventWatcherReconnectGaveUp', { serverId }));
     return;
   }
 
@@ -192,7 +196,7 @@ function cleanup(serverId: string): void {
   }
   if (state.socket) {
     try {
-      state.socket.close(1000, "no watchers");
+      state.socket.close(1000, 'no watchers');
     } catch {
       /* already closed */
     }

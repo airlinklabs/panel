@@ -1,1 +1,1 @@
-export * from "./apiValidator";
+export * from './apiValidator';

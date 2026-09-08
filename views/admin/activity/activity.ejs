@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Activity Log' }) %>
+<%- include('../../components/header', { title: t('activityLogTitle') }) %>
 
 <main class="min-h-screen m-auto">
   <div class="flex min-h-screen">
@@ -8,71 +8,71 @@
     <div class="px-8 lg:px-12 pt-6 pb-12 max-w-6xl">
       <div class="flex items-center justify-between mb-7">
         <div>
-          <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)">Activity Log</h1>
-          <p class="text-sm mt-0.5" style="color:var(--theme-text-muted)"><%= total %> action(s) recorded.</p>
+          <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('activityLogTitle') %></h1>
+          <p class="text-sm mt-0.5" style="color:var(--theme-text-muted)"><%= total %> <%= t('activityActionsRecorded') %></p>
         </div>
       </div>
 
       <form method="GET" action="/admin/activity" class="al-card mb-6">
         <div class="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label class="al-label" for="category">Category</label>
+            <label class="al-label" for="category"><%= t('activityCategory') %></label>
             <select id="category" name="category" class="al-input">
-              <option value="">All categories</option>
-              <option value="server" <%= filters.category === 'server' ? 'selected' : '' %>>Servers</option>
-              <option value="file" <%= filters.category === 'file' ? 'selected' : '' %>>Files</option>
-              <option value="backup" <%= filters.category === 'backup' ? 'selected' : '' %>>Backups</option>
-              <option value="database" <%= filters.category === 'database' ? 'selected' : '' %>>Databases</option>
-              <option value="user" <%= filters.category === 'user' ? 'selected' : '' %>>Users</option>
-              <option value="node" <%= filters.category === 'node' ? 'selected' : '' %>>Nodes</option>
-              <option value="image" <%= filters.category === 'image' ? 'selected' : '' %>>Images</option>
-              <option value="apikey" <%= filters.category === 'apikey' ? 'selected' : '' %>>API Keys</option>
-              <option value="schedule" <%= filters.category === 'schedule' ? 'selected' : '' %>>Schedules</option>
-              <option value="subuser" <%= filters.category === 'subuser' ? 'selected' : '' %>>Subusers</option>
+              <option value=""><%= t('activityAllCategories') %></option>
+              <option value="server" <%= filters.category === 'server' ? 'selected' : '' %>><%= t('activityCategoryServers') %></option>
+              <option value="file" <%= filters.category === 'file' ? 'selected' : '' %>><%= t('activityCategoryFiles') %></option>
+              <option value="backup" <%= filters.category === 'backup' ? 'selected' : '' %>><%= t('activityCategoryBackups') %></option>
+              <option value="database" <%= filters.category === 'database' ? 'selected' : '' %>><%= t('activityCategoryDatabases') %></option>
+              <option value="user" <%= filters.category === 'user' ? 'selected' : '' %>><%= t('activityCategoryUsers') %></option>
+              <option value="node" <%= filters.category === 'node' ? 'selected' : '' %>><%= t('activityCategoryNodes') %></option>
+              <option value="image" <%= filters.category === 'image' ? 'selected' : '' %>><%= t('activityCategoryImages') %></option>
+              <option value="apikey" <%= filters.category === 'apikey' ? 'selected' : '' %>><%= t('activityCategoryApiKeys') %></option>
+              <option value="schedule" <%= filters.category === 'schedule' ? 'selected' : '' %>><%= t('activityCategorySchedules') %></option>
+              <option value="subuser" <%= filters.category === 'subuser' ? 'selected' : '' %>><%= t('activityCategorySubusers') %></option>
             </select>
           </div>
           <div>
-            <label class="al-label" for="event">Event</label>
+            <label class="al-label" for="event"><%= t('activityEventLabel') %></label>
             <select id="event" name="event" class="al-input">
-              <option value="">All events</option>
+              <option value=""><%= t('activityAllEvents') %></option>
               <% events.forEach(e => { %>
                 <option value="<%= e.event %>" <%= filters.event === e.event ? 'selected' : '' %>><%= e.event %> (<%= e.count %>)</option>
               <% }); %>
             </select>
           </div>
           <div>
-            <label class="al-label" for="server">Server</label>
+            <label class="al-label" for="server"><%= t('activityServerLabel') %></label>
             <select id="server" name="server" class="al-input">
-              <option value="">All servers</option>
+              <option value=""><%= t('activityAllServers') %></option>
               <% servers.forEach(s => { %>
                 <option value="<%= s.UUID %>" <%= filters.server === s.UUID ? 'selected' : '' %>><%= s.name %></option>
               <% }); %>
             </select>
           </div>
           <div>
-            <label class="al-label" for="actor">Actor</label>
-            <input id="actor" name="actor" type="text" value="<%= filters.actor %>" class="al-input" placeholder="username / email">
+            <label class="al-label" for="actor"><%= t('activityActorLabel') %></label>
+            <input id="actor" name="actor" type="text" value="<%= filters.actor %>" class="al-input" placeholder="<%= t('activityActorPlaceholder') %>">
           </div>
           <div>
-            <label class="al-label" for="from">From</label>
+            <label class="al-label" for="from"><%= t('activityFromLabel') %></label>
             <input id="from" name="from" type="date" value="<%= filters.from %>" class="al-input">
           </div>
           <div>
-            <label class="al-label" for="to">To</label>
+            <label class="al-label" for="to"><%= t('activityToLabel') %></label>
             <input id="to" name="to" type="date" value="<%= filters.to %>" class="al-input">
           </div>
           <div class="flex items-end gap-2">
-            <button type="submit" class="al-btn-primary flex-1">Filter</button>
-            <a href="/admin/activity" class="al-btn-secondary">Reset</a>
+            <button type="submit" class="al-btn-primary flex-1"><%= t('activityFilterBtn') %></button>
+            <a href="/admin/activity" class="al-btn-secondary"><%= t('activityResetBtn') %></a>
           </div>
         </div>
       </form>
 
       <div class="al-card">
-        <h2 class="al-card-header">Recent Activity</h2>
+        <h2 class="al-card-header"><%= t('activityRecentActivity') %></h2>
         <div class="p-5">
           <% if (logs.length === 0) { %>
-            <p class="text-sm" style="color:var(--theme-text-muted)">No activity matching the current filters.</p>
+            <p class="text-sm" style="color:var(--theme-text-muted)"><%= t('activityNoMatchingFilters') %></p>
           <% } else { %>
             <% const groups = []; %>
             <% logs.forEach(log => {
@@ -112,7 +112,7 @@
                             </p>
                           </div>
                           <% if (log.metadata && Object.keys(log.metadata).length > 0) { %>
-                            <button type="button" class="al-btn-secondary text-xs shrink-0" data-activity-toggle="<%= log.id %>" aria-expanded="false">Details</button>
+                            <button type="button" class="al-btn-secondary text-xs shrink-0" data-activity-toggle="<%= log.id %>" aria-expanded="false"><%= t('activityDetailsBtn') %></button>
                           <% } %>
                         </div>
                         <% if (log.metadata && Object.keys(log.metadata).length > 0) { %>
@@ -133,9 +133,9 @@
                  addQs('event', filters.event); addQs('server', filters.server); addQs('actor', filters.actor);
                  addQs('category', filters.category); addQs('from', filters.from); addQs('to', filters.to); %>
               <div class="flex items-center justify-between mt-5">
-                <a href="/admin/activity?page=<%= Math.max(page - 1, 1) %><%= qs.map(q => '&' + q).join('') %>" class="al-btn-secondary <%= page <= 1 ? 'pointer-events-none opacity-40' : '' %>">Previous</a>
-                <span class="text-sm" style="color:var(--theme-text-muted)">Page <%= page %> / <%= totalPages %></span>
-                <a href="/admin/activity?page=<%= Math.min(page + 1, totalPages) %><%= qs.map(q => '&' + q).join('') %>" class="al-btn-secondary <%= page >= totalPages ? 'pointer-events-none opacity-40' : '' %>">Next</a>
+                <a href="/admin/activity?page=<%= Math.max(page - 1, 1) %><%= qs.map(q => '&' + q).join('') %>" class="al-btn-secondary <%= page <= 1 ? 'pointer-events-none opacity-40' : '' %>"><%= t('prev') %></a>
+                <span class="text-sm" style="color:var(--theme-text-muted)"><%= t('pageIndicator', { current: page, total: totalPages }) %></span>
+                <a href="/admin/activity?page=<%= Math.min(page + 1, totalPages) %><%= qs.map(q => '&' + q).join('') %>" class="al-btn-secondary <%= page >= totalPages ? 'pointer-events-none opacity-40' : '' %>"><%= t('next') %></a>
               </div>
             <% } %>
           <% } %>
@@ -154,7 +154,7 @@
       if (!meta) return;
       const open = meta.classList.toggle('hidden');
       btn.setAttribute('aria-expanded', String(!open));
-      btn.textContent = open ? 'Details' : 'Hide';
+      btn.textContent = open ? '<%= t('activityDetailsBtn') %>' : '<%= t('activityHideBtn') %>';
     });
   });
 })();

@@ -5,17 +5,17 @@
       <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
         <%- icon('database', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
       </div>
-      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong);">No database hosts yet</h3>
-      <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);">Add a MySQL host to start provisioning databases.</p>
+      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong);"><%= t('noDatabaseHostsYet') %></h3>
+      <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);"><%= t('noDatabaseHostsYetDesc') %></p>
       <div class="mt-5">
         <button type="button" class="al-btn-primary"
           hx-post="/api/v2/admin/databases/auto-host"
           hx-target="#admin-databases-list"
           hx-swap="outerHTML"
           hx-indicator="#auto-host-status">
-          <%- icon('zap', { size: 4, strokeWidth: 1.5 }) %> Auto-generate host
+          <%- icon('zap', { size: 4, strokeWidth: 1.5 }) %> <%= t('autoGenerateHost') %>
         </button>
-        <p id="auto-host-status" class="htmx-indicator text-xs mt-2" style="color:var(--theme-text-muted)">Working…</p>
+        <p id="auto-host-status" class="htmx-indicator text-xs mt-2" style="color:var(--theme-text-muted)"><%= t('adminDbWorking') %></p>
       </div>
     </div>
   <% } else { %>
@@ -29,11 +29,11 @@
     </colgroup>
     <thead class="al-table-head">
       <tr>
-        <th scope="col" class="al-table-th sm:pl-6">Name</th>
-        <th scope="col" class="al-table-th sm:pl-6">Host</th>
-        <th scope="col" class="al-table-th sm:pl-6">Databases</th>
-        <th scope="col" class="al-table-th sm:pl-6">Created</th>
-        <th scope="col" class="al-table-th sm:pl-6">Actions</th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('name') %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('host') %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('databases') %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('created') %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('actions') %></th>
       </tr>
     </thead>
     <tbody>
@@ -52,7 +52,7 @@
             </div>
             <div class="mt-1 ml-2 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" style="color:var(--theme-text-muted)">
               <%- icon('network', { size: 12, class: 'mr-1' }) %>
-              <%= host.node ? host.node.name : 'Any node' %>
+              <%= host.node ? host.node.name : t('anyNodeLabel') %>
             </div>
           </td>
           <td class="al-table-td"><%= host._count.databases %></td>
@@ -65,17 +65,17 @@
                 hx-indicator="find .htmx-indicator"
                 type="button"
                 class="al-btn-secondary text-xs">
-                <%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %> Test
+                <%- icon('play', { class: 'size-3', strokeWidth: 1.5 }) %> <%= t('test') %>
               </button>
               <button
                 hx-delete="/api/v2/admin/databases/<%= host.id %>"
                 hx-target="#admin-databases-list"
                 hx-swap="outerHTML"
-                hx-confirm="This will permanently remove the database host. This cannot be undone."
+                hx-confirm="<%= t('deleteDatabaseHostConfirm') %>"
                 type="button"
                 class="al-btn-ghost"
                 style="color:var(--theme-danger);"
-                aria-label="Delete host">
+                aria-label="<%= t('deleteHost') %>">
                 <%- icon('trash-2', { size: 16 }) %>
               </button>
             </div>

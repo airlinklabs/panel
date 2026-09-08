@@ -13,6 +13,7 @@
 
 import crypto from 'crypto';
 import logger from './handlers/logger';
+import { logT } from './services/i18n';
 
 export interface PanelConfig {
   /** NODE_ENV ('production' | 'development' | ...). */
@@ -77,10 +78,7 @@ export function resolveSessionSecret(
     );
   }
 
-  logger.warn(
-    '[config] SESSION_SECRET is missing or insecure. Generated an ephemeral secret ' +
-      'for this boot — sessions will NOT survive a restart. In production this is fatal.',
-  );
+  logger.warn(logT('log.configSessionSecretInsecure'));
   return crypto.randomBytes(32).toString('hex');
 }
 

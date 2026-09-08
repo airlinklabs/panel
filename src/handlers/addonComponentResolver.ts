@@ -1,28 +1,28 @@
-import path from "path";
-import fs from "fs";
+import path from 'path';
+import fs from 'fs';
 
-export type ViewportMode = "desktop" | "mobile";
+export type ViewportMode = 'desktop' | 'mobile';
 
 export type ComponentName =
-  | "header"
-  | "footer"
-  | "template"
-  | "modal"
-  | "toast"
-  | "serverHeader"
-  | "serverTemplate"
-  | "settingsTemplate"
-  | "tabComponent"
-  | "store"
-  | "sftp"
-  | "csrf"
-  | "installHeader"
-  | "imageViewer"
-  | "loadingState"
-  | "loadingPopup"
-  | "pageTitle"
-  | "serverFeatures"
-  | "uiButton";
+  | 'header'
+  | 'footer'
+  | 'template'
+  | 'modal'
+  | 'toast'
+  | 'serverHeader'
+  | 'serverTemplate'
+  | 'settingsTemplate'
+  | 'tabComponent'
+  | 'store'
+  | 'sftp'
+  | 'csrf'
+  | 'installHeader'
+  | 'imageViewer'
+  | 'loadingState'
+  | 'loadingPopup'
+  | 'pageTitle'
+  | 'serverFeatures'
+  | 'uiButton';
 
 export interface AddonComponents {
   header: string;
@@ -82,22 +82,22 @@ export class AddonComponentResolver {
 
   constructor(viewsPath: string) {
     this.viewsPath = viewsPath;
-    this.panelRoot = path.resolve(viewsPath, "..");
+    this.panelRoot = path.resolve(viewsPath, '..');
   }
 
   resolveViewport(
-    requested: ViewportMode | "auto",
+    requested: ViewportMode | 'auto',
     cookieViewport?: string,
   ): ViewportMode {
-    if (requested !== "auto") {
+    if (requested !== 'auto') {
       return requested;
     }
-    return cookieViewport === "mobile" ? "mobile" : "desktop";
+    return cookieViewport === 'mobile' ? 'mobile' : 'desktop';
   }
 
   getComponent(
     name: string,
-    viewport: ViewportMode = "desktop",
+    viewport: ViewportMode = 'desktop',
   ): string | null {
     if (!VALID_COMPONENT_NAMES.has(name)) {
       return null;
@@ -106,7 +106,7 @@ export class AddonComponentResolver {
     return resolver(this.panelRoot, viewport);
   }
 
-  getComponents(viewport: ViewportMode = "desktop"): Record<string, string> {
+  getComponents(viewport: ViewportMode = 'desktop'): Record<string, string> {
     const result: Record<string, string> = {};
     for (const [name, resolver] of Object.entries(COMPONENT_REGISTRY)) {
       result[name] = resolver(this.panelRoot, viewport);

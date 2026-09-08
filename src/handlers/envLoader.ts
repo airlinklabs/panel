@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import logger from './logger';
+import { logT } from '../services/i18n';
 
 // Required env vars that must be set for the panel to function.
 // If any are missing after .env load, the panel exits immediately.
@@ -44,9 +45,9 @@ export function loadEnv() {
     if (fs.existsSync(EXAMPLE_ENV_PATH)) {
       try {
         fs.copyFileSync(EXAMPLE_ENV_PATH, envPath);
-        logger.info('Created .env from example.env');
+        logger.info(logT('log.envCreatedFromExample'));
       } catch {
-        logger.warn('Could not copy example.env to .env');
+        logger.warn(logT('log.envCopyFailed'));
       }
     }
   }
@@ -58,15 +59,13 @@ export function loadEnv() {
       process.env[key] = value;
     }
   } catch (error) {
-    logger.error('Error loading .env file:', error);
+    logger.error(logT('log.envLoadError'), error);
   }
 
   // Fail-fast: ensure required env vars are set
   for (const key of REQUIRED_ENV_VARS) {
     if (!process.env[key]) {
-      logger.error(
-        `[env] FATAL: required env var ${key} is not set. Add it to .env`,
-      );
+      logger.error(logT('log.envRequiredVarMissing', { key }));
       process.exit(1);
     }
   }
@@ -81,9 +80,7 @@ export function loadEnv() {
       }
       const key = line.slice(0, eqIndex).trim();
       if (key && !process.env[key]) {
-        logger.warn(
-          `[env] optional env var ${key} is not set (see example.env)`,
-        );
+        logger.warn(logT('log.envOptionalVarMissing', { key }));
       }
     }
   } catch {

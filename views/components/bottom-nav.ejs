@@ -1,13 +1,13 @@
 <!-- Mobile top bar -->
 <div class="mobile-top-bar fixed top-0 left-0 right-0 z-40 lg:hidden h-12 flex items-center justify-between px-3.5 border-b" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
   <a href="/" class="flex items-center gap-2 min-w-0">
-    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-7 w-7 rounded-lg shrink-0" style="background:var(--theme-logo-bg);">
+    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="<%= t('logoAlt') %>" class="h-7 w-7 rounded-lg shrink-0" style="background:var(--theme-logo-bg);">
     <h1 class="font-medium text-[13px] truncate" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></h1>
   </a>
   <div class="flex items-center gap-1.5">
     <% if (user != null) { %>
     <a href="/account" class="p-1 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center" style="color:var(--theme-text-muted);">
-      <img loading="lazy" decoding="async" class="w-5.5 h-5.5 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="User avatar">
+      <img loading="lazy" decoding="async" class="w-5.5 h-5.5 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= t('userAvatarAlt') %>">
     </a>
     <% } %>
   </div>

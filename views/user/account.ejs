@@ -19,15 +19,15 @@
           <div class="relative shrink-0">
             <img loading="lazy" decoding="async" id="avatar-preview"
               src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>"
-              alt="Avatar"
+              alt="<%= t('avatar') %>"
               class="h-12 w-12 rounded-xl border object-cover" style="border-color:var(--theme-border);">
-            <label for="avatar-input" title="Upload photo"
+            <label for="avatar-input" title="<%= t('uploadPhoto') %>"
               class="absolute -bottom-1.5 -right-1.5 w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:opacity-80 transition" style="background:var(--theme-text);border:2px solid var(--theme-bg);">
               <%- icon('upload', { class: 'w-3 h-3', strokeWidth: 2.5, style: 'color:var(--theme-bg);' }) %>
             </label>
             <input id="avatar-input" type="file" accept="image/*" class="hidden">
             <% if (user.avatar) { %>
-            <button id="remove-avatar-btn" type="button" title="Remove photo"
+            <button id="remove-avatar-btn" type="button" title="<%= t('removePhoto') %>"
               class="absolute -top-1.5 -right-1.5 w-6 h-6 flex items-center justify-center rounded-full hover:opacity-85 transition" style="background:var(--theme-danger);border:2px solid var(--theme-bg);">
               <%- icon('x', { class: 'w-3 h-3', strokeWidth: 2.5, style: 'color:var(--theme-btn-danger-text);' }) %>
             </button>
@@ -98,7 +98,7 @@
               <div class="flex items-center gap-2">
                 <div class="relative flex-1">
                   <input id="currentPassword" type="password" name="currentPassword" placeholder="<%= req.translations.currentPassword || 'Current password' %>" class="al-input pr-10" data-al-al-input autocomplete="current-password">
-                  <button type="button" data-al-field-toggle aria-label="Show password" aria-pressed="false" class="al-btn-ghost absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
+                  <button type="button" data-al-field-toggle aria-label="<%= t('showPassword') %>" aria-pressed="false" class="al-btn-ghost absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
                     <%- icon('eye', { class: 'w-4 h-4' }) %>
                   </button>
                 </div>
@@ -114,7 +114,7 @@
               </label>
               <div class="relative">
                 <input id="newPassword" type="password" name="newPassword" placeholder="<%= req.translations.newPassword || 'New password' %>" disabled class="al-input pr-10 disabled:opacity-50" data-al-al-input autocomplete="new-password">
-                <button type="button" data-al-field-toggle aria-label="Show password" aria-pressed="false" class="al-btn-ghost absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
+                <button type="button" data-al-field-toggle aria-label="<%= t('showPassword') %>" aria-pressed="false" class="al-btn-ghost absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
                   <%- icon('eye', { class: 'w-4 h-4' }) %>
                 </button>
               </div>
@@ -358,7 +358,7 @@
         <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('submitImage') %></h2>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('submitImageText') %></p>
       </div>
-      <button type="button" id="imClose" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+      <button type="button" id="imClose" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
@@ -455,7 +455,7 @@
       });
       const result = await res.json();
       if (!res.ok) {
-        showToast(result.error || result.message || 'Failed to save ' + field, 'error');
+        showToast(result.error || result.message || '<%= req.translations.failedToSaveField || "Failed to save" %> ' + field, 'error');
         return null;
       }
       // Update sidebar username if changed
@@ -465,7 +465,7 @@
       }
       return result;
     } catch (err) {
-      showToast('Failed to save ' + field, 'error');
+      showToast('<%= req.translations.failedToSaveField || "Failed to save" %> ' + field, 'error');
       return null;
     }
   };
@@ -517,11 +517,11 @@
   document.querySelector('label[for="avatar-input"]')?.addEventListener('click', (e) => {
     e.preventDefault();
     openUploadModal({
-      title: 'Upload profile photo',
+      title: '<%= req.translations.uploadProfilePhoto || "Upload profile photo" %>',
       accept: 'image/*',
       onFile: async (file) => {
         const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
-        if (file.size > MAX_AVATAR_SIZE) { showToast('Image must be under 2 MB', 'error'); return; }
+        if (file.size > MAX_AVATAR_SIZE) { showToast('<%= req.translations.imageMustBeUnder2mb || "Image must be under 2 MB" %>', 'error'); return; }
         const reader = new FileReader();
         reader.onload = evt => openCropPopup(evt.target.result, csrfToken);
         reader.readAsDataURL(file);
@@ -535,14 +535,14 @@
       avatarPreview.src = '/avatar/<%= encodeURIComponent(user.username) %>';
       const removeAvatarBtn = document.getElementById('remove-avatar-btn');
       if (removeAvatarBtn) removeAvatarBtn.style.display = 'none';
-      showToast('Profile picture removed.', 'success');
-    } else showToast('Something went wrong.', 'error');
+      showToast('<%= req.translations.profilePictureRemoved || "Profile picture removed." %>', 'success');
+    } else showToast('<%= req.translations.errorOccurred || "Something went wrong." %>', 'error');
   });
 
   // Disable 2FA (requires current password)
   document.getElementById('disable2faBtn')?.addEventListener('click', async () => {
     const password = document.getElementById('disable2faPassword')?.value || '';
-    if (!password) { showToast('Enter your current password to disable 2FA.', 'error'); return; }
+    if (!password) { showToast('<%= req.translations.enterPasswordToDisable2fa || "Enter your current password to disable 2FA." %>', 'error'); return; }
     const btn = document.getElementById('disable2faBtn');
     btn.disabled = true;
     try {
@@ -553,15 +553,15 @@
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showToast('Two-factor authentication disabled.', 'success');
+        showToast('<%= req.translations.twoFactorDisabled || "Two-factor authentication disabled." %>', 'success');
         const twofaStatus = document.getElementById('twofa-status');
-        if (twofaStatus) al.patchEl(twofaStatus, '<p class="text-sm mb-3" style="color:var(--theme-text-muted)">Add an extra layer of security to your account.</p><a href="/account/2fa/setup" class="al-btn-primary text-sm inline-flex">Set up 2FA</a>');
+        if (twofaStatus) al.patchEl(twofaStatus, '<p class="text-sm mb-3" style="color:var(--theme-text-muted)"><%= req.translations.addExtraSecurity || "Add an extra layer of security to your account." %></p><a href="/account/2fa/setup" class="al-btn-primary text-sm inline-flex"><%= req.translations.setup2FA || "Set up 2FA" %></a>');
       } else {
-        showToast(data.error || 'Failed to disable 2FA.', 'error');
+        showToast(data.error || '<%= req.translations.failedToDisable2fa || "Failed to disable 2FA." %>', 'error');
       }
     } catch (err) {
       console.error('Failed to disable 2FA:', err);
-      showToast('Something went wrong.', 'error');
+      showToast('<%= req.translations.errorOccurred || "Something went wrong." %>', 'error');
     }
     btn.disabled = false;
   });
@@ -575,7 +575,7 @@
       const passkeys = data.passkeys || [];
       const el = document.getElementById('passkey-count-info');
       if (el && passkeys.length > 0) {
-        el.textContent = passkeys.length + ' passkey' + (passkeys.length !== 1 ? 's' : '') + ' registered · ';
+        el.textContent = passkeys.length + ' <%= req.translations.passkeyCount || "passkey" %>' + (passkeys.length !== 1 ? 's' : '') + ' <%= req.translations.registered || "registered" %> · ';
       }
     } catch (e) {}
   })();
@@ -587,15 +587,15 @@
       <div class="al-sheet-panel rounded-2xl shadow-lg border w-full max-w-lg overflow-hidden" style="background:var(--theme-bg-card);border-color:var(--theme-border);">
         <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b" style="border-color:var(--theme-border);">
           <div>
-            <p class="text-sm font-semibold" style="color:var(--theme-text-strong);">Position your photo</p>
-            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Drag and resize the selection box.</p>
+            <p class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= req.translations.positionYourPhoto || "Position your photo" %></p>
+            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= req.translations.dragResizeSelection || "Drag and resize the selection box." %></p>
           </div>
           <button type="button" id="crop-cancel" class="w-9 h-9 flex items-center justify-center rounded-lg hover:opacity-75 transition" style="color:var(--theme-text-muted);">
             <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
           </button>
         </div>
         <div class="relative select-none overflow-hidden" style="height:340px;background:var(--theme-bg);" id="crop-stage">
-          <img id="crop-img" src="${dataUrl}" draggable="false" alt="Crop preview" style="position:absolute;top:0;left:0;user-select:none;max-width:none"/>
+          <img id="crop-img" src="${dataUrl}" draggable="false" alt="<%= t('cropPreview') %>" style="position:absolute;top:0;left:0;user-select:none;max-width:none"/>
           <div id="crop-box" style="position:absolute;border:2px solid white;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);cursor:move;box-sizing:border-box">
             <div class="crop-handle" data-dir="nw" style="position:absolute;top:-5px;left:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:nw-resize"></div>
             <div class="crop-handle" data-dir="ne" style="position:absolute;top:-5px;right:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:ne-resize"></div>
@@ -604,8 +604,8 @@
           </div>
         </div>
         <div class="flex gap-3 px-5 py-4 border-t" style="border-color:var(--theme-border);">
-          <button type="button" id="crop-cancel-btn" class="al-btn-secondary flex-1 py-2.5">Cancel</button>
-          <button type="button" id="crop-save" class="al-btn-primary flex-1 py-2.5">Save photo</button>
+          <button type="button" id="crop-cancel-btn" class="al-btn-secondary flex-1 py-2.5"><%= t('cancel') %></button>
+          <button type="button" id="crop-save" class="al-btn-primary flex-1 py-2.5"><%= t('savePhoto') %></button>
         </div>
       </div>`;
     document.body.appendChild(overlay);
@@ -686,10 +686,10 @@
           if (res.ok) {
             const { avatar } = await res.json();
             avatarPreview.src = avatar + '?t=' + Date.now();
-            showToast('Profile picture updated.', 'success');
+            showToast('<%= req.translations.profilePictureUpdated || "Profile picture updated." %>', 'success');
             close();
-          } else showToast('Failed to upload', 'error');
-        } catch (err) { console.error('Avatar upload failed:', err); showToast('Failed to upload', 'error'); }
+          } else showToast('<%= req.translations.failedToUpload || "Failed to upload" %>', 'error');
+        } catch (err) { console.error('Avatar upload failed:', err); showToast('<%= req.translations.failedToUpload || "Failed to upload" %>', 'error'); }
       }, 'image/png');
     });
   }
@@ -747,7 +747,7 @@ function loader() {
 
   function goToMyImages() {
     closeModal();
-    showToast('Image submitted. It will appear in the table below once processed.', 'success');
+    showToast('<%= req.translations.imageSubmitted || "Image submitted. It will appear in the table below once processed." %>', 'success');
   }
 
   document.getElementById('openSubmitBtn')?.addEventListener('click', openModal);
@@ -786,7 +786,7 @@ function loader() {
       if (result.error && !result.success) {
         showToast(result.error, 'error');
       } else {
-        showToast(result.message || 'Submitted', 'success');
+        showToast(result.message || '<%= req.translations.submitted || "Submitted" %>', 'success');
         goToMyImages();
       }
     } catch (error) {
@@ -798,12 +798,12 @@ function loader() {
 
   document.getElementById('imSubmitJsonBtn').addEventListener('click', async function() {
     const raw = document.getElementById('imJsonInput').value;
-    if (!raw.trim()) { showToast('Paste an egg JSON first.', 'error'); return; }
+    if (!raw.trim()) { showToast('<%= req.translations.pasteEggJsonFirst || "Paste an egg JSON first." %>', 'error'); return; }
     let payload;
     try {
       payload = JSON.parse(raw);
     } catch {
-      showToast('Invalid JSON.', 'error');
+      showToast('<%= req.translations.invalidJson || "Invalid JSON." %>', 'error');
       return;
     }
     const l = loader();
@@ -818,7 +818,7 @@ function loader() {
       if (result.error && !result.success) {
         showToast(result.error, 'error');
       } else {
-        showToast(result.message || 'Submitted', 'success');
+        showToast(result.message || '<%= req.translations.submitted || "Submitted" %>', 'success');
         goToMyImages();
       }
     } catch (error) {
@@ -830,7 +830,7 @@ function loader() {
 
   document.getElementById('imSubmitUrlBtn').addEventListener('click', async function() {
     const url = document.getElementById('imUrlInput').value;
-    if (!url.trim()) { showToast('Please enter an image URL.', 'error'); return; }
+    if (!url.trim()) { showToast('<%= req.translations.enterImageUrl || "Please enter an image URL." %>', 'error'); return; }
     const l = loader();
     try {
       const response = await fetch('/api/v2/account/images/import-url', {
@@ -843,7 +843,7 @@ function loader() {
       if (result.error && !result.success) {
         showToast(result.error, 'error');
       } else {
-        showToast(result.message || 'Imported', 'success');
+        showToast(result.message || '<%= req.translations.imported || "Imported" %>', 'success');
         goToMyImages();
       }
     } catch (error) {
@@ -876,7 +876,7 @@ function loader() {
   document.querySelectorAll('[data-delete-image]').forEach(function(btn) {
       btn.addEventListener('click', async function() {
         const id = btn.dataset.deleteImage;
-        const msg = 'Delete this image?';
+        const msg = '<%= req.translations.deleteImageConfirm || "Delete this image?" %>';
         if (!confirm(msg)) return;
         const row = btn.closest('[data-image-id]');
         try {
@@ -885,14 +885,14 @@ function loader() {
           if (data.error) {
             showToast(data.error, 'error');
           } else {
-            showToast('Image deleted.', 'success');
+            showToast('<%= req.translations.imageDeleted || "Image deleted." %>', 'success');
             if (row && window.al) al.removeRow(row).then(syncImageEmptyState);
             else if (row) { row.remove(); syncImageEmptyState(); }
             else syncImageEmptyState();
           }
         } catch (error) {
           console.error('Failed to delete image:', error);
-          showToast('Something went wrong.', 'error');
+          showToast('<%= req.translations.errorOccurred || "Something went wrong." %>', 'error');
         }
       });
     });

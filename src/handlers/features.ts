@@ -1,9 +1,9 @@
-import { isHttpError } from "../utils/http";
-import prisma from "../db";
-import { fsListSchema, parseDaemonResponse } from "../types/daemon";
-import { checkNodeStatus } from "./utils/node/nodeStatus";
-import logger from "./logger";
-import { daemonRequest } from "./utils/core/daemonRequest";
+import { isHttpError } from '../utils/http';
+import prisma from '../db';
+import { fsListSchema, parseDaemonResponse } from '../types/daemon';
+import { checkNodeStatus } from './utils/node/nodeStatus';
+import logger from './logger';
+import { daemonRequest } from './utils/core/daemonRequest';
 
 interface ServerInfo {
   serverUUID: string;
@@ -31,7 +31,7 @@ export async function checkEulaStatus(
     }
 
     const nodeStatus = await checkNodeStatus(server.node);
-    if (nodeStatus.status === "Offline") {
+    if (nodeStatus.status === 'Offline') {
       return { accepted: true };
     }
 
@@ -39,52 +39,52 @@ export async function checkEulaStatus(
       nodeAddress: server.node.address,
       nodePort: server.node.port,
       nodeKey: server.node.key,
-      method: "GET",
-      path: "/fs/file/content",
-      params: { id: server.UUID, path: "eula.txt" },
-      responseType: "text",
+      method: 'GET',
+      path: '/fs/file/content',
+      params: { id: server.UUID, path: 'eula.txt' },
+      responseType: 'text',
     });
 
-    return { accepted: (eulaResponse.data as string).includes("eula=true") };
+    return { accepted: (eulaResponse.data as string).includes('eula=true') };
   } catch (error: any) {
     if (isHttpError(error) && error.status === 404) {
       return { accepted: false };
     }
     return {
       accepted: false,
-      error: "An error occurred while checking the EULA status.",
+      error: 'An error occurred while checking the EULA status.',
     };
   }
 }
 
 const EXCLUDED_WORLD_FOLDERS = new Set([
-  "plugins",
-  "config",
-  "cache",
-  "versions",
-  "logs",
-  "libraries",
-  "mods",
-  "bin",
-  "crash-reports",
-  "screenshots",
-  "resourcepacks",
-  "texturepacks",
-  "server",
-  "backups",
-  "airlink",
+  'plugins',
+  'config',
+  'cache',
+  'versions',
+  'logs',
+  'libraries',
+  'mods',
+  'bin',
+  'crash-reports',
+  'screenshots',
+  'resourcepacks',
+  'texturepacks',
+  'server',
+  'backups',
+  'airlink',
 ]);
 
-const REQUIRED_WORLD_FILES = ["uid.dat", "level.dat"];
+const REQUIRED_WORLD_FILES = ['uid.dat', 'level.dat'];
 const COMMON_WORLD_FILES = new Set([
-  "session.lock",
-  "region",
-  "data",
-  "playerdata",
-  "stats",
-  "advancements",
-  "DIM-1",
-  "DIM1",
+  'session.lock',
+  'region',
+  'data',
+  'playerdata',
+  'stats',
+  'advancements',
+  'DIM-1',
+  'DIM1',
 ]);
 
 export const isWorld = async (
@@ -92,10 +92,10 @@ export const isWorld = async (
   serverInfo: ServerInfo,
 ): Promise<boolean> => {
   if (
-    typeof folderName !== "string" ||
+    typeof folderName !== 'string' ||
     folderName.length === 0 ||
     EXCLUDED_WORLD_FOLDERS.has(folderName.toLowerCase()) ||
-    folderName.startsWith(".")
+    folderName.startsWith('.')
   ) {
     return false;
   }
@@ -105,8 +105,8 @@ export const isWorld = async (
       nodeAddress: serverInfo.nodeAddress,
       nodePort: serverInfo.nodePort,
       nodeKey: serverInfo.nodeKey,
-      method: "GET",
-      path: "/fs/list",
+      method: 'GET',
+      path: '/fs/list',
       params: { id: serverInfo.serverUUID, path: folderName },
       timeout: 5000,
     });

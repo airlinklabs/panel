@@ -51,8 +51,8 @@
           <%- include('../../components/ui/empty-state', {
             iconName: 'users',
             title: t('noUsersYet'),
-            description: 'Create your first user to get started.',
-            action: '<button id="createButtonEmpty" type="button" class="al-btn-primary"><span class="inline-flex items-center gap-1.5">' + icon('plus', { class: 'w-3.5 h-3.5' }) + ' Create user</span></button>'
+            description: t('createYourFirstUser'),
+            action: '<button id="createButtonEmpty" type="button" class="al-btn-primary"><span class="inline-flex items-center gap-1.5">' + icon('plus', { class: 'w-3.5 h-3.5' }) + ' ' + t('createUserBtn') + '</span></button>'
           }) %>
         <% } else { %>
 
@@ -75,12 +75,12 @@
             <div class="flex-1 min-w-0">
               <p class="text-[13px] font-medium truncate" style="color:var(--theme-text-strong);"><%= user.username %></p>
               <p class="text-[11px] truncate" style="color:var(--theme-text-muted);"><span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset"
-                style="<%= user.role === 'owner' ? 'background:var(--theme-warning-bg);color:var(--theme-warning)' : user.isAdmin ? 'background:var(--theme-accent);color:var(--theme-accent-text)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>"><% if (user.role === 'owner') { %><%- icon('crown', { size: 9, class: 'inline-block mr-0.5' }) %><% } %><%= user.role === 'owner' ? 'Owner' : user.isAdmin ? (req.translations.admin || 'Admin') : (req.translations.user || 'User') %></span></p>
+                style="<%= user.role === 'owner' ? 'background:var(--theme-warning-bg);color:var(--theme-warning)' : user.isAdmin ? 'background:var(--theme-accent);color:var(--theme-accent-text)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>"><% if (user.role === 'owner') { %><%- icon('crown', { size: 9, class: 'inline-block mr-0.5' }) %><% } %><%= user.role === 'owner' ? t('ownerRole') : user.isAdmin ? (req.translations.admin || 'Admin') : (req.translations.user || 'User') %></span></p>
             </div>
             <div class="flex items-center gap-1">
-              <a href="/admin/users/view/<%= user.id %>/" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="View user"><%- icon('external-link', { size: 16, class: 'shrink-0' }) %></a>
-              <a href="/admin/users/edit/<%= user.id %>/" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="Edit user"><%- icon('pencil', { size: 16, class: 'shrink-0' }) %></a>
-              <button @click="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);" aria-label="Delete user">
+              <a href="/admin/users/view/<%= user.id %>/" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="<%= t('viewUser') %>"><%- icon('external-link', { size: 16, class: 'shrink-0' }) %></a>
+              <a href="/admin/users/edit/<%= user.id %>/" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="<%= t('editUserBtn') %>"><%- icon('pencil', { size: 16, class: 'shrink-0' }) %></a>
+              <button @click="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);" aria-label="<%= t('deleteUserBtn') %>">
                 <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
               </button>
             </div>
@@ -134,15 +134,15 @@
                   <td class="al-table-td text-[13px]"><%= user.servers ? user.servers.length : 0 %></td>
                   <td class="al-table-td">
                     <div class="flex items-center gap-1">
-                      <a href="/admin/users/view/<%= user.id %>/" onclick="event.stopPropagation()" title="View" aria-label="View user"
+                      <a href="/admin/users/view/<%= user.id %>/" onclick="event.stopPropagation()" title="<%= t('viewUser') %>" aria-label="<%= t('viewUser') %>"
                         class="al-btn-ghost p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center">
                         <%- icon('external-link', { size: 14, class: 'shrink-0' }) %>
                       </a>
-                      <a href="/admin/users/edit/<%= user.id %>/" onclick="event.stopPropagation()" title="Edit" aria-label="Edit user"
+                      <a href="/admin/users/edit/<%= user.id %>/" onclick="event.stopPropagation()" title="<%= t('editUserBtn') %>" aria-label="<%= t('editUserBtn') %>"
                         class="al-btn-ghost p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center">
                         <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
                       </a>
-                      <button @click="event.stopPropagation(); deleteUser('<%= user.id %>')" type="button" title="Delete" aria-label="Delete user"
+                      <button @click="event.stopPropagation(); deleteUser('<%= user.id %>')" type="button" title="<%= t('deleteUserBtn') %>" aria-label="<%= t('deleteUserBtn') %>"
                         class="al-btn-ghost p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center" style="color:var(--theme-danger);">
                         <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
                       </button>
@@ -183,19 +183,19 @@ function userManager() {
       var pageData = document.getElementById('page-data').dataset;
       window.modal.confirm({
         title: pageData.deleteUserTitle || 'Delete User', body: pageData.deleteUserBody || 'Are you sure you want to delete this user?',
-        danger: true, confirmLabel: 'Yeah, delete it',
+        danger: true, confirmLabel: req.translations.yeahDeleteIt || 'Yeah, delete it',
         onConfirm: () => {
           fetch('/api/v2/admin/users/' + userId, { method: 'DELETE' }).then((response) => {
             if (response.ok) {
-              showToast('User deleted.', 'success');
+              showToast(req.translations.userDeleted || 'User deleted.', 'success');
               var tbody = document.querySelector('#userTable tbody');
               var nodes = document.querySelectorAll('[data-user-id="' + userId + '"]');
               Promise.all(Array.from(nodes).map((n) => window.al ? al.removeRow(n) : Promise.resolve())).then(() => {
-                if (tbody && !tbody.querySelector('[data-user-id]')) al.showEmpty(tbody, 'No users yet.', 4);
+                if (tbody && !tbody.querySelector('[data-user-id]')) al.showEmpty(tbody, req.translations.noUsersYet || 'No users yet.', 4);
                 this.syncUserCounts();
               });
-            } else showToast('Failed to delete user.', 'error');
-          }).catch(() => showToast('Failed to delete user.', 'error'));
+            } else showToast(req.translations.failedToDeleteUser || 'Failed to delete user.', 'error');
+          }).catch(() => showToast(req.translations.failedToDeleteUser || 'Failed to delete user.', 'error'));
         }
       });
     },

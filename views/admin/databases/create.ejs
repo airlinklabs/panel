@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Add Database Host' }) %>
+<%- include('../../components/header', { title: t('addDatabaseHostTitle') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -6,20 +6,20 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="dbHostCreate()">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Databases', href: '/admin/databases' },
-        { label: 'Add Host' }
+        { label: t('admin') },
+        { label: t('adminDatabaseBreadcrumbDb'), href: '/admin/databases' },
+        { label: t('adminDatabaseBreadcrumbAddHost') }
       ] }) %>
       <div class="al-page-header mb-5 flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title">Add Database Host</h1>
-          <p class="al-page-desc">A MySQL-compatible server that databases will be provisioned on.</p>
+          <h1 class="al-page-title"><%= t('addDatabaseHostTitle') %></h1>
+          <p class="al-page-desc"><%= t('addDatabaseHostDesc') %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
           <button type="submit" form="hostForm" class="al-btn-primary" :disabled="saving">
-            <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><span x-text="saving ? 'Saving…' : 'Save Host'">Save Host</span>
+            <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><span x-text="saving ? '<%= t('savingEllipsis') %>' : '<%= t('saveHost') %>'"><%= t('saveHost') %></span>
           </button>
-          <a href="/admin/databases" class="al-btn-secondary">Back to Databases</a>
+          <a href="/admin/databases" class="al-btn-secondary"><%= t('backToDatabases') %></a>
         </div>
       </div>
 
@@ -27,20 +27,20 @@
         <div x-show="error" x-text="error" class="rounded-xl px-4 py-3 text-sm" style="background:var(--theme-danger-bg);border:1px solid color-mix(in srgb, var(--theme-danger) 25%, transparent);color:var(--theme-danger)"></div>
         <form @submit.prevent="submit()" class="space-y-5">
           <div class="al-card">
-            <h2 class="al-card-header">Connection Details</h2>
+            <h2 class="al-card-header"><%= t('connectionDetails') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">
                 <label for="hostName" class="al-label flex items-center gap-1.5">
                   <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  Name
+                  <%= t('hostName') %>
                 </label>
-                <input id="hostName" x-model="form.name" class="al-input" placeholder="Primary MySQL host" required>
+                <input id="hostName" x-model="form.name" class="al-input" placeholder="<%= t('hostName') %>" required>
               </div>
 
               <div>
                 <label for="hostAddress" class="al-label flex items-center gap-1.5">
                   <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  Host Address
+                  <%= t('hostAddress') %>
                 </label>
                 <input id="hostAddress" x-model="form.host" class="al-input" placeholder="localhost or 10.0.0.5" required>
               </div>
@@ -48,7 +48,7 @@
               <div>
                 <label for="hostPort" class="al-label flex items-center gap-1.5">
                   <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  Port
+                  <%= t('portLabel') %>
                 </label>
                 <input id="hostPort" x-model.number="form.port" class="al-input" placeholder="<%= settings.defaultDbPort ?? 3306 %>" type="number">
               </div>
@@ -56,7 +56,7 @@
               <div>
                 <label for="hostUser" class="al-label flex items-center gap-1.5">
                   <%- icon('user', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  Username
+                  <%= t('usernameLabelForm') %>
                 </label>
                 <input id="hostUser" x-model="form.username" class="al-input" placeholder="root" autocomplete="off" required>
               </div>
@@ -64,22 +64,22 @@
               <div>
                 <label for="hostPassword" class="al-label flex items-center gap-1.5">
                   <%- icon('lock', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  Password
+                  <%= t('passwordLabelForm') %>
                 </label>
                 <input id="hostPassword" x-model="form.password" type="password" class="al-input" placeholder="••••••••" autocomplete="new-password" required>
               </div>
               <div>
                 <label for="hostNode" class="al-label flex items-center gap-1.5">
                   <%- icon('network', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  Node
+                  <%= t('nodeLabel') %>
                 </label>
                 <select id="hostNode" x-model="form.nodeId" class="al-input">
-                  <option value="">Any node (unscoped)</option>
+                  <option value=""><%= t('anyNodeUnscoped') %></option>
                   <% (nodes || []).forEach(n => { %>
                     <option value="<%= n.id %>"><%= n.name %></option>
                   <% }); %>
                 </select>
-                <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">Scopes this host to servers running on one node. Leave empty to allow any server.</p>
+                <p class="mt-1.5 text-[11px]" style="color:var(--theme-text-muted)"><%= t('nodeScopeHint') %></p>
               </div>
             </div>
           </div>
@@ -96,7 +96,7 @@
             if (this.saving) return;
             this.error = '';
             if (!this.form.name || !this.form.host || !this.form.username || !this.form.password) {
-              this.error = 'Please fill in all required fields.';
+              this.error = req.translations.fillAllRequiredFields || 'Please fill in all required fields.';
               return;
             }
             this.saving = true;
@@ -107,14 +107,14 @@
                 body: JSON.stringify(this.form),
               });
               if (res.ok) {
-                showToast('Database host added.', 'success');
+                showToast(req.translations.dbHostAdded || 'Database host added.', 'success');
                 setTimeout(() => { window.location.href = '/admin/databases'; }, 500);
               } else {
-                const data = await res.json().catch(() => ({ error: 'Failed to create host.' }));
-                this.error = data.error || data.message || 'Failed to create host.';
+                const data = await res.json().catch(() => ({ error: req.translations.dbHostCreateFailed || 'Failed to create host.' }));
+                this.error = data.error || data.message || (req.translations.dbHostCreateFailed || 'Failed to create host.');
               }
             } catch (e) {
-              this.error = 'Network error. Try again.';
+              this.error = req.translations.networkErrorTryAgain || 'Network error. Try again.';
             } finally {
               this.saving = false;
             }

@@ -1,26 +1,26 @@
-import { getSettings } from "../../../handlers/settingsCache";
-import type { Router, Request, Response } from "express";
+import { getSettings } from '../../../handlers/settingsCache';
+import type { Router, Request, Response } from 'express';
 import {
   isAuthenticatedForServer,
   requireSubUserPermission,
-} from "../../../handlers/utils/auth/serverAuthUtil";
-import logger from "../../../handlers/logger";
-import { checkForServerInstallation } from "../../../handlers/checkForServerInstallation";
-import { getServerStatus } from "../../../handlers/utils/server/serverStatus";
-import { getParamAsString } from "../../../utils/typeHelpers";
-import prisma from "../../../db";
-import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
+} from '../../../handlers/utils/auth/serverAuthUtil';
+import logger from '../../../handlers/logger';
+import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
+import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
+import { getParamAsString } from '../../../utils/typeHelpers';
+import prisma from '../../../db';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   containerStatusSchema,
   parseDaemonResponse,
-} from "../../../types/daemon";
+} from '../../../types/daemon';
 import {
   type ErrorMessage,
   type ServerVariable,
   getServerStatusInput,
   getImageFeatures,
   restartServerContainer,
-} from "./shared";
+} from './shared';
 
 // Pterodactyl-style validation rules ("required|between:1,32|regex:/^[a-z0-9]+$/i")
 export function validateVariableRules(
@@ -28,38 +28,38 @@ export function validateVariableRules(
   value: string,
 ): string | null {
   const rawRules =
-    variable.rules || variable.rules_field || variable.rulesField || "";
-  if (typeof rawRules !== "string" || rawRules.trim() === "") {
+    variable.rules || variable.rules_field || variable.rulesField || '';
+  if (typeof rawRules !== 'string' || rawRules.trim() === '') {
     return null;
   }
 
   const valueLabel = variable.name || variable.env;
   const rules = rawRules
-    .split("|")
+    .split('|')
     .map((r) => r.trim())
     .filter(Boolean);
 
   for (const rule of rules) {
-    if (rule === "required") {
-      if (value === "" || value === undefined || value === null) {
+    if (rule === 'required') {
+      if (value === '' || value === undefined || value === null) {
         return `${valueLabel} is required.`;
       }
       continue;
     }
-    if (rule === "string") {
+    if (rule === 'string') {
       continue;
     }
-    if (rule === "numeric") {
-      if (value !== "" && isNaN(Number(value))) {
+    if (rule === 'numeric') {
+      if (value !== '' && isNaN(Number(value))) {
         return `${valueLabel} must be a number.`;
       }
       continue;
     }
-    if (rule.startsWith("between:")) {
-      const [minStr, maxStr] = rule.slice("between:".length).split(",");
+    if (rule.startsWith('between:')) {
+      const [minStr, maxStr] = rule.slice('between:'.length).split(',');
       const min = Number(minStr);
       const max = Number(maxStr);
-      if (!isNaN(min) && !isNaN(max) && value !== "") {
+      if (!isNaN(min) && !isNaN(max) && value !== '') {
         const num = Number(value);
         if (isNaN(num) || num < min || num > max) {
           return `${valueLabel} must be between ${min} and ${max}.`;
@@ -67,33 +67,33 @@ export function validateVariableRules(
       }
       continue;
     }
-    if (rule.startsWith("min:")) {
-      const min = Number(rule.slice("min:".length));
+    if (rule.startsWith('min:')) {
+      const min = Number(rule.slice('min:'.length));
       if (
         !isNaN(min) &&
-        value !== "" &&
+        value !== '' &&
         (isNaN(Number(value)) || Number(value) < min)
       ) {
         return `${valueLabel} must be at least ${min}.`;
       }
       continue;
     }
-    if (rule.startsWith("max:")) {
-      const max = Number(rule.slice("max:".length));
+    if (rule.startsWith('max:')) {
+      const max = Number(rule.slice('max:'.length));
       if (
         !isNaN(max) &&
-        value !== "" &&
+        value !== '' &&
         (isNaN(Number(value)) || Number(value) > max)
       ) {
         return `${valueLabel} must be at most ${max}.`;
       }
       continue;
     }
-    if (rule.startsWith("regex:")) {
-      const rawPattern = rule.slice("regex:".length).trim();
+    if (rule.startsWith('regex:')) {
+      const rawPattern = rule.slice('regex:'.length).trim();
       const match = /^\/(.*)\/([a-z]*)$/s.exec(rawPattern);
       const pattern = match && match[1] !== undefined ? match[1] : rawPattern;
-      const flags = match ? match[2] : "";
+      const flags = match ? match[2] : '';
       let re: RegExp;
       try {
         re = new RegExp(pattern, flags);
@@ -103,7 +103,7 @@ export function validateVariableRules(
         );
         continue;
       }
-      if (value !== "" && !re.test(value)) {
+      if (value !== '' && !re.test(value)) {
         return (
           variable.rulesMessage ||
           `${valueLabel} does not match the required pattern.`
@@ -111,14 +111,14 @@ export function validateVariableRules(
       }
       continue;
     }
-    if (rule.startsWith("in:")) {
+    if (rule.startsWith('in:')) {
       const allowed = rule
-        .slice("in:".length)
-        .split(",")
+        .slice('in:'.length)
+        .split(',')
         .map((s) => s.trim())
         .filter(Boolean);
       if (allowed.length > 0 && !allowed.includes(value)) {
-        return `${valueLabel} must be one of: ${allowed.join(", ")}.`;
+        return `${valueLabel} must be one of: ${allowed.join(', ')}.`;
       }
     }
   }
@@ -128,9 +128,9 @@ export function validateVariableRules(
 
 export function registerStartupRoutes(router: Router): void {
   router.get(
-    "/server/:id/startup",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("startup"),
+    '/server/:id/startup',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('startup'),
     async (req: Request, res: Response) => {
       const errorMessage: ErrorMessage = {};
       const userId = req.session?.user?.id;
@@ -139,8 +139,8 @@ export function registerStartupRoutes(router: Router): void {
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
-          errorMessage.message = "User not found.";
-          return res.render("user/account", { errorMessage, user, req });
+          errorMessage.message = 'User not found.';
+          return res.render('user/account', { errorMessage, user, req });
         }
 
         const server = await prisma.server.findUnique({
@@ -149,8 +149,8 @@ export function registerStartupRoutes(router: Router): void {
         });
 
         if (!server) {
-          errorMessage.message = "Server not found.";
-          return res.render("user/server/startup", {
+          errorMessage.message = 'Server not found.';
+          return res.render('user/server/startup', {
             errorMessage,
             features: [],
             user,
@@ -169,7 +169,7 @@ export function registerStartupRoutes(router: Router): void {
               serverVariables = parsed;
             }
           } catch (error) {
-            logger.error("Error parsing server variables:", error);
+            logger.error('Error parsing server variables:', error);
           }
         } else {
           logger.info(`No variables found for server ${serverId}`);
@@ -178,7 +178,7 @@ export function registerStartupRoutes(router: Router): void {
           getServerStatusInput(server),
         );
 
-        return res.render("user/server/startup", {
+        return res.render('user/server/startup', {
           errorMessage,
           features,
           installed: await checkForServerInstallation(
@@ -192,9 +192,9 @@ export function registerStartupRoutes(router: Router): void {
           settings,
         });
       } catch (error) {
-        logger.error("Error fetching server startup data:", error);
-        errorMessage.message = "Error fetching server data.";
-        return res.render("user/server/startup", {
+        logger.error('Error fetching server startup data:', error);
+        errorMessage.message = 'Error fetching server data.';
+        return res.render('user/server/startup', {
           errorMessage,
           features: [],
           user: req.session?.user,
@@ -206,9 +206,9 @@ export function registerStartupRoutes(router: Router): void {
   );
 
   router.post(
-    "/server/:id/startup/command",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("startup"),
+    '/server/:id/startup/command',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('startup'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -222,7 +222,7 @@ export function registerStartupRoutes(router: Router): void {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
           logger.warn(`User not found: ${userId}`);
-          res.status(404).json({ error: "User not found" });
+          res.status(404).json({ error: 'User not found' });
           return;
         }
 
@@ -233,7 +233,7 @@ export function registerStartupRoutes(router: Router): void {
 
         if (!server) {
           logger.warn(`Server not found: ${serverId}`);
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
@@ -249,10 +249,10 @@ export function registerStartupRoutes(router: Router): void {
           logger.warn(
             `Startup command editing not allowed for server ${serverId}`,
           );
-          const acceptsJson = req.headers.accept?.includes("application/json");
+          const acceptsJson = req.headers.accept?.includes('application/json');
           if (acceptsJson) {
             res.status(403).json({
-              error: "Startup command editing not allowed for this server",
+              error: 'Startup command editing not allowed for this server',
             });
           } else {
             res.redirect(
@@ -271,8 +271,8 @@ export function registerStartupRoutes(router: Router): void {
         );
         try {
           const statusResponse = await daemonRequest<unknown>({
-            method: "GET",
-            path: "/container/status",
+            method: 'GET',
+            path: '/container/status',
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -284,7 +284,7 @@ export function registerStartupRoutes(router: Router): void {
 
           if (isRunning) {
             if (!server.dockerImage) {
-              res.status(400).json({ error: "Docker image not found." });
+              res.status(400).json({ error: 'Docker image not found.' });
               return;
             }
 
@@ -309,13 +309,13 @@ export function registerStartupRoutes(router: Router): void {
             where: { UUID: getParamAsString(serverId) },
             include: { node: true, image: true, owner: true },
           });
-          res.vary("HX-Request");
-          return res.render("fragments/user/server/startup-command", {
+          res.vary('HX-Request');
+          return res.render('fragments/user/server/startup-command', {
             req,
             server: updatedServer,
           });
         }
-        const acceptsJson = req.headers.accept?.includes("application/json");
+        const acceptsJson = req.headers.accept?.includes('application/json');
         if (acceptsJson) {
           res.status(200).json({ success: true });
         } else {
@@ -328,9 +328,9 @@ export function registerStartupRoutes(router: Router): void {
           `Error updating startup command for server ${serverId}:`,
           error,
         );
-        const acceptsJson = req.headers.accept?.includes("application/json");
+        const acceptsJson = req.headers.accept?.includes('application/json');
         if (acceptsJson) {
-          res.status(500).json({ error: "Failed to update startup command" });
+          res.status(500).json({ error: 'Failed to update startup command' });
         } else {
           res.redirect(
             `/server/${serverId}/startup?error=true&message=Failed+to+update+startup+command`,
@@ -341,9 +341,9 @@ export function registerStartupRoutes(router: Router): void {
   );
 
   router.post(
-    "/server/:id/startup/docker-image",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("startup"),
+    '/server/:id/startup/docker-image',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('startup'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -357,7 +357,7 @@ export function registerStartupRoutes(router: Router): void {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
           logger.warn(`User not found: ${userId}`);
-          res.status(404).json({ error: "User not found" });
+          res.status(404).json({ error: 'User not found' });
           return;
         }
 
@@ -368,7 +368,7 @@ export function registerStartupRoutes(router: Router): void {
 
         if (!server) {
           logger.warn(`Server not found: ${serverId}`);
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
@@ -399,9 +399,9 @@ export function registerStartupRoutes(router: Router): void {
           logger.warn(
             `Invalid Docker image selected for server ${serverId}: ${dockerImage}`,
           );
-          const acceptsJson = req.headers.accept?.includes("application/json");
+          const acceptsJson = req.headers.accept?.includes('application/json');
           if (acceptsJson) {
-            res.status(400).json({ error: "Invalid Docker image selected" });
+            res.status(400).json({ error: 'Invalid Docker image selected' });
           } else {
             res.redirect(
               `/server/${serverId}/startup?error=true&message=Invalid+Docker+image+selected`,
@@ -437,8 +437,8 @@ export function registerStartupRoutes(router: Router): void {
 
         try {
           const statusResponse = await daemonRequest<unknown>({
-            method: "GET",
-            path: "/container/status",
+            method: 'GET',
+            path: '/container/status',
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -469,14 +469,14 @@ export function registerStartupRoutes(router: Router): void {
             where: { UUID: getParamAsString(serverId) },
             include: { node: true, image: true, owner: true },
           });
-          res.vary("HX-Request");
-          return res.render("fragments/user/server/startup-docker", {
+          res.vary('HX-Request');
+          return res.render('fragments/user/server/startup-docker', {
             req,
             server: updatedServer,
           });
         }
 
-        const acceptsJson = req.headers.accept?.includes("application/json");
+        const acceptsJson = req.headers.accept?.includes('application/json');
         if (acceptsJson) {
           res.status(200).json({ success: true });
         } else {
@@ -490,9 +490,9 @@ export function registerStartupRoutes(router: Router): void {
           error,
         );
 
-        const acceptsJson = req.headers.accept?.includes("application/json");
+        const acceptsJson = req.headers.accept?.includes('application/json');
         if (acceptsJson) {
-          res.status(500).json({ error: "Failed to update Docker image" });
+          res.status(500).json({ error: 'Failed to update Docker image' });
         } else {
           res.redirect(
             `/server/${serverId}/startup?error=true&message=Failed+to+update+Docker+image`,
@@ -503,16 +503,16 @@ export function registerStartupRoutes(router: Router): void {
   );
 
   router.post(
-    "/server/:id/startup/variables",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("startup"),
+    '/server/:id/startup/variables',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('startup'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
-      const contentType = req.headers["content-type"] || "";
+      const contentType = req.headers['content-type'] || '';
       let variables: ServerVariable[];
 
-      if (contentType.includes("application/json")) {
+      if (contentType.includes('application/json')) {
         variables = req.body.variables || [];
       } else {
         logger.info(`Processing form data: ${JSON.stringify(req.body)}`);
@@ -524,7 +524,7 @@ export function registerStartupRoutes(router: Router): void {
 
         if (!server) {
           logger.warn(`Server not found: ${serverId}`);
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
@@ -534,7 +534,7 @@ export function registerStartupRoutes(router: Router): void {
           try {
             serverVariables = JSON.parse(server.Variables);
           } catch (error) {
-            logger.error("Error parsing server variables:", error);
+            logger.error('Error parsing server variables:', error);
           }
         }
 
@@ -542,28 +542,28 @@ export function registerStartupRoutes(router: Router): void {
           const formKey = `var_${variable.env}`;
           let value = req.body[formKey];
 
-          if (variable.type === "boolean") {
+          if (variable.type === 'boolean') {
             value = value ? 1 : 0;
-          } else if (variable.type === "number") {
+          } else if (variable.type === 'number') {
             const numValue = parseInt(value);
-            if (isNaN(numValue) || value === "" || value === undefined) {
+            if (isNaN(numValue) || value === '' || value === undefined) {
               value =
                 variable.value !== undefined &&
                 variable.value !== null &&
-                variable.value !== ""
+                variable.value !== ''
                   ? variable.value
                   : variable.default || 0;
             } else {
               value = numValue;
             }
-          } else if (variable.type === "text") {
-            if (value === "" || value === undefined) {
+          } else if (variable.type === 'text') {
+            if (value === '' || value === undefined) {
               value =
                 variable.value !== undefined &&
                 variable.value !== null &&
-                variable.value !== ""
+                variable.value !== ''
                   ? variable.value
-                  : variable.default || "";
+                  : variable.default || '';
             }
           }
 
@@ -591,7 +591,7 @@ export function registerStartupRoutes(router: Router): void {
             definitions = parsed;
           }
         } catch {
-          logger.error("Error parsing stored variables for validation");
+          logger.error('Error parsing stored variables for validation');
         }
       }
       const definitionByEnv = new Map(definitions.map((def) => [def.env, def]));
@@ -600,16 +600,16 @@ export function registerStartupRoutes(router: Router): void {
         .map((variable) => {
           const definition = definitionByEnv.get(variable.env);
           const rulesSource =
-            definition && typeof definition === "object"
+            definition && typeof definition === 'object'
               ? {
-                  ...definition,
-                  rules: definition.rules,
-                  rulesMessage: definition.rulesMessage,
-                }
+                ...definition,
+                rules: definition.rules,
+                rulesMessage: definition.rulesMessage,
+              }
               : variable;
           const error = validateVariableRules(
             rulesSource as ServerVariable,
-            String(variable.value ?? ""),
+            String(variable.value ?? ''),
           );
           return error ? { key: variable.env, error } : null;
         })
@@ -622,7 +622,7 @@ export function registerStartupRoutes(router: Router): void {
           `Variable validation failed for server ${serverId}: ${JSON.stringify(validationErrors)}`,
         );
         res.status(400).json({
-          error: "Variable validation failed.",
+          error: 'Variable validation failed.',
           fields: validationErrors,
         });
         return;
@@ -632,7 +632,7 @@ export function registerStartupRoutes(router: Router): void {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
           logger.warn(`User not found: ${userId}`);
-          res.status(404).json({ error: "User not found" });
+          res.status(404).json({ error: 'User not found' });
           return;
         }
 
@@ -643,7 +643,7 @@ export function registerStartupRoutes(router: Router): void {
 
         if (!server) {
           logger.warn(`Server not found: ${serverId}`);
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
@@ -655,8 +655,8 @@ export function registerStartupRoutes(router: Router): void {
 
         try {
           const statusResponse = await daemonRequest<unknown>({
-            method: "GET",
-            path: "/container/status",
+            method: 'GET',
+            path: '/container/status',
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -670,9 +670,9 @@ export function registerStartupRoutes(router: Router): void {
             if (!server.dockerImage) {
               logger.error(
                 `Docker image not found for server ${serverId}`,
-                new Error("Docker image not found"),
+                new Error('Docker image not found'),
               );
-              res.status(400).json({ error: "Docker image not found." });
+              res.status(400).json({ error: 'Docker image not found.' });
               return;
             }
 
@@ -703,15 +703,15 @@ export function registerStartupRoutes(router: Router): void {
               }
             } catch {}
           }
-          res.vary("HX-Request");
-          return res.render("fragments/user/server/startup-variables", {
+          res.vary('HX-Request');
+          return res.render('fragments/user/server/startup-variables', {
             req,
             server: updatedServer,
             serverVariables: updatedVariables,
           });
         }
 
-        const acceptsJson = req.headers.accept?.includes("application/json");
+        const acceptsJson = req.headers.accept?.includes('application/json');
         if (acceptsJson) {
           res.status(200).json({ success: true });
         } else {
@@ -721,9 +721,9 @@ export function registerStartupRoutes(router: Router): void {
         }
       } catch (error) {
         logger.error(`Error updating variables for server ${serverId}:`, error);
-        const acceptsJson = req.headers.accept?.includes("application/json");
+        const acceptsJson = req.headers.accept?.includes('application/json');
         if (acceptsJson) {
-          res.status(500).json({ error: "Failed to update server variables" });
+          res.status(500).json({ error: 'Failed to update server variables' });
         } else {
           res.redirect(
             `/server/${serverId}/startup?error=true&message=Failed+to+update+server+variables`,

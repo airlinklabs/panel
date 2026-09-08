@@ -172,7 +172,7 @@ function subusersPage() {
 
     async confirmAdd() {
       if (this.saving) return;
-      if (!this.addEmail.trim()) { showToast('Enter the user email.', 'error'); return; }
+      if (!this.addEmail.trim()) { showToast('<%= req.translations.enterUserEmail || "Enter the user email." %>', 'error'); return; }
       this.saving = true;
       try {
         const result = await api('/api/v2/servers/' + serverId + '/subusers', { method: 'POST', body: {
@@ -180,11 +180,11 @@ function subusersPage() {
           permissions: [...this.addPerms]
         } });
         if (result) {
-          showToast('Subuser added.', 'success');
+          showToast('<%= req.translations.subuserAdded || "Subuser added." %>', 'success');
           this.showAdd = false;
           window.location.reload();
         }
-      } catch (e) { showToast('Failed to add subuser.', 'error'); }
+      } catch (e) { showToast('<%= req.translations.failedToAddSubuser || "Failed to add subuser." %>', 'error'); }
       finally { this.saving = false; }
     },
 
@@ -196,24 +196,24 @@ function subusersPage() {
           permissions: [...this.editPerms]
         } });
         if (result) {
-          showToast('Permissions updated.', 'success');
+          showToast('<%= req.translations.permissionsUpdated || "Permissions updated." %>', 'success');
           this.showEdit = false;
           window.location.reload();
         }
-      } catch (e) { showToast('Failed to update permissions.', 'error'); }
+      } catch (e) { showToast('<%= req.translations.failedToUpdatePermissions || "Failed to update permissions." %>', 'error'); }
       finally { this.saving = false; }
     },
 
     async removeSubUser(id, name) {
       window.modal.confirm({
-        title: 'Remove subuser',
-        body: 'Remove ' + name + ' from this server? They will lose access immediately.',
+        title: '<%= req.translations.removeSubuser || "Remove subuser" %>',
+        body: '<%= req.translations.removeSubuserConfirm || "Remove" %> ' + name + ' <%= req.translations.removeSubuserWarning || "from this server? They will lose access immediately." %>',
         danger: true,
-        confirmLabel: 'Remove',
+        confirmLabel: '<%= req.translations.remove || "Remove" %>',
         onConfirm: async () => {
           const result = await api('/api/v2/servers/' + serverId + '/subusers/' + id, { method: 'DELETE' });
           if (result) {
-            showToast('Subuser removed.', 'success');
+            showToast('<%= req.translations.subuserRemoved || "Subuser removed." %>', 'success');
             window.location.reload();
           }
         }
@@ -232,9 +232,9 @@ function subusersPage() {
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Subusers' }
+        { label: t('subusers') }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
       <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-6">
@@ -248,7 +248,7 @@ function subusersPage() {
             <button @click="openAdd()" type="button"
                 class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
                 <%- icon('plus', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
-                Add Subuser
+                <%= t('addSubuser') %>
             </button>
           </div>
         </div>
@@ -367,7 +367,7 @@ function subusersPage() {
   <div class="al-sheet-panel w-full max-w-lg rounded-2xl max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="addSubUserTitle" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div class="flex justify-between items-center px-6 py-4 border-b">
       <h3 id="addSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('addSubuserTitle') %></h3>
-      <button type="button" @click="showAdd = false" aria-label="Close" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
+      <button type="button" @click="showAdd = false" aria-label="<%= t('close') %>" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
       <div>
@@ -420,7 +420,7 @@ function subusersPage() {
         <h3 id="editSubUserTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('editPermissions') %></h3>
         <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)" x-text="editName"></p>
       </div>
-      <button type="button" @click="showEdit = false" aria-label="Close" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
+      <button type="button" @click="showEdit = false" aria-label="<%= t('close') %>" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
       <div>

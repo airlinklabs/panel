@@ -535,7 +535,7 @@ function serverEditPage() {
 
     function syncPortsButton() {
       serverPortsInput.value = JSON.stringify(assignedPorts);
-      document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? `Assign ports (${assignedPorts.length})` : 'Assign ports';
+      document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? (req.translations.assignPorts || 'Assign ports') + ' (' + assignedPorts.length + ')' : (req.translations.assignPorts || 'Assign ports');
     }
 
     function renderPortRows() {
@@ -566,9 +566,9 @@ function serverEditPage() {
       // Optimistically revert the toggle; only flip it back on confirm.
       this.checked = false;
       window.modal.confirm({
-        title: 'Suspend server?',
-        body: 'The server will be stopped and the owner will not be able to start it. You can unsuspend at any time.',
-        danger: true, confirmLabel: 'Suspend',
+        title: req.translations.suspendServer || 'Suspend server?',
+        body: req.translations.suspendServerConfirm || 'The server will be stopped and the owner will not be able to start it. You can unsuspend at any time.',
+        danger: true, confirmLabel: req.translations.suspend || 'Suspend',
         onConfirm: function () {
           suspendServerToggle.checked = true;
           doSuspend('suspend', suspendServerToggle);
@@ -588,10 +588,10 @@ function serverEditPage() {
           throw new Error((await response.json()).error || 'Request failed');
         }
 
-        suspendServerLabel.textContent = action === 'suspend' ? 'Suspended' : 'Active';
+        suspendServerLabel.textContent = action === 'suspend' ? (req.translations.suspended || 'Suspended') : (req.translations.active || 'Active');
         const statusText = document.getElementById('serverStatusText');
         if (statusText) {
-          statusText.textContent = action === 'suspend' ? 'Suspended' : 'Active';
+          statusText.textContent = action === 'suspend' ? (req.translations.suspended || 'Suspended') : (req.translations.active || 'Active');
           statusText.style.color = action === 'suspend' ? 'var(--theme-danger)' : 'var(--theme-success)';
         }
         const statusCircle = document.getElementById('serverStatusCircle');
@@ -603,8 +603,8 @@ function serverEditPage() {
         }
       } catch (err) {
         toggle.checked = action === 'unsuspend';
-        suspendServerLabel.textContent = action === 'suspend' ? 'Active' : 'Suspended';
-        showToast('Failed to ' + action + ' server: ' + (err.message || 'unknown error'), 'error');
+        suspendServerLabel.textContent = action === 'suspend' ? (req.translations.active || 'Active') : (req.translations.suspended || 'Suspended');
+        showToast((req.translations.failedTo || 'Failed to ') + action + (req.translations.serverLowercase || ' server: ') + (err.message || (req.translations.unknownError || 'unknown error')), 'error');
       }
     }
 
@@ -625,8 +625,8 @@ function serverEditPage() {
         data.Suspended = 'false';
       }
 
-      const loader = showLoadingPopup('Updating Server', 'Processing server update...');
-      loader.updateProgress(20, 'Sending server configuration...');
+      const loader = showLoadingPopup(req.translations.updatingServer || 'Updating Server', req.translations.processingServerUpdate || 'Processing server update...');
+      loader.updateProgress(20, req.translations.sendingServerConfig || 'Sending server configuration...');
 
       try {
         const response = await fetch('/api/v2/admin/servers/<%= server.id %>', {
@@ -641,21 +641,21 @@ function serverEditPage() {
         const result = await response.json();
 
         if (response.ok) {
-          loader.updateProgress(100, 'Server updated successfully!');
+          loader.updateProgress(100, req.translations.serverUpdatedSuccessfully || 'Server updated successfully!');
           setTimeout(() => {
             loader.close();
-            showToast('Server updated successfully!', 'success');
+            showToast(req.translations.serverUpdatedSuccessfully || 'Server updated successfully!', 'success');
             setTimeout(() => {
               window.location.href = '/admin/servers';
             }, 1000);
           }, 500);
         } else {
           loader.close();
-          showToast('Failed to update server: ' + (result.error || 'Unknown error'), 'error');
+          showToast((req.translations.failedToUpdateServer || 'Failed to update server: ') + (result.error || (req.translations.unknownError || 'Unknown error')), 'error');
         }
       } catch (error) {
         loader.close();
-        showToast('Failed to update server: ' + error.message, 'error');
+        showToast((req.translations.failedToUpdateServer || 'Failed to update server: ') + error.message, 'error');
       }
     });
 </script>
@@ -682,16 +682,16 @@ function serverEditPage() {
     const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
 
     const statusSteps = {
-      'pending': { text: 'Queued...' },
-      'stopping': { text: 'Stopping server on source node...' },
-      'archiving': { text: 'Archiving server files...' },
-      'transferring': { text: 'Streaming data to destination...' },
-      'restoring': { text: 'Restoring files on destination...' },
-      'installing': { text: 'Installing server on destination...' },
-      'updating-db': { text: 'Updating database records...' },
-      'starting': { text: 'Starting server on destination...' },
-      'completed': { text: 'Transfer complete!' },
-      'failed': { text: 'Transfer failed' },
+      'pending': { text: req.translations.queued || 'Queued...' },
+      'stopping': { text: req.translations.stoppingServerOnSource || 'Stopping server on source node...' },
+      'archiving': { text: req.translations.archivingServerFiles || 'Archiving server files...' },
+      'transferring': { text: req.translations.streamingDataToDestination || 'Streaming data to destination...' },
+      'restoring': { text: req.translations.restoringFilesOnDestination || 'Restoring files on destination...' },
+      'installing': { text: req.translations.installingServerOnDestination || 'Installing server on destination...' },
+      'updating-db': { text: req.translations.updatingDatabaseRecords || 'Updating database records...' },
+      'starting': { text: req.translations.startingServerOnDestination || 'Starting server on destination...' },
+      'completed': { text: req.translations.transferComplete || 'Transfer complete!' },
+      'failed': { text: req.translations.transferFailed || 'Transfer failed' },
     };
 
     async function fetchNodesData() {
@@ -787,7 +787,7 @@ function serverEditPage() {
         `;
       });
 
-      transferPortsContainer.innerHTML = html || '<p class="text-xs text-neutral-500">No ports configured.</p>';
+      transferPortsContainer.innerHTML = html || '<p class="text-xs text-neutral-500">' + (req.translations.noPortsConfigured || 'No ports configured.') + '</p>';
       addTransferPortBtn.classList.toggle('hidden', transferPorts.length === 0);
       updateConfirmButton();
     }
@@ -866,7 +866,7 @@ function serverEditPage() {
       if (!nodeId || transferPorts.length === 0) return;
 
       confirmTransferBtn.disabled = true;
-      confirmTransferBtn.textContent = 'Starting transfer...';
+      confirmTransferBtn.textContent = req.translations.startingTransfer || 'Starting transfer...';
 
       try {
         const response = await fetch('/api/v2/admin/servers/<%= server.id %>/transfer', {
@@ -878,16 +878,16 @@ function serverEditPage() {
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(result.error || 'Failed to start transfer');
+          throw new Error(result.error || (req.translations.failedToStartTransfer || 'Failed to start transfer'));
         }
 
         closeTransferModal();
         startTransferPolling();
-        showToast('Transfer started!', 'success');
+        showToast(req.translations.transferStarted || 'Transfer started!', 'success');
       } catch (err) {
-        showToast('Failed to start transfer: ' + (err.message || 'unknown error'), 'error');
+        showToast((req.translations.failedToStartTransfer || 'Failed to start transfer: ') + (err.message || (req.translations.unknownError || 'unknown error')), 'error');
         confirmTransferBtn.disabled = false;
-        confirmTransferBtn.innerHTML = '<%- icon("arrow-right-left", { size: 14, class: "shrink-0" }) %>Transfer Server';
+        confirmTransferBtn.innerHTML = '<%- icon("arrow-right-left", { size: 14, class: "shrink-0" }) %>' + (req.translations.transferServer || 'Transfer Server');
       }
     });
 
@@ -915,9 +915,9 @@ function serverEditPage() {
 
         if (state.status === 'completed') {
           clearInterval(pollInterval);
-          transferStatusText.textContent = 'Transfer complete!';
+          transferStatusText.textContent = req.translations.transferComplete || 'Transfer complete!';
           transferStatusDetail.textContent = '';
-          showToast('Transfer complete!', 'success');
+          showToast(req.translations.transferComplete || 'Transfer complete!', 'success');
         } else if (state.status === 'failed') {
           clearInterval(pollInterval);
         }

@@ -8,9 +8,9 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Settings' }
+        { label: t('settings') }
       ] }) %>
       <!-- Page Header: title + meta left -->
       <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-4">
@@ -45,26 +45,26 @@
             </div>
             <div>
               <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('images') %></h3>
-              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.image.name || 'Unknown' %></p>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.image.name || t('unknown') %></p>
             </div>
             <div>
               <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('memory') %></h3>
-              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Memory === 0 ? 'Unlimited' : (server.Memory >= 1024 ? (server.Memory / 1024).toFixed(1) + ' GB' : server.Memory + ' MB') %></p>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Memory === 0 ? t('unlimited') : (server.Memory >= 1024 ? (server.Memory / 1024).toFixed(1) + ' GB' : server.Memory + ' MB') %></p>
             </div>
             <div>
               <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('cpu') %></h3>
-              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Cpu === 0 ? 'Unlimited' : (server.Cpu / 100).toFixed(1) + ' cores' %></p>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Cpu === 0 ? t('unlimited') : (server.Cpu / 100).toFixed(1) + ' ' + t('coresLabel') %></p>
             </div>
             <div>
               <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('storage') %></h3>
-              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Storage === 0 ? 'Unlimited' : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
+              <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Storage === 0 ? t('unlimited') : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
             </div>
             <div>
               <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('statusColumn') %></h3>
               <p class="text-[13px]" style="color:var(--theme-text-muted)">
                 <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
                   style="<%= server.Suspended ? 'background:var(--theme-warning-bg);color:var(--theme-warning);--tw-ring-color:color-mix(in srgb, var(--theme-warning) 25%, transparent)' : 'background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent)' %>">
-                  <%= server.Suspended ? 'Suspended' : 'Active' %>
+                  <%= server.Suspended ? t('suspendedLabel') : t('activeLabel') %>
                 </span>
               </p>
             </div>
@@ -123,14 +123,14 @@
     if (deleteServerButton) {
       deleteServerButton.addEventListener('click', () => {
         window.modal.confirm({
-          title: 'Delete Server',
-          body: 'This will permanently delete the server and all its data. Type <strong>DELETE</strong> to confirm.',
+          title: '<%= req.translations.deleteServer || "Delete Server" %>',
+          body: '<%= req.translations.deleteServerConfirm || "This will permanently delete the server and all its data. Type" %> <strong>DELETE</strong> <%= req.translations.toConfirm || "to confirm." %>',
           danger: true,
-          confirmLabel: 'Delete Server',
-          prompt: { label: 'Type DELETE to confirm', pattern: /^DELETE$/i, invalidMessage: 'You must type DELETE to confirm.' },
+          confirmLabel: '<%= req.translations.deleteServer || "Delete Server" %>',
+          prompt: { label: '<%= req.translations.typeDeleteToConfirm || "Type DELETE to confirm" %>', pattern: /^DELETE$/i, invalidMessage: '<%= req.translations.mustTypeDelete || "You must type DELETE to confirm." %>' },
           onConfirm: () => {
-            const loader = showProgressToast ? showProgressToast('Deleting Server…') : showLoadingToast('Deleting Server...');
-            loader.updateProgress(20, 'Contacting node...');
+            const loader = showProgressToast ? showProgressToast('<%= req.translations.deletingServer || "Deleting Server\u2026" %>') : showLoadingToast('<%= req.translations.deletingServer || "Deleting Server..." %>');
+            loader.updateProgress(20, '<%= req.translations.contactingNode || "Contacting node..." %>');
             <% if (user && user.isAdmin) { %>
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
             fetch('/api/v2/admin/servers/<%= server.id %>', {
@@ -140,14 +140,14 @@
               .then(r => {
                 loader.close();
                 if (r.ok) window.location.href = '/';
-                else return r.json().then(d => showToast((d && d.error) || "Couldn't delete the server.", 'error'));
+                else return r.json().then(d => showToast((d && d.error) || '<%= req.translations.couldntDeleteServer || "Couldn\u0027t delete the server." %>', 'error'));
               })
-              .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
+              .catch(() => { loader.close(); showToast('<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error'); });
             <% } else { %>
             fetch('/api/v2/servers/<%= server.UUID %>', { method: 'DELETE' })
               .then(r => r.json())
-              .then(d => { loader.close(); if (d.success) window.location.href = '/'; else showToast(d.error || "Couldn't delete the server.", 'error'); })
-              .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
+              .then(d => { loader.close(); if (d.success) window.location.href = '/'; else showToast(d.error || '<%= req.translations.couldntDeleteServer || "Couldn\u0027t delete the server." %>', 'error'); })
+              .catch(() => { loader.close(); showToast('<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error'); });
             <% } %>
           }
         });
@@ -158,18 +158,18 @@
     reinstallButton.addEventListener('click', () => {
       window.modal.confirm({
         title: '<%= req.translations.confirmReinstallation || "Confirm Reinstallation" %>',
-        body: 'Re-run the install scripts. Your files, worlds and settings are kept. Continue?',
+        body: '<%= req.translations.reinstallConfirm || "Re-run the install scripts. Your files, worlds and settings are kept. Continue?" %>',
         confirmLabel: '<%= req.translations.reinstall || "Reinstall" %>',
         onConfirm: () => {
-          const loader = showProgressToast ? showProgressToast('Reinstalling Server…') : showLoadingToast('Reinstalling Server...');
-          loader.updateProgress(10, 'Preparing for reinstallation...');
+          const loader = showProgressToast ? showProgressToast('<%= req.translations.reinstallingServer || "Reinstalling Server\u2026" %>') : showLoadingToast('<%= req.translations.reinstallingServer || "Reinstalling Server..." %>');
+          loader.updateProgress(10, '<%= req.translations.preparingReinstall || "Preparing for reinstallation..." %>');
           fetch(`/api/v2/servers/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: true }) })
             .then(r => r.json())
             .then(data => {
-              loader.updateProgress(100, 'Reinstallation initiated!');
-              setTimeout(() => { loader.close(); if (data.success) showToast('Server reinstalling. This may take a while.', 'success'); else showToast('Failed to reinstall server: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
+              loader.updateProgress(100, '<%= req.translations.reinstallationInitiated || "Reinstallation initiated!" %>');
+              setTimeout(() => { loader.close(); if (data.success) showToast('<%= req.translations.serverReinstalling || "Server reinstalling. This may take a while." %>', 'success'); else showToast('<%= req.translations.failedToReinstall || "Failed to reinstall server: " %>' + (data.error || '<%= req.translations.unknownError || "Unknown error" %>'), 'error'); }, 1000);
             })
-            .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
+            .catch(() => { loader.close(); showToast('<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error'); });
         }
       });
     });
@@ -178,20 +178,20 @@
     if (reinstallWipeButton) {
       reinstallWipeButton.addEventListener('click', () => {
         window.modal.confirm({
-          title: 'Reinstall & Delete All Data',
-          body: 'This wipes the server volume (worlds, configs, files) and reinstalls from scratch. Type <strong>DELETE</strong> to confirm.',
-          danger: true, confirmLabel: 'Continue',
-          prompt: { label: 'Type DELETE to confirm', pattern: /^DELETE$/i, invalidMessage: 'You must type DELETE to confirm.' },
+          title: '<%= req.translations.reinstallDeleteAllData || "Reinstall & Delete All Data" %>',
+          body: '<%= req.translations.reinstallDeleteAllDataConfirm || "This wipes the server volume (worlds, configs, files) and reinstalls from scratch. Type" %> <strong>DELETE</strong> <%= req.translations.toConfirm || "to confirm." %>',
+          danger: true, confirmLabel: '<%= req.translations.continue || "Continue" %>',
+          prompt: { label: '<%= req.translations.typeDeleteToConfirm || "Type DELETE to confirm" %>', pattern: /^DELETE$/i, invalidMessage: '<%= req.translations.mustTypeDelete || "You must type DELETE to confirm." %>' },
           onConfirm: () => {
-                const loader = showProgressToast ? showProgressToast('Reinstalling Server…') : showLoadingToast('Reinstalling Server...');
-            loader.updateProgress(10, 'Preparing for reinstallation...');
+                const loader = showProgressToast ? showProgressToast('<%= req.translations.reinstallingServer || "Reinstalling Server\u2026" %>') : showLoadingToast('<%= req.translations.reinstallingServer || "Reinstalling Server..." %>');
+            loader.updateProgress(10, '<%= req.translations.preparingReinstall || "Preparing for reinstallation..." %>');
             fetch(`/api/v2/servers/<%= server.UUID %>/reinstall`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ preserveData: false }) })
               .then(r => r.json())
               .then(data => {
-                loader.updateProgress(100, 'Reinstallation initiated!');
-                setTimeout(() => { loader.close(); if (data.success) showToast('Server reinstalling. All data was deleted.', 'success'); else showToast('Failed to reinstall server: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
+                loader.updateProgress(100, '<%= req.translations.reinstallationInitiated || "Reinstallation initiated!" %>');
+                setTimeout(() => { loader.close(); if (data.success) showToast('<%= req.translations.serverReinstallingAllDataDeleted || "Server reinstalling. All data was deleted." %>', 'success'); else showToast('<%= req.translations.failedToReinstall || "Failed to reinstall server: " %>' + (data.error || '<%= req.translations.unknownError || "Unknown error" %>'), 'error'); }, 1000);
               })
-              .catch(() => { loader.close(); showToast('Something went wrong.', 'error'); });
+              .catch(() => { loader.close(); showToast('<%= req.translations.somethingWentWrong || "Something went wrong." %>', 'error'); });
           }
         });
       });

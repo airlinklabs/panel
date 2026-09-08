@@ -4,6 +4,7 @@ import prisma from '../../db';
 import { getSessionStore } from '../sessionStore';
 import { daemonScheme } from '../utils/core/daemonRequest';
 import logger from '../logger';
+import { logT } from '../../services/i18n';
 
 /**
  * Parses the raw signed session ID from a connect.sid cookie value.
@@ -122,7 +123,7 @@ export function attachNodeStatsWs(server: Server): void {
       daemonWs = new WebSocket(wsUrl);
     } catch (err) {
       logger.warn(
-        `nodestats ws connect failed for node ${nodeId}`,
+        logT('log.nodestatsConnectFailed', { nodeId: String(nodeId) }),
         err as Record<string, unknown>,
       );
       ws.close(1011, 'could not connect to daemon');
@@ -143,7 +144,10 @@ export function attachNodeStatsWs(server: Server): void {
           const parsed = JSON.parse(msg);
           if (parsed.error) {
             logger.warn(
-              `nodestats ws auth failed for node ${nodeId}: ${parsed.error}`,
+              logT('log.nodestatsAuthFailed', {
+                nodeId: String(nodeId),
+                error: parsed.error,
+              }),
             );
             ws.close(1008, 'daemon auth failed');
             daemonWs.close();
@@ -159,14 +163,25 @@ export function attachNodeStatsWs(server: Server): void {
     });
 
     daemonWs.on('error', (err) => {
-      logger.warn(`nodestats ws error for node ${nodeId}: ${err.message}`);
+      logger.warn(
+        logT('log.nodestatsWsError', {
+          nodeId: String(nodeId),
+          error: err.message,
+        }),
+      );
       if (ws.readyState === WebSocket.OPEN) {
         ws.close(1011, 'daemon connection error');
       }
     });
 
     daemonWs.on('close', (code, reason) => {
-      logger.info(`nodestats ws closed for node ${nodeId}: ${code} ${reason}`);
+      logger.info(
+        logT('log.nodestatsWsClosed', {
+          nodeId: String(nodeId),
+          code: String(code),
+          reason: String(reason),
+        }),
+      );
       if (ws.readyState === WebSocket.OPEN) {
         ws.close(1000, 'daemon disconnected');
       }
@@ -191,5 +206,5 @@ export function attachNodeStatsWs(server: Server): void {
     });
   });
 
-  logger.info('node stats ws proxy attached');
+  logger.info(logT('log.nodestatsProxyAttached'));
 }

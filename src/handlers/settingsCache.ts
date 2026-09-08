@@ -1,8 +1,8 @@
-import prisma from "../db";
-import { cache } from "./cache";
-import { SETTINGS_CACHE_TTL_S } from "../config/timeouts";
+import prisma from '../db';
+import { cache } from './cache';
+import { SETTINGS_CACHE_TTL_S } from '../config/timeouts';
 
-const SETTINGS_KEY = "settings:main";
+const SETTINGS_KEY = 'settings:main';
 
 /**
  * Get panel settings with Redis cache. Settings are read on virtually

@@ -1,4 +1,5 @@
 import logger from './logger';
+import { logT } from '../services/i18n';
 
 export const SLOT_IDS = [
   'dashboard.home.beforeContent',
@@ -54,7 +55,7 @@ class SlotRegistry {
     render: SlotContribution['render'],
   ): void {
     if (!SLOT_IDS.includes(slotId)) {
-      logger.warn(`Unknown slot "${slotId}" from addon "${addonSlug}"`);
+      logger.warn(logT('log.addonUnknownSlot', { slotId, addonSlug }));
       return;
     }
 
@@ -108,7 +109,10 @@ class SlotRegistry {
         }
       } catch (err: any) {
         logger.error(
-          `Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`,
+          logT('log.addonSlotRenderError', {
+            slotId,
+            addonSlug: contrib.addonSlug,
+          }),
           err.message,
         );
       }
@@ -131,7 +135,10 @@ class SlotRegistry {
         }
       } catch (err: any) {
         logger.error(
-          `Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`,
+          logT('log.addonSlotRenderError', {
+            slotId,
+            addonSlug: contrib.addonSlug,
+          }),
           err.message,
         );
       }

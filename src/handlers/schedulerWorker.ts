@@ -1,15 +1,15 @@
-import CronParser from "cron-parser";
-import prisma from "../db";
-import { daemonRequest, type HttpResponse } from "./utils/core/daemonRequest";
+import CronParser from 'cron-parser';
+import prisma from '../db';
+import { daemonRequest, type HttpResponse } from './utils/core/daemonRequest';
 import {
   stopServerContainer,
   type ServerRuntimeConfig,
   type ServerPageServer,
-} from "../modules/user/server/shared";
-import { persistBackupRecord } from "../modules/user/server/backups";
-import { runtimeStartQueue } from "./runtimeQueue";
-import logger from "./logger";
-import { logT } from "../services/i18n";
+} from '../modules/user/server/shared';
+import { persistBackupRecord } from '../modules/user/server/backups';
+import { runtimeStartQueue } from './runtimeQueue';
+import logger from './logger';
+import { logT } from '../services/i18n';
 
 export interface ScheduleWithRelations {
   id: number;
@@ -22,7 +22,7 @@ export interface ScheduleWithRelations {
   nextRunAt: Date | null;
   createdAt: Date;
   server: ServerRuntimeConfig &
-    Pick<ServerPageServer, "image" | "UUID"> & { Suspended: boolean };
+    Pick<ServerPageServer, 'image' | 'UUID'> & { Suspended: boolean };
   tasks: { id: number; action: string; payload: string; timeOffset: number }[];
 }
 
@@ -32,15 +32,15 @@ export interface ScheduleRunResult {
 }
 
 function describeDaemonError(
-  resp: Pick<HttpResponse, "status" | "data">,
+  resp: Pick<HttpResponse, 'status' | 'data'>,
 ): string {
-  if (typeof resp.data === "object" && resp.data !== null) {
+  if (typeof resp.data === 'object' && resp.data !== null) {
     const data = resp.data as { error?: unknown; detail?: unknown };
     const parts = [data.error, data.detail].filter(
-      (v): v is string => typeof v === "string" && v.trim() !== "",
+      (v): v is string => typeof v === 'string' && v.trim() !== '',
     );
     if (parts.length > 0) {
-      return parts.join(" — ");
+      return parts.join(' — ');
     }
   }
   return `HTTP ${resp.status}`;
@@ -50,11 +50,11 @@ function describeThrownError(err: unknown): string {
   if (err instanceof Error) {
     if (err.cause !== undefined) {
       const cause =
-        typeof err.cause === "string"
+        typeof err.cause === 'string'
           ? err.cause
           : err.cause instanceof Error
             ? err.cause.message
-            : "";
+            : '';
       if (cause) {
         return `${err.message} (${cause})`;
       }
@@ -72,7 +72,7 @@ export async function runSchedule(
   for (const task of schedule.tasks) {
     let payload: Record<string, unknown>;
     try {
-      payload = JSON.parse(task.payload || "{}") as Record<string, unknown>;
+      payload = JSON.parse(task.payload || '{}') as Record<string, unknown>;
     } catch {
       errors.push(`task ${task.id}: invalid payload`);
       continue;
@@ -86,7 +86,7 @@ export async function runSchedule(
 
     if (schedule.server.Suspended) {
       logger.warn(
-        logT("log.scheduleSkippedSuspended", {
+        logT('log.scheduleSkippedSuspended', {
           id: schedule.id,
           uuid: schedule.server.UUID,
         }),
@@ -95,28 +95,28 @@ export async function runSchedule(
     }
 
     try {
-      if (task.action === "command") {
+      if (task.action === 'command') {
         const resp = await daemonRequest({
-          method: "POST",
-          path: "/container/command",
+          method: 'POST',
+          path: '/container/command',
           nodeAddress: schedule.server.node.address,
           nodePort: schedule.server.node.port,
           nodeKey: schedule.server.node.key,
           body: {
             id: schedule.server.UUID,
-            command: String(payload.command ?? ""),
+            command: String(payload.command ?? ''),
           },
         });
         if (resp.status >= 400) {
           errors.push(`task ${task.id}: ${describeDaemonError(resp)}`);
         }
-      } else if (task.action === "power") {
-        const action = String(payload.action ?? "");
-        if (!["start", "stop", "restart", "kill"].includes(action)) {
+      } else if (task.action === 'power') {
+        const action = String(payload.action ?? '');
+        if (!['start', 'stop', 'restart', 'kill'].includes(action)) {
           errors.push(`task ${task.id}: invalid power action "${action}"`);
           continue;
         }
-        if (action === "start") {
+        if (action === 'start') {
           try {
             // Scheduled starts also pass through the capacity-aware queue; the
             // queue processor grants them when the node has room.
@@ -132,12 +132,12 @@ export async function runSchedule(
           } catch (err) {
             errors.push(`task ${task.id}: ${describeThrownError(err)}`);
           }
-        } else if (action === "restart") {
+        } else if (action === 'restart') {
           try {
             await stopServerContainer(
               schedule.server,
               schedule.server.UUID,
-              "stop",
+              'stop',
               { releaseResources: false },
             ).catch(() => {
               /* noop */
@@ -155,9 +155,9 @@ export async function runSchedule(
             errors.push(`task ${task.id}: ${describeThrownError(err)}`);
           }
         } else {
-          const method = action === "kill" ? "DELETE" : "POST";
+          const method = action === 'kill' ? 'DELETE' : 'POST';
           const path =
-            action === "kill" ? "/container/kill" : `/container/${action}`;
+            action === 'kill' ? '/container/kill' : `/container/${action}`;
           const resp = await daemonRequest({
             method,
             path,
@@ -168,7 +168,7 @@ export async function runSchedule(
           });
           if (resp.status >= 400) {
             errors.push(`task ${task.id}: ${describeDaemonError(resp)}`);
-          } else if (action === "stop" || action === "kill") {
+          } else if (action === 'stop' || action === 'kill') {
             await prisma.server
               .update({
                 where: { UUID: schedule.server.UUID },
@@ -180,7 +180,7 @@ export async function runSchedule(
             runtimeStartQueue.cleanCapacityFreed().catch(() => undefined);
           }
         }
-      } else if (task.action === "backup") {
+      } else if (task.action === 'backup') {
         const name = String(payload.name ?? `scheduled-${Date.now()}`);
         const resp = await daemonRequest<{
           success: boolean;
@@ -193,8 +193,8 @@ export async function runSchedule(
             checksum?: string;
           };
         }>({
-          method: "POST",
-          path: "/container/backup",
+          method: 'POST',
+          path: '/container/backup',
           nodeAddress: schedule.server.node.address,
           nodePort: schedule.server.node.port,
           nodeKey: schedule.server.node.key,
@@ -207,7 +207,7 @@ export async function runSchedule(
           errors.push(`task ${task.id}: ${describeDaemonError(resp)}`);
         } else if (resp.data?.success === false) {
           errors.push(
-            `task ${task.id}: ${typeof resp.data.error === "string" && resp.data.error.trim() !== "" ? resp.data.error : "backup failed"}`,
+            `task ${task.id}: ${typeof resp.data.error === 'string' && resp.data.error.trim() !== '' ? resp.data.error : 'backup failed'}`,
           );
         } else if (resp.data?.success && resp.data.backup?.uuid) {
           try {
@@ -218,7 +218,7 @@ export async function runSchedule(
               filePath: resp.data.backup.filePath,
               size: BigInt(resp.data.backup.size ?? 0),
               checksum:
-                typeof resp.data.backup.checksum === "string"
+                typeof resp.data.backup.checksum === 'string'
                   ? resp.data.backup.checksum
                   : null,
               airlinkCloudId: null,
@@ -247,7 +247,7 @@ export function startScheduler(): void {
       const due = await prisma.schedule.findMany({
         where: { enabled: true, nextRunAt: { lte: now } },
         include: {
-          tasks: { orderBy: { order: "asc" } },
+          tasks: { orderBy: { order: 'asc' } },
           server: { include: { node: true, image: true } },
         },
       });
@@ -257,7 +257,7 @@ export function startScheduler(): void {
           const result = await runSchedule(schedule);
           if (!result.ok) {
             logger.warn(
-              logT("log.scheduleCompletedWithErrors", { id: schedule.id }),
+              logT('log.scheduleCompletedWithErrors', { id: schedule.id }),
               {
                 errors: result.errors,
               },
@@ -277,11 +277,11 @@ export function startScheduler(): void {
             },
           });
         } catch (err) {
-          logger.error(logT("log.scheduleFailed", { id: schedule.id }), err);
+          logger.error(logT('log.scheduleFailed', { id: schedule.id }), err);
         }
       }
     } catch (err) {
-      logger.error(logT("log.schedulerPollFailed"), err);
+      logger.error(logT('log.schedulerPollFailed'), err);
     }
   }, 30_000);
 }

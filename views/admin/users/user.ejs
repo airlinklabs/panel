@@ -61,7 +61,7 @@
                  </div>
                  <div>
                      <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('description') %></p>
-                    <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.description || 'No description provided' %></p>
+                     <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.description || t('noDescriptionProvided') %></p>
                  </div>
                </div>
              </div>
@@ -71,7 +71,7 @@
                </h2>
                <div class="space-y-4">
                  <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.totalServers || 'Total Servers' %></p>
+                     <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('totalServers') %></p>
                     <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.servers ? dataUser.servers.length : 0 %></p>
                  </div>
                </div>

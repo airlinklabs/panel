@@ -16,4 +16,4 @@ export const RPM_MAX = 10_000;
 export const LOGIN_ATTEMPTS_MAX = 100;
 export const LOCKOUT_MINUTES_MAX = 1440;
 export const MAX_API_KEYS_PER_USER = 25;
-export const RP_NAME = "Airlink";
+export const RP_NAME = 'Airlink';

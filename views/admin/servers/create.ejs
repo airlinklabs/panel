@@ -355,13 +355,13 @@ function serverCreatePage() {
 
         function syncPortsButton() {
           serverPortsInput.value = JSON.stringify(assignedPorts);
-          document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? `Assign ports (${assignedPorts.length})` : 'Assign ports';
+          document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? (req.translations.assignPorts || 'Assign ports') + ' (' + assignedPorts.length + ')' : (req.translations.assignPorts || 'Assign ports');
         }
 
         function renderPortRows() {
           if (!window.PortsAllocator) return;
           PortsAllocator.open({
-            title: 'Assign ports',
+            title: (req.translations.assignPorts || 'Assign ports'),
             requirements: getPortRequirements(),
             assignedPorts: assignedPorts,
             availablePorts: availablePorts,
@@ -377,7 +377,7 @@ function serverCreatePage() {
         function updateDockerImages() {
           const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
           const dockerImages = parseJson(selectedOption?.getAttribute('data-docker-images'), []);
-          dockerImageSelect.innerHTML = '<option value="" disabled selected>Select a Docker image</option>';
+          dockerImageSelect.innerHTML = '<option value="" disabled selected>' + (req.translations.selectDockerImage || 'Select a Docker image') + '</option>';
           dockerImages.forEach(imageObj => {
             Object.entries(imageObj).forEach(([key, value]) => {
               const option = document.createElement('option');
@@ -455,8 +455,8 @@ function serverCreatePage() {
           const data = Object.fromEntries(formData);
           data.variables = variablesArray;
           data.ports = assignedPorts;
-          const loader = showLoadingPopup('Creating Server', 'Initializing server creation...');
-          loader.updateProgress(20, 'Sending server configuration...');
+          const loader = showLoadingPopup(req.translations.creatingServer || 'Creating Server', req.translations.initializingServerCreation || 'Initializing server creation...');
+          loader.updateProgress(20, req.translations.sendingServerConfig || 'Sending server configuration...');
           fetch('/api/v2/admin/servers', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }, body: JSON.stringify(data),
           })
@@ -465,10 +465,10 @@ function serverCreatePage() {
               return response;
             })
             .then(data => {
-              loader.updateProgress(100, 'Server created successfully!');
-              setTimeout(() => { loader.close(); showToast('Server deployed. Go make something cool.', 'success'); setTimeout(() => { window.location.href = '/admin/servers'; }, 1000); }, 500);
+              loader.updateProgress(100, req.translations.serverCreatedSuccessfully || 'Server created successfully!');
+              setTimeout(() => { loader.close(); showToast(req.translations.serverDeployed || 'Server deployed. Go make something cool.', 'success'); setTimeout(() => { window.location.href = '/admin/servers'; }, 1000); }, 500);
             })
-            .catch(error => { loader.close(); console.error('Error:', error); showToast('Failed to create server: ' + error.message, 'error'); });
+            .catch(error => { loader.close(); console.error('Error:', error); showToast((req.translations.failedToCreateServer || 'Failed to create server: ') + error.message, 'error'); });
         });
 
         fetchNodesData();

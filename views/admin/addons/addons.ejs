@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Addons' }) %>
+<%- include('../../components/header', { title: t('addonsTitle') }) %>
 <%- include('../../components/loading-popup') %>
 
 <style>
@@ -12,39 +12,39 @@
     <div id="page-content" x-data="addonManager()" class="flex-1 overflow-y-auto pt-0 pb-12">
 
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Addons' }
+        { label: t('admin') },
+        { label: t('addonsTitle') }
       ] }) %>
 
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title">Addons</h1>
-          <p class="al-page-desc">Manage installed addons and browse the store</p>
+          <h1 class="al-page-title"><%= t('addonsTitle') %></h1>
+          <p class="al-page-desc"><%= t('addonsDesc') %></p>
         </div>
         <div class="flex gap-2 shrink-0">
-          <button id="reloadBtn" type="button" class="al-btn-secondary"><%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %>Reload</button>
+          <button id="reloadBtn" type="button" class="al-btn-secondary"><%- icon('refresh-cw', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('addonReload') %></button>
         </div>
       </div>
 
       <div class="al-page-body">
       <div class="flex">
-        <span class="px-3 py-2 mr-4 text-sm font-medium rounded-lg" style="background:var(--theme-primary);color:var(--theme-accent-text)">Installed <span class="ml-1 text-xs" style="color:var(--theme-text-muted)"><%= addons ? addons.length : 0 %></span></span>
-        <a href="/admin/addons/store" class="px-3 py-2 text-sm font-medium" style="color:var(--theme-text-muted)">Store</a>
+        <span class="px-3 py-2 mr-4 text-sm font-medium rounded-lg" style="background:var(--theme-primary);color:var(--theme-accent-text)"><%= t('addonInstalledTab') %> <span class="ml-1 text-xs" style="color:var(--theme-text-muted)"><%= addons ? addons.length : 0 %></span></span>
+        <a href="/admin/addons/store" class="px-3 py-2 text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('addonStoreTab') %></a>
       </div>
 
       <% if (!addonTableExists) { %>
       <div class="mt-5 rounded-xl bg-amber-600/20 dark:bg-amber-800/10 px-4 py-4 border-0 flex items-start gap-3" style="border-color:var(--theme-warning)">
         <%- icon('triangle-alert', { size: 20, class: 'mt-0.5 shrink-0', style: 'color:var(--theme-warning)' }) %>
         <div>
-          <p class="text-sm font-medium" style="color:var(--theme-warning);">Database migration required</p>
-          <p class="mt-1 text-xs" style="color:var(--theme-warning);opacity:0.8;">Run <code class="px-1 py-0.5 rounded font-mono bg-amber-500/10 dark:bg-amber-400/10">npm run migrate:dev</code> then restart.</p>
+          <p class="text-sm font-medium" style="color:var(--theme-warning);"><%= t('addonDatabaseMigrationRequired') %></p>
+          <p class="mt-1 text-xs" style="color:var(--theme-warning);opacity:0.8;"><%= t('addonMigrationHint', { code: 'npm run migrate:dev' }) %></p>
         </div>
       </div>
       <% } %>
 
       <% if (addons && addons.length > 0) { %>
       <div class="mt-5 mb-1">
-        <input id="addonSearchInput" type="text" placeholder="Filter addons…" aria-label="Search addons" class="al-input w-56">
+        <input id="addonSearchInput" type="text" placeholder="<%= t('addonFilterPlaceholder') %>" aria-label="<%= t('ariaSearchAddons') %>" class="al-input w-56">
       </div>
       <div class="overflow-x-auto shadow-sm rounded-xl mt-3 border" style="border-color:var(--theme-border)">
         <table class="al-table min-w-full">
@@ -56,10 +56,10 @@
           </colgroup>
           <thead class="al-table-head">
             <tr>
-              <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
-              <th class="al-table-th px-3 py-3.5 col-hide">Version</th>
-              <th class="al-table-th px-3 py-3.5 col-hide">Status</th>
-              <th class="al-table-th px-3 py-3.5">Actions</th>
+              <th class="al-table-th py-3.5 pl-6 pr-3"><%= t('name') %></th>
+              <th class="al-table-th px-3 py-3.5 col-hide"><%= t('version') %></th>
+              <th class="al-table-th px-3 py-3.5 col-hide"><%= t('status') %></th>
+              <th class="al-table-th px-3 py-3.5"><%= t('actions') %></th>
             </tr>
           </thead>
           <tbody class="divide-y" style="border-color:var(--theme-border)">
@@ -75,21 +75,21 @@
               <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide">v<%= addon.version %><% if (addon.author) { %> · <%= addon.author %><% } %></td>
               <td class="whitespace-nowrap px-3 py-4 text-sm col-hide">
                 <% if (addon.hasDisabledPh) { %>
-                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-warning-bg);color:var(--theme-warning);--tw-ring-color:color-mix(in srgb, var(--theme-warning) 25%, transparent);">Not enabled</span>
+                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-warning-bg);color:var(--theme-warning);--tw-ring-color:color-mix(in srgb, var(--theme-warning) 25%, transparent);"><%= t('addonNotEnabled') %></span>
                 <% } else if (addon.enabled) { %>
-                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent);">Enabled</span>
+                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent);"><%= t('addonEnabled') %></span>
                 <% } else { %>
-                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);box-shadow:inset 0 0 0 1px var(--theme-border)">Disabled</span>
+                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);box-shadow:inset 0 0 0 1px var(--theme-border)"><%= t('addonDisabled') %></span>
                 <% } %>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-2">
                   <button  @click="toggleAddon('<%= addon.slug %>', <%= !addon.enabled %>)" type="button"
                     class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">
-                    <%= addon.enabled ? 'Disable' : 'Enable' %>
+                    <%= addon.enabled ? t('addonDisable') : t('addonEnable') %>
                   </button>
                   <button  @click="confirmUninstall('<%= addon.slug %>', '<%= addon.name %>')" type="button"
-                    class="al-btn-danger" aria-label="Uninstall <%= addon.name %>">
+                    class="al-btn-danger" aria-label="<%= t('addonUninstallAria', { name: addon.name }) %>">
                     <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                   </button>
                 </div>
@@ -98,13 +98,13 @@
             <% }); %>
           </tbody>
         </table>
-        <div id="addonNoResults" class="hidden py-10 text-center text-sm" style="background:var(--theme-bg-card);color:var(--theme-text-muted)">No addons match your search.</div>
+        <div id="addonNoResults" class="hidden py-10 text-center text-sm" style="background:var(--theme-bg-card);color:var(--theme-text-muted)"><%= t('addonNoResults') %></div>
       </div>
       <% } else { %>
       <div class="flex flex-col items-center justify-center py-24 text-center">
-        <p class="text-sm" style="color:var(--theme-text-muted)"><% if (addonTableExists) { %>No addons installed<% } else { %>Migration required<% } %></p>
+        <p class="text-sm" style="color:var(--theme-text-muted)"><% if (addonTableExists) { %><%= t('addonNoInstalled') %><% } else { %><%= t('addonMigrationRequired') %><% } %></p>
         <% if (addonTableExists) { %>
-        <a href="/admin/addons/store" class="mt-4 al-btn-secondary inline-flex items-center gap-1.5"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %>Browse Store</a>
+        <a href="/admin/addons/store" class="mt-4 al-btn-secondary inline-flex items-center gap-1.5"><%- icon('store', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('addonBrowseStore') %></a>
         <% } %>
       </div>
       <% } %>
@@ -120,10 +120,10 @@ function addonManager() {
   return {
     init() {
       document.getElementById('reloadBtn').addEventListener('click', () => {
-        showLoadingPopup('Reloading addons…', 'Please wait…');
+        showLoadingPopup(req.translations.addonReloading || 'Reloading addons…', req.translations.pleaseWait || 'Please wait…');
         fetch('/api/v2/admin/addons/reload', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
-          .then(r => r.json()).then(data => { hideLoadingPopup(); showToast(data.message || (data.success ? 'Reloaded' : 'Failed'), data.success ? 'success' : 'error'); })
-          .catch(() => { hideLoadingPopup(); showToast('Something went wrong.', 'error'); });
+          .then(r => r.json()).then(data => { hideLoadingPopup(); showToast(data.message || (data.success ? (req.translations.addonReloaded || 'Reloaded') : (req.translations.failed || 'Failed')), data.success ? 'success' : 'error'); })
+          .catch(() => { hideLoadingPopup(); showToast(req.translations.somethingWentWrong || 'Something went wrong.', 'error'); });
       });
       const addonSearchInput = document.getElementById('addonSearchInput');
       if (addonSearchInput) {
@@ -141,15 +141,15 @@ function addonManager() {
       }
     },
     toggleAddon(slug, enable) {
-      showLoadingPopup('Updating addon…', 'Applying changes…');
+      showLoadingPopup(req.translations.addonUpdating || 'Updating addon…', req.translations.applyingChanges || 'Applying changes…');
       fetch('/api/v2/admin/addons/' + slug + '/toggle', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: enable.toString() }),
       }).then(r => r.json()).then(data => {
         hideLoadingPopup();
-        if (data.success) { showToast('Addon updated', 'success'); this.updateRow(slug, enable); }
-        else showToast(data.message || 'Failed', 'error');
-      }).catch(() => { hideLoadingPopup(); showToast('Something went wrong.', 'error'); });
+        if (data.success) { showToast(req.translations.addonUpdated || 'Addon updated', 'success'); this.updateRow(slug, enable); }
+        else showToast(data.message || (req.translations.failed || 'Failed'), 'error');
+      }).catch(() => { hideLoadingPopup(); showToast(req.translations.somethingWentWrong || 'Something went wrong.', 'error'); });
     },
     updateRow(slug, enabled) {
       const row = document.querySelector('[data-slug="' + slug + '"]');
@@ -157,24 +157,24 @@ function addonManager() {
       const badge = row.querySelector('.status-badge');
       if (badge) {
         badge.className = enabled ? BADGE_ENABLED : BADGE_DISABLED;
-        badge.textContent = enabled ? 'Enabled' : 'Disabled';
+        badge.textContent = enabled ? (req.translations.addonEnabled || 'Enabled') : (req.translations.addonDisabled || 'Disabled');
       }
       const btn = row.querySelector('.toggle-btn');
-      if (btn) { btn.textContent = enabled ? 'Disable' : 'Enable'; btn.onclick = () => this.toggleAddon(slug, !enabled); }
+      if (btn) { btn.textContent = enabled ? (req.translations.addonDisable || 'Disable') : (req.translations.addonEnable || 'Enable'); btn.onclick = () => this.toggleAddon(slug, !enabled); }
     },
     confirmUninstall(slug, name) {
       window.modal && window.modal.confirm
-        ? window.modal.confirm({ title: 'Uninstall Addon', body: 'Uninstall "' + name + '"? This cannot be undone.', danger: true, confirmLabel: 'Uninstall', onConfirm: () => this.uninstall(slug) })
+        ? window.modal.confirm({ title: req.translations.addonUninstallTitle || 'Uninstall Addon', body: (req.translations.addonUninstallConfirm || 'Uninstall "') + name + (req.translations.addonUninstallConfirmSuffix || '"? This cannot be undone.'), danger: true, confirmLabel: req.translations.addonUninstallAction || 'Uninstall', onConfirm: () => this.uninstall(slug) })
         : this.uninstall(slug);
     },
     uninstall(slug) {
-      showLoadingPopup('Uninstalling…', 'Removing files…');
+      showLoadingPopup(req.translations.addonUninstalling || 'Uninstalling…', req.translations.addonRemovingFiles || 'Removing files…');
       fetch('/api/v2/admin/addons/' + slug + '/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug }) })
         .then(r => r.json()).then(data => {
           hideLoadingPopup();
-          if (data.success) { showToast('Uninstalled', 'success'); const r = document.querySelector('[data-slug="' + slug + '"]'); if (r) r.remove(); }
-          else showToast(data.message || 'Failed', 'error');
-        }).catch(() => { hideLoadingPopup(); showToast('Something went wrong.', 'error'); });
+          if (data.success) { showToast(req.translations.addonUninstalled || 'Uninstalled', 'success'); const r = document.querySelector('[data-slug="' + slug + '"]'); if (r) r.remove(); }
+          else showToast(data.message || (req.translations.failed || 'Failed'), 'error');
+        }).catch(() => { hideLoadingPopup(); showToast(req.translations.somethingWentWrong || 'Something went wrong.', 'error'); });
     }
   };
 }

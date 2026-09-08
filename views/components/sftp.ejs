@@ -206,7 +206,7 @@
     document.getElementById('sftpValHost').textContent = data.host;
     document.getElementById('sftpValPort').textContent = data.port;
     document.getElementById('sftpValUser').textContent = data.username;
-    document.getElementById('sftpValPass').textContent = data.password || sftpPlainPassword || 'Regenerate to view';
+    document.getElementById('sftpValPass').textContent = data.password || sftpPlainPassword || (req.translations.regenerateToView || 'Regenerate to view');
     renderExpiry(data.expiresAt);
     showSftpState('credentials');
   }
@@ -266,7 +266,7 @@
     fetch('/api/v2/servers/' + SERVER_ID + '/sftp')
       .then(function (resp) {
         if (resp.status === 404) {
-          document.getElementById('sftpErrorTitle').textContent = 'No SFTP credentials yet.';
+          document.getElementById('sftpErrorTitle').textContent = '<%= (req.translations && req.translations.sftpNoCredentialsTitle) || "No SFTP credentials yet." %>';
           document.getElementById('sftpErrorMsg').textContent = '';
           showSftpState('error');
           return;
@@ -279,8 +279,8 @@
         return resp.json().then(fillCredentials);
       })
       .catch(function (err) {
-        document.getElementById('sftpErrorTitle').textContent = "Couldn't load credentials — maybe generate a fresh set?";
-        document.getElementById('sftpErrorMsg').textContent = err.message || 'Unknown error.';
+        document.getElementById('sftpErrorTitle').textContent = '<%= (req.translations && req.translations.sftpCredLoadError) || "Couldn\'t load credentials — maybe generate a fresh set?" %>';
+        document.getElementById('sftpErrorMsg').textContent = err.message || (req.translations.unknownError || 'Unknown error.');
         showSftpState('error');
       });
   }
@@ -307,12 +307,12 @@
       .then(function (data) {
         if (btn) btn.disabled = false;
         fillCredentials(data);
-        showToast('Fresh credentials ready.', 'success');
+        showToast('<%= (req.translations && req.translations.freshCredentialsReady) || "Fresh credentials ready." %>', 'success');
       })
       .catch(function (err) {
         if (btn) btn.disabled = false;
-        document.getElementById('sftpErrorTitle').textContent = "Couldn't generate credentials — please try again.";
-        document.getElementById('sftpErrorMsg').textContent = err.message || 'Unknown error.';
+        document.getElementById('sftpErrorTitle').textContent = '<%= (req.translations && req.translations.sftpCredGenError) || "Couldn\'t generate credentials — please try again." %>';
+        document.getElementById('sftpErrorMsg').textContent = err.message || (req.translations.unknownError || 'Unknown error.');
         showSftpState('error');
       });
   };
@@ -331,11 +331,11 @@
         sftpPlainPassword = null;
         sftpExpired = false;
         closeSftpModal();
-        showToast('SFTP access revoked.', 'success');
+        showToast('<%= (req.translations && req.translations.sftpAccessRevoked) || "SFTP access revoked." %>', 'success');
       })
       .catch(function (err) {
         console.error('Failed to revoke SFTP credentials:', err);
-        showToast(err && err.message ? err.message : 'Failed to revoke credentials. Try again.', 'error');
+        showToast(err && err.message ? err.message : '<%= (req.translations && req.translations.failedToRevokeCredentials) || "Failed to revoke credentials. Try again." %>', 'error');
       });
   };
 
@@ -361,12 +361,12 @@
       } finally {
         document.body.removeChild(ta);
       }
-      showToast(ok ? 'Copied!' : 'Copy failed — try selecting and copying manually.', ok ? 'success' : 'error');
+      showToast(ok ? '<%= (req.translations && req.translations.copied) || "Copied!" %>' : '<%= (req.translations && req.translations.copyFailedTryManually) || "Copy failed — try selecting and copying manually." %>', ok ? 'success' : 'error');
     };
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function () {
-        showToast('Copied!', 'success');
+        showToast('<%= (req.translations && req.translations.copied) || "Copied!" %>', 'success');
       }).catch(fallbackCopy);
     } else {
       fallbackCopy();

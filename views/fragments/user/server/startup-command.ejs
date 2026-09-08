@@ -41,14 +41,14 @@
       <div class="flex items-center">
         <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-danger-bg);color:var(--theme-danger);--tw-ring-color:color-mix(in srgb, var(--theme-danger) 25%, transparent);">
           <%- icon('circle-x', { class: 'mr-1.5 h-3 w-3', style: 'color:var(--theme-danger)', strokeWidth: 2 }) %>
-          Editing Disabled
+          <%= req.translations.editingDisabled || 'Editing Disabled' %>
         </span>
       </div>
     <% } else { %>
       <div class="flex items-center">
         <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent);">
           <%- icon('circle-check', { class: 'mr-1.5 h-3 w-3', style: 'color:var(--theme-success)', strokeWidth: 2 }) %>
-          Editing Enabled
+          <%= req.translations.editingEnabled || 'Editing Enabled' %>
         </span>
       </div>
     <% } %>

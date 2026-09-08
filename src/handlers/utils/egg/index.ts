@@ -1,1 +1,1 @@
-export * from "./eggParser";
+export * from './eggParser';

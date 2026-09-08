@@ -171,13 +171,13 @@ router.patch(
 // PATCH /api/v2/admin/settings/features — Update feature toggles
 // ---------------------------------------------------------------------------
 router.patch(
-  "/features",
+  '/features',
   parseBody(adminSettingsFeaturesBody),
   async (req, res) => {
     const data = req.validatedBody as any;
     const settings = await prisma.settings.findFirst();
     if (!settings) {
-      return jsonError(res, "NOT_FOUND", "Settings not found", 404);
+      return jsonError(res, 'NOT_FOUND', 'Settings not found', 404);
     }
 
     const updated = await prisma.settings.update({
@@ -187,7 +187,7 @@ router.patch(
 
     logActivity(
       req.adminUser?.id,
-      "settings.features.updated",
+      'settings.features.updated',
       undefined,
       { fields: Object.keys(data) },
       req.ip,

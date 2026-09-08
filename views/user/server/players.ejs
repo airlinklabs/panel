@@ -181,7 +181,7 @@
             if (info) {
               if (onlineEl) onlineEl.textContent = info.onlinePlayers || 0;
               if (maxEl) maxEl.textContent = info.maxPlayers || 0;
-              if (versionEl) versionEl.textContent = 'Version: ' + (info.version || 'Unknown');
+              if (versionEl) versionEl.textContent = '<%= req.translations.versionLabel || "Version" %>: ' + (info.version || '<%= req.translations.unknown || "Unknown" %>');
             }
 
             const staticEmpty = document.getElementById('no-players-message');
@@ -205,7 +205,7 @@
                   + '<img src="' + CRAFATAR_BASE + uuid + '?size=64&overlay" alt="' + name + '\'s Avatar" class="rounded-lg mr-4" width="64" height="64" loading="lazy">'
                   + '<div><p class="text-lg font-bold" style="color:var(--theme-text-strong)">' + name + '</p>'
                   + '<div class="flex items-center mt-1"><span class="al-dot-online mr-2"></span>'
-                  + '<span class="text-xs" style="color:var(--theme-text-muted)">Online</span></div></div></div></div>';
+                  + '<span class="text-xs" style="color:var(--theme-text-muted)"><%= req.translations.online || "Online" %></span></div></div></div></div>';
               }).join('');
             } else {
               if (grid) grid.remove();
@@ -215,8 +215,8 @@
                 dynamicEmpty.id = 'no-players-dynamic';
                 dynamicEmpty.className = 'rounded-xl p-8 text-center';
                 dynamicEmpty.style.cssText = 'background:var(--theme-bg-card);border:1px solid var(--theme-border)';
-                dynamicEmpty.innerHTML = '<h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300">No players online</h2>'
-                  + '<p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">Players will appear here when they join.</p>';
+                dynamicEmpty.innerHTML = '<h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.noPlayersOnline || "No players online" %></h2>'
+                  + '<p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto"><%= req.translations.playersWillAppear || "Players will appear here when they join." %></p>';
                 section.appendChild(dynamicEmpty);
               }
             }

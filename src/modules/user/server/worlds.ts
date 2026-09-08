@@ -1,24 +1,24 @@
-import { getSettings } from "../../../handlers/settingsCache";
-import type { Router, Request, Response } from "express";
+import { getSettings } from '../../../handlers/settingsCache';
+import type { Router, Request, Response } from 'express';
 import {
   isAuthenticatedForServer,
   requireSubUserPermission,
-} from "../../../handlers/utils/auth/serverAuthUtil";
-import logger from "../../../handlers/logger";
-import { isWorld } from "../../../handlers/features";
-import { fsListSchema, parseDaemonResponse } from "../../../types/daemon";
-import { checkForServerInstallation } from "../../../handlers/checkForServerInstallation";
-import { getServerStatus } from "../../../handlers/utils/server/serverStatus";
-import { getParamAsString } from "../../../utils/typeHelpers";
-import prisma from "../../../db";
-import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
-import { getServerStatusInput, getImageFeatures } from "./shared";
+} from '../../../handlers/utils/auth/serverAuthUtil';
+import logger from '../../../handlers/logger';
+import { isWorld } from '../../../handlers/features';
+import { fsListSchema, parseDaemonResponse } from '../../../types/daemon';
+import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
+import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
+import { getParamAsString } from '../../../utils/typeHelpers';
+import prisma from '../../../db';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { getServerStatusInput, getImageFeatures } from './shared';
 
 export function registerWorldsRoutes(router: Router): void {
   router.get(
-    "/server/:id/worlds",
-    isAuthenticatedForServer("id"),
-    requireSubUserPermission("files"),
+    '/server/:id/worlds',
+    isAuthenticatedForServer('id'),
+    requireSubUserPermission('files'),
     async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
@@ -26,7 +26,7 @@ export function registerWorldsRoutes(router: Router): void {
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
-          res.status(404).json({ error: "User not found" });
+          res.status(404).json({ error: 'User not found' });
           return;
         }
 
@@ -36,15 +36,15 @@ export function registerWorldsRoutes(router: Router): void {
         });
 
         if (!server) {
-          res.status(404).json({ error: "Server not found" });
+          res.status(404).json({ error: 'Server not found' });
           return;
         }
 
         try {
           const serverStatusInput = getServerStatusInput(server);
           const response = await daemonRequest<unknown>({
-            method: "GET",
-            path: "/fs/list",
+            method: 'GET',
+            path: '/fs/list',
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
@@ -56,7 +56,7 @@ export function registerWorldsRoutes(router: Router): void {
           const worlds = [];
           for (const folder of Folders) {
             if (
-              folder.type === "directory" &&
+              folder.type === 'directory' &&
               (await isWorld(folder.name, serverStatusInput))
             ) {
               worlds.push({ name: folder.name });
@@ -67,7 +67,7 @@ export function registerWorldsRoutes(router: Router): void {
 
           const serverStatus = await getServerStatus(serverStatusInput);
 
-          return res.render("user/server/worlds", {
+          return res.render('user/server/worlds', {
             errorMessage: {},
             user,
             worlds,
@@ -83,17 +83,17 @@ export function registerWorldsRoutes(router: Router): void {
         } catch (fileRequestError: unknown) {
           const errCode =
             fileRequestError &&
-            typeof fileRequestError === "object" &&
-            "code" in fileRequestError
+            typeof fileRequestError === 'object' &&
+            'code' in fileRequestError
               ? String((fileRequestError as { code: unknown }).code)
               : undefined;
           if (
-            errCode !== "ECONNREFUSED" &&
-            errCode !== "ETIMEDOUT" &&
-            errCode !== "ENOTFOUND" &&
-            errCode !== "ERR_BAD_RESPONSE"
+            errCode !== 'ECONNREFUSED' &&
+            errCode !== 'ETIMEDOUT' &&
+            errCode !== 'ENOTFOUND' &&
+            errCode !== 'ERR_BAD_RESPONSE'
           ) {
-            logger.error("Error fetching files:", fileRequestError);
+            logger.error('Error fetching files:', fileRequestError);
           }
 
           const serverStatus = await getServerStatus({
@@ -103,10 +103,10 @@ export function registerWorldsRoutes(router: Router): void {
             nodeKey: server.node.key,
           });
 
-          return res.render("user/server/worlds", {
+          return res.render('user/server/worlds', {
             errorMessage: {
               message:
-                "Failed to fetch worlds. The server may be offline or not responding.",
+                'Failed to fetch worlds. The server may be offline or not responding.',
             },
             user,
             worlds: [],
@@ -121,11 +121,11 @@ export function registerWorldsRoutes(router: Router): void {
           });
         }
       } catch (error) {
-        logger.error("Error getting worlds:", error);
+        logger.error('Error getting worlds:', error);
 
-        return res.render("user/server/worlds", {
+        return res.render('user/server/worlds', {
           errorMessage: {
-            message: "Failed to load worlds. Please try again later.",
+            message: 'Failed to load worlds. Please try again later.',
           },
           user: req.session?.user,
           worlds: [],
