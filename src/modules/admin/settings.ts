@@ -8,6 +8,7 @@ import type { Module } from "../../handlers/moduleInit";
 import prisma from "../../db";
 import { isAuthenticated } from "../../handlers/utils/auth/authUtil";
 import logger from "../../handlers/logger";
+import { logT } from "../../services/i18n";
 import { refreshSecurityCache } from "../../handlers/securityCache";
 import multer from "multer";
 import path from "path";
@@ -299,7 +300,7 @@ const adminModule: Module = {
             allThemes,
           });
         } catch (error: unknown) {
-          logger.error("Error loading settings page:", error);
+          logger.error(logT("log.errorLoadingSettings"), error);
           res.redirect("/login");
         }
       },
@@ -343,7 +344,7 @@ const adminModule: Module = {
             fs.rmSync(archivePath, { force: true }),
           );
         } catch (error: unknown) {
-          logger.error("Error generating example theme:", error);
+          logger.error(logT("log.errorGeneratingTheme"), error);
           res.status(500).json({ error: "Failed to generate example theme." });
         }
       },
@@ -446,7 +447,7 @@ const adminModule: Module = {
             panelWallpaper: data.panelWallpaper ?? null,
           });
         } catch (error: unknown) {
-          logger.error("Error saving appearance settings:", error);
+          logger.error(logT("log.errorSavingAppearance"), error);
           res
             .status(500)
             .json({ success: false, error: "Failed to save settings." });

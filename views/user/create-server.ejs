@@ -327,8 +327,8 @@ function createServerPage() {
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
-        { label: 'Create Server' }
+        { label: t('navDashboard'), href: '/' },
+        { label: t('createServerBreadcrumb') }
       ] }) %>
       <div class="px-8 lg:px-12 pt-6 pb-12 max-w-5xl">
 
@@ -352,11 +352,11 @@ function createServerPage() {
             <div class="p-5 space-y-4">
               <div>
                 <label class="al-label" for="serverName"><%= t('name') %></label>
-                <input id="serverName" type="text" placeholder="My server" maxlength="64" class="al-input">
+                <input id="serverName" type="text" placeholder="<%= t('serverName') %>" maxlength="64" class="al-input">
               </div>
               <div>
                 <label class="al-label" for="serverDescription"><%= t('description') %> <span style="color:var(--theme-text-muted);font-weight:normal">(<%= t('optional') %>)</span></label>
-                <input id="serverDescription" type="text" placeholder="What is this for?" maxlength="128" class="al-input">
+                <input id="serverDescription" type="text" placeholder="<%= t('whatIsThisFor') %>" maxlength="128" class="al-input">
               </div>
             </div>
           </div>
@@ -368,7 +368,7 @@ function createServerPage() {
               <div>
                 <label class="al-label" for="nodeId"><%= t('Node') %></label>
                 <select id="nodeId" class="hidden">
-                  <option value="" disabled>Select a node</option>
+                  <option value="" disabled><%= t('selectNode') %></option>
                   <% nodes.forEach(node => { %>
                   <option value="<%= node.id %>"<%= recommendedNodeId === node.id ? ' selected' : '' %>><%= node.name %> — <%= node.address %><% if (recommendedNodeId === node.id) { %> (recommended)<% } %></option>
                   <% }); %>
@@ -384,7 +384,7 @@ function createServerPage() {
                 <div>
                   <label class="al-label" for="imageId"><%= t('Image') %></label>
                   <select id="imageId" class="hidden">
-                    <option value="" disabled selected>Select an image</option>
+                    <option value="" disabled selected><%= t('selectImage') %></option>
                     <% images.forEach(image => { %>
                     <option value="<%= image.id %>" data-docker="<%= image.dockerImages %>" data-port-requirements='<%= image.portRequirements || "[]" %>'><%= image.name %></option>
                     <% }); %>
@@ -417,7 +417,7 @@ function createServerPage() {
               <div>
                 <label for="MemoryDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('server', { width: 14, height: 14 }) %>
-                  RAM
+                  <%= t('ram') %>
                 </label>
                 <!-- hidden field always holds MB -->
                 <input type="hidden" id="Memory" value="512">
@@ -429,24 +429,24 @@ function createServerPage() {
                     data-display="MemoryDisplay" data-hidden="Memory"
                     data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
-                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= resourceLimits.maxMemory > 0 ? 'Max ' + resourceLimits.maxMemory + ' MB' : 'Unlimited' %></p>
+                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= resourceLimits.maxMemory > 0 ? t('max') + ' ' + resourceLimits.maxMemory + ' MB' : t('unlimited') %></p>
               </div>
               <div>
                 <label for="Cpu" class="al-label flex items-center gap-1.5">
                   <%- icon('cpu', { width: 14, height: 14 }) %>
-                  CPU <span style="color:var(--theme-text-muted);font-weight:normal">(%)</span>
+                  <%= t('cpu') %> <span style="color:var(--theme-text-muted);font-weight:normal"><%= t('cpuPercent') %></span>
                 </label>
                 <div class="stepper">
                   <button type="button" class="stepper-btn" data-action="dec" data-target="Cpu" data-step="50" data-min="50" aria-label="Decrease CPU">−</button>
                   <input id="Cpu" type="number" value="100" min="50" max="<%= resourceLimits.maxCpu %>" class="stepper-input" aria-label="CPU percentage">
                   <button type="button" class="stepper-btn" data-action="inc" data-target="Cpu" data-step="50" data-max="<%= resourceLimits.maxCpu %>" aria-label="Increase CPU">+</button>
                 </div>
-                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)">50% = half a core. <%= resourceLimits.maxCpu > 0 ? 'Max ' + resourceLimits.maxCpu + '%' : 'Unlimited' %></p>
+                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= t('halfCoreHint') %> <%= resourceLimits.maxCpu > 0 ? t('max') + ' ' + resourceLimits.maxCpu + '%' : t('unlimited') %></p>
               </div>
               <div>
                 <label for="SwapDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('memory-stick', { width: 14, height: 14 }) %>
-                  Swap
+                  <%= t('swap') %>
                 </label>
                 <!-- hidden field always holds MB; -1 = unlimited, 0 = off -->
                 <input type="hidden" id="Swap" value="0">
@@ -458,12 +458,12 @@ function createServerPage() {
                     data-display="SwapDisplay" data-hidden="Swap"
                     data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
-                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)">0 = off, -1 = unlimited</p>
+                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= t('swapOffUnlimited') %></p>
               </div>
               <div>
                 <label for="StorageDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('hard-drive', { width: 14, height: 14 }) %>
-                  Storage
+                  <%= t('storage') %>
                 </label>
                 <!-- hidden field always holds MB -->
                 <input type="hidden" id="Storage" value="<%= defaultMaxStorageMb %>">
@@ -475,7 +475,7 @@ function createServerPage() {
                     data-display="StorageDisplay" data-hidden="Storage"
                     data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
                 </div>
-                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= resourceLimits.maxStorage > 0 ? 'Max ' + resourceLimits.maxStorage + ' MB' : 'Unlimited' %></p>
+                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= resourceLimits.maxStorage > 0 ? t('max') + ' ' + resourceLimits.maxStorage + ' MB' : t('unlimited') %></p>
               </div>
             </div>
           </div>
@@ -489,7 +489,7 @@ function createServerPage() {
           <div class="flex justify-end pt-1">
             <button type="button" id="createBtn"
               class="al-btn-primary px-6 py-2.5 text-sm font-medium shadow-sm transition inline-flex items-center gap-2">
-              <span id="createBtnText">Create server</span>
+              <span id="createBtnText"><%= t('createServer') %></span>
               <span id="createBtnSpinner" class="hidden w-4 h-4 border-2 rounded-full animate-spin" style="border-color:color-mix(in srgb, var(--theme-btn-primary-text) 25%, transparent);border-top-color:var(--theme-btn-primary-text);"></span>
             </button>
           </div>
@@ -502,10 +502,10 @@ function createServerPage() {
 </div><!-- /x-data -->
 
 <div id="portsContent" style="display:none;">
-  <p class="text-xs mb-3" style="color:var(--theme-text-muted)">External ports are assigned automatically to the next free node port. Edit the name and internal container port below.</p>
+  <p class="text-xs mb-3" style="color:var(--theme-text-muted)"><%= t('externalPortsHint') %></p>
   <div id="requiredPortsList" class="space-y-2"></div>
   <button type="button" id="addPortBtn" class="mt-3 text-sm font-medium inline-flex items-center gap-1.5 transition" style="color:var(--theme-text-muted)">
-    <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Add port
+    <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('addPort') %>
   </button>
   <div class="flex justify-end mt-4">
     <button type="button" id="portsOk" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-2"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>OK</button>

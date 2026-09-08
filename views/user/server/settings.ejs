@@ -100,12 +100,12 @@
 
           <div class="flex items-center justify-between gap-3">
             <div>
-              <h3 class="text-[13px] font-medium" style="color:var(--theme-text-muted)">Reinstall &amp; Delete All Data</h3>
-              <p class="text-[11px]" style="color:var(--theme-text-muted)">Wipes the server volume (worlds, configs, files) then reinstalls from scratch. This cannot be undone.</p>
+              <h3 class="text-[13px] font-medium" style="color:var(--theme-text-muted)"><%= t('reinstallAndDeleteData') %></h3>
+              <p class="text-[11px]" style="color:var(--theme-text-muted)"><%= t('reinstallAndDeleteDataDesc') %></p>
             </div>
             <button id="reinstallWipeButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
               <%- icon('triangle-alert', { class: 'size-3.5', strokeWidth: 1.5 }) %>
-              Reinstall &amp; Delete All Data
+              <%= t('reinstallAndDeleteData') %>
             </button>
           </div>
         </div>

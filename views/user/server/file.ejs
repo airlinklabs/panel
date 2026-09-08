@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Files' }) %>
+<%- include('../../components/header', { title: t('files') }) %>
 <style>
   .al-editor-shell { min-height: calc(100dvh - 15rem); }
   .al-editor-toolbar { gap: 0.75rem; }
@@ -27,9 +27,9 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Files', href: '/server/' + server.UUID + '/files' },
+        { label: t('files'), href: '/server/' + server.UUID + '/files' },
         { label: file.name }
       ] }) %>
       <!-- Page Header: title + meta left -->
@@ -142,11 +142,11 @@
           <%- icon('triangle-alert', { class: 'h-6 w-6', style: 'color:var(--theme-danger);' }) %>
         </div>
         <div>
-          <h3 class="text-sm font-medium" style="color:var(--theme-danger);">Connection Error</h3>
+          <h3 class="text-sm font-medium" style="color:var(--theme-danger);"><%= t('connectionError') %></h3>
           <p class="text-xs" style="color:var(--theme-danger);"><%= errorMessage.message %></p>
           <button type="button" id="retryConnectionBtn" class="al-btn-danger mt-2 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5">
             <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
-            Retry Connection
+            <%= t('retryConnection') %>
           </button>
         </div>
       </div>
@@ -184,7 +184,7 @@
               <div class="flex shrink-0">
                 <button id="saveBtn" class="al-ui-button-primary min-w-24" type="button">
                   <%- icon('save', { class: 'h-4 w-4 mr-1.5', strokeWidth: 2 }) %>
-                  Save
+                  <%= t('saveBtn') %>
                 </button>
               </div>
             </div>
@@ -193,24 +193,24 @@
               <div class="al-editor-status flex flex-col xl:flex-row xl:justify-between xl:items-center px-3 py-2 border-t text-xs font-mono overflow-x-auto" style="background:var(--theme-bg-secondary);border-top-color:var(--theme-border);color:var(--theme-text-muted);">
                 <div class="flex items-center gap-3 whitespace-nowrap">
                   <div id="editor-status">Line: 1, Column: 1</div>
-                  <div id="file-info" class="px-2 py-0.5 rounded" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Loading...</div>
+                  <div id="file-info" class="px-2 py-0.5 rounded" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('loadingEllipsis') %></div>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                   <div class="flex items-center">
-                    <span class="opacity-75 mr-1.5">Word Wrap:</span>
-                    <button type="button" id="toggle-wordwrap" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Off</button>
+                    <span class="opacity-75 mr-1.5"><%= t('wordWrap') %>:</span>
+                    <button type="button" id="toggle-wordwrap" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('offLabel') %></button>
                   </div>
                   <div class="flex items-center">
-                    <span class="opacity-75 mr-1.5">Minimap:</span>
-                    <button type="button" id="toggle-minimap" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Off</button>
+                    <span class="opacity-75 mr-1.5"><%= t('minimap') %>:</span>
+                    <button type="button" id="toggle-minimap" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('offLabel') %></button>
                   </div>
                   <div class="flex items-center">
-                    <span class="opacity-75 mr-1.5">Theme:</span>
-                    <button type="button" id="toggle-theme" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Auto</button>
+                    <span class="opacity-75 mr-1.5"><%= t('theme') %>:</span>
+                    <button type="button" id="toggle-theme" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('autoLabel') %></button>
                   </div>
                   <div class="flex items-center">
-                    <span class="opacity-75 mr-1.5">Save:</span>
-                    <span data-kbd class="px-1.5 py-0.5 rounded" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">Ctrl+S</span>
+                    <span class="opacity-75 mr-1.5"><%= t('saveBtn') %>:</span>
+                    <span data-kbd class="px-1.5 py-0.5 rounded" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('ctrlS') %></span>
                   </div>
                 </div>
               </div>

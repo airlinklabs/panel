@@ -46,6 +46,7 @@ import {
   DEFAULT_BACKUP_LIMIT,
 } from "../../config/server";
 import { DAEMON_TIMEOUT_REINSTALL_MS } from "../../config/daemonTimeouts";
+import { logT } from "../../services/i18n";
 
 const SUSPENDED_TRUE = "true";
 
@@ -88,7 +89,7 @@ const adminModule: Module = {
 
           res.render("admin/servers/servers", { user, req, settings, servers });
         } catch (error: unknown) {
-          logger.error("Error fetching servers:", error);
+          logger.error(logT("log.errorFetchingServers"), error);
           return res.redirect("/login");
         }
       },
@@ -148,7 +149,7 @@ const adminModule: Module = {
             serverMounts,
           });
         } catch (error: unknown) {
-          logger.error("Error fetching server for editing:", error);
+          logger.error(logT("log.errorFetchingServerForEditing"), error);
           res.redirect("/admin/servers");
           return;
         }
@@ -363,13 +364,15 @@ const adminModule: Module = {
               server.UUID,
             );
           } catch (err: unknown) {
-            logger.error("Error syncing allocation claims:", err);
+            logger.error(logT("log.errorSyncingAllocations"), err);
           }
 
           // If server is being suspended, stop it
           if (suspensionChanged && newSuspendedState) {
             try {
-              logger.info(`Stopping server ${server.UUID} due to suspension`);
+              logger.info(
+                logT("log.stoppingServerSuspension", { uuid: server.UUID }),
+              );
 
               await daemonRequest({
                 nodeAddress: server.node.address,
@@ -392,18 +395,20 @@ const adminModule: Module = {
                   /* noop */
                 });
               logger.info(
-                `Server ${server.UUID} stopped successfully due to suspension`,
+                logT("log.serverStoppedSuspension", { uuid: server.UUID }),
               );
             } catch (stopError) {
               logger.error(
-                `Error stopping server ${server.UUID} during suspension:`,
+                logT("log.errorStoppingServerSuspension", {
+                  uuid: server.UUID,
+                }),
                 stopError,
               );
               // Continue with the update even if stopping fails
             }
           }
 
-          logger.info(`Server ${serverId} updated successfully`);
+          logger.info(logT("log.serverUpdatedSuccessfully", { id: serverId }));
           await logActivity(req, "server:update", {
             serverId: String(server.UUID),
             metadata: { name, suspended: newSuspendedState },
@@ -431,12 +436,12 @@ const adminModule: Module = {
               });
             }
           } catch (mountError) {
-            logger.error("Error syncing server mounts:", mountError);
+            logger.error(logT("log.errorSyncingMounts"), mountError);
           }
 
           res.status(200).json({ success: true });
         } catch (error: unknown) {
-          logger.error("Error updating server:", error);
+          logger.error(logT("log.errorUpdatingServer"), error);
           res.status(500).json({ error: "Failed to update server" });
           return;
         }
@@ -468,7 +473,7 @@ const adminModule: Module = {
             users,
           });
         } catch (error: unknown) {
-          logger.error("Error fetching data for server creation:", error);
+          logger.error(logT("log.errorFetchingServerCreation"), error);
           return res.redirect("/login");
         }
       },
@@ -600,7 +605,7 @@ const adminModule: Module = {
             error instanceof Error
               ? error.message
               : "Error validating port allocation";
-          logger.error("Error validating server resources:", error);
+          logger.error(logT("log.errorValidatingServerResources"), error);
           res.status(400).json({ error: message });
           return;
         }
@@ -732,14 +737,17 @@ const adminModule: Module = {
                   created.UUID,
                 ).catch((err: unknown) => {
                   logger.warn(
-                    `Failed to claim ports for server ${created.UUID}: ${err instanceof Error ? err.message : err}`,
+                    logT("log.errorClaimingPorts", {
+                      uuid: created.UUID,
+                      msg: err instanceof Error ? err.message : String(err),
+                    }),
                   );
                 });
                 return created;
               },
             );
           } catch (error: unknown) {
-            logger.error("Error creating server:", error);
+            logger.error(logT("log.errorCreatingServer"), error);
             res
               .status(400)
               .send(
@@ -809,7 +817,7 @@ const adminModule: Module = {
                 });
               } catch (error: unknown) {
                 logger.error(
-                  `Error parsing Variables for server ID ${server.id}:`,
+                  logT("log.errorParsingVariables", { id: server.id }),
                   error,
                 );
                 await prisma.server.update({
@@ -820,9 +828,7 @@ const adminModule: Module = {
               }
 
               if (!Array.isArray(ServerEnv)) {
-                logger.error(
-                  `ServerEnv is not an array for server ID ${server.id}. Skipping...`,
-                );
+                logger.error(logT("log.serverEnvNotArray", { id: server.id }));
                 await prisma.server.update({
                   where: { id: server.id },
                   data: { Queued: false },
@@ -847,7 +853,7 @@ const adminModule: Module = {
                   scripts = JSON.parse(server.image.scripts);
                 } catch (error: unknown) {
                   logger.error(
-                    `Error parsing scripts for server ID ${server.id}:`,
+                    logT("log.errorParsingScripts", { id: server.id }),
                     error,
                   );
                   await prisma.server.update({
@@ -938,7 +944,7 @@ const adminModule: Module = {
                     }
                   } else {
                     logger.info(
-                      `No install scripts for server ${server.id}, marking as installed`,
+                      logT("log.noInstallScripts", { id: server.id }),
                     );
                   }
 
@@ -954,7 +960,7 @@ const adminModule: Module = {
                   );
                 } catch (error: unknown) {
                   logger.error(
-                    `Error sending install request for server ID ${server.id}:`,
+                    logT("log.errorSendingInstallRequest", { id: server.id }),
                     error,
                   );
                   await prisma.server.update({
@@ -974,9 +980,7 @@ const adminModule: Module = {
                   );
                 }
               } else {
-                logger.warn(
-                  `No scripts found for server ID ${server.id}, marking as installed`,
-                );
+                logger.warn(logT("log.noScriptsFound", { id: server.id }));
                 await prisma.server.update({
                   where: { id: server.id },
                   data: { Queued: false },
@@ -1003,7 +1007,7 @@ const adminModule: Module = {
             state: {},
           });
         } catch (error: unknown) {
-          logger.error("Error creating server:", error);
+          logger.error(logT("log.errorCreatingServer"), error);
           res.status(500).json({ error: "Error creating server" });
         }
       },
@@ -1044,7 +1048,11 @@ const adminModule: Module = {
           try {
             if (!force) {
               logger.info(
-                `Deleting container ${server.UUID} on node ${server.node.address}:${server.node.port}`,
+                logT("log.deletingContainer", {
+                  uuid: server.UUID,
+                  address: server.node.address,
+                  port: server.node.port,
+                }),
               );
 
               try {
@@ -1072,11 +1080,15 @@ const adminModule: Module = {
 
                   if (isNotFound) {
                     logger.warn(
-                      `Container ${server.UUID} not found on daemon, proceeding with database cleanup`,
+                      logT("log.containerNotFoundDaemon", {
+                        uuid: server.UUID,
+                      }),
                     );
                   } else {
                     logger.error(
-                      `Daemon returned unexpected status ${response.status}:`,
+                      logT("log.unexpectedDaemonStatus", {
+                        status: response.status,
+                      }),
                       response.data,
                     );
                     throw new Error(
@@ -1085,11 +1097,11 @@ const adminModule: Module = {
                   }
                 } else {
                   logger.info(
-                    `Successfully deleted container ${server.UUID} on daemon`,
+                    logT("log.containerDeletedDaemon", { uuid: server.UUID }),
                   );
                 }
               } catch (error: unknown) {
-                logger.error("Error deleting container on daemon:", error);
+                logger.error(logT("log.errorDeletingContainer"), error);
                 throw new Error(
                   `${safeClientMessage(error, "The daemon is unreachable")} Use ?force=true to remove from panel only.`,
                   { cause: error },
@@ -1097,7 +1109,7 @@ const adminModule: Module = {
               }
             }
 
-            logger.info(`Deleting server ${serverId} from database`);
+            logger.info(logT("log.deletingServerDatabase", { id: serverId }));
             await prisma.$transaction(async (tx) => {
               await tx.sftpCredential.deleteMany({
                 where: { serverId: server.UUID },
@@ -1128,7 +1140,9 @@ const adminModule: Module = {
               state: {},
             });
 
-            logger.info(`Server ${serverId} successfully deleted`);
+            logger.info(
+              logT("log.serverDeletedSuccessfully", { id: serverId }),
+            );
             await logActivity(req, "server:delete", {
               metadata: {
                 name: server.name,
@@ -1139,7 +1153,7 @@ const adminModule: Module = {
             res.redirect("/admin/servers");
             return;
           } catch (error: unknown) {
-            logger.error("Error deleting server:", error);
+            logger.error(logT("log.errorDeletingServer"), error);
             const errorMessage =
               error instanceof Error ? error.message : String(error);
             res
@@ -1148,7 +1162,7 @@ const adminModule: Module = {
             return;
           }
         } catch (error: unknown) {
-          logger.error("Error in delete server route:", error);
+          logger.error(logT("log.errorDeleteRoute"), error);
           res.status(500).json({ error: "Error deleting server" });
         }
       },
@@ -1208,7 +1222,12 @@ const adminModule: Module = {
             // ignore if already stopped
           }
 
-          logger.info(`Server ${serverId} suspended by user ${userId}`);
+          logger.info(
+            logT("log.serverSuspended", {
+              id: serverId,
+              userId: String(userId ?? 0),
+            }),
+          );
           await logActivity(req, "server:suspend", {
             serverId: String(server.UUID),
             metadata: { name: server.name },
@@ -1243,7 +1262,7 @@ const adminModule: Module = {
 
           res.json({ success: true, message: "Server suspended" });
         } catch (error: unknown) {
-          logger.error("Error suspending server:", error);
+          logger.error(logT("log.errorSuspendingServer"), error);
           res.status(500).json({ error: "Failed to suspend server" });
         }
       },
@@ -1281,7 +1300,12 @@ const adminModule: Module = {
             data: { Suspended: false },
           });
 
-          logger.info(`Server ${serverId} unsuspended by user ${userId}`);
+          logger.info(
+            logT("log.serverUnsuspended", {
+              id: serverId,
+              userId: String(userId ?? 0),
+            }),
+          );
           await logActivity(req, "server:unsuspend", {
             serverId: String(server.UUID),
             metadata: { name: server.name },
@@ -1300,7 +1324,7 @@ const adminModule: Module = {
           }
           res.json({ success: true, message: "Server unsuspended" });
         } catch (error: unknown) {
-          logger.error("Error unsuspending server:", error);
+          logger.error(logT("log.errorUnsuspendingServer"), error);
           res.status(500).json({ error: "Failed to unsuspend server" });
         }
       },
@@ -1367,7 +1391,7 @@ const adminModule: Module = {
 
           res.json({ success: true, transferId: serverId });
         } catch (error: unknown) {
-          logger.error("Error starting transfer:", error);
+          logger.error(logT("log.errorStartingTransfer"), error);
           res.status(400).json({
             error: safeClientMessage(error, "Failed to start transfer"),
           });
@@ -1402,7 +1426,7 @@ const adminModule: Module = {
             targetNodeId: state.targetNodeId,
           });
         } catch (error: unknown) {
-          logger.error("Error getting transfer status:", error);
+          logger.error(logT("log.errorGettingTransferStatus"), error);
           res.status(500).json({ error: "Failed to get transfer status" });
         }
       },

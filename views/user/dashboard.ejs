@@ -173,26 +173,26 @@
                 </div>
                 <div class="flex-1 rounded-lg px-2 py-1.5" style="background:var(--theme-bg-secondary);">
                   <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);"><%= t('disk') %></p>
-                  <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= server.Storage === 0 ? 'Unlimited' : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
+                  <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= server.Storage === 0 ? t('unlimited') : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
                 </div>
               </div>
               <div class="flex items-center justify-between pt-1.5 border-t" style="border-color:var(--theme-border);">
                 <div class="flex items-center gap-1.5 min-w-0">
-                  <img loading="lazy" decoding="async" class="h-3.5 w-3.5 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : '/avatar/' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="<%= server.owner ? server.owner.username : 'Unknown' %>">
-                  <span class="text-[11px] truncate" style="color:var(--theme-text-muted);"><%= server.owner ? server.owner.username : 'Unknown' %></span>
+                  <img loading="lazy" decoding="async" class="h-3.5 w-3.5 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : '/avatar/' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="<%= server.owner ? server.owner.username : t('unknown') %>">
+                  <span class="text-[11px] truncate" style="color:var(--theme-text-muted);"><%= server.owner ? server.owner.username : t('unknown') %></span>
                 </div>
                 <% if (server.node) { %>
                 <span class="text-xs shrink-0 ml-2 truncate max-w-[6rem]" style="color:var(--theme-text-placeholder);"><%= server.node.name || server.node.address %></span>
                 <% } %>
               </div>
             </a>
-            <button type="button" class="server-actions-btn absolute top-2 right-2 w-9 h-9 flex items-center justify-center rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:group-focus-visible:opacity-100 hover:bg-[var(--theme-bg-hover)] z-10" style="color:var(--theme-text-muted);" aria-label="Server actions" data-uuid="<%= server.UUID %>">
+            <button type="button" class="server-actions-btn absolute top-2 right-2 w-9 h-9 flex items-center justify-center rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:group-focus-visible:opacity-100 hover:bg-[var(--theme-bg-hover)] z-10" style="color:var(--theme-text-muted);" aria-label="<%= t('actions') %>" data-uuid="<%= server.UUID %>">
               <%- icon('more-horizontal', { class: 'w-4 h-4' }) %>
             </button>
             <!-- Context menu -->
             <div class="server-ctx-menu hidden absolute z-40 top-2 right-2 rounded-xl shadow-lg py-1 w-44" role="menu" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-              <button type="button" role="menuitem" class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm rounded-t-xl transition inline-flex items-center gap-1.5" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>" aria-label="Add to folder"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Add to folder</button>
-              <button type="button" role="menuitem" class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition inline-flex items-center gap-1.5" style="color:var(--theme-text); display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>" data-uuid="<%= server.UUID %>" aria-label="Remove from folder"><%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %>Remove from folder</button>
+              <button type="button" role="menuitem" class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm rounded-t-xl transition inline-flex items-center gap-1.5" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>" aria-label="<%= t('addToFolder') %>"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('addToFolder') %></button>
+              <button type="button" role="menuitem" class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition inline-flex items-center gap-1.5" style="color:var(--theme-text); display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>" data-uuid="<%= server.UUID %>" aria-label="<%= t('removeFromFolder') %>"><%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('removeFromFolder') %></button>
             </div>
           </div>
           <% }); %>
@@ -210,11 +210,11 @@
             </colgroup>
             <thead class="al-table-head">
               <tr>
-                <th class="al-table-th pl-6">Server</th>
-                <th class="al-table-th">Status</th>
-                <th class="al-table-th">Owner</th>
-                <th class="al-table-th">RAM</th>
-                <th class="al-table-th">CPU</th>
+                <th class="al-table-th pl-6"><%= t('serverColumn') %></th>
+                <th class="al-table-th"><%= t('statusColumn') %></th>
+                <th class="al-table-th"><%= t('ownerColumn') %></th>
+                <th class="al-table-th"><%= t('ram') %></th>
+                <th class="al-table-th"><%= t('cpu') %></th>
               </tr>
             </thead>
             <tbody style="border-color:var(--theme-border);">
@@ -224,7 +224,7 @@
                 <td class="al-table-td pl-6">
                   <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= server.name %>
                     <% if (server.shared) { %>
-                    <span class="al-badge-neutral align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> Shared</span>
+                    <span class="al-badge-neutral align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> <%= t('shared') %></span>
                     <% } %>
                   </p>
                   <% if (server.description) { %><p class="text-xs truncate max-w-xs" style="color:var(--theme-text-muted);"><%= server.description %></p><% } %>
@@ -234,7 +234,7 @@
                   <%- include('../components/ui/status-badge', { status: server.Suspended ? 'suspended' : server.status === 'running' ? 'online' : server.dockerStatus === 'restarting' ? 'starting' : 'offline' }) %>
                 </div>
                 </td>
-                <td class="al-table-td"><%= server.owner ? server.owner.username : 'Unknown' %></td>
+                <td class="al-table-td"><%= server.owner ? server.owner.username : t('unknown') %></td>
                 <td class="al-table-td"><%= Math.round(server.ramUsage) %>%</td>
                 <td class="al-table-td"><%= Math.round(server.cpuUsage) %>%</td>
               </tr>
@@ -273,10 +273,10 @@
     <div class="flex justify-between items-center px-6 py-4 border-b flex-shrink-0" style="border-color:var(--theme-border);">
       <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);" id="folderPopupTitle"></h2>
       <div class="flex items-center gap-1">
-        <button type="button" id="deleteFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" style="color:var(--theme-danger);" title="Delete folder" aria-label="Delete folder">
+        <button type="button" id="deleteFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" style="color:var(--theme-danger);" title="<%= t('deleteFolder') %>" aria-label="<%= t('deleteFolder') %>">
           <%- icon('trash-2', { class: 'w-3.5 h-3.5', strokeWidth: 1.5 }) %>
         </button>
-        <button type="button" id="closeFolderPopup" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="Close">
+        <button type="button" id="closeFolderPopup" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="<%= t('close') %>">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
@@ -291,19 +291,19 @@
 <div class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="newFolderOverlay">
     <div id="newFolderPanel" class="al-sheet-panel border rounded-2xl w-full max-w-[380px] max-h-[85vh] flex flex-col will-change-transform" role="dialog" aria-modal="true" aria-labelledby="newFolderTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
-      <h2 id="newFolderTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);">New folder</h2>
-      <button type="button" onclick="document.getElementById('cancelNewFolder').click()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="Close">
+      <h2 id="newFolderTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('newFolder') %></h2>
+      <button type="button" onclick="document.getElementById('cancelNewFolder').click()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="<%= t('close') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
     <div class="px-6 py-4">
-      <p class="text-xs mb-4" style="color:var(--theme-text-muted);">Give your folder a name. Drag server cards onto it to add servers.</p>
-      <label for="newFolderName" class="sr-only">Folder name</label>
-      <input id="newFolderName" type="text" class="al-input" placeholder="e.g. Game Servers">
+      <p class="text-xs mb-4" style="color:var(--theme-text-muted);"><%= t('giveFolderName') %></p>
+      <label for="newFolderName" class="sr-only"><%= t('folderName') %></label>
+      <input id="newFolderName" type="text" class="al-input" placeholder="<%= t('folderNamePlaceholder') %>">
     </div>
     <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
-      <button type="button" id="cancelNewFolder" class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
-      <button type="button" id="confirmNewFolder" class="al-btn-primary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Create</button>
+      <button type="button" id="cancelNewFolder" class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('cancel') %></button>
+      <button type="button" id="confirmNewFolder" class="al-btn-primary"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('create') %></button>
     </div>
   </div>
 </div>
@@ -312,17 +312,17 @@
 <div class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none data-[open]:opacity-100 data-[open]:pointer-events-auto" id="deleteFolderOverlay">
     <div id="deleteFolderPanel" class="al-sheet-panel border rounded-2xl w-full max-w-[380px] max-h-[85vh] flex flex-col will-change-transform" role="dialog" aria-modal="true" aria-labelledby="deleteFolderTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
-      <h2 id="deleteFolderTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);">Delete folder?</h2>
-      <button type="button" onclick="document.getElementById('cancelDeleteFolder').click()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="Close">
+      <h2 id="deleteFolderTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('deleteFolderQuestion') %></h2>
+      <button type="button" onclick="document.getElementById('cancelDeleteFolder').click()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);" aria-label="<%= t('close') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
     <div class="px-6 py-4">
-      <p class="text-xs" style="color:var(--theme-text-muted);">Servers inside will stay accessible. They just won't be in this folder.</p>
+      <p class="text-xs" style="color:var(--theme-text-muted);"><%= t('serversInsideAccessible') %></p>
     </div>
     <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
-      <button type="button" id="cancelDeleteFolder" class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
-      <button type="button" id="confirmDeleteFolder" class="al-btn-danger"><%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %>Delete folder</button>
+      <button type="button" id="cancelDeleteFolder" class="al-btn-secondary"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('cancel') %></button>
+      <button type="button" id="confirmDeleteFolder" class="al-btn-danger"><%- icon('trash-2', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('deleteFolder') %></button>
     </div>
   </div>
 </div>

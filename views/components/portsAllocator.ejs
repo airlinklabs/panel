@@ -10,37 +10,37 @@
           <%- icon('plug', { class: 'w-4 h-4' }) %>
         </span>
         <div class="min-w-0">
-          <h2 id="paTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Assign ports</h2>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">External ports are drawn from the node's allocation</p>
+          <h2 id="paTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('assignPorts') %></h2>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('externalPortsHint') %></p>
         </div>
       </div>
-      <button type="button" id="paClose" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted)" aria-label="Close">
+      <button type="button" id="paClose" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted)" aria-label="<%= t('closeModal') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
 
     <div class="px-6 py-4">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-xs font-medium" style="color:var(--theme-text-muted)">Port mappings</p>
+        <p class="text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('portMappings') %></p>
         <span id="paCount" class="text-[10px] font-medium px-2 py-0.5 rounded-full"
           style="background:var(--theme-accent-subtle); color:var(--theme-text-strong)"></span>
       </div>
       <div id="paRows" class="space-y-2.5 max-h-[46vh] overflow-y-auto pr-1"></div>
       <div id="paEmpty" class="hidden text-center py-8">
-        <p class="text-sm" style="color:var(--theme-text-muted)">No ports available on this node</p>
+        <p class="text-sm" style="color:var(--theme-text-muted)"><%= t('noPortsAvailable') %></p>
       </div>
       <button type="button" id="paAddRow" class="mt-3 w-full flex items-center justify-center gap-1.5 rounded-xl border border-dashed px-3 py-2.5 text-xs font-medium transition hover:bg-[var(--theme-bg-hover)] active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1"
         style="color:var(--theme-text-muted); border-color:var(--theme-border)">
         <%- icon('plus', { class: 'size-4' }) %>
-        Add port
+        <%= t('addPort') %>
       </button>
     </div>
 
     <div class="al-sheet-footer justify-between" style="border-color:var(--theme-border)">
       <p id="paHint" class="text-[11px]" style="color:var(--theme-text-muted)"></p>
       <div class="flex gap-2 shrink-0">
-        <button type="button" id="paCancel" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Cancel</button>
-        <button type="button" id="paSave" class="al-btn-primary px-4 py-2 text-xs font-medium inline-flex items-center gap-2"><%- icon('save', { class: 'size-3', strokeWidth: 1.5 }) %>Save ports</button>
+        <button type="button" id="paCancel" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('cancel') %></button>
+        <button type="button" id="paSave" class="al-btn-primary px-4 py-2 text-xs font-medium inline-flex items-center gap-2"><%- icon('save', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('savePorts') %></button>
       </div>
     </div>
   </div>

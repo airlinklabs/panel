@@ -8,7 +8,7 @@
 <%- include('../components/template') %>
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
-        { label: req.translations.myImages || 'My Images' }
+        { label: t('myImages') }
       ] }) %>
 
       <div class="al-page-header flex items-start justify-between gap-4">
@@ -97,7 +97,7 @@
                   <div class="flex gap-2">
                     <% if (image.status !== 'approved') { %>
                     <a href="/my-images/edit/<%= image.id %>" class="al-btn-secondary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
-                      <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>Edit
+                      <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('edit') %>
                     </a>
                     <% } %>
                     <button type="button" class="al-btn-danger" data-delete-image="<%= image.id %>" aria-label="Delete <%= image.name %>">
@@ -117,9 +117,9 @@
 </main>
 
 <div id="page-data" style="display:none"
-  data-delete-confirm="<%= req.translations.deleteImageConfirm || 'Delete this image?' %>"
-  data-deleted="<%= req.translations.imageDeleted || 'Image deleted.' %>"
-  data-error="<%= req.translations.errorOccurred || 'Something went wrong.' %>"
+  data-delete-confirm="<%= t('deleteImageConfirm') %>"
+  data-deleted="<%= t('imageDeleted') %>"
+  data-error="<%= t('somethingWentWrong') %>"
 ></div>
 
 <%- include('../components/footer') %>

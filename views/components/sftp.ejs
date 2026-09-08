@@ -1,8 +1,8 @@
 
-<button @click="openSftpModal()" type="button" aria-label="Open SFTP access"
+<button @click="openSftpModal()" type="button" aria-label="<%= t('openSftpAccess') %>"
   class="border block rounded-xl hover:opacity-90 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none" style="background:var(--theme-btn-secondary-bg);border-color:var(--theme-btn-secondary-border);color:var(--theme-btn-secondary-text);">
   <%- icon('lock', { class: 'size-4 inline-flex mr-1 mb-0.5' }) %>
-  SFTP
+  <%= t('sftp') %>
 </button>
 
 
@@ -21,11 +21,11 @@
           <%- icon('lock', { class: 'size-4', style: 'color:var(--theme-text-muted);' }) %>
         </div>
         <div>
-          <h2 id="sftpModalTitle" class="text-sm font-semibold leading-none" style="color:var(--theme-text-strong);">SFTP Access</h2>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Connect using any SFTP client</p>
+          <h2 id="sftpModalTitle" class="text-sm font-semibold leading-none" style="color:var(--theme-text-strong);"><%= t('sftpAccess') %></h2>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= t('connectUsingSftpClient') %></p>
         </div>
         </div>
-      <button type="button" @click="closeSftpModal()" aria-label="Close" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);">
+      <button type="button" @click="closeSftpModal()" aria-label="<%= t('closeModal') %>" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted);">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
@@ -33,7 +33,7 @@
     
     <div id="sftpLoading" class="flex items-center gap-3 px-6 py-8">
       <span class="animate-spin size-4 shrink-0" style="color:var(--theme-text-muted);"><%- icon('loader', { class: 'size-4' }) %></span>
-      <span class="text-sm" style="color:var(--theme-text-muted);">Fetching your keys…</span>
+      <span class="text-sm" style="color:var(--theme-text-muted);"><%= t('fetchingKeys') %></span>
     </div>
 
     
@@ -41,13 +41,13 @@
       <div class="flex items-start gap-3 p-3 rounded-lg mb-4" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);">
         <%- icon('triangle-alert', { class: 'size-4 shrink-0 mt-0.5', style: 'color:var(--theme-danger);' }) %>
         <div>
-          <p id="sftpErrorTitle" class="text-xs font-medium" style="color:var(--theme-danger);">Couldn't load credentials — maybe generate a fresh set?</p>
+          <p id="sftpErrorTitle" class="text-xs font-medium" style="color:var(--theme-danger);"><%= t('couldntLoadCredentials') %></p>
           <p id="sftpErrorMsg" class="text-xs mt-0.5" style="color:var(--theme-danger);opacity:0.7;"></p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button type="button" @click="generateSftpCredentials()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none border inline-flex items-center gap-1.5" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong);border-color:var(--theme-border);"><%- icon('key-round', { class: 'size-3', strokeWidth: 1.5 }) %>Generate credentials</button>
-        <button type="button" @click="closeSftpModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none hover:opacity-80 inline-flex items-center gap-1.5" style="color:var(--theme-text-muted);"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Close</button>
+        <button type="button" @click="generateSftpCredentials()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none border inline-flex items-center gap-1.5" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong);border-color:var(--theme-border);"><%- icon('key-round', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('generateCredentials') %></button>
+        <button type="button" @click="closeSftpModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none hover:opacity-80 inline-flex items-center gap-1.5" style="color:var(--theme-text-muted);"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('close') %></button>
       </div>
     </div>
 
@@ -57,9 +57,9 @@
 
         
         <div class="flex items-center gap-3 py-2">
-          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);">Host</span>
+          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);"><%= t('host') %></span>
           <span id="sftpValHost" class="text-xs flex-1 truncate font-mono" style="color:var(--theme-text);"></span>
-          <button type="button" @click="sftpCopy('sftpValHost')" aria-label="Copy host" class="copy-btn shrink-0 flex items-center justify-center w-9 h-9 rounded-lg transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);">
+          <button type="button" @click="sftpCopy('sftpValHost')" aria-label="<%= t('copyHost') %>" class="copy-btn shrink-0 flex items-center justify-center w-9 h-9 rounded-lg transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);">
             <%- icon('copy', { class: 'size-3', strokeWidth: 2 }) %>
           </button>
         </div>
@@ -67,9 +67,9 @@
 
         
         <div class="flex items-center gap-3 py-2">
-          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);">Port</span>
+          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);"><%= t('port') %></span>
           <span id="sftpValPort" class="text-xs flex-1 font-mono" style="color:var(--theme-text);"></span>
-          <button type="button" @click="sftpCopy('sftpValPort')" aria-label="Copy port" class="copy-btn shrink-0 flex items-center justify-center w-9 h-9 rounded-lg transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);">
+          <button type="button" @click="sftpCopy('sftpValPort')" aria-label="<%= t('copyPort') %>" class="copy-btn shrink-0 flex items-center justify-center w-9 h-9 rounded-lg transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);">
             <%- icon('copy', { class: 'size-3', strokeWidth: 2 }) %>
           </button>
         </div>
@@ -77,9 +77,9 @@
 
         
         <div class="flex items-center gap-3 py-2">
-          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);">Username</span>
+          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);"><%= t('username') %></span>
           <span id="sftpValUser" class="text-xs flex-1 truncate font-mono" style="color:var(--theme-text);"></span>
-          <button type="button" @click="sftpCopy('sftpValUser')" aria-label="Copy username" class="copy-btn shrink-0 flex items-center justify-center w-9 h-9 rounded-lg transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);">
+          <button type="button" @click="sftpCopy('sftpValUser')" aria-label="<%= t('copyUsername') %>" class="copy-btn shrink-0 flex items-center justify-center w-9 h-9 rounded-lg transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);">
             <%- icon('copy', { class: 'size-3', strokeWidth: 2 }) %>
           </button>
         </div>
@@ -87,9 +87,9 @@
 
         
         <div class="flex items-center gap-3 py-2">
-          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);">Password</span>
-          <span id="sftpValPass" class="text-xs flex-1 truncate font-mono blur-sm transition-all duration-200 cursor-default select-all sftp-password" style="color:var(--theme-text);" title="Hover or tap to reveal"></span>
-          <button type="button" @click="sftpCopy('sftpValPass')" aria-label="Copy password" class="copy-btn shrink-0 flex items-center justify-center w-9 h-9 rounded-lg transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);">
+          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);"><%= t('password') %></span>
+          <span id="sftpValPass" class="text-xs flex-1 truncate font-mono blur-sm transition-all duration-200 cursor-default select-all sftp-password" style="color:var(--theme-text);" title="<%= t('hoverToReveal') %>"></span>
+          <button type="button" @click="sftpCopy('sftpValPass')" aria-label="<%= t('copyPassword') %>" class="copy-btn shrink-0 flex items-center justify-center w-9 h-9 rounded-lg transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted);">
             <%- icon('copy', { class: 'size-3', strokeWidth: 2 }) %>
           </button>
         </div>
@@ -97,7 +97,7 @@
 
         
         <div class="flex items-center gap-3 py-2" id="sftpExpiryRow">
-          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);">Expires</span>
+          <span class="text-xs font-medium w-16 shrink-0" style="color:var(--theme-text-muted);"><%= t('expires') %></span>
           <span id="sftpValExpiry" class="text-xs flex-1 font-mono" style="color:var(--theme-text);"></span>
         </div>
 
@@ -105,8 +105,8 @@
 
       
       <div class="al-sheet-footer" style="border-color:var(--theme-border);">
-        <button type="button" @click="generateSftpCredentials()" id="sftpRegenBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none disabled:opacity-40 inline-flex items-center gap-1.5" style="background:var(--theme-warning);color:var(--theme-bg);"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>Regenerate</button>
-        <button type="button" @click="revokeSftpCredentials()" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none inline-flex items-center gap-1.5" style="background:var(--theme-danger);color:var(--theme-btn-danger-text);"><%- icon('trash-2', { class: 'size-3', strokeWidth: 1.5 }) %>Revoke</button>
+        <button type="button" @click="generateSftpCredentials()" id="sftpRegenBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none disabled:opacity-40 inline-flex items-center gap-1.5" style="background:var(--theme-warning);color:var(--theme-bg);"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('regenerate') %></button>
+        <button type="button" @click="revokeSftpCredentials()" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1 outline-none inline-flex items-center gap-1.5" style="background:var(--theme-danger);color:var(--theme-btn-danger-text);"><%- icon('trash-2', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('revoke') %></button>
       </div>
     </div>
 

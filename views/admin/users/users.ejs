@@ -10,8 +10,8 @@
     <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="userManager()">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Users' }
+        { label: t('admin') },
+        { label: t('breadcrumbUsers') }
       ] }) %>
       <%- include('../../components/ui/page-header', {
         title: t('adminUsersTitle'),

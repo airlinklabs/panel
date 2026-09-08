@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Databases' }) %>
+<%- include('../../components/header', { title: t('databases') }) %>
 
 <main class="h-screen m-auto" style="color:var(--theme-text)">
   <div class="flex h-full">
@@ -8,9 +8,9 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Databases' }
+        { label: t('databases') }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
       <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-6">
@@ -25,7 +25,7 @@
             <button id="newDatabaseBtn" @click="openAddDatabaseModal()" type="button"
                 class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
                 <%- icon('plus', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
-                <%= req.translations.newDatabase || 'New Database' %>
+                <%= t('newDatabase') %>
             </button>
           </div>
           <% } %>
@@ -56,15 +56,15 @@
   <div id="addDatabasePanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border)">
       <div>
-        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.createDatabase || 'Create Database' %></h2>
-        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= req.translations.dbProvisionHint || 'A database, user and password will be provisioned on this host.' %></p>
+        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('createDatabase') %></h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('dbProvisionHint') %></p>
       </div>
       <button type="button" @click="closeAddDatabaseModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-      <label for="dbHostSelect" class="al-label"><%= req.translations.databaseHostLabel || 'Database host' %></label>
+      <label for="dbHostSelect" class="al-label"><%= t('databaseHostLabel') %></label>
       <select id="dbHostSelect" class="al-input w-full">
         <% hosts.forEach(host => { %>
           <option value="<%= host.id %>"><%= host.name %> (<%= host.host %>:<%= host.port %>)</option>
@@ -74,11 +74,11 @@
     <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border)">
       <button type="button" @click="closeAddDatabaseModal()" class="al-btn-secondary inline-flex items-center gap-1.5">
         <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <%= req.translations.cancel || 'Cancel' %>
+        <%= t('cancel') %>
       </button>
       <button type="button" id="confirmAddDatabase" class="al-btn-primary inline-flex items-center gap-1.5">
         <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <%= req.translations.createDatabaseBtn || 'Create database' %>
+        <%= t('createDatabaseBtn') %>
       </button>
     </div>
   </div>

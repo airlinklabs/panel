@@ -69,9 +69,9 @@ function escJS(val) {
     <!-- Content -->
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Files' }
+        { label: t('files') }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
       <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-4">
@@ -201,13 +201,13 @@ function escJS(val) {
               <input
                 id="fileSearchInput"
                 type="text"
-                placeholder="Filter files…"
+                placeholder="<%= t('filterFiles') %>"
                 class="flex-1 bg-transparent text-[13px] focus:outline-none"
                 style="color:var(--theme-text-strong);"
                 autocomplete="off"
                 spellcheck="false"
-                aria-label="Filter files">
-              <button type="button" id="clearFileSearch" class="hidden p-0.5 rounded transition" aria-label="Clear search filter" style="color:var(--theme-text-muted);">
+                aria-label="<%= t('filterFiles') %>">
+              <button type="button" id="clearFileSearch" class="hidden p-0.5 rounded transition" aria-label="<%= t('clearSearchFilter') %>" style="color:var(--theme-text-muted);">
                 <%- icon('x', { size: 10 }) %>
               </button>
             </div>
@@ -215,7 +215,7 @@ function escJS(val) {
               <thead class="al-table-head">
               <tr>
                 <th class="px-3 py-2 text-left w-10" scope="col">
-                  <input type="checkbox" id="selectAll" class="form-checkbox h-3.5 w-3.5 rounded transition file-checkbox" aria-label="Select all files">
+                  <input type="checkbox" id="selectAll" class="form-checkbox h-3.5 w-3.5 rounded transition file-checkbox" aria-label="<%= t('selectFileAll') %>">
                 </th>
                 <th class="al-table-th px-3 py-2 text-left" scope="col"><%= t('name') %></th>
                 <th class="al-table-th px-3 py-2 text-left w-24" scope="col"><%= t('size') %></th>

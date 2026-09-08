@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Edit Image' }) %>
+<%- include('../../components/header', { title: t('adminEditImageTitle') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -8,27 +8,27 @@
 <%- include('../../components/template') %>
     <div id="page-content" x-data="imageEditor()" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Images', href: '/admin/images' },
-        { label: image.name || 'Edit Image' }
+        { label: t('admin') },
+        { label: t('breadcrumbImages'), href: '/admin/images' },
+        { label: image.name || t('adminEditImageTitle') }
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title"><%= image.name || 'Edit Image' %></h1>
-          <p class="al-page-desc">Edit egg configuration, variables, Docker images, and install scripts.</p>
+          <h1 class="al-page-title"><%= image.name || t('adminEditImageTitle') %></h1>
+          <p class="al-page-desc"><%= t('adminEditImageText') %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button type="button" id="tab-save-btn" class="al-btn-primary">Save</button>
-          <button type="button" id="tab-reset-btn" class="al-btn-secondary"><%- icon('rotate-ccw', { class: 'size-4', strokeWidth: 1.5 }) %>Reset</button>
-          <a href="/admin/images/export/<%= image.id %>" class="al-btn-secondary">Export</a>
-          <a href="/admin/images" class="al-btn-secondary">Back</a>
+          <button type="button" id="tab-save-btn" class="al-btn-primary"><%= t('save') %></button>
+          <button type="button" id="tab-reset-btn" class="al-btn-secondary"><%- icon('rotate-ccw', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('reset') %></button>
+          <a href="/admin/images/export/<%= image.id %>" class="al-btn-secondary"><%= t('export') %></a>
+          <a href="/admin/images" class="al-btn-secondary"><%= t('back') %></a>
         </div>
       </div>
 
       <% if (req.query.success) { %>
         <div class="px-6 sm:px-8 mt-5">
           <div class="px-4 py-3 rounded-xl text-sm" style="background:var(--theme-success-bg);border:1px solid var(--theme-success);color:var(--theme-success)">
-            Changes saved successfully.
+            <%= t('changesSaved') %>
           </div>
         </div>
       <% } %>
@@ -36,31 +36,31 @@
       <div class="al-page-body" data-al-tabs data-tabs-default="general" data-tabs-hash>
         <!-- Tab nav -->
         <div role="tablist" class="flex gap-1 mb-6">
-          <button type="button" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" data-tab="general" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('layout-grid', { class: 'size-4', strokeWidth: 1.5 }) %>General</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-docker" id="tab-docker" data-tab="docker" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('container', { class: 'size-4', strokeWidth: 1.5 }) %>Docker Images</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-variables" id="tab-variables" data-tab="variables" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('variable', { class: 'size-4', strokeWidth: 1.5 }) %>Variables</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-install" id="tab-install" data-tab="install" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('terminal', { class: 'size-4', strokeWidth: 1.5 }) %>Install Script</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" data-tab="settings" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('settings', { class: 'size-4', strokeWidth: 1.5 }) %>Settings</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-raw" id="tab-raw" data-tab="raw" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('file-json', { class: 'size-4', strokeWidth: 1.5 }) %>Raw JSON</button>
+          <button type="button" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" data-tab="general" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('layout-grid', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('general') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-docker" id="tab-docker" data-tab="docker" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('container', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('dockerImages') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-variables" id="tab-variables" data-tab="variables" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('variable', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('variables') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-install" id="tab-install" data-tab="install" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('terminal', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('installScript') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" data-tab="settings" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('settings', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('settings') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-raw" id="tab-raw" data-tab="raw" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('file-json', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('rawJson') %></button>
         </div>
 
         <!-- General tab -->
         <div id="panel-general" role="tabpanel" aria-labelledby="tab-general" data-tab-panel="general" class="tab-panel space-y-5">
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Basics</h2>
+            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)"><%= t('basics') %></h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div>
-                <label for="field-name" class="al-label mb-1.5">Name</label>
+                <label for="field-name" class="al-label mb-1.5"><%= t('name') %></label>
                 <input type="text" id="field-name" value="<%= image.name || '' %>"
                   class="al-input">
               </div>
               <div>
-                <label for="field-author" class="al-label mb-1.5">Author</label>
+                <label for="field-author" class="al-label mb-1.5"><%= t('author') %></label>
                 <input type="text" id="field-author" value="<%= image.author || '' %>"
                   class="al-input">
               </div>
               <div class="sm:col-span-2">
-                <label for="field-description" class="al-label mb-1.5">Description</label>
+                <label for="field-description" class="al-label mb-1.5"><%= t('description') %></label>
                 <textarea id="field-description" rows="2"
                   class="w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-accent)] transition resize-none" style="border-color:var(--theme-border);background:var(--theme-bg-input);color:var(--theme-text-strong)"><%= image.description || '' %></textarea>
               </div>
@@ -68,25 +68,25 @@
           </div>
 
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Process</h2>
+            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)"><%= t('process') %></h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div class="sm:col-span-2">
-                <label for="field-startup" class="al-label mb-1.5">Startup Command</label>
+                <label for="field-startup" class="al-label mb-1.5"><%= t('startupCommand') %></label>
                 <input type="text" id="field-startup" value="<%= image.startup || '' %>" placeholder="e.g. java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}"
                   class="al-input font-mono">
                 <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Use <code class="font-mono px-1 rounded" style="background:var(--theme-bg-secondary)">{{VARIABLE_NAME}}</code> to reference egg variables.</p>
               </div>
               <div>
-                <label for="field-stop" class="al-label mb-1.5">Stop Command</label>
+                <label for="field-stop" class="al-label mb-1.5"><%= t('stopCommand') %></label>
                 <input type="text" id="field-stop" value="<%= image.stop || 'stop' %>" placeholder="stop"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Command sent to the container to stop it gracefully.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('stopCommandHint') %></p>
               </div>
               <div>
-                <label for="field-startup-done" class="al-label mb-1.5">Startup Done Signal</label>
+                <label for="field-startup-done" class="al-label mb-1.5"><%= t('startupDoneSignal') %></label>
                 <input type="text" id="field-startup-done" value="<%= image.startup_done || '' %>" placeholder="e.g. For help, type"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">String in the server output that means the server finished starting.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('startupDoneSignalHint') %></p>
               </div>
             </div>
           </div>
@@ -96,15 +96,15 @@
         <div id="panel-docker" role="tabpanel" aria-labelledby="tab-docker" data-tab-panel="docker" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <div class="flex items-center justify-between px-5 py-3.5 rounded-t-xl" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
-              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Docker Images</h2>
+              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= t('dockerImages') %></h2>
               <button type="button" id="add-docker-image"
                 class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
                 <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
-                Add Image
+                <%= t('addImage') %>
               </button>
             </div>
             <div class="px-5 py-4">
-              <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Each entry maps a display label to a Docker image reference. The label is what users see in dropdowns.</p>
+              <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('dockerImagesDesc') %></p>
               <div id="docker-images-list" class="space-y-2">
                 <!-- populated by JS -->
               </div>
@@ -116,15 +116,15 @@
         <div id="panel-variables" role="tabpanel" aria-labelledby="tab-variables" data-tab-panel="variables" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <div class="flex items-center justify-between px-5 py-3.5 rounded-t-xl" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
-              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Egg Variables</h2>
+              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= t('eggVariables') %></h2>
               <button type="button" id="add-variable"
                 class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
                 <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
-                Add Variable
+                <%= t('addVariable') %>
               </button>
             </div>
             <div class="px-5 py-4">
-              <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Variables are injected as environment variables into the container. <code class="font-mono px-1 rounded" style="background:var(--theme-bg-secondary)">env_variable</code> is the name used in the startup command and Docker environment.</p>
+              <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('variablesDesc') %></p>
               <div id="variables-list" class="space-y-3">
                 <!-- populated by JS -->
               </div>
@@ -135,25 +135,25 @@
         <!-- Install Script tab -->
         <div id="panel-install" role="tabpanel" aria-labelledby="tab-install" data-tab-panel="install" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Installation Script</h2>
+            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)"><%= t('installationScript') %></h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div>
-                <label for="field-install-container" class="al-label mb-1.5">Container Image</label>
+                <label for="field-install-container" class="al-label mb-1.5"><%= t('containerImage') %></label>
                 <input type="text" id="field-install-container" placeholder="e.g. eclipse-temurin:21-jdk-jammy"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Docker image the install script runs inside.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('containerImageHint') %></p>
               </div>
               <div>
-                <label for="field-install-entrypoint" class="al-label mb-1.5">Entrypoint</label>
+                <label for="field-install-entrypoint" class="al-label mb-1.5"><%= t('entrypoint') %></label>
                 <input type="text" id="field-install-entrypoint" placeholder="bash"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Shell that executes the script (usually <code class="font-mono">bash</code>).</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('entrypointHint') %></p>
               </div>
               <div class="sm:col-span-2">
-                <label for="field-install-script" class="al-label mb-1.5">Script</label>
+                <label for="field-install-script" class="al-label mb-1.5"><%= t('script') %></label>
                 <textarea id="field-install-script" rows="16" placeholder="#!/bin/bash&#10;# Install script runs inside the container&#10;apt update && apt install -y curl"
                   class="al-input font-mono resize-y"></textarea>
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Files are placed in <code class="font-mono px-1 rounded" style="background:var(--theme-bg-secondary)">/mnt/server</code> inside the install container. The script runs as root.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('scriptHint') %></p>
               </div>
             </div>
           </div>
@@ -163,15 +163,15 @@
         <div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-tab-panel="settings" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <div class="flex items-center justify-between px-5 py-3.5 rounded-t-xl" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
-              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Required Ports</h2>
+              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= t('requiredPorts') %></h2>
               <button type="button" id="add-port-requirement"
                 class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
                 <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
-                Add Port
+                <%= t('addPort') %>
               </button>
             </div>
             <div class="px-5 py-4">
-              <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Each entry is shown when creating servers. Users get exactly these required ports; admins can add more.</p>
+              <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('requiredPortsDesc') %></p>
               <div id="port-requirements-list" class="space-y-2"></div>
             </div>
           </div>
@@ -180,9 +180,9 @@
         <!-- Raw JSON tab -->
         <div id="panel-raw" role="tabpanel" aria-labelledby="tab-raw" data-tab-panel="raw" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Raw JSON</h2>
+            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)"><%= t('rawJson') %></h2>
             <div class="px-5 py-5">
-              <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Edit the complete egg JSON directly. Must be valid JSON — the editor will warn on errors. Saving here overwrites all tab values.</p>
+              <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('rawJsonDesc') %></p>
               <div id="json-editor" class="w-full h-[480px] rounded-xl border overflow-hidden" style="border-color:var(--theme-border)"></div>
             </div>
           </div>

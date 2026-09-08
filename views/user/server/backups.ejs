@@ -8,9 +8,9 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Backups' }
+        { label: t('backups') }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
       <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-6">
@@ -24,7 +24,7 @@
             <button id="createBackup" onclick="openCreateBackupModal()" type="button"
                 class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
                 <%- icon('plus', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
-                Create Backup
+                <%= t('createBackup') %>
             </button>
           </div>
         </div>
@@ -73,7 +73,7 @@
                             <% if (backup.locked) { %>
                               <span data-locked-badge class="ml-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium align-middle" style="background:var(--theme-warning-bg, var(--theme-bg-secondary));color:var(--theme-warning, var(--theme-text-muted))">
                                 <%- icon('lock', { class: 'size-2.5', strokeWidth: 2 }) %>
-                                locked
+                                <%= t('locked') %>
                               </span>
                             <% } %>
                           </div>

@@ -7,6 +7,7 @@ import { emitRealtime } from "./realtime/events";
 import { PLAYER_STATS_INTERVAL_MS } from "../config/timeouts";
 import { PLAYER_STATS_PLAYER_STATS_MAX_DATA_POINTS } from "../config/ui";
 import { DAEMON_TIMEOUT_SHORT_MS } from "../config/daemonTimeouts";
+import { logT } from "../services/i18n";
 
 // Interval in milliseconds (5 minutes)
 // Maximum number of data points to keep (48 hours worth of data at 5-minute intervals)
@@ -128,7 +129,7 @@ export async function collectPlayerStats(): Promise<void> {
       state: {},
     });
   } catch (error) {
-    logger.warn("Player stats collection failed", { error });
+    logger.warn(logT("log.playerStatsCollectionFailed"), { error });
   }
 }
 
@@ -151,7 +152,9 @@ export function startPlayerStatsCollection(): void {
     PLAYER_STATS_INTERVAL_MS,
   );
   logger.info(
-    `Player stats collection started (interval: ${PLAYER_STATS_INTERVAL_MS / 1000} seconds)`,
+    logT("log.playerStatsCollectionStarted", {
+      interval: PLAYER_STATS_INTERVAL_MS / 1000,
+    }),
   );
 }
 
@@ -162,6 +165,6 @@ export function stopPlayerStatsCollection(): void {
   if (statsCollectionInterval) {
     clearInterval(statsCollectionInterval);
     statsCollectionInterval = null;
-    logger.info("Player stats collection stopped");
+    logger.info(logT("log.playerStatsCollectionStopped"));
   }
 }

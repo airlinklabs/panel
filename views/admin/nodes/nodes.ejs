@@ -10,8 +10,8 @@
     <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="nodeManager()">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Nodes' }
+        { label: t('admin') },
+        { label: t('navNodes') }
       ] }) %>
       <%- include('../../components/ui/page-header', {
         title: t('adminNodesTitle'),
@@ -23,8 +23,8 @@
       <div class="al-page-body" data-al-tabs data-tabs-default="nodes" data-tabs-hash>
 
         <div role="tablist" class="flex gap-1 mb-6">
-          <button id="tab-btn-nodes" type="button" data-tab="nodes" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-nodes" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %>Nodes</button>
-          <button id="tab-btn-locations" type="button" data-tab="locations" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-locations" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) %>Locations</button>
+          <button id="tab-btn-nodes" type="button" data-tab="nodes" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-nodes" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('navNodes') %></button>
+          <button id="tab-btn-locations" type="button" data-tab="locations" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-locations" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('navLocations') %></button>
         </div>
 
         <div id="tab-panel-nodes" role="tabpanel" aria-labelledby="tab-btn-nodes" data-tab-panel="nodes">
@@ -85,8 +85,8 @@
         <div id="locations" class="mt-6 space-y-5">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-lg font-semibold tracking-tight" style="color:var(--theme-text-strong);">Locations</h2>
-              <p class="text-sm mt-0.5" style="color:var(--theme-text-muted);">Group nodes by region.</p>
+              <h2 class="text-lg font-semibold tracking-tight" style="color:var(--theme-text-strong);"><%= t('locations') %></h2>
+              <p class="text-sm mt-0.5" style="color:var(--theme-text-muted);"><%= t('groupNodesByRegion') %></p>
             </div>
           </div>
 

@@ -1,5 +1,6 @@
-import type express from 'express';
-import logger from './logger';
+import type express from "express";
+import logger from "./logger";
+import { logT } from "../services/i18n";
 
 export const loadModules = async (
   app: express.Express,
@@ -7,25 +8,29 @@ export const loadModules = async (
   serverPort?: number,
   wsInstance?: { applyTo: (router: express.Router) => void },
 ) => {
-  const { registeredModules } = await import('../modules/registry');
+  const { registeredModules } = await import("../modules/registry");
   const modules = registeredModules();
 
-  logger.info('Initializing — loading core modules and components');
+  logger.info(logT("log.initializingModules"));
 
-  const panelMajor = airlinkVersion.split('.')[0];
+  const panelMajor = airlinkVersion.split(".")[0];
   let loaded = 0;
   let errors = 0;
 
   for (const entry of modules) {
     const mod = entry.module;
-    const modMajor = mod.info.version.split('.')[0];
+    const modMajor = mod.info.version.split(".")[0];
 
     // Version compatibility is a hard contract: an incompatible module is a
     // misconfiguration that must surface at startup, not a silent skip.
     if (modMajor !== panelMajor) {
       errors++;
       logger.error(
-        `[feature-registry] '${entry.name}' requires panel v${mod.info.version} (found v${airlinkVersion})`,
+        logT("log.moduleVersionMismatch", {
+          name: entry.name,
+          required: mod.info.version,
+          current: airlinkVersion,
+        }),
       );
       continue;
     }
@@ -38,20 +43,17 @@ export const loadModules = async (
       loaded++;
     } catch (error) {
       errors++;
-      logger.error(
-        `[feature-registry] Failed to mount '${entry.name}':`,
-        error,
-      );
+      logger.error(logT("log.moduleFailedMount", { name: entry.name }), error);
     }
   }
 
-  logger.info(`Loaded ${loaded} modules, errors ${errors}`);
+  logger.info(logT("log.modulesLoaded", { loaded, errors }));
 
   if (errors > 0) {
-    logger.error(`[feature-registry] ${errors} module(s) failed to load`);
+    logger.error(logT("log.modulesFailedCount", { count: errors }));
   }
 
   if (serverPort) {
-    logger.info(`Server running on http://localhost:${serverPort}`);
+    logger.info(logT("log.serverRunning", { port: serverPort }));
   }
 };

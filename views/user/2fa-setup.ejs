@@ -1,4 +1,4 @@
-<%- include('../components/header', { title: 'Two-Factor Authentication' }) %>
+<%- include('../components/header', { title: t('twoFactorSetupTitle') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -8,14 +8,14 @@
 <%- include('../components/template') %>
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
-        { label: 'Account', href: '/account' },
-        { label: 'Two-Factor Authentication' }
+        { label: t('navAccount'), href: '/account' },
+        { label: t('twoFactorSetupTitle') }
       ] }) %>
 
       <div class="al-page-header mb-5">
         <% if (required) { %>
           <div class="mb-4 rounded-lg border px-4 py-3 text-sm" style="border-color:color-mix(in srgb, var(--theme-warning) 40%, transparent);background:color-mix(in srgb, var(--theme-warning) 10%, transparent)" style="color:var(--theme-text-strong)">
-            <strong>Two-factor authentication is required</strong> to access the admin panel. Enable it now to continue.
+            <strong><%= t('twoFactorRequired') %></strong> <%= t('twoFactorRequiredDesc') %>
           </div>
         <% } %>
         <div class="flex items-center gap-4">
@@ -23,8 +23,8 @@
             <%- icon('shield', { class: 'w-5 h-5', strokeWidth: 1.5 }) %>
           </div>
           <div>
-            <h1 class="al-page-title">Set up two-factor authentication</h1>
-            <p class="al-page-desc">Scan the QR code with an authenticator app, then confirm with a code.</p>
+            <h1 class="al-page-title"><%= t('twoFactorSetupTitle') %></h1>
+            <p class="al-page-desc"><%= t('twoFactorSetupDesc') %></p>
           </div>
         </div>
       </div>
@@ -34,20 +34,20 @@
           <ol class="flex items-center gap-2 text-xs font-medium mb-8">
             <li class="flex items-center gap-2" style="color:var(--theme-accent)">
               <span class="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold" style="background:var(--theme-accent);color:var(--theme-accent-text)">1</span>
-              Scan QR code
+              <%= t('scanQrCode') %>
             </li>
             <li class="h-px flex-1" style="background:var(--theme-border)"></li>
             <li class="flex items-center gap-2" style="color:var(--theme-text-muted)">
               <span class="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold border" style="background:var(--theme-bg-secondary);border-color:var(--theme-border);color:var(--theme-text-muted)">2</span>
-              Enter code
+              <%= t('enterCode') %>
             </li>
           </ol>
 
           <div class="flex flex-col items-center mb-7">
             <div class="rounded-2xl border p-1.5" style="border-color:var(--theme-border);background:var(--theme-bg-card)">
-              <img src="<%= qrDataUrl %>" alt="QR code" class="h-48 w-48" width="220" height="220">
+              <img src="<%= qrDataUrl %>" alt="<%= t('qrCodeAlt') %>" class="h-48 w-48" width="220" height="220">
             </div>
-            <p class="text-sm mt-4 mb-2" style="color:var(--theme-text-muted)">Can't scan? Enter this key manually in your authenticator app:</p>
+            <p class="text-sm mt-4 mb-2" style="color:var(--theme-text-muted)"><%= t('cantScanKey') %></p>
             <div class="flex items-center gap-2 w-full max-w-xs">
               <code class="select-all flex-1 truncate rounded-lg px-3 py-2 text-sm font-mono text-center" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><%= secretBase32 %></code>
               <button type="button" id="copySecret" class="al-btn-ghost shrink-0" aria-label="Copy secret key"
@@ -66,39 +66,39 @@
             hx-disabled-elt="find button[type='submit']"
             hx-indicator="#enable-form-status">
             <%- include('../components/csrf') %>
-            <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">6-digit code from your app</label>
+            <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('twoFactorCodeLabel') %></label>
             <div class="flex gap-2">
               <input id="totpToken" name="token" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" autofocus placeholder="••••••" class="al-input flex-1 text-center font-mono text-lg tracking-[0.4em]">
-              <button id="enableBtn" type="submit" class="al-btn-primary px-5"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %>Enable 2FA</button>
+              <button id="enableBtn" type="submit" class="al-btn-primary px-5"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('enabled2FA') %></button>
             </div>
-            <p id="enable-form-status" class="htmx-indicator text-sm mt-2" aria-live="polite" style="color:var(--theme-text-muted)">Enabling…</p>
+            <p id="enable-form-status" class="htmx-indicator text-sm mt-2" aria-live="polite" style="color:var(--theme-text-muted)"><%= t('enabling') %></p>
           </form>
 
           <div class="mt-7 pt-4 text-xs" style="border-top:1px solid var(--theme-border); color:var(--theme-text-muted)">
             <p class="flex items-center gap-1.5">
               <%- icon('shield-check', { class: 'w-3.5 h-3.5 shrink-0' }) %>
-              Once enabled, you will be asked for a code from your authenticator app every time you sign in.
+              <%= t('twoFactorEnabledOnce') %>
             </p>
-            <p class="mt-1.5">Supported apps: Google Authenticator, Authy, 1Password, Bitwarden and other TOTP-compatible apps.</p>
+            <p class="mt-1.5"><%= t('supportedApps') %></p>
           </div>
         </div>
 
         <!-- Passkey registration -->
         <div id="passkey-setup-card" class="al-card p-6 sm:p-8 max-w-xl mx-auto mt-6">
-          <h3 class="text-sm font-semibold mb-3" style="color:var(--theme-text-strong)">Passkey (Face ID / Fingerprint / Security Key)</h3>
-          <p class="text-sm mb-4" style="color:var(--theme-text-muted)">Register a passkey for passwordless 2FA verification.</p>
+          <h3 class="text-sm font-semibold mb-3" style="color:var(--theme-text-strong)"><%= t('passkeyTitle') %></h3>
+          <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= t('passkeyDesc') %></p>
 
           <div id="passkey-setup-status"></div>
 
           <div class="flex gap-2 mb-4">
-            <input id="passkeyDeviceName" type="text" placeholder="Device name (optional)" class="al-input flex-1">
+            <input id="passkeyDeviceName" type="text" placeholder="<%= t('deviceNameOptional') %>" class="al-input flex-1">
             <button type="button" id="registerPasskeyBtn" class="al-btn-primary">
-              <%- icon('key', { class: 'size-4', strokeWidth: 1.5 }) %>Register passkey
+              <%- icon('key', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('registerPasskey') %>
             </button>
           </div>
 
           <div id="passkey-list" class="mt-4" style="display:none">
-            <h4 class="text-xs font-medium mb-2" style="color:var(--theme-text-muted)">Registered passkeys</h4>
+            <h4 class="text-xs font-medium mb-2" style="color:var(--theme-text-muted)"><%= t('registeredPasskeys') %></h4>
             <div id="passkey-items" class="space-y-2"></div>
           </div>
         </div>

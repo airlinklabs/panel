@@ -13,14 +13,14 @@
   <div class="absolute inset-0" onclick="closeUploadModal()"></div>
   <div id="uploadModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full shadow-xl max-h-[85vh] flex flex-col will-change-transform" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="al-sheet-header" style="border-color:var(--theme-border);">
-      <p id="uploadModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);">Upload file</p>
-      <button type="button" onclick="closeUploadModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
+      <p id="uploadModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('uploadFile') %></p>
+      <button type="button" onclick="closeUploadModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('closeModal') %>"><%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %></button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
       <div id="uploadModalDropZone" class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-colors" style="border-color:var(--theme-border); color:var(--theme-text-muted);">
         <%- icon('upload', { class: 'w-10 h-10 mb-3', strokeWidth: 1.5 }) %>
-        <p class="text-sm font-medium" style="color:var(--theme-text-strong);">Drag & drop a file here</p>
-        <p class="text-xs mt-1" style="color:var(--theme-text-muted);">or click to browse</p>
+        <p class="text-sm font-medium" style="color:var(--theme-text-strong);"><%= t('dragDropFile') %></p>
+        <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= t('orClickToBrowse') %></p>
         <p id="uploadModalAcceptHint" class="text-xs mt-2" style="color:var(--theme-text-muted);"></p>
       </div>
       <input type="file" id="uploadModalInput" class="hidden">
@@ -33,15 +33,15 @@
             <p id="uploadModalFileName" class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"></p>
             <p id="uploadModalFileSize" class="text-xs" style="color:var(--theme-text-muted);"></p>
           </div>
-          <button type="button" onclick="clearUploadModalSelection()" class="shrink-0 p-1.5 rounded-lg transition-colors" style="color:var(--theme-text-muted);" aria-label="Remove file">
+          <button type="button" onclick="clearUploadModalSelection()" class="shrink-0 p-1.5 rounded-lg transition-colors" style="color:var(--theme-text-muted);" aria-label="<%= t('removeFile') %>">
             <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
           </button>
         </div>
       </div>
     </div>
     <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
-      <button type="button" onclick="closeUploadModal()" class="al-btn-secondary inline-flex items-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>Cancel</button>
-      <button type="button" id="uploadModalConfirmBtn" class="al-btn-primary inline-flex items-center gap-1.5" disabled><%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %>Upload</button>
+      <button type="button" onclick="closeUploadModal()" class="al-btn-secondary inline-flex items-center gap-1.5"><%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('cancel') %></button>
+      <button type="button" id="uploadModalConfirmBtn" class="al-btn-primary inline-flex items-center gap-1.5" disabled><%- icon('upload', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('uploadBtn') %></button>
     </div>
   </div>
 </div>

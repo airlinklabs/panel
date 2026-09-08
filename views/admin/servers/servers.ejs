@@ -240,7 +240,7 @@
           <button type="button" id="runVtScanButton" @click="runVtFileScan()"
             class="al-btn-primary w-full sm:w-auto min-h-[44px]">
             <%- icon('shield', { size: 16, class: 'shrink-0' }) %>
-            Upload to VirusTotal
+            <%= t('uploadToVt') %>
           </button>
         </div>
 
@@ -256,13 +256,13 @@
       <!-- Footer -->
       <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
         <button type="button" id="radarRescanBtn" class="hidden text-xs hover:underline min-h-[44px] flex items-center justify-center sm:justify-start" style="color:var(--theme-text-muted);" @click="resetRadarToPickerPhase()">
-          <%- icon('arrow-left', { class: 'size-3.5 inline mr-1' }) %> Run another scan
+          <%- icon('arrow-left', { class: 'size-3.5 inline mr-1' }) %> <%= t('runAnotherScan') %>
         </button>
         <div class="sm:ml-auto">
           <button type="button" @click="closeRadarScanModal()"
             class="al-btn-secondary w-full sm:w-auto min-h-[44px]">
             <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-            Close
+            <%= t('close') %>
           </button>
         </div>
       </div>

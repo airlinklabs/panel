@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Image Store' }) %>
+<%- include('../../components/header', { title: t('imageStoreTitle') }) %>
 
 <main class="min-h-screen m-auto">
   <div class="flex min-h-screen">
@@ -7,22 +7,22 @@
     <div id="page-content" x-data="imageStore()" class="flex-1 overflow-y-auto pt-0 pb-12">
 
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Images', href: '/admin/images' },
-        { label: 'Store' }
+        { label: t('admin') },
+        { label: t('breadcrumbImages'), href: '/admin/images' },
+        { label: t('storeTab') }
       ] }) %>
 
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title">Image Store</h1>
-          <p class="al-page-desc">Browse and install images from the Pterodactyl community</p>
+          <h1 class="al-page-title"><%= t('imageStoreTitle') %></h1>
+          <p class="al-page-desc"><%= t('imageStoreDesc') %></p>
         </div>
       </div>
 
       <div class="al-page-body">
         <div class="flex">
-          <a href="/admin/images" class="px-3 py-2 mr-4 text-sm font-medium transition hover:text-[var(--theme-text)]" style="color:var(--theme-text-muted)">Installed</a>
-          <span class="px-3 py-2 text-sm font-medium rounded-lg" style="background:var(--theme-primary);color:var(--theme-accent-text)">Store</span>
+          <a href="/admin/images" class="px-3 py-2 mr-4 text-sm font-medium transition hover:text-[var(--theme-text)]" style="color:var(--theme-text-muted)"><%= t('installed') %></a>
+          <span class="px-3 py-2 text-sm font-medium rounded-lg" style="background:var(--theme-primary);color:var(--theme-accent-text)"><%= t('storeTab') %></span>
         </div>
 
         <%- include('./store-panel') %>

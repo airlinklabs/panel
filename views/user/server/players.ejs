@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Players' }) %>
+<%- include('../../components/header', { title: t('players') }) %>
 
 <main class="h-screen m-auto" style="color:var(--theme-text)">
   <div class="flex h-full">
@@ -11,9 +11,9 @@
     <!-- Main Content -->
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Players' }
+        { label: t('players') }
       ] }) %>
       <!-- Page Header: title + meta left -->
       <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
@@ -32,7 +32,7 @@
           <div id="players-error-banner" class="p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);">
           <%- icon('triangle-alert', { class: 'size-6 mt-2 ml-1', style:'color:var(--theme-danger)' }) %>
       <div>
-        <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= req.translations.connectionError || 'Error' %></p>
+        <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('connectionError') %></p>
         <p class="text-sm" style="color:var(--theme-text-muted)"><%= errorMessage.message %></p>
       </div>
     </div>
@@ -51,15 +51,15 @@
         <div class="al-card p-6 mb-6 shadow-lg">
           <div class="flex flex-col md:flex-row justify-between items-center mb-4">
             <div>
-              <h2 class="text-xl font-semibold mb-1" style="color:var(--theme-text-strong)"><%= req.translations.players || 'Players' %></h2>
+              <h2 class="text-xl font-semibold mb-1" style="color:var(--theme-text-strong)"><%= t('players') %></h2>
               <p class="text-sm" style="color:var(--theme-text-muted)">
                 <% if (typeof serverInfo !== 'undefined') { %>
-                  <span class="font-medium" id="onlineCount"><%= serverInfo.onlinePlayers || 0 %></span> / <span id="maxCount"><%= serverInfo.maxPlayers || 0 %></span> players online
+                  <span class="font-medium" id="onlineCount"><%= serverInfo.onlinePlayers || 0 %></span> / <span id="maxCount"><%= serverInfo.maxPlayers || 0 %></span> <%= t('playersOnlineLabel') %>
                   <% if (serverInfo.version) { %>
-                    • <span style="color:var(--theme-text-muted)" id="versionLabel">Version: <%= serverInfo.version %></span>
+                    • <span style="color:var(--theme-text-muted)" id="versionLabel"><%= t('versionLabel') %> <%= serverInfo.version %></span>
                   <% } %>
                 <% } else { %>
-                  Manage your server's player list
+                  <%= t('managePlayerList') %>
                 <% } %>
               </p>
             </div>
@@ -69,10 +69,10 @@
           <div class="text-xs mb-4 flex items-center" style="color:var(--theme-text-muted)">
             <%- icon('refresh-cw', { class: 'h-3 w-3 mr-1', strokeWidth: 2 }) %>
             <span>
-              Refreshing in <span id="refresh-countdown">30</span> seconds
+              <%= t('refreshingIn') %> <span id="refresh-countdown">30</span> <%= t('secondsUnit') %>
                 <button type="button" @click="refreshPlayers()" class="ml-2 transition-colors duration-200 inline-flex items-center" style="color:var(--theme-accent)">
                   <%- icon('refresh-cw', { class: 'h-3 w-3 mr-1' }) %>
-                Refresh now
+                <%= t('refreshNow') %>
               </button>
             </span>
           </div>
@@ -96,7 +96,7 @@
                   <p class="text-lg font-bold" style="color:var(--theme-text-strong)"><%= player.name %></p>
                   <div class="flex items-center mt-1">
                     <span class="al-dot-online mr-2"></span>
-                    <span class="text-xs" style="color:var(--theme-text-muted)"><%= req.translations.online || 'Online' %></span>
+                    <span class="text-xs" style="color:var(--theme-text-muted)"><%= t('active') %></span>
                   </div>
                 </div>
               </div>
@@ -112,14 +112,14 @@
                   <%- icon('wifi-off', { class: 'size-6', strokeWidth: 1.5 }) %>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.serverOffline || 'Server Offline' %></h2>
+              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= t('serverOffline') %></h2>
               <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
-                The server appears to be offline. Start your server to see online players.
+                <%= t('serverOfflinePlayersDesc') %>
               </p>
               <div class="mt-6">
                 <button type="button" @click="refreshPlayers()" class="al-btn-primary px-4 py-2 rounded-lg inline-flex items-center">
                   <%- icon('refresh-cw', { class: 'h-4 w-4 mr-2' }) %>
-                  Refresh
+                  <%= t('refresh') %>
                 </button>
               </div>
             <% } else if (serverIsOnline) { %>
@@ -129,17 +129,17 @@
                   <%- icon('ellipsis', { class: 'h-8 w-8', style: 'color:var(--theme-success)', strokeWidth: 2 }) %>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.serverOnline || 'Server is online' %></h2>
+              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= t('serverOnline') %></h2>
               <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
-                Your server is running but no players are currently connected. Players will appear here when they join.
+                <%= t('serverOnlineDesc') %>
               </p>
               <div class="mt-4 text-sm" style="color:var(--theme-text-muted)">
                 <div class="flex items-center justify-center gap-4">
                   <div>
-                    <span class="font-semibold">Version:</span> <%= serverInfo.version %>
+                    <span class="font-semibold"><%= t('versionLabel') %></span> <%= serverInfo.version %>
                   </div>
                   <div>
-                    <span class="font-semibold">Capacity:</span> <%= serverInfo.onlinePlayers %>/<%= serverInfo.maxPlayers %>
+                    <span class="font-semibold"><%= t('capacityLabel') %></span> <%= serverInfo.onlinePlayers %>/<%= serverInfo.maxPlayers %>
                   </div>
                 </div>
               </div>
@@ -150,9 +150,9 @@
                   <%- icon('circle-help', { class: 'h-8 w-8', style: 'color:var(--theme-warning)', strokeWidth: 2 }) %>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.statusUnknown || 'Status Unknown' %></h2>
+              <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= t('statusUnknown') %></h2>
               <p class="mt-2 text-sm max-w-md mx-auto" style="color:var(--theme-text-muted)">
-                We couldn't determine if your server is online. It may be starting up or in an unusual state.
+                <%= t('statusUnknownDesc') %>
               </p>
             <% } %>
           </div>

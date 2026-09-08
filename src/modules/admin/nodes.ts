@@ -9,6 +9,7 @@ import type { Permission } from "../../handlers/permissions";
 import { registerPermission } from "../../handlers/permissions";
 import { checkNodeStatus } from "../../handlers/utils/node/nodeStatus";
 import logger from "../../handlers/logger";
+import { logT } from "../../services/i18n";
 import { getParamAsNumber } from "../../utils/typeHelpers";
 import { daemonRequest } from "../../handlers/utils/core/daemonRequest";
 import { syncNodeAllocations } from "../../handlers/utils/server/allocations";
@@ -116,7 +117,7 @@ async function listNodes(res: Response, includeServers = false) {
 
     return nodesWithStatus;
   } catch (error: unknown) {
-    logger.error("Error fetching nodes:", error);
+    logger.error(logT("log.errorFetchingNodes"), error);
     res.status(500).json({ message: "Error fetching nodes." });
     return;
   }
@@ -163,7 +164,7 @@ const adminModule: Module = {
             locations,
           });
         } catch (error: unknown) {
-          logger.error("Error fetching user:", error);
+          logger.error(logT("log.errorFetchingUser"), error);
           return res.redirect("/login");
         }
       },
@@ -192,7 +193,7 @@ const adminModule: Module = {
             locations,
           });
         } catch (error: unknown) {
-          logger.error("Error fetching user:", error);
+          logger.error(logT("log.errorFetchingUser"), error);
           return res.redirect("/login");
         }
       },
@@ -406,7 +407,7 @@ const adminModule: Module = {
           res.status(200).json({ message: "Node created successfully.", node });
           return;
         } catch (error: unknown) {
-          logger.error("Error when creating the node:", error);
+          logger.error(logT("log.errorCreatingNode"), error);
           res.status(500).json({ message: "Error when creating the node." });
           return;
         }
@@ -551,7 +552,7 @@ const adminModule: Module = {
                 : "Node deleted successfully.",
             });
           } catch (error: unknown) {
-            logger.error("Error when deleting the node:", error);
+            logger.error(logT("log.errorDeletingNode"), error);
             if (req.get("HX-Request") === "true") {
               return res.status(500).render("fragments/shared/error-banner", {
                 targetId: "admin-nodes",
@@ -562,7 +563,7 @@ const adminModule: Module = {
             res.status(500).json({ message: "Error when deleting the node." });
           }
         } catch (error: unknown) {
-          logger.error("Error fetching user:", error);
+          logger.error(logT("log.errorFetchingUser"), error);
           return res.redirect("/login");
         }
       },
@@ -592,7 +593,7 @@ const adminModule: Module = {
             .json(`configure --panel "${process.env.URL}" --key "${node.key}"`);
           return;
         } catch (error: unknown) {
-          logger.error("Error fetching user:", error);
+          logger.error(logT("log.errorFetchingUser"), error);
           return res.redirect("/login");
         }
       },
@@ -689,7 +690,7 @@ const adminModule: Module = {
             locations,
           });
         } catch (error: unknown) {
-          logger.error("Error fetching user:", error);
+          logger.error(logT("log.errorFetchingUser"), error);
           return res.redirect("/login");
         }
       },
@@ -867,7 +868,7 @@ const adminModule: Module = {
           res.status(200).json({ message: "Node updated successfully.", node });
           return;
         } catch (error: unknown) {
-          logger.error("Error when updating the node:", error);
+          logger.error(logT("log.errorUpdatingNode"), error);
           res.status(500).json({ message: "Error when updating the node." });
           return;
         }
@@ -898,7 +899,7 @@ const adminModule: Module = {
             .json({ message: "Node maintenance mode updated.", node: updated });
           return;
         } catch (error: unknown) {
-          logger.error("Error toggling node maintenance mode:", error);
+          logger.error(logT("log.errorTogglingMaintenance"), error);
           res
             .status(500)
             .json({ message: "Error toggling node maintenance mode." });

@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Server Logs' }) %>
+<%- include('../../components/header', { title: t('serverLogs') }) %>
 
 <main class="h-screen m-auto" style="color:var(--theme-text)">
   <div class="flex h-full">
@@ -8,9 +8,9 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Logs' }
+        { label: t('logs') }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
       <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
@@ -23,12 +23,12 @@
           <div class="flex gap-2 shrink-0">
             <a href="/server/<%= server.UUID %>" class="al-btn-ghost inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-center text-sm font-medium transition duration-300">
               <%- icon('terminal', { class: 'size-4', strokeWidth: 1.5 }) %>
-              Back to console
+              <%= t('backToConsole') %>
             </a>
             <button id="logsRefreshBtn" type="button"
                 class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
                 <%- icon('refresh-cw', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
-                Refresh
+                <%= t('refresh') %>
             </button>
           </div>
         </div>
@@ -47,8 +47,8 @@
         <div class="al-card rounded-lg shadow overflow-hidden">
           <div class="al-card-header">
             <div>
-              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Recent output</h2>
-              <p class="text-xs" style="color:var(--theme-text-muted)">Recent console output</p>
+              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('recentOutput') %></h2>
+              <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('recentOutputDesc') %></p>
             </div>
           </div>
           <div id="logsViewer" class="h-96 overflow-y-auto p-3 font-mono text-[12px] leading-relaxed whitespace-pre-wrap break-words"
@@ -59,8 +59,8 @@
         <div class="al-card rounded-lg shadow overflow-hidden">
           <div class="al-card-header">
             <div>
-              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Saved logs</h2>
-              <p class="text-xs" style="color:var(--theme-text-muted)">Archived snapshots of the console log, taken when the server stopped</p>
+              <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('savedLogs') %></h2>
+              <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('savedLogsDesc') %></p>
             </div>
           </div>
           <ul id="logsArchiveList" class="divide-y" style="border-color:var(--theme-border)"></ul>

@@ -103,7 +103,7 @@
     <!-- Content -->
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
@@ -306,12 +306,12 @@
       <div id="mobileDaemonOfflineWarning" class="mt-3 flex items-center gap-2.5 border rounded-xl px-3 py-2.5<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %> hidden<% } %>" style="background:color-mix(in srgb, var(--theme-danger) 12%, transparent);border-color:color-mix(in srgb, var(--theme-danger) 20%, transparent)">
         <%- icon('triangle-alert', { size: 16, class: 'shrink-0', style: 'color:var(--theme-danger);' }) %>
         <div class="min-w-0 flex-1">
-          <p class="text-xs font-medium" style="color:var(--theme-danger);">Connection Error</p>
+          <p class="text-xs font-medium" style="color:var(--theme-danger);"><%= t('connectionError') %></p>
           <p class="text-[11px] truncate" style="color:var(--theme-danger);"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'The daemon appears to be offline.' %></p>
         </div>
         <button type="button" onclick="retryDaemonConnection()" class="al-btn-danger shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-lg transition inline-flex items-center gap-1.5">
           <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Retry
+          <%= t('retry') %>
         </button>
       </div>
 
@@ -321,19 +321,19 @@
           <%= server.Suspended ? 'disabled' : '' %>
           class="al-btn-success flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
           <%- icon('play', { class: 'w-3.5 h-3.5' }) %>
-          <%= req.translations.start %>
+          <%= t('start') %>
         </button>
         <button id="mobileRestartButton" type="button"
           <%= server.Suspended ? 'disabled' : '' %>
           class="al-btn-secondary flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
           <%- icon('refresh-cw', { class: 'w-3.5 h-3.5' }) %>
-          <%= req.translations.restart %>
+          <%= t('restart') %>
         </button>
         <button id="mobileStopButton" type="button"
           <%= server.Suspended ? 'disabled' : '' %>
           class="al-btn-danger flex-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
           <%- icon('square', { class: 'w-3.5 h-3.5' }) %>
-          <%= req.translations.stop %>
+          <%= t('stop') %>
         </button>
       </div>
     </div>
@@ -348,7 +348,7 @@
     <div class="mt-3 mb-3">
       <div class="rounded-xl px-3 py-2.5 flex items-center gap-2" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm)">
         <%- icon('globe', { class: 'h-4 w-4 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
-        <span class="text-[10px] font-medium shrink-0" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %>:</span>
+        <span class="text-[10px] font-medium shrink-0" style="color:var(--theme-text-muted)"><%= t('addressIP') %>:</span>
         <span class="text-xs font-medium font-mono truncate flex-1" id="mobile-server-ip-text" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= (() => { const ports = JSON.parse(server.Ports); const primary = ports.filter(Port => Port.primary); return (primary.length ? primary : ports).slice(-1)[0]?.externalPort || String((primary.length ? primary : ports).slice(-1)[0]?.Port || '').split(':')[0]; })() %></span>
         <button type="button" id="mobile-copy-ip-btn" title="Copy server address" class="shrink-0 rounded-md p-1 transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)">
           <%- icon('copy', { id: 'mobile-copy-icon', class: 'h-3.5 w-3.5', style: 'color:var(--theme-text-muted)', strokeWidth: 2 }) %>
@@ -360,14 +360,14 @@
     <!-- Mobile Terminal -->
     <div class="rounded-t-xl overflow-hidden" style="border:1px solid var(--theme-border)">
       <div class="flex items-center px-3 py-2 shrink-0" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
-        <span class="text-[11px] font-medium select-none tracking-wide" style="color:var(--theme-text-muted)">console</span>
+        <span class="text-[11px] font-medium select-none tracking-wide" style="color:var(--theme-text-muted)"><%= t('console') %></span>
       </div>
       <div id="mobile-terminal-container" class="w-full relative">
         <div id="mobile-terminal"></div>
       </div>
       <div class="relative" style="border-top:1px solid var(--theme-border)">
-        <p id="consoleReadOnlyNoticeMobile" class="hidden text-[11px] px-4 py-1.5 m-0" style="color:var(--theme-text-muted)">View-only — console input is active in another tab</p>
-        <input id="mobile-input" type="text" autocomplete="off" aria-label="Console input" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
+        <p id="consoleReadOnlyNoticeMobile" class="hidden text-[11px] px-4 py-1.5 m-0" style="color:var(--theme-text-muted)"><%= t('viewOnlyNotice') %></p>
+        <input id="mobile-input" type="text" autocomplete="off" aria-label="<%= t('typeACommand') %>" placeholder="<%= t('typeACommand') %>"
           class="w-full px-4 py-3 text-sm outline-none placeholder:font-medium rounded-b-xl" style="background:var(--theme-bg-card);color:var(--theme-text-strong)">
       </div>
     </div>
@@ -378,7 +378,7 @@
       <div class="relative overflow-hidden rounded-xl px-3 py-3 min-h-[5rem]" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:0">
         <canvas id="mobileStatusChart"></canvas>
         <div class="relative z-10">
-          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= req.translations.Status %></p>
+          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= t('status') %></p>
           <p id="mobile-status" class="mt-0.5 text-base font-semibold leading-tight" style="color:var(--theme-text-strong)">--</p>
           <p id="mobile-status-log-text" class="text-[10px] truncate hidden" style="color:var(--theme-text-muted)"></p>
         </div>
@@ -387,7 +387,7 @@
       <div class="relative overflow-hidden rounded-xl px-3 py-3 min-h-[5rem]" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:1">
         <canvas id="mobileRamChart"></canvas>
         <div class="relative z-10">
-          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= req.translations.ramUsage %></p>
+          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= t('ramUsage') %></p>
           <p id="mobile-ramUsage" class="mt-0.5 text-xs font-medium leading-tight break-all" style="color:var(--theme-text-strong)">0%</p>
         </div>
       </div>
@@ -395,7 +395,7 @@
       <div class="relative overflow-hidden rounded-xl px-3 py-3 min-h-[5rem]" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:2">
         <canvas id="mobileCpuChart"></canvas>
         <div class="relative z-10">
-          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= req.translations.cpuUsage %></p>
+          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= t('cpuUsage') %></p>
           <p id="mobile-cpuUsage" class="mt-0.5 text-base font-semibold leading-tight" style="color:var(--theme-text-strong)">0%</p>
         </div>
       </div>
@@ -403,7 +403,7 @@
       <div class="relative overflow-hidden rounded-xl px-3 py-3 min-h-[5rem]" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm);--i:3">
         <canvas id="mobileDiskChart" class="hidden"></canvas>
         <div class="relative z-10">
-          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= req.translations.diskUsage %></p>
+          <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= t('diskUsage') %></p>
           <p id="mobile-diskUsage" class="mt-0.5 text-xs font-medium leading-tight break-all" style="color:var(--theme-text-strong)">--</p>
         </div>
       </div>

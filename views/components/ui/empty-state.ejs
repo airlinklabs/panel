@@ -3,7 +3,7 @@
   <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
     <%- icon(locals.iconName || 'inbox', { class: 'w-5 h-5', style: 'color:var(--theme-text-muted)' }) %>
   </div>
-  <h3 class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= locals.title || 'Nothing here' %></h3>
+  <h3 class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= locals.title || t('nothingHere') %></h3>
   <% if (locals.description) { %>
   <p class="text-[13px] mt-1 max-w-xs" style="color:var(--theme-text-muted)"><%= locals.description %></p>
   <% } %>

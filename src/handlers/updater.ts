@@ -6,6 +6,7 @@ import { httpGet } from "../utils/http";
 import { ok, err, type Result } from "../utils/result";
 import { PANEL_UPDATE_API_BASE } from "../config/urls";
 import { UPDATER_TIMEOUT_MS } from "../config/daemonTimeouts";
+import { logT } from "../services/i18n";
 
 interface GithubRelease {
   tag_name: string;
@@ -54,7 +55,7 @@ function spawnSyncSafe(
       stdio: options.stdio ?? "pipe",
     });
     if (result.error) {
-      logger.error("Update command failed:", result.error.message);
+      logger.error(logT("log.updateCommandFailed"), result.error.message);
       return { success: false, error: "Update failed" };
     }
     if (result.status !== 0) {
@@ -65,7 +66,7 @@ function spawnSyncSafe(
     }
     return { success: true, output: result.stdout };
   } catch (error) {
-    logger.error("Update command error:", error);
+    logger.error(logT("log.updateCommandError"), error);
     return { success: false, error: "Update failed" };
   }
 }
@@ -124,7 +125,7 @@ export async function checkForUpdates(): Promise<
       });
     }
   } catch (error) {
-    logger.error("Error checking for updates:", error);
+    logger.error(logT("log.errorCheckingUpdates"), error);
     return err("GITHUB_API_ERROR");
   }
 }
@@ -195,7 +196,7 @@ export async function performUpdate(): Promise<Result<void, UpdateError>> {
 
     return ok(undefined);
   } catch (error) {
-    logger.error("Error performing update:", error);
+    logger.error(logT("log.errorPerformingUpdate"), error);
     return err("GIT_COMMAND_FAILED");
   }
 }

@@ -1,12 +1,12 @@
 <% /* status-badge: { status: online|offline|starting|stopping|installing|suspended } */
 const s = (locals.status || 'offline').toLowerCase();
 const configs = {
-  online:     { cls: 'al-badge-online',  label: 'Online' },
-  offline:    { cls: 'al-badge-offline', label: 'Offline' },
-  starting:   { cls: 'al-badge-warning', label: 'Starting' },
-  stopping:   { cls: 'al-badge-warning', label: 'Stopping' },
-  installing: { cls: 'al-badge-info',    label: 'Installing' },
-  suspended:  { cls: 'al-badge-offline', label: 'Suspended' },
+  online:     { cls: 'al-badge-online',  label: t('online') },
+  offline:    { cls: 'al-badge-offline', label: t('offline') },
+  starting:   { cls: 'al-badge-warning', label: t('starting') },
+  stopping:   { cls: 'al-badge-warning', label: t('stopping') },
+  installing: { cls: 'al-badge-info',    label: t('installing') },
+  suspended:  { cls: 'al-badge-offline', label: t('suspended') },
 };
 const cfg = configs[s] || configs.offline;
 %>
