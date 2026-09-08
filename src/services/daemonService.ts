@@ -5,6 +5,7 @@
 
 import prisma from "../db";
 import { daemonScheme } from "../handlers/utils/core/daemonRequest";
+import { DEFAULT_DAEMON_TIMEOUT_MS } from "../config/timeouts";
 
 interface DaemonRequestOpts {
   method?: string;
@@ -58,7 +59,7 @@ async function fetchDaemon(
       opts?.body !== null && opts?.body !== undefined
         ? JSON.stringify(opts.body)
         : undefined,
-    signal: AbortSignal.timeout(opts?.timeout ?? 30000),
+    signal: AbortSignal.timeout(opts?.timeout ?? DEFAULT_DAEMON_TIMEOUT_MS),
   });
 }
 

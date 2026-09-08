@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Settings' }) %>
+<%- include('../../components/header', { title: t('adminSettingsTitle') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -12,11 +12,11 @@
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title">Settings</h1>
-          <p class="al-page-desc">Manage your panel configuration.</p>
+          <h1 class="al-page-title"><%= t('adminSettingsTitle') %></h1>
+          <p class="al-page-desc"><%= t('adminSettingsText') %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <span id="autosave-indicator" class="text-xs font-medium transition-opacity duration-300 opacity-0" style="color:var(--theme-success);">Saved</span>
+          <span id="autosave-indicator" class="text-xs font-medium transition-opacity duration-300 opacity-0" style="color:var(--theme-success);"><%= t('settingsSaved') %></span>
         </div>
       </div>
 
@@ -24,10 +24,10 @@
 
         <!-- Tab bar -->
         <div role="tablist" class="flex gap-1 mb-6">
-          <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('palette', { class: 'size-4', strokeWidth: 1.5 }) %>Appearance</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>Servers</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %>Security</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-features" id="tab-features" data-tab="features" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('toggle-left', { class: 'size-4', strokeWidth: 1.5 }) %>Features</button>
+          <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('palette', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('theme') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('navServers') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('securityTitle') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-features" id="tab-features" data-tab="features" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('toggle-left', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('features') %></button>
         </div>
 
         <!-- ── APPEARANCE ──────────────────────────────────────────────────── -->
@@ -36,15 +36,15 @@
 
           <!-- Branding -->
           <div class="al-card">
-            <h2 class="al-card-header">Branding</h2>
+            <h2 class="al-card-header"><%= t('siteTitle') %></h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 p-4">
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Site title</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('siteTitleLabel') %></label>
                 <input type="text" name="title" value="<%= settings.title %>"
                   class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Logo</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('logoLabel') %></label>
                 <div class="flex items-center gap-2">
                   <button type="button" @click="openUploadModal({ title: 'Upload logo', accept: 'image/*', onFile: function(f) { document.getElementById('logo-input')._selectedFile = f; document.getElementById('logo-label-name').textContent = f.name; document.getElementById('logo-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
                     <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
@@ -60,7 +60,7 @@
                 <% } %>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Favicon</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('faviconLabel') %></label>
                 <div class="flex items-center gap-2">
                   <button type="button" @click="openUploadModal({ title: 'Upload favicon', accept: '.ico,.png,.jpg,.jpeg', onFile: function(f) { document.getElementById('favicon-input')._selectedFile = f; document.getElementById('favicon-label-name').textContent = f.name; document.getElementById('favicon-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
                     <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
@@ -71,15 +71,15 @@
                   </button>
                 </div>
                 <input type="file" id="favicon-input" name="favicon" accept=".ico,.png,.jpg,.jpeg" class="hidden">
-                <p class="text-xs mt-1" style="color:var(--theme-text-muted)">PNG or JPG auto-converted to .ico</p>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('faviconHint') %></p>
               </div>
             </div>
           </div>
 
           <!-- Themes -->
           <div class="al-card">
-            <h2 class="al-card-header">Theme</h2>
-            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">Select a theme for the panel. All users will see this theme.</p>
+            <h2 class="al-card-header"><%= t('theme') %></h2>
+            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)"><%= t('themeDesc') %></p>
             <div class="p-4">
               <div class="space-y-2">
                 <% const themeVal = settings.theme || 'dark'; %>
@@ -88,7 +88,7 @@
                   <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= themeVal === 'light' ? 'al-radio-ring-active' : '' %>" style="<%= themeVal !== 'light' ? 'border-color:var(--theme-border)' : '' %>">
                     <% if (themeVal === 'light') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                   </span>
-                  <span class="text-sm flex-1" style="color:var(--theme-text)">Light Mode</span>
+                  <p class="text-sm flex-1" style="color:var(--theme-text)"><%= t('lightMode') %></p>
                   <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
                 </label>
                 <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= themeVal === 'dark' ? 'al-radio-active' : 'hover:border-[var(--theme-border)]' %>" style="<%= themeVal !== 'dark' ? 'border-color:var(--theme-border)' : '' %>">
@@ -96,7 +96,7 @@
                   <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= themeVal === 'dark' ? 'al-radio-ring-active' : '' %>" style="<%= themeVal !== 'dark' ? 'border-color:var(--theme-border)' : '' %>">
                     <% if (themeVal === 'dark') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                   </span>
-                  <span class="text-sm flex-1" style="color:var(--theme-text)">Dark Mode</span>
+                  <p class="text-sm flex-1" style="color:var(--theme-text)"><%= t('darkMode') %></p>
                   <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
                 </label>
                 <% allThemes.filter(t => t.name !== 'default' && t.name !== 'default-light' && t.name !== 'default-dark').forEach(function(theme) { %>
@@ -117,11 +117,11 @@
             </div>
             <div class="p-5" style="border-top:1px solid var(--theme-border)">
               <div class="flex items-center justify-between mb-2">
-                <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Upload custom theme</p>
-                <a href="/admin/settings/example-theme" class="text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)">Download example</a>
+                <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('uploadCustomTheme') %></p>
+                <a href="/admin/settings/example-theme" class="text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)"><%= t('downloadExample') %></a>
               </div>
-              <p class="text-xs mb-3" style="color:var(--theme-text-muted)">A .zip containing info.json, light.css, dark.css.</p>
-              <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Upload theme file</label>
+              <p class="text-xs mb-3" style="color:var(--theme-text-muted)"><%= t('themeFileHint') %></p>
+              <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('uploadThemeFile') %></label>
               <div class="flex items-center gap-2">
                 <button type="button" @click="openUploadModal({ title: 'Upload theme', accept: '.zip', onFile: function(f) { document.getElementById('theme-file-input')._selectedFile = f; document.getElementById('theme-label-name').textContent = f.name; document.getElementById('theme-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
                   <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
@@ -137,11 +137,11 @@
 
           <!-- Auth page wallpapers -->
           <div class="al-card">
-            <h2 class="al-card-header">Auth page wallpapers</h2>
-            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">Background image on the login and register pages. Upload a file or paste a URL. Leave both blank to use the default.</p>
+            <h2 class="al-card-header"><%= t('authPageWallpapers') %></h2>
+            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)"><%= t('authWallpaperDesc') %></p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 p-4">
               <div>
-                <p class="text-sm font-medium mb-3" style="color:var(--theme-text-strong)">Login page</p>
+                <p class="text-sm font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('login') %></p>
                 <% if (settings.loginWallpaper) { %>
                  <img src="<%= settings.loginWallpaper %>" alt="Login page wallpaper preview" class="h-20 w-full object-cover rounded-xl mb-3" style="border-color:var(--theme-border)">
                 <% } %>
@@ -156,13 +156,13 @@
                   </button>
                 </div>
                 <input type="file" id="login-wallpaper-file" name="loginWallpaperFile" accept="image/*" class="hidden">
-                <label for="login-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Or paste a URL</label>
+                <label for="login-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('orPasteUrl') %></label>
                 <input type="text" id="login-wallpaper-url" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
                   class="al-input">
               </div>
               <div>
-                <p class="text-sm font-medium mb-3" style="color:var(--theme-text-strong)">Register page</p>
+                <p class="text-sm font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('register') %></p>
                 <% if (settings.registerWallpaper) { %>
                  <img src="<%= settings.registerWallpaper %>" alt="Register page wallpaper preview" class="h-20 w-full object-cover rounded-xl mb-3" style="border-color:var(--theme-border)">
                 <% } %>
@@ -177,7 +177,7 @@
                   </button>
                 </div>
                 <input type="file" id="register-wallpaper-file" name="registerWallpaperFile" accept="image/*" class="hidden">
-                <label for="register-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Or paste a URL</label>
+                <label for="register-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('orPasteUrl') %></label>
                 <input type="text" id="register-wallpaper-url" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
                   class="al-input">
@@ -187,8 +187,8 @@
 
           <!-- Panel wallpaper -->
           <div class="al-card">
-            <h2 class="al-card-header">Panel wallpaper</h2>
-            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">Background image behind the panel content. Upload a file or paste a URL. Leave both blank to use the plain theme background. The Overview and Credits pages keep their own backgrounds.</p>
+            <h2 class="al-card-header"><%= t('panelWallpaper') %></h2>
+            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)"><%= t('panelWallpaperDesc') %></p>
             <div class="p-4">
               <% if (settings.panelWallpaper) { %>
                <img src="<%= settings.panelWallpaper %>" alt="Panel wallpaper preview" class="h-20 w-full object-cover rounded-xl mb-3" style="border-color:var(--theme-border)">
@@ -204,7 +204,7 @@
                 </button>
               </div>
               <input type="file" id="panel-wallpaper-file" name="panelWallpaperFile" accept="image/*" class="hidden">
-              <label for="panel-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Or paste a URL</label>
+              <label for="panel-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('orPasteUrl') %></label>
               <input type="text" id="panel-wallpaper-url" name="panelWallpaperUrl" placeholder="https://…"
                 value="<%= (settings.panelWallpaper && settings.panelWallpaper.startsWith('http')) ? settings.panelWallpaper : '' %>"
                 class="al-input">
@@ -218,12 +218,12 @@
         <div id="panel-servers" role="tabpanel" aria-labelledby="tab-servers" data-tab-panel="servers" class="tab-panel space-y-5" hidden>
 
           <div class="al-card">
-            <h2 class="al-card-header">User permissions</h2>
+            <h2 class="al-card-header"><%= t('navServers') %></h2>
             <div class="p-4 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Allow users to create servers</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Users can create their own servers up to their limit.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('allowCreateServers') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('allowCreateServersDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" aria-label="Allow users to create servers" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
@@ -234,8 +234,8 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Allow users to delete servers</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Users can delete servers they own.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('allowDeleteServers') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('allowDeleteServersDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" aria-label="Allow users to delete servers" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
@@ -246,8 +246,8 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Allow users to submit images</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Users can submit custom images for admin approval. Approved images appear in the create-server flow.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('allowSubmitImages') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('allowSubmitImagesDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="allowUserCreateImages" class="sr-only peer" aria-label="Allow users to submit images" <%= settings.allowUserCreateImages ? 'checked' : '' %>>
@@ -258,8 +258,8 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Show onboarding tutorial</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">New users get a short tutorial after their first login.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('showOnboarding') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('showOnboardingDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="onboardingEnabled" class="sr-only peer" aria-label="Show onboarding tutorial" <%= settings.onboardingEnabled ? 'checked' : '' %>>
@@ -271,17 +271,17 @@
 
               <div id="onboardingStepsEditor" class="mt-4 pt-4" style="border-top:1px solid var(--theme-border)">
                 <div class="flex items-center justify-between mb-3">
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Onboarding steps</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('onboardingSteps') %></p>
                   <div class="flex gap-2">
                     <button type="button" id="onboardingPreviewBtn" class="al-btn-ghost px-3 py-1.5 text-xs font-medium" onclick="previewOnboarding()">
-                      <%- icon('eye', { class: 'size-3.5', strokeWidth: 1.5 }) %> Preview
+                      <%- icon('eye', { class: 'size-3.5', strokeWidth: 1.5 }) %> <%= t('preview') %>
                     </button>
                     <button type="button" id="addOnboardingStep" class="al-btn-ghost px-3 py-1.5 text-xs font-medium" onclick="addOnboardingStep()">
-                      <%- icon('plus', { class: 'size-3.5', strokeWidth: 1.5 }) %> Add step
+                      <%- icon('plus', { class: 'size-3.5', strokeWidth: 1.5 }) %> <%= t('addStep') %>
                     </button>
                   </div>
                 </div>
-                <p class="text-xs mb-3" style="color:var(--theme-text-muted)">Define the steps shown to new users. Each step has a title, description, icon (lucide name), and optional CTA link.</p>
+                <p class="text-xs mb-3" style="color:var(--theme-text-muted)"><%= t('onboardingStepsDesc') %></p>
                 <div id="onboardingStepList" class="space-y-3"></div>
                 <textarea id="onboardingStepsJson" class="hidden" rows="4"><%= settings.onboardingSteps || '[]' %></textarea>
               </div>
@@ -289,21 +289,21 @@
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">File uploads</h2>
+            <h2 class="al-card-header"><%= t('uploadLimit') %></h2>
             <div class="p-4">
-              <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Upload limit <span class="font-normal" style="color:var(--theme-text-muted)">(MB)</span></label>
+              <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('uploadLimitLabel') %> <span class="font-normal" style="color:var(--theme-text-muted)">(MB)</span></label>
               <div class="relative max-w-xs">
                 <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
                   class="al-input pr-12">
                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style="color:var(--theme-text-muted)">MB</span>
               </div>
-              <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Maximum file size users can upload via the file manager.</p>
+              <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('uploadLimitDesc') %></p>
             </div>
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Default limits</h2>
-            <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)">Applied to new users unless overridden per-user.</p>
+            <h2 class="al-card-header"><%= t('defaultLimits') %></h2>
+            <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)"><%= t('defaultLimitsDesc') %></p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 p-4">
               <div>
                 <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Server limit</label>
@@ -372,11 +372,11 @@
 
           <!-- Registration -->
           <div class="al-card">
-            <h2 class="al-card-header">Registration</h2>
+            <h2 class="al-card-header"><%= t('securityTitle') %></h2>
             <div class="p-4 flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Allow public registration</p>
-                <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">When off, only admins can create new accounts.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('allowPublicRegistration') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('allowPublicRegistrationDesc') %></p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="allowRegistration" class="sr-only peer" aria-label="Allow public registration" <%= settings.allowRegistration ? 'checked' : '' %>>
@@ -405,7 +405,7 @@
 
           <!-- Rate limiting -->
           <div class="al-card">
-            <h2 class="al-card-header">Rate limiting</h2>
+            <h2 class="al-card-header"><%= t('rateLimiting') %></h2>
             <div class="p-4 space-y-4">
               <div class="flex items-center justify-between">
                 <div>
@@ -837,320 +837,10 @@
 </main>
 
 
+<script nonce="<%- nonce %>" src="/scripts/admin-settings.js"></script>
 <script nonce="<%- nonce %>">
-function adminSettings() {
-  return {
-    init() {
-      var formAppearance = document.getElementById('form-appearance');
-      if (formAppearance) {
-        formAppearance.querySelectorAll('input[type="text"], input[type="number"]').forEach((input) => { input.addEventListener('change', () => this.saveAppearance()); });
-        formAppearance.querySelectorAll('input[name="theme"]').forEach((radio) => { radio.addEventListener('change', () => this.saveAppearance()); });
-      }
-      var serversPanel = document.getElementById('panel-servers');
-      if (serversPanel) serversPanel.querySelectorAll('input').forEach((input) => { input.addEventListener('change', () => this.saveServers()); });
-      var securityPanel = document.getElementById('panel-security');
-      if (securityPanel) securityPanel.querySelectorAll('input').forEach((input) => { input.addEventListener('change', () => this.saveSecurity()); });
-      var featuresPanel = document.getElementById('panel-features');
-      if (featuresPanel) featuresPanel.querySelectorAll('input').forEach((input) => { input.addEventListener('change', () => this.saveFeatures()); });
-
-      document.getElementById('banIpBtn').addEventListener('click', async () => {
-        const ip = document.getElementById('banIpInput').value.trim();
-        if (!ip) return showToast('Enter an IP address', 'error');
-        const d = await window.api('/api/v2/admin/settings/ban-ip', 'POST', { ip });
-        if (d && d.success) { document.getElementById('banIpInput').value = ''; showToast('IP banned. Bye bye.', 'success'); this.addBanRow(ip); }
-        else if (d) showToast(d.error || 'Failed', 'error');
-      });
-
-      document.getElementById('bannedIpList').addEventListener('click', async (e) => {
-        var btn = e.target.closest('.unban-btn');
-        if (!btn) return;
-        const d = await window.api('/api/v2/admin/settings/unban-ip', 'POST', { ip: btn.dataset.ip });
-        if (d && d.success) { showToast('IP unbanned. Welcome back.', 'success'); this.removeBanRow(btn); }
-        else if (d) showToast(d.error || 'Failed', 'error');
-      });
-
-      document.getElementById('smtpTestBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('smtpTestBtn'), result = document.getElementById('smtpTestResult'), orig = btn.innerHTML;
-        btn.disabled = true; btn.textContent = 'Testing\u2026'; result.classList.add('hidden');
-        try {
-          const d = await fetch('/api/v2/admin/settings/smtp/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(r => r.json());
-          result.classList.remove('hidden'); result.textContent = d.success ? 'Connection OK.' : d.error || 'Connection failed.';
-          result.className = 'px-5 pb-5 text-xs ' + (d.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400');
-        } catch { result.classList.remove('hidden'); result.textContent = 'Connection failed.'; result.className = 'px-5 pb-5 text-xs text-red-600 dark:text-red-400'; }
-        finally { btn.disabled = false; btn.innerHTML = orig; }
-      });
-
-      document.getElementById('s3TestBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('s3TestBtn'), result = document.getElementById('s3TestResult'), orig = btn.innerHTML;
-        btn.disabled = true; btn.textContent = 'Testing\u2026'; result.classList.add('hidden');
-        try {
-          const d = await fetch('/api/v2/admin/settings/s3/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(r => r.json());
-          result.classList.remove('hidden'); result.textContent = d.success ? d.message || 'Connection OK.' : d.error || 'Connection failed.';
-          result.className = 'px-5 pb-5 text-xs ' + (d.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400');
-        } catch { result.classList.remove('hidden'); result.textContent = 'Connection failed.'; result.className = 'px-5 pb-5 text-xs text-red-600 dark:text-red-400'; }
-        finally { btn.disabled = false; btn.innerHTML = orig; }
-      });
-
-      document.querySelectorAll('input[type="radio"]').forEach((radio) => {
-        radio.addEventListener('change', function() {
-          var group = document.querySelectorAll('input[name="' + this.name + '"]');
-          group.forEach((r) => {
-            var label = r.closest('label'); if (!label) return;
-            var ring = label.querySelector('.rounded-full.border-2'), dot = ring && ring.querySelector('.al-radio-dot-active');
-            if (r.checked) {
-              label.classList.add('al-radio-active'); label.classList.remove('border-neutral-200', 'dark:border-neutral-600/30');
-              if (ring) { ring.classList.add('al-radio-ring-active'); ring.classList.remove('border-neutral-300', 'dark:border-neutral-600'); }
-              if (!dot && ring) { var d = document.createElement('span'); d.className = 'w-2.5 h-2.5 rounded-full al-radio-dot-active'; ring.appendChild(d); }
-            } else {
-              label.classList.remove('al-radio-active'); label.classList.add('border-neutral-200', 'dark:border-neutral-600/30');
-              if (ring) { ring.classList.remove('al-radio-ring-active'); ring.classList.add('border-neutral-300', 'dark:border-neutral-600'); }
-              if (dot) dot.remove();
-            }
-          });
-        });
-      });
-    },
-
-    showSaved() {
-      var el = document.getElementById('autosave-indicator'); if (!el) return;
-      el.style.opacity = '1'; clearTimeout(el._hideTimer);
-      el._hideTimer = setTimeout(() => { el.style.opacity = '0'; }, 2000);
-    },
-
-    async post(url, body) {
-      try {
-        const r = await fetch(url, { method: 'POST', headers: body instanceof FormData ? undefined : { 'Content-Type': 'application/json' }, body: body instanceof FormData ? body : JSON.stringify(body) });
-        const d = await r.json(); if (!d.success) throw new Error(d.error || 'Failed'); this.showSaved(); return d;
-      } catch (err) { showToast(err.message || 'Failed', 'error'); return false; }
-    },
-
-    applyThemeCss(value) {
-      var link = document.getElementById('theme-css');
-      if (value && value !== 'default' && value !== 'light' && value !== 'dark') {
-        if (!link) { link = document.createElement('link'); link.rel = 'stylesheet'; link.id = 'theme-css'; document.head.appendChild(link); }
-        try { var _u = new URL(value, window.location.origin); if (_u.protocol === 'https:' || _u.protocol === 'http:') link.href = _u.href; } catch(_e) {}
-      } else if (link) link.parentNode.removeChild(link);
-    },
-
-    applyThemeFromForm() {
-      var formAppearance = document.getElementById('form-appearance'); if (!formAppearance) return;
-      var checked = formAppearance.querySelector('input[name="theme"]:checked'), value = checked ? checked.value : 'dark';
-      this.applyThemeCss(value);
-      var isLightTheme = value === 'light' || (value && value.indexOf('light') !== -1);
-      if (isLightTheme) document.documentElement.classList.remove('dark'); else document.documentElement.classList.add('dark');
-      if (window.applyThemeSheets) window.applyThemeSheets();
-    },
-
-    applyWallpaperFromResponse(url) {
-      var layer = document.getElementById('al-wallpaper-layer'), body = document.body;
-      if (url) {
-        body.classList.add('al-wallpaper'); body.style.setProperty('--al-wallpaper-image', "url('" + url + "')");
-        if (!layer) { layer = document.createElement('div'); layer.id = 'al-wallpaper-layer'; layer.setAttribute('aria-hidden', 'true'); document.body.insertBefore(layer, document.body.firstChild); }
-      } else { body.classList.remove('al-wallpaper'); body.style.removeProperty('--al-wallpaper-image'); if (layer) layer.parentNode.removeChild(layer); }
-    },
-
-    async saveAppearance() {
-      var formAppearance = document.getElementById('form-appearance'); if (!formAppearance) return;
-      var fd = new FormData();
-      var titleInput = formAppearance.querySelector('input[name="title"]'); if (titleInput) fd.set('title', titleInput.value);
-      var themeRadio = formAppearance.querySelector('input[name="theme"]:checked'); if (themeRadio) fd.set('theme', themeRadio.value);
-      ['logo-input', 'favicon-input', 'theme-file-input', 'login-wallpaper-file', 'register-wallpaper-file', 'panel-wallpaper-file'].forEach((id) => { var el = document.getElementById(id); if (el && el._selectedFile) fd.set(el.name, el._selectedFile); });
-      ['login-wallpaper-url', 'register-wallpaper-url', 'panel-wallpaper-url'].forEach((id) => { var el = document.getElementById(id); if (el) fd.set(el.name, el.value); });
-      const ok = await this.post('/api/v2/admin/settings/general', fd);
-      if (ok) { this.applyThemeFromForm(); this.applyWallpaperFromResponse(ok.panelWallpaper); }
-    },
-
-    saveServers() {
-      var stepsJson = document.getElementById('onboardingStepsJson');
-      this.post('/api/v2/admin/settings/server-policy', {
-        allowUserCreateServer: document.getElementById('allowUserCreateServer').checked, allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
-        allowUserCreateImages: document.getElementById('allowUserCreateImages').checked, onboardingEnabled: document.getElementById('onboardingEnabled').checked,
-        onboardingSteps: stepsJson ? stepsJson.value : '[]',
-        defaultServerLimit: parseInt(document.getElementById('defaultServerLimit').value, 10) || 0, defaultMaxMemory: parseInt(document.getElementById('defaultMaxMemory').value, 10) || 0,
-        defaultMaxCpu: parseInt(document.getElementById('defaultMaxCpu').value, 10) || 0, defaultMaxStorage: parseInt(document.getElementById('defaultMaxStorage').value, 10) || 0,
-        defaultMaxDatabases: parseInt(document.getElementById('defaultMaxDatabases').value, 10) || 0, defaultOverallocateMemory: parseInt(document.getElementById('defaultOverallocateMemory').value, 10) || 0,
-        defaultOverallocateDisk: parseInt(document.getElementById('defaultOverallocateDisk').value, 10) || 0, defaultOverallocateCpu: parseInt(document.getElementById('defaultOverallocateCpu').value, 10) || 0,
-        uploadLimit: parseInt(document.getElementById('uploadLimitInput').value, 10) || 100,
-      });
-    },
-
-    saveSecurity() {
-      Promise.all([
-        this.post('/api/v2/admin/settings/security', {
-          rateLimitEnabled: document.getElementById('rateLimitEnabled').checked, rateLimitRpm: parseInt(document.getElementById('rateLimitRpm').value, 10) || 0,
-          loginMaxAttempts: parseInt(document.getElementById('loginMaxAttempts').value, 10) || 0, loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes').value, 10) || 0,
-          enforceDaemonHttps: document.getElementById('enforceDaemonHttps').checked, require2faForAdmins: document.getElementById('require2faForAdmins').checked,
-          behindReverseProxy: document.getElementById('behindReverseProxy').checked, hashApiKeys: document.getElementById('hashApiKeys').checked,
-          virusTotalApiKey: document.getElementById('vtKeyInput').value.trim() || null,
-        }),
-        this.post('/api/v2/admin/settings/general', (() => { var fd = new FormData(); var reg = document.getElementById('allowRegistration'); fd.set('allowRegistration', reg && reg.checked ? 'true' : 'false'); return fd; })()),
-        this.post('/api/v2/admin/settings/smtp', {
-          smtpHost: document.getElementById('smtpHost').value.trim() || null, smtpPort: parseInt(document.getElementById('smtpPort').value, 10) || 587,
-          smtpUser: document.getElementById('smtpUser').value.trim() || null, smtpPassword: document.getElementById('smtpPassword').value || null,
-          smtpFrom: document.getElementById('smtpFrom').value.trim() || null, smtpSecure: document.getElementById('smtpSecure').checked,
-          emailCooldown: parseInt(document.getElementById('emailCooldown').value, 10) || 0,
-        }),
-        this.post('/api/v2/admin/settings/s3', {
-          s3Enabled: document.getElementById('s3Enabled').checked, s3Endpoint: document.getElementById('s3Endpoint').value.trim() || null,
-          s3Region: document.getElementById('s3Region').value.trim() || null, s3Bucket: document.getElementById('s3Bucket').value.trim() || null,
-          s3AccessKey: document.getElementById('s3AccessKey').value.trim() || null, s3SecretKey: document.getElementById('s3SecretKey').value || null,
-          s3PathStyle: document.getElementById('s3PathStyle').checked,
-        }),
-      ]);
-    },
-
-    saveFeatures() {
-      this.post('/api/v2/admin/settings/features', {
-        twoFactorRequired: document.getElementById('twoFactorRequired').checked,
-        sftpEnabled: document.getElementById('sftpEnabled').checked,
-        backupsEnabled: document.getElementById('backupsEnabled').checked,
-        schedulesEnabled: document.getElementById('schedulesEnabled').checked,
-        databasesEnabled: document.getElementById('databasesEnabled').checked,
-        fileManagerEnabled: document.getElementById('fileManagerEnabled').checked,
-        consoleEnabled: document.getElementById('consoleEnabled').checked,
-        playerTrackingEnabled: document.getElementById('playerTrackingEnabled').checked,
-        scannerEnabled: document.getElementById('scannerEnabled').checked,
-        airlinkCloudEnabled: document.getElementById('airlinkCloudEnabled').checked,
-      });
-      this.post('/api/v2/admin/settings/server-policy', {
-        defaultMemory: parseInt(document.getElementById('featureDefaultMemory').value, 10) || 512,
-        defaultCpu: parseInt(document.getElementById('featureDefaultCpu').value, 10) || 100,
-        defaultDisk: parseInt(document.getElementById('featureDefaultDisk').value, 10) || 5120,
-        maxServersPerUser: parseInt(document.getElementById('maxServersPerUser').value, 10) || 10,
-      });
-    },
-
-    banRowHtml(ip) {
-      return '<div class="flex items-center justify-between rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-4 py-2.5"><span class="text-sm font-mono text-neutral-700 dark:text-neutral-300">' + window.escHtml(ip) + '</span><button type="button" class="unban-btn text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition inline-flex items-center gap-1.5" data-ip="' + window.escAttr(ip) + '">' + (window.alIcon ? window.alIcon('shield-check', 'size-3', { strokeWidth: 1.5 }) : '') + 'Unban</button></div>';
-    },
-
-    addBanRow(ip) {
-      var list = document.getElementById('bannedIpList'); if (!list) return;
-      var hasEmpty = Array.prototype.some.call(list.children, (child) => child.tagName === 'P');
-      if (hasEmpty) Array.prototype.forEach.call(list.children, (child) => { if (child.tagName === 'P') child.parentNode.removeChild(child); });
-      al.addRow(list, this.banRowHtml(ip));
-    },
-
-    removeBanRow(btn) {
-      var row = btn.closest('.flex.items-center.justify-between'); if (!row) return;
-      var list = document.getElementById('bannedIpList');
-      al.removeRow(row).then(() => { if (list && !list.querySelector('.unban-btn')) { var p = document.createElement('p'); p.className = 'text-sm text-neutral-400'; p.textContent = 'No banned IPs.'; list.appendChild(p); } });
-    },
-  };
-}
-
-/* Onboarding step builder */
 var onbSteps = [];
 try { onbSteps = JSON.parse(document.getElementById('onboardingStepsJson').value || '[]'); } catch(e) { onbSteps = []; }
-
-function syncOnbJson() {
-  var ta = document.getElementById('onboardingStepsJson');
-  if (ta) ta.value = JSON.stringify(onbSteps);
-}
-
-function renderOnbStepList() {
-  var list = document.getElementById('onboardingStepList');
-  if (!list) return;
-  list.innerHTML = '';
-  onbSteps.forEach(function(step, i) {
-    var card = document.createElement('div');
-    card.className = 'rounded-xl p-3 mb-2';
-    card.style.cssText = 'background:var(--theme-bg-secondary);border:1px solid var(--theme-border)';
-    card.innerHTML =
-      '<div class="flex items-center justify-between mb-2">' +
-        '<span class="text-xs font-medium" style="color:var(--theme-text-muted)">Step ' + (i + 1) + '</span>' +
-        '<div class="flex gap-1">' +
-          (i > 0 ? '<button type="button" class="al-btn-ghost p-1 rounded" onclick="moveOnbStep(' + i + ',-1)" title="Move up">&uarr;</button>' : '') +
-          (i < onbSteps.length - 1 ? '<button type="button" class="al-btn-ghost p-1 rounded" onclick="moveOnbStep(' + i + ',1)" title="Move down">&darr;</button>' : '') +
-          '<button type="button" class="al-btn-ghost p-1 rounded" onclick="removeOnbStep(' + i + ')" style="color:var(--theme-danger)" title="Remove">&times;</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
-        '<div><label class="text-xs" style="color:var(--theme-text-muted)">Title</label>' +
-          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.title || '') + '" onchange="onbSteps[' + i + '].title=this.value;syncOnbJson()"></div>' +
-        '<div><label class="text-xs" style="color:var(--theme-text-muted)">Icon (lucide name)</label>' +
-          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.icon || '') + '" placeholder="e.g. server, shield, zap" onchange="onbSteps[' + i + '].icon=this.value;syncOnbJson()"></div>' +
-        '<div class="sm:col-span-2"><label class="text-xs" style="color:var(--theme-text-muted)">Description</label>' +
-          '<textarea rows="2" class="al-input text-xs py-1.5" onchange="onbSteps[' + i + '].text=this.value;syncOnbJson()">' + window.escHtml(step.text || '') + '</textarea></div>' +
-        '<div><label class="text-xs" style="color:var(--theme-text-muted)">CTA text (optional)</label>' +
-          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.cta || '') + '" placeholder="e.g. Get started" onchange="onbSteps[' + i + '].cta=this.value;syncOnbJson()"></div>' +
-        '<div><label class="text-xs" style="color:var(--theme-text-muted)">CTA URL (optional)</label>' +
-          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.ctaUrl || '') + '" placeholder="e.g. /create-server" onchange="onbSteps[' + i + '].ctaUrl=this.value;syncOnbJson()"></div>' +
-      '</div>';
-    list.appendChild(card);
-  });
-  syncOnbJson();
-}
-
-function addOnbStep() {
-  onbSteps.push({ title: '', text: '', icon: 'layout-dashboard', cta: '', ctaUrl: '' });
-  renderOnbStepList();
-}
-
-function removeOnbStep(i) {
-  onbSteps.splice(i, 1);
-  renderOnbStepList();
-}
-
-function moveOnbStep(i, dir) {
-  var j = i + dir;
-  if (j < 0 || j >= onbSteps.length) return;
-  var tmp = onbSteps[i];
-  onbSteps[i] = onbSteps[j];
-  onbSteps[j] = tmp;
-  renderOnbStepList();
-}
-
-function previewOnboarding() {
-  var steps = onbSteps.length > 0 ? onbSteps : [
-    { title: 'Your dashboard', text: 'This is where all your servers live.', icon: 'layout-dashboard' },
-    { title: 'Create your first server', text: 'Pick an image, choose a node, and allocate resources.', icon: 'server' },
-    { title: 'Make it yours', text: 'Set your avatar and profile in Account settings.', icon: 'user' }
-  ];
-  var iconPaths = {
-    'layout-dashboard': '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v-5H3z"/>',
-    'server': '<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>',
-    'user': '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-    'settings': '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
-    'shield': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-    'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'
-  };
-  var cur = 0;
-  function svgIcon(n) { return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--theme-text)">' + (iconPaths[n] || iconPaths['layout-dashboard']) + '</svg>'; }
-
-  var overlay = document.createElement('div');
-  overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4';
-  overlay.style.cssText = 'background:rgba(0,0,0,0.5)';
-  var panel = document.createElement('div');
-  panel.className = 'rounded-2xl max-w-md w-full shadow-xl p-6';
-  panel.style.cssText = 'background:var(--theme-bg-card);border:1px solid var(--theme-border)';
-  overlay.appendChild(panel);
-  document.body.appendChild(overlay);
-
-  function renderPreview() {
-    var s = steps[cur];
-    var dots = steps.map(function(_, i) { return '<div class="flex-1 h-1 rounded-full" style="background:' + (i <= cur ? 'var(--theme-text)' : 'var(--theme-border-subtle)') + '"></div>'; }).join('');
-    var ctaHtml = (s.cta && s.ctaUrl) ? '<a href="' + s.ctaUrl + '" class="inline-flex items-center gap-1.5 mt-3 text-sm font-medium" style="color:var(--theme-text)">' + s.cta + ' &rarr;</a>' : '';
-    panel.innerHTML =
-      '<div class="flex items-start justify-between mb-5"><div><h2 class="text-base font-semibold" style="color:var(--theme-text-strong)">Welcome to the panel!</h2><p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">A few quick tips to get you started.</p></div><button type="button" class="al-btn-ghost p-2 rounded-lg" onclick="this.closest(\'.fixed\').remove()">&times;</button></div>' +
-      '<div class="mb-5"><div class="flex gap-2 mb-4">' + dots + '</div>' +
-      '<div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style="background:var(--theme-bg-secondary)">' + svgIcon(s.icon || 'layout-dashboard') + '</div>' +
-      '<h3 class="text-sm font-semibold mb-1.5" style="color:var(--theme-text-strong)">' + window.escHtml(s.title || 'Untitled step') + '</h3>' +
-      '<p class="text-sm leading-relaxed" style="color:var(--theme-text-muted)">' + window.escHtml(s.text || '') + '</p>' + ctaHtml + '</div>' +
-      '<div class="flex items-center justify-between gap-3">' +
-        '<button type="button" class="al-btn-ghost px-3 py-2 text-xs font-medium" ' + (cur === 0 ? 'style="visibility:hidden"' : '') + ' onclick="previewPrev()">&larr; Back</button>' +
-        '<span class="flex-1"></span>' +
-        (cur < steps.length - 1 ? '<button type="button" class="al-btn-primary px-4 py-2 text-sm font-medium" onclick="previewNext()">Next &rarr;</button>' : '<button type="button" class="al-btn-primary px-4 py-2 text-sm font-medium" onclick="this.closest(\'.fixed\').remove()">Done</button>') +
-      '</div>';
-  }
-  window.previewNext = function() { if (cur < steps.length - 1) { cur++; renderPreview(); } };
-  window.previewPrev = function() { if (cur > 0) { cur--; renderPreview(); } };
-  overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
-  renderPreview();
-}
-
-/* Init step list on page load */
-document.addEventListener('DOMContentLoaded', function() { renderOnbStepList(); });
 </script>
 
 <%- include('../../components/footer') %>

@@ -1,18 +1,18 @@
-import { getSettings } from '../../../handlers/settingsCache';
-import type { Request, Response, NextFunction } from 'express';
-import { Router } from 'express';
-import type { Module } from '../../../handlers/moduleInit';
-import prisma from '../../../db';
-import logger from '../../../handlers/logger';
-import { queueer } from '../../../handlers/queueer';
-import { getParamAsNumber } from '../../../utils/typeHelpers';
+import { getSettings } from "../../../handlers/settingsCache";
+import type { Request, Response, NextFunction } from "express";
+import { Router } from "express";
+import type { Module } from "../../../handlers/moduleInit";
+import prisma from "../../../db";
+import logger from "../../../handlers/logger";
+import { queueer } from "../../../handlers/queueer";
+import { getParamAsNumber } from "../../../utils/typeHelpers";
 import {
   listNodes,
   getNode,
   deleteNode,
   NodeError,
-} from '../../../services/nodeService';
-import { deleteServer } from '../../../services/serverService';
+} from "../../../services/nodeService";
+import { deleteServer } from "../../../services/serverService";
 import {
   listUsers,
   getUserFull,
@@ -20,19 +20,17 @@ import {
   updateUser,
   deleteUser,
   isLastAdmin,
-} from '../../../services/userService';
-import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
-import { getUsedExternalPorts } from '../../../handlers/utils/server/ports';
-import { apiValidator } from '../../../handlers/utils/api/apiValidator';
+} from "../../../services/userService";
+import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
+import { getUsedExternalPorts } from "../../../handlers/utils/server/ports";
+import { apiValidator } from "../../../handlers/utils/api/apiValidator";
 import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_MEMORY_MB,
   DEFAULT_CPU_PERCENT,
   DEFAULT_STORAGE_MB,
-} from '../../../config/constants';
-
-const PTERO_MEMORY_MB = 1024;
-const PTERO_DISK_MB = 1024;
+} from "../../../config/constants";
+import { PTERO_MEMORY_MB, PTERO_DISK_MB } from "../../../config/server";
 
 // Legacy application API wrapper. The canonical `apiValidator` is hash-aware,
 // enforces `active`, applies a constant-time delay on invalid keys and never
@@ -60,7 +58,7 @@ export const legacyApiValidator = (
     const json = body as { error?: string } | undefined;
     const inactiveKey =
       pendingStatus === 401 &&
-      json?.error === 'Unauthorized: API Key is inactive';
+      json?.error === "Unauthorized: API Key is inactive";
     const invalidKey = pendingStatus === 403;
 
     if (inactiveKey || invalidKey) {
@@ -107,7 +105,7 @@ const coreModule: Module = {
           const { users, servers: rawServers } = await listUsers({
             page: 1,
             perPage: DEFAULT_PAGE_SIZE,
-            include: include === 'servers' ? ['servers'] : undefined,
+            include: include === "servers" ? ["servers"] : undefined,
             filter,
           });
           const servers = rawServers as any[];
@@ -127,17 +125,17 @@ const coreModule: Module = {
                   attributes: {
                     id: number;
                     name: string;
-                    node: (typeof servers)[number]['node'];
+                    node: (typeof servers)[number]["node"];
                   };
                 }[],
               },
             };
 
-            if (include && include === 'servers' && servers) {
+            if (include && include === "servers" && servers) {
               userData.relationships.servers = servers
                 .filter((server) => server.ownerId === user.id)
                 .map((server: any) => ({
-                  object: 'server',
+                  object: "server",
                   attributes: {
                     id: server.id,
                     name: server.name,
@@ -397,7 +395,7 @@ const coreModule: Module = {
             if (isLast) {
               res
                 .status(400)
-                .json({ error: 'Cannot delete the last admin user.' });
+                .json({ error: "Cannot delete the last admin user." });
               return;
             }
           }
@@ -422,7 +420,7 @@ const coreModule: Module = {
           const nodes = await listNodes();
 
           const formattedNodes = nodes.map((node) => ({
-            object: 'node',
+            object: "node",
             attributes: {
               id: node.id,
               uuid: node.id.toString(),
@@ -454,14 +452,14 @@ const coreModule: Module = {
             },
           });
         } catch (error) {
-          logger.error('Error fetching nodes:', error);
-          res.status(500).json({ error: 'Internal Server Error' });
+          logger.error("Error fetching nodes:", error);
+          res.status(500).json({ error: "Internal Server Error" });
         }
       },
     );
 
     router.get(
-      '/api/application/nodes/:id',
+      "/api/application/nodes/:id",
       legacyApiValidator,
       async (req: Request, res: Response) => {
         try {
@@ -516,8 +514,8 @@ const coreModule: Module = {
             res.status(error.status).json({ error: error.message });
             return;
           }
-          logger.error('Error deleting node:', error);
-          res.status(500).json({ error: 'Internal Server Error' });
+          logger.error("Error deleting node:", error);
+          res.status(500).json({ error: "Internal Server Error" });
         }
       },
     );
@@ -775,7 +773,7 @@ const coreModule: Module = {
 
           const deleted = await deleteServer(serverId);
           if (!deleted) {
-            res.status(404).json({ error: 'Server not found' });
+            res.status(404).json({ error: "Server not found" });
             return;
           }
 

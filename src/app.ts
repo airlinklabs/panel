@@ -1,54 +1,66 @@
-import { getSettings } from './handlers/settingsCache';
-import type { Request, Response, NextFunction } from 'express';
-import type { Socket } from 'net';
-import express from 'express';
-import prisma from './db';
-import path from 'path';
-import session from 'express-session';
-import { loadEnv } from './handlers/envLoader';
-import { databaseLoader } from './handlers/databaseLoader';
-import { loadModules } from './handlers/modulesLoader';
-import logger, { drawBanner } from './handlers/logger';
-import config from '../storage/config.json';
-import cookieParser from 'cookie-parser';
-import expressWs from 'express-ws';
-import compression from 'compression';
-import { translationMiddleware } from './handlers/utils/core/translation';
-import { getSessionStore } from './handlers/sessionStore';
-import { settingsLoader } from './handlers/settingsLoader';
-import { loadAddons, setAppInstance } from './handlers/addonHandler';
+import { getSettings } from "./handlers/settingsCache";
+import type { Request, Response, NextFunction } from "express";
+import type { Socket } from "net";
+import express from "express";
+import prisma from "./db";
+import path from "path";
+import session from "express-session";
+import { loadEnv } from "./handlers/envLoader";
+import { databaseLoader } from "./handlers/databaseLoader";
+import { loadModules } from "./handlers/modulesLoader";
+import logger, { drawBanner } from "./handlers/logger";
+import config from "../storage/config.json";
+import cookieParser from "cookie-parser";
+import expressWs from "express-ws";
+import compression from "compression";
+import { i18nMiddleware, initI18n } from "./services/i18n";
+import { templateConfigMiddleware } from "./handlers/templateConfig";
+import { getSessionStore } from "./handlers/sessionStore";
+import { settingsLoader } from "./handlers/settingsLoader";
+import { loadAddons, setAppInstance } from "./handlers/addonHandler";
 import {
   initializeDefaultUIComponents,
   uiComponentStore,
-} from './handlers/uiComponentHandler';
-import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
-import { startScheduler } from './handlers/schedulerWorker';
-import { initEggCatalogue } from './handlers/eggCatalogueService';
-import { reenqueueQueuedInstalls } from './handlers/installQueue';
-import crypto from 'crypto';
-import helmet from 'helmet';
-import { createRedisRateLimit } from './handlers/utils/security/redisRateLimit';
-import icon from './utils/icon';
-import { getClientIp } from './utils/ip';
+} from "./handlers/uiComponentHandler";
+import { startPlayerStatsCollection } from "./handlers/playerStatsCollector";
+import { startScheduler } from "./handlers/schedulerWorker";
+import { initEggCatalogue } from "./handlers/eggCatalogueService";
+import { reenqueueQueuedInstalls } from "./handlers/installQueue";
+import crypto from "crypto";
+import helmet from "helmet";
+import { createRedisRateLimit } from "./handlers/utils/security/redisRateLimit";
+import {
+  HSTS_MAX_AGE_S,
+  SECURITY_CACHE_REFRESH_MS,
+  RATE_LIMIT_WINDOW_MS,
+  GLOBAL_RATE_LIMIT_MAX,
+  SESSION_MAX_AGE_MS,
+  JSON_BODY_LIMIT,
+  URLENCODED_LIMIT,
+  RAW_BODY_LIMIT,
+  PRISMA_DISCONNECT_TIMEOUT_MS,
+} from "./config/defaults";
+import icon from "./utils/icon";
+import { getClientIp } from "./utils/ip";
 import csrfProtection, {
   handleCsrfError,
   addCsrfTokenToLocals,
-} from './handlers/utils/security/csrfProtection';
-import { isCsrfExempt } from './handlers/utils/security/csrfRouting';
+} from "./handlers/utils/security/csrfProtection";
+import { isCsrfExempt } from "./handlers/utils/security/csrfRouting";
 import {
   errorPageHandler,
   notFoundHandler,
   renderErrorPage,
-} from './handlers/errorPages';
-import { logSystemError } from './services/systemLogService';
+} from "./handlers/errorPages";
+import { logSystemError } from "./services/systemLogService";
 
-import { getConfig } from './config';
-import { installRenderResolver } from './handlers/renderResolver';
-import { validationErrorBoundary } from './utils/validation';
+import { getConfig } from "./config";
+import { installRenderResolver } from "./handlers/renderResolver";
+import { validationErrorBoundary } from "./utils/validation";
 import {
   refreshSecurityCache,
   getSecurityCache,
-} from './handlers/securityCache';
+} from "./handlers/securityCache";
 
 loadEnv();
 
@@ -74,7 +86,7 @@ const airlinkVersion = config.meta.version;
 const airlinkCodename = config.meta.codename;
 
 // ── Startup banner ───────────────────────────────────────────────────────────
-drawBanner('Airlink Panel', airlinkVersion, airlinkCodename);
+drawBanner("Airlink Panel", airlinkVersion, airlinkCodename);
 
 // Trust proxy when the panel is behind a reverse proxy (Nginx, Caddy, etc).
 // Reads from DB at startup — affects req.ip used by rate limiting and IP banning.
@@ -83,7 +95,7 @@ drawBanner('Airlink Panel', airlinkVersion, airlinkCodename);
   try {
     const s = await getSettings();
     if (s?.behindReverseProxy) {
-      app.set('trust proxy', 1);
+      app.set("trust proxy", 1);
     }
   } catch {
     // DB not ready yet — leave default (no trust proxy)
@@ -94,47 +106,47 @@ drawBanner('Airlink Panel', airlinkVersion, airlinkCodename);
 const expressWsInstance = expressWs(app);
 
 // Load static files
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Runtime uploads (user-uploaded files)
-app.use('/uploads', express.static(path.join(__dirname, '../storage/uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "../storage/uploads")));
 
 // Themes — built-in + user-installed
-app.use('/themes', express.static(path.join(__dirname, '../storage/themes')));
+app.use("/themes", express.static(path.join(__dirname, "../storage/themes")));
 
 // Root favicon (runtime-generated)
 app.use(
-  '/favicon.ico',
-  express.static(path.join(__dirname, '../public/assets/favicon.ico')),
+  "/favicon.ico",
+  express.static(path.join(__dirname, "../public/assets/favicon.ico")),
 );
 
 // Vendor — serve node_modules directly at /vendor/
-app.use('/vendor', express.static(path.join(__dirname, '../node_modules')));
+app.use("/vendor", express.static(path.join(__dirname, "../node_modules")));
 
 // Fonts — Inter via @fontsource
 app.use(
-  '/vendor/@fontsource-variable/inter',
+  "/vendor/@fontsource-variable/inter",
   express.static(
-    path.join(__dirname, '../node_modules/@fontsource-variable/inter'),
+    path.join(__dirname, "../node_modules/@fontsource-variable/inter"),
   ),
 );
 
 // Load views
-const viewsPath = path.join(__dirname, '../views');
-app.set('views', viewsPath);
-app.set('view engine', 'ejs');
+const viewsPath = path.join(__dirname, "../views");
+app.set("views", viewsPath);
+app.set("view engine", "ejs");
 // Cache compiled EJS templates in memory. In production this is already the
 // default, but setting it explicitly ensures it's on regardless of NODE_ENV.
-app.set('view cache', true);
+app.set("view cache", true);
 
-const addonViewsDir = path.join(__dirname, '../../storage/addons');
+const addonViewsDir = path.join(__dirname, "../../storage/addons");
 
 // Load compression
 app.use(compression());
 
 // htmx detection — sets req.htmx for all downstream handlers
 app.use((req: any, _res, next) => {
-  req.htmx = req.headers['hx-request'] === 'true';
+  req.htmx = req.headers["hx-request"] === "true";
   next();
 });
 
@@ -147,7 +159,7 @@ const isProduction = panelConfig.isProduction;
 // Nonce middleware — generates a per-request CSP nonce for XSS protection.
 // Exposed as res.locals.nonce (EJS templates) and req.nonce (downstream handlers).
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const nonce = crypto.randomBytes(16).toString('base64');
+  const nonce = crypto.randomBytes(16).toString("base64");
   res.locals.nonce = nonce;
   req.nonce = nonce;
   next();
@@ -155,11 +167,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // X-Request-Id — propagates a stable request ID from browser → panel → daemon for distributed tracing.
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const incoming = req.headers['x-request-id'];
+  const incoming = req.headers["x-request-id"];
   const requestId =
-    (typeof incoming === 'string' && incoming.trim()) || crypto.randomUUID();
-  req.headers['x-request-id'] = requestId;
-  res.setHeader('X-Request-Id', requestId);
+    (typeof incoming === "string" && incoming.trim()) || crypto.randomUUID();
+  req.headers["x-request-id"] = requestId;
+  res.setHeader("X-Request-Id", requestId);
   next();
 });
 
@@ -169,39 +181,39 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   helmet({
     noSniff: true,
-    frameguard: { action: 'deny' },
+    frameguard: { action: "deny" },
     hsts: isHttps
-      ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+      ? { maxAge: HSTS_MAX_AGE_S, includeSubDomains: true, preload: true }
       : false,
-    crossOriginOpenerPolicy: isHttps ? { policy: 'same-origin' } : false,
+    crossOriginOpenerPolicy: isHttps ? { policy: "same-origin" } : false,
     originAgentCluster: isHttps ? undefined : false,
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-    permittedCrossDomainPolicies: { permittedPolicies: 'none' },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    permittedCrossDomainPolicies: { permittedPolicies: "none" },
 
     contentSecurityPolicy: isProduction
       ? {
-        directives: {
-          defaultSrc: ['\'self\''],
-          scriptSrc: ['\'self\'', `'nonce-${nonce}'`, '\'strict-dynamic\''],
-          scriptSrcAttr: ['\'unsafe-inline\''],
-          styleSrc: ['\'self\'', '\'unsafe-inline\''],
-          fontSrc: ['\'self\'', 'data:'],
-          imgSrc: ['\'self\'', 'data:', 'blob:', 'https:'],
-          connectSrc: ['\'self\'', ...(isHttps ? ['wss:'] : ['ws:', 'wss:'])],
-          frameAncestors: ['\'none\''],
-          objectSrc: ['\'none\''],
-          baseUri: ['\'self\''],
-          formAction: ['\'self\''],
-          upgradeInsecureRequests: [],
-        },
-      }
+          directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"],
+            scriptSrcAttr: ["'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            fontSrc: ["'self'", "data:"],
+            imgSrc: ["'self'", "data:", "blob:", "https:"],
+            connectSrc: ["'self'", ...(isHttps ? ["wss:"] : ["ws:", "wss:"])],
+            frameAncestors: ["'none'"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            upgradeInsecureRequests: [],
+          },
+        }
       : false,
   })(req, res, next);
 });
 
 // Initial load + refresh every 30 seconds
 refreshSecurityCache();
-setInterval(refreshSecurityCache, 30_000);
+setInterval(refreshSecurityCache, SECURITY_CACHE_REFRESH_MS);
 
 // IP ban middleware — uses cached list, no per-request DB hit
 app.use((req, res, next) => {
@@ -211,7 +223,7 @@ app.use((req, res, next) => {
       req,
       res,
       403,
-      'Your IP address is blocked from this panel.',
+      "Your IP address is blocked from this panel.",
     );
     return;
   }
@@ -221,9 +233,9 @@ app.use((req, res, next) => {
 // Rate limiter — Redis-backed sliding window for distributed/multi-instance support
 app.use(
   createRedisRateLimit({
-    windowMs: 60 * 1000,
-    max: 500,
-    keyPrefix: 'rl:global',
+    windowMs: RATE_LIMIT_WINDOW_MS,
+    max: GLOBAL_RATE_LIMIT_MAX,
+    keyPrefix: "rl:global",
     skip: () => !getSecurityCache().rateLimitEnabled,
     standardHeaders: true,
     legacyHeaders: false,
@@ -243,40 +255,46 @@ app.use(
     cookie: {
       secure: useSecureCookie,
       httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: "lax",
+      maxAge: SESSION_MAX_AGE_MS,
     },
   }),
 );
 
 app.use(
   express.json({
-    limit: '512kb',
+    limit: JSON_BODY_LIMIT,
   }),
 );
 app.use(
   express.urlencoded({
     extended: false,
-    limit: '512kb',
-    parameterLimit: 1000,
+    limit: JSON_BODY_LIMIT,
+    parameterLimit: URLENCODED_LIMIT,
   }),
 );
 app.use(
   express.raw({
-    limit: '1mb',
+    limit: RAW_BODY_LIMIT,
   }),
 );
 app.use(
   express.text({
-    limit: '512kb',
+    limit: JSON_BODY_LIMIT,
   }),
 );
 
 // Load cookies
 app.use(cookieParser());
 
-// Load translation
-app.use(translationMiddleware);
+// Initialize i18n — pre-load all language bundles at startup
+initI18n();
+
+// Load translation — attaches req.t(), req.tn(), res.locals.t to every request
+app.use(i18nMiddleware);
+
+// Config constants for EJS templates
+app.use(templateConfigMiddleware);
 
 // Apply CSRF protection
 app.use((req, res, next) => {
@@ -317,7 +335,7 @@ app.use(async (_req, res, next) => {
   res.locals.isMobileViewport = false;
 
   try {
-    const { getSettings } = await import('./handlers/settingsCache');
+    const { getSettings } = await import("./handlers/settingsCache");
     res.locals.settings = await getSettings();
   } catch {
     res.locals.settings = null;
@@ -342,20 +360,20 @@ app.use(errorPageHandler);
   try {
     // ── Initialize with ora-style progress ─────────────────────────────────
     await databaseLoader();
-    logger.info('Database connected');
+    logger.info("Database connected");
 
     await settingsLoader();
-    logger.info('Settings loaded');
+    logger.info("Settings loaded");
 
     initializeDefaultUIComponents();
-    logger.info('UI components initialized');
+    logger.info("UI components initialized");
 
     await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
-    logger.info('Modules loaded');
+    logger.info("Modules loaded");
 
     setAppInstance(app);
     await loadAddons(app);
-    logger.info('Addons loaded');
+    logger.info("Addons loaded");
 
     // Consistent request-validation boundary
     app.use(validationErrorBoundary);
@@ -364,22 +382,22 @@ app.use(errorPageHandler);
     app.use(errorPageHandler);
 
     // Global unhandled error logger — captures errors that slip through middleware
-    process.on('unhandledRejection', (reason: unknown) => {
+    process.on("unhandledRejection", (reason: unknown) => {
       const msg = reason instanceof Error ? reason.message : String(reason);
       const stack = reason instanceof Error ? reason.stack : undefined;
       logSystemError({
         message: `Unhandled rejection: ${msg}`,
         stack,
-        component: 'api',
-        severity: 'error',
+        component: "api",
+        severity: "error",
       });
     });
-    process.on('uncaughtException', (err: Error) => {
+    process.on("uncaughtException", (err: Error) => {
       logSystemError({
         message: `Uncaught exception: ${err.message}`,
         stack: err.stack,
-        component: 'api',
-        severity: 'critical',
+        component: "api",
+        severity: "critical",
       });
     });
 
@@ -391,7 +409,7 @@ app.use(errorPageHandler);
       initEggCatalogue().catch((err) =>
         logger.warn(`Store catalogue init failed: ${err?.message || err}`),
       );
-      import('./handlers/realtime/nodeStatsWs').then((m) =>
+      import("./handlers/realtime/nodeStatsWs").then((m) =>
         m.attachNodeStatsWs(server),
       );
     });
@@ -399,9 +417,9 @@ app.use(errorPageHandler);
     let shuttingDown = false;
     const connections = new Set<Socket>();
 
-    server.on('connection', (conn) => {
+    server.on("connection", (conn) => {
       connections.add(conn);
-      conn.on('close', () => connections.delete(conn));
+      conn.on("close", () => connections.delete(conn));
     });
 
     async function shutdown(signal: string) {
@@ -437,8 +455,8 @@ app.use(errorPageHandler);
           prisma.$disconnect(),
           new Promise((_, reject) =>
             setTimeout(
-              () => reject(new Error('prisma disconnect timeout')),
-              5_000,
+              () => reject(new Error("prisma disconnect timeout")),
+              PRISMA_DISCONNECT_TIMEOUT_MS,
             ),
           ),
         ]);
@@ -453,10 +471,10 @@ app.use(errorPageHandler);
       process.exit(0);
     }
 
-    process.on('SIGINT', () => shutdown('SIGINT'));
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on("SIGINT", () => shutdown("SIGINT"));
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
   } catch (err) {
-    logger.error('Failed to load modules or database:', err);
+    logger.error("Failed to load modules or database:", err);
   }
 })();
 

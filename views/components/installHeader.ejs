@@ -181,9 +181,11 @@
     .catch(function(err) { console.warn('Server status poll failed:', err); });
   }
 
+  const POLL_INTERVAL = 3000;
+
   function startPolling() {
     if (poller) clearInterval(poller);
-    poller = setInterval(function() { poll(); heartbeat(); }, 3000);
+    poller = setInterval(function() { poll(); heartbeat(); }, POLL_INTERVAL);
     poll();
     heartbeat();
   }
@@ -247,7 +249,7 @@
     window.showProgressToast('Installing server…', {
       indeterminate: true,
       group: 'install:' + serverUUID,
-      job: { url: '/api/v2/servers/' + serverUUID + '/status', intervalMs: 3000 },
+      job: { url: '/api/v2/servers/' + serverUUID + '/status', intervalMs: POLL_INTERVAL },
     });
   }
 })();

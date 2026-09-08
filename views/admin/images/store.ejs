@@ -136,8 +136,9 @@ function imageStore() {
       if(typeof showToast==="function") showToast("Could not refresh the catalogue","error");
       return;
     }
+    var REFRESH_POLL_INTERVAL_MS = 1000;
     for(var i=0;i<60;i++) {
-      await new Promise(function(r){setTimeout(r,1000);});
+      await new Promise(function(r){setTimeout(r,REFRESH_POLL_INTERVAL_MS);});
       try { var cur=(await(await fetch("/api/v2/admin/images/store/catalogue")).json()).builtAt||0; if(cur!==before)break; } catch(e) {}
     }
     allImages=[]; show("loadingEl"); hide("listEl"); hide("emptyEl");

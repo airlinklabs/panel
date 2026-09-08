@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Create Node' }) %>
+<%- include('../../components/header', { title: t('adminCreateNodeTitle') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -12,24 +12,24 @@
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title"><%= req.translations.adminCreateNodeTitle %></h1>
-          <p class="al-page-desc"><%= req.translations.adminCreateNodeText || 'One more node and you\'ll have a proper fleet going.' %></p>
+          <h1 class="al-page-title"><%= t('adminCreateNodeTitle') %></h1>
+          <p class="al-page-desc"><%= t('adminCreateNodeText') %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button id="createNodeBtn" type="button" class="al-btn-primary" @click="createNode()"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.create || 'Create Node' %></button>
-          <a href="/admin/nodes" class="al-btn-secondary">Back to Nodes</a>
+          <button id="createNodeBtn" type="button" class="al-btn-primary" @click="createNode()"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('createNode') %></button>
+          <a href="/admin/nodes" class="al-btn-secondary"><%= t('backToNodes') %></a>
         </div>
       </div>
 
       <div id="nodeForm" class="al-page-body space-y-5">
         <form class="space-y-5">
           <div class="al-card">
-            <h2 class="al-card-header">General</h2>
+            <h2 class="al-card-header"><%= t('general') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">
                 <label for="nodeName" class="al-label flex items-center gap-1.5">
                   <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.name %>
+                  <%= t('name') %>
                 </label>
                 <input id="nodeName" class="al-input" placeholder="My node">
               </div>
@@ -37,7 +37,7 @@
               <div>
                 <label for="nodeAddress" class="al-label flex items-center gap-1.5">
                   <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.addressIP %>
+                  <%= t('addressIP') %>
                 </label>
                 <input id="nodeAddress" class="al-input" placeholder="localhost">
               </div>
@@ -45,7 +45,7 @@
               <div>
                 <label for="nodePort" class="al-label flex items-center gap-1.5">
                   <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.daemonPort %>
+                  <%= t('daemonPort') %>
                 </label>
                 <input id="nodePort" class="al-input" placeholder="3002">
               </div>
@@ -53,12 +53,12 @@
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Resource Allocation</h2>
+            <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label for="nodeRam" class="al-label flex items-center gap-1.5">
                   <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.ram %>
+                  <%= t('ram') %>
                 </label>
                 <input type="hidden" id="nodeRamValue" value="">
                 <div class="flex gap-2 items-center">
@@ -77,7 +77,7 @@
               <div>
                 <label for="nodeDisk" class="al-label flex items-center gap-1.5">
                   <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.disk %>
+                  <%= t('disk') %>
                 </label>
                 <input type="hidden" id="nodeDiskValue" value="">
                 <div class="flex gap-2 items-center">
@@ -96,7 +96,7 @@
               <div>
                 <label for="nodeProcessor" class="al-label flex items-center gap-1.5">
                   <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.cpu %>
+                  <%= t('cpu') %>
                 </label>
                 <input type="hidden" id="nodeCpuValue" value="">
                 <div class="flex gap-2 items-center">
@@ -116,8 +116,8 @@
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Overallocation</h2>
-            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)">Allow servers to exceed node limits by this percentage (0 = strict).</p>
+            <h2 class="al-card-header"><%= t('overallocation') %></h2>
+            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)"><%= t('overallocationDesc') %></p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label for="nodeOverallocateMemory" class="al-label flex items-center gap-1.5">
@@ -222,7 +222,7 @@
   </div>
 </main>
 
-<%- include('../../components/loadingPopup') %>
+<%- include('../../components/loading-popup') %>
 
 <style>
 #nodeForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }

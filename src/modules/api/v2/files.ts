@@ -30,8 +30,13 @@ import {
   copyFileBody,
   zipBody,
   unzipBody,
-} from './dto';
-import { daemonRequest } from '../../../services/daemonService';
+} from "./dto";
+import { daemonRequest } from "../../../services/daemonService";
+import {
+  DAEMON_TIMEOUT_FILE_MS,
+  DAEMON_TIMEOUT_FILE_WRITE_MS,
+  DAEMON_TIMEOUT_FILE_HEAVY_MS,
+} from "../../../config/daemonTimeouts";
 
 const router = Router();
 
@@ -46,17 +51,17 @@ router.get("/", async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'files.read')) {
+  if (!requireSubUserPermission(res, resolved, "files.read")) {
     return;
   }
 
-  const dirPath = (req.query.path as string) || '/';
+  const dirPath = (req.query.path as string) || "/";
 
   try {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/files?path=${encodeURIComponent(dirPath)}`,
-      { timeout: 15000 },
+      { timeout: DAEMON_TIMEOUT_FILE_MS },
     );
 
     if (!response.ok) {
@@ -87,7 +92,7 @@ router.get("/content", async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'files.read')) {
+  if (!requireSubUserPermission(res, resolved, "files.read")) {
     return;
   }
 
@@ -105,7 +110,7 @@ router.get("/content", async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/files/content?path=${encodeURIComponent(filePath)}`,
-      { timeout: 15000 },
+      { timeout: DAEMON_TIMEOUT_FILE_MS },
     );
 
     if (!response.ok) {
@@ -136,7 +141,7 @@ router.post("/content", parseBody(writeFileBody), async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'files.write')) {
+  if (!requireSubUserPermission(res, resolved, "files.write")) {
     return;
   }
 
@@ -149,7 +154,11 @@ router.post("/content", parseBody(writeFileBody), async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/files/content`,
-      { method: 'POST', body: { file, content }, timeout: 30000 },
+      {
+        method: "POST",
+        body: { file, content },
+        timeout: DAEMON_TIMEOUT_FILE_WRITE_MS,
+      },
     );
 
     if (!response.ok) {
@@ -179,7 +188,7 @@ router.delete("/", parseBody(deleteFileBody), async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'files.write')) {
+  if (!requireSubUserPermission(res, resolved, "files.write")) {
     return;
   }
 
@@ -189,7 +198,11 @@ router.delete("/", parseBody(deleteFileBody), async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/files`,
-      { method: 'DELETE', body: { file }, timeout: 30000 },
+      {
+        method: "DELETE",
+        body: { file },
+        timeout: DAEMON_TIMEOUT_FILE_WRITE_MS,
+      },
     );
 
     if (!response.ok) {
@@ -219,7 +232,7 @@ router.post("/rename", parseBody(renameFileBody), async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'files.write')) {
+  if (!requireSubUserPermission(res, resolved, "files.write")) {
     return;
   }
 
@@ -232,7 +245,11 @@ router.post("/rename", parseBody(renameFileBody), async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/files/rename`,
-      { method: 'POST', body: { file, newname }, timeout: 15000 },
+      {
+        method: "POST",
+        body: { file, newname },
+        timeout: DAEMON_TIMEOUT_FILE_MS,
+      },
     );
 
     if (!response.ok) {
@@ -262,7 +279,7 @@ router.post("/mkdir", parseBody(mkdirBody), async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'files.write')) {
+  if (!requireSubUserPermission(res, resolved, "files.write")) {
     return;
   }
 
@@ -272,7 +289,7 @@ router.post("/mkdir", parseBody(mkdirBody), async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/files/mkdir`,
-      { method: 'POST', body: { name }, timeout: 15000 },
+      { method: "POST", body: { name }, timeout: DAEMON_TIMEOUT_FILE_MS },
     );
 
     if (!response.ok) {
@@ -302,7 +319,7 @@ router.post("/copy", parseBody(copyFileBody), async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'files.write')) {
+  if (!requireSubUserPermission(res, resolved, "files.write")) {
     return;
   }
 
@@ -315,7 +332,11 @@ router.post("/copy", parseBody(copyFileBody), async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/files/copy`,
-      { method: 'POST', body: { file, target }, timeout: 30000 },
+      {
+        method: "POST",
+        body: { file, target },
+        timeout: DAEMON_TIMEOUT_FILE_WRITE_MS,
+      },
     );
 
     if (!response.ok) {
@@ -345,7 +366,7 @@ router.post("/zip", parseBody(zipBody), async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'files.write')) {
+  if (!requireSubUserPermission(res, resolved, "files.write")) {
     return;
   }
 
@@ -358,7 +379,11 @@ router.post("/zip", parseBody(zipBody), async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/files/zip`,
-      { method: 'POST', body: { files, target }, timeout: 60000 },
+      {
+        method: "POST",
+        body: { files, target },
+        timeout: DAEMON_TIMEOUT_FILE_HEAVY_MS,
+      },
     );
 
     if (!response.ok) {
@@ -388,7 +413,7 @@ router.post("/unzip", parseBody(unzipBody), async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'files.write')) {
+  if (!requireSubUserPermission(res, resolved, "files.write")) {
     return;
   }
 
@@ -401,7 +426,11 @@ router.post("/unzip", parseBody(unzipBody), async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/files/unzip`,
-      { method: 'POST', body: { file, target }, timeout: 60000 },
+      {
+        method: "POST",
+        body: { file, target },
+        timeout: DAEMON_TIMEOUT_FILE_HEAVY_MS,
+      },
     );
 
     if (!response.ok) {
@@ -431,7 +460,7 @@ router.post("/pull", async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'files.write')) {
+  if (!requireSubUserPermission(res, resolved, "files.write")) {
     return;
   }
 
@@ -439,7 +468,7 @@ router.post("/pull", async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/files/pull`,
-      { method: 'POST', timeout: 60000 },
+      { method: "POST", timeout: DAEMON_TIMEOUT_FILE_HEAVY_MS },
     );
 
     if (!response.ok) {

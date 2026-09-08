@@ -14,8 +14,8 @@
       <% if (settings.logo) { %>
       <img src="<%= settings.logo %>" alt="" class="h-10 w-10 rounded-xl object-contain mb-5">
       <% } %>
-      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong)">Two-factor authentication</h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)">Enter the 6-digit code from your authenticator app.</p>
+      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong)"><%= t('twoFactorVerifyTitle') %></h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('twoFactorVerifyDesc') %></p>
     </div>
 
     <% if (req.query.err) { %>
@@ -29,10 +29,10 @@
     <div id="passkeySection" class="mb-4" style="display:none">
       <button type="button" id="passkeyBtn" class="auth-submit w-full" style="display:flex;justify-content:center;gap:8px">
         <%- icon('key', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <span class="btn-label">Sign in with passkey</span>
+        <span class="btn-label"><%= t('loginPasskeyButton') %></span>
         <span class="spinner"></span>
       </button>
-      <p class="text-sm text-center mt-3" style="color:var(--theme-text-muted)">— or use a different method —</p>
+      <p class="text-sm text-center mt-3" style="color:var(--theme-text-muted)">— <%= t('orUseDifferentMethod') %> —</p>
     </div>
 
     <form
@@ -49,14 +49,14 @@
       <%- include('../components/csrf') %>
       <div class="space-y-4">
         <div>
-          <label class="auth-label" for="token" id="tokenLabel">6-digit code</label>
+          <label class="auth-label" for="token" id="tokenLabel"><%= t('twoFactorCodeLabel') %></label>
           <input id="token" name="token" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code"
             required autofocus class="auth-input" placeholder="••••••" style="text-align:center;font-size:20px;letter-spacing:0.4em;font-family:monospace">
         </div>
 
         <button type="submit" class="auth-submit inline-flex items-center gap-1.5" id="submitBtn">
           <%- icon('shield-check', { class: 'size-4', strokeWidth: 1.5 }) %>
-          <span class="btn-label">Verify and sign in</span>
+          <span class="btn-label"><%= t('verifyAndSignIn') %></span>
           <span class="spinner"></span>
         </button>
         <p id="verify-form-status" class="htmx-indicator text-sm text-center" style="color:var(--theme-text-muted)">Verifying…</p>
@@ -64,12 +64,12 @@
     </form>
 
     <p class="text-sm text-center mt-4" style="color:var(--theme-text-muted)">
-      <button type="button" id="toggleRecovery" class="font-medium hover:underline" style="color:var(--theme-text-link)">Use a recovery code instead</button>
+      <button type="button" id="toggleRecovery" class="font-medium hover:underline" style="color:var(--theme-text-link)"><%= t('useRecoveryCode') %></button>
     </p>
 
     <p class="text-sm text-center mt-6" style="color:var(--theme-text-muted)">
-      Lost access to your authenticator app?
-      <a href="/login" class="font-medium hover:underline" style="color:var(--theme-text-link)">Sign in again</a>
+      <%= t('lostAuthenticator') %>
+      <a href="/login" class="font-medium hover:underline" style="color:var(--theme-text-link)"><%= t('signInAgain') %></a>
     </p>
 
   </div>

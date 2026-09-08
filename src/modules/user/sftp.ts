@@ -1,39 +1,43 @@
-import type { Request, Response } from 'express';
-import { Router } from 'express';
-import type { Module } from '../../handlers/moduleInit';
+import type { Request, Response } from "express";
+import { Router } from "express";
+import type { Module } from "../../handlers/moduleInit";
 import {
   isAuthenticatedForServer,
   requireSubUserPermission,
-} from '../../handlers/utils/auth/serverAuthUtil';
-import { getParamAsString } from '../../utils/typeHelpers';
-import prisma from '../../db';
-import logger from '../../handlers/logger';
-import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
-import { logActivity } from '../../handlers/utils/activity/activityLogger';
-import bcrypt from 'bcryptjs';
+} from "../../handlers/utils/auth/serverAuthUtil";
+import { getParamAsString } from "../../utils/typeHelpers";
+import prisma from "../../db";
+import logger from "../../handlers/logger";
+import { daemonRequest } from "../../handlers/utils/core/daemonRequest";
+import { logActivity } from "../../handlers/utils/activity/activityLogger";
+import bcrypt from "bcryptjs";
+import {
+  SFTP_CREDENTIAL_TIMEOUT_MS,
+  SFTP_VALIDATE_TIMEOUT_MS,
+} from "../../config/daemonTimeouts";
 
 const sftpModule: Module = {
   info: {
-    name: 'SFTP Module',
-    description: 'Provides SFTP credential generation for server file access.',
-    version: '2.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
+    name: "SFTP Module",
+    description: "Provides SFTP credential generation for server file access.",
+    version: "2.0.0",
+    moduleVersion: "1.0.0",
+    author: "AirLinkLab",
+    license: "MIT",
   },
 
   router: () => {
     const router = Router();
 
     router.get(
-      '/server/:id/sftp/credentials',
-      isAuthenticatedForServer('id'),
-      requireSubUserPermission('files.sftp'),
+      "/server/:id/sftp/credentials",
+      isAuthenticatedForServer("id"),
+      requireSubUserPermission("files.sftp"),
       async (req: Request, res: Response) => {
         const serverId = getParamAsString(req.params?.id);
 
         if (!serverId) {
-          res.status(400).json({ error: 'Server ID is required.' });
+          res.status(400).json({ error: "Server ID is required." });
           return;
         }
 
@@ -43,7 +47,7 @@ const sftpModule: Module = {
           });
 
           if (!stored) {
-            res.status(404).json({ error: 'No credentials found.' });
+            res.status(404).json({ error: "No credentials found." });
             return;
           }
 
@@ -54,23 +58,23 @@ const sftpModule: Module = {
             expiresAt: stored.expiresAt,
           });
         } catch (error) {
-          logger.error('SFTP credential fetch error:', error);
+          logger.error("SFTP credential fetch error:", error);
           res
             .status(500)
-            .json({ error: 'Internal error while fetching SFTP credentials.' });
+            .json({ error: "Internal error while fetching SFTP credentials." });
         }
       },
     );
 
     router.post(
-      '/server/:id/sftp/credentials',
-      isAuthenticatedForServer('id'),
-      requireSubUserPermission('files.sftp'),
+      "/server/:id/sftp/credentials",
+      isAuthenticatedForServer("id"),
+      requireSubUserPermission("files.sftp"),
       async (req: Request, res: Response) => {
         const serverId = getParamAsString(req.params?.id);
 
         if (!serverId) {
-          res.status(400).json({ error: 'Server ID is required.' });
+          res.status(400).json({ error: "Server ID is required." });
           return;
         }
 
@@ -81,7 +85,7 @@ const sftpModule: Module = {
           });
 
           if (!server) {
-            res.status(404).json({ error: 'Server not found.' });
+            res.status(404).json({ error: "Server not found." });
             return;
           }
 
@@ -95,10 +99,10 @@ const sftpModule: Module = {
                 nodeAddress: server.node.address,
                 nodePort: server.node.port,
                 nodeKey: server.node.key,
-                method: 'DELETE',
-                path: '/sftp/credentials',
+                method: "DELETE",
+                path: "/sftp/credentials",
                 body: { id: server.UUID },
-                timeout: 10000,
+                timeout: SFTP_CREDENTIAL_TIMEOUT_MS,
               });
             } catch {
               // non-fatal, proceed to regenerate
@@ -109,19 +113,19 @@ const sftpModule: Module = {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
-            method: 'POST',
-            path: '/sftp/credentials',
+            method: "POST",
+            path: "/sftp/credentials",
             body: { id: server.UUID },
-            timeout: 15000,
+            timeout: SFTP_VALIDATE_TIMEOUT_MS,
           });
 
           if (response.status < 200 || response.status >= 300) {
             const errBody = response.data as
               Record<string, unknown> | undefined;
             const message =
-              typeof errBody?.error === 'string' && errBody.error
+              typeof errBody?.error === "string" && errBody.error
                 ? errBody.error
-                : 'The daemon failed to generate SFTP credentials.';
+                : "The daemon failed to generate SFTP credentials.";
             res.status(502).json({ error: message });
             return;
           }
@@ -129,12 +133,12 @@ const sftpModule: Module = {
           // Validate at the boundary: only persist well-formed credentials.
           const data = response.data;
           const username =
-            typeof data?.username === 'string' ? data.username : '';
+            typeof data?.username === "string" ? data.username : "";
           const password =
-            typeof data?.password === 'string' ? data.password : '';
-          const port = typeof data?.port === 'number' ? data.port : NaN;
+            typeof data?.password === "string" ? data.password : "";
+          const port = typeof data?.port === "number" ? data.port : NaN;
           const expiresAt =
-            typeof data?.expiresAt === 'string' ? data.expiresAt : null;
+            typeof data?.expiresAt === "string" ? data.expiresAt : null;
           const expiresDate = expiresAt ? new Date(expiresAt) : null;
 
           if (
@@ -148,7 +152,7 @@ const sftpModule: Module = {
             );
             res
               .status(502)
-              .json({ error: 'The daemon returned invalid SFTP credentials.' });
+              .json({ error: "The daemon returned invalid SFTP credentials." });
             return;
           }
 
@@ -176,19 +180,19 @@ const sftpModule: Module = {
 
           res.json({ username, password, host, port, expiresAt });
         } catch (error) {
-          if (error instanceof Error && 'status' in error) {
+          if (error instanceof Error && "status" in error) {
             const httpErr = error as unknown as {
               status: number;
               body?: { error?: string };
             };
             const status = httpErr.status || 500;
             const message =
-              httpErr.body?.error || 'Failed to generate SFTP credentials.';
+              httpErr.body?.error || "Failed to generate SFTP credentials.";
             res.status(status).json({ error: message });
           } else {
-            logger.error('SFTP credential request error:', error);
+            logger.error("SFTP credential request error:", error);
             res.status(500).json({
-              error: 'Internal error while generating SFTP credentials.',
+              error: "Internal error while generating SFTP credentials.",
             });
           }
         }
@@ -196,14 +200,14 @@ const sftpModule: Module = {
     );
 
     router.delete(
-      '/server/:id/sftp/credentials',
-      isAuthenticatedForServer('id'),
-      requireSubUserPermission('files.sftp'),
+      "/server/:id/sftp/credentials",
+      isAuthenticatedForServer("id"),
+      requireSubUserPermission("files.sftp"),
       async (req: Request, res: Response) => {
         const serverId = getParamAsString(req.params?.id);
 
         if (!serverId) {
-          res.status(400).json({ error: 'Server ID is required.' });
+          res.status(400).json({ error: "Server ID is required." });
           return;
         }
 
@@ -214,7 +218,7 @@ const sftpModule: Module = {
           });
 
           if (!server) {
-            res.status(404).json({ error: 'Server not found.' });
+            res.status(404).json({ error: "Server not found." });
             return;
           }
 
@@ -222,31 +226,31 @@ const sftpModule: Module = {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
-            method: 'DELETE',
-            path: '/sftp/credentials',
+            method: "DELETE",
+            path: "/sftp/credentials",
             body: { id: server.UUID },
-            timeout: 10000,
+            timeout: SFTP_CREDENTIAL_TIMEOUT_MS,
           });
 
           await prisma.sftpCredential.deleteMany({
             where: { serverId },
           });
 
-          res.json({ message: 'SFTP credentials revoked.' });
+          res.json({ message: "SFTP credentials revoked." });
         } catch (error) {
-          if (error instanceof Error && 'status' in error) {
+          if (error instanceof Error && "status" in error) {
             const httpErr = error as unknown as {
               status: number;
               body?: { error?: string };
             };
             const status = httpErr.status || 500;
             const message =
-              httpErr.body?.error || 'Failed to revoke SFTP credentials.';
+              httpErr.body?.error || "Failed to revoke SFTP credentials.";
             res.status(status).json({ error: message });
           } else {
-            logger.error('SFTP revocation error:', error);
+            logger.error("SFTP revocation error:", error);
             res.status(500).json({
-              error: 'Internal error while revoking SFTP credentials.',
+              error: "Internal error while revoking SFTP credentials.",
             });
           }
         }
@@ -254,14 +258,14 @@ const sftpModule: Module = {
     );
 
     router.get(
-      '/server/:id/sftp/activity',
-      isAuthenticatedForServer('id'),
-      requireSubUserPermission('files.sftp'),
+      "/server/:id/sftp/activity",
+      isAuthenticatedForServer("id"),
+      requireSubUserPermission("files.sftp"),
       async (req: Request, res: Response) => {
         const serverId = getParamAsString(req.params?.id);
 
         if (!serverId) {
-          res.status(400).json({ error: 'Server ID is required.' });
+          res.status(400).json({ error: "Server ID is required." });
           return;
         }
 
@@ -272,7 +276,7 @@ const sftpModule: Module = {
           });
 
           if (!server) {
-            res.status(404).json({ error: 'Server not found.' });
+            res.status(404).json({ error: "Server not found." });
             return;
           }
 
@@ -282,31 +286,31 @@ const sftpModule: Module = {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             nodeKey: server.node.key,
-            method: 'GET',
-            path: '/sftp/activity',
+            method: "GET",
+            path: "/sftp/activity",
             params: { server: server.UUID },
-            timeout: 10000,
+            timeout: SFTP_CREDENTIAL_TIMEOUT_MS,
           });
 
           const events = response.data?.events ?? [];
 
           for (const event of events) {
-            const kind = String((event as { kind?: string }).kind ?? '');
+            const kind = String((event as { kind?: string }).kind ?? "");
             const username = String(
-              (event as { username?: string }).username ?? '',
+              (event as { username?: string }).username ?? "",
             );
-            const ip = String((event as { ip?: string }).ip ?? '');
+            const ip = String((event as { ip?: string }).ip ?? "");
             const path = String(
-              (event as { path?: string; from?: string }).path ?? '',
+              (event as { path?: string; from?: string }).path ?? "",
             );
 
             // Only real file mutations belong in the audit log. Session
             // lifecycle (connect/disconnect) and view-only reads are noise.
             const mapToAuditEvent: Record<string, string> = {
-              write: 'file:sftp-write',
-              rename: 'file:sftp-rename',
-              remove: 'file:sftp-delete',
-              mkdir: 'file:create',
+              write: "file:sftp-write",
+              rename: "file:sftp-rename",
+              remove: "file:sftp-delete",
+              mkdir: "file:create",
             };
             const auditEvent = mapToAuditEvent[kind];
             if (!auditEvent) {
@@ -321,10 +325,10 @@ const sftpModule: Module = {
 
           res.json({ events: events.length });
         } catch (error) {
-          logger.error('SFTP activity drain error:', error);
+          logger.error("SFTP activity drain error:", error);
           res
             .status(500)
-            .json({ error: 'Internal error while fetching SFTP activity.' });
+            .json({ error: "Internal error while fetching SFTP activity." });
         }
       },
     );

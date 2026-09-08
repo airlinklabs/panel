@@ -47,6 +47,8 @@ import {
   createFolderBody,
   addServerToFolderBody,
 } from "./dto";
+import { V2_AVATAR_UPLOAD_LIMIT_BYTES } from "../../../config/limits";
+import { AVATAR_MIME_ALLOWLIST } from "../../../config/mime";
 
 const router = Router();
 
@@ -264,8 +266,8 @@ router.post("/avatar", async (req, res) => {
   }
 
   const file = req.file;
-  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-  if (!allowedTypes.includes(file.mimetype)) {
+  const allowedTypes = AVATAR_MIME_ALLOWLIST;
+  if (!allowedTypes.includes(file.mimetype as (typeof allowedTypes)[number])) {
     return jsonError(
       res,
       "BAD_REQUEST",
@@ -274,7 +276,7 @@ router.post("/avatar", async (req, res) => {
     );
   }
 
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = V2_AVATAR_UPLOAD_LIMIT_BYTES;
   if (file.size > maxSize) {
     return jsonError(res, "BAD_REQUEST", "File must be less than 5MB", 400);
   }

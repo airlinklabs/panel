@@ -1,4 +1,4 @@
-<%- include('../components/header', { title: req.translations.userAccountTitle || 'Account' }) %>
+<%- include('../components/header', { title: t('userAccountTitle') }) %>
 
 <style>
 </style>
@@ -34,8 +34,8 @@
             <% } %>
           </div>
           <div class="min-w-0 flex-1">
-            <h1 class="al-page-title"><%= req.translations.userAccountTitle || 'Account' %></h1>
-            <p class="al-page-desc"><%= req.translations.userAccountText || 'Manage your profile and preferences.' %></p>
+            <h1 class="al-page-title"><%= t('userAccountTitle') %></h1>
+            <p class="al-page-desc"><%= t('userAccountText') %></p>
           </div>
           <a href="/credits"
             class="al-btn-secondary text-xs">
@@ -46,13 +46,13 @@
       </div>
 
       <div class="al-page-body space-y-4" data-al-tabs data-tabs-default="profile" data-tabs-hash>
-        <div role="tablist" aria-label="<%= req.translations.userAccountTitle || 'Account' %>" class="flex gap-1 mb-5">
+        <div role="tablist" aria-label="<%= t('userAccountTitle') %>" class="flex gap-1 mb-5">
           <button type="button" role="tab" data-tab="profile" aria-selected="true" tabindex="0" aria-controls="account-panel-profile"
-            class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('user', { class: 'size-4', strokeWidth: 1.5 }) %> <%= req.translations.profileTab || 'Profile' %></button>
+            class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('user', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('profileTab') %></button>
           <button type="button" role="tab" data-tab="images" aria-selected="false" tabindex="-1" aria-controls="account-panel-images"
-            class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('image', { class: 'size-4', strokeWidth: 1.5 }) %> <%= req.translations.imagesTab || 'Images' %></button>
+            class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('image', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('imagesTab') %></button>
           <button type="button" role="tab" data-tab="history" aria-selected="false" tabindex="-1" aria-controls="account-panel-history"
-            class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('history', { class: 'size-4', strokeWidth: 1.5 }) %> <%= req.translations.historyTab || 'Login History' %></button>
+            class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('history', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('historyTab') %></button>
         </div>
 
         <div role="tabpanel" data-tab-panel="profile" id="account-panel-profile">
@@ -62,7 +62,7 @@
             <!-- Username -->
             <div x-data="{ saving: false, lastSaved: null }">
               <label class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
-                <%- icon('user', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.username || 'Username' %>
+                <%- icon('user', { class: 'w-3.5 h-3.5' }) %> <%= t('username') %>
               </label>
               <div class="flex gap-1.5">
                 <input id="username" type="text" name="username" placeholder="<%= user.username %>"
@@ -80,7 +80,7 @@
             <!-- Email -->
             <div x-data="{ saving: false, lastSaved: null }">
               <label class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
-                <%- icon('mail', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.email || 'Email' %>
+                <%- icon('mail', { class: 'w-3.5 h-3.5' }) %> <%= t('email') %>
               </label>
               <input id="email" type="email" name="email" placeholder="<%= user.email %>" class="al-input"
                 @input.debounce.600ms="saving = true; window._accountSave('email').then(d => { saving = false; lastSaved = d ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null; })">
@@ -93,7 +93,7 @@
             <!-- Current password -->
             <div class="al-field" data-al-field x-data="{ saving: false, lastSaved: null }">
               <label for="currentPassword" class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
-                <%- icon('lock', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.currentPassword || 'Current password' %>
+                <%- icon('lock', { class: 'w-3.5 h-3.5' }) %> <%= t('currentPassword') %>
               </label>
               <div class="flex items-center gap-2">
                 <div class="relative flex-1">
@@ -110,7 +110,7 @@
             <!-- New password -->
             <div class="al-field" data-al-field x-data="{ saving: false, lastSaved: null }">
               <label for="newPassword" class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
-                <%- icon('lock', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.newPassword || 'New password' %>
+                <%- icon('lock', { class: 'w-3.5 h-3.5' }) %> <%= t('newPassword') %>
               </label>
               <div class="relative">
                 <input id="newPassword" type="password" name="newPassword" placeholder="<%= req.translations.newPassword || 'New password' %>" disabled class="al-input pr-10 disabled:opacity-50" data-al-al-input autocomplete="new-password">
@@ -124,7 +124,7 @@
             <!-- Description (full width) -->
             <div class="md:col-span-2" x-data="{ saving: false, lastSaved: null }">
               <label class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
-                <%- icon('file-text', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.description || 'Description' %>
+                <%- icon('file-text', { class: 'w-3.5 h-3.5' }) %> <%= t('description') %>
               </label>
               <textarea id="description" name="description" rows="2" class="al-input resize-none"
                 @input.debounce.600ms="saving = true; window._accountSave('description').then(d => { saving = false; lastSaved = d ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null; })"><%= user.description %></textarea>
@@ -137,20 +137,14 @@
             <!-- Language -->
             <div x-data="{ saving: false, lastSaved: null }">
               <label for="language" class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
-                <%- icon('globe', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.languagePreference || 'Language' %>
+                <%- icon('globe', { class: 'w-3.5 h-3.5' }) %> <%= t('languagePreference') %>
               </label>
               <select id="language" name="language" class="cs-native"
                 @change="saving = true; window._accountSave('language').then(d => { saving = false; lastSaved = d ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null; })">
-                <option value="en"  <%= req.lang === 'en'  ? 'selected' : '' %>>English</option>
-                <option value="fr"  <%= req.lang === 'fr'  ? 'selected' : '' %>>Français</option>
-                <option value="de"  <%= req.lang === 'de'  ? 'selected' : '' %>>Deutsch</option>
-                <option value="es"  <%= req.lang === 'es'  ? 'selected' : '' %>>Español</option>
-                <option value="pt"  <%= req.lang === 'pt'  ? 'selected' : '' %>>Português</option>
-                <option value="it"  <%= req.lang === 'it'  ? 'selected' : '' %>>Italiano</option>
-                <option value="ru"  <%= req.lang === 'ru'  ? 'selected' : '' %>>Русский</option>
-                <option value="zh"  <%= req.lang === 'zh'  ? 'selected' : '' %>>中文</option>
-                <option value="ja"  <%= req.lang === 'ja'  ? 'selected' : '' %>>日本語</option>
-                <option value="ta"  <%= req.lang === 'ta'  ? 'selected' : '' %>>தமிழ்</option>
+                <% const languageNames = { en: 'English', fr: 'Français', de: 'Deutsch', es: 'Español', pt: 'Português', it: 'Italiano', ru: 'Русский', zh: '中文', ja: '日本語', ta: 'தமிழ்' }; %>
+                <% (supportedLanguages || ['en']).forEach(function(lang) { %>
+                <option value="<%= lang %>" <%= req.lang === lang ? 'selected' : '' %>><%= languageNames[lang] || lang %></option>
+                <% }); %>
               </select>
               <div class="custom-select" data-for="language"></div>
               <div class="flex items-center gap-2 mt-1 h-4">
@@ -162,27 +156,27 @@
             <!-- 2FA -->
             <div>
               <p class="flex items-center gap-1.5 text-sm font-medium mb-3" style="color:var(--theme-text-strong)">
-                <%- icon('shield', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.twoFactorAuth || 'Two-factor authentication' %>
+                <%- icon('shield', { class: 'w-3.5 h-3.5' }) %> <%= t('twoFactorAuth') %>
               </p>
               <div id="twofa-status">
               <% if (user.totpEnabled !== true) { %>
-              <p class="text-sm mb-3" style="color:var(--theme-text-muted)">Add an extra layer of security to your account.</p>
-              <a href="/account/2fa/setup" class="al-btn-primary text-sm inline-flex">Set up 2FA</a>
+              <p class="text-sm mb-3" style="color:var(--theme-text-muted)"><%= t('addExtraSecurity') %></p>
+              <a href="/account/2fa/setup" class="al-btn-primary text-sm inline-flex"><%= t('setup2FA') %></a>
               <% } else { %>
               <div class="flex items-center gap-2 mb-3">
                 <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
                   style="background:var(--theme-success-bg);color:var(--theme-success)">
-                  <%- icon('check', { class: 'w-3 h-3' }) %> Enabled
+                  <%- icon('check', { class: 'w-3 h-3' }) %> <%= t('enabled') %>
                 </span>
               </div>
               <div class="flex gap-2 items-center">
                 <input id="disable2faPassword" type="password" placeholder="Current password" class="al-input text-sm flex-1" style="max-width:180px">
-                <button id="disable2faBtn" type="button" class="al-btn-secondary text-sm"><%- icon('shield-off', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.disable2FA || 'Disable 2FA' %></button>
+                <button id="disable2faBtn" type="button" class="al-btn-secondary text-sm"><%- icon('shield-off', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('disable2FA') %></button>
               </div>
               <% } %>
               <p class="text-xs mt-2" style="color:var(--theme-text-muted)">
                 <span id="passkey-count-info"></span>
-                <a href="/account/2fa/setup" style="color:var(--theme-text-link)" class="hover:underline">Manage passkeys</a>
+                <a href="/account/2fa/setup" style="color:var(--theme-text-link)" class="hover:underline"><%= t('managePasskeys') %></a>
               </p>
               </div>
             </div>
@@ -193,7 +187,7 @@
           <div class="mt-6 pt-5" style="border-top:1px solid var(--theme-border)" x-data="{ saving: false }">
             <button id="saveAccountBtn" type="button" class="al-btn-primary px-6 py-2.5 text-sm font-medium"
               @click="saving = true; Promise.all(['username','email','description','language','preferredNode'].map(f => window._accountSave(f))).then(results => { saving = false; if(results.some(d => d !== null)) showToast('All changes saved.', 'success'); })">
-              <span x-show="!saving"><%= req.translations.saveChanges || 'Save Changes' %></span>
+              <span x-show="!saving"><%= t('saveChanges') %></span>
               <span x-show="saving">Saving...</span>
             </button>
           </div>
@@ -201,8 +195,8 @@
 
         <!-- Preferred node -->
         <div class="al-card p-4" x-data="{ saving: false, lastSaved: null }">
-          <p class="text-sm font-medium mb-1" style="color:var(--theme-text-strong)"><%= req.translations.preferredNode || 'Preferred node' %></p>
-          <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= req.translations.preferredNodeDesc || 'Pick the node your servers are created on by default.' %></p>
+          <p class="text-sm font-medium mb-1" style="color:var(--theme-text-strong)"><%= t('preferredNode') %></p>
+          <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('preferredNodeDesc') %></p>
           <select id="preferredNode" class="al-input"
             @change="saving = true; window._accountSave('preferredNode').then(d => { saving = false; lastSaved = d ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null; })">
             <option value=""><%= req.translations.autoSelectNode || 'Auto (least loaded)' %></option>
@@ -223,20 +217,20 @@
           <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
             <div>
               <p class="flex items-center gap-1.5 text-sm font-medium mb-1" style="color:var(--theme-text-strong)">
-                <%- icon('image', { class: 'w-4 h-4', strokeWidth: 1.5 }) %> <%= req.translations.customImages || 'Custom images' %>
+                <%- icon('image', { class: 'w-4 h-4', strokeWidth: 1.5 }) %> <%= t('customImages') %>
               </p>
-              <p class="text-xs" style="color:var(--theme-text-muted)"><%= req.translations.customImagesDesc || 'Submit an egg JSON or import from a URL. Admins review submissions before they become usable.' %></p>
+              <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('customImagesDesc') %></p>
             </div>
             <% if (allowed) { %>
             <button id="openSubmitBtn" type="button" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5 shrink-0">
               <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-              <%= req.translations.submitImage || 'Submit Image' %>
+              <%= t('submitImage') %>
             </button>
             <% } %>
           </div>
 
           <% if (!allowed) { %>
-          <p class="text-xs" style="color:var(--theme-text-muted)"><%= req.translations.imageSubmissionsDisabledText || 'An administrator has turned off user image submissions.' %></p>
+          <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('imageSubmissionsDisabledText') %></p>
           <% } else { %>
             <!-- Inline image list (replaces /my-images standalone page) -->
             <div id="myImagesEmpty" class="flex flex-col items-center justify-center py-12 text-center <%= (!images || images.length === 0) ? '' : 'hidden' %>">
@@ -244,20 +238,20 @@
                 <%- icon('image', { class: 'w-5 h-5', style: 'color:var(--theme-text-muted)' }) %>
               </div>
               <p class="text-sm font-medium" style="color:var(--theme-text-strong)">
-                <%= req.translations.noSubmittedImages || 'No submitted images yet.' %>
+                <%= t('noSubmittedImages') %>
               </p>
               <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
-                <%= req.translations.noSubmittedImagesText || 'Submit an egg JSON and it will appear here with review status.' %>
+                <%= t('noSubmittedImagesText') %>
               </p>
             </div>
             <div id="myImagesTable" class="overflow-x-auto shadow-sm rounded-xl border <%= (!images || images.length === 0) ? 'hidden' : '' %>" style="border-color:var(--theme-border)">
               <table class="al-table min-w-full">
                 <thead class="al-table-head">
                   <tr>
-                    <th class="al-table-th py-3 pl-6 pr-3"><%= req.translations.name || 'Name' %></th>
-                    <th class="al-table-th px-3 py-3"><%= req.translations.submitted || 'Submitted' %></th>
-                    <th class="al-table-th px-3 py-3"><%= req.translations.status || 'Status' %></th>
-                    <th class="al-table-th px-3 py-3"><%= req.translations.actions || 'Actions' %></th>
+                    <th class="al-table-th py-3 pl-6 pr-3"><%= t('name') %></th>
+                    <th class="al-table-th px-3 py-3"><%= t('submitted') %></th>
+                    <th class="al-table-th px-3 py-3"><%= t('statusColumn') %></th>
+                    <th class="al-table-th px-3 py-3"><%= t('actions') %></th>
                   </tr>
                 </thead>
                 <tbody class="divide-y" style="border-color:var(--theme-border)">
@@ -274,17 +268,17 @@
                       <% if (image.status === 'approved') { %>
                       <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
                         style="background:var(--theme-success-bg);color:var(--theme-success)">
-                        <%= req.translations.approved || 'Approved' %>
+                        <%= t('approved') %>
                       </span>
                       <% } else if (image.status === 'rejected') { %>
                       <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
                         style="background:var(--theme-danger-bg);color:var(--theme-danger)">
-                        <%= req.translations.rejected || 'Rejected' %>
+                        <%= t('rejected') %>
                       </span>
                       <% } else { %>
                       <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
                         style="background:var(--theme-warning-bg);color:var(--theme-warning)">
-                        <%= req.translations.pendingApproval || 'Pending review' %>
+                        <%= t('pendingApproval') %>
                       </span>
                       <% } %>
                     </td>
@@ -292,7 +286,7 @@
                       <div class="flex gap-2">
                         <% if (image.status !== 'approved') { %>
                         <a href="/my-images/edit/<%= image.id %>" class="al-btn-secondary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
-                          <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.edit || 'Edit' %>
+                          <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('update') %>
                         </a>
                         <% } %>
                         <button type="button" class="al-btn-danger" data-delete-image="<%= image.id %>" aria-label="Delete <%= image.name %>">
@@ -312,7 +306,7 @@
         <div role="tabpanel" data-tab-panel="history" id="account-panel-history" hidden>
         <!-- Login history -->
         <div class="al-card p-4">
-          <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= req.translations.loginHistory || 'Login history' %></p>
+          <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= t('loginHistory') %></p>
           <div class="overflow-x-auto shadow-sm rounded-xl border" style="border-color:var(--theme-border)">
             <table class="al-table min-w-full text-sm">
               <colgroup>
@@ -322,9 +316,9 @@
               </colgroup>
               <thead class="al-table-head">
                 <tr>
-                  <th class="al-table-th px-4 py-3"><%= req.translations.dateTime || 'Date & Time' %></th>
-                  <th class="al-table-th px-4 py-3"><%= req.translations.ipAddress || 'IP Address' %></th>
-                  <th class="al-table-th px-4 py-3"><%= req.translations.browserDevice || 'Browser / Device' %></th>
+                  <th class="al-table-th px-4 py-3"><%= t('dateTime') %></th>
+                  <th class="al-table-th px-4 py-3"><%= t('ipAddress') %></th>
+                  <th class="al-table-th px-4 py-3"><%= t('browserDevice') %></th>
                 </tr>
               </thead>
               <tbody class="divide-y" style="border-color:var(--theme-border)">
@@ -337,7 +331,7 @@
                   </tr>
                   <% }) %>
                 <% } else { %>
-                <tr><td colspan="3" class="px-4 py-6 text-center text-sm" style="color:var(--theme-text-muted);"><%= req.translations.noLoginHistory || 'No login history available' %></td></tr>
+                <tr><td colspan="3" class="px-4 py-6 text-center text-sm" style="color:var(--theme-text-muted);"><%= t('noLoginHistory') %></td></tr>
                 <% } %>
               </tbody>
             </table>
@@ -351,8 +345,8 @@
 </main>
 
 <div id="image-submit-data" style="display:none"
-  data-submitting="<%= req.translations.submitting || 'Submitting image...' %>"
-  data-submit-error="<%= req.translations.errorSubmitting || 'Failed to submit the image.' %>"
+  data-submitting="<%= t('submittingImage') %>"
+  data-submit-error="<%= t('failedToSubmitImage') %>"
 ></div>
 
 <!-- Image submission popup -->
@@ -361,8 +355,8 @@
   <div class="flex flex-col max-h-[88vh]">
     <div class="al-sheet-header" style="border-color:var(--theme-border)">
       <div>
-        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.submitImage || 'Submit Image' %></h2>
-        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= req.translations.submitImageText || 'Admins review submissions before they are usable.' %></p>
+        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('submitImage') %></h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('submitImageText') %></p>
       </div>
       <button type="button" id="imClose" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
@@ -370,9 +364,9 @@
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
       <div class="flex gap-1 p-1 rounded-xl mb-4" style="background:var(--theme-bg-secondary)">
-        <button type="button" id="imModeManual" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-strong); background:var(--theme-bg-card);"><%= req.translations.manualEnter || 'Enter details' %></button>
-        <button type="button" id="imModeJson" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-muted);"><%= req.translations.pasteJson || 'Paste JSON' %></button>
-        <button type="button" id="imModeUrl" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-muted);"><%= req.translations.importFromUrl || 'Import from URL' %></button>
+        <button type="button" id="imModeManual" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-strong); background:var(--theme-bg-card);"><%= t('manualEnter') %></button>
+        <button type="button" id="imModeJson" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-muted);"><%= t('pasteJson') %></button>
+        <button type="button" id="imModeUrl" class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition" style="color:var(--theme-text-muted);"><%= t('importFromUrl') %></button>
       </div>
 
       <!-- Manual form -->

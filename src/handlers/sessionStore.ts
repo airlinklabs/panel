@@ -1,9 +1,9 @@
-import session from 'express-session';
-import { getRedisClient } from './redis';
+import session from "express-session";
+import { getRedisClient } from "./redis";
+import { SESSION_DEFAULT_TTL_S } from "../config/timeouts";
 
-const SESSION_PREFIX = 'airlink:sess:';
-const USER_INDEX_PREFIX = 'airlink:usr:';
-const DEFAULT_TTL_SEC = 7 * 24 * 60 * 60; // 7 days
+const SESSION_PREFIX = "airlink:sess:";
+const USER_INDEX_PREFIX = "airlink:usr:";
 
 /**
  * Redis-backed session store using ioredis directly.
@@ -22,7 +22,7 @@ class RedisSessionStore extends session.Store {
     super();
     this.redis = getRedisClient();
     this.prefix = SESSION_PREFIX;
-    this.defaultTtl = DEFAULT_TTL_SEC;
+    this.defaultTtl = SESSION_DEFAULT_TTL_S;
   }
 
   get(
@@ -56,7 +56,7 @@ class RedisSessionStore extends session.Store {
     const data = JSON.stringify(sess);
 
     this.redis
-      .set(`${this.prefix}${sid}`, data, 'EX', ttlSec)
+      .set(`${this.prefix}${sid}`, data, "EX", ttlSec)
       .then(() => {
         // Track user → session mapping for admin session revocation.
         try {
@@ -208,7 +208,7 @@ class RedisSessionStore extends session.Store {
 
   private getTTL(sess: session.SessionData): number {
     const maxAge = sess.cookie?.maxAge;
-    if (typeof maxAge === 'number') {
+    if (typeof maxAge === "number") {
       return Math.ceil(maxAge / 1000);
     }
     return this.defaultTtl;
@@ -216,18 +216,18 @@ class RedisSessionStore extends session.Store {
 
   private async getAllKeys(): Promise<string[]> {
     const keys: string[] = [];
-    let cursor = '0';
+    let cursor = "0";
     do {
       const [nextCursor, batch] = await this.redis.scan(
         cursor,
-        'MATCH',
+        "MATCH",
         `${this.prefix}*`,
-        'COUNT',
+        "COUNT",
         200,
       );
       cursor = nextCursor;
       keys.push(...batch);
-    } while (cursor !== '0');
+    } while (cursor !== "0");
     return keys;
   }
 }

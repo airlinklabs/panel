@@ -1,16 +1,15 @@
-import { URL } from 'url';
-import type { Readable } from 'stream';
+import { URL } from "url";
+import type { Readable } from "stream";
+import { CONTENT_TYPE_JSON, CONTENT_TYPE_TEXT } from "../config/limits";
 
-const CONTENT_TYPE_JSON = 'application/json';
-const CONTENT_TYPE_TEXT = 'text/plain';
-const HEADER_AUTHORIZATION = 'Authorization';
-const HEADER_CONTENT_TYPE = 'Content-Type';
-const BASIC_AUTH_PREFIX = 'Basic ';
-const PROTOCOL_HTTP = 'http:';
-const PROTOCOL_HTTPS = 'https:';
+const HEADER_AUTHORIZATION = "Authorization";
+const HEADER_CONTENT_TYPE = "Content-Type";
+const BASIC_AUTH_PREFIX = "Basic ";
+const PROTOCOL_HTTP = "http:";
+const PROTOCOL_HTTPS = "https:";
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-export type ResponseType = 'json' | 'text' | 'arraybuffer' | 'stream';
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+export type ResponseType = "json" | "text" | "arraybuffer" | "stream";
 
 export interface HttpRequestOptions {
   body?: unknown;
@@ -36,7 +35,7 @@ export interface HttpResponse<T = unknown> {
 }
 
 function isHttpError(error: unknown): error is HttpError {
-  return error instanceof Error && 'status' in error && 'body' in error;
+  return error instanceof Error && "status" in error && "body" in error;
 }
 
 function validateUrl(urlStr: string): URL {
@@ -71,20 +70,20 @@ function buildUrl(
 function buildBasicAuth(username: string, password: string): string {
   return (
     BASIC_AUTH_PREFIX +
-    Buffer.from(`${username}:${password}`).toString('base64')
+    Buffer.from(`${username}:${password}`).toString("base64")
   );
 }
 
 function isStreamLike(body: unknown): body is Readable | ReadableStream {
   return (
-    typeof body === 'object' &&
+    typeof body === "object" &&
     body !== null &&
-    ('pipe' in body || typeof (body as ReadableStream).getReader === 'function')
+    ("pipe" in body || typeof (body as ReadableStream).getReader === "function")
   );
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
-  const contentType = response.headers.get('content-type') ?? '';
+  const contentType = response.headers.get("content-type") ?? "";
   if (contentType.includes(CONTENT_TYPE_JSON)) {
     return response.json() as Promise<T>;
   }
@@ -103,7 +102,7 @@ async function request<T = unknown>(
     auth,
     timeout,
     signal,
-    responseType = 'json',
+    responseType = "json",
   } = options;
 
   validateUrl(url);
@@ -117,8 +116,8 @@ async function request<T = unknown>(
     );
   }
 
-  if (body !== undefined && body !== null && responseType !== 'stream') {
-    if (typeof body === 'string') {
+  if (body !== undefined && body !== null && responseType !== "stream") {
+    if (typeof body === "string") {
       headers[HEADER_CONTENT_TYPE] = CONTENT_TYPE_TEXT;
     } else if (Buffer.isBuffer(body)) {
       // Don't set content type for buffers (likely form data streams)
@@ -152,10 +151,10 @@ async function request<T = unknown>(
     if (
       body !== undefined &&
       body !== null &&
-      method.toUpperCase() !== 'GET' &&
-      method.toUpperCase() !== 'HEAD'
+      method.toUpperCase() !== "GET" &&
+      method.toUpperCase() !== "HEAD"
     ) {
-      if (typeof body === 'string') {
+      if (typeof body === "string") {
         fetchOptions.body = body;
       } else if (Buffer.isBuffer(body)) {
         fetchOptions.body = body;
@@ -169,8 +168,8 @@ async function request<T = unknown>(
     const response = await fetch(finalUrl, fetchOptions);
 
     let data: T;
-    if (responseType === 'stream') {
-      const nodeStream = await import('stream');
+    if (responseType === "stream") {
+      const nodeStream = await import("stream");
       const webStream = response.body;
       if (webStream) {
         const readable = new nodeStream.Readable({
@@ -194,10 +193,10 @@ async function request<T = unknown>(
       } else {
         data = null as T;
       }
-    } else if (responseType === 'arraybuffer') {
+    } else if (responseType === "arraybuffer") {
       const buffer = Buffer.from(await response.arrayBuffer());
       data = buffer as T;
-    } else if (responseType === 'text') {
+    } else if (responseType === "text") {
       data = (await response.text()) as T;
     } else {
       data = await parseResponse<T>(response);
@@ -210,12 +209,12 @@ async function request<T = unknown>(
       data,
     };
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
+    if (error instanceof DOMException && error.name === "AbortError") {
       const abortError = new Error(
         `Request timed out after ${timeout}ms`,
       ) as HttpError;
       abortError.status = 0;
-      abortError.statusText = 'Timeout';
+      abortError.statusText = "Timeout";
       abortError.body = null;
       throw abortError;
     }
@@ -229,41 +228,41 @@ async function request<T = unknown>(
 
 export async function httpGet<T = unknown>(
   url: string,
-  options: Omit<HttpRequestOptions, 'body'> = {},
+  options: Omit<HttpRequestOptions, "body"> = {},
 ): Promise<HttpResponse<T>> {
-  return request<T>('GET', url, options);
+  return request<T>("GET", url, options);
 }
 
 export async function httpPost<T = unknown>(
   url: string,
   body?: unknown,
-  options: Omit<HttpRequestOptions, 'body'> = {},
+  options: Omit<HttpRequestOptions, "body"> = {},
 ): Promise<HttpResponse<T>> {
-  return request<T>('POST', url, { ...options, body });
+  return request<T>("POST", url, { ...options, body });
 }
 
 export async function httpPut<T = unknown>(
   url: string,
   body?: unknown,
-  options: Omit<HttpRequestOptions, 'body'> = {},
+  options: Omit<HttpRequestOptions, "body"> = {},
 ): Promise<HttpResponse<T>> {
-  return request<T>('PUT', url, { ...options, body });
+  return request<T>("PUT", url, { ...options, body });
 }
 
 export async function httpPatch<T = unknown>(
   url: string,
   body?: unknown,
-  options: Omit<HttpRequestOptions, 'body'> = {},
+  options: Omit<HttpRequestOptions, "body"> = {},
 ): Promise<HttpResponse<T>> {
-  return request<T>('PATCH', url, { ...options, body });
+  return request<T>("PATCH", url, { ...options, body });
 }
 
 export async function httpDelete<T = unknown>(
   url: string,
   body?: unknown,
-  options: Omit<HttpRequestOptions, 'body'> = {},
+  options: Omit<HttpRequestOptions, "body"> = {},
 ): Promise<HttpResponse<T>> {
-  return request<T>('DELETE', url, { ...options, body });
+  return request<T>("DELETE", url, { ...options, body });
 }
 
 export { isHttpError };

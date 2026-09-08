@@ -50,7 +50,7 @@
                   <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
                   Port
                 </label>
-                <input id="hostPort" x-model.number="form.port" class="al-input" placeholder="3306" type="number">
+                <input id="hostPort" x-model.number="form.port" class="al-input" placeholder="<%= settings.defaultDbPort ?? 3306 %>" type="number">
               </div>
 
               <div>
@@ -91,7 +91,7 @@
         return {
           saving: false,
           error: '',
-          form: { name: '', host: '', port: 3306, username: 'root', password: '', nodeId: '' },
+          form: { name: '', host: '', port: <%= settings.defaultDbPort ?? 3306 %>, username: 'root', password: '', nodeId: '' },
           async submit() {
             if (this.saving) return;
             this.error = '';

@@ -1,4 +1,4 @@
-<%- include('../components/header', { title: 'Create Server' }) %>
+<%- include('../components/header', { title: t('createAServer') }) %>
 
 <style>
   ::-webkit-scrollbar { display: none; }
@@ -131,7 +131,7 @@ function createServerPage() {
       }
 
       document.getElementById('addPortBtn').addEventListener('click', function () {
-        portsState.push({ name: 'Port ' + (portsState.length + 1), internalPort: 25565 });
+        portsState.push({ name: 'Port ' + (portsState.length + 1), internalPort: <%= defaultServerPort %> });
         renderPortRows();
       });
 
@@ -335,10 +335,10 @@ function createServerPage() {
         <!-- Header -->
         <div class="flex items-center justify-between mb-7">
           <div>
-            <h1 class="al-page-title">Create a server</h1>
-            <p class="al-page-desc"><%= currentCount %> of <%= serverLimit %> servers used</p>
+            <h1 class="al-page-title"><%= t('createAServer') %></h1>
+            <p class="al-page-desc"><%= currentCount %> <%= t('ofServersUsed') %> <%= serverLimit %></p>
           </div>
-          <a href="/" class="text-sm transition" style="color:var(--theme-text-muted)">Cancel</a>
+          <a href="/" class="text-sm transition" style="color:var(--theme-text-muted)"><%= t('cancel') %></a>
         </div>
 
         <div class="space-y-5">
@@ -348,14 +348,14 @@ function createServerPage() {
 
           <!-- Details -->
           <div class="al-card">
-            <div class="al-card-header">Details</div>
+            <div class="al-card-header"><%= t('details') %></div>
             <div class="p-5 space-y-4">
               <div>
-                <label class="al-label" for="serverName">Name</label>
+                <label class="al-label" for="serverName"><%= t('name') %></label>
                 <input id="serverName" type="text" placeholder="My server" maxlength="64" class="al-input">
               </div>
               <div>
-                <label class="al-label" for="serverDescription">Description <span style="color:var(--theme-text-muted);font-weight:normal">(optional)</span></label>
+                <label class="al-label" for="serverDescription"><%= t('description') %> <span style="color:var(--theme-text-muted);font-weight:normal">(<%= t('optional') %>)</span></label>
                 <input id="serverDescription" type="text" placeholder="What is this for?" maxlength="128" class="al-input">
               </div>
             </div>
@@ -363,10 +363,10 @@ function createServerPage() {
 
           <!-- Node & Image -->
           <div class="al-card">
-            <div class="al-card-header">Node & image</div>
+            <div class="al-card-header"><%= t('nodeAndImage') %></div>
             <div class="p-5 space-y-4">
               <div>
-                <label class="al-label" for="nodeId">Node</label>
+                <label class="al-label" for="nodeId"><%= t('Node') %></label>
                 <select id="nodeId" class="hidden">
                   <option value="" disabled>Select a node</option>
                   <% nodes.forEach(node => { %>
@@ -376,13 +376,13 @@ function createServerPage() {
                 <div class="custom-select" data-for="nodeId"></div>
               </div>
               <div id="nodeHeadroom" class="hidden space-y-2.5 rounded-xl p-4" style="border:1px solid var(--theme-border); background:var(--theme-bg-secondary);">
-                <p class="text-xs font-medium" style="color:var(--theme-text-muted)">Node headroom</p>
+                <p class="text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('nodeHeadroom') %></p>
                 <div id="nodeHeadroomRows" class="space-y-2.5"></div>
                 <p id="headroomHint" class="text-[11px]" style="color:var(--theme-text-muted)"></p>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="al-label" for="imageId">Image</label>
+                  <label class="al-label" for="imageId"><%= t('Image') %></label>
                   <select id="imageId" class="hidden">
                     <option value="" disabled selected>Select an image</option>
                     <% images.forEach(image => { %>
@@ -392,7 +392,7 @@ function createServerPage() {
                   <div class="custom-select" data-for="imageId"></div>
                 </div>
                 <div>
-                  <label class="al-label" for="dockerImage">Docker variant</label>
+                  <label class="al-label" for="dockerImage"><%= t('dockerVariant') %></label>
                   <select id="dockerImage" class="hidden">
                     <option value="" disabled selected>Select an image first</option>
                   </select>
@@ -400,9 +400,9 @@ function createServerPage() {
                 </div>
               </div>
               <div>
-                <label class="al-label">Ports</label>
+                <label class="al-label"><%= t('Ports') %></label>
                 <button type="button" id="assignPortsBtn" class="cs-trigger">
-                  <span id="assignPortsLabel">Assign ports</span>
+                  <span id="assignPortsLabel"><%= t('assignPorts') %></span>
                 </button>
               </div>
             </div>
@@ -412,7 +412,7 @@ function createServerPage() {
 
           <!-- Resources -->
           <div class="al-card overflow-hidden">
-            <div class="al-card-header">Resources</div>
+            <div class="al-card-header"><%= t('resources') %></div>
             <div class="p-5 grid grid-cols-3 gap-4">
               <div>
                 <label for="MemoryDisplay" class="al-label flex items-center gap-1.5">
@@ -466,7 +466,7 @@ function createServerPage() {
                   Storage
                 </label>
                 <!-- hidden field always holds MB -->
-                <input type="hidden" id="Storage" value="5120">
+                <input type="hidden" id="Storage" value="<%= defaultMaxStorageMb %>">
                 <div class="flex items-stretch gap-0">
                   <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="StorageDisplay" data-step="1" data-min="1" aria-label="Decrease storage">−</button>
                   <input id="StorageDisplay" type="number" value="5" min="1" class="stepper-input flex-1" aria-label="Storage value">
@@ -512,7 +512,7 @@ function createServerPage() {
   </div>
 </div>
 
-<%- include('../components/loadingPopup') %>
+<%- include('../components/loading-popup') %>
 
 <script nonce="<%- nonce %>">window.__nodeHeadroom = <%- JSON.stringify(nodeHeadroom) %>;</script>
 

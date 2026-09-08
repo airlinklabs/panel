@@ -1,7 +1,7 @@
 import prisma from "../db";
 import { daemonRequest } from "../handlers/utils/core/daemonRequest";
-import { fsListSchema, parseDaemonResponse } from "../platform/daemon/dtos";
-import type { FsFileEntry } from "../platform/daemon/dtos";
+import { fsListSchema, parseDaemonResponse } from "../types/daemon";
+import type { FsFileEntry } from "../types/daemon";
 import { isPathSafe } from "../utils/pathSecurity";
 
 const FILE_TIMEOUT_MS = 15_000;

@@ -245,7 +245,7 @@
 function imageEditor() {
   const MONACO_FONT_SIZE = 13;
   const MONACO_TAB_SIZE = 2;
-  const DEFAULT_PORT = 25565;
+  const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
   let originalData = null;
   let monacoEditor = null;
 

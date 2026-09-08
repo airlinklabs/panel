@@ -192,7 +192,7 @@ function serverEditPage() {
                   <%- icon('layers', { size: 14, class: 'shrink-0' }) %>
                   Database limit:
                 </label>
-                <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= server.databaseLimit ?? 5 %>" class="al-input mt-2 mb-1">
+                <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= server.databaseLimit ?? settings.defaultDatabaseLimit ?? 5 %>" class="al-input mt-2 mb-1">
                 <p class="text-xs" style="color:var(--theme-text-muted)">0 = unlimited databases</p>
               </div>
             </div>
@@ -206,7 +206,7 @@ function serverEditPage() {
                   <%- icon('database-backup', { size: 14, class: 'shrink-0' }) %>
                   Backup limit:
                 </label>
-                <input id="serverBackupLimit" name="backupLimit" type="number" min="0" value="<%= server.backupLimit ?? 5 %>" class="al-input mt-2">
+                <input id="serverBackupLimit" name="backupLimit" type="number" min="0" value="<%= server.backupLimit ?? settings.defaultBackupLimit ?? 5 %>" class="al-input mt-2">
                 <p class="text-xs" style="color:var(--theme-text-muted)">0 = unlimited backups</p>
               </div>
               <div>
@@ -376,7 +376,7 @@ function serverEditPage() {
 </div><!-- /x-data -->
 
 <%- include('../../components/portsAllocator') %>
-<%- include('../../components/loadingPopup') %>
+<%- include('../../components/loading-popup') %>
 
 <!-- Transfer Modal -->
 <div id="transferModal" class="al-sheet-overlay fixed inset-0 z-50 hidden">
@@ -520,7 +520,7 @@ function serverEditPage() {
 
     function ensureMinimumPortRows() {
       const requirements = getPortRequirements();
-      const DEFAULT_PORT = 25565;
+      const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
       while (assignedPorts.length < requirements.length) {
         const req = requirements[assignedPorts.length] || {};
         assignedPorts.push({
@@ -679,7 +679,7 @@ function serverEditPage() {
     let nodesData = {};
     let pollInterval = null;
 
-    const DEFAULT_PORT = 25565;
+    const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
 
     const statusSteps = {
       'pending': { text: 'Queued...' },

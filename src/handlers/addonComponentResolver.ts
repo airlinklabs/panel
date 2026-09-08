@@ -1,28 +1,28 @@
-import path from 'path';
-import fs from 'fs';
+import path from "path";
+import fs from "fs";
 
-export type ViewportMode = 'desktop' | 'mobile';
+export type ViewportMode = "desktop" | "mobile";
 
 export type ComponentName =
-  | 'header'
-  | 'footer'
-  | 'template'
-  | 'modal'
-  | 'toast'
-  | 'serverHeader'
-  | 'serverTemplate'
-  | 'settingsTemplate'
-  | 'tabComponent'
-  | 'store'
-  | 'sftp'
-  | 'csrf'
-  | 'installHeader'
-  | 'imageViewer'
-  | 'loadingState'
-  | 'loadingPopup'
-  | 'pageTitle'
-  | 'serverFeatures'
-  | 'uiButton';
+  | "header"
+  | "footer"
+  | "template"
+  | "modal"
+  | "toast"
+  | "serverHeader"
+  | "serverTemplate"
+  | "settingsTemplate"
+  | "tabComponent"
+  | "store"
+  | "sftp"
+  | "csrf"
+  | "installHeader"
+  | "imageViewer"
+  | "loadingState"
+  | "loadingPopup"
+  | "pageTitle"
+  | "serverFeatures"
+  | "uiButton";
 
 export interface AddonComponents {
   header: string;
@@ -55,9 +55,9 @@ const COMPONENT_REGISTRY: Record<
   template: (r, v) => path.join(r, `views/${v}/components/template`),
   modal: (r, v) => path.join(r, `views/${v}/components/modal`),
   toast: (r, v) => path.join(r, `views/${v}/components/toast`),
-  serverHeader: (r, v) => path.join(r, `views/${v}/components/serverHeader`),
+  serverHeader: (r, v) => path.join(r, `views/${v}/components/server-header`),
   serverTemplate: (r, v) =>
-    path.join(r, `views/${v}/components/serverTemplate`),
+    path.join(r, `views/${v}/components/server-template`),
   settingsTemplate: (r, v) =>
     path.join(r, `views/${v}/components/settingsTemplate`),
   tabComponent: (r, v) => path.join(r, `views/${v}/components/tabComponent`),
@@ -65,12 +65,12 @@ const COMPONENT_REGISTRY: Record<
   sftp: (r, v) => path.join(r, `views/${v}/components/sftp`),
   csrf: (r, v) => path.join(r, `views/${v}/components/csrf`),
   installHeader: (r, v) => path.join(r, `views/${v}/components/installHeader`),
-  imageViewer: (r, v) => path.join(r, `views/${v}/components/imageViewer`),
+  imageViewer: (r, v) => path.join(r, `views/${v}/components/image-viewer`),
   loadingState: (r, v) => path.join(r, `views/${v}/components/loading-state`),
-  loadingPopup: (r, v) => path.join(r, `views/${v}/components/loadingPopup`),
+  loadingPopup: (r, v) => path.join(r, `views/${v}/components/loading-popup`),
   pageTitle: (r, v) => path.join(r, `views/${v}/components/pageTitle`),
   serverFeatures: (r, v) =>
-    path.join(r, `views/${v}/components/serverFeatures`),
+    path.join(r, `views/${v}/components/server-features`),
   uiButton: (r, v) => path.join(r, `views/${v}/components/ui/button`),
 };
 
@@ -82,22 +82,22 @@ export class AddonComponentResolver {
 
   constructor(viewsPath: string) {
     this.viewsPath = viewsPath;
-    this.panelRoot = path.resolve(viewsPath, '..');
+    this.panelRoot = path.resolve(viewsPath, "..");
   }
 
   resolveViewport(
-    requested: ViewportMode | 'auto',
+    requested: ViewportMode | "auto",
     cookieViewport?: string,
   ): ViewportMode {
-    if (requested !== 'auto') {
+    if (requested !== "auto") {
       return requested;
     }
-    return cookieViewport === 'mobile' ? 'mobile' : 'desktop';
+    return cookieViewport === "mobile" ? "mobile" : "desktop";
   }
 
   getComponent(
     name: string,
-    viewport: ViewportMode = 'desktop',
+    viewport: ViewportMode = "desktop",
   ): string | null {
     if (!VALID_COMPONENT_NAMES.has(name)) {
       return null;
@@ -106,7 +106,7 @@ export class AddonComponentResolver {
     return resolver(this.panelRoot, viewport);
   }
 
-  getComponents(viewport: ViewportMode = 'desktop'): Record<string, string> {
+  getComponents(viewport: ViewportMode = "desktop"): Record<string, string> {
     const result: Record<string, string> = {};
     for (const [name, resolver] of Object.entries(COMPONENT_REGISTRY)) {
       result[name] = resolver(this.panelRoot, viewport);

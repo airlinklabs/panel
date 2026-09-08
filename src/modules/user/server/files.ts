@@ -10,10 +10,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { isWorld } from "../../../handlers/features";
-import {
-  fsListSchema,
-  parseDaemonResponse,
-} from "../../../platform/daemon/dtos";
+import { fsListSchema, parseDaemonResponse } from "../../../types/daemon";
 import { checkForServerInstallation } from "../../../handlers/checkForServerInstallation";
 import { getServerStatus } from "../../../handlers/utils/server/serverStatus";
 import { getParamAsString } from "../../../utils/typeHelpers";
@@ -38,6 +35,16 @@ import {
   getServerStatusInput,
   getImageFeatures,
 } from "./shared";
+import {
+  DAEMON_TIMEOUT_FILE_MS,
+  DAEMON_TIMEOUT_FILE_WRITE_MS,
+  DAEMON_TIMEOUT_FILE_HEAVY_MS,
+  DAEMON_TIMEOUT_MEDIUM_MS,
+} from "../../../config/daemonTimeouts";
+import {
+  FILE_SMALL_UPLOAD_THRESHOLD_BYTES,
+  FILE_UPLOAD_CHUNK_BYTES,
+} from "../../../config/limits";
 
 export function registerFilesRoutes(router: Router): void {
   router.get(
@@ -270,7 +277,7 @@ export function registerFilesRoutes(router: Router): void {
           nodePort: server.node.port,
           nodeKey: server.node.key,
           body: { id: server.UUID, path: filePath },
-          timeout: 15000,
+          timeout: DAEMON_TIMEOUT_FILE_MS,
         });
 
         if (
@@ -698,7 +705,7 @@ export function registerFilesRoutes(router: Router): void {
               id: server.UUID,
               path: filePath,
             },
-            timeout: 10000,
+            timeout: DAEMON_TIMEOUT_MEDIUM_MS,
           });
 
           logger.success(
@@ -887,7 +894,7 @@ export function registerFilesRoutes(router: Router): void {
         );
         logger.info(`File size: ${req.file.size} bytes`);
 
-        if (req.file.size < 10 * 1024 * 1024) {
+        if (req.file.size < FILE_SMALL_UPLOAD_THRESHOLD_BYTES) {
           const fileContent = fs.readFileSync(req.file.path, "base64");
           const fileContentWithMeta = `data:${req.file.mimetype};base64,${fileContent}`;
 
@@ -906,7 +913,7 @@ export function registerFilesRoutes(router: Router): void {
               fileName,
               fileContent: fileContentWithMeta,
             },
-            timeout: 60000,
+            timeout: DAEMON_TIMEOUT_FILE_HEAVY_MS,
           });
           logger.info(
             `File ${fileName} successfully uploaded to ${relativePath}`,
@@ -932,11 +939,11 @@ export function registerFilesRoutes(router: Router): void {
               path: relativePath,
               fileName,
             },
-            timeout: 10000,
+            timeout: DAEMON_TIMEOUT_MEDIUM_MS,
           });
           logger.info(`Created empty file ${fileName} in ${relativePath}`);
 
-          const CHUNK_SIZE = 5 * 1024 * 1024;
+          const CHUNK_SIZE = FILE_UPLOAD_CHUNK_BYTES;
           const totalChunks = Math.ceil(req.file.size / CHUNK_SIZE);
           const fd = fs.openSync(req.file.path, "r");
 
@@ -963,7 +970,7 @@ export function registerFilesRoutes(router: Router): void {
                   chunkIndex: i,
                   totalChunks,
                 },
-                timeout: 30000,
+                timeout: DAEMON_TIMEOUT_FILE_WRITE_MS,
               });
               logger.info(
                 `Uploaded chunk ${i + 1}/${totalChunks} for file ${fileName}`,

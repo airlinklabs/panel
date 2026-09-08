@@ -14,7 +14,7 @@
 </div>
 
 <!-- Mobile bottom navigation -->
-<nav id="mobile-bottom-nav" class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t" aria-label="Mobile navigation" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
+<nav id="mobile-bottom-nav" class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t" aria-label="<%= t('mobileNavigation') %>" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
   <div class="flex items-stretch h-[52px] px-1.5">
     <%
     const bottomNavItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
@@ -33,19 +33,36 @@
     <% }); %>
 
     <!-- More button (for remaining items) -->
-    <button type="button" id="mobile-more-btn" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1 text-[11px] transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" aria-label="More navigation options" aria-expanded="false" aria-controls="mobile-more-sheet">
+    <button type="button" id="mobile-more-btn" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1 text-[11px] transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" aria-label="<%= t('moreNavigationOptions') %>" aria-expanded="false" aria-controls="mobile-more-sheet">
       <%- icon('more-horizontal', { class: 'w-4 h-4' }) %>
-      <span>More</span>
+      <span><%= t('more') %></span>
     </button>
   </div>
 </nav>
 
 <!-- More sheet (extends up from bottom bar) -->
-<div id="mobile-more-sheet" class="mobile-more-sheet fixed left-0 right-0 bottom-[60px] z-50 lg:hidden opacity-0 pointer-events-none will-change-transform" role="dialog" aria-label="Additional navigation" aria-modal="true" inert style="top: auto; max-height: calc(100vh - 80px);">
+<div id="mobile-more-sheet" class="mobile-more-sheet fixed left-0 right-0 bottom-[60px] z-50 lg:hidden opacity-0 pointer-events-none will-change-transform" role="dialog" aria-label="<%= t('additionalNavigation') %>" aria-modal="true" inert style="top: auto; max-height: calc(100vh - 80px);">
   <style>
+    :root {
+      --sheet-pill-width: 36px;
+      --sheet-pill-height: 4px;
+      --sheet-pill-radius: 2px;
+      --sheet-scroll-gradient-top: 24px;
+      --sheet-scroll-gradient-bottom: 16px;
+      --sheet-scroll-max-height: calc(100vh - 130px);
+      --sheet-item-min-height: var(--sheet-item-min-height);
+      --sheet-item-padding: 0.875rem;
+      --sheet-swipe-distance: 16px;
+      --sheet-view-fade-duration: 140ms;
+      --sheet-swipe-duration: 300ms;
+      --sheet-item-stagger: 25ms;
+      --sheet-server-stagger: 30ms;
+      --sheet-pill-transition-duration: 200ms;
+    }
+
     #mobile-more-sheet {
       translate: none;
-      transform: translateY(16px);
+      transform: translateY(var(--sheet-swipe-distance));
       transition: transform var(--dur-enter, 320ms) cubic-bezier(0.16, 1, 0.3, 1),
                   opacity var(--dur-enter, 320ms) cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -55,18 +72,18 @@
       pointer-events: auto;
     }
     #mobile-more-sheet.closing {
-      transform: translateY(16px);
+      transform: translateY(var(--sheet-swipe-distance));
       opacity: 0;
       transition: transform var(--dur-exit, 180ms) cubic-bezier(0.4, 0, 1, 1),
                   opacity var(--dur-exit, 180ms) cubic-bezier(0.4, 0, 1, 1);
     }
     .sheet-pill {
-      width: 36px;
-      height: 4px;
-      border-radius: 2px;
+      width: var(--sheet-pill-width);
+      height: var(--sheet-pill-height);
+      border-radius: var(--sheet-pill-radius);
       background: var(--theme-text-muted);
       opacity: 0.35;
-      transition: opacity 200ms, transform 200ms;
+      transition: opacity var(--sheet-pill-transition-duration), transform var(--sheet-pill-transition-duration);
       margin: 0 auto;
     }
     .sheet-pill:active,
@@ -80,7 +97,7 @@
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       scrollbar-width: none;
-      max-height: calc(100vh - 130px);
+      max-height: var(--sheet-scroll-max-height);
     }
     .sheet-scroll::-webkit-scrollbar { display: none; }
     .sheet-scroll::before {
@@ -89,7 +106,7 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 24px;
+      height: var(--sheet-scroll-gradient-top);
       display: block;
       background: linear-gradient(to bottom, var(--theme-nav-bg), transparent);
       pointer-events: none;
@@ -101,7 +118,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 16px;
+      height: var(--sheet-scroll-gradient-bottom);
       display: block;
       background: linear-gradient(to top, var(--theme-nav-bg), transparent);
       pointer-events: none;
@@ -115,19 +132,19 @@
       color: var(--theme-text-on-accent, #fff);
     }
     @keyframes sheet-view-fade { from { opacity: 0; } to { opacity: 1; } }
-    #mobile-more-server-view.showing, #mobile-more-main.showing { animation: sheet-view-fade 140ms ease-out both; }
+    #mobile-more-server-view.showing, #mobile-more-main.showing { animation: sheet-view-fade var(--sheet-view-fade-duration) ease-out both; }
     #mobile-more-main .sheet-anim-item { opacity: 0; }
     #mobile-more-main.showing .sheet-anim-item {
-      animation: sheet-swipe-left 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
-      animation-delay: min(calc(var(--i, 0) * 25ms), 300ms);
+      animation: sheet-swipe-left var(--sheet-swipe-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: min(calc(var(--i, 0) * var(--sheet-item-stagger)), var(--sheet-swipe-duration));
     }
     #mobile-more-server-view .server-anim-in { opacity: 0; }
     #mobile-more-server-view.showing .server-anim-in {
-      animation: sheet-swipe-right 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
-      animation-delay: calc(var(--i, 0) * 30ms);
+      animation: sheet-swipe-right var(--sheet-swipe-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: calc(var(--i, 0) * var(--sheet-server-stagger));
     }
-    @keyframes sheet-swipe-left { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes sheet-swipe-right { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes sheet-swipe-left { from { opacity: 0; transform: translateX(calc(-1 * var(--sheet-swipe-distance))); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes sheet-swipe-right { from { opacity: 0; transform: translateX(var(--sheet-swipe-distance)); } to { opacity: 1; transform: translateX(0); } }
     @media (prefers-reduced-motion: reduce) {
       #mobile-more-sheet, #mobile-more-sheet.closing { transition: none; }
       #mobile-more-server-view.showing, #mobile-more-main.showing,
@@ -140,7 +157,7 @@
 
   <div class="rounded-t-2xl border-t shadow-xl flex flex-col" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
     <!-- Pill drag handle -->
-    <div id="mobile-sheet-pill" class="flex items-center justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing touch-none select-none" role="separator" aria-label="Drag to resize">
+    <div id="mobile-sheet-pill" class="flex items-center justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing touch-none select-none" role="separator" aria-label="<%= t('dragToResize') %>">
       <div class="sheet-pill"></div>
     </div>
 
@@ -172,13 +189,13 @@
           mSheetHasServerView = true;
       %>
       <div id="mobile-more-server-view" class="mobile-sheet-view showing">
-        <button type="button" id="mobile-sheet-back-btn" role="menuitem" class="sheet-item sheet-view-toggle flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px;">
+        <button type="button" id="mobile-sheet-back-btn" role="menuitem" class="sheet-item sheet-view-toggle flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: var(--sheet-item-min-height);">
           <%- icon('arrow-left', { class: 'w-4 h-4' }) %>
           <span class="text-[13px]"><%= mT.navBack || 'Back' %></span>
         </button>
         <% mGrouped.forEach(grp => { %>
           <% grp.entries.forEach(entry => { %>
-          <a href="<%= entry.url %>" role="menuitem" class="server-anim-in sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:<%= mAnimIdx++ %>" data-sheet-match-url="<%= entry.url %>">
+          <a href="<%= entry.url %>" role="menuitem" class="server-anim-in sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: var(--sheet-item-min-height); --i:<%= mAnimIdx++ %>" data-sheet-match-url="<%= entry.url %>">
             <%- entry.item.icon %>
             <span class="text-[13px]"><%= entry.item.label %></span>
           </a>
@@ -189,13 +206,13 @@
 
       <div id="mobile-more-main" class="mobile-sheet-view<%= mSheetHasServerView ? ' hidden' : '' %>">
       <% if (mSheetHasServerView) { %>
-      <button type="button" id="mobile-sheet-goback-btn" role="menuitem" class="sheet-item sheet-view-toggle flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px;">
+      <button type="button" id="mobile-sheet-goback-btn" role="menuitem" class="sheet-item sheet-view-toggle flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: var(--sheet-item-min-height);">
         <%- icon('arrow-left', { class: 'w-4 h-4' }) %>
         <span class="text-[13px]"><%= mT.navGoBack || 'Go Back' %></span>
       </button>
       <% } %>
       <% (bottomNavItems || []).slice(4).forEach(function(item, i) { %>
-      <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:<%= i + 1 %>" data-match-prefix="<%= item.matchPrefix || '' %>">
+      <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: var(--sheet-item-min-height); --i:<%= i + 1 %>" data-match-prefix="<%= item.matchPrefix || '' %>">
         <%- item.icon %>
         <span class="text-[13px]"><%= item.label %></span>
       </a>
@@ -203,18 +220,18 @@
 
       <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
         <% if (user != null) { %>
-        <a href="/account" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:20">
+        <a href="/account" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: var(--sheet-item-min-height); --i:20">
           <img loading="lazy" decoding="async" class="w-5 h-5 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="">
-          <span class="text-[13px]">Account</span>
+          <span class="text-[13px]"><%= t('account') %></span>
         </a>
-        <a href="/logout" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:21">
+        <a href="/logout" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: var(--sheet-item-min-height); --i:21">
           <%- icon('log-out', { class: 'w-4 h-4' }) %>
-          <span class="text-[13px]">Logout</span>
+          <span class="text-[13px]"><%= t('logout') %></span>
         </a>
         <% } else { %>
-        <a href="/login" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:20">
+        <a href="/login" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: var(--sheet-item-min-height); --i:20">
           <%- icon('log-in', { class: 'w-4 h-4' }) %>
-          <span class="text-[13px]">Login</span>
+          <span class="text-[13px]"><%= t('login') %></span>
         </a>
         <% } %>
       <% if (isAdminUser) { %>
@@ -224,7 +241,7 @@
       <% if (admGroups.length > 0) { %>
         <% admGroups.forEach(function(group) { %>
         <% group.items.forEach(function(item) { %>
-        <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: 38px; --i:<%= admSheetIdx++ %>">
+        <a href="<%= item.url %>" role="menuitem" class="sheet-anim-item sheet-item mobile-more-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-colors" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent; min-height: var(--sheet-item-min-height); --i:<%= admSheetIdx++ %>">
           <%- item.icon %>
           <span class="text-[13px]"><%= item.label %></span>
         </a>

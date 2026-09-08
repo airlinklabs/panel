@@ -1,4 +1,4 @@
-<%- include('../components/header', { title: 'Dashboard' }) %>
+<%- include('../components/header', { title: t('userDashboardTitle') }) %>
 
 <style>
   ::-webkit-scrollbar { display: none; }
@@ -20,36 +20,36 @@
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard' }
+        { label: t('navDashboard') }
       ] }) %>
       <div class="al-page-body pt-4">
 
         <!-- Header -->
         <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div>
-            <h1 class="al-page-title"><%= req.translations.userDashboardTitle %></h1>
-            <p class="al-page-desc"><%= req.translations.userDashboardText %></p>
+            <h1 class="al-page-title"><%= t('userDashboardTitle') %></h1>
+            <p class="al-page-desc"><%= t('userDashboardText') %></p>
           </div>
           <div class="flex items-center gap-2">
             <% if (canCreateServer) { %>
             <a href="/create-server" class="al-btn-primary">
               <%- icon('plus', { class: 'h-4 w-4' }) %>
-              New server
+              <%= t('newServer') %>
             </a>
             <% } %>
             <button type="button" id="newFolderBtn" class="al-btn-secondary">
               <%- icon('folder-plus', { class: 'h-4 w-4', strokeWidth: 1.5 }) %>
-              New folder
+              <%= t('newFolder') %>
             </button>
             <% if (servers && servers.length > 0) { %>
             <div class="flex items-center gap-1 p-1 rounded-xl" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
               <button type="button" id="gridViewBtn" class="vt-active min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);" aria-pressed="true">
                 <%- icon('grid-2x2', { class: 'h-4 w-4' }) %>
-                Grid
+                <%= t('gridView') %>
               </button>
               <button type="button" id="listViewBtn" class="min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 transition-colors" style="color:var(--theme-text-muted);" aria-pressed="false">
                 <%- icon('list', { class: 'h-4 w-4' }) %>
-                List
+                <%= t('listView') %>
               </button>
             </div>
             <% } %>
@@ -61,14 +61,14 @@
         <%- include('../components/ui/alert', { type: 'warning', message: req.translations.awaitingInstallation || "Server is installing", detail: req.translations.awaitingInstallationDesc || "This server is not ready yet. It will be available once installation completes." }) %>
         <% } %>
         <% if (req.query.err === 'SERVER_LIMIT_REACHED') { %>
-        <%- include('../components/ui/alert', { type: 'warning', message: "Server limit reached", detail: 'You have reached the maximum number of servers allowed. Contact your admin to increase your limit.' }) %>
+        <%- include('../components/ui/alert', { type: 'warning', message: t('serverLimitReached'), detail: t('serverLimitReachedDesc') }) %>
         <% } %>
         <% if (typeof daemonOffline !== 'undefined' && daemonOffline) { %>
         <div class="al-alert-danger mb-5">
           <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
           <div class="flex-1">
-            <p class="font-medium"><%= req.translations.connectionError || 'Connection Error' %></p>
-            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
+            <p class="font-medium"><%= t('connectionError') %></p>
+            <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= t('connectionErrorDesc') %></p>
             <% if (typeof offlineNodes !== 'undefined' && offlineNodes.length > 0) { %>
             <ul class="text-xs opacity-80 mt-2 space-y-1">
               <% offlineNodes.forEach(node => { %>
@@ -80,19 +80,19 @@
               </li>
               <% }); %>
             </ul>
-            <p class="text-xs mt-2" style="color:var(--theme-text-muted);">The daemon on these nodes isn't responding. Servers on them stay offline until it comes back.</p>
+            <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('daemonNotResponding') %></p>
             <% } %>
           </div>
-          <button type="button" id="retryDaemonCheck" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %><%= req.translations.retry || 'Retry' %></button>
+          <button type="button" id="retryDaemonCheck" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);"><%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('retry') %></button>
         </div>
         <% } %>
 
         <% if (servers.length === 0 && (!folders || folders.length === 0)) { %>
-        <% var createServerAction = '<a href="' + (user.isAdmin ? '/admin/servers/create' : '/create-server') + '" class="al-btn-primary"><span class="inline-flex items-center gap-1.5">' + icon('plus', { class: 'w-4 h-4' }) + ' Create server</span></a>'; %>
+        <% var createServerAction = '<a href="' + (user.isAdmin ? '/admin/servers/create' : '/create-server') + '" class="al-btn-primary"><span class="inline-flex items-center gap-1.5">' + icon('plus', { class: 'w-4 h-4' }) + ' ' + t('createServer') + '</span></a>'; %>
         <%- include('../components/ui/empty-state', {
           iconName: 'server',
-          title: req.translations.noServersYet || 'No servers yet',
-          description: user.isAdmin ? 'Create your first server to get started.' : (canCreateServer ? 'Create your first server or ask an admin to assign one.' : 'An admin will assign one to you.'),
+          title: t('noServersYet'),
+          description: user.isAdmin ? t('createFirstServer') : (canCreateServer ? t('createFirstServerOrAskAdmin') : t('adminWillAssign')),
           action: user.isAdmin || canCreateServer ? createServerAction : ''
         }) %>
         <% } else { %>
@@ -100,7 +100,7 @@
         <!-- ── Folders ──────────────────────────────────────── -->
         <% if (folders && folders.length > 0) { %>
         <div class="mb-6">
-          <p class="al-section-label">Folders</p>
+          <p class="al-section-label"><%= t('folders') %></p>
           <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5" id="folderGrid">
             <% let folderIdx = 0; folders.forEach(folder => { %>
             <div class="al-card flex items-center gap-3 cursor-pointer relative transition-[background,border-color,box-shadow] select-none hover:border-[var(--theme-border-accent)] group folder-card"
@@ -114,17 +114,17 @@
               <%- icon('folder', { class: 'h-5 w-5 shrink-0', style: 'color:var(--theme-warning);', fill: 'currentColor' }) %>
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= folder.name %></p>
-                <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= folder.members.length %> server<%= folder.members.length !== 1 ? 's' : '' %></p>
+                <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= tn('servers', folder.members.length) %></p>
               </div>
             </div>
             <% }); %>
           </div>
-          <p class="text-xs mt-2" style="color:var(--theme-text-muted);">Drag a server card onto a folder to add it</p>
+          <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('dragServerToFolder') %></p>
         </div>
         <% } %>
 
         <!-- ── Servers header ───────────────────────────────── -->
-        <p class="al-section-label">Servers</p>
+        <p class="al-section-label"><%= t('servers') %></p>
 
         <!-- Grid view -->
         <div id="gridView" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mb-5">
@@ -149,13 +149,13 @@
                 <div class="min-w-0 flex-1 mr-2">
                   <h3 class="text-[13px] font-medium truncate" style="color:var(--theme-text-strong);"><%= server.name %>
                     <% if (server.shared) { %>
-                    <span class="al-badge-neutral align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> Shared</span>
+                    <span class="al-badge-neutral align-middle ml-1"><%- icon('users', { class: 'w-2.5 h-2.5' }) %> <%= t('shared') %></span>
                     <% } %>
                   </h3>
                   <% if (server.description) { %>
                     <p class="text-xs mt-0.5 truncate" style="color:var(--theme-text-muted);"><%= server.description %></p>
                   <% } else { %>
-                    <p class="text-xs mt-0.5 truncate italic" style="color:var(--theme-text-placeholder);"><%= req.translations.noDescription || 'No description' %></p>
+                    <p class="text-xs mt-0.5 truncate italic" style="color:var(--theme-text-placeholder);"><%= t('noDescription') %></p>
                   <% } %>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
@@ -164,15 +164,15 @@
               </div>
               <div class="flex gap-2 mb-2">
                 <div class="flex-1 rounded-lg px-2 py-1.5" style="background:var(--theme-bg-secondary);">
-                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);">RAM</p>
+                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);"><%= t('ram') %></p>
                   <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= Math.round(server.ramUsage) %>%</p>
                 </div>
                 <div class="flex-1 rounded-lg px-2 py-1.5" style="background:var(--theme-bg-secondary);">
-                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);">CPU</p>
+                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);"><%= t('cpu') %></p>
                   <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= Math.round(server.cpuUsage) %>%</p>
                 </div>
                 <div class="flex-1 rounded-lg px-2 py-1.5" style="background:var(--theme-bg-secondary);">
-                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);">Storage</p>
+                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);"><%= t('disk') %></p>
                   <p class="text-[13px] font-medium" style="color:var(--theme-text);"><%= server.Storage === 0 ? 'Unlimited' : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
                 </div>
               </div>
@@ -246,11 +246,11 @@
         <% if (totalPages > 1) { %>
         <div class="flex items-center justify-center gap-2 mt-2">
           <% if (currentPage > 1) { %>
-          <a href="/?page=<%= currentPage - 1 %>" class="al-btn-secondary"><%= req.translations.prev || 'Previous' %></a>
+          <a href="/?page=<%= currentPage - 1 %>" class="al-btn-secondary"><%= t('prev') %></a>
           <% } %>
           <span class="text-[13px]" style="color:var(--theme-text-muted);"><%= currentPage %> / <%= totalPages %></span>
           <% if (currentPage < totalPages) { %>
-          <a href="/?page=<%= currentPage + 1 %>" class="al-btn-secondary"><%= req.translations.next || 'Next' %></a>
+          <a href="/?page=<%= currentPage + 1 %>" class="al-btn-secondary"><%= t('next') %></a>
           <% } %>
         </div>
         <% } %>
@@ -343,8 +343,8 @@
   <div id="onboardingPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl p-6" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="flex items-start justify-between mb-5">
       <div>
-        <h2 id="onboardingTitle" class="text-base font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.onboardingWelcome || 'Welcome to the panel!' %></h2>
-        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= req.translations.onboardingIntro || 'A few quick tips to get you started.' %></p>
+        <h2 id="onboardingTitle" class="text-base font-semibold" style="color:var(--theme-text-strong)"><%= t('onboardingWelcome') %></h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('onboardingIntro') %></p>
       </div>
       <button type="button" id="onboardingDismiss" class="al-btn-ghost p-2 rounded-lg flex items-center justify-center shrink-0" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
@@ -359,21 +359,21 @@
     <div class="flex items-center justify-between gap-3">
       <button type="button" id="onboardingPrev" class="al-btn-ghost px-3 py-2 text-xs font-medium hidden">
         <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %>
-        <%= req.translations.back || 'Back' %>
+        <%= t('back') %>
       </button>
       <span class="flex-1"></span>
-      <button type="button" id="onboardingRemindLater" class="al-btn-ghost px-3 py-2 text-xs font-medium hidden" title="<%= req.translations.remindMeLater || 'Remind me later' %>">
-        <%= req.translations.remindMeLater || 'Remind me later' %>
+      <button type="button" id="onboardingRemindLater" class="al-btn-ghost px-3 py-2 text-xs font-medium hidden" title="<%= t('remindMeLater') %>">
+        <%= t('remindMeLater') %>
       </button>
-      <button type="button" id="onboardingDontShow" class="al-btn-ghost px-3 py-2 text-xs font-medium hidden" style="color:var(--theme-danger)" title="<%= req.translations.dontShowAgain || 'Don\'t show again' %>">
-        <%= req.translations.dontShowAgain || "Don't show again" %>
+      <button type="button" id="onboardingDontShow" class="al-btn-ghost px-3 py-2 text-xs font-medium hidden" style="color:var(--theme-danger)" title="<%= t('dontShowAgain') %>">
+        <%= t('dontShowAgain') %>
       </button>
       <button type="button" id="onboardingNext" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5">
-        <%= req.translations.next || 'Next' %>
+        <%= t('next') %>
         <%- icon('arrow-right', { class: 'size-4', strokeWidth: 1.5 }) %>
       </button>
       <a href="#" id="onboardingFinish" class="al-btn-primary hidden px-4 py-2 text-sm font-medium">
-        <%= req.translations.getStarted || 'Get started' %>
+        <%= t('getStarted') %>
       </a>
     </div>
   </div>

@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Backups' }) %>
+<%- include('../../components/header', { title: t('backups') }) %>
 
 <main class="h-screen m-auto" style="color:var(--theme-text)">
   <div class="flex h-full">
@@ -16,9 +16,9 @@
       <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-6">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
-            <%- include('../../components/serverHeader') %>
+            <%- include('../../components/server-header') %>
             <!-- Server meta: image · node · id -->
-            <%- include('../../components/serverMeta') %>
+            <%- include('../../components/server-meta') %>
           </div>
           <div class="flex gap-2 shrink-0">
             <button id="createBackup" onclick="openCreateBackupModal()" type="button"
@@ -33,7 +33,7 @@
       <%- include('../../components/installHeader') %>
 
       <!-- Server Template -->
-      <%- include('../../components/serverTemplate') %>
+      <%- include('../../components/server-template') %>
 
       <div id="server-page-body">
 
@@ -43,8 +43,8 @@
           <div class="al-card rounded-lg shadow overflow-hidden">
             <div class="al-card-header">
               <div>
-                <h2 class="text-[13px] font-semibold" style="color:var(--theme-text-strong)">Server Backups</h2>
-                <p class="text-[11px]" style="color:var(--theme-text-muted)">Manage your server backups.</p>
+                <h2 class="text-[13px] font-semibold" style="color:var(--theme-text-strong)"><%= t('serverBackups') %></h2>
+                <p class="text-[11px]" style="color:var(--theme-text-muted)"><%= t('manageBackups') %></p>
               </div>
             </div>
             <div class="overflow-x-auto">
@@ -58,10 +58,10 @@
                   </colgroup>
                   <thead class="al-table-head">
                     <tr>
-                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide">Name</th>
-                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide">Size</th>
-                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide">Created</th>
-                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide text-right">Actions</th>
+                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide"><%= t('name') %></th>
+                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide"><%= t('size') %></th>
+                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide"><%= t('createdAt') %></th>
+                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide text-right"><%= t('actions') %></th>
                     </tr>
                   </thead>
                   <tbody id="backups-table-body" class="divide-y" style="border-color:var(--theme-border)">
@@ -98,21 +98,21 @@
                               style="color:var(--theme-accent);background:var(--theme-accent-subtle)"
                             >
                               <%- icon('download', { class: 'w-3 h-3 mr-1' }) %>
-                              Download
+                              <%= t('download') %>
                             </button>
                             <button type="button" data-action="restore"
                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                               style="color:var(--theme-success);background:var(--theme-success-bg)"
                             >
                               <%- icon('refresh-cw', { class: 'w-3 h-3 mr-1' }) %>
-                              Restore
+                              <%= t('restore') %>
                             </button>
                             <button type="button" data-action="toggle-lock"
                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                               style="<%= backup.locked ? 'color:var(--theme-warning);background:var(--theme-warning-bg, var(--theme-bg-secondary))' : 'color:var(--theme-text-muted);background:var(--theme-bg-secondary)' %>"
                             >
                               <%- icon('lock', { class: 'w-3 h-3 mr-1' }) %>
-                              <%= backup.locked ? 'Unlock' : 'Lock' %>
+                              <%= backup.locked ? t('unlock') : t('lock') %>
                             </button>
                             <button type="button" data-action="delete"
                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
@@ -120,7 +120,7 @@
                               <%= backup.locked ? 'disabled title="Locked backups cannot be deleted until unlocked"' : '' %>
                             >
                               <%- icon('trash-2', { class: 'w-3 h-3 mr-1' }) %>
-                              Delete
+                              <%= t('delete') %>
                             </button>
                           </div>
                         </td>
@@ -131,9 +131,9 @@
               <% } else { %>
                 <div class="p-8 text-center">
                   <%- icon('database', { class: 'mx-auto h-12 w-12', style: 'color:var(--theme-text-muted)' }) %>
-                  <h3 class="mt-2 text-sm font-medium" style="color:var(--theme-text-strong)">No backups</h3>
-                  <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Backups protect your server's world and files. Create one to get started.</p>
-                  <button type="button" onclick="openCreateBackupModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Create backup</button>
+                  <h3 class="mt-2 text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('noBackups') %></h3>
+                  <p class="mt-1 text-sm" style="color:var(--theme-text-muted)"><%= t('noBackupsDesc') %></p>
+                  <button type="button" onclick="openCreateBackupModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('createBackup') %></button>
                 </div>
               <% } %>
             </div>
@@ -146,36 +146,36 @@
       </div>
 </main>
 
-<%- include('../../components/loadingPopup') %>
+<%- include('../../components/loading-popup') %>
 
 <!-- Create Backup Modal -->
 <div id="createBackupModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
   <div id="createBackupModalPanel" class="al-sheet-panel border rounded-2xl shadow-lg w-full max-w-sm mx-4 will-change-transform max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
     <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border)">
       <div>
-        <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Create Backup</p>
-        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Choose a name for this backup.</p>
+        <p class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('createBackup') %></p>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('chooseBackupName') %></p>
       </div>
       <button type="button" onclick="closeCreateBackupModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-      <label for="backupName" class="al-label"><%= req.translations.enterBackupName || 'Enter backup name' %></label>
+      <label for="backupName" class="al-label"><%= t('enterBackupName') %></label>
       <input type="text"
         id="backupName"
         class="al-input"
-        placeholder="<%= req.translations.enterBackupName || 'Enter backup name' %>"
+        placeholder="<%= t('enterBackupName') %>"
         onkeydown="handleBackupNameKeyPress(event)">
     </div>
     <div class="flex gap-2 px-6 py-4 border-t justify-end">
       <button type="button" onclick="closeCreateBackupModal()" class="al-btn-secondary inline-flex items-center gap-1.5">
         <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-        Cancel
+        <%= t('cancel') %>
       </button>
       <button type="button" onclick="confirmCreateBackup()" class="al-btn-primary inline-flex items-center gap-1.5">
         <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-        Create
+        <%= t('create') %>
       </button>
     </div>
   </div>

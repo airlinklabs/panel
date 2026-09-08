@@ -1,0 +1,20 @@
+/**
+ * Daemon request timeouts — keyed by operation type.
+ */
+
+export const DAEMON_TIMEOUT_SHORT_MS = 5_000;
+export const DAEMON_TIMEOUT_MEDIUM_MS = 10_000;
+export const DAEMON_TIMEOUT_FILE_MS = 15_000;
+export const DAEMON_TIMEOUT_FILE_WRITE_MS = 30_000;
+export const DAEMON_TIMEOUT_FILE_HEAVY_MS = 60_000;
+export const DAEMON_TIMEOUT_REINSTALL_MS = 600_000;
+export const DAEMON_TIMEOUT_BACKUP_MS = 300_000;
+export const DAEMON_TIMEOUT_BACKUP_RESTORE_MS = 120_000;
+export const DAEMON_TIMEOUT_VT_LOOKUP_MS = 15_000;
+export const DAEMON_TIMEOUT_VT_UPLOAD_MS = 60_000;
+export const DAEMON_TIMEOUT_RADAR_ZIP_MS = 120_000;
+export const DAEMON_TIMEOUT_VT_WAIT_MS = 90_000;
+export const DASHBOARD_STATUS_TIMEOUT_MS = 2_000;
+export const CONSOLE_TIMEOUT_MS = 10_000;
+export const SFTP_CREDENTIAL_TIMEOUT_MS = 10_000;
+export const SFTP_VALIDATE_TIMEOUT_MS = 15_000;

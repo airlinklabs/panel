@@ -25,12 +25,17 @@ import {
   paginateQuery,
   parsePage,
   parsePerPage,
-} from './helpers';
-import { createBackupBody } from './dto';
+} from "./helpers";
+import { createBackupBody } from "./dto";
 import {
   daemonRequest,
   DaemonNodeNotFoundError,
-} from '../../../services/daemonService';
+} from "../../../services/daemonService";
+import {
+  DAEMON_TIMEOUT_BACKUP_MS,
+  DAEMON_TIMEOUT_BACKUP_RESTORE_MS,
+  DAEMON_TIMEOUT_MEDIUM_MS,
+} from "../../../config/daemonTimeouts";
 
 const router = Router();
 
@@ -42,7 +47,7 @@ router.get("/", async (req, res) => {
   if (!resolved) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'backups')) {
+  if (!requireSubUserPermission(res, resolved, "backups")) {
     return;
   }
 
@@ -55,7 +60,7 @@ router.get("/", async (req, res) => {
       prisma.backup.findMany({
         where,
         ...args,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
       }),
     () => prisma.backup.count({ where }),
     page,
@@ -76,7 +81,7 @@ router.post("/", parseBody(createBackupBody), async (req, res) => {
   if (checkSuspended(res, resolved)) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'backups.create')) {
+  if (!requireSubUserPermission(res, resolved, "backups.create")) {
     return;
   }
 
@@ -90,14 +95,14 @@ router.post("/", parseBody(createBackupBody), async (req, res) => {
     resolved.server.backupLimit > 0 &&
     backupCount >= resolved.server.backupLimit
   ) {
-    return jsonError(res, 'FORBIDDEN', 'Backup limit reached', 403);
+    return jsonError(res, "FORBIDDEN", "Backup limit reached", 403);
   }
 
   try {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/backup`,
-      { method: 'POST', body: { name }, timeout: 60000 },
+      { method: "POST", body: { name }, timeout: DAEMON_TIMEOUT_BACKUP_MS },
     );
 
     if (!response.ok) {
@@ -112,18 +117,18 @@ router.post("/", parseBody(createBackupBody), async (req, res) => {
 
     logActivity(
       getAuthenticatedUserId(req),
-      'backup.created',
+      "backup.created",
       resolved.server.UUID,
       { name },
       req.ip,
     );
 
-    jsonOk(res, { name, status: 'creating' });
+    jsonOk(res, { name, status: "creating" });
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
-      return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
+      return jsonError(res, "NOT_FOUND", "Node not found", 404);
     }
-    jsonError(res, 'DAEMON_UNREACHABLE', 'Could not reach daemon', 502);
+    jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
   }
 });
 
@@ -135,7 +140,7 @@ router.delete("/:backupId", async (req, res) => {
   if (!resolved) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'backups.delete')) {
+  if (!requireSubUserPermission(res, resolved, "backups.delete")) {
     return;
   }
 
@@ -154,7 +159,7 @@ router.delete("/:backupId", async (req, res) => {
     await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/backup/${backup.UUID}`,
-      { method: 'DELETE', timeout: 30000 },
+      { method: "DELETE", timeout: DAEMON_TIMEOUT_BACKUP_MS },
     );
   } catch {
     // Best effort
@@ -164,7 +169,7 @@ router.delete("/:backupId", async (req, res) => {
 
   logActivity(
     getAuthenticatedUserId(req),
-    'backup.deleted',
+    "backup.deleted",
     resolved.server.UUID,
     { backupName: backup.name },
     req.ip,
@@ -189,14 +194,14 @@ router.post("/:backupId/restore", async (req, res) => {
     where: { UUID: req.params.backupId },
   });
   if (!backup || backup.serverId !== resolved.server.UUID) {
-    return jsonError(res, 'NOT_FOUND', 'Backup not found', 404);
+    return jsonError(res, "NOT_FOUND", "Backup not found", 404);
   }
 
   try {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/backup/${backup.UUID}/restore`,
-      { method: 'POST', timeout: 120000 },
+      { method: "POST", timeout: DAEMON_TIMEOUT_BACKUP_RESTORE_MS },
     );
 
     if (!response.ok) {
@@ -211,18 +216,18 @@ router.post("/:backupId/restore", async (req, res) => {
 
     logActivity(
       getAuthenticatedUserId(req),
-      'backup.restored',
+      "backup.restored",
       resolved.server.UUID,
       { backupName: backup.name },
       req.ip,
     );
 
-    jsonOk(res, { backupId: backup.UUID, status: 'restoring' });
+    jsonOk(res, { backupId: backup.UUID, status: "restoring" });
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
-      return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
+      return jsonError(res, "NOT_FOUND", "Node not found", 404);
     }
-    jsonError(res, 'DAEMON_UNREACHABLE', 'Could not reach daemon', 502);
+    jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
   }
 });
 
@@ -258,7 +263,7 @@ router.get("/:backupId/download", async (req, res) => {
   if (!resolved) {
     return;
   }
-  if (!requireSubUserPermission(res, resolved, 'backups')) {
+  if (!requireSubUserPermission(res, resolved, "backups")) {
     return;
   }
 
@@ -266,14 +271,14 @@ router.get("/:backupId/download", async (req, res) => {
     where: { UUID: req.params.backupId },
   });
   if (!backup || backup.serverId !== resolved.server.UUID) {
-    return jsonError(res, 'NOT_FOUND', 'Backup not found', 404);
+    return jsonError(res, "NOT_FOUND", "Backup not found", 404);
   }
 
   try {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/backup/${backup.UUID}/download`,
-      { timeout: 120000 },
+      { timeout: DAEMON_TIMEOUT_BACKUP_RESTORE_MS },
     );
 
     if (!response.ok) {
@@ -304,9 +309,9 @@ router.get("/:backupId/download", async (req, res) => {
     res.end();
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
-      return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
+      return jsonError(res, "NOT_FOUND", "Node not found", 404);
     }
-    jsonError(res, 'DAEMON_UNREACHABLE', 'Could not reach daemon', 502);
+    jsonError(res, "DAEMON_UNREACHABLE", "Could not reach daemon", 502);
   }
 });
 
@@ -323,7 +328,7 @@ router.get("/progress", async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/backup/progress`,
-      { timeout: 10000 },
+      { timeout: DAEMON_TIMEOUT_MEDIUM_MS },
     );
 
     if (!response.ok) {
@@ -334,9 +339,9 @@ router.get("/progress", async (req, res) => {
     jsonOk(res, data);
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
-      return jsonOk(res, { progress: 0, status: 'unknown' });
+      return jsonOk(res, { progress: 0, status: "unknown" });
     }
-    jsonOk(res, { progress: 0, status: 'unreachable' });
+    jsonOk(res, { progress: 0, status: "unreachable" });
   }
 });
 
@@ -353,7 +358,7 @@ router.get("/restore/progress", async (req, res) => {
     const response = await daemonRequest(
       resolved.server.UUID,
       `/servers/${resolved.server.UUID}/backup/restore/progress`,
-      { timeout: 10000 },
+      { timeout: DAEMON_TIMEOUT_MEDIUM_MS },
     );
 
     if (!response.ok) {
@@ -364,9 +369,9 @@ router.get("/restore/progress", async (req, res) => {
     jsonOk(res, data);
   } catch (err) {
     if (err instanceof DaemonNodeNotFoundError) {
-      return jsonOk(res, { progress: 0, status: 'unknown' });
+      return jsonOk(res, { progress: 0, status: "unknown" });
     }
-    jsonOk(res, { progress: 0, status: 'unreachable' });
+    jsonOk(res, { progress: 0, status: "unreachable" });
   }
 });
 

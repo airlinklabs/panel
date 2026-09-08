@@ -1,41 +1,42 @@
-import { getSettings } from '../../../handlers/settingsCache';
-import type { Request, Response } from 'express';
+import { getSettings } from "../../../handlers/settingsCache";
+import type { Request, Response } from "express";
 import type {
   Prisma,
   Users,
   settings as PanelSettings,
-} from '../../../generated/prisma/client';
-import prisma from '../../../db';
-import { getParamAsString } from '../../../utils/typeHelpers';
-import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+} from "../../../generated/prisma/client";
+import prisma from "../../../db";
+import { getParamAsString } from "../../../utils/typeHelpers";
+import { daemonRequest } from "../../../handlers/utils/core/daemonRequest";
 import {
   getPrimaryExternalPort,
   portsToDaemonString,
-} from '../../../handlers/utils/server/ports';
-import { assertNodeCapacity } from '../../../handlers/utils/server/resourceCheck';
-import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
+} from "../../../handlers/utils/server/ports";
+import { assertNodeCapacity } from "../../../handlers/utils/server/resourceCheck";
+import { emitRealtime, serverEvent } from "../../../handlers/realtime/events";
+import { INLINE_DELAY_MS } from "../../../config/timeouts";
 
 declare global {
   var serverStoppingStates: Record<string, boolean>;
 }
 
-const DAEMON_AUTH_USERNAME = 'Airlink';
+const DAEMON_AUTH_USERNAME = "Airlink";
 
 /** A daemon start failure with an explicit retry contract for the runtime queue. */
 export class ServerStartFailure extends Error {
   readonly retryable: boolean;
-  readonly code: 'DAEMON_PORT_CONFLICT' | 'DAEMON_START_FAILED';
+  readonly code: "DAEMON_PORT_CONFLICT" | "DAEMON_START_FAILED";
 
   constructor(
     message: string,
     options: {
-      code: 'DAEMON_PORT_CONFLICT' | 'DAEMON_START_FAILED';
+      code: "DAEMON_PORT_CONFLICT" | "DAEMON_START_FAILED";
       retryable: boolean;
       cause: unknown;
     },
   ) {
     super(message, { cause: options.cause });
-    this.name = 'ServerStartFailure';
+    this.name = "ServerStartFailure";
     this.code = options.code;
     this.retryable = options.retryable;
   }
@@ -56,15 +57,15 @@ export function classifyDaemonStartFailure(
     return new ServerStartFailure(
       `The server cannot start because port ${portConflict[1]} is already in use on this node. Contact an administrator to assign another port.`,
       {
-        code: 'DAEMON_PORT_CONFLICT',
+        code: "DAEMON_PORT_CONFLICT",
         retryable: false,
         cause: `daemon: ${rawDetail}`,
       },
     );
   }
 
-  return new ServerStartFailure('The daemon could not start the server.', {
-    code: 'DAEMON_START_FAILED',
+  return new ServerStartFailure("The daemon could not start the server.", {
+    code: "DAEMON_START_FAILED",
     retryable: true,
     cause: `daemon: ${rawDetail}`,
   });
@@ -77,7 +78,7 @@ export interface ErrorMessage {
 export interface ServerVariable {
   name: string;
   env: string;
-  type: 'boolean' | 'text' | 'number';
+  type: "boolean" | "text" | "number";
   default: string | number | boolean;
   value: string | number | boolean;
   rules?: string;
@@ -98,34 +99,34 @@ export type ServerPageServer = Prisma.ServerGetPayload<{
 
 export type ServerPageContext =
   | {
-      status: 'ready';
+      status: "ready";
       settings: PanelSettings | null;
       user: Users;
       server: ServerPageServer;
     }
   | {
-      status: 'missing-user';
+      status: "missing-user";
       settings: PanelSettings | null;
       user: null;
     }
   | {
-      status: 'missing-server';
+      status: "missing-server";
       settings: PanelSettings | null;
       user: Users;
     };
 
 export type AuthenticatedServerContext =
   | {
-      status: 'ready';
+      status: "ready";
       user: Users;
       server: ServerPageServer;
     }
   | {
-      status: 'missing-user';
+      status: "missing-user";
       user: null;
     }
   | {
-      status: 'missing-server';
+      status: "missing-server";
       user: Users;
     };
 
@@ -133,7 +134,7 @@ export function getAuthenticatedUserId(req: Request): number {
   const userId = req.session?.user?.id;
   if (!userId) {
     throw new Error(
-      'Authenticated server request is missing a session user id.',
+      "Authenticated server request is missing a session user id.",
     );
   }
   return userId;
@@ -151,7 +152,7 @@ export async function loadServerPageContext(
   ]);
 
   if (!user) {
-    return { status: 'missing-user', settings, user: null };
+    return { status: "missing-user", settings, user: null };
   }
 
   const server = await prisma.server.findUnique({
@@ -160,10 +161,10 @@ export async function loadServerPageContext(
   });
 
   if (!server) {
-    return { status: 'missing-server', settings, user };
+    return { status: "missing-server", settings, user };
   }
 
-  return { status: 'ready', settings, user, server };
+  return { status: "ready", settings, user, server };
 }
 
 export async function loadAuthenticatedServerContext(
@@ -174,7 +175,7 @@ export async function loadAuthenticatedServerContext(
 
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) {
-    return { status: 'missing-user', user: null };
+    return { status: "missing-user", user: null };
   }
 
   const server = await prisma.server.findUnique({
@@ -183,30 +184,30 @@ export async function loadAuthenticatedServerContext(
   });
 
   if (!server) {
-    return { status: 'missing-server', user };
+    return { status: "missing-server", user };
   }
 
-  return { status: 'ready', user, server };
+  return { status: "ready", user, server };
 }
 
 export function sendMissingServerContext(
   res: Response,
   context: AuthenticatedServerContext,
-): context is Exclude<AuthenticatedServerContext, { status: 'ready' }> {
-  if (context.status === 'missing-user') {
-    res.status(404).json({ error: 'User not found' });
+): context is Exclude<AuthenticatedServerContext, { status: "ready" }> {
+  if (context.status === "missing-user") {
+    res.status(404).json({ error: "User not found" });
     return true;
   }
 
-  if (context.status === 'missing-server') {
-    res.status(404).json({ error: 'Server not found' });
+  if (context.status === "missing-server") {
+    res.status(404).json({ error: "Server not found" });
     return true;
   }
 
   return false;
 }
 
-export function getServerDaemonAuth(server: Pick<ServerPageServer, 'node'>): {
+export function getServerDaemonAuth(server: Pick<ServerPageServer, "node">): {
   username: string;
   password: string;
 } {
@@ -217,7 +218,7 @@ export function getServerDaemonAuth(server: Pick<ServerPageServer, 'node'>): {
 }
 
 export function getServerStatusInput(
-  server: Pick<ServerPageServer, 'UUID' | 'node'>,
+  server: Pick<ServerPageServer, "UUID" | "node">,
 ) {
   return {
     nodeAddress: server.node.address,
@@ -235,7 +236,7 @@ export function getImageFeatures(
   }
   try {
     const info =
-      typeof image.info === 'string' ? JSON.parse(image.info) : image.info;
+      typeof image.info === "string" ? JSON.parse(image.info) : image.info;
     return Array.isArray(info?.features) ? info.features : [];
   } catch {
     return [];
@@ -261,7 +262,7 @@ export function buildEnvVariables(
       if (!key) {
         continue;
       }
-      const raw = v.value !== undefined ? v.value : (v.default_value ?? '');
+      const raw = v.value !== undefined ? v.value : (v.default_value ?? "");
       env[key] = String(raw);
     }
     return env;
@@ -276,31 +277,31 @@ export function getPrimaryPort(portsJson: string): number | undefined {
 
 export type ServerRuntimeConfig = Pick<
   ServerPageServer,
-  | 'Cpu'
-  | 'Memory'
-  | 'Swap'
-  | 'Ports'
-  | 'StartCommand'
-  | 'Storage'
-  | 'Variables'
-  | 'dockerImage'
-  | 'node'
+  | "Cpu"
+  | "Memory"
+  | "Swap"
+  | "Ports"
+  | "StartCommand"
+  | "Storage"
+  | "Variables"
+  | "dockerImage"
+  | "node"
 >;
 
 export function buildServerRuntimeEnv(
-  server: Pick<ServerRuntimeConfig, 'Cpu' | 'Memory' | 'Variables' | 'Ports'>,
+  server: Pick<ServerRuntimeConfig, "Cpu" | "Memory" | "Variables" | "Ports">,
   variables: string | null | ServerVariable[] = server.Variables,
 ): Record<string, string> {
   const ports = getPrimaryPort(server.Ports);
   const envVariables = buildEnvVariables(variables);
-  envVariables['SERVER_PORT'] = String(ports ?? '');
-  envVariables['SERVER_MEMORY'] = String(server.Memory);
-  envVariables['SERVER_CPU'] = String(server.Cpu);
+  envVariables["SERVER_PORT"] = String(ports ?? "");
+  envVariables["SERVER_MEMORY"] = String(server.Memory);
+  envVariables["SERVER_CPU"] = String(server.Cpu);
   return envVariables;
 }
 
 export function getConfiguredDockerImage(
-  server: Pick<ServerRuntimeConfig, 'dockerImage'>,
+  server: Pick<ServerRuntimeConfig, "dockerImage">,
 ): string | null {
   if (!server.dockerImage) {
     return null;
@@ -309,21 +310,21 @@ export function getConfiguredDockerImage(
 }
 
 export async function stopServerContainer(
-  server: Pick<ServerPageServer, 'node' | 'image'>,
+  server: Pick<ServerPageServer, "node" | "image">,
   serverId: string,
-  stopCommand = server.image?.stop || 'stop',
+  stopCommand = server.image?.stop || "stop",
   options: { releaseResources?: boolean } = {},
 ): Promise<void> {
   const releaseResources = options.releaseResources !== false;
   emitRealtime(
-    serverEvent('server.power.stop.started', serverId, {
+    serverEvent("server.power.stop.started", serverId, {
       state: { stopCommand },
     }),
   );
   try {
     await daemonRequest({
-      method: 'POST',
-      path: '/container/stop',
+      method: "POST",
+      path: "/container/stop",
       nodeAddress: server.node.address,
       nodePort: server.node.port,
       nodeKey: server.node.key,
@@ -334,10 +335,10 @@ export async function stopServerContainer(
     });
   } catch (error) {
     emitRealtime(
-      serverEvent('server.power.stop.failed', serverId, {
+      serverEvent("server.power.stop.failed", serverId, {
         error: {
-          message: 'The daemon could not stop the server.',
-          code: 'DAEMON_UNREACHABLE',
+          message: "The daemon could not stop the server.",
+          code: "DAEMON_UNREACHABLE",
         },
       }),
     );
@@ -354,14 +355,14 @@ export async function stopServerContainer(
       });
   }
   emitRealtime(
-    serverEvent('server.power.stopped', serverId, {
+    serverEvent("server.power.stopped", serverId, {
       state: { running: false },
     }),
   );
 }
 
 export async function startServerContainer(
-  server: ServerRuntimeConfig & Pick<ServerPageServer, 'image'>,
+  server: ServerRuntimeConfig & Pick<ServerPageServer, "image">,
   serverId: string,
   options: {
     dockerImage?: string;
@@ -372,7 +373,7 @@ export async function startServerContainer(
 ): Promise<void> {
   const dockerImage = options.dockerImage ?? getConfiguredDockerImage(server);
   if (!dockerImage) {
-    throw new Error('Docker image not found.');
+    throw new Error("Docker image not found.");
   }
 
   // Runtime capacity gate: only running servers consume node capacity, so a
@@ -399,11 +400,11 @@ export async function startServerContainer(
   }
 
   let startResponse;
-  emitRealtime(serverEvent('server.power.start.started', serverId));
+  emitRealtime(serverEvent("server.power.start.started", serverId));
   try {
     startResponse = await daemonRequest({
-      method: 'POST',
-      path: '/container/start',
+      method: "POST",
+      path: "/container/start",
       nodeAddress: server.node.address,
       nodePort: server.node.port,
       nodeKey: server.node.key,
@@ -426,25 +427,25 @@ export async function startServerContainer(
     });
   } catch (error) {
     emitRealtime(
-      serverEvent('server.power.start.failed', serverId, {
+      serverEvent("server.power.start.failed", serverId, {
         error: {
-          message: 'The daemon could not start the server.',
-          code: 'DAEMON_UNREACHABLE',
+          message: "The daemon could not start the server.",
+          code: "DAEMON_UNREACHABLE",
         },
       }),
     );
-    throw new Error('daemon is unreachable — is it running?', { cause: error });
+    throw new Error("daemon is unreachable — is it running?", { cause: error });
   }
 
   if (startResponse.status >= 400) {
     const body =
-      typeof startResponse.data === 'object' && startResponse.data !== null
+      typeof startResponse.data === "object" && startResponse.data !== null
         ? (startResponse.data as { error?: string; detail?: string })
         : {};
-    const rawDetail = `${body.error ?? 'request failed'}${body.detail ? ` — ${body.detail}` : ''}`;
+    const rawDetail = `${body.error ?? "request failed"}${body.detail ? ` — ${body.detail}` : ""}`;
     const failure = classifyDaemonStartFailure(rawDetail);
     emitRealtime(
-      serverEvent('server.power.start.failed', serverId, {
+      serverEvent("server.power.start.failed", serverId, {
         error: { message: failure.message, code: failure.code },
         state: { detail: rawDetail },
       }),
@@ -460,7 +461,7 @@ export async function startServerContainer(
       /* noop */
     });
   emitRealtime(
-    serverEvent('server.power.started', serverId, { state: { running: true } }),
+    serverEvent("server.power.started", serverId, { state: { running: true } }),
   );
 }
 
@@ -484,7 +485,7 @@ async function resolveServerMounts(
 }
 
 export async function restartServerContainer(
-  server: ServerRuntimeConfig & Pick<ServerPageServer, 'image'>,
+  server: ServerRuntimeConfig & Pick<ServerPageServer, "image">,
   serverId: string,
   options: {
     dockerImage?: string;
@@ -499,6 +500,6 @@ export async function restartServerContainer(
   await stopServerContainer(server, serverId, options.stopCommand, {
     releaseResources: false,
   });
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, INLINE_DELAY_MS));
   await startServerContainer(server, serverId, options);
 }

@@ -10,31 +10,32 @@
  *   DELETE /:id               — Remove a passkey
  */
 
-import { Router } from 'express';
+import { Router } from "express";
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
-} from '@simplewebauthn/server';
+} from "@simplewebauthn/server";
 import type {
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
-} from '@simplewebauthn/server';
-import prisma from '../../../db';
-import logger from '../../../handlers/logger';
-import { jsonOk, jsonError } from './helpers';
-import { redisRateLimit } from '../../../handlers/utils/security/redisRateLimit';
+} from "@simplewebauthn/server";
+import prisma from "../../../db";
+import logger from "../../../handlers/logger";
+import { jsonOk, jsonError } from "./helpers";
+import { redisRateLimit } from "../../../handlers/utils/security/redisRateLimit";
+import { RP_NAME } from "../../../config/auth";
 
-const rpName = 'Airlink';
+const rpName = RP_NAME;
 // RPID should be the panel's domain — falls back to localhost for dev
 const getRpID = (req: any) => {
-  const host = req.hostname || 'localhost';
+  const host = req.hostname || "localhost";
   // Strip port if present
-  return host.split(':')[0];
+  return host.split(":")[0];
 };
 const getOrigin = (req: any) => {
-  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+  const proto = req.headers["x-forwarded-proto"] || req.protocol || "https";
   return `${proto}://${req.headers.host || req.hostname}`;
 };
 
@@ -42,21 +43,21 @@ const passkeyRouter = Router();
 
 // ── POST /register/options ───────────────────────────────────────────────────
 // Generate registration challenge for a new passkey
-passkeyRouter.post('/register/options', async (req: any, res: any) => {
+passkeyRouter.post("/register/options", async (req: any, res: any) => {
   try {
     const userId = req.session?.user?.id;
     if (!userId) {
       return void jsonError(
         res,
-        'UNAUTHORIZED',
-        'Authentication required',
+        "UNAUTHORIZED",
+        "Authentication required",
         401,
       );
     }
 
     const user = await prisma.users.findUnique({ where: { id: userId } });
     if (!user) {
-      return void jsonError(res, 'NOT_FOUND', 'User not found', 404);
+      return void jsonError(res, "NOT_FOUND", "User not found", 404);
     }
 
     // Get existing credentials for exclusion
@@ -69,14 +70,14 @@ passkeyRouter.post('/register/options', async (req: any, res: any) => {
       rpID: getRpID(req),
       userName: user.email,
       userDisplayName: user.username || user.email,
-      attestationType: 'none',
+      attestationType: "none",
       excludeCredentials: existingCredentials.map((cred) => ({
         id: cred.credentialId,
         transports: cred.transports ? JSON.parse(cred.transports) : undefined,
       })),
       authenticatorSelection: {
-        residentKey: 'preferred',
-        userVerification: 'preferred',
+        residentKey: "preferred",
+        userVerification: "preferred",
       },
     });
 
@@ -85,15 +86,15 @@ passkeyRouter.post('/register/options', async (req: any, res: any) => {
 
     jsonOk(res, { options });
   } catch (error) {
-    logger.error('Passkey registration options error:', error);
-    jsonError(res, 'INTERNAL', 'Failed to generate registration options', 500);
+    logger.error("Passkey registration options error:", error);
+    jsonError(res, "INTERNAL", "Failed to generate registration options", 500);
   }
 });
 
 // ── POST /register/verify ────────────────────────────────────────────────────
 // Verify registration response and save the credential
 passkeyRouter.post(
-  '/register/verify',
+  "/register/verify",
   redisRateLimit,
   async (req: any, res: any) => {
     try {
@@ -101,8 +102,8 @@ passkeyRouter.post(
       if (!userId) {
         return void jsonError(
           res,
-          'UNAUTHORIZED',
-          'Authentication required',
+          "UNAUTHORIZED",
+          "Authentication required",
           401,
         );
       }
@@ -111,8 +112,8 @@ passkeyRouter.post(
       if (!challenge) {
         return void jsonError(
           res,
-          'BAD_REQUEST',
-          'No pending registration challenge',
+          "BAD_REQUEST",
+          "No pending registration challenge",
           400,
         );
       }
@@ -124,8 +125,8 @@ passkeyRouter.post(
       if (!credential) {
         return void jsonError(
           res,
-          'BAD_REQUEST',
-          'Missing credential data',
+          "BAD_REQUEST",
+          "Missing credential data",
           400,
         );
       }
@@ -142,8 +143,8 @@ passkeyRouter.post(
       if (!verification.verified || !verification.registrationInfo) {
         return void jsonError(
           res,
-          'BAD_REQUEST',
-          'Registration verification failed',
+          "BAD_REQUEST",
+          "Registration verification failed",
           400,
         );
       }
@@ -154,7 +155,7 @@ passkeyRouter.post(
       await prisma.webAuthnCredential.create({
         data: {
           credentialId: regCredential.id,
-          publicKey: Buffer.from(regCredential.publicKey).toString('base64url'),
+          publicKey: Buffer.from(regCredential.publicKey).toString("base64url"),
           counter: BigInt(regCredential.counter),
           transports: credential.response?.transports
             ? JSON.stringify(credential.response.transports)
@@ -173,10 +174,10 @@ passkeyRouter.post(
       // Clear challenge
       delete req.session.pendingWebAuthnChallenge;
 
-      jsonOk(res, { message: 'Passkey registered successfully' });
+      jsonOk(res, { message: "Passkey registered successfully" });
     } catch (error) {
-      logger.error('Passkey registration verify error:', error);
-      jsonError(res, 'INTERNAL', 'Registration verification failed', 500);
+      logger.error("Passkey registration verify error:", error);
+      jsonError(res, "INTERNAL", "Registration verification failed", 500);
     }
   },
 );
@@ -184,7 +185,7 @@ passkeyRouter.post(
 // ── POST /auth/options ───────────────────────────────────────────────────────
 // Generate authentication challenge (used during login 2FA)
 passkeyRouter.post(
-  '/auth/options',
+  "/auth/options",
   redisRateLimit,
   async (req: any, res: any) => {
     try {
@@ -192,8 +193,8 @@ passkeyRouter.post(
       if (!pendingUserId) {
         return void jsonError(
           res,
-          'BAD_REQUEST',
-          'No pending login session',
+          "BAD_REQUEST",
+          "No pending login session",
           400,
         );
       }
@@ -206,8 +207,8 @@ passkeyRouter.post(
       if (credentials.length === 0) {
         return void jsonError(
           res,
-          'BAD_REQUEST',
-          'No passkeys registered',
+          "BAD_REQUEST",
+          "No passkeys registered",
           400,
         );
       }
@@ -218,7 +219,7 @@ passkeyRouter.post(
           id: cred.credentialId,
           transports: cred.transports ? JSON.parse(cred.transports) : undefined,
         })),
-        userVerification: 'preferred',
+        userVerification: "preferred",
       });
 
       // Store challenge in session
@@ -226,8 +227,8 @@ passkeyRouter.post(
 
       jsonOk(res, { options });
     } catch (error) {
-      logger.error('Passkey auth options error:', error);
-      jsonError(res, 'INTERNAL', 'Failed to generate auth options', 500);
+      logger.error("Passkey auth options error:", error);
+      jsonError(res, "INTERNAL", "Failed to generate auth options", 500);
     }
   },
 );
@@ -235,7 +236,7 @@ passkeyRouter.post(
 // ── POST /auth/verify ────────────────────────────────────────────────────────
 // Verify authentication assertion (completes 2FA login)
 passkeyRouter.post(
-  '/auth/verify',
+  "/auth/verify",
   redisRateLimit,
   async (req: any, res: any) => {
     try {
@@ -243,8 +244,8 @@ passkeyRouter.post(
       if (!pendingUserId) {
         return void jsonError(
           res,
-          'BAD_REQUEST',
-          'No pending login session',
+          "BAD_REQUEST",
+          "No pending login session",
           400,
         );
       }
@@ -253,8 +254,8 @@ passkeyRouter.post(
       if (!challenge) {
         return void jsonError(
           res,
-          'BAD_REQUEST',
-          'No pending auth challenge',
+          "BAD_REQUEST",
+          "No pending auth challenge",
           400,
         );
       }
@@ -265,8 +266,8 @@ passkeyRouter.post(
       if (!credential) {
         return void jsonError(
           res,
-          'BAD_REQUEST',
-          'Missing credential data',
+          "BAD_REQUEST",
+          "Missing credential data",
           400,
         );
       }
@@ -276,7 +277,7 @@ passkeyRouter.post(
         where: { credentialId: credential.id },
       });
       if (!storedCredential) {
-        return void jsonError(res, 'NOT_FOUND', 'Credential not found', 404);
+        return void jsonError(res, "NOT_FOUND", "Credential not found", 404);
       }
 
       const expectedOrigin = getOrigin(req);
@@ -288,7 +289,7 @@ passkeyRouter.post(
         expectedRPID: getRpID(req),
         credential: {
           id: storedCredential.credentialId,
-          publicKey: Buffer.from(storedCredential.publicKey, 'base64url'),
+          publicKey: Buffer.from(storedCredential.publicKey, "base64url"),
           counter: Number(storedCredential.counter),
           transports: storedCredential.transports
             ? JSON.parse(storedCredential.transports)
@@ -299,8 +300,8 @@ passkeyRouter.post(
       if (!verification.verified) {
         return void jsonError(
           res,
-          'UNAUTHORIZED',
-          'Authentication failed',
+          "UNAUTHORIZED",
+          "Authentication failed",
           400,
         );
       }
@@ -316,10 +317,10 @@ passkeyRouter.post(
         where: { id: pendingUserId },
       });
       if (!user) {
-        return void jsonError(res, 'NOT_FOUND', 'User not found', 404);
+        return void jsonError(res, "NOT_FOUND", "User not found", 404);
       }
 
-      const { getClientIp } = await import('../../../utils/ip');
+      const { getClientIp } = await import("../../../utils/ip");
 
       await new Promise<void>((resolve, reject) =>
         req.session.regenerate((err: any) => (err ? reject(err) : resolve())),
@@ -329,8 +330,8 @@ passkeyRouter.post(
         id: user.id,
         email: user.email,
         isAdmin: user.isAdmin,
-        description: user.description ?? '',
-        username: user.username ?? '',
+        description: user.description ?? "",
+        username: user.username ?? "",
         role: user.role,
         onboardingCompleted: user.onboardingCompleted,
         onboardingSkipped: user.onboardingSkipped,
@@ -340,31 +341,31 @@ passkeyRouter.post(
         data: {
           userId: user.id,
           ipAddress: getClientIp(req),
-          userAgent: req.headers['user-agent'] || null,
+          userAgent: req.headers["user-agent"] || null,
         },
       });
 
       // Clear pending state
       delete req.session.pendingWebAuthnChallenge;
 
-      jsonOk(res, { redirect: '/' });
+      jsonOk(res, { redirect: "/" });
     } catch (error) {
-      logger.error('Passkey auth verify error:', error);
-      jsonError(res, 'INTERNAL', 'Authentication verification failed', 500);
+      logger.error("Passkey auth verify error:", error);
+      jsonError(res, "INTERNAL", "Authentication verification failed", 500);
     }
   },
 );
 
 // ── GET / ────────────────────────────────────────────────────────────────────
 // List user's registered passkeys
-passkeyRouter.get('/', async (req: any, res: any) => {
+passkeyRouter.get("/", async (req: any, res: any) => {
   try {
     const userId = req.session?.user?.id;
     if (!userId) {
       return void jsonError(
         res,
-        'UNAUTHORIZED',
-        'Authentication required',
+        "UNAUTHORIZED",
+        "Authentication required",
         401,
       );
     }
@@ -376,26 +377,26 @@ passkeyRouter.get('/', async (req: any, res: any) => {
         deviceName: true,
         createdAt: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     jsonOk(res, credentials);
   } catch (error) {
-    logger.error('Passkey list error:', error);
-    jsonError(res, 'INTERNAL', 'Failed to list passkeys', 500);
+    logger.error("Passkey list error:", error);
+    jsonError(res, "INTERNAL", "Failed to list passkeys", 500);
   }
 });
 
 // ── DELETE /:id ──────────────────────────────────────────────────────────────
 // Remove a passkey
-passkeyRouter.delete('/:id', async (req: any, res: any) => {
+passkeyRouter.delete("/:id", async (req: any, res: any) => {
   try {
     const userId = req.session?.user?.id;
     if (!userId) {
       return void jsonError(
         res,
-        'UNAUTHORIZED',
-        'Authentication required',
+        "UNAUTHORIZED",
+        "Authentication required",
         401,
       );
     }
@@ -406,7 +407,7 @@ passkeyRouter.delete('/:id', async (req: any, res: any) => {
       where: { id, userId },
     });
     if (!credential) {
-      return void jsonError(res, 'NOT_FOUND', 'Passkey not found', 404);
+      return void jsonError(res, "NOT_FOUND", "Passkey not found", 404);
     }
 
     await prisma.webAuthnCredential.delete({ where: { id } });
@@ -422,10 +423,10 @@ passkeyRouter.delete('/:id', async (req: any, res: any) => {
       });
     }
 
-    jsonOk(res, { message: 'Passkey deleted' });
+    jsonOk(res, { message: "Passkey deleted" });
   } catch (error) {
-    logger.error('Passkey delete error:', error);
-    jsonError(res, 'INTERNAL', 'Failed to delete passkey', 500);
+    logger.error("Passkey delete error:", error);
+    jsonError(res, "INTERNAL", "Failed to delete passkey", 500);
   }
 });
 

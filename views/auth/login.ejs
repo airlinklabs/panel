@@ -14,8 +14,8 @@
       <% if (settings.logo) { %>
       <img src="<%= settings.logo %>" alt="<%= settings.title %> logo" class="h-10 w-10 rounded-xl object-contain mb-5">
       <% } %>
-      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong)">Sign in</h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)">to <%= settings.title %></p>
+      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong)"><%= t('loginTitle') %></h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('loginSubtitle') %> <%= settings.title %></p>
     </div>
 
     <% if (req.query.err) { %>
@@ -36,13 +36,13 @@
       <%- include('../components/csrf') %>
       <div class="space-y-4">
         <div>
-          <label class="auth-label" for="identifier">Username or email</label>
+          <label class="auth-label" for="identifier"><%= t('username') %></label>
           <input id="identifier" name="identifier" type="text" autocomplete="username"
             required spellcheck="false" autocapitalize="none"
             class="auth-input" placeholder="you@example.com"<% if (req.query.err) { %> aria-describedby="login-error" aria-invalid="true"<% } %>>
         </div>
         <div>
-          <label class="auth-label" for="password">Password</label>
+          <label class="auth-label" for="password"><%= t('password') %></label>
           <div class="pw-wrapper">
             <input id="password" name="password" type="password" autocomplete="current-password"
               required class="auth-input" placeholder="••••••••" style="padding-right:40px"<% if (req.query.err) { %> aria-describedby="login-error" aria-invalid="true"<% } %>>
@@ -57,16 +57,16 @@
           <span class="cb-box" id="cbBox">
             <span class="cb-check" id="cbCheck"><%- icon('check', { width: 10, height: 10, strokeWidth: 1.5 }) %></span>
           </span>
-          <span class="text-sm" style="color:var(--theme-text-muted)">Remember me</span>
+          <span class="text-sm" style="color:var(--theme-text-muted)"><%= t('rememberMe') %></span>
         </label>
 
         <div class="text-right -mt-2">
-          <a href="/forgot-password" class="text-xs transition" style="color:var(--theme-text-muted)">Forgot password?</a>
+          <a href="/forgot-password" class="text-xs transition" style="color:var(--theme-text-muted)"><%= t('forgotPassword') %></a>
         </div>
 
         <button type="submit" class="auth-submit inline-flex items-center gap-1.5" id="submitBtn">
           <%- icon('log-in', { class: 'size-4', strokeWidth: 1.5 }) %>
-          <span class="btn-label">Sign in</span>
+          <span class="btn-label"><%= t('loginTitle') %></span>
           <span class="spinner"></span>
         </button>
       </div>
@@ -74,8 +74,8 @@
 
     <% if (settings.allowRegistration) { %>
     <p class="text-sm text-center mt-6" style="color:var(--theme-text-muted)">
-      Don't have an account?
-      <a href="/register" class="font-medium hover:underline" style="color:var(--theme-text-link)">Create one</a>
+      <%= t('noAccount') %>
+      <a href="/register" class="font-medium hover:underline" style="color:var(--theme-text-link)"><%= t('register') %></a>
     </p>
     <% } %>
 

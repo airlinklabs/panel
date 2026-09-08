@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: req.translations.adminEditUserTitle || 'Edit User' }) %>
+<%- include('../../components/header', { title: t('adminEditUserTitle') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -14,12 +14,12 @@
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title"><%= req.translations.adminEditUserTitle || 'Edit User' %></h1>
-          <p class="al-page-desc"><%= req.translations.adminEditUserText || 'Edit user details and permissions.' %></p>
+          <h1 class="al-page-title"><%= t('adminEditUserTitle') %></h1>
+          <p class="al-page-desc"><%= t('adminEditUserText') %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <a href="/admin/users" class="al-btn-secondary">Back to Users</a>
-          <button type="submit" form="editUserForm" class="al-btn-primary" x-data x-bind:disabled="$root.querySelector && false"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.saveChanges || 'Save Changes' %></button>
+          <a href="/admin/users" class="al-btn-secondary"><%= t('backToUsers') %></a>
+          <button type="submit" form="editUserForm" class="al-btn-primary" x-data x-bind:disabled="$root.querySelector && false"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('saveChanges') %></button>
         </div>
       </div>
 
@@ -29,7 +29,7 @@
         </template>
         <form id="editUserForm" @submit.prevent="submit()" class="space-y-5">
           <div class="al-card">
-            <h2 class="al-card-header"><%= req.translations.userInformation || 'User Information' %></h2>
+            <h2 class="al-card-header"><%= t('userInformation') %></h2>
             <div class="flex items-center gap-4 mb-5 pb-5 border-b" style="border-color:var(--theme-border)">
               <img class="h-12 w-12 rounded-xl object-cover shrink-0 border" style="border-color:var(--theme-border)" src="<%= dataUser.avatar ? dataUser.avatar : '/avatar/' + encodeURIComponent(dataUser.username) %>" alt="<%= dataUser.username %>">
               <div>
@@ -41,7 +41,7 @@
               <div>
                 <label for="username" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%- icon('user', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.username || 'Username' %>
+                  <%= t('username') %>
                 </label>
                 <input type="text" x-model="form.username" class="al-input" required>
               </div>
@@ -49,14 +49,14 @@
               <div>
                 <label for="email" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%- icon('mail', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.email || 'Email' %>
+                  <%= t('email') %>
                 </label>
                 <input type="email" x-model="form.email" class="al-input" required>
               </div>
 
               <div class="md:col-span-2">
                 <label for="description" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%= req.translations.description || 'Description' %>
+                  <%= t('description') %>
                 </label>
                 <textarea x-model="form.description" rows="3" class="al-input"><%= dataUser.description || '' %></textarea>
               </div>
@@ -64,19 +64,19 @@
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header"><%= req.translations.security || 'Security' %></h2>
+            <h2 class="al-card-header"><%= t('security') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label for="password" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
                   <%- icon('lock', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.newPassword || 'New Password' %> <span class="text-xs" style="color:var(--theme-text-muted)">(<%= req.translations.leaveBlankToKeep || 'Leave blank to keep current password' %>)</span>
+                  <%= t('newPassword') %> <span class="text-xs" style="color:var(--theme-text-muted)">(<%= t('leaveBlankToKeep') %>)</span>
                 </label>
                 <input type="password" x-model="form.password" class="al-input">
               </div>
 
               <div>
                 <label for="confirmPassword" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
-                  <%= req.translations.confirmPassword || 'Confirm Password' %>
+                  <%= t('confirmPassword') %>
                 </label>
                 <input type="password" x-model="form.confirmPassword" class="al-input">
               </div>
@@ -86,10 +86,10 @@
                   <div class="flex items-center justify-between">
                     <div>
                       <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">
-                        <%= req.translations.role || 'Role' %>
+                        <%= t('role') %>
                       </h3>
                       <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
-                        <%= req.translations.roleDescription || 'Owner and admin roles are signaled by isAdmin below. Privileged normally have not admin powers but get expanded settings.' %>
+                        <%= t('roleDescription') %>
                       </p>
                     </div>
                     <select x-model="form.role" class="al-input w-44" :disabled="form.role === 'owner'">
@@ -109,16 +109,16 @@
                   <div class="flex items-center justify-between">
                     <div>
                       <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">
-                        <%= req.translations.adminStatus || 'Administrator Status' %>
+                        <%= t('adminStatus') %>
                       </h3>
                       <p class="text-xs mt-1" style="color:var(--theme-text-muted)">
-                        <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
+                        <%= t('adminDescription') %>
                       </p>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer shrink-0" <% if (dataUser.role === 'owner') { %>title="Owner is always an administrator"<% } %>>
                       <input type="checkbox" x-model="form.isAdmin" class="sr-only peer" <% if (dataUser.role === 'owner') { %>disabled<% } %>>
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                      <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-strong)" x-text="form.isAdmin ? '<%= req.translations.enabled || 'Enabled' %>' : '<%= req.translations.disabled || 'Disabled' %>'"></span>
+                      <span class="ms-3 text-sm font-medium" style="color:var(--theme-text-strong)" x-text="form.isAdmin ? '<%= t('enabled') %>' : '<%= t('disabled') %>'"></span>
                     </label>
                   </div>
                 </div>
@@ -127,8 +127,8 @@
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Server Limits</h2>
-            <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Leave blank to use the global defaults set in Admin &rarr; Settings &rarr; Servers.</p>
+            <h2 class="al-card-header"><%= t('serverLimits') %></h2>
+            <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('leaveBlankForDefaults') %></p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
@@ -198,7 +198,7 @@
   </div>
 </main>
 
-<%- include('../../components/loadingPopup') %>
+<%- include('../../components/loading-popup') %>
 
 <style>
 #editUserForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }

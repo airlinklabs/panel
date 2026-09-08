@@ -15,29 +15,18 @@ import {
   inspectImage,
   isSafeUserDirName,
   normalizeUserText,
-} from '../../utils/imageSecurity';
-import { redisRateLimit } from '../../handlers/utils/security/redisRateLimit';
-import type { ErrorMessage } from './server/shared';
-import { BCRYPT_SALT_ROUNDS } from '../../config/constants';
-
-const AVATAR_MAX_SIZE_BYTES = 2 * 1024 * 1024;
-const DESCRIPTION_MAX_LENGTH = 255;
-const USERNAME_MIN_LENGTH = 3;
-const USERNAME_MAX_LENGTH = 32;
-const COOKIE_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
-
-const SUPPORTED_LANGUAGES = [
-  "en",
-  "fr",
-  "de",
-  "es",
-  "pt",
-  "it",
-  "ru",
-  "zh",
-  "ja",
-  "ta",
-] as const;
+} from "../../utils/imageSecurity";
+import { redisRateLimit } from "../../handlers/utils/security/redisRateLimit";
+import type { ErrorMessage } from "./server/shared";
+import { BCRYPT_SALT_ROUNDS } from "../../config/constants";
+import { AVATAR_UPLOAD_LIMIT_BYTES } from "../../config/limits";
+import { ACCOUNT_COOKIE_MAX_AGE_MS } from "../../config/timeouts";
+import {
+  DESCRIPTION_MAX_LENGTH,
+  USERNAME_MIN_LENGTH,
+  USERNAME_MAX_LENGTH,
+} from "../../config/auth";
+import { SUPPORTED_LANGUAGES } from "../../config/mime";
 
 // Avatars are buffered in memory so the server can verify the real content
 // before anything touches disk. The stored filename and extension come from
@@ -45,7 +34,7 @@ const SUPPORTED_LANGUAGES = [
 // client-declared mimetype or original filename.
 const avatarUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: AVATAR_MAX_SIZE_BYTES, files: 1 },
+  limits: { fileSize: AVATAR_UPLOAD_LIMIT_BYTES, files: 1 },
 });
 
 const AVATARS_DIR = path.join(process.cwd(), "storage", "uploads", "avatars");
@@ -107,8 +96,8 @@ const accountModule: Module = {
           }
 
           const allowed =
-            user.role === 'owner' ||
-            user.role === 'admin' ||
+            user.role === "owner" ||
+            user.role === "admin" ||
             settings?.allowUserCreateImages === true;
 
           res.render("user/account", {
@@ -445,7 +434,7 @@ const accountModule: Module = {
           });
 
           res.status(200).json({
-            message: 'Preferred node saved.',
+            message: "Preferred node saved.",
             preferredNodeId: node.id,
           });
         } catch (error) {
@@ -475,7 +464,7 @@ const accountModule: Module = {
         try {
           // Set the language cookie
           res.cookie("lang", language, {
-            maxAge: COOKIE_MAX_AGE_MS,
+            maxAge: ACCOUNT_COOKIE_MAX_AGE_MS,
             httpOnly: true,
             sameSite: "strict",
           });
@@ -491,7 +480,7 @@ const accountModule: Module = {
     router.post(
       "/upload-avatar",
       isAuthenticated(),
-      avatarUpload.single('avatar'),
+      avatarUpload.single("avatar"),
       redisRateLimit,
       async (req: Request, res: Response) => {
         if (!req.file) {

@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Server Settings' }) %>
+<%- include('../../components/header', { title: t('serverSettings') }) %>
 
 <main class="h-screen m-auto" style="color:var(--theme-text)">
   <div class="flex h-full">
@@ -16,51 +16,51 @@
       <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-4">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
-            <%- include('../../components/serverHeader') %>
-            <%- include('../../components/serverMeta') %>
+            <%- include('../../components/server-header') %>
+            <%- include('../../components/server-meta') %>
           </div>
         </div>
       </div>
       <%- include('../../components/installHeader') %>
-      <%- include('../../components/serverTemplate') %>
+      <%- include('../../components/server-template') %>
 
       <div class="al-page-body space-y-4 mt-6">
 
         <%- include('../../fragments/user/server/settings-form', { req, server }) %>
 
         <div class="al-card p-4">
-          <h2 class="text-[15px] font-semibold mb-3" style="color:var(--theme-text-strong)"><%= req.translations.serverInformation || 'Server Information' %></h2>
+          <h2 class="text-[15px] font-semibold mb-3" style="color:var(--theme-text-strong)"><%= t('serverInformation') %></h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.serverId || 'Server ID' %></h3>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('serverId') %></h3>
               <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.UUID %></p>
             </div>
             <div>
-              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.createdAt || 'Created' %></h3>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('createdAt') %></h3>
               <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= new Date(server.createdAt).toLocaleString() %></p>
             </div>
             <div>
-              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.nodes || 'Node' %></h3>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('nodes') %></h3>
               <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.node.name %></p>
             </div>
             <div>
-              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.images || 'Image' %></h3>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('images') %></h3>
               <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.image.name || 'Unknown' %></p>
             </div>
             <div>
-              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.memory || 'Memory' %></h3>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('memory') %></h3>
               <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Memory === 0 ? 'Unlimited' : (server.Memory >= 1024 ? (server.Memory / 1024).toFixed(1) + ' GB' : server.Memory + ' MB') %></p>
             </div>
             <div>
-              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.cpu || 'CPU' %></h3>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('cpu') %></h3>
               <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Cpu === 0 ? 'Unlimited' : (server.Cpu / 100).toFixed(1) + ' cores' %></p>
             </div>
             <div>
-              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.storage || 'Storage' %></h3>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('storage') %></h3>
               <p class="text-[13px]" style="color:var(--theme-text-muted)"><%= server.Storage === 0 ? 'Unlimited' : (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') %></p>
             </div>
             <div>
-              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= req.translations.statusColumn || 'Status' %></h3>
+              <h3 class="text-[11px] font-medium uppercase tracking-wide mb-0.5" style="color:var(--theme-text-muted)"><%= t('statusColumn') %></h3>
               <p class="text-[13px]" style="color:var(--theme-text-muted)">
                 <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
                   style="<%= server.Suspended ? 'background:var(--theme-warning-bg);color:var(--theme-warning);--tw-ring-color:color-mix(in srgb, var(--theme-warning) 25%, transparent)' : 'background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:color-mix(in srgb, var(--theme-success) 25%, transparent)' %>">
@@ -72,29 +72,29 @@
         </div>
 
         <div class="al-card p-4" style="background:var(--theme-danger-bg);border-color:color-mix(in oklch, var(--theme-danger) 20%, transparent)">
-          <h2 class="text-[15px] font-semibold mb-3" style="color:var(--theme-text-strong)"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
+          <h2 class="text-[15px] font-semibold mb-3" style="color:var(--theme-text-strong)"><%= t('dangerZone') %></h2>
 
           <% if (user && (user.isAdmin || settings?.allowUserDeleteServer)) { %>
           <div class="flex items-center justify-between mb-3">
             <div>
-              <h3 class="text-[13px] font-medium" style="color:var(--theme-text-muted)">Delete Server</h3>
-              <p class="text-[11px]" style="color:var(--theme-text-muted)">Permanently delete this server and all its data.</p>
+              <h3 class="text-[13px] font-medium" style="color:var(--theme-text-muted)"><%= t('deleteServer') %></h3>
+              <p class="text-[11px]" style="color:var(--theme-text-muted)"><%= t('deleteServerDesc') %></p>
             </div>
             <button id="deleteServerButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
               <%- icon('trash-2', { class: 'size-3.5', strokeWidth: 1.5 }) %>
-              Delete
+              <%= t('delete') %>
             </button>
           </div>
           <% } %>
 
           <div class="flex items-center justify-between gap-3 mb-3">
             <div>
-              <h3 class="text-[13px] font-medium" style="color:var(--theme-text-muted)"><%= req.translations.reinstallServer || 'Reinstall Server' %></h3>
-              <p class="text-[11px]" style="color:var(--theme-text-muted)">Re-run the install scripts. Your files, worlds and settings are kept.</p>
+              <h3 class="text-[13px] font-medium" style="color:var(--theme-text-muted)"><%= t('reinstallServer') %></h3>
+              <p class="text-[11px]" style="color:var(--theme-text-muted)"><%= t('reinstallServerDesc') %></p>
             </div>
             <button id="reinstallButton" type="button" class="al-btn-danger inline-flex items-center gap-1.5">
               <%- icon('rotate-ccw', { class: 'size-3.5', strokeWidth: 1.5 }) %>
-              <%= req.translations.reinstall || 'Reinstall' %>
+              <%= t('reinstall') %>
             </button>
           </div>
 
@@ -115,7 +115,7 @@
   </div>
 </main>
 
-<%- include('../../components/loadingPopup') %>
+<%- include('../../components/loading-popup') %>
 <%- include('../../components/footer') %>
 
 <script nonce="<%- nonce %>">

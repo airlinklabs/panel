@@ -1,8 +1,8 @@
-import prisma from '../db';
-import { cache } from './cache';
+import prisma from "../db";
+import { cache } from "./cache";
+import { SETTINGS_CACHE_TTL_S } from "../config/timeouts";
 
-const SETTINGS_KEY = 'settings:main';
-const SETTINGS_TTL = 300; // 5 minutes
+const SETTINGS_KEY = "settings:main";
 
 /**
  * Get panel settings with Redis cache. Settings are read on virtually
@@ -13,7 +13,7 @@ const SETTINGS_TTL = 300; // 5 minutes
  * fresh reads.
  */
 export async function getSettings() {
-  return cache.wrap(SETTINGS_KEY, SETTINGS_TTL, () =>
+  return cache.wrap(SETTINGS_KEY, SETTINGS_CACHE_TTL_S, () =>
     prisma.settings.findUnique({ where: { id: 1 } }),
   );
 }

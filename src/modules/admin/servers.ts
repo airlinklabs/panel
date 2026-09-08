@@ -1,16 +1,16 @@
-import { getSettings } from '../../handlers/settingsCache';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
-import type { Module } from '../../handlers/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import type { Permission } from '../../handlers/permissions';
-import { registerPermission } from '../../handlers/permissions';
-import logger from '../../handlers/logger';
-import { queueer } from '../../handlers/queueer';
-import { getParamAsNumber, getParamAsString } from '../../utils/typeHelpers';
-import { safeClientMessage } from '../../utils/errors';
-import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { getSettings } from "../../handlers/settingsCache";
+import type { Request, Response } from "express";
+import { Router } from "express";
+import type { Module } from "../../handlers/moduleInit";
+import prisma from "../../db";
+import { isAuthenticated } from "../../handlers/utils/auth/authUtil";
+import type { Permission } from "../../handlers/permissions";
+import { registerPermission } from "../../handlers/permissions";
+import logger from "../../handlers/logger";
+import { queueer } from "../../handlers/queueer";
+import { getParamAsNumber, getParamAsString } from "../../utils/typeHelpers";
+import { safeClientMessage } from "../../utils/errors";
+import { daemonRequest } from "../../handlers/utils/core/daemonRequest";
 import {
   getUsedExternalPorts,
   normalizeServerPorts,
@@ -19,60 +19,63 @@ import {
   serializeServerPorts,
   validatePortAssignments,
   getPrimaryExternalPort,
-} from '../../handlers/utils/server/ports';
-import { assertNodeCapacity } from '../../handlers/utils/server/resourceCheck';
+} from "../../handlers/utils/server/ports";
+import { assertNodeCapacity } from "../../handlers/utils/server/resourceCheck";
 import {
   claimNodePorts,
   getNodePortPool,
   releaseServerAllocations,
   withNodePortLock,
-} from '../../handlers/utils/server/allocations';
-import { logActivity } from '../../handlers/utils/activity/activityLogger';
-import { sendServerSuspended } from '../../handlers/utils/core/mailer';
+} from "../../handlers/utils/server/allocations";
+import { logActivity } from "../../handlers/utils/activity/activityLogger";
+import { sendServerSuspended } from "../../handlers/utils/core/mailer";
 import {
   startTransfer,
   getTransferState,
-} from '../../handlers/utils/server/serverTransfer';
-import { runtimeStartQueue } from '../../handlers/runtimeQueue';
+} from "../../handlers/utils/server/serverTransfer";
+import { runtimeStartQueue } from "../../handlers/runtimeQueue";
 import {
   emitRealtime,
   serverEvent,
   userEvent,
-} from '../../handlers/realtime/events';
+} from "../../handlers/realtime/events";
+import {
+  DEFAULT_SERVER_PORT,
+  DEFAULT_STOP_COMMAND,
+  DEFAULT_DATABASE_LIMIT,
+  DEFAULT_BACKUP_LIMIT,
+} from "../../config/server";
+import { DAEMON_TIMEOUT_REINSTALL_MS } from "../../config/daemonTimeouts";
 
-const DEFAULT_SERVER_PORT = 25565;
-const DEFAULT_STOP_COMMAND = 'stop';
-const DEFAULT_DATABASE_LIMIT = 5;
-const DEFAULT_BACKUP_LIMIT = 5;
-const SUSPENDED_TRUE = 'true';
+const SUSPENDED_TRUE = "true";
 
-registerPermission('airlink.admin.servers.view' as Permission);
-registerPermission('airlink.admin.servers.create' as Permission);
-registerPermission('airlink.admin.servers.update' as Permission);
-registerPermission('airlink.admin.servers.delete' as Permission);
+registerPermission("airlink.admin.servers.view" as Permission);
+registerPermission("airlink.admin.servers.create" as Permission);
+registerPermission("airlink.admin.servers.update" as Permission);
+registerPermission("airlink.admin.servers.delete" as Permission);
 
 const adminModule: Module = {
   info: {
-    name: 'Admin Module',
-    description: 'This file is for admin functionality.',
-    version: '2.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
+    name: "Admin Module",
+    description: "This file is for admin functionality.",
+    version: "2.0.0",
+    moduleVersion: "1.0.0",
+    author: "AirLinkLab",
+    license: "MIT",
   },
 
   router: () => {
     const router = Router();
 
     router.get(
-      '/admin/servers',
-      isAuthenticated(true, 'airlink.admin.servers.view'),
+      "/admin/servers",
+      isAuthenticated(true, "airlink.admin.servers.view"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            return res.redirect("/login");
           }
 
           const servers = await prisma.server.findMany({
@@ -83,29 +86,29 @@ const adminModule: Module = {
           });
           const settings = await getSettings();
 
-          res.render('admin/servers/servers', { user, req, settings, servers });
+          res.render("admin/servers/servers", { user, req, settings, servers });
         } catch (error: unknown) {
-          logger.error('Error fetching servers:', error);
-          return res.redirect('/login');
+          logger.error("Error fetching servers:", error);
+          return res.redirect("/login");
         }
       },
     );
 
     router.get(
-      '/admin/servers/edit/:id',
-      isAuthenticated(true, 'airlink.admin.servers.view'),
+      "/admin/servers/edit/:id",
+      isAuthenticated(true, "airlink.admin.servers.view"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            res.redirect('/login');
+            res.redirect("/login");
             return;
           }
 
           const serverId = getParamAsNumber(req.params.id);
           if (isNaN(serverId)) {
-            res.status(400).send('Invalid server ID');
+            res.status(400).send("Invalid server ID");
             return;
           }
 
@@ -120,7 +123,7 @@ const adminModule: Module = {
           });
 
           if (!server) {
-            res.status(404).send('Server not found');
+            res.status(404).send("Server not found");
             return;
           }
 
@@ -133,7 +136,7 @@ const adminModule: Module = {
             where: { serverId: server.UUID },
           });
 
-          res.render('admin/servers/edit', {
+          res.render("admin/servers/edit", {
             user,
             req,
             settings,
@@ -145,28 +148,28 @@ const adminModule: Module = {
             serverMounts,
           });
         } catch (error: unknown) {
-          logger.error('Error fetching server for editing:', error);
-          res.redirect('/admin/servers');
+          logger.error("Error fetching server for editing:", error);
+          res.redirect("/admin/servers");
           return;
         }
       },
     );
 
     router.post(
-      '/admin/servers/edit/:id',
-      isAuthenticated(true, 'airlink.admin.servers.update'),
+      "/admin/servers/edit/:id",
+      isAuthenticated(true, "airlink.admin.servers.update"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: "Unauthorized" });
             return;
           }
 
           const serverId = getParamAsNumber(req.params.id);
           if (isNaN(serverId)) {
-            res.status(400).json({ error: 'Invalid server ID' });
+            res.status(400).json({ error: "Invalid server ID" });
             return;
           }
 
@@ -176,7 +179,7 @@ const adminModule: Module = {
           });
 
           if (!server) {
-            res.status(404).json({ error: 'Server not found' });
+            res.status(404).json({ error: "Server not found" });
             return;
           }
 
@@ -209,7 +212,7 @@ const adminModule: Module = {
             !Storage ||
             !ownerId
           ) {
-            res.status(400).json({ error: 'Missing required fields' });
+            res.status(400).json({ error: "Missing required fields" });
             return;
           }
 
@@ -217,7 +220,7 @@ const adminModule: Module = {
           const cpuInt = parseInt(String(Cpu), 10);
           const storageInt = parseInt(String(Storage), 10);
           const swapInt =
-            Swap !== undefined && Swap !== ''
+            Swap !== undefined && Swap !== ""
               ? Math.max(0, parseInt(String(Swap), 10) || 0)
               : 0;
           if (
@@ -229,7 +232,7 @@ const adminModule: Module = {
             storageInt <= 0
           ) {
             res.status(400).json({
-              error: 'Memory, CPU, and Storage must be positive integers.',
+              error: "Memory, CPU, and Storage must be positive integers.",
             });
             return;
           }
@@ -238,7 +241,7 @@ const adminModule: Module = {
             where: { id: parseInt(String(ownerId), 10) },
           });
           if (!owner) {
-            res.status(400).json({ error: 'Owner not found' });
+            res.status(400).json({ error: "Owner not found" });
             return;
           }
 
@@ -251,7 +254,7 @@ const adminModule: Module = {
             where: { id: parseInt(imageId) },
           });
           if (!selectedImage) {
-            res.status(400).json({ error: 'Image not found' });
+            res.status(400).json({ error: "Image not found" });
             return;
           }
 
@@ -279,10 +282,10 @@ const adminModule: Module = {
               server.nodeId === parseInt(nodeId)
                 ? server.node
                 : await prisma.node.findUnique({
-                  where: { id: parseInt(nodeId) },
-                });
+                    where: { id: parseInt(nodeId) },
+                  });
             if (!capacityNode) {
-              res.status(400).json({ error: 'Target node not found.' });
+              res.status(400).json({ error: "Target node not found." });
               return;
             }
             await assertNodeCapacity(
@@ -297,7 +300,7 @@ const adminModule: Module = {
               error:
                 error instanceof Error
                   ? error.message
-                  : 'Node capacity exceeded.',
+                  : "Node capacity exceeded.",
             });
             return;
           }
@@ -316,28 +319,28 @@ const adminModule: Module = {
               Storage: storageInt,
               StartCommand,
               databaseLimit:
-                databaseLimit !== undefined && databaseLimit !== ''
+                databaseLimit !== undefined && databaseLimit !== ""
                   ? Math.max(0, parseInt(databaseLimit) || 0)
                   : DEFAULT_DATABASE_LIMIT,
               backupLimit:
-                backupLimit !== undefined && backupLimit !== ''
+                backupLimit !== undefined && backupLimit !== ""
                   ? Math.max(0, parseInt(backupLimit) || 0)
                   : DEFAULT_BACKUP_LIMIT,
               backupIgnoreList:
-                typeof backupIgnoreList === 'string'
+                typeof backupIgnoreList === "string"
                   ? backupIgnoreList.trim()
-                  : '',
+                  : "",
               Ports: serializeServerPorts(submittedPorts),
               Suspended: newSuspendedState,
             },
           });
           emitRealtime(
-            serverEvent('server.updated', server.UUID, {
+            serverEvent("server.updated", server.UUID, {
               state: { id: server.id, name, suspended: newSuspendedState },
             }),
           );
           emitRealtime({
-            type: 'admin.servers.updated',
+            type: "admin.servers.updated",
             scope: { admin: true },
             state: {},
           });
@@ -345,7 +348,7 @@ const adminModule: Module = {
           // Update allowStartupEdit field
           await prisma.server.update({
             where: { id: serverId },
-            data: { allowStartupEdit: allowStartupEdit === 'true' },
+            data: { allowStartupEdit: allowStartupEdit === "true" },
           });
 
           // Reconcile port claims: if the node changed, release old claims, then
@@ -360,7 +363,7 @@ const adminModule: Module = {
               server.UUID,
             );
           } catch (err: unknown) {
-            logger.error('Error syncing allocation claims:', err);
+            logger.error("Error syncing allocation claims:", err);
           }
 
           // If server is being suspended, stop it
@@ -372,8 +375,8 @@ const adminModule: Module = {
                 nodeAddress: server.node.address,
                 nodePort: server.node.port,
                 nodeKey: server.node.key,
-                method: 'POST',
-                path: '/container/stop',
+                method: "POST",
+                path: "/container/stop",
                 body: {
                   id: String(server.UUID),
                   stopCmd: server.image?.stop || DEFAULT_STOP_COMMAND,
@@ -401,7 +404,7 @@ const adminModule: Module = {
           }
 
           logger.info(`Server ${serverId} updated successfully`);
-          await logActivity(req, 'server:update', {
+          await logActivity(req, "server:update", {
             serverId: String(server.UUID),
             metadata: { name, suspended: newSuspendedState },
           });
@@ -411,9 +414,9 @@ const adminModule: Module = {
             const rawMountIds = req.body.mountIds;
             const nextMountIds: number[] = Array.isArray(rawMountIds)
               ? rawMountIds
-                .map((m: unknown) => Number(String(m)).valueOf())
-                .filter((v) => Number.isInteger(v))
-              : typeof rawMountIds === 'string'
+                  .map((m: unknown) => Number(String(m)).valueOf())
+                  .filter((v) => Number.isInteger(v))
+              : typeof rawMountIds === "string"
                 ? [Number(rawMountIds)].filter((v) => Number.isInteger(v))
                 : [];
             await prisma.serverMount.deleteMany({
@@ -428,27 +431,27 @@ const adminModule: Module = {
               });
             }
           } catch (mountError) {
-            logger.error('Error syncing server mounts:', mountError);
+            logger.error("Error syncing server mounts:", mountError);
           }
 
           res.status(200).json({ success: true });
         } catch (error: unknown) {
-          logger.error('Error updating server:', error);
-          res.status(500).json({ error: 'Failed to update server' });
+          logger.error("Error updating server:", error);
+          res.status(500).json({ error: "Failed to update server" });
           return;
         }
       },
     );
 
     router.get(
-      '/admin/servers/create',
-      isAuthenticated(true, 'airlink.admin.servers.view'),
+      "/admin/servers/create",
+      isAuthenticated(true, "airlink.admin.servers.view"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            return res.redirect("/login");
           }
 
           const users = await prisma.users.findMany();
@@ -456,7 +459,7 @@ const adminModule: Module = {
           const images = await prisma.images.findMany();
           const settings = await getSettings();
 
-          res.render('admin/servers/create', {
+          res.render("admin/servers/create", {
             user,
             req,
             settings,
@@ -465,15 +468,15 @@ const adminModule: Module = {
             users,
           });
         } catch (error: unknown) {
-          logger.error('Error fetching data for server creation:', error);
-          return res.redirect('/login');
+          logger.error("Error fetching data for server creation:", error);
+          return res.redirect("/login");
         }
       },
     );
 
     router.post(
-      '/admin/servers/create',
-      isAuthenticated(true, 'airlink.admin.servers.create'),
+      "/admin/servers/create",
+      isAuthenticated(true, "airlink.admin.servers.create"),
       async (req: Request, res: Response) => {
         const {
           name,
@@ -505,7 +508,7 @@ const adminModule: Module = {
           !Storage ||
           !userId
         ) {
-          res.status(400).json({ error: 'Missing required fields' });
+          res.status(400).json({ error: "Missing required fields" });
           return;
         }
 
@@ -513,7 +516,7 @@ const adminModule: Module = {
         const cpuInt = parseInt(String(Cpu), 10);
         const storageInt = parseInt(String(Storage), 10);
         const swapInt =
-          Swap !== undefined && Swap !== ''
+          Swap !== undefined && Swap !== ""
             ? Math.max(0, parseInt(String(Swap), 10) || 0)
             : 0;
         if (
@@ -525,14 +528,14 @@ const adminModule: Module = {
           storageInt <= 0
         ) {
           res.status(400).json({
-            error: 'Memory, CPU, and Storage must be positive integers.',
+            error: "Memory, CPU, and Storage must be positive integers.",
           });
           return;
         }
 
         const owner = await prisma.users.findUnique({ where: { id: userId } });
         if (!owner) {
-          res.status(400).json({ error: 'Owner not found' });
+          res.status(400).json({ error: "Owner not found" });
           return;
         }
 
@@ -544,13 +547,13 @@ const adminModule: Module = {
           });
 
           if (!node) {
-            res.status(400).json({ error: 'Selected node not found' });
+            res.status(400).json({ error: "Selected node not found" });
             return;
           }
 
           if (node.maintenanceMode) {
             res.status(400).json({
-              error: 'Cannot create a server on a node under maintenance',
+              error: "Cannot create a server on a node under maintenance",
             });
             return;
           }
@@ -567,7 +570,7 @@ const adminModule: Module = {
             where: { id: parseInt(imageId) },
           });
           if (!image) {
-            res.status(400).json({ error: 'Image not found' });
+            res.status(400).json({ error: "Image not found" });
             return;
           }
 
@@ -596,8 +599,8 @@ const adminModule: Module = {
           const message =
             error instanceof Error
               ? error.message
-              : 'Error validating port allocation';
-          logger.error('Error validating server resources:', error);
+              : "Error validating port allocation";
+          logger.error("Error validating server resources:", error);
           res.status(400).json({ error: message });
           return;
         }
@@ -616,13 +619,13 @@ const adminModule: Module = {
           });
 
           if (!selectedImage) {
-            res.status(400).json({ error: 'Image not found' });
+            res.status(400).json({ error: "Image not found" });
             return;
           }
 
           const dockerImagesRaw = selectedImage.dockerImages;
           if (!dockerImagesRaw) {
-            res.status(400).json({ error: 'Docker image not found' });
+            res.status(400).json({ error: "Docker image not found" });
             return;
           }
 
@@ -634,21 +637,21 @@ const adminModule: Module = {
           );
 
           if (!imageDocker) {
-            res.status(400).json({ error: 'Docker image not found' });
+            res.status(400).json({ error: "Docker image not found" });
             return;
           }
 
           const StartCommand = selectedImage.startup;
 
           if (!StartCommand) {
-            res.status(400).json({ error: 'Image startup command not found' });
+            res.status(400).json({ error: "Image startup command not found" });
             return;
           }
 
           // Merge submitted variable values into the egg variable definitions
           let imageVariables: Record<string, unknown>[] = [];
           try {
-            imageVariables = JSON.parse(selectedImage.variables || '[]');
+            imageVariables = JSON.parse(selectedImage.variables || "[]");
           } catch {
             imageVariables = [];
           }
@@ -656,14 +659,14 @@ const adminModule: Module = {
           const submittedVars = Array.isArray(variables) ? variables : [];
           const mergedVariables = imageVariables.map(
             (imgVar: Record<string, unknown>) => {
-              const envKey = String(imgVar.env_variable ?? imgVar.env ?? '');
+              const envKey = String(imgVar.env_variable ?? imgVar.env ?? "");
               const submitted = submittedVars.find(
                 (sv: Record<string, unknown>) =>
-                  String(sv.env_variable ?? sv.env ?? '') === envKey,
+                  String(sv.env_variable ?? sv.env ?? "") === envKey,
               );
               return {
                 ...imgVar,
-                value: submitted?.value ?? imgVar.default_value ?? '',
+                value: submitted?.value ?? imgVar.default_value ?? "",
               };
             },
           );
@@ -709,9 +712,9 @@ const adminModule: Module = {
                     Swap: swapInt,
                     Cpu: cpuInt,
                     databaseLimit:
-                      databaseLimit !== undefined && databaseLimit !== ''
+                      databaseLimit !== undefined && databaseLimit !== ""
                         ? Math.max(0, parseInt(databaseLimit) || 0)
-                        : 5,
+                        : DEFAULT_DATABASE_LIMIT,
                     Storage: storageInt,
                     Variables: JSON.stringify(mergedVariables),
                     StartCommand,
@@ -721,7 +724,7 @@ const adminModule: Module = {
 
                 await prisma.server.update({
                   where: { id: created.id },
-                  data: { allowStartupEdit: allowStartupEdit === 'true' },
+                  data: { allowStartupEdit: allowStartupEdit === "true" },
                 });
                 await claimNodePorts(
                   parseInt(nodeId),
@@ -736,13 +739,13 @@ const adminModule: Module = {
               },
             );
           } catch (error: unknown) {
-            logger.error('Error creating server:', error);
+            logger.error("Error creating server:", error);
             res
               .status(400)
               .send(
                 error instanceof Error
                   ? error.message
-                  : 'Failed to create server.',
+                  : "Failed to create server.",
               );
             return;
           }
@@ -760,7 +763,7 @@ const adminModule: Module = {
 
             for (const server of servers) {
               emitRealtime(
-                serverEvent('server.install.started', server.UUID, {
+                serverEvent("server.install.started", server.UUID, {
                   operationId: server.UUID,
                   state: { queued: true, installing: true },
                 }),
@@ -779,12 +782,12 @@ const adminModule: Module = {
 
                 // Normalize variable shape — Pterodactyl uses env_variable, legacy uses env
                 ServerEnv = (parsed as Record<string, unknown>[]).map((v) => ({
-                  env: String(v.env_variable ?? v.env ?? ''),
-                  value: v.value ?? v.default_value ?? '',
+                  env: String(v.env_variable ?? v.env ?? ""),
+                  value: v.value ?? v.default_value ?? "",
                 }));
 
                 let serverPort = String(
-                  parseServerPorts(Port)[0]?.externalPort ?? '',
+                  parseServerPorts(Port)[0]?.externalPort ?? "",
                 );
                 const primaryExternalPort = getPrimaryExternalPort(
                   server.Ports,
@@ -793,15 +796,15 @@ const adminModule: Module = {
                   serverPort = String(primaryExternalPort);
                 }
                 ServerEnv.push({
-                  env: 'SERVER_PORT',
+                  env: "SERVER_PORT",
                   value: serverPort,
                 });
                 ServerEnv.push({
-                  env: 'SERVER_MEMORY',
+                  env: "SERVER_MEMORY",
                   value: String(server.Memory),
                 });
                 ServerEnv.push({
-                  env: 'SERVER_CPU',
+                  env: "SERVER_CPU",
                   value: String(server.Cpu),
                 });
               } catch (error: unknown) {
@@ -858,7 +861,7 @@ const adminModule: Module = {
                   // Pterodactyl egg format: scripts.installation has script, container, entrypoint
                   if (
                     scripts.installation &&
-                    typeof scripts.installation === 'object'
+                    typeof scripts.installation === "object"
                   ) {
                     const installation = scripts.installation as Record<
                       string,
@@ -869,16 +872,16 @@ const adminModule: Module = {
                       nodeAddress: server.node.address,
                       nodePort: server.node.port,
                       nodeKey: server.node.key,
-                      method: 'POST',
-                      path: '/container/installer',
+                      method: "POST",
+                      path: "/container/installer",
                       body: {
                         id: server.UUID,
                         script: installation.script,
                         container: installation.container,
-                        entrypoint: installation.entrypoint || 'bash',
+                        entrypoint: installation.entrypoint || "bash",
                         env,
                       },
-                      timeout: 600000,
+                      timeout: DAEMON_TIMEOUT_REINSTALL_MS,
                     });
 
                     // Legacy ALC format: scripts.install is an array of file downloads
@@ -887,7 +890,7 @@ const adminModule: Module = {
                     // install rather than on the first Start click.
                     let dockerImageValue: string | undefined;
                     try {
-                      const parsed = JSON.parse(server.dockerImage || '{}');
+                      const parsed = JSON.parse(server.dockerImage || "{}");
                       dockerImageValue = Object.values(parsed)[0] as
                         string | undefined;
                     } catch {
@@ -898,8 +901,8 @@ const adminModule: Module = {
                       nodeAddress: server.node.address,
                       nodePort: server.node.port,
                       nodeKey: server.node.key,
-                      method: 'POST',
-                      path: '/container/install',
+                      method: "POST",
+                      path: "/container/install",
                       body: {
                         id: server.UUID,
                         image: dockerImageValue,
@@ -915,22 +918,22 @@ const adminModule: Module = {
                       },
                     });
 
-                    if (scripts.native && typeof scripts.native === 'object') {
+                    if (scripts.native && typeof scripts.native === "object") {
                       const native = scripts.native as Record<string, string>;
                       await daemonRequest({
                         nodeAddress: server.node.address,
                         nodePort: server.node.port,
                         nodeKey: server.node.key,
-                        method: 'POST',
-                        path: '/container/installer',
+                        method: "POST",
+                        path: "/container/installer",
                         body: {
                           id: server.UUID,
                           env,
                           script: native.CMD,
                           container: native.container,
-                          entrypoint: 'bash',
+                          entrypoint: "bash",
                         },
-                        timeout: 600000,
+                        timeout: DAEMON_TIMEOUT_REINSTALL_MS,
                       });
                     }
                   } else {
@@ -944,7 +947,7 @@ const adminModule: Module = {
                     data: { Queued: false },
                   });
                   emitRealtime(
-                    serverEvent('server.install.completed', server.UUID, {
+                    serverEvent("server.install.completed", server.UUID, {
                       operationId: server.UUID,
                       state: { installing: false, queued: false },
                     }),
@@ -959,13 +962,13 @@ const adminModule: Module = {
                     data: { Queued: false },
                   });
                   emitRealtime(
-                    serverEvent('server.install.failed', server.UUID, {
+                    serverEvent("server.install.failed", server.UUID, {
                       operationId: server.UUID,
                       error: {
                         message:
                           error instanceof Error
                             ? error.message
-                            : 'Install dispatch failed',
+                            : "Install dispatch failed",
                       },
                     }),
                   );
@@ -984,31 +987,31 @@ const adminModule: Module = {
 
           res
             .status(200)
-            .json({ success: true, message: 'Server created successfully' });
-          await logActivity(req, 'server:create', {
+            .json({ success: true, message: "Server created successfully" });
+          await logActivity(req, "server:create", {
             serverId: String(createdServer.UUID),
             metadata: { name, nodeId: createdServer.nodeId },
           });
           emitRealtime(
-            serverEvent('server.created', createdServer.UUID, {
+            serverEvent("server.created", createdServer.UUID, {
               state: { id: createdServer.id, name, UUID: createdServer.UUID },
             }),
           );
           emitRealtime({
-            type: 'admin.servers.updated',
+            type: "admin.servers.updated",
             scope: { admin: true },
             state: {},
           });
         } catch (error: unknown) {
-          logger.error('Error creating server:', error);
-          res.status(500).json({ error: 'Error creating server' });
+          logger.error("Error creating server:", error);
+          res.status(500).json({ error: "Error creating server" });
         }
       },
     );
 
     router.post(
-      '/admin/server/delete/:id',
-      isAuthenticated(true, 'airlink.admin.servers.delete'),
+      "/admin/server/delete/:id",
+      isAuthenticated(true, "airlink.admin.servers.delete"),
       async (req: Request, res: Response) => {
         const { id } = req.params;
 
@@ -1016,13 +1019,13 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            res.redirect('/login');
+            res.redirect("/login");
             return;
           }
 
           const serverId = getParamAsNumber(id);
           if (isNaN(serverId)) {
-            res.status(400).json({ error: 'Invalid server ID' });
+            res.status(400).json({ error: "Invalid server ID" });
             return;
           }
 
@@ -1032,11 +1035,11 @@ const adminModule: Module = {
           });
 
           if (!server) {
-            res.status(404).json({ error: 'Server not found' });
+            res.status(404).json({ error: "Server not found" });
             return;
           }
 
-          const force = req.query.force === 'true';
+          const force = req.query.force === "true";
 
           try {
             if (!force) {
@@ -1049,8 +1052,8 @@ const adminModule: Module = {
                   nodeAddress: server.node.address,
                   nodePort: server.node.port,
                   nodeKey: server.node.key,
-                  method: 'DELETE',
-                  path: '/container',
+                  method: "DELETE",
+                  path: "/container",
                   body: {
                     id: server.UUID,
                   },
@@ -1062,10 +1065,10 @@ const adminModule: Module = {
                   const isNotFound =
                     response.status === 404 ||
                     (responseData &&
-                      typeof responseData === 'object' &&
-                      'error' in responseData &&
-                      typeof responseData.error === 'string' &&
-                      responseData.error.includes('not exist'));
+                      typeof responseData === "object" &&
+                      "error" in responseData &&
+                      typeof responseData.error === "string" &&
+                      responseData.error.includes("not exist"));
 
                   if (isNotFound) {
                     logger.warn(
@@ -1086,9 +1089,9 @@ const adminModule: Module = {
                   );
                 }
               } catch (error: unknown) {
-                logger.error('Error deleting container on daemon:', error);
+                logger.error("Error deleting container on daemon:", error);
                 throw new Error(
-                  `${safeClientMessage(error, 'The daemon is unreachable')} Use ?force=true to remove from panel only.`,
+                  `${safeClientMessage(error, "The daemon is unreachable")} Use ?force=true to remove from panel only.`,
                   { cause: error },
                 );
               }
@@ -1115,28 +1118,28 @@ const adminModule: Module = {
             });
 
             emitRealtime(
-              serverEvent('server.deleted', server.UUID, {
+              serverEvent("server.deleted", server.UUID, {
                 state: { id: server.id, name: server.name },
               }),
             );
             emitRealtime({
-              type: 'admin.servers.updated',
+              type: "admin.servers.updated",
               scope: { admin: true },
               state: {},
             });
 
             logger.info(`Server ${serverId} successfully deleted`);
-            await logActivity(req, 'server:delete', {
+            await logActivity(req, "server:delete", {
               metadata: {
                 name: server.name,
                 nodeId: server.nodeId,
                 serverUUID: server.UUID,
               },
             });
-            res.redirect('/admin/servers');
+            res.redirect("/admin/servers");
             return;
           } catch (error: unknown) {
-            logger.error('Error deleting server:', error);
+            logger.error("Error deleting server:", error);
             const errorMessage =
               error instanceof Error ? error.message : String(error);
             res
@@ -1145,27 +1148,27 @@ const adminModule: Module = {
             return;
           }
         } catch (error: unknown) {
-          logger.error('Error in delete server route:', error);
-          res.status(500).json({ error: 'Error deleting server' });
+          logger.error("Error in delete server route:", error);
+          res.status(500).json({ error: "Error deleting server" });
         }
       },
     );
 
     router.post(
-      '/admin/servers/:id/suspend',
-      isAuthenticated(true, 'airlink.admin.servers.update'),
+      "/admin/servers/:id/suspend",
+      isAuthenticated(true, "airlink.admin.servers.update"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: "Unauthorized" });
             return;
           }
 
           const serverId = getParamAsNumber(req.params.id);
           if (isNaN(serverId)) {
-            res.status(400).json({ error: 'Invalid server ID' });
+            res.status(400).json({ error: "Invalid server ID" });
             return;
           }
 
@@ -1175,7 +1178,7 @@ const adminModule: Module = {
           });
 
           if (!server) {
-            res.status(404).json({ error: 'Server not found' });
+            res.status(404).json({ error: "Server not found" });
             return;
           }
 
@@ -1186,11 +1189,11 @@ const adminModule: Module = {
 
           try {
             await daemonRequest({
-              method: 'POST',
-              path: '/container/stop',
-              nodeAddress: server.node?.address ?? '',
+              method: "POST",
+              path: "/container/stop",
+              nodeAddress: server.node?.address ?? "",
               nodePort: server.node?.port ?? 0,
-              nodeKey: server.node?.key ?? '',
+              nodeKey: server.node?.key ?? "",
               body: { id: server.UUID },
             });
             await prisma.server
@@ -1206,18 +1209,18 @@ const adminModule: Module = {
           }
 
           logger.info(`Server ${serverId} suspended by user ${userId}`);
-          await logActivity(req, 'server:suspend', {
+          await logActivity(req, "server:suspend", {
             serverId: String(server.UUID),
             metadata: { name: server.name },
           });
           emitRealtime(
-            serverEvent('server.updated', server.UUID, {
+            serverEvent("server.updated", server.UUID, {
               state: { name: server.name, suspended: true },
             }),
           );
           if (server.ownerId) {
             emitRealtime(
-              userEvent('account.suspended', Number(server.ownerId), {
+              userEvent("account.suspended", Number(server.ownerId), {
                 state: { suspended: true },
               }),
             );
@@ -1225,42 +1228,42 @@ const adminModule: Module = {
 
           const owner = server.ownerId
             ? await prisma.users.findUnique({
-              where: { id: Number(server.ownerId) },
-              select: { email: true },
-            })
+                where: { id: Number(server.ownerId) },
+                select: { email: true },
+              })
             : null;
           if (owner?.email) {
             await sendServerSuspended({
               to: owner.email,
-              panelName: 'Airlink',
+              panelName: "Airlink",
               serverName: server.name,
-              panelUrl: process.env.PANEL_URL ?? '',
+              panelUrl: process.env.PANEL_URL ?? "",
             });
           }
 
-          res.json({ success: true, message: 'Server suspended' });
+          res.json({ success: true, message: "Server suspended" });
         } catch (error: unknown) {
-          logger.error('Error suspending server:', error);
-          res.status(500).json({ error: 'Failed to suspend server' });
+          logger.error("Error suspending server:", error);
+          res.status(500).json({ error: "Failed to suspend server" });
         }
       },
     );
 
     router.post(
-      '/admin/servers/:id/unsuspend',
-      isAuthenticated(true, 'airlink.admin.servers.update'),
+      "/admin/servers/:id/unsuspend",
+      isAuthenticated(true, "airlink.admin.servers.update"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: "Unauthorized" });
             return;
           }
 
           const serverId = getParamAsNumber(req.params.id);
           if (isNaN(serverId)) {
-            res.status(400).json({ error: 'Invalid server ID' });
+            res.status(400).json({ error: "Invalid server ID" });
             return;
           }
 
@@ -1269,7 +1272,7 @@ const adminModule: Module = {
           });
 
           if (!server) {
-            res.status(404).json({ error: 'Server not found' });
+            res.status(404).json({ error: "Server not found" });
             return;
           }
 
@@ -1279,26 +1282,26 @@ const adminModule: Module = {
           });
 
           logger.info(`Server ${serverId} unsuspended by user ${userId}`);
-          await logActivity(req, 'server:unsuspend', {
+          await logActivity(req, "server:unsuspend", {
             serverId: String(server.UUID),
             metadata: { name: server.name },
           });
           emitRealtime(
-            serverEvent('server.updated', server.UUID, {
+            serverEvent("server.updated", server.UUID, {
               state: { name: server.name, suspended: false },
             }),
           );
           if (server.ownerId) {
             emitRealtime(
-              userEvent('account.suspended', Number(server.ownerId), {
+              userEvent("account.suspended", Number(server.ownerId), {
                 state: { suspended: false },
               }),
             );
           }
-          res.json({ success: true, message: 'Server unsuspended' });
+          res.json({ success: true, message: "Server unsuspended" });
         } catch (error: unknown) {
-          logger.error('Error unsuspending server:', error);
-          res.status(500).json({ error: 'Failed to unsuspend server' });
+          logger.error("Error unsuspending server:", error);
+          res.status(500).json({ error: "Failed to unsuspend server" });
         }
       },
     );
@@ -1306,32 +1309,32 @@ const adminModule: Module = {
     // ── Server Transfer ──────────────────────────────────────────────────
 
     router.post(
-      '/admin/servers/:id/transfer',
-      isAuthenticated(true, 'airlink.admin.servers.update'),
+      "/admin/servers/:id/transfer",
+      isAuthenticated(true, "airlink.admin.servers.update"),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: "Unauthorized" });
             return;
           }
 
           const serverId = getParamAsNumber(req.params.id);
           if (isNaN(serverId)) {
-            res.status(400).json({ error: 'Invalid server ID' });
+            res.status(400).json({ error: "Invalid server ID" });
             return;
           }
 
           const { targetNodeId, ports } = req.body;
           if (!targetNodeId || !Array.isArray(ports) || ports.length === 0) {
-            res.status(400).json({ error: 'Missing targetNodeId or ports' });
+            res.status(400).json({ error: "Missing targetNodeId or ports" });
             return;
           }
 
           const targetNodeIdNum = parseInt(targetNodeId);
           if (isNaN(targetNodeIdNum)) {
-            res.status(400).json({ error: 'Invalid target node ID' });
+            res.status(400).json({ error: "Invalid target node ID" });
             return;
           }
 
@@ -1353,7 +1356,7 @@ const adminModule: Module = {
             req,
           );
 
-          await logActivity(req, 'server:transfer', {
+          await logActivity(req, "server:transfer", {
             serverId: String(state.serverUUID),
             metadata: {
               name: state.serverName,
@@ -1364,28 +1367,28 @@ const adminModule: Module = {
 
           res.json({ success: true, transferId: serverId });
         } catch (error: unknown) {
-          logger.error('Error starting transfer:', error);
+          logger.error("Error starting transfer:", error);
           res.status(400).json({
-            error: safeClientMessage(error, 'Failed to start transfer'),
+            error: safeClientMessage(error, "Failed to start transfer"),
           });
         }
       },
     );
 
     router.get(
-      '/admin/servers/:id/transfer/status',
-      isAuthenticated(true, 'airlink.admin.servers.view'),
+      "/admin/servers/:id/transfer/status",
+      isAuthenticated(true, "airlink.admin.servers.view"),
       async (req: Request, res: Response) => {
         try {
           const serverId = getParamAsNumber(req.params.id);
           if (isNaN(serverId)) {
-            res.status(400).json({ error: 'Invalid server ID' });
+            res.status(400).json({ error: "Invalid server ID" });
             return;
           }
 
           const state = getTransferState(serverId);
           if (!state) {
-            res.json({ status: 'idle' });
+            res.json({ status: "idle" });
             return;
           }
 
@@ -1399,15 +1402,15 @@ const adminModule: Module = {
             targetNodeId: state.targetNodeId,
           });
         } catch (error: unknown) {
-          logger.error('Error getting transfer status:', error);
-          res.status(500).json({ error: 'Failed to get transfer status' });
+          logger.error("Error getting transfer status:", error);
+          res.status(500).json({ error: "Failed to get transfer status" });
         }
       },
     );
 
     router.get(
-      '/admin/queue',
-      isAuthenticated(true, 'airlink.admin.servers.view'),
+      "/admin/queue",
+      isAuthenticated(true, "airlink.admin.servers.view"),
       async (req: Request, res: Response) => {
         try {
           const entries = runtimeStartQueue.listQueueForAdmin();
@@ -1439,39 +1442,39 @@ const adminModule: Module = {
             })),
           });
         } catch (error: unknown) {
-          logger.error('Error fetching runtime queue:', error);
-          res.status(500).json({ error: 'Failed to fetch runtime queue' });
+          logger.error("Error fetching runtime queue:", error);
+          res.status(500).json({ error: "Failed to fetch runtime queue" });
         }
       },
     );
 
     router.post(
-      '/admin/queue/:serverId/kick',
-      isAuthenticated(true, 'airlink.admin.servers.view'),
+      "/admin/queue/:serverId/kick",
+      isAuthenticated(true, "airlink.admin.servers.view"),
       async (req: Request, res: Response) => {
         try {
           const serverId = getParamAsString(req.params.serverId);
           if (!serverId) {
-            res.status(400).json({ error: 'Invalid server ID' });
+            res.status(400).json({ error: "Invalid server ID" });
             return;
           }
           const removed = await runtimeStartQueue.cancelQueuedStart(serverId);
           res.json({ removed });
         } catch (error: unknown) {
-          logger.error('Error kicking queued start:', error);
-          res.status(500).json({ error: 'Failed to kick queued start' });
+          logger.error("Error kicking queued start:", error);
+          res.status(500).json({ error: "Failed to kick queued start" });
         }
       },
     );
 
     router.post(
-      '/admin/queue/users/:userId/ban',
-      isAuthenticated(true, 'airlink.admin.servers.view'),
+      "/admin/queue/users/:userId/ban",
+      isAuthenticated(true, "airlink.admin.servers.view"),
       async (req: Request, res: Response) => {
         try {
           const userId = getParamAsNumber(req.params.userId);
           if (isNaN(userId)) {
-            res.status(400).json({ error: 'Invalid user ID' });
+            res.status(400).json({ error: "Invalid user ID" });
             return;
           }
           const minutes = Number(req.body?.minutes) || 30;
@@ -1481,27 +1484,27 @@ const adminModule: Module = {
           );
           res.json({ removed, banned: true });
         } catch (error: unknown) {
-          logger.error('Error banning user from queue:', error);
-          res.status(500).json({ error: 'Failed to ban user from queue' });
+          logger.error("Error banning user from queue:", error);
+          res.status(500).json({ error: "Failed to ban user from queue" });
         }
       },
     );
 
     router.post(
-      '/admin/queue/users/:userId/unban',
-      isAuthenticated(true, 'airlink.admin.servers.view'),
+      "/admin/queue/users/:userId/unban",
+      isAuthenticated(true, "airlink.admin.servers.view"),
       async (req: Request, res: Response) => {
         try {
           const userId = getParamAsNumber(req.params.userId);
           if (isNaN(userId)) {
-            res.status(400).json({ error: 'Invalid user ID' });
+            res.status(400).json({ error: "Invalid user ID" });
             return;
           }
           const unbanned = await runtimeStartQueue.unbanUserFromQueue(userId);
           res.json({ unbanned });
         } catch (error: unknown) {
-          logger.error('Error unbanning user from queue:', error);
-          res.status(500).json({ error: 'Failed to unban user from queue' });
+          logger.error("Error unbanning user from queue:", error);
+          res.status(500).json({ error: "Failed to unban user from queue" });
         }
       },
     );

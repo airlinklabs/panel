@@ -1,17 +1,16 @@
-import { getSettings } from '../../handlers/settingsCache';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
-import type { Module } from '../../handlers/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import logger from '../../handlers/logger';
-import { registerPermission } from '../../handlers/permissions';
-import { getParamAsNumber } from '../../utils/typeHelpers';
-import crypto from 'crypto';
-import { generateApiKey } from '../../utils/apiKey';
-import { logActivity } from '../../handlers/utils/activity/activityLogger';
-
-const MAX_API_KEYS_PER_USER = 25;
+import { getSettings } from "../../handlers/settingsCache";
+import type { Request, Response } from "express";
+import { Router } from "express";
+import type { Module } from "../../handlers/moduleInit";
+import prisma from "../../db";
+import { isAuthenticated } from "../../handlers/utils/auth/authUtil";
+import logger from "../../handlers/logger";
+import { registerPermission } from "../../handlers/permissions";
+import { getParamAsNumber } from "../../utils/typeHelpers";
+import crypto from "crypto";
+import { generateApiKey } from "../../utils/apiKey";
+import { logActivity } from "../../handlers/utils/activity/activityLogger";
+import { MAX_API_KEYS_PER_USER } from "../../config/auth";
 
 function sha256(value: string): string {
   return crypto.createHash("sha256").update(value).digest("hex");
@@ -49,7 +48,7 @@ const coreModule: Module = {
       "/admin/api/docs",
       isAuthenticated(true, "airlink.admin.api.docs.view"),
       async (req: Request, res: Response) => {
-        res.redirect('/admin/apikeys');
+        res.redirect("/admin/apikeys");
       },
     );
 

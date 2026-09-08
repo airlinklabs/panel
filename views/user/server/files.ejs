@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Files' }) %>
+<%- include('../../components/header', { title: t('files') }) %>
 <style>
   .al-file-panel { contain: layout paint; }
   .al-file-row {
@@ -77,38 +77,38 @@ function escJS(val) {
       <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-4">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
-            <%- include('../../components/serverHeader') %>
-            <%- include('../../components/serverMeta') %>
+            <%- include('../../components/server-header') %>
+            <%- include('../../components/server-meta') %>
           </div>
           <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
           <div class="flex flex-wrap gap-1.5 shrink-0">
             <button id="createFile" onclick="openCreateFileModal()" type="button"
                 class="al-btn-secondary">
                 <%- icon('file-plus', { class: 'size-3.5 inline-flex mr-1' }) %>
-                New File
+                <%= t('newFile') %>
             </button>
 
             <button id="createFolder" onclick="openCreateFolderModal()" type="button"
                 class="al-btn-secondary">
                 <%- icon('folder-plus', { class: 'size-3.5 inline-flex mr-1' }) %>
-                New Folder
+                <%= t('newFolder') %>
             </button>
 
             <button id="uploadFile" onclick="openUploadFileModal()" type="button"
                 class="al-btn-secondary">
                 <%- icon('upload', { class: 'size-3.5 inline-flex mr-1' }) %>
-                Upload File
+                <%= t('uploadFile') %>
             </button>
 
             <button id="pullFile" onclick="openPullFileModal()" type="button"
                 class="al-btn-secondary">
                 <%- icon('download', { class: 'size-3.5 inline-flex mr-1' }) %>
-                Pull From URL
+                <%= t('pullFromUrl') %>
             </button>
 
             <button onclick="refreshFileList()" type="button" class="al-btn-secondary">
                 <%- icon('refresh-cw', { class: 'size-3.5 inline-flex mr-1' }) %>
-                Refresh
+                <%= t('refresh') %>
             </button>
 
               <%- include('../../components/sftp', { server: server }) %>
@@ -122,7 +122,7 @@ function escJS(val) {
       <!-- Daemon down message removed as requested -->
 
       <!-- Server Template -->
-      <%- include('../../components/serverTemplate') %>
+      <%- include('../../components/server-template') %>
 
       <div id="server-page-body">
 
@@ -133,11 +133,11 @@ function escJS(val) {
           <%- icon('triangle-alert', { class: 'h-4 w-4', strokeWidth: 2, style: 'color:var(--theme-danger);' }) %>
         </div>
         <div>
-          <h3 class="text-[13px] font-medium" style="color:var(--theme-danger);">Connection Error</h3>
+          <h3 class="text-[13px] font-medium" style="color:var(--theme-danger);"><%= t('connectionError') %></h3>
           <p class="text-[11px]" style="color:var(--theme-danger);"><%= errorMessage.message %></p>
           <button type="button" onclick="window.location.reload()" class="al-btn-danger mt-1.5 px-2.5 py-1 text-[11px] rounded-lg transition-colors inline-flex items-center gap-1.5">
             <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
-            Retry Connection
+            <%= t('retryConnection') %>
           </button>
         </div>
       </div>
@@ -153,14 +153,14 @@ function escJS(val) {
               <%- icon('wifi-off', { class: 'size-5', strokeWidth: 1.5 }) %>
               </div>
             </div>
-            <h2 class="text-base font-semibold" style="color:var(--theme-text-strong)">Node's gone quiet — file management is on hold until it's back.</h2>
+            <h2 class="text-base font-semibold" style="color:var(--theme-text-strong)"><%= t('nodeOfflineTitle') %></h2>
             <p class="mt-1.5 text-[13px] max-w-md mx-auto" style="color:var(--theme-text-muted)">
-              The daemon appears to be offline. File management is unavailable until the connection is restored.
+              <%= t('nodeOfflineDesc') %>
             </p>
             <div class="mt-4">
               <button type="button" onclick="window.location.reload()" class="al-btn-primary px-3 py-1.5 text-[13px] rounded-lg inline-flex items-center gap-1.5">
                 <%- icon('refresh-cw', { class: 'size-3.5', strokeWidth: 1.5 }) %>
-                Retry Connection
+                <%= t('retryConnection') %>
               </button>
             </div>
           </div>
@@ -217,16 +217,16 @@ function escJS(val) {
                 <th class="px-3 py-2 text-left w-10" scope="col">
                   <input type="checkbox" id="selectAll" class="form-checkbox h-3.5 w-3.5 rounded transition file-checkbox" aria-label="Select all files">
                 </th>
-                <th class="al-table-th px-3 py-2 text-left" scope="col">Name</th>
-                <th class="al-table-th px-3 py-2 text-left w-24" scope="col">Size</th>
-                <th class="al-table-th px-3 py-2 text-left w-32 hidden md:table-cell" scope="col">Modified</th>
+                <th class="al-table-th px-3 py-2 text-left" scope="col"><%= t('name') %></th>
+                <th class="al-table-th px-3 py-2 text-left w-24" scope="col"><%= t('size') %></th>
+                <th class="al-table-th px-3 py-2 text-left w-32 hidden md:table-cell" scope="col"><%= t('modified') %></th>
               </tr>
             </thead>
             <tbody id="fileTableBody">
               <%- include('./files-rows', { files, currentPath, server }) %>
             </tbody>
           </table>
-          <%- include('../../components/ui/al-pagination', { total: files.length, pageSize: 50 }) %>
+          <%- include('../../components/ui/al-pagination', { total: files.length, pageSize: filesPageSize }) %>
         </div>
       </div>
       <% } %>
@@ -239,23 +239,23 @@ function escJS(val) {
    <div id="floatingActionBar" class="fixed bottom-14 lg:bottom-0 right-0 z-40 py-3.5 px-6 flex items-center justify-between gap-4 left-0 lg:left-60 translate-y-full transition-transform duration-300 ease-out shadow-lg" style="background:var(--theme-bg-card); border-top:1px solid var(--theme-border);">
      <div class="flex items-center gap-2.5">
        <%- icon('check-square', { size: 15, class: 'shrink-0' }) %>
-       <span id="selectedFilesCount" class="text-sm font-medium" style="color:var(--theme-text-strong)">0 files selected</span>
+        <span id="selectedFilesCount" class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('filesSelected') %></span>
      </div>
      <div class="flex items-center gap-2">
        <button type="button" id="massRenameBtn"
          class="al-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
-         <%- icon('pencil', { size: 13, class: 'shrink-0' }) %>
-         Rename
-       </button>
-       <button type="button" id="massArchiveBtn"
-         class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
-         <%- icon('file-archive', { size: 13, class: 'shrink-0' }) %>
-         Archive
-       </button>
-       <button type="button" id="massDeleteBtn"
-         class="al-btn-danger inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
-         <%- icon('trash-2', { size: 13, class: 'shrink-0' }) %>
-         Delete
+          <%- icon('pencil', { size: 13, class: 'shrink-0' }) %>
+          <%= t('rename') %>
+        </button>
+        <button type="button" id="massArchiveBtn"
+          class="al-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
+          <%- icon('file-archive', { size: 13, class: 'shrink-0' }) %>
+          <%= t('archive') %>
+        </button>
+        <button type="button" id="massDeleteBtn"
+          class="al-btn-danger inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium">
+          <%- icon('trash-2', { size: 13, class: 'shrink-0' }) %>
+          <%= t('delete') %>
        </button>
        <button type="button" id="dismissSelectionBtn"
          class="inline-flex items-center justify-center w-7 h-7 rounded-lg transition ml-1"
@@ -271,8 +271,8 @@ function escJS(val) {
     <div id="moveModalPanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
       <div class="flex justify-between items-center px-6 py-4 border-b">
         <div>
-          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Move file</h2>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Enter the destination path. Use / for subdirectories.</p>
+          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('moveFile') %></h2>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('moveFileDesc') %></p>
         </div>
         <button type="button" onclick="closeMoveModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
@@ -287,11 +287,11 @@ function escJS(val) {
       <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closeMoveModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
           <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Cancel
+          <%= t('cancel') %>
         </button>
         <button type="button" onclick="confirmMove()" class="al-btn-primary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
           <%- icon('move-right', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Move
+          <%= t('move') %>
         </button>
       </div>
     </div>
@@ -302,7 +302,7 @@ function escJS(val) {
     <div id="massDeleteModalPanel" class="al-sheet-panel rounded-2xl shadow-xl w-full max-w-sm mx-4 will-change-transform max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
       <div class="flex justify-between items-center px-6 py-4 border-b">
         <div>
-          <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Confirm Mass Deletion</p>
+          <p class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('confirmMassDeletion') %></p>
         </div>
         <button type="button" onclick="closeMassDeleteModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
@@ -314,11 +314,11 @@ function escJS(val) {
       <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closeMassDeleteModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
           <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Cancel
+          <%= t('cancel') %>
         </button>
         <button type="button" id="confirmMassDelete" class="al-btn-danger px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
           <%- icon('trash-2', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Delete
+          <%= t('delete') %>
         </button>
       </div>
     </div>
@@ -328,8 +328,8 @@ function escJS(val) {
     <div id="createFileModalPanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
       <div class="flex justify-between items-center px-6 py-4 border-b">
         <div>
-          <h2 id="createModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">New File</h2>
-          <p id="createModalHint" class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Use / to create files inside new folders.</p>
+          <h2 id="createModalTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('newFile') %></h2>
+          <p id="createModalHint" class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('newFileDesc') %></p>
         </div>
         <button type="button" onclick="closeCreateFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
@@ -345,11 +345,11 @@ function escJS(val) {
       <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closeCreateFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
           <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Cancel
+          <%= t('cancel') %>
         </button>
         <button type="button" onclick="confirmCreateFile()" class="al-btn-primary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
           <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Create
+          <%= t('create') %>
         </button>
       </div>
     </div>
@@ -362,8 +362,8 @@ function escJS(val) {
     <div id="pullFileModalPanel" class="al-sheet-panel rounded-2xl max-w-md w-full will-change-transform shadow-xl max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
       <div class="flex justify-between items-center px-6 py-4 border-b">
         <div>
-          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Pull File From URL</h2>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Download a file from a public URL into the current directory.</p>
+          <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('pullFileFromUrl') %></h2>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('pullFileDesc') %></p>
         </div>
         <button type="button" onclick="closePullFileModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
@@ -371,7 +371,7 @@ function escJS(val) {
       </div>
       <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
         <div class="mb-4">
-          <label for="pullUrlInput" class="mb-1.5 block text-xs font-medium" style="color:var(--theme-text-muted)">File URL</label>
+          <label for="pullUrlInput" class="mb-1.5 block text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('fileUrl') %></label>
           <input type="url" id="pullUrlInput" class="al-input w-full font-mono" placeholder="https://example.com/file.zip" autocomplete="off" spellcheck="false">
           <p id="pullUrlPreview" class="mt-2 text-xs font-mono hidden" style="color:var(--theme-text-muted)"></p>
         </div>
@@ -379,11 +379,11 @@ function escJS(val) {
       <div class="flex gap-2 px-6 py-4 border-t justify-end">
         <button type="button" onclick="closePullFileModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2">
           <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-          Cancel
+          <%= t('cancel') %>
         </button>
         <button type="button" id="pullButton" class="al-btn-primary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
           <%- icon('download', { class: 'size-4', strokeWidth: 1.5 }) %>
-          Pull
+          <%= t('pull') %>
         </button>
       </div>
     </div>
@@ -395,16 +395,16 @@ function escJS(val) {
       </div>
 </main>
 
-<%- include('../../components/loadingPopup')%>
-<%- include('../../components/imageViewer')%>
+<%- include('../../components/loading-popup')%>
+<%- include('../../components/image-viewer')%>
 
 <!-- Rename Modal -->
 <div id="renameModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none ">
   <div id="renameModalPanel" class="al-sheet-panel rounded-2xl w-full sm:max-w-md shadow-xl will-change-transform sm:mx-4 max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
     <div class="flex justify-between items-center px-6 py-4 border-b">
       <div>
-        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)">Rename</h2>
-        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Use / to move the file into a different folder.</p>
+        <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('rename') %></h2>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('renameDesc') %></p>
       </div>
       <button type="button" onclick="closeRenameModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
@@ -421,11 +421,11 @@ function escJS(val) {
     <div class="flex gap-2 px-6 py-4 border-t justify-end">
       <button type="button" onclick="closeRenameModal()" class="al-btn-secondary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
         <%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>
-        Cancel
+        <%= t('cancel') %>
       </button>
       <button type="button" onclick="confirmRename()" class="al-btn-primary px-4 py-2 text-xs font-medium active:scale-95 inline-flex items-center gap-2">
         <%- icon('pencil', { class: 'size-3', strokeWidth: 1.5 }) %>
-        Rename
+        <%= t('rename') %>
       </button>
     </div>
   </div>
@@ -950,7 +950,7 @@ function openCreateFileModal() {
           showToast('Upload timed out. Try a smaller file.', 'error');
         };
 
-        xhr.timeout = 300000;
+        xhr.timeout = <%= fileUploadTimeoutMs %>;
 
         xhr.send(formData);
       } catch (error) {

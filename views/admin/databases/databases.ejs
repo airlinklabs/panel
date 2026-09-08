@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: req.translations.adminDatabasesTitle || 'Databases' }) %>
+<%- include('../../components/header', { title: t('adminDatabasesTitle') }) %>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
@@ -12,9 +12,9 @@
         { label: req.translations.adminDatabasesTitle || 'Databases' }
       ] }) %>
       <%- include('../../components/ui/page-header', {
-        title: req.translations.adminDatabasesTitle || 'Database Hosts',
-        description: req.translations.adminDatabasesText || 'Manage MySQL hosts used to provision databases for servers.',
-        actions: '<a href="/admin/databases/create" class="al-btn-primary inline-flex items-center gap-1.5">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + (req.translations.addDatabaseHost || 'Add Host') + '</a>'
+        title: t('adminDatabasesTitle'),
+        description: t('adminDatabasesText'),
+        actions: '<a href="/admin/databases/create" class="al-btn-primary inline-flex items-center gap-1.5">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + t('addDatabaseHost') + '</a>'
       }) %>
 
       <div class="al-page-body">
@@ -23,8 +23,8 @@
           <div class="al-card rounded-xl p-5">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.adminDbAutoHostTitle || 'Auto-generate database host' %></h3>
-                <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.adminDbAutoHostDesc || 'Creates a MySQL host from the panel environment defaults (MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD) when none exists, then verifies the connection.' %></p>
+                <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('adminDbAutoHostTitle') %></h3>
+                <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)"><%= t('adminDbAutoHostDesc') %></p>
               </div>
               <button type="button" class="al-btn-primary shrink-0" id="autoHostBtn"
                 hx-post="/api/v2/admin/databases/auto-host"
@@ -41,8 +41,8 @@
           <div class="al-card rounded-xl p-5">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= req.translations.adminDbAutoBucketTitle || 'Auto-generate S3 bucket' %></h3>
-                <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)"><%= req.translations.adminDbAutoBucketDesc || 'Creates the bucket configured in Admin Settings on your S3-compatible endpoint if it does not exist yet.' %></p>
+                <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('adminDbAutoBucketTitle') %></h3>
+                <p class="mt-1 text-xs leading-relaxed" style="color:var(--theme-text-muted)"><%= t('adminDbAutoBucketDesc') %></p>
               </div>
               <button type="button" class="al-btn-primary shrink-0" id="autoBucketBtn"
                 hx-post="/api/v2/admin/databases/auto-bucket"
@@ -58,13 +58,13 @@
         </div>
 
         <% if (req.query.err == "none") { %>
-          <%- include('../../components/ui/alert', { type: 'success', message: req.translations.databaseHostCreated || 'Database host created!', detail: req.translations.databaseHostCreatedDesc || 'The host has been saved and is ready to use.' }) %>
+          <%- include('../../components/ui/alert', { type: 'success', message: t('databaseHostCreated'), detail: t('databaseHostCreatedDesc') }) %>
         <% } %>
         <% if (req.query.err == "missing_fields") { %>
-          <%- include('../../components/ui/alert', { type: 'danger', message: req.translations.missingFields || 'Missing fields', detail: req.translations.missingFieldsDesc || 'Name, host, username and password are required.' }) %>
+          <%- include('../../components/ui/alert', { type: 'danger', message: t('missingFields'), detail: t('missingFieldsDesc') }) %>
         <% } %>
         <% if (req.query.err == "create_failed") { %>
-          <%- include('../../components/ui/alert', { type: 'danger', message: req.translations.createFailed || 'Creation failed', detail: req.translations.createFailedDesc || 'Could not save the database host. Try again.' }) %>
+          <%- include('../../components/ui/alert', { type: 'danger', message: t('createFailed'), detail: t('createFailedDesc') }) %>
         <% } %>
 
         <div id="admin-databases-status"></div>

@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Dashboard' }) %>
+<%- include('../../components/header', { title: t('adminNodesTitle') }) %>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
@@ -14,10 +14,10 @@
         { label: 'Nodes' }
       ] }) %>
       <%- include('../../components/ui/page-header', {
-        title: req.translations.adminNodesTitle,
-        description: req.translations.adminNodesText,
-        actions: '<a href="#locations" class="al-btn-secondary text-sm">' + icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) + 'Locations</a>' +
-                 '<button id="createButton" type="button" class="al-btn-primary" @click="location.href=\'/admin/nodes/create\'">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
+        title: t('adminNodesTitle'),
+        description: t('adminNodesText'),
+        actions: '<a href="#locations" class="al-btn-secondary text-sm">' + icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) + ' ' + t('navLocations') + '</a>' +
+                 '<button id="createButton" type="button" class="al-btn-primary" @click="location.href=\'/admin/nodes/create\'">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + t('createNewNode') + '</button>'
       }) %>
 
       <div class="al-page-body" data-al-tabs data-tabs-default="nodes" data-tabs-hash>
@@ -31,34 +31,34 @@
 
         <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 mt-6">
           <div class="al-card">
-            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= req.translations.totalNodes %></h2>
+            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= t('totalNodes') %></h2>
             <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="totalNodesTotal"><%= nodes.length %></p>
             <% if (nodes.length > 0) { %>
-            <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineNodes %>: <span id="onlineNodesTotal"><%= nodes.filter(node => node.status === 'Online').length %></span></p>
+            <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('onlineNodes') %>: <span id="onlineNodesTotal"><%= nodes.filter(node => node.status === 'Online').length %></span></p>
             <% } else { %>
-              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noNodesAvailable || 'No nodes available' %></p>
+              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('noNodesAvailable') %></p>
             <% } %>
           </div>
           <div class="al-card">
-            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);">Servers</h2>
+            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= t('servers') %></h2>
             <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="totalNodeInstancesTotal">
               <%= nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) %>
             </p>
             <% const totalInstances = nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0); %>
             <% if (totalInstances > 0 && nodes.length > 0) { %>
               <p class="text-xs mt-2" style="color:var(--theme-text-muted);">
-                <%= req.translations.averageInstanceDensity %>:
+                <%= t('averageInstanceDensity') %>:
                 <span id="avgNodeInstancesTotal"><%= (totalInstances / nodes.length).toFixed(2) %></span>
               </p>
             <% } else { %>
-              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noInstancesAvailable %></p>
+              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('noInstancesAvailable') %></p>
             <% } %>
           </div>
         </div>
 
         <!-- notifications -->
         <% if (req.query.err == "none") { %>
-          <%- include('../../components/ui/alert', { type: 'success', message: req.translations.success + '!', detail: req.translations.actionCompleted }) %>
+          <%- include('../../components/ui/alert', { type: 'success', message: t('success') + '!', detail: t('actionCompleted') }) %>
         <% } %>
 
         <!-- Daemon offline warning -->
@@ -66,12 +66,12 @@
           <div class="al-alert-danger mb-5">
             <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
             <div class="flex-1">
-              <p class="font-medium">Connection Error</p>
-              <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">One or more nodes are offline. Some information may be unavailable.</p>
+              <p class="font-medium"><%= t('connectionError') %></p>
+              <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('connectionErrorDesc') %></p>
             </div>
             <button type="button" @click="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
               <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
-              Retry Connection
+              <%= t('retry') %>
             </button>
           </div>
         <% } %>
@@ -97,7 +97,7 @@
               </div>
               <div>
                 <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);" id="totalLocationsCount"><%= locations.length %></p>
-                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Locations</p>
+                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);"><%= t('locations') %></p>
               </div>
             </div>
             <div class="al-card p-5 flex items-center gap-4">
@@ -106,7 +106,7 @@
               </div>
               <div>
                 <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);" id="nodesAssignedTotal"><%= nodes.filter(n => n.locationId).length %></p>
-                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Nodes assigned</p>
+                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);"><%= t('nodesAssigned') %></p>
               </div>
             </div>
             <div class="al-card p-5 flex items-center gap-4">
@@ -115,13 +115,13 @@
               </div>
               <div>
                 <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);" id="nodesUnassignedTotal"><%= nodes.filter(n => !n.locationId).length %></p>
-                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Nodes without a location</p>
+                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);"><%= t('nodesWithoutLocation') %></p>
               </div>
             </div>
           </div>
 
           <div class="al-card">
-            <h3 class="al-card-header flex items-center gap-2"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Create Location</h3>
+            <h3 class="al-card-header flex items-center gap-2"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('createLocation') %></h3>
             <div class="p-5">
               <div id="admin-locations-status"></div>
               <form id="createLocationForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end"
@@ -154,18 +154,18 @@
                 }}">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div>
-                  <label class="al-label" for="locName">Name</label>
+                  <label class="al-label" for="locName"><%= t('name') %></label>
                   <input id="locName" name="name" type="text" placeholder="US East" class="al-input" required x-model="name">
                 </div>
                 <div>
-                  <label class="al-label" for="locCode">Short code</label>
+                  <label class="al-label" for="locCode"><%= t('shortCode') %></label>
                   <input id="locCode" name="shortCode" type="text" placeholder="us-east" class="al-input" autocapitalize="off" spellcheck="false" required x-model="shortCode">
                 </div>
                 <div class="lg:col-span-2 flex items-end">
                   <button type="button" @click="submit()" class="al-btn-primary w-full sm:w-auto" :disabled="saving">
                     <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-                    <span x-show="!saving">Create Location</span>
-                    <span x-show="saving">Creating...</span>
+                    <span x-show="!saving"><%= t('createLocation') %></span>
+                    <span x-show="saving"><%= t('creating') %></span>
                   </button>
                 </div>
               </form>
@@ -173,7 +173,7 @@
           </div>
 
           <div class="al-card">
-            <h3 class="al-card-header flex items-center gap-2"><%- icon('map', { class: 'size-4', strokeWidth: 1.5 }) %>All Locations</h3>
+            <h3 class="al-card-header flex items-center gap-2"><%- icon('map', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('allLocations') %></h3>
             <div class="p-5">
               <%- include('../../fragments/admin/locations/location-list', { locations }) %>
             </div>

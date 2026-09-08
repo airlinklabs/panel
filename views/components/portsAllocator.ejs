@@ -50,7 +50,7 @@
 (function () {
   if (window.PortsAllocator) return;
 
-  const DEFAULT_GAME_PORT = 25565;
+  const DEFAULT_GAME_PORT = <%= defaultGamePort %>;
 
   const modal = document.getElementById('paModal');
   const panel = document.getElementById('paPanel');

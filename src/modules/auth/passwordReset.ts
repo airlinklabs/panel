@@ -10,10 +10,16 @@ import { sendPasswordReset } from "../../handlers/utils/core/mailer";
 import { getClientIp } from "../../utils/ip";
 import { createRedisRateLimit } from "../../handlers/utils/security/redisRateLimit";
 import { logActivity } from "../../handlers/utils/activity/activityLogger";
+import {
+  FORGOT_PASSWORD_WINDOW_MS,
+  RESET_PASSWORD_WINDOW_MS,
+  RESET_TOKEN_EXPIRY_MS,
+} from "../../config/timeouts";
+import { BCRYPT_SALT_ROUNDS } from "../../config/auth";
 
 // 3 requests per hour per IP — enough for a legitimate user, too few for abuse.
 const forgotRateLimit = createRedisRateLimit({
-  windowMs: 60 * 60 * 1000,
+  windowMs: FORGOT_PASSWORD_WINDOW_MS,
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
@@ -28,7 +34,7 @@ const forgotRateLimit = createRedisRateLimit({
 // (token-enumeration / DoS defense). Returns 429 JSON rather than redirecting
 // so API callers get a machine-readable response.
 const resetRateLimit = createRedisRateLimit({
-  windowMs: 10 * 60 * 1000,
+  windowMs: RESET_PASSWORD_WINDOW_MS,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
@@ -78,7 +84,7 @@ const passwordResetModule: Module = {
                 data: {
                   userId: user.id,
                   token,
-                  expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+                  expiresAt: new Date(Date.now() + RESET_TOKEN_EXPIRY_MS),
                 },
               });
 
@@ -173,7 +179,7 @@ const passwordResetModule: Module = {
           await prisma.users.update({
             where: { id: record.userId },
             data: {
-              password: await bcrypt.hash(password, 12),
+              password: await bcrypt.hash(password, BCRYPT_SALT_ROUNDS),
               loginAttempts: 0,
               lockedUntil: null,
             },

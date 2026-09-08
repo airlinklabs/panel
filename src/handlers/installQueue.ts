@@ -1,11 +1,10 @@
-import prisma from '../db';
-import logger from './logger';
-import { daemonRequest } from './utils/core/daemonRequest';
-import { queueer } from './queueer';
-import { getPrimaryExternalPort } from './utils/server/ports';
-import { emitRealtime, serverEvent } from './realtime/events';
-
-const INSTALL_TIMEOUT_MS = 600_000;
+import prisma from "../db";
+import logger from "./logger";
+import { daemonRequest } from "./utils/core/daemonRequest";
+import { queueer } from "./queueer";
+import { getPrimaryExternalPort } from "./utils/server/ports";
+import { emitRealtime, serverEvent } from "./realtime/events";
+import { DAEMON_TIMEOUT_REINSTALL_MS } from "../config/daemonTimeouts";
 
 export async function processQueuedServerInstalls(): Promise<void> {
   const servers = await prisma.server.findMany({
@@ -15,7 +14,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
 
   for (const server of servers) {
     emitRealtime(
-      serverEvent('server.install.started', server.UUID, {
+      serverEvent("server.install.started", server.UUID, {
         operationId: server.UUID,
         state: { queued: true, installing: true },
       }),
@@ -35,15 +34,15 @@ export async function processQueuedServerInstalls(): Promise<void> {
         env: String(
           (v as Record<string, unknown>).env_variable ??
             (v as Record<string, unknown>).env ??
-            '',
+            "",
         ),
         value: String(
           (v as Record<string, unknown>).value ??
             (v as Record<string, unknown>).default_value ??
-            '',
+            "",
         ),
       }));
-      let serverPort: string | number = '';
+      let serverPort: string | number = "";
       try {
         const primaryExternalPort = getPrimaryExternalPort(server.Ports);
         if (primaryExternalPort) {
@@ -52,9 +51,9 @@ export async function processQueuedServerInstalls(): Promise<void> {
       } catch {
         /* keep fallback */
       }
-      serverEnv.push({ env: 'SERVER_PORT', value: serverPort });
-      serverEnv.push({ env: 'SERVER_MEMORY', value: String(server.Memory) });
-      serverEnv.push({ env: 'SERVER_CPU', value: String(server.Cpu) });
+      serverEnv.push({ env: "SERVER_PORT", value: serverPort });
+      serverEnv.push({ env: "SERVER_MEMORY", value: String(server.Memory) });
+      serverEnv.push({ env: "SERVER_CPU", value: String(server.Cpu) });
     } catch (err) {
       logger.error(`Error parsing Variables for server ${server.id}:`, err);
       await prisma.server.update({
@@ -74,9 +73,9 @@ export async function processQueuedServerInstalls(): Promise<void> {
 
     if (!server.image?.scripts) {
       emitRealtime(
-        serverEvent('server.install.failed', server.UUID, {
+        serverEvent("server.install.failed", server.UUID, {
           operationId: server.UUID,
-          error: { message: 'No install scripts for this image' },
+          error: { message: "No install scripts for this image" },
         }),
       );
       await prisma.server.update({
@@ -99,7 +98,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
     }
 
     try {
-      if (scripts.installation && typeof scripts.installation === 'object') {
+      if (scripts.installation && typeof scripts.installation === "object") {
         const inst = scripts.installation as {
           script: string;
           container: string;
@@ -109,21 +108,21 @@ export async function processQueuedServerInstalls(): Promise<void> {
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
-          method: 'POST',
-          path: '/container/installer',
+          method: "POST",
+          path: "/container/installer",
           body: {
             id: server.UUID,
             script: inst.script,
             container: inst.container,
-            entrypoint: inst.entrypoint || 'bash',
+            entrypoint: inst.entrypoint || "bash",
             env,
           },
-          timeout: INSTALL_TIMEOUT_MS,
+          timeout: DAEMON_TIMEOUT_REINSTALL_MS,
         });
       } else if (Array.isArray(scripts.install)) {
         let dockerImageValue: string | undefined;
         try {
-          const parsed = JSON.parse(server.dockerImage || '{}');
+          const parsed = JSON.parse(server.dockerImage || "{}");
           dockerImageValue = Object.values(parsed)[0] as string | undefined;
         } catch {
           /* leave undefined */
@@ -133,8 +132,8 @@ export async function processQueuedServerInstalls(): Promise<void> {
           nodeAddress: server.node.address,
           nodePort: server.node.port,
           nodeKey: server.node.key,
-          method: 'POST',
-          path: '/container/install',
+          method: "POST",
+          path: "/container/install",
           body: {
             id: server.UUID,
             image: dockerImageValue,
@@ -148,7 +147,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
               }),
             ),
           },
-          timeout: INSTALL_TIMEOUT_MS,
+          timeout: DAEMON_TIMEOUT_REINSTALL_MS,
         });
       }
       await prisma.server.update({
@@ -156,7 +155,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
         data: { Queued: false },
       });
       emitRealtime(
-        serverEvent('server.install.completed', server.UUID, {
+        serverEvent("server.install.completed", server.UUID, {
           operationId: server.UUID,
           state: { installing: false, queued: false },
         }),
@@ -172,11 +171,11 @@ export async function processQueuedServerInstalls(): Promise<void> {
         data: { Queued: false, Installing: false },
       });
       emitRealtime(
-        serverEvent('server.install.failed', server.UUID, {
+        serverEvent("server.install.failed", server.UUID, {
           operationId: server.UUID,
           error: {
             message:
-              err instanceof Error ? err.message : 'Install dispatch failed',
+              err instanceof Error ? err.message : "Install dispatch failed",
           },
         }),
       );
@@ -195,7 +194,7 @@ export function reenqueueQueuedInstalls(): void {
         await processQueuedServerInstalls();
       }
     } catch (error) {
-      logger.error('Error recovering queued installs on boot:', error);
+      logger.error("Error recovering queued installs on boot:", error);
     }
   });
 }

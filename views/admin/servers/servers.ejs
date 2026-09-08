@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Servers' }) %>
+<%- include('../../components/header', { title: t('adminServersTitle') }) %>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
@@ -10,21 +10,21 @@
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="serverManager()">
 
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Servers' }
+        { label: t('admin') },
+        { label: t('breadcrumbServers') }
       ] }) %>
 
       <!-- Page header -->
       <%- include('../../components/ui/page-header', {
-        title: req.translations.adminServersTitle,
-        description: req.translations.adminServersText,
-        actions: '<a href="/admin/servers/create" class="al-btn-primary inline-flex items-center gap-1.5">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewServer + '</a>'
+        title: t('adminServersTitle'),
+        description: t('adminServersText'),
+        actions: '<a href="/admin/servers/create" class="al-btn-primary inline-flex items-center gap-1.5">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + t('createNewServer') + '</a>'
       }) %>
 
       <div class="al-page-body">
 
         <% if (req.query.err == "none") { %>
-          <%- include('../../components/ui/alert', { type: 'success', message: req.translations.actionCompleted }) %>
+          <%- include('../../components/ui/alert', { type: 'success', message: t('actionCompleted') }) %>
         <% } %>
 
         <!-- Sentinel — watched to know when toolbar scrolls off screen -->
@@ -35,17 +35,17 @@
           <div style="min-height:0;overflow:hidden">
             <div id="bulkToolbarContent" class="mb-3 pb-0.5" style="opacity:0;transition:opacity 0.28s ease">
               <div class="al-card flex items-center gap-2 p-2.5">
-                <span class="selection-count text-[13px] font-medium mr-1" style="color:var(--theme-text);">0 selected</span>
+                <span class="selection-count text-[13px] font-medium mr-1" style="color:var(--theme-text);"><%= t('selected') %></span>
                 <div class="h-3.5 w-px mx-1" style="background:var(--theme-border);"></div>
                 <button type="button" @click="bulkRadarScan()"
                   class="al-btn-secondary text-[11px]">
                   <%- icon('radar', { size: 12, class: 'shrink-0' }) %>
-                  Radar Scan
+                  <%= t('radarScan') %>
                 </button>
                 <button type="button" @click="bulkDelete()"
                   class="al-btn-danger text-[11px] ml-auto">
                   <%- icon('trash-2', { size: 12, class: 'shrink-0' }) %>
-                  Delete
+                  <%= t('delete') %>
                 </button>
               </div>
             </div>
@@ -56,17 +56,17 @@
         <div id="floatingToolbar"
           style="position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:40;opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1)">
           <div class="al-card flex items-center gap-2 p-2.5 shadow-xl">
-            <span class="selection-count text-[13px] font-medium mr-1" style="color:var(--theme-text);">0 selected</span>
+            <span class="selection-count text-[13px] font-medium mr-1" style="color:var(--theme-text);"><%= t('selected') %></span>
             <div class="h-3.5 w-px mx-1" style="background:var(--theme-border);"></div>
             <button type="button" @click="bulkRadarScan()"
               class="al-btn-secondary text-[11px]">
               <%- icon('radar', { size: 12, class: 'shrink-0' }) %>
-              Radar Scan
+              <%= t('radarScan') %>
             </button>
             <button type="button" @click="bulkDelete()"
               class="al-btn-danger text-[11px] ml-auto">
               <%- icon('trash-2', { size: 12, class: 'shrink-0' }) %>
-              Delete
+              <%= t('delete') %>
             </button>
           </div>
         </div>
@@ -76,9 +76,9 @@
           <% if (servers.length === 0) { %>
             <%- include('../../components/ui/empty-state', {
               iconName: 'server',
-              title: 'No servers yet',
-              description: 'Create your first server to get started.',
-              action: '<a href="/admin/servers/create" class="al-btn-primary">' + req.translations.createNewServer + '</a>'
+              title: t('noServersYet'),
+              description: t('createFirstServer'),
+              action: '<a href="/admin/servers/create" class="al-btn-primary">' + t('createNewServer') + '</a>'
             }) %>
           <% } else { %>
           <table class="al-table">
@@ -94,11 +94,11 @@
             <thead class="al-table-head">
               <tr>
                 <th scope="col" class="al-table-th w-10"></th>
-                <th scope="col" class="al-table-th"><%= req.translations.name %></th>
-                <th scope="col" class="al-table-th"><%= req.translations.Owner %></th>
-                <th scope="col" class="al-table-th"><%= req.translations.Node %></th>
-                <th scope="col" class="al-table-th"><%= req.translations.connection %></th>
-                <th scope="col" class="al-table-th"><%= req.translations.Status %></th>
+                <th scope="col" class="al-table-th"><%= t('name') %></th>
+                <th scope="col" class="al-table-th"><%= t('Owner') %></th>
+                <th scope="col" class="al-table-th"><%= t('Node') %></th>
+                <th scope="col" class="al-table-th"><%= t('connection') %></th>
+                <th scope="col" class="al-table-th"><%= t('Status') %></th>
                 <th scope="col" class="al-table-th"></th>
               </tr>
             </thead>
@@ -140,20 +140,20 @@
                 <td class="al-table-td">
                   <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
                     style="<%= server.Suspended ? 'background:var(--theme-warning-bg);color:var(--theme-warning)' : 'background:var(--theme-success-bg);color:var(--theme-success)' %>">
-                    <%= server.Suspended ? 'Suspended' : 'Enabled' %>
+                    <%= server.Suspended ? t('suspended') : t('enabled') %>
                   </span>
                 </td>
                 <td class="al-table-td">
                   <div class="flex items-center gap-1.5">
-                    <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()" title="Open console" aria-label="Open console"
+                    <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()" title="<%= t('openConsole') %>" aria-label="<%= t('openConsole') %>"
                       class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
                       <%- icon('external-link', { size: 16, class: 'shrink-0' }) %>
                     </a>
-                    <a href="/admin/servers/edit/<%= server.id %>" onclick="event.stopPropagation()" title="Edit" aria-label="Edit server"
+                    <a href="/admin/servers/edit/<%= server.id %>" onclick="event.stopPropagation()" title="<%= t('edit') %>" aria-label="<%= t('editServer') %>"
                       class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
                       <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
                     </a>
-                    <button type="button" @click="event.stopPropagation(); deleteServer('<%= server.id %>', '<%= server.name %>')" title="Delete" aria-label="Delete server"
+                    <button type="button" @click="event.stopPropagation(); deleteServer('<%= server.id %>', '<%= server.name %>')" title="<%= t('delete') %>" aria-label="<%= t('deleteServer') %>"
                       class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);">
                       <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                     </button>
@@ -171,7 +171,7 @@
   </div>
 </main>
 
-<%- include('../../components/loadingPopup') %>
+<%- include('../../components/loading-popup') %>
 
 <!-- Radar scan modal -->
 <div id="radarScanModal" class="al-sheet-overlay fixed inset-0 z-50 hidden">
@@ -181,8 +181,8 @@
 
       <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
         <div>
-          <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong);" id="radarScanModalTitle">Radar Scan</h3>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);" id="radarScanModalSubtitle">Pick a script and scan the server volume</p>
+          <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong);" id="radarScanModalTitle"><%= t('radarScan') %></h3>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);" id="radarScanModalSubtitle"><%= t('radarScanDesc') %></p>
         </div>
         <button type="button" @click="closeRadarScanModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
@@ -194,17 +194,17 @@
 
         <!-- Scan mode toggle — only shown when VT key configured -->
         <div id="scanModeToggle" class="hidden mb-5">
-          <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);">Scan method</p>
+          <p class="text-xs font-medium mb-2" style="color:var(--theme-text-muted);"><%= t('scanMethod') %></p>
           <div class="flex flex-col sm:flex-row gap-2">
             <button type="button" id="modeBuiltin" @click="setScanMode('builtin')"
               class="flex-1 flex items-center gap-2 px-3 py-3 sm:py-2.5 rounded-lg border-2 text-xs font-medium transition-all min-h-[44px]" style="border-color:var(--theme-border-accent); background:var(--theme-text-strong); color:var(--theme-accent-text);">
               <%- icon('radar', { size: 14, class: 'shrink-0' }) %>
-              Built-in patterns
+              <%= t('builtinPatterns') %>
             </button>
             <button type="button" id="modeVT" @click="setScanMode('vt')"
               class="flex-1 flex items-center gap-2 px-3 py-3 sm:py-2.5 rounded-lg border-2 text-xs font-medium transition-all min-h-[44px]" style="border-color:var(--theme-border); background:var(--theme-bg-secondary); color:var(--theme-text-muted);">
               <%- icon('shield', { size: 14, class: 'shrink-0' }) %>
-              VirusTotal file scan
+              <%= t('vtFileScan') %>
             </button>
           </div>
         </div>
@@ -213,9 +213,9 @@
         <div id="builtinPickerSection">
           <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-start">
             <div class="flex-1">
-              <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);" for="scriptSelect">Script</label>
+              <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted);" for="scriptSelect"><%= t('script') %></label>
               <select id="scriptSelect" class="cs-native">
-                <option value="">Loading scripts...</option>
+                <option value=""><%= t('loadingScripts') %></option>
               </select>
               <div class="custom-select" data-for="scriptSelect"></div>
             </div>
@@ -223,7 +223,7 @@
               <button type="button" id="runScanButton" @click="runRadarScan()"
                 class="al-btn-primary w-full sm:w-auto min-h-[44px]">
                 <%- icon('radar', { size: 16, class: 'shrink-0' }) %>
-                Run Scan
+                <%= t('runScan') %>
               </button>
             </div>
           </div>

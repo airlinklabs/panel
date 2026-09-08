@@ -54,14 +54,31 @@ import {
   adminCreateMountBody,
   adminCreateApiKeyBody,
   adminUpdateApiKeyBody,
-} from '../dto';
-import { getSettings } from '../../../../handlers/settingsCache';
-import logger from '../../../../handlers/logger';
-import { redisRateLimit } from '../../../../handlers/utils/security/redisRateLimit';
-import fs from 'fs/promises';
-import path from 'path';
-import { httpGet } from '../../../../utils/http';
-import { getSystemLogs } from '../../../../services/systemLogService';
+} from "../dto";
+import { getSettings } from "../../../../handlers/settingsCache";
+import logger from "../../../../handlers/logger";
+import { redisRateLimit } from "../../../../handlers/utils/security/redisRateLimit";
+import fs from "fs/promises";
+import path from "path";
+import { httpGet } from "../../../../utils/http";
+import { getSystemLogs } from "../../../../services/systemLogService";
+import {
+  PANEL_UPDATE_API_BASE,
+  VT_API_BASE,
+  VT_GUI_FILE_URL,
+  VT_GUI_UPLOAD_URL,
+} from "../../../../config/urls";
+import {
+  VT_POLL_INTERVAL_MS,
+  DEFAULT_DAEMON_TIMEOUT_MS,
+} from "../../../../config/timeouts";
+import {
+  DAEMON_TIMEOUT_MEDIUM_MS,
+  DAEMON_TIMEOUT_VT_UPLOAD_MS,
+  DAEMON_TIMEOUT_VT_WAIT_MS,
+  DAEMON_TIMEOUT_RADAR_ZIP_MS,
+} from "../../../../config/daemonTimeouts";
+import { VT_FILE_LIMIT_BYTES } from "../../../../config/limits";
 
 const router = Router();
 
@@ -93,12 +110,12 @@ router.post(
       where: { shortCode: data.shortCode },
     });
     if (existing) {
-      return jsonError(res, 'CONFLICT', 'Short code already in use', 409);
+      return jsonError(res, "CONFLICT", "Short code already in use", 409);
     }
     const location = await prisma.location.create({ data });
     logActivity(
       req.adminUser?.id,
-      'location.created',
+      "location.created",
       undefined,
       { name: location.name },
       req.ip,
@@ -113,11 +130,11 @@ router.put(
   async (req, res) => {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) {
-      return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
+      return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
     }
     const existing = await prisma.location.findUnique({ where: { id } });
     if (!existing) {
-      return jsonError(res, 'NOT_FOUND', 'Not found', 404);
+      return jsonError(res, "NOT_FOUND", "Not found", 404);
     }
     const data = req.validatedBody as any;
     if (data.shortCode) {
@@ -125,7 +142,7 @@ router.put(
         where: { shortCode: data.shortCode },
       });
       if (dup && dup.id !== id) {
-        return jsonError(res, 'CONFLICT', 'Short code already in use', 409);
+        return jsonError(res, "CONFLICT", "Short code already in use", 409);
       }
     }
     const updated = await prisma.location.update({ where: { id }, data });
@@ -136,17 +153,17 @@ router.put(
 router.delete("/locations/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
   }
   const location = await prisma.location.findUnique({ where: { id } });
   if (!location) {
-    return jsonError(res, 'NOT_FOUND', 'Not found', 404);
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
   }
   const nodeCount = await prisma.node.count({ where: { locationId: id } });
   if (nodeCount > 0) {
     return jsonError(
       res,
-      'CONFLICT',
+      "CONFLICT",
       `Cannot delete location with ${nodeCount} nodes`,
       409,
     );
@@ -154,7 +171,7 @@ router.delete("/locations/:id", async (req, res) => {
   await prisma.location.delete({ where: { id } });
   logActivity(
     req.adminUser?.id,
-    'location.deleted',
+    "location.deleted",
     undefined,
     { name: location.name },
     req.ip,
@@ -177,7 +194,7 @@ router.post("/mounts", parseBody(adminCreateMountBody), async (req, res) => {
   const mount = await prisma.mount.create({ data });
   logActivity(
     req.adminUser?.id,
-    'mount.created',
+    "mount.created",
     undefined,
     { name: mount.name },
     req.ip,
@@ -188,11 +205,11 @@ router.post("/mounts", parseBody(adminCreateMountBody), async (req, res) => {
 router.delete("/mounts/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
   }
   const mount = await prisma.mount.findUnique({ where: { id } });
   if (!mount) {
-    return jsonError(res, 'NOT_FOUND', 'Not found', 404);
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
   }
   const serverCount = await prisma.serverMount.count({
     where: { mountId: id },
@@ -200,7 +217,7 @@ router.delete("/mounts/:id", async (req, res) => {
   if (serverCount > 0) {
     return jsonError(
       res,
-      'CONFLICT',
+      "CONFLICT",
       `Cannot delete mount used by ${serverCount} servers`,
       409,
     );
@@ -208,7 +225,7 @@ router.delete("/mounts/:id", async (req, res) => {
   await prisma.mount.delete({ where: { id } });
   logActivity(
     req.adminUser?.id,
-    'mount.deleted',
+    "mount.deleted",
     undefined,
     { name: mount.name },
     req.ip,
@@ -257,7 +274,7 @@ router.post("/apikeys", parseBody(adminCreateApiKeyBody), async (req, res) => {
   });
   logActivity(
     req.adminUser?.id,
-    'apikey.created',
+    "apikey.created",
     undefined,
     { name: data.name },
     req.ip,
@@ -271,11 +288,11 @@ router.put(
   async (req, res) => {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) {
-      return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
+      return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
     }
     const existing = await prisma.apiKey.findUnique({ where: { id } });
     if (!existing) {
-      return jsonError(res, 'NOT_FOUND', 'Not found', 404);
+      return jsonError(res, "NOT_FOUND", "Not found", 404);
     }
     const data = req.validatedBody as any;
     const updateData: Record<string, unknown> = {};
@@ -309,16 +326,16 @@ router.put(
 router.delete("/apikeys/:id", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
   }
   const existing = await prisma.apiKey.findUnique({ where: { id } });
   if (!existing) {
-    return jsonError(res, 'NOT_FOUND', 'Not found', 404);
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
   }
   await prisma.apiKey.delete({ where: { id } });
   logActivity(
     req.adminUser?.id,
-    'apikey.deleted',
+    "apikey.deleted",
     undefined,
     { name: existing.name },
     req.ip,
@@ -329,11 +346,11 @@ router.delete("/apikeys/:id", async (req, res) => {
 router.post("/apikeys/:id/toggle", async (req, res) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid ID", 400);
   }
   const existing = await prisma.apiKey.findUnique({ where: { id } });
   if (!existing) {
-    return jsonError(res, 'NOT_FOUND', 'Not found', 404);
+    return jsonError(res, "NOT_FOUND", "Not found", 404);
   }
   const updated = await prisma.apiKey.update({
     where: { id },
@@ -357,7 +374,7 @@ router.post("/addons/:slug/toggle", async (req, res) => {
     where: { slug: String(req.params.slug) },
   });
   if (!addon) {
-    return jsonError(res, 'NOT_FOUND', 'Addon not found', 404);
+    return jsonError(res, "NOT_FOUND", "Addon not found", 404);
   }
   const updated = await prisma.addon.update({
     where: { slug: addon.slug },
@@ -365,7 +382,7 @@ router.post("/addons/:slug/toggle", async (req, res) => {
   });
   logActivity(
     req.adminUser?.id,
-    'addon.toggled',
+    "addon.toggled",
     undefined,
     { slug: addon.slug, enabled: updated.enabled },
     req.ip,
@@ -378,11 +395,11 @@ router.post("/addons/:slug/reload", async (req, res) => {
     where: { slug: String(req.params.slug) },
   });
   if (!addon) {
-    return jsonError(res, 'NOT_FOUND', 'Addon not found', 404);
+    return jsonError(res, "NOT_FOUND", "Addon not found", 404);
   }
   logActivity(
     req.adminUser?.id,
-    'addon.reloaded',
+    "addon.reloaded",
     undefined,
     { slug: addon.slug },
     req.ip,
@@ -395,13 +412,13 @@ router.post("/addons/:slug/uninstall", async (req, res) => {
     where: { slug: String(req.params.slug) },
   });
   if (!addon) {
-    return jsonError(res, 'NOT_FOUND', 'Addon not found', 404);
+    return jsonError(res, "NOT_FOUND", "Addon not found", 404);
   }
   await prisma.addon.delete({ where: { slug: addon.slug } });
   await prisma.addonSetting.deleteMany({ where: { addonSlug: addon.slug } });
   logActivity(
     req.adminUser?.id,
-    'addon.uninstalled',
+    "addon.uninstalled",
     undefined,
     { slug: addon.slug },
     req.ip,
@@ -413,12 +430,9 @@ router.post("/addons/:slug/uninstall", async (req, res) => {
 
 router.get("/overview/check-update", async (_req, res) => {
   try {
-    const response = await fetch(
-      "https://api.github.com/repos/airlinklabs/panel/releases/latest",
-      {
-        signal: AbortSignal.timeout(10000),
-      },
-    );
+    const response = await fetch(`${PANEL_UPDATE_API_BASE}/releases/latest`, {
+      signal: AbortSignal.timeout(DEFAULT_DAEMON_TIMEOUT_MS),
+    });
     if (!response.ok) {
       return jsonOk(res, { updateAvailable: false });
     }
@@ -442,14 +456,14 @@ router.get("/overview/check-update", async (_req, res) => {
   }
 });
 
-router.post('/overview/perform-update', redisRateLimit, async (req, res) => {
+router.post("/overview/perform-update", redisRateLimit, async (req, res) => {
   try {
     const { execSync } = await import("child_process");
     execSync("git pull && npm install && npm run build", {
       cwd: process.cwd(),
-      timeout: 120000,
+      timeout: DAEMON_TIMEOUT_RADAR_ZIP_MS,
     });
-    logActivity(req.adminUser?.id, 'system.updated', undefined, {}, req.ip);
+    logActivity(req.adminUser?.id, "system.updated", undefined, {}, req.ip);
     jsonOk(res, { updated: true });
   } catch (err) {
     jsonError(res, "UPDATE_FAILED", `Update failed: ${String(err)}`, 500);
@@ -461,20 +475,20 @@ router.post('/overview/perform-update', redisRateLimit, async (req, res) => {
 router.post("/radar/scan/:serverId", async (req, res) => {
   const serverId = parseInt(String(req.params.serverId), 10);
   if (isNaN(serverId)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid server ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid server ID", 400);
   }
   const server = await prisma.server.findUnique({ where: { id: serverId } });
   if (!server) {
-    return jsonError(res, 'NOT_FOUND', 'Server not found', 404);
+    return jsonError(res, "NOT_FOUND", "Server not found", 404);
   }
-  logActivity(req.adminUser?.id, 'radar.scan', server.UUID, {}, req.ip);
+  logActivity(req.adminUser?.id, "radar.scan", server.UUID, {}, req.ip);
   jsonOk(res, { scanRequested: true, serverId });
 });
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/admin/radar/virustotal-enabled — VT status check
 // ---------------------------------------------------------------------------
-router.get('/radar/virustotal-enabled', async (_req, res) => {
+router.get("/radar/virustotal-enabled", async (_req, res) => {
   try {
     const settings = await getSettings();
     jsonOk(res, { enabled: !!settings?.virusTotalApiKey });
@@ -486,9 +500,9 @@ router.get('/radar/virustotal-enabled', async (_req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/admin/radar/scripts — List radar scan scripts
 // ---------------------------------------------------------------------------
-router.get('/radar/scripts', redisRateLimit, async (_req, res) => {
+router.get("/radar/scripts", redisRateLimit, async (_req, res) => {
   try {
-    const radarDir = path.join(__dirname, '../../../../storage/radar');
+    const radarDir = path.join(__dirname, "../../../../storage/radar");
 
     try {
       await fs.access(radarDir);
@@ -499,24 +513,24 @@ router.get('/radar/scripts', redisRateLimit, async (_req, res) => {
     const files = await fs.readdir(radarDir);
     const scripts = await Promise.all(
       files
-        .filter((file) => file.endsWith('.json'))
+        .filter((file) => file.endsWith(".json"))
         .map(async (file) => {
-          const content = await fs.readFile(path.join(radarDir, file), 'utf-8');
+          const content = await fs.readFile(path.join(radarDir, file), "utf-8");
           try {
             const scriptData = JSON.parse(content);
             return {
-              id: file.replace('.json', ''),
+              id: file.replace(".json", ""),
               name: scriptData.name || file,
-              description: scriptData.description || '',
-              version: scriptData.version || '1.0.0',
+              description: scriptData.description || "",
+              version: scriptData.version || "1.0.0",
               filename: file,
             };
           } catch {
             return {
-              id: file.replace('.json', ''),
+              id: file.replace(".json", ""),
               name: file,
-              description: 'Invalid script format',
-              version: 'unknown',
+              description: "Invalid script format",
+              version: "unknown",
               filename: file,
             };
           }
@@ -525,30 +539,30 @@ router.get('/radar/scripts', redisRateLimit, async (_req, res) => {
 
     jsonOk(res, scripts);
   } catch (error: unknown) {
-    logger.error('Error fetching radar scripts:', error);
-    jsonError(res, 'SCRIPTS_ERROR', 'Failed to fetch radar scripts', 500);
+    logger.error("Error fetching radar scripts:", error);
+    jsonError(res, "SCRIPTS_ERROR", "Failed to fetch radar scripts", 500);
   }
 });
 
 // ---------------------------------------------------------------------------
 // POST /api/v2/admin/radar/vtscan/:serverId — VT file scan
 // ---------------------------------------------------------------------------
-router.post('/radar/vtscan/:serverId', async (req, res) => {
+router.post("/radar/vtscan/:serverId", async (req, res) => {
   const settings = await getSettings();
   const apiKey = settings?.virusTotalApiKey;
 
   if (!apiKey) {
     return jsonError(
       res,
-      'VT_NOT_CONFIGURED',
-      'VirusTotal API key is not configured. Add it in Admin Settings.',
+      "VT_NOT_CONFIGURED",
+      "VirusTotal API key is not configured. Add it in Admin Settings.",
       503,
     );
   }
 
   const serverId = parseInt(String(req.params.serverId), 10);
   if (isNaN(serverId)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid server ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid server ID", 400);
   }
 
   const server = await prisma.server.findUnique({
@@ -556,44 +570,44 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
     include: { node: true },
   });
   if (!server) {
-    return jsonError(res, 'NOT_FOUND', 'Server not found', 404);
+    return jsonError(res, "NOT_FOUND", "Server not found", 404);
   }
 
   try {
-    const { default: fsSync } = await import('fs');
-    const { default: pathMod } = await import('path');
+    const { default: fsSync } = await import("fs");
+    const { default: pathMod } = await import("path");
 
     const tmpPath = pathMod.join(
-      '/tmp',
+      "/tmp",
       `vtscan-${server.UUID}-${Date.now()}.zip`,
     );
 
     // Import daemonRequest from the services layer
     const { daemonRequest } =
-      await import('../../../../services/daemonService');
+      await import("../../../../services/daemonService");
 
-    const zipResponse = await daemonRequest(server.UUID, '/radar/zip', {
-      method: 'POST',
+    const zipResponse = await daemonRequest(server.UUID, "/radar/zip", {
+      method: "POST",
       body: {
         id: server.UUID,
-        include: ['plugins', 'mods', 'config', 'addons', 'datapacks'],
+        include: ["plugins", "mods", "config", "addons", "datapacks"],
         exclude: [
-          'world',
-          'world_nether',
-          'world_the_end',
-          'logs',
-          'cache',
-          'crash-reports',
+          "world",
+          "world_nether",
+          "world_the_end",
+          "logs",
+          "cache",
+          "crash-reports",
         ],
         maxFileSizeMb: 32,
       },
-      timeout: 120000,
+      timeout: DAEMON_TIMEOUT_RADAR_ZIP_MS,
     });
 
     if (!zipResponse.ok) {
       return jsonError(
         res,
-        'DAEMON_ERROR',
+        "DAEMON_ERROR",
         `Daemon returned ${zipResponse.status}`,
         502,
       );
@@ -603,12 +617,12 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
     fsSync.writeFileSync(tmpPath, buffer);
 
     const stat = fsSync.statSync(tmpPath);
-    if (stat.size > 32 * 1024 * 1024) {
+    if (stat.size > VT_FILE_LIMIT_BYTES) {
       fsSync.unlinkSync(tmpPath);
       return jsonError(
         res,
-        'FILE_TOO_LARGE',
-        'Zipped server files exceed 32 MB — VT free tier limit.',
+        "FILE_TOO_LARGE",
+        "Zipped server files exceed 32 MB — VT free tier limit.",
         413,
       );
     }
@@ -621,23 +635,23 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
       Buffer.from(
         `--${boundary}\r\n` +
           `Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n` +
-          'Content-Type: application/zip\r\n\r\n',
+          "Content-Type: application/zip\r\n\r\n",
       ),
       fileBuffer,
       Buffer.from(`\r\n--${boundary}--\r\n`),
     ]);
 
-    const { httpPost } = await import('../../../../utils/http');
+    const { httpPost } = await import("../../../../utils/http");
 
     const uploadResponse = await httpPost<Record<string, unknown>>(
-      'https://www.virustotal.com/api/v3/files',
+      `${VT_API_BASE}/files`,
       formBody,
       {
         headers: {
-          'Content-Type': `multipart/form-data; boundary=${boundary}`,
-          'x-apikey': apiKey,
+          "Content-Type": `multipart/form-data; boundary=${boundary}`,
+          "x-apikey": apiKey,
         },
-        timeout: 90000,
+        timeout: DAEMON_TIMEOUT_VT_UPLOAD_MS,
       },
     );
 
@@ -646,7 +660,7 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
     if (uploadResponse.status !== 200 && uploadResponse.status !== 409) {
       return jsonError(
         res,
-        'VT_ERROR',
+        "VT_ERROR",
         `VT returned status ${uploadResponse.status}`,
         502,
       );
@@ -659,8 +673,8 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
     if (!analysisId) {
       return jsonError(
         res,
-        'VT_ERROR',
-        'VT did not return an analysis ID',
+        "VT_ERROR",
+        "VT did not return an analysis ID",
         502,
       );
     }
@@ -668,11 +682,11 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
     // Poll VT up to 8 times, 20s apart
     let analysisData: Record<string, unknown> | null = null;
     for (let attempt = 0; attempt < 8; attempt++) {
-      await new Promise((r) => setTimeout(r, 20000));
+      await new Promise((r) => setTimeout(r, VT_POLL_INTERVAL_MS));
 
       const pollResponse = await httpGet<Record<string, unknown>>(
-        `https://www.virustotal.com/api/v3/analyses/${analysisId}`,
-        { headers: { 'x-apikey': apiKey }, timeout: 15000 },
+        `${VT_API_BASE}/analyses/${analysisId}`,
+        { headers: { "x-apikey": apiKey }, timeout: DAEMON_TIMEOUT_VT_WAIT_MS },
       );
 
       const pollData = pollResponse.data as Record<string, unknown> | undefined;
@@ -680,7 +694,7 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
         (pollData?.data as Record<string, unknown> | undefined)?.attributes as
           Record<string, unknown> | undefined
       )?.status;
-      if (status === 'completed') {
+      if (status === "completed") {
         analysisData = pollResponse.data;
         break;
       }
@@ -690,16 +704,14 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
       return jsonOk(res, {
         pending: true,
         analysisId,
-        vtLink: 'https://www.virustotal.com/gui/home/upload',
+        vtLink: VT_GUI_UPLOAD_URL,
       });
     }
 
     const meta = analysisData.meta as Record<string, unknown> | undefined;
     const fileInfo = meta?.file_info as Record<string, unknown> | undefined;
     const sha256 = fileInfo?.sha256 as string | undefined;
-    const vtLink = sha256
-      ? `https://www.virustotal.com/gui/file/${sha256}`
-      : 'https://www.virustotal.com/gui/home/upload';
+    const vtLink = sha256 ? VT_GUI_FILE_URL(sha256) : VT_GUI_UPLOAD_URL;
 
     const dataAttrs = (analysisData.data as Record<string, unknown>)
       ?.attributes as Record<string, unknown> | undefined;
@@ -710,7 +722,7 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
     const stats = (dataAttrs?.stats || {}) as Record<string, number>;
     const maliciousEngines = Object.entries(results)
       .filter(
-        ([, v]) => v.category === 'malicious' || v.category === 'suspicious',
+        ([, v]) => v.category === "malicious" || v.category === "suspicious",
       )
       .map(([engine, v]) => ({ engine, result: v.result }));
 
@@ -724,25 +736,25 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
     });
   } catch (error: unknown) {
     logger.error(
-      'VT file scan error:',
+      "VT file scan error:",
       error instanceof Error ? error.message : error,
     );
-    jsonError(res, 'VT_SCAN_FAILED', 'File scan failed', 502);
+    jsonError(res, "VT_SCAN_FAILED", "File scan failed", 502);
   }
 });
 
 // ---------------------------------------------------------------------------
 // POST /api/v2/admin/radar/virustotal — VT hash lookup
 // ---------------------------------------------------------------------------
-router.post('/radar/virustotal', async (req, res) => {
+router.post("/radar/virustotal", async (req, res) => {
   const settings = await getSettings();
   const apiKey = settings?.virusTotalApiKey;
 
   if (!apiKey) {
     return jsonError(
       res,
-      'VT_NOT_CONFIGURED',
-      'VirusTotal API key is not configured. Add it in Admin Settings.',
+      "VT_NOT_CONFIGURED",
+      "VirusTotal API key is not configured. Add it in Admin Settings.",
       503,
     );
   }
@@ -751,18 +763,18 @@ router.post('/radar/virustotal', async (req, res) => {
   if (!hash || !/^[a-fA-F0-9]{32,64}$/.test(hash)) {
     return jsonError(
       res,
-      'BAD_REQUEST',
-      'A valid MD5, SHA1, or SHA256 hash is required',
+      "BAD_REQUEST",
+      "A valid MD5, SHA1, or SHA256 hash is required",
       400,
     );
   }
 
   try {
     const vtResponse = await httpGet<Record<string, unknown>>(
-      `https://www.virustotal.com/api/v3/files/${hash}`,
+      `${VT_API_BASE}/files/${hash}`,
       {
-        headers: { 'x-apikey': apiKey },
-        timeout: 15000,
+        headers: { "x-apikey": apiKey },
+        timeout: DAEMON_TIMEOUT_VT_WAIT_MS,
       },
     );
 
@@ -771,10 +783,10 @@ router.post('/radar/virustotal', async (req, res) => {
     }
 
     if (vtResponse.status !== 200) {
-      logger.error('VirusTotal API error:', `Status ${vtResponse.status}`);
+      logger.error("VirusTotal API error:", `Status ${vtResponse.status}`);
       return jsonError(
         res,
-        'VT_ERROR',
+        "VT_ERROR",
         `VirusTotal request failed — status ${vtResponse.status}`,
         502,
       );
@@ -804,17 +816,17 @@ router.post('/radar/virustotal', async (req, res) => {
       size: attrs.size || null,
       firstSeen: attrs.first_submission_date
         ? new Date(Number(attrs.first_submission_date) * 1000)
-          .toISOString()
-          .split('T')[0]
+            .toISOString()
+            .split("T")[0]
         : null,
-      vtLink: `https://www.virustotal.com/gui/file/${hash}`,
+      vtLink: VT_GUI_FILE_URL(hash),
     });
   } catch (error: unknown) {
     logger.error(
-      'VirusTotal API error:',
+      "VirusTotal API error:",
       error instanceof Error ? error.message : error,
     );
-    jsonError(res, 'VT_FAILED', 'VirusTotal scan failed', 502);
+    jsonError(res, "VT_FAILED", "VirusTotal scan failed", 502);
   }
 });
 
@@ -833,10 +845,10 @@ router.get("/analytics/summary", async (_req, res) => {
 
 // ======================== ACTIVITY LOGS ========================
 
-router.get('/activity-logs', async (req, res) => {
-  const page = parseInt(String(req.query.page ?? '1'), 10) || 1;
+router.get("/activity-logs", async (req, res) => {
+  const page = parseInt(String(req.query.page ?? "1"), 10) || 1;
   const perPage = Math.min(
-    parseInt(String(req.query.perPage ?? '50'), 10) || 50,
+    parseInt(String(req.query.perPage ?? "50"), 10) || 50,
     100,
   );
   const category = (req.query.category as string) || undefined;
@@ -877,7 +889,7 @@ router.get('/activity-logs', async (req, res) => {
       },
       skip: (page - 1) * perPage,
       take: perPage,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     }),
     prisma.activityLog.count({ where }),
   ]);
@@ -891,7 +903,7 @@ router.get('/activity-logs', async (req, res) => {
 });
 
 // Activity logs summary — counts by category and severity for charts
-router.get('/activity-logs/summary', async (_req, res) => {
+router.get("/activity-logs/summary", async (_req, res) => {
   const now = new Date();
   const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -902,14 +914,14 @@ router.get('/activity-logs/summary', async (_req, res) => {
       prisma.activityLog.count({ where: { createdAt: { gte: last24h } } }),
       prisma.activityLog.count({ where: { createdAt: { gte: last7d } } }),
       prisma.activityLog.groupBy({
-        by: ['category'],
+        by: ["category"],
         _count: true,
-        orderBy: { _count: { category: 'desc' } },
+        orderBy: { _count: { category: "desc" } },
       }),
       prisma.activityLog.groupBy({
-        by: ['severity'],
+        by: ["severity"],
         _count: true,
-        orderBy: { _count: { severity: 'desc' } },
+        orderBy: { _count: { severity: "desc" } },
       }),
       // Last 30 days grouped by day
       prisma.$queryRawUnsafe<{ date: string; count: bigint }[]>(
@@ -940,15 +952,15 @@ router.get('/activity-logs/summary', async (_req, res) => {
 
 // ======================== SYSTEM LOGS (owner-only) ========================
 
-router.get('/system-logs', async (req, res) => {
+router.get("/system-logs", async (req, res) => {
   // Owner-only check
-  if (req.adminUser?.role !== 'owner') {
-    return jsonError(res, 'FORBIDDEN', 'Owner access required', 403);
+  if (req.adminUser?.role !== "owner") {
+    return jsonError(res, "FORBIDDEN", "Owner access required", 403);
   }
 
-  const page = parseInt(String(req.query.page ?? '1'), 10) || 1;
+  const page = parseInt(String(req.query.page ?? "1"), 10) || 1;
   const perPage = Math.min(
-    parseInt(String(req.query.perPage ?? '50'), 10) || 50,
+    parseInt(String(req.query.perPage ?? "50"), 10) || 50,
     100,
   );
   const severity = (req.query.severity as string) || undefined;
@@ -975,9 +987,9 @@ router.get('/system-logs', async (req, res) => {
 });
 
 // System logs summary — counts by severity and component
-router.get('/system-logs/summary', async (req, res) => {
-  if (req.adminUser?.role !== 'owner') {
-    return jsonError(res, 'FORBIDDEN', 'Owner access required', 403);
+router.get("/system-logs/summary", async (req, res) => {
+  if (req.adminUser?.role !== "owner") {
+    return jsonError(res, "FORBIDDEN", "Owner access required", 403);
   }
 
   const now = new Date();
@@ -987,14 +999,14 @@ router.get('/system-logs/summary', async (req, res) => {
     prisma.systemLog.count(),
     prisma.systemLog.count({ where: { createdAt: { gte: last24h } } }),
     prisma.systemLog.groupBy({
-      by: ['severity'],
+      by: ["severity"],
       _count: true,
-      orderBy: { _count: { severity: 'desc' } },
+      orderBy: { _count: { severity: "desc" } },
     }),
     prisma.systemLog.groupBy({
-      by: ['component'],
+      by: ["component"],
       _count: true,
-      orderBy: { _count: { component: 'desc' } },
+      orderBy: { _count: { component: "desc" } },
     }),
   ]);
 
@@ -1022,8 +1034,8 @@ router.get("/playerstats", async (_req, res) => {
   jsonOk(res, stats);
 });
 
-router.post('/playerstats/collect', async (req, res) => {
-  logActivity(req.adminUser?.id, 'playerstats.collect', undefined, {}, req.ip);
+router.post("/playerstats/collect", async (req, res) => {
+  logActivity(req.adminUser?.id, "playerstats.collect", undefined, {}, req.ip);
   jsonOk(res, { collectRequested: true });
 });
 
