@@ -355,12 +355,59 @@ app.use(
 // Catch errors from global middleware registered before modules.
 app.use(errorPageHandler);
 
+// Seed default roles if the Role table is empty (fresh DB after prisma db push).
+async function seedDefaultRoles() {
+  const count = await prisma.role.count();
+  if (count > 0) return;
+  const now = new Date();
+  const defaults = [
+    {
+      name: "owner",
+      displayName: "Owner",
+      description: "Full system owner",
+      isAdmin: true,
+      isSystem: true,
+      sortOrder: 0,
+      permissions: "[]",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      name: "admin",
+      displayName: "Admin",
+      description: "Administrator",
+      isAdmin: true,
+      isSystem: true,
+      sortOrder: 1,
+      permissions: "[]",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      name: "user",
+      displayName: "User",
+      description: "Standard user",
+      isAdmin: false,
+      isSystem: true,
+      sortOrder: 2,
+      permissions: "[]",
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+  await prisma.role.createMany({ data: defaults });
+  logger.info("Default roles seeded");
+}
+
 // Load modules, plugins, database and start the webserver
 (async () => {
   try {
     // ── Initialize with ora-style progress ─────────────────────────────────
     await databaseLoader();
     logger.info("Database connected");
+
+    // Seed default roles if missing (needed for fresh DBs after prisma db push).
+    await seedDefaultRoles();
 
     await settingsLoader();
     logger.info("Settings loaded");
