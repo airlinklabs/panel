@@ -142,7 +142,7 @@
               <select id="language" name="language" class="cs-native"
                 @change="saving = true; window._accountSave('language').then(d => { saving = false; lastSaved = d ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null; })">
                 <% const languageNames = { en: 'English', fr: 'Français', de: 'Deutsch', es: 'Español', pt: 'Português', it: 'Italiano', ru: 'Русский', zh: '中文', ja: '日本語', ta: 'தமிழ்' }; %>
-                <% (supportedLanguages || ['en']).forEach(function(lang) { %>
+                <% (SUPPORTED_LANGUAGES || ['en']).forEach(function(lang) { %>
                 <option value="<%= lang %>" <%= req.lang === lang ? 'selected' : '' %>><%= languageNames[lang] || lang %></option>
                 <% }); %>
               </select>
