@@ -76,6 +76,19 @@ function buildApp(): express.Express {
     res.locals.airlinkVersion = "2.0.0";
     res.locals.airlinkCodename = "test";
     res.locals.icon = () => "";
+    res.locals.t = (key: string) => key;
+    res.locals.tn = (key: string) => key;
+    res.locals.panel = {
+      isProduction: false,
+      isHttps: false,
+      name: "Test Panel",
+      version: "2.0.0",
+      codename: "test",
+    };
+    res.locals.config = {};
+    res.locals.adminMenuItems = [];
+    res.locals.regularMenuItems = [];
+    res.locals.adminSidebarGroups = [];
     next();
   });
 
@@ -160,7 +173,7 @@ describe("admin/users HTMX fragments", () => {
         headers: { "HX-Request": "true" },
       });
       const html = await res.text();
-      expect(html).toContain("No users yet");
+      expect(html).toContain("noUsersYet");
     });
 
     it("renders user rows when users exist", async () => {

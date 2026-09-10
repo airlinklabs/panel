@@ -54,7 +54,7 @@ describe("feature registry", () => {
     ).toBe(true);
 
     // Api group follows.
-    const apiStart = names.indexOf("api/alternative");
+    const apiStart = names.indexOf("api/legacy");
     const apiEnd = names.indexOf("api/v2");
     expect(apiStart).toBe(adminEnd + 1);
     expect(apiEnd).toBe(apiStart + 2);

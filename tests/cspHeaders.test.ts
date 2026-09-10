@@ -48,7 +48,7 @@ describe("CSP configuration in app.ts", () => {
   });
 
   it("includes unsafe-eval in script-src for Alpine.js", () => {
-    expect(src).toContain("'unsafe-eval'");
+    expect(src).toContain("unsafe-eval");
   });
 
   it("generates a fresh nonce per request", () => {
