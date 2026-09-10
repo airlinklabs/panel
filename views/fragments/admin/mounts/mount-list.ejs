@@ -1,16 +1,16 @@
 <!-- Mount list fragment — replaces the card body on create/delete -->
 <div id="admin-mounts-list" class="al-card">
-  <h2 class="al-card-header">All Mounts</h2>
+  <h2 class="al-card-header"><%= t('allMounts') %></h2>
   <% if (mounts.length === 0) { %>
     <div class="flex flex-col items-center justify-center py-20 text-center">
       <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
         <%- icon('folder', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
       </div>
-      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong);">No mounts yet</h3>
-      <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);">Create a mount to expose a host directory to server containers.</p>
+      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong);"><%= t('noMountsYet') %></h3>
+      <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted);"><%= t('noMountsYetDesc') %></p>
       <div class="mt-5">
         <button type="button" class="al-btn-primary" hx-get="/api/v2/admin/mounts/new" hx-target="#admin-mounts-dialog" hx-swap="innerHTML">
-          <span class="inline-flex items-center gap-1.5"><%- icon('plus', { class: 'w-4 h-4' }) %> New mount</span>
+          <span class="inline-flex items-center gap-1.5"><%- icon('plus', { class: 'w-4 h-4' }) %> <%= t('newMount') %></span>
         </button>
       </div>
     </div>
@@ -26,11 +26,11 @@
         </colgroup>
         <thead class="al-table-head">
           <tr>
-            <th scope="col" class="al-table-th sm:pl-6">Name</th>
-            <th scope="col" class="al-table-th sm:pl-6">Source</th>
-            <th scope="col" class="al-table-th sm:pl-6">Target</th>
-            <th scope="col" class="al-table-th sm:pl-6">Read-only</th>
-            <th scope="col" class="al-table-th sm:pl-6">Actions</th>
+            <th scope="col" class="al-table-th sm:pl-6"><%= t('name') %></th>
+            <th scope="col" class="al-table-th sm:pl-6"><%= t('mountSourceLabel') %></th>
+            <th scope="col" class="al-table-th sm:pl-6"><%= t('mountTargetLabel') %></th>
+            <th scope="col" class="al-table-th sm:pl-6"><%= t('mountReadOnlyLabel') %></th>
+            <th scope="col" class="al-table-th sm:pl-6"><%= t('actions') %></th>
           </tr>
         </thead>
         <tbody>
@@ -47,19 +47,19 @@
             </td>
             <td class="al-table-td">
               <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" <%= m.readOnly ? 'style="background:var(--theme-warning-bg);color:var(--theme-warning)"' : 'style="background:var(--theme-success-bg);color:var(--theme-success)"' %>>
-                <%= m.readOnly ? 'Read-only' : 'Read-write' %>
+                <%= m.readOnly ? t('mountReadOnlyLabel') : t('mountReadWriteLabel') %>
               </span>
             </td>
             <td class="al-table-td">
               <div class="flex gap-3">
                 <button
                   x-data="{ deleting: false }"
-                  @click="if(!deleting && confirm('Delete this mount? Servers using it will no longer be able to attach it.')) { deleting = true; fetch('/api/v2/admin/mounts/<%= m.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) { showToast('Mount deleted.', 'success'); window.location.reload(); } else { showToast('Failed to delete.', 'error'); deleting = false; } }).catch(() => { showToast('Network error.', 'error'); deleting = false; }); }"
+                  @click="if(!deleting && confirm('<%= (req.translations && req.translations.deleteMountConfirmList) || 'Delete this mount? Servers using it will no longer be able to attach it.' %>')) { deleting = true; fetch('/api/v2/admin/mounts/<%= m.id %>', { method: 'DELETE', headers: { 'csrf-token': document.querySelector('meta[name=csrf-token]')?.content || '' } }).then(r => { if(r.ok) { showToast('<%= (req.translations && req.translations.mountDeleted) || 'Mount deleted.', %>', 'success'); window.location.reload(); } else { showToast('<%= (req.translations && req.translations.failedToDeleteMount) || 'Failed to delete.', %>', 'error'); deleting = false; } }).catch(() => { showToast('<%= (req.translations && req.translations.networkError) || 'Network error.', %>', 'error'); deleting = false; }); }"
                   type="button"
                   class="al-btn-ghost"
                   style="color:var(--theme-danger);"
                   :disabled="deleting"
-                  aria-label="Delete mount">
+                  aria-label="<%= t('ariaDeleteMount') %>">
                   <%- icon('trash-2', { size: 16 }) %>
                 </button>
               </div>

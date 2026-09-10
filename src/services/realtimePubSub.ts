@@ -1,6 +1,7 @@
 import { getRedisClient } from '../handlers/redis';
 import type Redis from 'ioredis';
 import logger from '../handlers/logger';
+import { logT } from './i18n';
 
 const CHANNEL = 'airlink:realtime';
 
@@ -15,7 +16,7 @@ export function publishEvent(event: {
     const redis = getRedisClient();
     redis.publish(CHANNEL, JSON.stringify(event));
   } catch (err) {
-    logger.warn('[realtime-pubsub] publish failed', { error: String(err) });
+    logger.warn(logT('log.realtimePublishFailed'), { error: String(err) });
   }
 }
 
@@ -26,7 +27,7 @@ export function subscribeToEvents(
     if (!subscriber) {
       subscriber = getRedisClient().duplicate();
       subscriber.on('error', (err: Error) => {
-        logger.warn('[realtime-pubsub] subscriber error', {
+        logger.warn(logT('log.realtimeSubscriberError'), {
           error: err.message,
         });
       });
@@ -47,7 +48,7 @@ export function subscribeToEvents(
       subscriber?.unsubscribe(CHANNEL);
     };
   } catch (err) {
-    logger.warn('[realtime-pubsub] subscribe failed', { error: String(err) });
+    logger.warn(logT('log.realtimeSubscribeFailed'), { error: String(err) });
     return () => {
       /* noop */
     };

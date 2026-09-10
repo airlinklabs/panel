@@ -1,9 +1,9 @@
 import session from 'express-session';
 import { getRedisClient } from './redis';
+import { SESSION_DEFAULT_TTL_S } from '../config/timeouts';
 
 const SESSION_PREFIX = 'airlink:sess:';
 const USER_INDEX_PREFIX = 'airlink:usr:';
-const DEFAULT_TTL_SEC = 7 * 24 * 60 * 60; // 7 days
 
 /**
  * Redis-backed session store using ioredis directly.
@@ -22,7 +22,7 @@ class RedisSessionStore extends session.Store {
     super();
     this.redis = getRedisClient();
     this.prefix = SESSION_PREFIX;
-    this.defaultTtl = DEFAULT_TTL_SEC;
+    this.defaultTtl = SESSION_DEFAULT_TTL_S;
   }
 
   get(

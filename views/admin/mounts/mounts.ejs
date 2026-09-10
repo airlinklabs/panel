@@ -1,0 +1,33 @@
+<%- include('../../components/header', { title: t('mountsTitle') }) %>
+
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0">
+      <%- include('../../components/sidebar') %>
+    </div>
+<%- include('../../components/template') %>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [ { label: t('admin') }, { label: t('breadcrumbMounts') } ] }) %>
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title"><%= t('mountsTitle') %></h1>
+          <p class="al-page-desc"><%= t('mountsDesc') %></p>
+        </div>
+        <button type="button" class="al-btn-primary shrink-0"
+          x-data
+          @click="window.modal.show({ title: '<%= t('newMount') %>', bodyNode: document.getElementById('mountCreateForm'), panelClass: 'max-w-lg' })">
+          <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('newMount') %>
+        </button>
+      </div>
+
+      <div class="al-page-body">
+        <div id="admin-mounts-status"></div>
+        <%- include('../../fragments/admin/mounts/mount-list', { mounts }) %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="mountCreateForm" class="hidden"></div>
+
+<%- include('../../components/footer') %>

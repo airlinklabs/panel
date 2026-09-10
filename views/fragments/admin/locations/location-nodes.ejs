@@ -8,7 +8,7 @@
       </button>
       <div>
         <p class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= location.name %></p>
-        <p class="text-xs" style="color:var(--theme-text-muted);"><%= location.shortCode %> &middot; <%= nodes.length %> node(s)</p>
+        <p class="text-xs" style="color:var(--theme-text-muted);"><%= location.shortCode %> &middot; <%= nodes.length %> <%= nodes.length === 1 ? t('nodeSingular') : t('nodePlural') %></p>
       </div>
     </div>
   </div>
@@ -18,8 +18,8 @@
       <div class="mx-auto mb-3 w-12 h-12 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb, var(--theme-border) 35%, transparent); color:var(--theme-text-muted);">
         <%- icon('server', { class: 'size-6', strokeWidth: 1.5 }) %>
       </div>
-      <p class="text-sm font-medium" style="color:var(--theme-text-strong);">No nodes here yet</p>
-      <p class="text-xs mt-1" style="color:var(--theme-text-muted);">Assign nodes to this location from the node editor.</p>
+      <p class="text-sm font-medium" style="color:var(--theme-text-strong);"><%= t('noNodesHereYet') %></p>
+      <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= t('noNodesHereYetDesc') %></p>
     </div>
   <% } else { %>
     <div class="space-y-2">
@@ -32,7 +32,7 @@
           </div>
           <div class="flex items-center gap-1 shrink-0">
             <span class="text-xs px-2 py-0.5 rounded-lg" style="background:<%= node.status === 'online' ? 'color-mix(in srgb, var(--theme-success) 12%, transparent)' : node.status === 'starting' ? 'color-mix(in srgb, var(--theme-warning) 12%, transparent)' : 'color-mix(in srgb, var(--theme-text-muted) 12%, transparent)' %>; color:<%= node.status === 'online' ? 'var(--theme-success)' : node.status === 'starting' ? 'var(--theme-warning)' : 'var(--theme-text-muted)' %>;"><%= node.status || 'offline' %></span>
-            <span class="text-xs" style="color:var(--theme-text-muted);"><%= node.servers.length %> server(s)</span>
+            <span class="text-xs" style="color:var(--theme-text-muted);"><%= node.servers.length %> <%= node.servers.length === 1 ? t('serverSingular') : t('serverPlural') %></span>
           </div>
           <%- icon('chevron-right', { class: 'size-4 shrink-0', strokeWidth: 1.5, style: 'color:var(--theme-text-muted)' }) %>
         </a>

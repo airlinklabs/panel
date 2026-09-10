@@ -13,13 +13,14 @@ import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   daemonPlayerListSchema,
   parseDaemonResponse,
-} from '../../../platform/daemon/dtos';
+} from '../../../types/daemon';
 import {
   type ServerPageServer,
   getServerStatusInput,
   getImageFeatures,
   getPrimaryPort,
 } from './shared';
+import { DAEMON_TIMEOUT_MEDIUM_MS } from '../../../config/daemonTimeouts';
 
 type PlayerServer = Pick<ServerPageServer, 'UUID' | 'Ports' | 'node' | 'image'>;
 
@@ -55,7 +56,7 @@ export function registerPlayersRoutes(router: Router): void {
           host: server.node.address,
           port: primaryPort,
         },
-        timeout: 8000,
+        timeout: DAEMON_TIMEOUT_MEDIUM_MS,
       });
 
       const playersData = parseDaemonResponse(

@@ -42,7 +42,7 @@ const adminModule: Module = {
         if (req.get('HX-Request') === 'true') {
           return res.render('fragments/admin/mounts/mount-list', vm);
         }
-        res.render('admin/mounts/index', { user, req, settings, ...vm });
+        res.render('admin/mounts/mounts', { user, req, settings, ...vm });
       },
     );
 

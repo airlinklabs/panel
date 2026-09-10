@@ -1,0 +1,42 @@
+<style>
+  :root {
+    --loading-gap: 8px;
+    --loading-font-size: 12px;
+    --loading-spinner-size: 12px;
+    --loading-spinner-border: 1.5px;
+    --loading-spinner-duration: 0.65s;
+  }
+
+  /* Inline action feedback bar */
+  #actionFeedback {
+    display: none;
+    align-items: center;
+    gap: var(--loading-gap);
+    font-size: var(--loading-font-size);
+    color: var(--af-color, var(--theme-text-muted, #6b7280));
+    transition: opacity 0.3s ease;
+  }
+  #actionFeedback.visible { display: flex; }
+  #actionFeedback.fading  { opacity: 0; }
+  .af-spinner {
+    width: var(--loading-spinner-size);
+    height: var(--loading-spinner-size);
+    border: var(--loading-spinner-border) solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: af-spin var(--loading-spinner-duration) linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes af-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .af-spinner { animation: none; }
+  }
+</style>
+
+<div id="actionFeedback" aria-live="polite">
+  <span class="af-spinner" id="afSpinner"></span>
+  <%- icon('check', { id: 'afCheck', class: 'hidden', width: 13, height: 13, strokeWidth: 2.5 }) %>
+  <span id="afText"></span>
+</div>
+
+<script nonce="<%- nonce %>" defer src="/javascript/shared/loading-popup.js?v=5"></script>

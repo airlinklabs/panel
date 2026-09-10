@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Create Node' }) %>
+<%- include('../../components/header', { title: t('adminCreateNodeTitle') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -6,30 +6,30 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="nodeCreate()">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Nodes', href: '/admin/nodes' },
-        { label: 'Create' }
+        { label: t('admin') },
+        { label: t('navNodes'), href: '/admin/nodes' },
+        { label: t('create') }
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title"><%= req.translations.adminCreateNodeTitle %></h1>
-          <p class="al-page-desc"><%= req.translations.adminCreateNodeText || 'One more node and you\'ll have a proper fleet going.' %></p>
+          <h1 class="al-page-title"><%= t('adminCreateNodeTitle') %></h1>
+          <p class="al-page-desc"><%= t('adminCreateNodeText') %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button id="createNodeBtn" type="button" class="al-btn-primary" @click="createNode()"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= req.translations.create || 'Create Node' %></button>
-          <a href="/admin/nodes" class="al-btn-secondary">Back to Nodes</a>
+          <button id="createNodeBtn" type="button" class="al-btn-primary" @click="createNode()"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('createNode') %></button>
+          <a href="/admin/nodes" class="al-btn-secondary"><%= t('backToNodes') %></a>
         </div>
       </div>
 
       <div id="nodeForm" class="al-page-body space-y-5">
         <form class="space-y-5">
           <div class="al-card">
-            <h2 class="al-card-header">General</h2>
+            <h2 class="al-card-header"><%= t('general') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">
                 <label for="nodeName" class="al-label flex items-center gap-1.5">
                   <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.name %>
+                  <%= t('name') %>
                 </label>
                 <input id="nodeName" class="al-input" placeholder="My node">
               </div>
@@ -37,7 +37,7 @@
               <div>
                 <label for="nodeAddress" class="al-label flex items-center gap-1.5">
                   <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.addressIP %>
+                  <%= t('addressIP') %>
                 </label>
                 <input id="nodeAddress" class="al-input" placeholder="localhost">
               </div>
@@ -45,7 +45,7 @@
               <div>
                 <label for="nodePort" class="al-label flex items-center gap-1.5">
                   <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.daemonPort %>
+                  <%= t('daemonPort') %>
                 </label>
                 <input id="nodePort" class="al-input" placeholder="3002">
               </div>
@@ -53,23 +53,23 @@
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Resource Allocation</h2>
+            <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label for="nodeRam" class="al-label flex items-center gap-1.5">
                   <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.ram %>
+                  <%= t('ram') %>
                 </label>
                 <input type="hidden" id="nodeRamValue" value="">
                 <div class="flex gap-2 items-center">
                   <div class="flex items-stretch flex-1 gap-0">
-                    <input id="nodeRam" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+                    <input id="nodeRam" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
                     <button type="button" class="al-format-switcher" data-format-switcher
                       data-display="nodeRam" data-hidden="nodeRamValue"
                       data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
                   </div>
                   <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
-                    <input type="checkbox" id="nodeRamAll" class="rounded focus:ring-0" style="border-color:var(--theme-border-input);color:var(--theme-text-strong)"> All
+                    <input type="checkbox" id="nodeRamAll" class="rounded focus:ring-0" style="border-color:var(--theme-border-input);color:var(--theme-text-strong)"> <%= t('all') %>
                   </label>
                 </div>
               </div>
@@ -77,18 +77,18 @@
               <div>
                 <label for="nodeDisk" class="al-label flex items-center gap-1.5">
                   <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.disk %>
+                  <%= t('disk') %>
                 </label>
                 <input type="hidden" id="nodeDiskValue" value="">
                 <div class="flex gap-2 items-center">
                   <div class="flex items-stretch flex-1 gap-0">
-                    <input id="nodeDisk" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+                    <input id="nodeDisk" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
                     <button type="button" class="al-format-switcher" data-format-switcher
                       data-display="nodeDisk" data-hidden="nodeDiskValue"
                       data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
                   </div>
                   <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
-                    <input type="checkbox" id="nodeDiskAll" class="rounded focus:ring-0" style="border-color:var(--theme-border-input);color:var(--theme-text-strong)"> All
+                    <input type="checkbox" id="nodeDiskAll" class="rounded focus:ring-0" style="border-color:var(--theme-border-input);color:var(--theme-text-strong)"> <%= t('all') %>
                   </label>
                 </div>
               </div>
@@ -96,61 +96,61 @@
               <div>
                 <label for="nodeProcessor" class="al-label flex items-center gap-1.5">
                   <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.cpu %>
+                  <%= t('cpu') %>
                 </label>
                 <input type="hidden" id="nodeCpuValue" value="">
                 <div class="flex gap-2 items-center">
                   <div class="flex items-stretch flex-1 gap-0">
-                    <input id="nodeProcessor" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+                    <input id="nodeProcessor" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
                     <button type="button" class="al-format-switcher" data-format-switcher
                       data-display="nodeProcessor" data-hidden="nodeCpuValue"
                       data-units="1:%,100:Cores" data-default-unit="Cores">Cores</button>
                   </div>
                   <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
-                    <input type="checkbox" id="nodeProcessorAll" class="rounded focus:ring-0" style="border-color:var(--theme-border-input);color:var(--theme-text-strong)"> All
+                    <input type="checkbox" id="nodeProcessorAll" class="rounded focus:ring-0" style="border-color:var(--theme-border-input);color:var(--theme-text-strong)"> <%= t('all') %>
                   </label>
                 </div>
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">1 core = 100%</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('coreHint') %></p>
               </div>
             </div>
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Overallocation</h2>
-            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)">Allow servers to exceed node limits by this percentage (0 = strict).</p>
+            <h2 class="al-card-header"><%= t('overallocation') %></h2>
+            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)"><%= t('overallocationDesc') %></p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label for="nodeOverallocateMemory" class="al-label flex items-center gap-1.5">
                   <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  Memory %
+                  <%= t('memory') %> %
                 </label>
                 <input id="nodeOverallocateMemory" type="number" min="0" value="<%= settings.defaultOverallocateMemory ?? 0 %>" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Default from global settings.</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('defaultFromGlobalSettings') %></p>
               </div>
               <div>
                 <label for="nodeOverallocateDisk" class="al-label flex items-center gap-1.5">
                   <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  Disk %
+                  <%= t('disk') %> %
                 </label>
                 <input id="nodeOverallocateDisk" type="number" min="0" value="<%= settings.defaultOverallocateDisk ?? 0 %>" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Default from global settings.</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('defaultFromGlobalSettings') %></p>
               </div>
               <div>
                 <label for="nodeOverallocateCpu" class="al-label flex items-center gap-1.5">
                   <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
-                  CPU %
+                  <%= t('cpu') %> %
                 </label>
                 <input id="nodeOverallocateCpu" type="number" min="0" value="<%= settings.defaultOverallocateCpu ?? 0 %>" class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Default from global settings.</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('defaultFromGlobalSettings') %></p>
               </div>
             </div>
             <div class="mt-4">
               <label for="nodeLocation" class="al-label flex items-center gap-1.5">
                 <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
-                Location
+                <%= t('location') %>
               </label>
               <select id="nodeLocation" class="al-input">
-                <option value="">No location</option>
+                <option value=""><%= t('noLocation') %></option>
                 <% (locations || []).forEach(loc => { %>
                   <option value="<%= loc.id %>"><%= loc.name %> (<%= loc.shortCode %>)</option>
                 <% }); %>
@@ -159,16 +159,16 @@
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Daemon Configuration</h2>
+            <h2 class="al-card-header"><%= t('daemonConfiguration') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-2">
-                <label for="daemonKey" class="al-label"><%= req.translations.daemonKey || 'Daemon Key' %></label>
-                <input id="daemonKey" class="al-input" placeholder="Leave blank to auto-generate">
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Optional. If left blank, a secure key will be generated automatically.</p>
+                <label for="daemonKey" class="al-label"><%= t('daemonKey') %></label>
+                <input id="daemonKey" class="al-input" placeholder="<%= t('leaveBlankToAutoGenerate') %>">
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('daemonKeyOptionalDesc') %></p>
               </div>
 
               <div class="md:col-span-2">
-                <label for="allocatedPorts" class="al-label">Allocated Ports</label>
+                <label for="allocatedPorts" class="al-label"><%= t('allocatedPorts') %></label>
                 <div class="space-y-2">
                   <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
                     <!-- Port tags will be inserted here -->
@@ -177,7 +177,7 @@
                     <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1" @keypress.enter.prevent="addPortFromInput()">
                     <button id="addPortBtn" type="button" class="al-btn-primary" @click="addPortFromInput()">
                       <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-                      Add Port
+                      <%= t('addPort') %>
                     </button>
                   </div>
                 </div>
@@ -193,14 +193,14 @@
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background:color-mix(in srgb, var(--theme-success) 12%, transparent); color:var(--theme-success);">
               <%- icon('check-circle', { class: 'size-8', strokeWidth: 1.5 }) %>
             </div>
-            <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong);">Node created — one step left</h2>
-            <p class="text-sm mt-2 max-w-md mx-auto" style="color:var(--theme-text-muted);">Run this command on the machine where the daemon will run. It connects the daemon to this panel.</p>
+            <h2 class="text-xl font-semibold" style="color:var(--theme-text-strong);"><%= t('nodeCreatedOneStepLeft') %></h2>
+            <p class="text-sm mt-2 max-w-md mx-auto" style="color:var(--theme-text-muted);"><%= t('nodeCreatedRunCommand') %></p>
           </div>
 
           <div class="rounded-2xl border p-5" style="border-color:var(--theme-border); background:var(--theme-bg-secondary);">
             <p class="text-xs font-medium mb-3 flex items-center gap-1.5" style="color:var(--theme-text-muted);">
               <%- icon('terminal', { width: 13, height: 13, class: 'shrink-0' }) %>
-              Run on the daemon machine
+              <%= t('runOnDaemonMachine') %>
             </p>
             <div class="relative">
               <div id="daemonCliCommand" class="rounded-xl border p-4 pr-12 text-[13px] font-mono whitespace-nowrap overflow-x-auto cursor-text select-all" style="background:var(--theme-bg-input); border-color:var(--theme-border); color:var(--theme-text-strong);" tabindex="0" aria-label="Daemon connect command"></div>
@@ -211,9 +211,9 @@
 
           <div class="flex flex-col sm:flex-row gap-3 mt-6">
             <button id="verifyDaemonBtn" type="button" class="al-btn-primary flex-1 justify-center" @click="verifyDaemon()">
-              <%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %> I've done this — verify connection
+              <%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('iveDoneThisVerify') %>
             </button>
-            <a href="/admin/nodes" class="al-btn-secondary flex-1 justify-center">Back to Nodes</a>
+            <a href="/admin/nodes" class="al-btn-secondary flex-1 justify-center"><%= t('backToNodes') %></a>
           </div>
           <p id="daemonVerifyResult" class="hidden mt-4 text-sm font-medium text-center"></p>
         </div>
@@ -222,7 +222,7 @@
   </div>
 </main>
 
-<%- include('../../components/loadingPopup') %>
+<%- include('../../components/loading-popup') %>
 
 <style>
 #nodeForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
@@ -267,7 +267,7 @@ function nodeCreate() {
         const emptyMessage = document.createElement('div');
         emptyMessage.className = 'col-span-4 text-sm italic';
         emptyMessage.style.color = 'var(--theme-text-muted)';
-        emptyMessage.textContent = 'No ports allocated yet. Add ports that will be available for servers.';
+        emptyMessage.textContent = req.translations.noPortsAllocated || 'No ports allocated yet. Add ports that will be available for servers.';
         portsList.appendChild(emptyMessage);
         return;
       }
@@ -322,7 +322,7 @@ function nodeCreate() {
       if (input.includes('-')) {
         const [start, end] = input.split('-').map(p => parseInt(p.trim()));
         if (isNaN(start) || isNaN(end) || start >= end || start < this.PORT_MIN || end > this.PORT_MAX) {
-          showToast('Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between ' + this.PORT_MIN + ' and ' + this.PORT_MAX + '.', 'error');
+          showToast((req.translations.invalidPortRange || 'Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between ') + this.PORT_MIN + (req.translations.and || ' and ') + this.PORT_MAX + '.', 'error');
           return;
         }
         for (let port = start; port <= end; port++) {
@@ -331,7 +331,7 @@ function nodeCreate() {
       } else {
         const port = parseInt(input.trim());
         if (isNaN(port) || port < this.PORT_MIN || port > this.PORT_MAX) {
-          showToast('Invalid port. Port must be between ' + this.PORT_MIN + ' and ' + this.PORT_MAX + '.', 'error');
+          showToast((req.translations.invalidPort || 'Invalid port. Port must be between ') + this.PORT_MIN + (req.translations.and || ' and ') + this.PORT_MAX + '.', 'error');
           return;
         }
         if (!this.allocatedPorts.includes(port)) this.allocatedPorts.push(port);
@@ -389,16 +389,16 @@ function nodeCreate() {
       };
 
       if (!nodeData.name || !nodeData.address || !nodeData.port) {
-        showToast('Please fill in all required fields.', 'error');
+        showToast(req.translations.pleaseFillAllRequired || 'Please fill in all required fields.', 'error');
         return;
       }
 
-      if (!ramAll && !nodeData.ram) { showToast('RAM is required when not unlimited.', 'error'); return; }
-      if (!diskAll && !nodeData.disk) { showToast('Disk is required when not unlimited.', 'error'); return; }
-      if (!cpuAll && !nodeData.cpu) { showToast('CPU is required when not unlimited.', 'error'); return; }
+      if (!ramAll && !nodeData.ram) { showToast(req.translations.ramRequired || 'RAM is required when not unlimited.', 'error'); return; }
+      if (!diskAll && !nodeData.disk) { showToast(req.translations.diskRequired || 'Disk is required when not unlimited.', 'error'); return; }
+      if (!cpuAll && !nodeData.cpu) { showToast(req.translations.cpuRequired || 'CPU is required when not unlimited.', 'error'); return; }
 
-      const loader = showLoadingPopup('Creating Node', 'Initializing node creation...');
-      loader.updateProgress(20, 'Sending node configuration...');
+      const loader = showLoadingPopup(req.translations.creatingNode || 'Creating Node', req.translations.initializingNodeCreation || 'Initializing node creation...');
+      loader.updateProgress(20, req.translations.sendingNodeConfig || 'Sending node configuration...');
 
       try {
         const response = await fetch('/api/v2/admin/nodes', {
@@ -409,7 +409,7 @@ function nodeCreate() {
 
         if (response.ok) {
           const data = await response.json();
-          loader.updateProgress(100, 'Node created!');
+          loader.updateProgress(100, req.translations.nodeCreated || 'Node created!');
           setTimeout(() => {
             loader.close();
             sessionStorage.setItem('airlink:newNode', JSON.stringify(data.node));
@@ -418,12 +418,12 @@ function nodeCreate() {
         } else {
           loader.close();
           const data = await response.json().catch(() => ({}));
-          showToast(data.error || data.message || 'Failed to create node.', 'error');
+          showToast(data.error || data.message || (req.translations.failedToCreateNode || 'Failed to create node.'), 'error');
         }
       } catch (error) {
         loader.close();
         console.error('Error creating node:', error);
-        showToast('Error creating node. Try again.', 'error');
+        showToast(req.translations.errorCreatingNode || 'Error creating node. Try again.', 'error');
       }
     },
 
@@ -438,7 +438,7 @@ function nodeCreate() {
       document.getElementById('daemonCliCommand').textContent = cli;
 
       const copyHint = document.getElementById('copyDaemonCliHint');
-      copyHint.textContent = 'Paste into a terminal on the machine where the daemon runs.';
+      copyHint.textContent = req.translations.pasteIntoTerminal || 'Paste into a terminal on the machine where the daemon runs.';
 
       this._currentNode = node;
       this._currentCli = cli;
@@ -463,11 +463,11 @@ function nodeCreate() {
           ta.remove();
         }
         copyCli.innerHTML = '<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-        copyHint.textContent = 'Copied!';
+        copyHint.textContent = req.translations.copied || 'Copied!';
       } catch {
-        copyHint.textContent = 'Could not copy. Select the command above and copy it manually.';
+        copyHint.textContent = req.translations.couldNotCopySelect || 'Could not copy. Select the command above and copy it manually.';
       }
-      setTimeout(() => { copyCli.innerHTML = label; copyHint.textContent = 'Paste into a terminal on the machine where the daemon runs.'; }, this.COPY_RESET_DELAY_MS);
+      setTimeout(() => { copyCli.innerHTML = label; copyHint.textContent = req.translations.pasteIntoTerminal || 'Paste into a terminal on the machine where the daemon runs.'; }, this.COPY_RESET_DELAY_MS);
     },
 
     async verifyDaemon() {
@@ -475,7 +475,7 @@ function nodeCreate() {
       const btn = document.getElementById('verifyDaemonBtn');
       const result = document.getElementById('daemonVerifyResult');
       btn.disabled = true;
-      btn.textContent = 'Checking...';
+      btn.textContent = req.translations.checking || 'Checking...';
       result.classList.add('hidden');
 
       try {
@@ -484,20 +484,20 @@ function nodeCreate() {
         result.classList.remove('hidden');
         if (d.connected) {
           result.style.color = 'var(--theme-success)';
-          result.textContent = 'Daemon is live' + (d.version ? ' (' + d.version + ')' : '') + '. Key checks out — servers can now run on this node.';
-          showToast('Daemon verified!', 'success');
+          result.textContent = (req.translations.daemonIsLive || 'Daemon is live') + (d.version ? ' (' + d.version + ')' : '') + '. ' + (req.translations.keyChecksOut || 'Key checks out \u2014 servers can now run on this node.');
+          showToast(req.translations.daemonVerified || 'Daemon verified!', 'success');
           setTimeout(() => { window.location.href = '/admin/nodes?verified=' + node.id; }, this.VERIFY_DELAY_MS);
         } else {
           result.style.color = 'var(--theme-danger)';
-          result.textContent = d.error || 'Could not reach the daemon. Check the address, port, and key.';
+          result.textContent = d.error || (req.translations.couldNotReachDaemon || 'Could not reach the daemon. Check the address, port, and key.');
         }
       } catch {
         result.classList.remove('hidden');
         result.style.color = 'var(--theme-danger)';
-        result.textContent = 'Verification failed. Check the address, port, and key, then try again.';
+        result.textContent = req.translations.verificationFailed || 'Verification failed. Check the address, port, and key, then try again.';
       } finally {
         btn.disabled = false;
-        btn.textContent = 'I\'ve done this — verify connection';
+        btn.textContent = req.translations.verifyConnection || 'I\'ve done this — verify connection';
       }
     },
 

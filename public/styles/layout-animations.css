@@ -6,6 +6,22 @@
   or touch anything that has its own animation or must not move.
 */
 
+:root {
+  /* Skeleton */
+  --skeleton-radius: 8px;
+  --skeleton-color-dark: rgba(255, 255, 255, 0.04);
+  --skeleton-shine-dark: rgba(255, 255, 255, 0.08);
+  --skeleton-row-height: 10px;
+  --skeleton-heading-height: 16px;
+  --skeleton-card-height: 80px;
+  --skeleton-avatar-size: 36px;
+
+  /* Translations */
+  --translate-y-sm: 8px;
+  --translate-y-md: 10px;
+  --translate-x-sm: 4px;
+}
+
 /* ── Shared enter/exit transition ─────────────────────────────────────────
    Every element listed here gets an opacity+transform transition.
    @starting-style defines the "from" state when the element first becomes
@@ -97,7 +113,7 @@
 .tab-content,
 .m-pane {
   transition:
-    opacity   0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
   transition-behavior: allow-discrete;
 }
@@ -150,7 +166,7 @@
   .tab-content,
   .m-pane {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(var(--translate-y-md));
   }
 }
 
@@ -179,8 +195,14 @@
 */
 
 @keyframes card-enter {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(var(--translate-y-sm));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── All table rows load-in ──────────────────────────────────────────────*/
@@ -207,8 +229,14 @@ tbody tr {
 */
 
 @keyframes row-enter {
-  from { opacity: 0; transform: translateX(-4px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--translate-x-sm)));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* ── All grid items load-in ─────────────────────────────────────────────*/
@@ -222,8 +250,12 @@ tbody tr {
 
 /* ── Skeleton shimmer ───────────────────────────────────────────────────*/
 @keyframes skeleton-shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton {
@@ -235,25 +267,45 @@ tbody tr {
   );
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.8s ease-in-out infinite;
-  border-radius: 8px;
+  border-radius: var(--skeleton-radius);
 }
 
 .dark .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0.04) 25%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(255,255,255,0.04) 75%
+    var(--skeleton-color-dark) 25%,
+    var(--skeleton-shine-dark) 50%,
+    var(--skeleton-color-dark) 75%
   );
   background-size: 200% 100%;
 }
 
-.skeleton-text     { height: 12px; width: 60%; }
-.skeleton-text-sm  { height: 10px; width: 40%; }
-.skeleton-title    { height: 16px; width: 80%; }
-.skeleton-avatar   { width: 36px; height: 36px; border-radius: 50%; }
-.skeleton-card     { height: 80px; width: 100%; }
-.skeleton-row      { height: 48px; width: 100%; margin-bottom: 4px; }
+.skeleton-text {
+  height: 12px;
+  width: 60%;
+}
+.skeleton-text-sm {
+  height: var(--skeleton-row-height);
+  width: 40%;
+}
+.skeleton-title {
+  height: var(--skeleton-heading-height);
+  width: 80%;
+}
+.skeleton-avatar {
+  width: var(--skeleton-avatar-size);
+  height: var(--skeleton-avatar-size);
+  border-radius: 50%;
+}
+.skeleton-card {
+  height: var(--skeleton-card-height);
+  width: 100%;
+}
+.skeleton-row {
+  height: 48px;
+  width: 100%;
+  margin-bottom: 4px;
+}
 
 /* ── Stats cards load-in ──────────────────────────────────────────────────*/
 /* Disabled: causes double-pulse flicker on page load. */
@@ -287,7 +339,9 @@ img {
 /* Respect user's motion preference — collapse animations only, preserve transitions
    for focus visibility, state feedback, and reduced-motion-appropriate motion. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;

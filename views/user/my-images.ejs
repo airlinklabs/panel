@@ -1,4 +1,4 @@
-<%- include('../components/header', { title: 'My Images' }) %>
+<%- include('../components/header', { title: t('myImages') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -8,19 +8,19 @@
 <%- include('../components/template') %>
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
-        { label: req.translations.myImages || 'My Images' }
+        { label: t('myImages') }
       ] }) %>
 
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title"><%= req.translations.myImages || 'My Images' %></h1>
-          <p class="al-page-desc"><%= req.translations.myImagesText || 'Submit and manage custom images. They become usable once an admin approves them.' %></p>
+          <h1 class="al-page-title"><%= t('myImages') %></h1>
+          <p class="al-page-desc"><%= t('myImagesText') %></p>
         </div>
         <% if (allowed) { %>
         <div class="flex gap-2 shrink-0">
           <a href="/account#submit-image" class="al-btn-primary inline-flex items-center gap-1.5">
             <%- icon('plus', { size: 16 }) %>
-            <%= req.translations.submitImage || 'Submit Image' %>
+            <%= t('submitImage') %>
           </a>
         </div>
         <% } %>
@@ -33,10 +33,10 @@
             <%- icon('ban', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
           </div>
           <p class="text-sm font-medium" style="color:var(--theme-text-strong)">
-            <%= req.translations.imageSubmissionsDisabled || 'Image submissions are disabled.' %>
+            <%= t('imageSubmissionsDisabled') %>
           </p>
           <p class="text-sm mt-1" style="color:var(--theme-text-muted)">
-            <%= req.translations.imageSubmissionsDisabledText || 'An administrator has turned off user image submissions.' %>
+            <%= t('imageSubmissionsDisabledText') %>
           </p>
         </div>
         <% } else { %>
@@ -45,24 +45,24 @@
             <%- icon('image', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
           </div>
           <p class="text-sm font-medium" style="color:var(--theme-text-strong)">
-            <%= req.translations.noSubmittedImages || 'No submitted images yet.' %>
+            <%= t('noSubmittedImages') %>
           </p>
           <p class="text-sm mt-1" style="color:var(--theme-text-muted)">
-            <%= req.translations.noSubmittedImagesText || 'Submit an egg JSON and it will appear here with review status.' %>
+            <%= t('noSubmittedImagesText') %>
           </p>
           <a href="/account#submit-image" class="mt-4 al-btn-primary inline-flex items-center gap-1.5">
             <%- icon('plus', { size: 16 }) %>
-            <%= req.translations.submitImage || 'Submit Image' %>
+            <%= t('submitImage') %>
           </a>
         </div>
         <div id="myImagesTable" class="overflow-x-auto shadow-sm rounded-xl border <%= images.length === 0 ? 'hidden' : '' %>" style="border-color:var(--theme-border)">
           <table class="al-table min-w-full">
             <thead class="al-table-head">
               <tr>
-                <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
-                <th class="al-table-th px-3 py-3.5">Submitted</th>
-                <th class="al-table-th px-3 py-3.5">Status</th>
-                <th class="al-table-th px-3 py-3.5">Actions</th>
+                <th class="al-table-th py-3.5 pl-6 pr-3"><%= t('name') %></th>
+                <th class="al-table-th px-3 py-3.5"><%= t('submitted') %></th>
+                <th class="al-table-th px-3 py-3.5"><%= t('Status') %></th>
+                <th class="al-table-th px-3 py-3.5"><%= t('actions') %></th>
               </tr>
             </thead>
             <tbody class="divide-y" style="border-color:var(--theme-border)">
@@ -79,17 +79,17 @@
                   <% if (image.status === 'approved') { %>
                   <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
                     style="background:var(--theme-success-bg);color:var(--theme-success)">
-                    <%= req.translations.approved || 'Approved' %>
+                    <%= t('approved') %>
                   </span>
                   <% } else if (image.status === 'rejected') { %>
                   <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
                     style="background:var(--theme-danger-bg);color:var(--theme-danger)">
-                    <%= req.translations.rejected || 'Rejected' %>
+                    <%= t('rejected') %>
                   </span>
                   <% } else { %>
                   <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
                     style="background:var(--theme-warning-bg);color:var(--theme-warning)">
-                    <%= req.translations.pendingApproval || 'Pending review' %>
+                    <%= t('pendingApproval') %>
                   </span>
                   <% } %>
                 </td>
@@ -97,7 +97,7 @@
                   <div class="flex gap-2">
                     <% if (image.status !== 'approved') { %>
                     <a href="/my-images/edit/<%= image.id %>" class="al-btn-secondary px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5">
-                      <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %>Edit
+                      <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('edit') %>
                     </a>
                     <% } %>
                     <button type="button" class="al-btn-danger" data-delete-image="<%= image.id %>" aria-label="Delete <%= image.name %>">
@@ -117,9 +117,9 @@
 </main>
 
 <div id="page-data" style="display:none"
-  data-delete-confirm="<%= req.translations.deleteImageConfirm || 'Delete this image?' %>"
-  data-deleted="<%= req.translations.imageDeleted || 'Image deleted.' %>"
-  data-error="<%= req.translations.errorOccurred || 'Something went wrong.' %>"
+  data-delete-confirm="<%= t('deleteImageConfirm') %>"
+  data-deleted="<%= t('imageDeleted') %>"
+  data-error="<%= t('somethingWentWrong') %>"
 ></div>
 
 <%- include('../components/footer') %>

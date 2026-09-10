@@ -10,37 +10,37 @@
           <%- icon('plug', { class: 'w-4 h-4' }) %>
         </span>
         <div class="min-w-0">
-          <h2 id="paTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)">Assign ports</h2>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">External ports are drawn from the node's allocation</p>
+          <h2 id="paTitle" class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('assignPorts') %></h2>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('externalPortsHint') %></p>
         </div>
       </div>
-      <button type="button" id="paClose" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted)" aria-label="Close">
+      <button type="button" id="paClose" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" style="color:var(--theme-text-muted)" aria-label="<%= t('closeModal') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
 
     <div class="px-6 py-4">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-xs font-medium" style="color:var(--theme-text-muted)">Port mappings</p>
+        <p class="text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('portMappings') %></p>
         <span id="paCount" class="text-[10px] font-medium px-2 py-0.5 rounded-full"
           style="background:var(--theme-accent-subtle); color:var(--theme-text-strong)"></span>
       </div>
       <div id="paRows" class="space-y-2.5 max-h-[46vh] overflow-y-auto pr-1"></div>
       <div id="paEmpty" class="hidden text-center py-8">
-        <p class="text-sm" style="color:var(--theme-text-muted)">No ports available on this node</p>
+        <p class="text-sm" style="color:var(--theme-text-muted)"><%= t('noPortsAvailable') %></p>
       </div>
       <button type="button" id="paAddRow" class="mt-3 w-full flex items-center justify-center gap-1.5 rounded-xl border border-dashed px-3 py-2.5 text-xs font-medium transition hover:bg-[var(--theme-bg-hover)] active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-accent)] focus-visible:ring-offset-1"
         style="color:var(--theme-text-muted); border-color:var(--theme-border)">
         <%- icon('plus', { class: 'size-4' }) %>
-        Add port
+        <%= t('addPort') %>
       </button>
     </div>
 
     <div class="al-sheet-footer justify-between" style="border-color:var(--theme-border)">
       <p id="paHint" class="text-[11px]" style="color:var(--theme-text-muted)"></p>
       <div class="flex gap-2 shrink-0">
-        <button type="button" id="paCancel" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %>Cancel</button>
-        <button type="button" id="paSave" class="al-btn-primary px-4 py-2 text-xs font-medium inline-flex items-center gap-2"><%- icon('save', { class: 'size-3', strokeWidth: 1.5 }) %>Save ports</button>
+        <button type="button" id="paCancel" class="al-btn-secondary px-4 py-2 text-xs font-medium inline-flex items-center gap-2"><%- icon('x', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('cancel') %></button>
+        <button type="button" id="paSave" class="al-btn-primary px-4 py-2 text-xs font-medium inline-flex items-center gap-2"><%- icon('save', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('savePorts') %></button>
       </div>
     </div>
   </div>
@@ -50,7 +50,7 @@
 (function () {
   if (window.PortsAllocator) return;
 
-  const DEFAULT_GAME_PORT = 25565;
+  const DEFAULT_GAME_PORT = <%= defaultGamePort %>;
 
   const modal = document.getElementById('paModal');
   const panel = document.getElementById('paPanel');
@@ -104,10 +104,10 @@
         : null;
       if (confirm) {
         confirm({
-          title: 'Discard unsaved port changes?',
-          body: 'You have unsaved changes to this port mapping. They will be lost.',
+          title: '<%= (req.translations && req.translations.discardUnsavedPortChanges) || "Discard unsaved port changes?" %>',
+          body: '<%= (req.translations && req.translations.unsavedPortChangesWarning) || "You have unsaved changes to this port mapping. They will be lost." %>',
           danger: true,
-          confirmLabel: 'Discard changes',
+          confirmLabel: '<%= (req.translations && req.translations.discardChanges) || "Discard changes" %>',
           onConfirm: forceClose
         });
         return;
@@ -133,11 +133,11 @@
     if (avail.length === 0) {
       emptyEl.classList.remove('hidden');
       addBtn.classList.add('hidden');
-      countEl.textContent = '0 ports';
+      countEl.textContent = '<%= (req.translations && req.translations.zeroPorts) || "0 ports" %>';
     } else {
       emptyEl.classList.add('hidden');
       addBtn.classList.remove('hidden');
-      countEl.textContent = rows.length + ' port' + (rows.length === 1 ? '' : 's') + ' assigned';
+      countEl.textContent = rows.length + '<%= (req.translations && req.translations.portCountSingular) || " port" %>' + (rows.length === 1 ? '' : '<%= (req.translations && req.translations.portsCountLabel) || "s" %>') + '<%= (req.translations && req.translations.portsAssignedLabel) || " assigned" %>';
     }
 
     rows.forEach(function (row, index) {
@@ -152,7 +152,7 @@
       const nameLabel = document.createElement('span');
       nameLabel.className = 'text-[11px] font-medium';
       nameLabel.style.color = 'var(--theme-text-muted)';
-      nameLabel.textContent = 'Port name';
+      nameLabel.textContent = '<%= (req.translations && req.translations.portNameLabel) || "Port name" %>';
       topRow.appendChild(nameLabel);
 
       if (index === 0) {
@@ -160,7 +160,7 @@
         badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide';
         badge.style.background = 'var(--theme-accent)';
         badge.style.color = 'var(--theme-accent-text)';
-        badge.textContent = 'Primary';
+        badge.textContent = '<%= (req.translations && req.translations.primaryLabel) || "Primary" %>';
         topRow.appendChild(badge);
       }
 
@@ -169,14 +169,14 @@
         req.className = 'px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide';
         req.style.background = 'var(--theme-accent-subtle)';
         req.style.color = 'var(--theme-text-strong)';
-        req.textContent = 'Required';
+        req.textContent = '<%= (req.translations && req.translations.requiredLabel) || "Required" %>';
         topRow.appendChild(req);
       } else {
         const rmBtn = document.createElement('button');
         rmBtn.type = 'button';
         rmBtn.className = 'pa-rm ml-auto rounded-lg p-2.5 transition hover:bg-neutral-200 dark:hover:bg-white/10';
         rmBtn.style.color = 'var(--theme-danger)';
-        rmBtn.setAttribute('aria-label', 'Remove port');
+        rmBtn.setAttribute('aria-label', '<%= (req.translations && req.translations.removePortLabel) || "Remove port" %>');
         rmBtn.innerHTML = '<%- icon('trash-2', { class: 'w-4 h-4', strokeWidth: 1.75 }) %>';
         rmBtn.addEventListener('click', function () {
           rows.splice(index, 1);
@@ -194,14 +194,14 @@
       nameInput.style.background = 'var(--theme-bg-card)';
       nameInput.style.color = 'var(--theme-text-strong)';
       nameInput.value = row.name || '';
-      nameInput.placeholder = 'e.g. Game port';
+      nameInput.placeholder = '<%= (req.translations && req.translations.portNamePlaceholder) || "e.g. Game port" %>';
       nameInput.addEventListener('input', function () { row.name = nameInput.value; });
       el.appendChild(nameInput);
 
       const pair = document.createElement('div');
       pair.className = 'grid grid-cols-2 gap-2.5';
 
-      const intWrap = field('Internal port', 'number');
+      const intWrap = field('<%= (req.translations && req.translations.internalPortLabel) || "Internal port" %>', 'number');
       const intInput = intWrap.querySelector('input');
       intInput.min = '1'; intInput.max = '65535';
       intInput.value = row.internalPort !== undefined && row.internalPort !== null ? row.internalPort : '';
@@ -214,7 +214,7 @@
       const extLabel = document.createElement('span');
       extLabel.className = 'block text-[11px] mb-1';
       extLabel.style.color = 'var(--theme-text-muted)';
-      extLabel.textContent = 'External port';
+      extLabel.textContent = '<%= (req.translations && req.translations.externalPortLabel) || "External port" %>';
       extWrap.appendChild(extLabel);
       const extBtn = document.createElement('button');
       extBtn.type = 'button';
@@ -246,7 +246,7 @@
 
       const extValue = row.externalPort !== undefined && row.externalPort !== null ? String(row.externalPort) : '';
       const chosen = avail.find(function (a) { return String(a.port) === extValue; });
-      extText.textContent = chosen ? chosen.label : (extValue ? 'Port ' + extValue : 'Select port…');
+      extText.textContent = chosen ? chosen.label : (extValue ? '<%= (req.translations && req.translations.portLabel) || "Port " %>' + extValue : '<%= (req.translations && req.translations.selectPort) || "Select port…" %>');
       if (!chosen) extText.style.opacity = '0.45';
       extBtn.appendChild(extText);
       extBtn.appendChild(chevron);
@@ -266,7 +266,7 @@
           opt.setAttribute('aria-disabled', String(taken));
           const txt = document.createElement('span');
           txt.className = 'truncate';
-          txt.textContent = item.label + (taken ? ' — in use' : '');
+          txt.textContent = item.label + (taken ? '<%= (req.translations && req.translations.inUseLabel) || " — in use" %>' : '');
           opt.appendChild(txt);
           if (isSel) {
             const ck = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -399,8 +399,8 @@
     hintEl.textContent = (cfg.availablePorts || []).length === 0
       ? ''
       : (rows.length > 0 && rowsChanged()
-          ? 'Unsaved changes'
-          : (cfg.requirements.length ? 'First port is marked as primary' : ''));
+          ? '<%= (req.translations && req.translations.unsavedChanges) || "Unsaved changes" %>'
+          : (cfg.requirements.length ? '<%= (req.translations && req.translations.firstPortPrimary) || "First port is marked as primary" %>' : ''));
   }
 
   function field(labelText, type) {

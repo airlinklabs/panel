@@ -14,9 +14,8 @@ import {
   runtimeStartQueue,
   QueueBannedError,
 } from '../../../handlers/runtimeQueue';
-
-const STOP_STATE_TTL_MS = 120_000;
-const RESTART_DELAY_MS = 2_000;
+import { STOP_STATE_TTL_MS, RESTART_DELAY_MS } from '../../../config/timeouts';
+import { logT } from '../../../services/i18n';
 
 export function registerPowerRoutes(router: Router): void {
   router.post(
@@ -56,7 +55,10 @@ export function registerPowerRoutes(router: Router): void {
           (powerAction === 'start' || powerAction === 'restart')
         ) {
           logger.warn(
-            `Attempt to start suspended server ${serverId} by user ${userId}`,
+            logT('log.attemptToStartSuspendedServer', {
+              serverId: String(serverId),
+              userId: String(userId),
+            }),
           );
           res.status(403).json({
             error:
@@ -70,7 +72,11 @@ export function registerPowerRoutes(router: Router): void {
           (powerAction === 'start' || powerAction === 'restart')
         ) {
           logger.warn(
-            `Attempt to start server ${serverId} on node ${server.node.id} in maintenance mode by user ${userId}`,
+            logT('log.attemptToStartServerOnMaintenanceNode', {
+              serverId: String(serverId),
+              nodeId: String(server.node.id),
+              userId: String(userId),
+            }),
           );
           res.status(403).json({
             error:
@@ -102,7 +108,9 @@ export function registerPowerRoutes(router: Router): void {
                 // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                 delete global.serverStoppingStates[cacheKey];
                 logger.info(
-                  `Cleared stopping state for server ${serverId} after timeout`,
+                  logT('log.clearedStoppingState', {
+                    serverId: String(serverId),
+                  }),
                 );
               }
             }, STOP_STATE_TTL_MS);
@@ -124,7 +132,9 @@ export function registerPowerRoutes(router: Router): void {
                 stopCmd: server.image?.stop || 'stop',
               },
             });
-            logger.info(`Container stopped successfully: ${serverId}`);
+            logger.info(
+              logT('log.containerStopped', { serverId: String(serverId) }),
+            );
             await prisma.server
               .update({
                 where: { UUID: String(serverId) },
@@ -142,7 +152,9 @@ export function registerPowerRoutes(router: Router): void {
             const stopErr = stopError as { status?: number } | undefined;
             if (stopErr?.status === 404) {
               logger.info(
-                `Container already stopped or not found: ${serverId}`,
+                logT('log.containerAlreadyStopped', {
+                  serverId: String(serverId),
+                }),
               );
 
               await prisma.server
@@ -164,7 +176,7 @@ export function registerPowerRoutes(router: Router): void {
                 delete global.serverStoppingStates[cacheKey];
               }
             } else {
-              logger.warn('Failed to stop container', {
+              logger.warn(logT('log.failedToStopContainer'), {
                 serverId: String(serverId),
                 action: 'stop',
                 error: stopError,
@@ -179,7 +191,7 @@ export function registerPowerRoutes(router: Router): void {
           powerAction !== 'stop' &&
           powerAction !== 'restart'
         ) {
-          logger.error('Invalid power action:', powerAction);
+          logger.error(logT('log.invalidPowerAction'), powerAction);
           res
             .status(400)
             .json({ error: `Invalid power action: ${powerAction}` });
@@ -235,7 +247,9 @@ export function registerPowerRoutes(router: Router): void {
             throw error;
           }
 
-          logger.info(`Container restart queued successfully: ${serverId}`);
+          logger.info(
+            logT('log.containerRestartQueued', { serverId: String(serverId) }),
+          );
           await logActivity(req, 'server:restart', {
             serverId: String(serverId),
           });
@@ -288,7 +302,7 @@ export function registerPowerRoutes(router: Router): void {
           throw error;
         }
       } catch (error) {
-        logger.error('Failed to process power action', error, {
+        logger.error(logT('log.failedToProcessPowerAction'), {
           serverId: String(serverId),
           action: String(powerAction),
         });
@@ -365,7 +379,9 @@ export function registerPowerRoutes(router: Router): void {
             server.ownerId === user.id ||
             user.role === 'privileged',
         });
-        logger.info(`Container restart queued successfully: ${serverId}`);
+        logger.info(
+          logT('log.containerRestartQueued', { serverId: String(serverId) }),
+        );
 
         if (q.queued) {
           res.status(202).json({
@@ -380,7 +396,7 @@ export function registerPowerRoutes(router: Router): void {
           .status(200)
           .json({ success: true, message: 'Server restarted successfully' });
       } catch (error) {
-        logger.error('Error restarting server:', error);
+        logger.error(logT('log.errorRestartingServer'), error);
         res.status(500).json({ error: 'Failed to restart server' });
       }
     },
@@ -422,7 +438,7 @@ export function registerPowerRoutes(router: Router): void {
         const removed = await runtimeStartQueue.cancelQueuedStart(server.UUID);
         res.json({ success: true, wasQueued: removed });
       } catch (error) {
-        logger.error('Error cancelling queued start:', error);
+        logger.error(logT('log.errorCancellingQueuedStart'), error);
         res.status(500).json({ error: 'Failed to cancel queued start.' });
       }
     },

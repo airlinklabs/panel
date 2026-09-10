@@ -3,6 +3,10 @@ import path from 'path';
 import { exec, spawnSync } from 'child_process';
 import { promisify } from 'util';
 import logger from './logger';
+import { EGG_CATALOGUE_REFRESH_MS } from '../config/timeouts';
+import { EGG_REPO_URL } from '../config/urls';
+import { DAEMON_TIMEOUT_SHORT_MS } from '../config/daemonTimeouts';
+import { logT } from '../services/i18n';
 
 const execAsync = promisify(exec);
 
@@ -12,7 +16,7 @@ const REPOS = [
   {
     id: 'game',
     dir: 'game-eggs',
-    url: 'https://github.com/pterodactyl/game-eggs.git',
+    url: EGG_REPO_URL,
   },
   {
     id: 'application',
@@ -25,8 +29,6 @@ const REPOS = [
     url: 'https://github.com/pterodactyl/generic-eggs.git',
   },
 ];
-
-const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
 
 export interface StoreImage {
   name: string;
@@ -52,7 +54,7 @@ function isGitAvailable(): boolean {
     const result = spawnSync('git', ['--version'], {
       shell: false,
       stdio: 'ignore',
-      timeout: 5000,
+      timeout: DAEMON_TIMEOUT_SHORT_MS,
     });
     return result.status === 0;
   } catch {
@@ -79,17 +81,17 @@ async function cloneOrPullRepo(
 
   if (!fs.existsSync(targetDir) || !isGitRepo(targetDir)) {
     if (fs.existsSync(targetDir)) {
-      logger.info(
-        `Store: removing broken directory at ${targetDir} before re-cloning`,
-      );
+      logger.info(logT('log.storeRemovingBrokenDir', { dir: targetDir }));
       fs.rmSync(targetDir, { recursive: true, force: true });
     }
-    logger.info(`Store: cloning ${repoUrl}`);
+    logger.info(logT('log.storeCloning', { url: repoUrl }));
     await execAsync(`git clone --depth=1 "${repoUrl}" "${targetDir}"`, { env });
     return;
   }
 
-  logger.info(`Store: pulling latest for ${path.basename(targetDir)}`);
+  logger.info(
+    logT('log.storePullingLatest', { dir: path.basename(targetDir) }),
+  );
   await execAsync(`git -C "${targetDir}" pull`, { env });
 }
 
@@ -256,7 +258,7 @@ function buildCatalogueFromDisk(): StoreImage[] {
 
 async function updateRepos(): Promise<void> {
   if (!isGitAvailable()) {
-    logger.warn('Store: git not found -- cannot clone egg repos');
+    logger.warn(logT('log.storeGitNotFound'));
     return;
   }
 
@@ -271,7 +273,10 @@ async function updateRepos(): Promise<void> {
   results.forEach((r, i) => {
     if (r.status === 'rejected') {
       logger.warn(
-        `Store: ${REPOS[i]?.dir ?? i} failed: ${r.reason?.message || r.reason}`,
+        logT('log.storeRepoFailed', {
+          repo: REPOS[i]?.dir ?? String(i),
+          reason: String(r.reason?.message || r.reason),
+        }),
       );
     }
   });
@@ -280,7 +285,7 @@ async function updateRepos(): Promise<void> {
 function rebuildCatalogue(): void {
   catalogue = buildCatalogueFromDisk();
   lastBuilt = Date.now();
-  logger.info(`Store: catalogue built -- ${catalogue.length} images`);
+  logger.info(logT('log.storeCatalogueBuilt', { count: catalogue.length }));
 }
 
 function scheduleAutoUpdate(): void {
@@ -288,10 +293,10 @@ function scheduleAutoUpdate(): void {
     clearInterval(updateTimer);
   }
   updateTimer = setInterval(async () => {
-    logger.info('Store: auto-updating egg repos');
+    logger.info(logT('log.storeAutoUpdating'));
     await updateRepos();
     rebuildCatalogue();
-  }, TWO_DAYS_MS);
+  }, EGG_CATALOGUE_REFRESH_MS);
   if (updateTimer.unref) {
     updateTimer.unref();
   }

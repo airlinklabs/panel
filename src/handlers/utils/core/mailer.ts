@@ -1,6 +1,7 @@
 import { getSettings } from '../../settingsCache';
 import nodemailer from 'nodemailer';
 import logger from '../../logger';
+import { logT } from '../../../services/i18n';
 
 const DEFAULT_SMTP_PORT = 587;
 const DEFAULT_SMTP_FROM = 'noreply@airlink';
@@ -37,7 +38,7 @@ export async function sendMail(
     });
     return true;
   } catch (error) {
-    logger.error('Failed to send email:', error);
+    logger.error(logT('log.emailSendFailed'), error);
     return false;
   }
 }

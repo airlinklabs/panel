@@ -1,8 +1,7 @@
 import { URL } from 'url';
 import type { Readable } from 'stream';
+import { CONTENT_TYPE_JSON, CONTENT_TYPE_TEXT } from '../config/limits';
 
-const CONTENT_TYPE_JSON = 'application/json';
-const CONTENT_TYPE_TEXT = 'text/plain';
 const HEADER_AUTHORIZATION = 'Authorization';
 const HEADER_CONTENT_TYPE = 'Content-Type';
 const BASIC_AUTH_PREFIX = 'Basic ';

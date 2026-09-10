@@ -9,6 +9,7 @@ import {
 import { persistBackupRecord } from '../modules/user/server/backups';
 import { runtimeStartQueue } from './runtimeQueue';
 import logger from './logger';
+import { logT } from '../services/i18n';
 
 export interface ScheduleWithRelations {
   id: number;
@@ -85,7 +86,10 @@ export async function runSchedule(
 
     if (schedule.server.Suspended) {
       logger.warn(
-        `Schedule ${schedule.id} skipped: server ${schedule.server.UUID} is suspended`,
+        logT('log.scheduleSkippedSuspended', {
+          id: schedule.id,
+          uuid: schedule.server.UUID,
+        }),
       );
       return { ok: errors.length === 0, errors };
     }
@@ -252,9 +256,12 @@ export function startScheduler(): void {
         try {
           const result = await runSchedule(schedule);
           if (!result.ok) {
-            logger.warn(`Schedule ${schedule.id} completed with task errors`, {
-              errors: result.errors,
-            });
+            logger.warn(
+              logT('log.scheduleCompletedWithErrors', { id: schedule.id }),
+              {
+                errors: result.errors,
+              },
+            );
           }
           const offsetClock = new Date(
             now.getTime() + (schedule.timeOffset || 0) * 60_000,
@@ -270,11 +277,11 @@ export function startScheduler(): void {
             },
           });
         } catch (err) {
-          logger.error(`Schedule ${schedule.id} failed`, err);
+          logger.error(logT('log.scheduleFailed', { id: schedule.id }), err);
         }
       }
     } catch (err) {
-      logger.error('Scheduler poll failed', err);
+      logger.error(logT('log.schedulerPollFailed'), err);
     }
   }, 30_000);
 }

@@ -3,6 +3,7 @@ import { doubleCsrf } from 'csrf-csrf';
 import crypto from 'crypto';
 import logger from '../../logger';
 import { getClientIp } from '../../../utils/ip';
+import { logT } from '../../../services/i18n';
 
 const CSRF_TOKEN_SIZE = 32;
 // Session cookies already derive their Secure attribute from URL in app.ts.
@@ -100,7 +101,11 @@ export const handleCsrfError = (
     return next(err);
   }
   logger.warn(
-    `CSRF attack detected: IP=${getClientIp(req)}, Path=${req.path}, Method=${req.method}`,
+    logT('log.csrfAttackDetected', {
+      ip: String(getClientIp(req)),
+      path: req.path,
+      method: req.method,
+    }),
   );
   const wantsJson =
     req.get('HX-Request') === 'true' ||
@@ -137,7 +142,7 @@ export const addCsrfTokenToLocals = (
     ensureCsrfSessionId(req);
     res.locals.csrfToken = getCsrfUtilities().generateCsrfToken(req, res);
   } catch (error: unknown) {
-    logger.warn('Failed to generate CSRF token', { error });
+    logger.warn(logT('log.csrfTokenGenerateFailed'), { error });
   }
   next();
 };

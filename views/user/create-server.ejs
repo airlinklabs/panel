@@ -1,4 +1,4 @@
-<%- include('../components/header', { title: 'Create Server' }) %>
+<%- include('../components/header', { title: t('createAServer') }) %>
 
 <style>
   ::-webkit-scrollbar { display: none; }
@@ -81,14 +81,14 @@ function createServerPage() {
 
       function updateRequiredPorts() {
         assignPortsLabel.textContent = portsState.length
-          ? 'Ports (' + portsState.length + ')'
-          : 'Assign ports';
+          ? '<%= req.translations.portsCount || "Ports" %> (' + portsState.length + ')'
+          : '<%= req.translations.assignPorts || "Assign ports" %>';
       }
 
       function renderPortRows() {
         requiredPortsList.innerHTML = '';
         if (!portsState.length) {
-          requiredPortsList.innerHTML = '<p class="text-xs text-neutral-500 dark:text-neutral-400">No ports yet. Add one below, or leave empty for a single auto-assigned port.</p>';
+          requiredPortsList.innerHTML = '<p class="text-xs text-neutral-500 dark:text-neutral-400"><%= req.translations.noPortsYet || "No ports yet. Add one below, or leave empty for a single auto-assigned port." %></p>';
           return;
         }
         portsState.forEach(function (port, index) {
@@ -96,7 +96,7 @@ function createServerPage() {
           row.className = 'grid grid-cols-[1fr_auto_auto] gap-2 items-center';
           const nameInput = document.createElement('input');
           nameInput.type = 'text';
-          nameInput.placeholder = 'Name';
+          nameInput.placeholder = '<%= req.translations.name || "Name" %>';
           nameInput.maxLength = 32;
           nameInput.value = port.name || '';
           nameInput.className = 'al-input';
@@ -109,15 +109,15 @@ function createServerPage() {
           internalInput.max = '65535';
           internalInput.value = port.internalPort;
           internalInput.className = 'al-input font-mono';
-          internalInput.title = 'Internal (container) port';
+          internalInput.title = '<%= req.translations.internalPort || "Internal (container) port" %>';
           internalInput.addEventListener('input', function () {
             portsState[index].internalPort = parseInt(internalInput.value, 10);
           });
           const removeBtn = document.createElement('button');
           removeBtn.type = 'button';
           removeBtn.className = 'px-2 py-2 rounded-lg text-neutral-500 hover:text-red-500 hover:bg-red-500/10 transition';
-          removeBtn.title = 'Remove port';
-          removeBtn.setAttribute('aria-label', 'Remove port');
+          removeBtn.title = '<%= req.translations.removePort || "Remove port" %>';
+          removeBtn.setAttribute('aria-label', '<%= req.translations.removePort || "Remove port" %>');
           removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 4.5v9A6 6 0 0 1 6 21a6 6 0 0 1-3-5.2V6.5A6 6 0 0 0 12 3"/></svg>'.replace(/<svg/g, '<svg ');
           removeBtn.addEventListener('click', function () {
             portsState.splice(index, 1);
@@ -131,7 +131,7 @@ function createServerPage() {
       }
 
       document.getElementById('addPortBtn').addEventListener('click', function () {
-        portsState.push({ name: 'Port ' + (portsState.length + 1), internalPort: 25565 });
+        portsState.push({ name: '<%= req.translations.port || "Port" %> ' + (portsState.length + 1), internalPort: <%= defaultServerPort %> });
         renderPortRows();
       });
 
@@ -141,7 +141,7 @@ function createServerPage() {
         dockerSelect.innerHTML = '';
         const ph = document.createElement('option');
         ph.value = '';
-        ph.textContent = 'Select variant';
+        ph.textContent = '<%= req.translations.selectVariant || "Select variant" %>';
         ph.disabled = true;
         ph.selected = true;
         dockerSelect.appendChild(ph);
@@ -165,7 +165,7 @@ function createServerPage() {
 
       assignPortsBtn.addEventListener('click', function () {
         renderPortRows();
-        window.modal.show({ title: 'Assign ports', bodyNode: document.getElementById('portsContent'), panelClass: 'max-w-lg' });
+        window.modal.show({ title: '<%= req.translations.assignPorts || "Assign ports" %>', bodyNode: document.getElementById('portsContent'), panelClass: 'max-w-lg' });
       });
 
       portsOkBtn.addEventListener('click', function () {
@@ -246,7 +246,7 @@ function createServerPage() {
 
       function showConfirm(title, body) {
         return new Promise(function (resolve) {
-          window.modal.confirm({ title: title, body: body, confirmLabel: 'Create', onConfirm: resolve });
+          window.modal.confirm({ title: title, body: body, confirmLabel: '<%= req.translations.create || "Create" %>', onConfirm: resolve });
         });
       }
 
@@ -254,7 +254,7 @@ function createServerPage() {
         var btn = this;
         var origText = btn.textContent;
         btn.disabled = true;
-        btn.textContent = 'Creating...';
+        btn.textContent = '<%= req.translations.creating || "Creating..." %>';
         var name = serverNameInput.value.trim();
         var description = document.getElementById('serverDescription').value.trim();
         var nodeId = nodeIdSelect.value;
@@ -266,16 +266,16 @@ function createServerPage() {
         var swap = parseInt(swapInput.value);
         document.querySelectorAll('.form-input').forEach(function (el) { el.classList.remove('invalid'); });
         var validationErrors = [];
-        if (!name) { validationErrors.push('Server name is required.'); serverNameInput.classList.add('invalid'); }
-        else if (name.length < 3) { validationErrors.push('Server name must be at least 3 characters.'); serverNameInput.classList.add('invalid'); }
-        if (!nodeId) validationErrors.push('Select a node.');
-        if (!imageId) validationErrors.push('Select an image.');
-        if (!dockerImage) validationErrors.push('Select a docker variant.');
-        if (mem < MIN_MEMORY) validationErrors.push('Memory must be at least ' + MIN_MEMORY + ' MB.');
-        if (storage < MIN_STORAGE) validationErrors.push('Storage must be at least ' + MIN_STORAGE + ' MB.');
-        if (cpu < MIN_CPU) validationErrors.push('CPU must be at least ' + MIN_CPU + '%.');
+        if (!name) { validationErrors.push('<%= req.translations.serverNameRequired || "Server name is required." %>'); serverNameInput.classList.add('invalid'); }
+        else if (name.length < 3) { validationErrors.push('<%= req.translations.serverNameMinLength || "Server name must be at least 3 characters." %>'); serverNameInput.classList.add('invalid'); }
+        if (!nodeId) validationErrors.push('<%= req.translations.selectNodeError || "Select a node." %>');
+        if (!imageId) validationErrors.push('<%= req.translations.selectImageError || "Select an image." %>');
+        if (!dockerImage) validationErrors.push('<%= req.translations.selectDockerVariant || "Select a docker variant." %>');
+        if (mem < MIN_MEMORY) validationErrors.push('<%= req.translations.memoryMustBeAtLeast || "Memory must be at least" %> ' + MIN_MEMORY + ' MB.');
+        if (storage < MIN_STORAGE) validationErrors.push('<%= req.translations.storageMustBeAtLeast || "Storage must be at least" %> ' + MIN_STORAGE + ' MB.');
+        if (cpu < MIN_CPU) validationErrors.push('<%= req.translations.cpuMustBeAtLeast || "CPU must be at least" %> ' + MIN_CPU + '%.');
         if (portsState.some(function (entry) { return !entry.name || !Number.isInteger(entry.internalPort) || entry.internalPort < 1 || entry.internalPort > 65535; })) {
-          validationErrors.push('Every port needs a name and a valid internal port (1-65535).');
+          validationErrors.push('<%= req.translations.portValidation || "Every port needs a name and a valid internal port (1-65535)." %>');
         }
         if (validationErrors.length > 0) {
           btn.disabled = false;
@@ -283,7 +283,7 @@ function createServerPage() {
           self.error = validationErrors.join('\n');
           return;
         }
-        var ok = await showConfirm('Create server?', '"' + name + '" will be created and queued for installation. This may take a moment.');
+        var ok = await showConfirm('<%= req.translations.createServerConfirm || "Create server?" %>', '"' + name + '" <%= req.translations.willBeCreated || "will be created and queued for installation. This may take a moment." %>');
         if (!ok) { btn.disabled = false; btn.textContent = origText; return; }
         try {
           var r = await fetch('/api/v2/servers', {
@@ -296,7 +296,7 @@ function createServerPage() {
             if (toastContainer) {
               var toast = document.createElement('div');
               toast.className = 'al-toast al-toast-success';
-              toast.innerHTML = '<span class="al-toast-icon">' + alIcon('circle-check', 'w-4 h-4', { strokeWidth: 2 }) + '</span><span class="al-toast-text">Server created successfully!</span>';
+              toast.innerHTML = '<span class="al-toast-icon">' + alIcon('circle-check', 'w-4 h-4', { strokeWidth: 2 }) + '</span><span class="al-toast-text"><%= req.translations.serverCreatedSuccess || "Server created successfully!" %></span>';
               toastContainer.appendChild(toast);
               setTimeout(function () { toast.classList.add('show'); }, TOAST_SHOW_DELAY);
               setTimeout(function () { toast.classList.remove('show'); setTimeout(function () { toast.remove(); }, TOAST_REMOVE_DELAY); }, TOAST_HIDE_DELAY);
@@ -305,13 +305,13 @@ function createServerPage() {
           } else {
             btn.disabled = false;
             btn.textContent = origText;
-            self.error = d.error || 'Something went wrong.';
+            self.error = d.error || '<%= req.translations.errorOccurred || "Something went wrong." %>';
           }
         } catch (err) {
           console.error('Failed to create server:', err);
           btn.disabled = false;
           btn.textContent = origText;
-          self.error = 'Network error. Try again.';
+          self.error = '<%= req.translations.networkErrorRetry || "Network error. Try again." %>';
         }
       });
     }
@@ -327,18 +327,18 @@ function createServerPage() {
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
-        { label: 'Create Server' }
+        { label: t('navDashboard'), href: '/' },
+        { label: t('createServerBreadcrumb') }
       ] }) %>
       <div class="px-8 lg:px-12 pt-6 pb-12 max-w-5xl">
 
         <!-- Header -->
         <div class="flex items-center justify-between mb-7">
           <div>
-            <h1 class="al-page-title">Create a server</h1>
-            <p class="al-page-desc"><%= currentCount %> of <%= serverLimit %> servers used</p>
+            <h1 class="al-page-title"><%= t('createAServer') %></h1>
+            <p class="al-page-desc"><%= currentCount %> <%= t('ofServersUsed') %> <%= serverLimit %></p>
           </div>
-          <a href="/" class="text-sm transition" style="color:var(--theme-text-muted)">Cancel</a>
+          <a href="/" class="text-sm transition" style="color:var(--theme-text-muted)"><%= t('cancel') %></a>
         </div>
 
         <div class="space-y-5">
@@ -348,27 +348,27 @@ function createServerPage() {
 
           <!-- Details -->
           <div class="al-card">
-            <div class="al-card-header">Details</div>
+            <div class="al-card-header"><%= t('details') %></div>
             <div class="p-5 space-y-4">
               <div>
-                <label class="al-label" for="serverName">Name</label>
-                <input id="serverName" type="text" placeholder="My server" maxlength="64" class="al-input">
+                <label class="al-label" for="serverName"><%= t('name') %></label>
+                <input id="serverName" type="text" placeholder="<%= t('serverName') %>" maxlength="64" class="al-input">
               </div>
               <div>
-                <label class="al-label" for="serverDescription">Description <span style="color:var(--theme-text-muted);font-weight:normal">(optional)</span></label>
-                <input id="serverDescription" type="text" placeholder="What is this for?" maxlength="128" class="al-input">
+                <label class="al-label" for="serverDescription"><%= t('description') %> <span style="color:var(--theme-text-muted);font-weight:normal">(<%= t('optional') %>)</span></label>
+                <input id="serverDescription" type="text" placeholder="<%= t('whatIsThisFor') %>" maxlength="128" class="al-input">
               </div>
             </div>
           </div>
 
           <!-- Node & Image -->
           <div class="al-card">
-            <div class="al-card-header">Node & image</div>
+            <div class="al-card-header"><%= t('nodeAndImage') %></div>
             <div class="p-5 space-y-4">
               <div>
-                <label class="al-label" for="nodeId">Node</label>
+                <label class="al-label" for="nodeId"><%= t('Node') %></label>
                 <select id="nodeId" class="hidden">
-                  <option value="" disabled>Select a node</option>
+                  <option value="" disabled><%= t('selectNode') %></option>
                   <% nodes.forEach(node => { %>
                   <option value="<%= node.id %>"<%= recommendedNodeId === node.id ? ' selected' : '' %>><%= node.name %> — <%= node.address %><% if (recommendedNodeId === node.id) { %> (recommended)<% } %></option>
                   <% }); %>
@@ -376,15 +376,15 @@ function createServerPage() {
                 <div class="custom-select" data-for="nodeId"></div>
               </div>
               <div id="nodeHeadroom" class="hidden space-y-2.5 rounded-xl p-4" style="border:1px solid var(--theme-border); background:var(--theme-bg-secondary);">
-                <p class="text-xs font-medium" style="color:var(--theme-text-muted)">Node headroom</p>
+                <p class="text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('nodeHeadroom') %></p>
                 <div id="nodeHeadroomRows" class="space-y-2.5"></div>
                 <p id="headroomHint" class="text-[11px]" style="color:var(--theme-text-muted)"></p>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="al-label" for="imageId">Image</label>
+                  <label class="al-label" for="imageId"><%= t('Image') %></label>
                   <select id="imageId" class="hidden">
-                    <option value="" disabled selected>Select an image</option>
+                    <option value="" disabled selected><%= t('selectImage') %></option>
                     <% images.forEach(image => { %>
                     <option value="<%= image.id %>" data-docker="<%= image.dockerImages %>" data-port-requirements='<%= image.portRequirements || "[]" %>'><%= image.name %></option>
                     <% }); %>
@@ -392,17 +392,17 @@ function createServerPage() {
                   <div class="custom-select" data-for="imageId"></div>
                 </div>
                 <div>
-                  <label class="al-label" for="dockerImage">Docker variant</label>
+                  <label class="al-label" for="dockerImage"><%= t('dockerVariant') %></label>
                   <select id="dockerImage" class="hidden">
-                    <option value="" disabled selected>Select an image first</option>
+                    <option value="" disabled selected><%= req.translations.selectImageFirst || "Select an image first" %></option>
                   </select>
                   <div class="custom-select" data-for="dockerImage"></div>
                 </div>
               </div>
               <div>
-                <label class="al-label">Ports</label>
+                <label class="al-label"><%= t('Ports') %></label>
                 <button type="button" id="assignPortsBtn" class="cs-trigger">
-                  <span id="assignPortsLabel">Assign ports</span>
+                  <span id="assignPortsLabel"><%= t('assignPorts') %></span>
                 </button>
               </div>
             </div>
@@ -412,12 +412,12 @@ function createServerPage() {
 
           <!-- Resources -->
           <div class="al-card overflow-hidden">
-            <div class="al-card-header">Resources</div>
+            <div class="al-card-header"><%= t('resources') %></div>
             <div class="p-5 grid grid-cols-3 gap-4">
               <div>
                 <label for="MemoryDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('server', { width: 14, height: 14 }) %>
-                  RAM
+                  <%= t('ram') %>
                 </label>
                 <!-- hidden field always holds MB -->
                 <input type="hidden" id="Memory" value="512">
@@ -429,24 +429,24 @@ function createServerPage() {
                     data-display="MemoryDisplay" data-hidden="Memory"
                     data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
-                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= resourceLimits.maxMemory > 0 ? 'Max ' + resourceLimits.maxMemory + ' MB' : 'Unlimited' %></p>
+                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= resourceLimits.maxMemory > 0 ? t('max') + ' ' + resourceLimits.maxMemory + ' MB' : t('unlimited') %></p>
               </div>
               <div>
                 <label for="Cpu" class="al-label flex items-center gap-1.5">
                   <%- icon('cpu', { width: 14, height: 14 }) %>
-                  CPU <span style="color:var(--theme-text-muted);font-weight:normal">(%)</span>
+                  <%= t('cpu') %> <span style="color:var(--theme-text-muted);font-weight:normal"><%= t('cpuPercent') %></span>
                 </label>
                 <div class="stepper">
                   <button type="button" class="stepper-btn" data-action="dec" data-target="Cpu" data-step="50" data-min="50" aria-label="Decrease CPU">−</button>
                   <input id="Cpu" type="number" value="100" min="50" max="<%= resourceLimits.maxCpu %>" class="stepper-input" aria-label="CPU percentage">
                   <button type="button" class="stepper-btn" data-action="inc" data-target="Cpu" data-step="50" data-max="<%= resourceLimits.maxCpu %>" aria-label="Increase CPU">+</button>
                 </div>
-                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)">50% = half a core. <%= resourceLimits.maxCpu > 0 ? 'Max ' + resourceLimits.maxCpu + '%' : 'Unlimited' %></p>
+                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= t('halfCoreHint') %> <%= resourceLimits.maxCpu > 0 ? t('max') + ' ' + resourceLimits.maxCpu + '%' : t('unlimited') %></p>
               </div>
               <div>
                 <label for="SwapDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('memory-stick', { width: 14, height: 14 }) %>
-                  Swap
+                  <%= t('swap') %>
                 </label>
                 <!-- hidden field always holds MB; -1 = unlimited, 0 = off -->
                 <input type="hidden" id="Swap" value="0">
@@ -458,15 +458,15 @@ function createServerPage() {
                     data-display="SwapDisplay" data-hidden="Swap"
                     data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
                 </div>
-                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)">0 = off, -1 = unlimited</p>
+                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= t('swapOffUnlimited') %></p>
               </div>
               <div>
                 <label for="StorageDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('hard-drive', { width: 14, height: 14 }) %>
-                  Storage
+                  <%= t('storage') %>
                 </label>
                 <!-- hidden field always holds MB -->
-                <input type="hidden" id="Storage" value="5120">
+                <input type="hidden" id="Storage" value="<%= defaultMaxStorageMb %>">
                 <div class="flex items-stretch gap-0">
                   <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="StorageDisplay" data-step="1" data-min="1" aria-label="Decrease storage">−</button>
                   <input id="StorageDisplay" type="number" value="5" min="1" class="stepper-input flex-1" aria-label="Storage value">
@@ -475,7 +475,7 @@ function createServerPage() {
                     data-display="StorageDisplay" data-hidden="Storage"
                     data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
                 </div>
-                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= resourceLimits.maxStorage > 0 ? 'Max ' + resourceLimits.maxStorage + ' MB' : 'Unlimited' %></p>
+                <p class="text-[11px] mt-1.5" style="color:var(--theme-text-muted)"><%= resourceLimits.maxStorage > 0 ? t('max') + ' ' + resourceLimits.maxStorage + ' MB' : t('unlimited') %></p>
               </div>
             </div>
           </div>
@@ -489,7 +489,7 @@ function createServerPage() {
           <div class="flex justify-end pt-1">
             <button type="button" id="createBtn"
               class="al-btn-primary px-6 py-2.5 text-sm font-medium shadow-sm transition inline-flex items-center gap-2">
-              <span id="createBtnText">Create server</span>
+              <span id="createBtnText"><%= t('createServer') %></span>
               <span id="createBtnSpinner" class="hidden w-4 h-4 border-2 rounded-full animate-spin" style="border-color:color-mix(in srgb, var(--theme-btn-primary-text) 25%, transparent);border-top-color:var(--theme-btn-primary-text);"></span>
             </button>
           </div>
@@ -502,17 +502,17 @@ function createServerPage() {
 </div><!-- /x-data -->
 
 <div id="portsContent" style="display:none;">
-  <p class="text-xs mb-3" style="color:var(--theme-text-muted)">External ports are assigned automatically to the next free node port. Edit the name and internal container port below.</p>
+  <p class="text-xs mb-3" style="color:var(--theme-text-muted)"><%= t('externalPortsHint') %></p>
   <div id="requiredPortsList" class="space-y-2"></div>
   <button type="button" id="addPortBtn" class="mt-3 text-sm font-medium inline-flex items-center gap-1.5 transition" style="color:var(--theme-text-muted)">
-    <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Add port
+    <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('addPort') %>
   </button>
   <div class="flex justify-end mt-4">
     <button type="button" id="portsOk" class="al-btn-primary px-4 py-2 text-sm font-medium inline-flex items-center gap-2"><%- icon('check', { class: 'size-4', strokeWidth: 1.5 }) %>OK</button>
   </div>
 </div>
 
-<%- include('../components/loadingPopup') %>
+<%- include('../components/loading-popup') %>
 
 <script nonce="<%- nonce %>">window.__nodeHeadroom = <%- JSON.stringify(nodeHeadroom) %>;</script>
 

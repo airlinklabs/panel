@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Analytics' }) %>
+<%- include('../../components/header', { title: t('adminAnalyticsTitle') }) %>
 
 <main class="min-h-screen m-auto">
   <div class="flex min-h-screen">
@@ -7,19 +7,19 @@
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Analytics' }
+        { label: t('admin') },
+        { label: t('breadcrumbAnalytics') }
       ] }) %>
       <div class="al-page-header">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="al-page-title">Analytics</h1>
-            <p class="al-page-desc">Live data from the database and connected daemons.</p>
+            <h1 class="al-page-title"><%= t('adminAnalyticsTitle') %></h1>
+            <p class="al-page-desc"><%= t('analyticsLiveDesc') %></p>
           </div>
           <button type="button" id="refreshBtn"
             class="al-btn-secondary flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition">
             <%- icon('refresh-cw', { id: 'refreshIcon', class: 'w-4 h-4', strokeWidth: 1.5 }) %>
-            Refresh
+            <%= t('analyticsRefreshBtn') %>
           </button>
         </div>
       </div>
@@ -27,19 +27,19 @@
       <div class="al-page-body" data-al-tabs data-tabs-default="servers" data-tabs-hash>
         <!-- Tab bar -->
         <div class="flex gap-1 mb-6 flex-wrap" role="tablist">
-          <button type="button" id="tab-servers"  aria-controls="panel-servers"  data-tab="servers"  tabindex="0"  class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="true"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>Servers</button>
-          <button type="button" id="tab-nodes"    aria-controls="panel-nodes"    data-tab="nodes"    tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %>Nodes</button>
-          <button type="button" id="tab-activity" aria-controls="panel-activity" data-tab="activity" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('activity', { class: 'size-4', strokeWidth: 1.5 }) %>Activity</button>
-          <button type="button" id="tab-logs"     aria-controls="panel-logs"     data-tab="logs"     tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('scroll-text', { class: 'size-4', strokeWidth: 1.5 }) %>Activity Logs</button>
+          <button type="button" id="tab-servers"  aria-controls="panel-servers"  data-tab="servers"  tabindex="0"  class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="true"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabServers') %></button>
+          <button type="button" id="tab-nodes"    aria-controls="panel-nodes"    data-tab="nodes"    tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabNodes') %></button>
+          <button type="button" id="tab-activity" aria-controls="panel-activity" data-tab="activity" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('activity', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabActivity') %></button>
+          <button type="button" id="tab-logs"     aria-controls="panel-logs"     data-tab="logs"     tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('scroll-text', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabLogs') %></button>
           <% if (user.role === 'owner') { %>
-          <button type="button" id="tab-system"   aria-controls="panel-system"   data-tab="system"   tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('shield-alert', { class: 'size-4', strokeWidth: 1.5 }) %>System Logs</button>
+          <button type="button" id="tab-system"   aria-controls="panel-system"   data-tab="system"   tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2" role="tab" aria-selected="false"><%- icon('shield-alert', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('analyticsTabSystem') %></button>
           <% } %>
         </div>
 
         <!-- Loading state -->
         <div id="loading-state" class="flex items-center gap-3 py-12" style="color:var(--theme-text-muted)">
           <%- icon('loader-circle', { class: 'animate-spin w-5 h-5', strokeWidth: 2 }) %>
-          <span class="text-sm">Loading analytics…</span>
+          <span class="text-sm"><%= t('analyticsLoadingData') %></span>
         </div>
 
         <!-- ── SERVERS ─────────────────────────────────────────────────────── -->
@@ -47,24 +47,24 @@
 
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Total servers</p>
+              <p class="al-section-label"><%= t('analyticsTotalServers') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="sv-total">—</p>
               <p class="text-xs mt-1" style="color:var(--theme-text-muted)" id="sv-suspended-label"></p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Allocated RAM</p>
+              <p class="al-section-label"><%= t('analyticsAllocatedRam') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="sv-ram">—</p>
-              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">across all servers</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('analyticsAcrossAllServers') %></p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Allocated CPU</p>
+              <p class="al-section-label"><%= t('analyticsAllocatedCpu') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="sv-cpu">—</p>
-              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">total allocation</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('analyticsTotalAllocation') %></p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Allocated disk</p>
+              <p class="al-section-label"><%= t('analyticsAllocatedDisk') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="sv-storage">—</p>
-              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">total allocation</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('analyticsTotalAllocation') %></p>
             </div>
           </div>
 
@@ -72,13 +72,13 @@
 
             <!-- Top images -->
             <div class="al-card p-5">
-              <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)">Images in use</p>
+              <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= t('analyticsImagesInUse') %></p>
               <div id="sv-images" class="space-y-3"></div>
             </div>
 
             <!-- Heaviest servers -->
             <div class="al-card overflow-hidden">
-              <h2 class="al-card-header">Highest allocated servers</h2>
+              <h2 class="al-card-header"><%= t('analyticsHighestAllocated') %></h2>
               <div class="divide-y divide-[var(--theme-border)]" id="sv-heavy"></div>
             </div>
 
@@ -90,15 +90,15 @@
 
           <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Nodes</p>
+              <p class="al-section-label"><%= t('analyticsNodesLabel') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="nd-total">—</p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Online</p>
+              <p class="al-section-label"><%= t('analyticsOnlineLabel') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-success)" id="nd-online">—</p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Offline</p>
+              <p class="al-section-label"><%= t('analyticsOfflineLabel') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-danger)" id="nd-offline">—</p>
             </div>
           </div>
@@ -111,30 +111,30 @@
 
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Users</p>
+              <p class="al-section-label"><%= t('analyticsUsersLabel') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="ac-users">—</p>
               <p class="text-xs mt-1" style="color:var(--theme-text-muted)" id="ac-admins-label"></p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Images installed</p>
+              <p class="al-section-label"><%= t('analyticsImagesInstalled') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="ac-images">—</p>
-              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">in library</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('analyticsInLibrary') %></p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Logins (30d)</p>
+              <p class="al-section-label"><%= t('analyticsLogins30d') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="ac-logins">—</p>
-              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">panel sessions</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('analyticsPanelSessions') %></p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Avg/day</p>
+              <p class="al-section-label"><%= t('analyticsAvgPerDay') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="ac-avg">—</p>
-              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">logins per day</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('analyticsLoginsPerDay') %></p>
             </div>
           </div>
 
           <!-- Login chart -->
           <div class="al-card p-5">
-            <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)">Login activity — last 30 days</p>
+            <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= t('analyticsLoginActivity30d') %></p>
             <div class="relative h-44">
               <canvas id="loginChart"></canvas>
             </div>
@@ -142,14 +142,14 @@
 
           <!-- Recent logins -->
           <div class="al-card overflow-hidden">
-            <h2 class="al-card-header">Recent logins</h2>
+            <h2 class="al-card-header"><%= t('analyticsRecentLogins') %></h2>
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm divide-y divide-[var(--theme-border)]">
                 <thead style="background:var(--theme-bg-secondary)">
                   <tr>
-                    <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">User ID</th>
-                    <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">IP Address</th>
-                    <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Time</th>
+                    <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('analyticsUserId') %></th>
+                    <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('ipAddress') %></th>
+                    <th class="px-5 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('activityTime') %></th>
                   </tr>
                 </thead>
                 <tbody id="ac-logins-table" class="divide-y divide-[var(--theme-border)]"></tbody>
@@ -163,26 +163,26 @@
 
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Total events</p>
+              <p class="al-section-label"><%= t('analyticsTotalEvents') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="log-total">—</p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Last 24h</p>
+              <p class="al-section-label"><%= t('analyticsLast24h') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-info)" id="log-24h">—</p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Last 7 days</p>
+              <p class="al-section-label"><%= t('analyticsLast7days') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-success)" id="log-7d">—</p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Categories</p>
+              <p class="al-section-label"><%= t('analyticsCategoriesLabel') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="log-categories">—</p>
             </div>
           </div>
 
           <!-- Events over time chart -->
           <div class="al-card p-5">
-            <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)">Events — last 30 days</p>
+            <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= t('analyticsEvents30d') %></p>
             <div class="relative h-44">
               <canvas id="activityChart"></canvas>
             </div>
@@ -192,37 +192,37 @@
           <div class="al-card p-4">
             <div class="flex flex-wrap gap-3 items-center">
               <select id="log-filter-category" class="al-select text-sm px-3 py-1.5">
-                <option value="">All categories</option>
-                <option value="user_action">User Action</option>
-                <option value="system_error">System Error</option>
-                <option value="security">Security</option>
-                <option value="server_lifecycle">Server Lifecycle</option>
+                <option value=""><%= t('analyticsAllCategoriesFilter') %></option>
+                <option value="user_action"><%= t('analyticsUserAction') %></option>
+                <option value="system_error"><%= t('analyticsSystemError') %></option>
+                <option value="security"><%= t('analyticsSecurity') %></option>
+                <option value="server_lifecycle"><%= t('analyticsServerLifecycle') %></option>
               </select>
               <select id="log-filter-severity" class="al-select text-sm px-3 py-1.5">
-                <option value="">All severities</option>
-                <option value="info">Info</option>
-                <option value="warning">Warning</option>
-                <option value="error">Error</option>
-                <option value="critical">Critical</option>
+                <option value=""><%= t('analyticsAllSeverities') %></option>
+                <option value="info"><%= t('analyticsSeverityInfo') %></option>
+                <option value="warning"><%= t('analyticsSeverityWarning') %></option>
+                <option value="error"><%= t('analyticsSeverityError') %></option>
+                <option value="critical"><%= t('analyticsSeverityCritical') %></option>
               </select>
-              <input id="log-filter-search" type="text" placeholder="Search events…" class="al-input text-sm px-3 py-1.5" />
-              <button id="log-filter-apply" class="al-btn-primary text-sm px-3 py-1.5">Apply</button>
+              <input id="log-filter-search" type="text" placeholder="<%= t('analyticsSearchEvents') %>" class="al-input text-sm px-3 py-1.5" />
+              <button id="log-filter-apply" class="al-btn-primary text-sm px-3 py-1.5"><%= t('analyticsApplyBtn') %></button>
             </div>
           </div>
 
           <!-- Activity feed -->
           <div class="al-card overflow-hidden">
-            <h2 class="al-card-header">Recent activity</h2>
+            <h2 class="al-card-header"><%= t('analyticsRecentActivityLog') %></h2>
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm divide-y divide-[var(--theme-border)]">
                 <thead style="background:var(--theme-bg-secondary)">
                   <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Time</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">User</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Event</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Category</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Severity</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">IP</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('activityTime') %></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('activityUser') %></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('activityAction') %></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('activityCategory') %></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('analyticsSeverityLabel') %></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('activityIP') %></th>
                   </tr>
                 </thead>
                 <tbody id="log-feed-table" class="divide-y divide-[var(--theme-border)]"></tbody>
@@ -238,22 +238,22 @@
 
           <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Total system logs</p>
+              <p class="al-section-label"><%= t('analyticsTotalSystemLogs') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="sys-total">—</p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Last 24h</p>
+              <p class="al-section-label"><%= t('analyticsLast24h') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-info)" id="sys-24h">—</p>
             </div>
             <div class="al-card px-4 py-4">
-              <p class="al-section-label">Components</p>
+              <p class="al-section-label"><%= t('analyticsComponentsLabel') %></p>
               <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="sys-components">—</p>
             </div>
           </div>
 
           <!-- Severity breakdown chart -->
           <div class="al-card p-5">
-            <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)">System logs by severity</p>
+            <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)"><%= t('analyticsSystemLogsBySeverity') %></p>
             <div class="relative h-44">
               <canvas id="systemChart"></canvas>
             </div>
@@ -263,35 +263,35 @@
           <div class="al-card p-4">
             <div class="flex flex-wrap gap-3 items-center">
               <select id="sys-filter-severity" class="al-select text-sm px-3 py-1.5">
-                <option value="">All severities</option>
-                <option value="warning">Warning</option>
-                <option value="error">Error</option>
-                <option value="critical">Critical</option>
+                <option value=""><%= t('analyticsAllSeverities') %></option>
+                <option value="warning"><%= t('analyticsSeverityWarning') %></option>
+                <option value="error"><%= t('analyticsSeverityError') %></option>
+                <option value="critical"><%= t('analyticsSeverityCritical') %></option>
               </select>
               <select id="sys-filter-component" class="al-select text-sm px-3 py-1.5">
-                <option value="">All components</option>
-                <option value="api">API</option>
-                <option value="daemon">Daemon</option>
-                <option value="database">Database</option>
-                <option value="redis">Redis</option>
-                <option value="scheduler">Scheduler</option>
+                <option value=""><%= t('analyticsAllComponents') %></option>
+                <option value="api"><%= t('analyticsApiComponent') %></option>
+                <option value="daemon"><%= t('analyticsDaemonComponent') %></option>
+                <option value="database"><%= t('analyticsDatabaseComponent') %></option>
+                <option value="redis"><%= t('analyticsRedisComponent') %></option>
+                <option value="scheduler"><%= t('analyticsSchedulerComponent') %></option>
               </select>
-              <input id="sys-filter-search" type="text" placeholder="Search logs…" class="al-input text-sm px-3 py-1.5" />
-              <button id="sys-filter-apply" class="al-btn-primary text-sm px-3 py-1.5">Apply</button>
+              <input id="sys-filter-search" type="text" placeholder="<%= t('analyticsSearchLogs') %>" class="al-input text-sm px-3 py-1.5" />
+              <button id="sys-filter-apply" class="al-btn-primary text-sm px-3 py-1.5"><%= t('analyticsApplyBtn') %></button>
             </div>
           </div>
 
           <!-- System log table -->
           <div class="al-card overflow-hidden">
-            <h2 class="al-card-header">System logs</h2>
+            <h2 class="al-card-header"><%= t('analyticsSystemLogsTitle') %></h2>
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm divide-y divide-[var(--theme-border)]">
                 <thead style="background:var(--theme-bg-secondary)">
                   <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Time</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Severity</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Component</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)">Message</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('activityTime') %></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('analyticsSeverityLabel') %></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('analyticsComponentLabel') %></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium" style="color:var(--theme-text-muted)"><%= t('analyticsMessageLabel') %></th>
                   </tr>
                 </thead>
                 <tbody id="sys-log-table" class="divide-y divide-[var(--theme-border)]"></tbody>

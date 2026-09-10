@@ -7,6 +7,8 @@
  * keep the raw detail for the server log only.
  */
 
+import { DOCKER_INSTALL_PATH } from '../config/ui';
+
 export type ErrorCategory =
   'daemon' | 'database' | 'filesystem' | 'network' | 'validation' | 'unknown';
 
@@ -28,7 +30,7 @@ const CATEGORY_HINT: Partial<Record<ErrorCategory, string>> = {
 const DAEMON_MARKERS = [
   'docker',
   'container',
-  '/var/lib/docker',
+  DOCKER_INSTALL_PATH,
   'docker.sock',
   'failed to attach',
   'no such container',

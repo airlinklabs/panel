@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Dashboard' }) %>
+<%- include('../../components/header', { title: t('adminNodesTitle') }) %>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
@@ -10,55 +10,55 @@
     <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="nodeManager()">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Nodes' }
+        { label: t('admin') },
+        { label: t('navNodes') }
       ] }) %>
       <%- include('../../components/ui/page-header', {
-        title: req.translations.adminNodesTitle,
-        description: req.translations.adminNodesText,
-        actions: '<a href="#locations" class="al-btn-secondary text-sm">' + icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) + 'Locations</a>' +
-                 '<button id="createButton" type="button" class="al-btn-primary" @click="location.href=\'/admin/nodes/create\'">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</button>'
+        title: t('adminNodesTitle'),
+        description: t('adminNodesText'),
+        actions: '<a href="#locations" class="al-btn-secondary text-sm">' + icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) + ' ' + t('navLocations') + '</a>' +
+                 '<button id="createButton" type="button" class="al-btn-primary" @click="location.href=\'/admin/nodes/create\'">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + t('createNewNode') + '</button>'
       }) %>
 
       <div class="al-page-body" data-al-tabs data-tabs-default="nodes" data-tabs-hash>
 
         <div role="tablist" class="flex gap-1 mb-6">
-          <button id="tab-btn-nodes" type="button" data-tab="nodes" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-nodes" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %>Nodes</button>
-          <button id="tab-btn-locations" type="button" data-tab="locations" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-locations" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) %>Locations</button>
+          <button id="tab-btn-nodes" type="button" data-tab="nodes" role="tab" aria-selected="true" tabindex="0" aria-controls="tab-panel-nodes" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('network', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('navNodes') %></button>
+          <button id="tab-btn-locations" type="button" data-tab="locations" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-panel-locations" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('map-pin', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('navLocations') %></button>
         </div>
 
         <div id="tab-panel-nodes" role="tabpanel" aria-labelledby="tab-btn-nodes" data-tab-panel="nodes">
 
         <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 mt-6">
           <div class="al-card">
-            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= req.translations.totalNodes %></h2>
+            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= t('totalNodes') %></h2>
             <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="totalNodesTotal"><%= nodes.length %></p>
             <% if (nodes.length > 0) { %>
-            <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineNodes %>: <span id="onlineNodesTotal"><%= nodes.filter(node => node.status === 'Online').length %></span></p>
+            <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('onlineNodes') %>: <span id="onlineNodesTotal"><%= nodes.filter(node => node.status === 'Online').length %></span></p>
             <% } else { %>
-              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noNodesAvailable || 'No nodes available' %></p>
+              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('noNodesAvailable') %></p>
             <% } %>
           </div>
           <div class="al-card">
-            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);">Servers</h2>
+            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= t('servers') %></h2>
             <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);" id="totalNodeInstancesTotal">
               <%= nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) %>
             </p>
             <% const totalInstances = nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0); %>
             <% if (totalInstances > 0 && nodes.length > 0) { %>
               <p class="text-xs mt-2" style="color:var(--theme-text-muted);">
-                <%= req.translations.averageInstanceDensity %>:
+                <%= t('averageInstanceDensity') %>:
                 <span id="avgNodeInstancesTotal"><%= (totalInstances / nodes.length).toFixed(2) %></span>
               </p>
             <% } else { %>
-              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noInstancesAvailable %></p>
+              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= t('noInstancesAvailable') %></p>
             <% } %>
           </div>
         </div>
 
         <!-- notifications -->
         <% if (req.query.err == "none") { %>
-          <%- include('../../components/ui/alert', { type: 'success', message: req.translations.success + '!', detail: req.translations.actionCompleted }) %>
+          <%- include('../../components/ui/alert', { type: 'success', message: t('success') + '!', detail: t('actionCompleted') }) %>
         <% } %>
 
         <!-- Daemon offline warning -->
@@ -66,12 +66,12 @@
           <div class="al-alert-danger mb-5">
             <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
             <div class="flex-1">
-              <p class="font-medium">Connection Error</p>
-              <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">One or more nodes are offline. Some information may be unavailable.</p>
+              <p class="font-medium"><%= t('connectionError') %></p>
+              <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('connectionErrorDesc') %></p>
             </div>
             <button type="button" @click="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">
               <%- icon('refresh-cw', { class: 'size-3', strokeWidth: 1.5 }) %>
-              Retry Connection
+              <%= t('retry') %>
             </button>
           </div>
         <% } %>
@@ -85,8 +85,8 @@
         <div id="locations" class="mt-6 space-y-5">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-lg font-semibold tracking-tight" style="color:var(--theme-text-strong);">Locations</h2>
-              <p class="text-sm mt-0.5" style="color:var(--theme-text-muted);">Group nodes by region.</p>
+              <h2 class="text-lg font-semibold tracking-tight" style="color:var(--theme-text-strong);"><%= t('locations') %></h2>
+              <p class="text-sm mt-0.5" style="color:var(--theme-text-muted);"><%= t('groupNodesByRegion') %></p>
             </div>
           </div>
 
@@ -97,7 +97,7 @@
               </div>
               <div>
                 <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);" id="totalLocationsCount"><%= locations.length %></p>
-                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Locations</p>
+                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);"><%= t('locations') %></p>
               </div>
             </div>
             <div class="al-card p-5 flex items-center gap-4">
@@ -106,7 +106,7 @@
               </div>
               <div>
                 <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);" id="nodesAssignedTotal"><%= nodes.filter(n => n.locationId).length %></p>
-                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Nodes assigned</p>
+                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);"><%= t('nodesAssigned') %></p>
               </div>
             </div>
             <div class="al-card p-5 flex items-center gap-4">
@@ -115,13 +115,13 @@
               </div>
               <div>
                 <p class="text-2xl font-semibold leading-none" style="color:var(--theme-text-strong);" id="nodesUnassignedTotal"><%= nodes.filter(n => !n.locationId).length %></p>
-                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);">Nodes without a location</p>
+                <p class="text-xs mt-1.5" style="color:var(--theme-text-muted);"><%= t('nodesWithoutLocation') %></p>
               </div>
             </div>
           </div>
 
           <div class="al-card">
-            <h3 class="al-card-header flex items-center gap-2"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Create Location</h3>
+            <h3 class="al-card-header flex items-center gap-2"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('createLocation') %></h3>
             <div class="p-5">
               <div id="admin-locations-status"></div>
               <form id="createLocationForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end"
@@ -143,29 +143,29 @@
                         const frag = tmp.querySelector('#admin-locations-list');
                         if (frag) target.replaceWith(frag);
                       }
-                      showToast('Location created.', 'success');
+                      showToast(req.translations.locationCreated || 'Location created.', 'success');
                       this.name = ''; this.shortCode = '';
                     } else {
                       const data = await res.json().catch(() => ({}));
-                      showToast(data.error || data.message || 'Failed to create location.', 'error');
+                      showToast(data.error || data.message || (req.translations.failedToCreateLocation || 'Failed to create location.'), 'error');
                     }
-                  } catch (e) { showToast('Failed to create location.', 'error'); }
+                  } catch (e) { showToast(req.translations.failedToCreateLocation || 'Failed to create location.', 'error'); }
                   this.saving = false;
                 }}">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div>
-                  <label class="al-label" for="locName">Name</label>
+                  <label class="al-label" for="locName"><%= t('name') %></label>
                   <input id="locName" name="name" type="text" placeholder="US East" class="al-input" required x-model="name">
                 </div>
                 <div>
-                  <label class="al-label" for="locCode">Short code</label>
+                  <label class="al-label" for="locCode"><%= t('shortCode') %></label>
                   <input id="locCode" name="shortCode" type="text" placeholder="us-east" class="al-input" autocapitalize="off" spellcheck="false" required x-model="shortCode">
                 </div>
                 <div class="lg:col-span-2 flex items-end">
                   <button type="button" @click="submit()" class="al-btn-primary w-full sm:w-auto" :disabled="saving">
                     <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-                    <span x-show="!saving">Create Location</span>
-                    <span x-show="saving">Creating...</span>
+                    <span x-show="!saving"><%= t('createLocation') %></span>
+                    <span x-show="saving"><%= t('creating') %></span>
                   </button>
                 </div>
               </form>
@@ -173,7 +173,7 @@
           </div>
 
           <div class="al-card">
-            <h3 class="al-card-header flex items-center gap-2"><%- icon('map', { class: 'size-4', strokeWidth: 1.5 }) %>All Locations</h3>
+            <h3 class="al-card-header flex items-center gap-2"><%- icon('map', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('allLocations') %></h3>
             <div class="p-5">
               <%- include('../../fragments/admin/locations/location-list', { locations }) %>
             </div>
@@ -199,13 +199,13 @@ function handleRowClick(event, url) {
 }
 
 function showConfirmModal(title, message, onConfirm) {
-  window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Yeah, delete it', onConfirm });
+  window.modal.confirm({ title, body: message, danger: true, confirmLabel: req.translations.yeahDeleteIt || 'Yeah, delete it', onConfirm });
 }
 
 function configure(nodeId) {
   fetch(`/admin/node/${nodeId}/configure`)
     .then(function(response) {
-      if (!response.ok) throw new Error('Failed to fetch configure command');
+      if (!response.ok)           throw new Error(req.translations.failedToFetchConfigCommand || 'Failed to fetch configure command');
       return response.json();
     })
     .then(function(data) {
@@ -215,15 +215,15 @@ function configure(nodeId) {
         '<div class="flex justify-center items-center mb-6">' +
           alIcon('badge-check', 'text-emerald-500', { width: 64, height: 64 }) +
         '</div>' +
-        '<p class="mb-4 text-neutral-600 dark:text-neutral-300 text-center">Run this command on the daemon machine to connect it to this panel:</p>' +
+        '<p class="mb-4 text-neutral-600 dark:text-neutral-300 text-center">' + (req.translations.runCommandOnDaemon || 'Run this command on the daemon machine to connect it to this panel:') + '</p>' +
         '<pre class="bg-neutral-100 dark:bg-neutral-900 p-3 rounded-xl mb-4 overflow-x-auto"><code id="commandCode" class="text-emerald-500">' + data + '</code></pre>' +
         '<div class="flex justify-end">' +
-          '<button id="copyBtn" class="bg-emerald-600 text-white px-4 py-2 rounded-xl mr-2 hover:bg-emerald-700 transition-colors">Copy</button>' +
-          '<button id="doneBtn" class="bg-neutral-800 dark:bg-neutral-700 text-white px-4 py-2 rounded-xl hover:bg-neutral-700 dark:hover:bg-neutral-600 transition-colors">Close</button>' +
+          '<button id="copyBtn" class="bg-emerald-600 text-white px-4 py-2 rounded-xl mr-2 hover:bg-emerald-700 transition-colors">' + (req.translations.copy || 'Copy') + '</button>' +
+          '<button id="doneBtn" class="bg-neutral-800 dark:bg-neutral-700 text-white px-4 py-2 rounded-xl hover:bg-neutral-700 dark:hover:bg-neutral-600 transition-colors">' + (req.translations.close || 'Close') + '</button>' +
         '</div>';
 
       window.modal.show({
-        title: 'Node Configured',
+        title: req.translations.nodeConfigured || 'Node Configured',
         bodyNode: popup,
         panelClass: 'max-w-xl',
       });
@@ -233,20 +233,20 @@ function configure(nodeId) {
         var copyBtn = this;
         navigator.clipboard.writeText(command)
           .then(function() {
-            copyBtn.textContent = 'Copied!';
+            copyBtn.textContent = req.translations.copied || 'Copied!';
             copyBtn.classList.replace('bg-emerald-600', 'bg-neutral-600');
             setTimeout(function() {
-              copyBtn.textContent = 'Copy';
+              copyBtn.textContent = req.translations.copy || 'Copy';
               copyBtn.classList.replace('bg-neutral-600', 'bg-emerald-600');
             }, 2000);
           })
-          .catch(function(error) { console.error('Failed to copy:', error); showToast('Couldn\'t copy the command. Try again.', 'error'); });
+          .catch(function(error) { console.error('Failed to copy:', error); showToast(req.translations.couldNotCopyCommand || "Couldn't copy the command. Try again.", 'error'); });
       });
       document.getElementById('doneBtn').addEventListener('click', function() { window.modal.close(); });
     })
     .catch(function(error) {
       console.error(error);
-      showToast(error.message || 'Failed to fetch configure command.', 'error');
+      showToast(error.message || (req.translations.failedToFetchConfigCommand || 'Failed to fetch configure command.'), 'error');
     });
 }
 
@@ -276,11 +276,11 @@ function nodeManager() {
     offlineBannerHtml() {
       return alIcon('triangle-alert', 'w-4 h-4 shrink-0 mt-0.5') +
         '<div class="flex-1">' +
-        '<p class="font-medium">Connection Error</p>' +
-        '<p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p>' +
+        '<p class="font-medium">' + (req.translations.connectionError || 'Connection Error') + '</p>' +
+        '<p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">' + (req.translations.oneOrMoreNodesOffline || 'One or more nodes are offline. Some information may be unavailable.') + '</p>' +
         '</div>' +
         '<button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">' +
-        alIcon('refresh-cw', 'size-3', { strokeWidth: 1.5 }) + 'Retry Connection</button>';
+        alIcon('refresh-cw', 'size-3', { strokeWidth: 1.5 }) + ' ' + (req.translations.retryConnection || 'Retry Connection') + '</button>';
     },
 
     injectOfflineBanner() {
@@ -331,7 +331,7 @@ function nodeManager() {
 
 window.refreshNodeStatuses = function () {
   var banner = document.querySelector('.al-alert-danger');
-  if (banner && window.al) al.patchEl(banner, '<div class="flex items-center gap-3">' + alIcon('loader-circle', 'w-4 h-4 animate-spin') + '<p class="font-medium">Reconnecting…</p></div>');
+  if (banner && window.al) al.patchEl(banner, '<div class="flex items-center gap-3">' + alIcon('loader-circle', 'w-4 h-4 animate-spin') + '<p class="font-medium">' + (req.translations.reconnecting || 'Reconnecting…') + '</p></div>');
   fetch('/api/v2/admin/nodes/list')
     .then(function(r) { return r.json(); })
     .then(function(nodes) {
@@ -350,8 +350,8 @@ window.refreshNodeStatuses = function () {
         if (alertEl && window.al) {
           al.patchEl(alertEl,
             alIcon('triangle-alert', 'w-4 h-4 shrink-0 mt-0.5') +
-            '<div class="flex-1"><p class="font-medium">Connection Error</p><p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p></div>' +
-            '<button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">' + alIcon('refresh-cw', 'size-3', { strokeWidth: 1.5 }) + 'Retry Connection</button>'
+            '<div class="flex-1"><p class="font-medium">' + (req.translations.connectionError || 'Connection Error') + '</p><p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">' + (req.translations.oneOrMoreNodesOffline || 'One or more nodes are offline. Some information may be unavailable.') + '</p></div>' +
+            '<button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">' + alIcon('refresh-cw', 'size-3', { strokeWidth: 1.5 }) + ' ' + (req.translations.retryConnection || 'Retry Connection') + '</button>'
           );
         } else if (!alertEl) {
           var table = document.getElementById('admin-nodes-table');
@@ -360,8 +360,8 @@ window.refreshNodeStatuses = function () {
             b.className = 'al-alert-danger mb-5';
             b.innerHTML =
               alIcon('triangle-alert', 'w-4 h-4 shrink-0 mt-0.5') +
-              '<div class="flex-1"><p class="font-medium">Connection Error</p><p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">One or more nodes are offline. Some information may be unavailable.</p></div>' +
-              '<button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">' + alIcon('refresh-cw', 'size-3', { strokeWidth: 1.5 }) + 'Retry Connection</button>';
+              '<div class="flex-1"><p class="font-medium">' + (req.translations.connectionError || 'Connection Error') + '</p><p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">' + (req.translations.oneOrMoreNodesOffline || 'One or more nodes are offline. Some information may be unavailable.') + '</p></div>' +
+              '<button type="button" onclick="refreshNodeStatuses()" class="shrink-0 px-3 py-1 text-xs rounded-lg transition-colors inline-flex items-center gap-1.5" style="background:var(--theme-danger-bg); color:var(--theme-danger);">' + alIcon('refresh-cw', 'size-3', { strokeWidth: 1.5 }) + ' ' + (req.translations.retryConnection || 'Retry Connection') + '</button>';
             table.parentNode.insertBefore(b, table);
           }
         }
@@ -388,21 +388,21 @@ window.refreshNodeStatuses = function () {
     body.innerHTML =
       '<form id="editLocationForm" class="flex flex-col gap-4">' +
         '<div>' +
-          '<label class="al-label" for="editLocName">Name</label>' +
+          '<label class="al-label" for="editLocName">' + (req.translations.name || 'Name') + '</label>'' +
           '<input id="editLocName" name="name" type="text" value="' + name.replace(/"/g, '&quot;') + '" class="al-input" required>' +
         '</div>' +
         '<div>' +
-          '<label class="al-label" for="editLocCode">Short code</label>' +
+          '<label class="al-label" for="editLocCode">' + (req.translations.shortCode || 'Short code') + '</label>'' +
           '<input id="editLocCode" name="shortCode" type="text" value="' + shortCode.replace(/"/g, '&quot;') + '" class="al-input" autocapitalize="off" spellcheck="false" required>' +
         '</div>' +
         '<div class="flex justify-end gap-2 pt-1">' +
-          '<button type="button" onclick="window.modal.close()" class="al-btn-secondary px-4 py-2 text-sm font-medium">Cancel</button>' +
-          '<button type="submit" class="al-btn-primary px-4 py-2 text-sm font-medium">Save</button>' +
+          '<button type="button" onclick="window.modal.close()" class="al-btn-secondary px-4 py-2 text-sm font-medium">' + (req.translations.cancel || 'Cancel') + '</button>'' +
+          '<button type="submit" class="al-btn-primary px-4 py-2 text-sm font-medium">' + (req.translations.save || 'Save') + '</button>'' +
         '</div>' +
       '</form>';
 
     window.modal.show({
-      title: 'Edit Location',
+      title: req.translations.editLocation || 'Edit Location',
       bodyNode: body,
       panelClass: 'max-w-md',
     });
@@ -419,14 +419,14 @@ window.refreshNodeStatuses = function () {
         });
         var data = await res.json();
         if (res.ok) {
-          showToast('Location updated.', 'success');
+          showToast(req.translations.locationUpdated || 'Location updated.', 'success');
           window.modal.close();
           htmx.ajax('GET', '/admin/nodes', { target: '#tab-panel-locations', swap: 'innerHTML' });
         } else {
-          showToast(data.message || 'Update failed.', 'error');
+          showToast(data.message || (req.translations.updateFailed || 'Update failed.'), 'error');
         }
       } catch(err) {
-        showToast('Update failed.', 'error');
+        showToast(req.translations.updateFailed || 'Update failed.', 'error');
       }
     });
   };
@@ -437,7 +437,7 @@ window.refreshNodeStatuses = function () {
     overlay.innerHTML =
       '<div class="al-sheet-panel rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);">' +
         '<div class="al-sheet-header" style="border-color:var(--theme-border)">' +
-          '<div><p class="text-sm font-semibold" style="color:var(--theme-text-strong);">Nodes in ' + name.replace(/</g, '&lt;') + '</p></div>' +
+          '<div><p class="text-sm font-semibold" style="color:var(--theme-text-strong);">' + (req.translations.nodesIn || 'Nodes in ') + name.replace(/</g, '&lt;') + '</p></div>' +
           '<button type="button" data-close-location-nodes class="w-9 h-9 flex items-center justify-center rounded-lg hover:opacity-75 transition" style="color:var(--theme-text-muted);">' +
             '<%- icon("x", { class: "w-4 h-4", strokeWidth: 2 }) %>' +
           '</button>' +

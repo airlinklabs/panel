@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
 import logger from './logger';
+import { logT } from '../services/i18n';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 
@@ -28,11 +29,11 @@ export function getRedisClient(): Redis {
   });
 
   client.on('connect', () => {
-    logger.info('Redis connected');
+    logger.info(logT('log.redisConnected'));
   });
 
   client.on('error', (err: Error) => {
-    logger.warn('Redis connection error', { error: err.message });
+    logger.warn(logT('log.redisConnectionError'), { error: err.message });
   });
 
   return client;

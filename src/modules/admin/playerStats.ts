@@ -11,8 +11,9 @@ import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import {
   daemonPlayerListSchema,
   parseDaemonResponse,
-} from '../../platform/daemon/dtos';
+} from '../../types/daemon';
 import { getPrimaryExternalPort } from '../../handlers/utils/server/ports';
+import { DAEMON_TIMEOUT_SHORT_MS } from '../../config/daemonTimeouts';
 
 registerPermission('airlink.admin.playerstats.view');
 
@@ -111,7 +112,7 @@ const adminModule: Module = {
                     host: server.node.address,
                     port: primaryPort,
                   },
-                  timeout: 5000,
+                  timeout: DAEMON_TIMEOUT_SHORT_MS,
                 });
 
                 const playersData =

@@ -2,7 +2,7 @@
 <% if (locals.items && items.length > 0) { %>
 <div class="lg:hidden w-full" style="border-bottom:1px solid var(--theme-border);background:var(--theme-bg-secondary);">
   <div class="pr-6 sm:pr-8 pl-0 py-2">
-    <nav aria-label="Breadcrumb">
+      <nav aria-label="<%= t('breadcrumb') %>">
       <ol class="flex items-center gap-1.5 text-[11px] min-w-0">
         <% items.forEach(function(item, index) { %>
           <li class="flex items-center gap-1.5 min-w-0 <%= index === items.length - 1 ? 'flex-1' : 'shrink-0' %>">

@@ -2,10 +2,9 @@ import { isHttpError } from '../../../utils/http';
 import {
   containerStatusSchema,
   parseDaemonResponse,
-} from '../../../platform/daemon/dtos';
+} from '../../../types/daemon';
 import { daemonRequest } from '../core/daemonRequest';
-
-const SERVER_STATUS_TIMEOUT_MS = 3000;
+import { SERVER_STATUS_TIMEOUT_MS } from '../../../config/timeouts';
 
 interface ServerInfo {
   nodeAddress: string;

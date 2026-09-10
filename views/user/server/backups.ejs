@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Backups' }) %>
+<%- include('../../components/header', { title: t('backups') }) %>
 
 <main class="h-screen m-auto" style="color:var(--theme-text)">
   <div class="flex h-full">
@@ -8,23 +8,23 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Backups' }
+        { label: t('backups') }
       ] }) %>
       <!-- Page Header: title + meta left, buttons right -->
       <div class="px-6 sm:px-8 pt-3 pb-2 sm:pb-6">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
-            <%- include('../../components/serverHeader') %>
+            <%- include('../../components/server-header') %>
             <!-- Server meta: image · node · id -->
-            <%- include('../../components/serverMeta') %>
+            <%- include('../../components/server-meta') %>
           </div>
           <div class="flex gap-2 shrink-0">
             <button id="createBackup" onclick="openCreateBackupModal()" type="button"
                 class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
                 <%- icon('plus', { class: 'size-4 inline-flex mr-1 mb-0.5', strokeWidth: 1.5 }) %>
-                Create Backup
+                <%= t('createBackup') %>
             </button>
           </div>
         </div>
@@ -33,7 +33,7 @@
       <%- include('../../components/installHeader') %>
 
       <!-- Server Template -->
-      <%- include('../../components/serverTemplate') %>
+      <%- include('../../components/server-template') %>
 
       <div id="server-page-body">
 
@@ -43,8 +43,8 @@
           <div class="al-card rounded-lg shadow overflow-hidden">
             <div class="al-card-header">
               <div>
-                <h2 class="text-[13px] font-semibold" style="color:var(--theme-text-strong)">Server Backups</h2>
-                <p class="text-[11px]" style="color:var(--theme-text-muted)">Manage your server backups.</p>
+                <h2 class="text-[13px] font-semibold" style="color:var(--theme-text-strong)"><%= t('serverBackups') %></h2>
+                <p class="text-[11px]" style="color:var(--theme-text-muted)"><%= t('manageBackups') %></p>
               </div>
             </div>
             <div class="overflow-x-auto">
@@ -58,10 +58,10 @@
                   </colgroup>
                   <thead class="al-table-head">
                     <tr>
-                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide">Name</th>
-                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide">Size</th>
-                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide">Created</th>
-                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide text-right">Actions</th>
+                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide"><%= t('name') %></th>
+                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide"><%= t('size') %></th>
+                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide"><%= t('createdAt') %></th>
+                      <th scope="col" class="al-table-th px-6 py-3 text-[11px] uppercase tracking-wide text-right"><%= t('actions') %></th>
                     </tr>
                   </thead>
                   <tbody id="backups-table-body" class="divide-y" style="border-color:var(--theme-border)">
@@ -73,7 +73,7 @@
                             <% if (backup.locked) { %>
                               <span data-locked-badge class="ml-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium align-middle" style="background:var(--theme-warning-bg, var(--theme-bg-secondary));color:var(--theme-warning, var(--theme-text-muted))">
                                 <%- icon('lock', { class: 'size-2.5', strokeWidth: 2 }) %>
-                                locked
+                                <%= t('locked') %>
                               </span>
                             <% } %>
                           </div>
@@ -83,7 +83,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                           <div class="text-sm" style="color:var(--theme-text-muted)">
-                            <%= backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown' %>
+                            <%= backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : t('unknown') %>
                           </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -98,29 +98,29 @@
                               style="color:var(--theme-accent);background:var(--theme-accent-subtle)"
                             >
                               <%- icon('download', { class: 'w-3 h-3 mr-1' }) %>
-                              Download
+                              <%= t('download') %>
                             </button>
                             <button type="button" data-action="restore"
                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                               style="color:var(--theme-success);background:var(--theme-success-bg)"
                             >
                               <%- icon('refresh-cw', { class: 'w-3 h-3 mr-1' }) %>
-                              Restore
+                              <%= t('restore') %>
                             </button>
                             <button type="button" data-action="toggle-lock"
                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                               style="<%= backup.locked ? 'color:var(--theme-warning);background:var(--theme-warning-bg, var(--theme-bg-secondary))' : 'color:var(--theme-text-muted);background:var(--theme-bg-secondary)' %>"
                             >
                               <%- icon('lock', { class: 'w-3 h-3 mr-1' }) %>
-                              <%= backup.locked ? 'Unlock' : 'Lock' %>
+                              <%= backup.locked ? t('unlock') : t('lock') %>
                             </button>
                             <button type="button" data-action="delete"
                               class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                               style="<%= backup.locked ? 'opacity:40;pointer-events:none;color:var(--theme-danger);background:var(--theme-danger-bg)' : 'color:var(--theme-danger);background:var(--theme-danger-bg)' %>"
-                              <%= backup.locked ? 'disabled title="Locked backups cannot be deleted until unlocked"' : '' %>
+                              <%= backup.locked ? 'disabled title="' + t('lockedBackupsCannotBeDeleted') + '"' : '' %>
                             >
                               <%- icon('trash-2', { class: 'w-3 h-3 mr-1' }) %>
-                              Delete
+                              <%= t('delete') %>
                             </button>
                           </div>
                         </td>
@@ -131,9 +131,9 @@
               <% } else { %>
                 <div class="p-8 text-center">
                   <%- icon('database', { class: 'mx-auto h-12 w-12', style: 'color:var(--theme-text-muted)' }) %>
-                  <h3 class="mt-2 text-sm font-medium" style="color:var(--theme-text-strong)">No backups</h3>
-                  <p class="mt-1 text-sm" style="color:var(--theme-text-muted)">Backups protect your server's world and files. Create one to get started.</p>
-                  <button type="button" onclick="openCreateBackupModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>Create backup</button>
+                  <h3 class="mt-2 text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('noBackups') %></h3>
+                  <p class="mt-1 text-sm" style="color:var(--theme-text-muted)"><%= t('noBackupsDesc') %></p>
+                  <button type="button" onclick="openCreateBackupModal()" class="al-btn-primary inline-flex items-center gap-1.5 mt-5 rounded-xl px-4 py-2 text-sm font-medium"><%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('createBackup') %></button>
                 </div>
               <% } %>
             </div>
@@ -146,36 +146,36 @@
       </div>
 </main>
 
-<%- include('../../components/loadingPopup') %>
+<%- include('../../components/loading-popup') %>
 
 <!-- Create Backup Modal -->
 <div id="createBackupModal" class="al-sheet-overlay fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
   <div id="createBackupModalPanel" class="al-sheet-panel border rounded-2xl shadow-lg w-full max-w-sm mx-4 will-change-transform max-h-[85vh] flex flex-col" style="background:var(--theme-bg-card);border-color:var(--theme-border)">
     <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border)">
       <div>
-        <p class="text-sm font-semibold" style="color:var(--theme-text-strong)">Create Backup</p>
-        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Choose a name for this backup.</p>
+        <p class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('createBackup') %></p>
+        <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('chooseBackupName') %></p>
       </div>
-      <button type="button" onclick="closeCreateBackupModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+      <button type="button" onclick="closeCreateBackupModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="<%= t('close') %>">
         <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
       </button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
-      <label for="backupName" class="al-label"><%= req.translations.enterBackupName || 'Enter backup name' %></label>
+      <label for="backupName" class="al-label"><%= t('enterBackupName') %></label>
       <input type="text"
         id="backupName"
         class="al-input"
-        placeholder="<%= req.translations.enterBackupName || 'Enter backup name' %>"
+        placeholder="<%= t('enterBackupName') %>"
         onkeydown="handleBackupNameKeyPress(event)">
     </div>
     <div class="flex gap-2 px-6 py-4 border-t justify-end">
       <button type="button" onclick="closeCreateBackupModal()" class="al-btn-secondary inline-flex items-center gap-1.5">
         <%- icon('x', { class: 'size-4', strokeWidth: 1.5 }) %>
-        Cancel
+        <%= t('cancel') %>
       </button>
       <button type="button" onclick="confirmCreateBackup()" class="al-btn-primary inline-flex items-center gap-1.5">
         <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-        Create
+        <%= t('create') %>
       </button>
     </div>
   </div>
@@ -186,7 +186,7 @@
 const serverUUID = '<%= server.UUID %>';
 
 function showConfirmation(title, message, onConfirm) {
-  window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Confirm', onConfirm });
+  window.modal.confirm({ title, body: message, danger: true, confirmLabel: '<%= req.translations.confirm || "Confirm" %>', onConfirm });
 }
 
 // Modal functions
@@ -224,7 +224,7 @@ async function confirmCreateBackup() {
   const name = document.getElementById('backupName').value.trim();
 
   if (!name) {
-     showToast('Enter a backup name.', 'error');
+     showToast('<%= req.translations.enterBackupName || "Enter a backup name." %>', 'error');
     return;
   }
 
@@ -232,11 +232,11 @@ async function confirmCreateBackup() {
   // Persisted progress toast — it survives page changes (and keeps making
   // progress via the /backups/progress job) if the user navigates while the
   // daemon is still compressing the backup.
-  const loading = window.showProgressToast ? window.showProgressToast('Creating backup…', {
+  const loading = window.showProgressToast ? window.showProgressToast('<%= req.translations.creatingBackup || "Creating backup\u2026" %>', {
     group: 'backup:' + serverUUID,
     autoCompleteAt100: false,
     job: { url: '/server/' + serverUUID + '/backups/progress', intervalMs: 2000 },
-  }) : window.showLoadingToast('Creating backup...');
+  }) : window.showLoadingToast('<%= req.translations.creatingBackup || "Creating backup..." %>');
 
   try {
     const response = await fetch(`/api/v2/servers/${serverUUID}/backups`, {
@@ -251,17 +251,17 @@ async function confirmCreateBackup() {
 
     if (data.success) {
       // Complete the progress toast with the server's result message.
-      loading.complete(true, data.message || 'Backup created.');
+      loading.complete(true, data.message || '<%= req.translations.backupCreated || "Backup created." %>');
       // Reload page to show new backup
       addBackupRow(data.backup);
     } else {
       loading.close();
-      showToast(data.error || 'Failed to create backup', 'error');
+      showToast(data.error || '<%= req.translations.failedToCreateBackup || "Failed to create backup" %>', 'error');
     }
   } catch (error) {
     loading.close();
     console.error('Failed to create backup:', error);
-    showToast('Failed to create backup. Try again.', 'error');
+    showToast('<%= req.translations.failedToCreateBackupRetry || "Failed to create backup. Try again." %>', 'error');
   }
 }
 
@@ -273,15 +273,15 @@ function downloadBackup(backupId) {
 // Restore backup
 function restoreBackup(backupId, backupName) {
   showConfirmation(
-    'Restore Backup',
-    `Are you sure you want to restore the backup "${backupName}"? This will replace all current server files and cannot be undone.`,
+    '<%= req.translations.restoreBackup || "Restore Backup" %>',
+    '<%= req.translations.restoreBackupConfirm || "Are you sure you want to restore the backup" %> "' + backupName + '"? <%= req.translations.restoreBackupWarning || "This will replace all current server files and cannot be undone." %>',
     async () => {
       // Persisted progress toast — survives page changes and keeps polling the
       // restore job (see /backups/restore/progress) while the daemon restores.
-      const loading = window.showProgressToast ? window.showProgressToast('Restoring backup…', {
+      const loading = window.showProgressToast ? window.showProgressToast('<%= req.translations.restoringBackup || "Restoring backup\u2026" %>', {
         group: 'restore:' + serverUUID,
         job: { url: '/server/' + serverUUID + '/backups/restore/progress', intervalMs: 2000 },
-      }) : window.showLoadingToast('Restoring backup...');
+      }) : window.showLoadingToast('<%= req.translations.restoringBackup || "Restoring backup..." %>');
 
       try {
         const response = await fetch(`/api/v2/servers/${serverUUID}/backups/${backupId}/restore`, {
@@ -294,15 +294,15 @@ function restoreBackup(backupId, backupName) {
         const data = await response.json();
 
         if (data.success) {
-          loading.complete(true, data.message || 'Backup restored.');
+          loading.complete(true, data.message || '<%= req.translations.backupRestored || "Backup restored." %>');
         } else {
           loading.close();
-          showToast(data.error || 'Failed to restore backup. Give it another try, or check that the node is online.', 'error');
+          showToast(data.error || '<%= req.translations.failedToRestoreBackup || "Failed to restore backup. Give it another try, or check that the node is online." %>', 'error');
         }
       } catch (error) {
         loading.close();
         console.error('Failed to restore backup:', error);
-        showToast('Failed to restore backup. Give it another try, or check that the node is online.', 'error');
+        showToast('<%= req.translations.failedToRestoreBackup || "Failed to restore backup. Give it another try, or check that the node is online." %>', 'error');
       }
     }
   );
@@ -315,7 +315,7 @@ function addBackupRow(backup) {
     if (emptyState) {
       const card = emptyState.closest('.al-card');
       if (card) {
-        card.innerHTML = `<div class="overflow-x-auto"><table class="al-table min-w-full"><colgroup><col style="min-width:260px"><col style="min-width:100px"><col style="min-width:180px"><col style="min-width:160px"></colgroup><thead class="al-table-head"><tr><th scope="col" class="al-table-th px-6 py-3 uppercase">Name</th><th scope="col" class="al-table-th px-6 py-3 uppercase">Size</th><th scope="col" class="al-table-th px-6 py-3 uppercase">Created</th><th scope="col" class="al-table-th px-6 py-3 uppercase text-right">Actions</th></tr></thead><tbody id="backups-table-body" class="divide-y" style="border-color:var(--theme-border)"></tbody></table></div>`;
+        card.innerHTML = `<div class="overflow-x-auto"><table class="al-table min-w-full"><colgroup><col style="min-width:260px"><col style="min-width:100px"><col style="min-width:180px"><col style="min-width:160px"></colgroup><thead class="al-table-head"><tr><th scope="col" class="al-table-th px-6 py-3 uppercase"><%= req.translations.name || "Name" %></th><th scope="col" class="al-table-th px-6 py-3 uppercase"><%= req.translations.size || "Size" %></th><th scope="col" class="al-table-th px-6 py-3 uppercase"><%= req.translations.createdAt || "Created" %></th><th scope="col" class="al-table-th px-6 py-3 uppercase text-right"><%= req.translations.actions || "Actions" %></th></tr></thead><tbody id="backups-table-body" class="divide-y" style="border-color:var(--theme-border)"></tbody></table></div>`;
         tbody = document.getElementById('backups-table-body');
       }
     }
@@ -339,14 +339,14 @@ function addBackupRow(backup) {
 
   const sizeTd = document.createElement('td');
   sizeTd.className = 'px-6 py-4 whitespace-nowrap';
-  const sizeText = backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown';
+  const sizeText = backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : '<%= req.translations.unknown || "Unknown" %>';
   const safeSizeText = escHtml(sizeText);
   sizeTd.innerHTML = `<div class="text-sm" style="color:var(--theme-text-muted)">${safeSizeText}</div>`;
   tr.appendChild(sizeTd);
 
   const createdTd = document.createElement('td');
   createdTd.className = 'px-6 py-4 whitespace-nowrap';
-  createdTd.innerHTML = `<div class="text-sm" style="color:var(--theme-text-muted)">Now</div>`;
+  createdTd.innerHTML = `<div class="text-sm" style="color:var(--theme-text-muted)"><%= req.translations.now || "Now" %></div>`;
   tr.appendChild(createdTd);
 
   const actionsTd = document.createElement('td');
@@ -357,19 +357,19 @@ function addBackupRow(backup) {
   const downloadBtn = document.createElement('button');
   downloadBtn.className = 'inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
   downloadBtn.style.cssText = 'color:var(--theme-accent);background:var(--theme-accent-subtle)';
-  downloadBtn.textContent = 'Download';
+  downloadBtn.textContent = '<%= req.translations.download || "Download" %>';
   downloadBtn.addEventListener('click', () => downloadBackup(backup.UUID));
 
   const restoreBtn = document.createElement('button');
   restoreBtn.className = 'inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
   restoreBtn.style.cssText = 'color:var(--theme-success);background:var(--theme-success-bg)';
-  restoreBtn.textContent = 'Restore';
+  restoreBtn.textContent = '<%= req.translations.restore || "Restore" %>';
   restoreBtn.addEventListener('click', () => restoreBackup(backup.UUID, backup.name));
 
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
   deleteBtn.style.cssText = 'color:var(--theme-danger);background:var(--theme-danger-bg)';
-  deleteBtn.textContent = 'Delete';
+  deleteBtn.textContent = '<%= req.translations.delete || "Delete" %>';
   deleteBtn.addEventListener('click', () => deleteBackup(backup.UUID, backup.name));
 
   actionsDiv.appendChild(downloadBtn);
@@ -395,14 +395,14 @@ async function toggleBackupLock(backupId, backupName, currentlyLocked) {
     const data = await response.json();
 
     if (data.success) {
-      showToast(currentlyLocked ? 'Backup unlocked.' : 'Backup locked.', 'success');
+      showToast(currentlyLocked ? '<%= req.translations.backupUnlocked || "Backup unlocked." %>' : '<%= req.translations.backupLocked || "Backup locked." %>', 'success');
       updateBackupLockUI(backupId, backupName, !currentlyLocked);
     } else {
-      showToast(data.error || 'Failed to update backup lock', 'error');
+      showToast(data.error || '<%= req.translations.failedToUpdateBackupLock || "Failed to update backup lock" %>', 'error');
     }
   } catch (error) {
     console.error('Failed to toggle backup lock:', error);
-    showToast('Failed to update backup lock. Try again.', 'error');
+    showToast('<%= req.translations.failedToUpdateBackupLockRetry || "Failed to update backup lock. Try again." %>', 'error');
   }
 }
 
@@ -413,7 +413,7 @@ function updateBackupLockUI(backupId, backupName, locked) {
   const lockBtn = row.querySelector('button[data-action="toggle-lock"]');
   if (lockBtn) {
     const label = lockBtn.childNodes[lockBtn.childNodes.length - 1];
-    if (label && label.nodeType === Node.TEXT_NODE) label.textContent = locked ? 'Unlock' : 'Lock';
+    if (label && label.nodeType === Node.TEXT_NODE) label.textContent = locked ? '<%= req.translations.unlock || "Unlock" %>' : '<%= req.translations.lock || "Lock" %>';
     lockBtn.style.cssText = locked
       ? 'color:var(--theme-warning);background:var(--theme-warning-bg, var(--theme-bg-secondary))'
       : 'color:var(--theme-text-muted);background:var(--theme-bg-secondary)';
@@ -423,7 +423,7 @@ function updateBackupLockUI(backupId, backupName, locked) {
   if (delBtn) {
     if (locked) {
       delBtn.disabled = true;
-      delBtn.setAttribute('title', 'Locked backups cannot be deleted until unlocked');
+      delBtn.setAttribute('title', '<%= req.translations.lockedBackupsCannotBeDeleted || "Locked backups cannot be deleted until unlocked" %>');
       delBtn.style.cssText = 'opacity:40;pointer-events:none;color:var(--theme-danger);background:var(--theme-danger-bg)';
     } else {
       delBtn.disabled = false;
@@ -442,7 +442,7 @@ function updateBackupLockUI(backupId, backupName, locked) {
     badge.style.cssText = 'background:var(--theme-warning-bg, var(--theme-bg-secondary));color:var(--theme-warning, var(--theme-text-muted))';
     const icon = lockBtn && lockBtn.querySelector('svg');
     if (icon) badge.appendChild(icon.cloneNode(true));
-    badge.appendChild(document.createTextNode(' locked'));
+    badge.appendChild(document.createTextNode(' <%= req.translations.locked || "locked" %>'));
     nameDiv.appendChild(badge);
   } else if (!locked && badge) {
     badge.remove();
@@ -451,8 +451,8 @@ function updateBackupLockUI(backupId, backupName, locked) {
 
 // Delete backup
 function deleteBackup(backupId, backupName) {  showConfirmation(
-    'Delete Backup',
-    `Are you sure you want to delete the backup "${backupName}"? This action cannot be undone.`,
+    '<%= req.translations.deleteBackup || "Delete Backup" %>',
+    '<%= req.translations.deleteBackupConfirm || "Are you sure you want to delete the backup" %> "' + backupName + '"? <%= req.translations.deleteBackupWarning || "This action cannot be undone." %>',
     async () => {
       try {
         const response = await fetch(`/api/v2/servers/${serverUUID}/backups/${backupId}`, {
@@ -465,22 +465,22 @@ function deleteBackup(backupId, backupName) {  showConfirmation(
         const data = await response.json();
 
         if (data.success) {
-           showToast('Backup deleted.', 'success');
+           showToast('<%= req.translations.backupDeleted || "Backup deleted." %>', 'success');
           const row = document.querySelector(`tr[data-backup-id="${backupId}"]`);
           if (row) {
             al.removeRow(row).then(() => {
               const tbody = document.getElementById('backups-table-body');
               if (tbody && tbody.children.length === 0) {
-                al.showEmpty(tbody, 'No backups yet. Backups protect your server\'s world and files.', 4);
+                al.showEmpty(tbody, '<%= req.translations.noBackupsYetDesc || "No backups yet. Backups protect your server\'s world and files." %>', 4);
               }
             });
           }
         } else {
-          showToast(data.error || 'Failed to delete backup', 'error');
+          showToast(data.error || '<%= req.translations.failedToDeleteBackup || "Failed to delete backup" %>', 'error');
         }
       } catch (error) {
         console.error('Failed to delete backup:', error);
-        showToast('Failed to delete backup. Try again.', 'error');
+        showToast('<%= req.translations.failedToDeleteBackupRetry || "Failed to delete backup. Try again." %>', 'error');
       }
     }
   );

@@ -9,19 +9,26 @@ import type { Permission } from '../../handlers/permissions';
 import { registerPermission } from '../../handlers/permissions';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
+import { logT } from '../../services/i18n';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import { syncNodeAllocations } from '../../handlers/utils/server/allocations';
 import { generateApiKey } from '../../utils/apiKey';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import { emitRealtime } from '../../handlers/realtime/events';
+import {
+  MIN_PORT,
+  MAX_PORT,
+  MIN_NODE_PORT,
+  NODE_NAME_MIN_LENGTH,
+  NODE_NAME_MAX_LENGTH,
+} from '../../config/auth';
+import {
+  DAEMON_TIMEOUT_SHORT_MS,
+  DAEMON_TIMEOUT_MEDIUM_MS,
+} from '../../config/daemonTimeouts';
 
 const UNLIMITED_RESOURCE = 'all';
-const MIN_PORT_NUMBER = 1024;
-const MAX_PORT_NUMBER = 65535;
-const MIN_NODE_PORT = 1025;
-const NAME_MIN_LENGTH = 3;
-const NAME_MAX_LENGTH = 50;
 
 const NODE_ADDRESS_REGEX =
   /^(localhost|(?:\d{1,3}\.){3}\d{1,3}|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/;
@@ -110,7 +117,7 @@ async function listNodes(res: Response, includeServers = false) {
 
     return nodesWithStatus;
   } catch (error: unknown) {
-    logger.error('Error fetching nodes:', error);
+    logger.error(logT('log.errorFetchingNodes'), error);
     res.status(500).json({ message: 'Error fetching nodes.' });
     return;
   }
@@ -157,7 +164,7 @@ const adminModule: Module = {
             locations,
           });
         } catch (error: unknown) {
-          logger.error('Error fetching user:', error);
+          logger.error(logT('log.errorFetchingUser'), error);
           return res.redirect('/login');
         }
       },
@@ -186,7 +193,7 @@ const adminModule: Module = {
             locations,
           });
         } catch (error: unknown) {
-          logger.error('Error fetching user:', error);
+          logger.error(logT('log.errorFetchingUser'), error);
           return res.redirect('/login');
         }
       },
@@ -261,11 +268,11 @@ const adminModule: Module = {
           res.status(400).json({ message: 'Name must be a string.' });
           return;
         } else if (
-          name.length < NAME_MIN_LENGTH ||
-          name.length > NAME_MAX_LENGTH
+          name.length < NODE_NAME_MIN_LENGTH ||
+          name.length > NODE_NAME_MAX_LENGTH
         ) {
           res.status(400).json({
-            message: `Name must be between ${NAME_MIN_LENGTH} and ${NAME_MAX_LENGTH} characters long.`,
+            message: `Name must be between ${NODE_NAME_MIN_LENGTH} and ${NODE_NAME_MAX_LENGTH} characters long.`,
           });
           return;
         }
@@ -317,11 +324,11 @@ const adminModule: Module = {
         if (
           !port ||
           isNaN(parseInt(port)) ||
-          parseInt(port) <= MIN_PORT_NUMBER ||
-          parseInt(port) > MAX_PORT_NUMBER
+          parseInt(port) <= MIN_PORT ||
+          parseInt(port) > MAX_PORT
         ) {
           res.status(400).json({
-            message: `Port must be a number between ${MIN_NODE_PORT} and ${MAX_PORT_NUMBER}.`,
+            message: `Port must be a number between ${MIN_NODE_PORT} and ${MAX_PORT}.`,
           });
           return;
         }
@@ -334,13 +341,9 @@ const adminModule: Module = {
             throw new Error('Allocated ports must be an array');
           }
           for (const p of parsedPorts) {
-            if (
-              typeof p !== 'number' ||
-              p < MIN_PORT_NUMBER ||
-              p > MAX_PORT_NUMBER
-            ) {
+            if (typeof p !== 'number' || p < MIN_PORT || p > MAX_PORT) {
               throw new Error(
-                `Each port must be a number between ${MIN_PORT_NUMBER} and ${MAX_PORT_NUMBER}`,
+                `Each port must be a number between ${MIN_PORT} and ${MAX_PORT}`,
               );
             }
           }
@@ -404,7 +407,7 @@ const adminModule: Module = {
           res.status(200).json({ message: 'Node created successfully.', node });
           return;
         } catch (error: unknown) {
-          logger.error('Error when creating the node:', error);
+          logger.error(logT('log.errorCreatingNode'), error);
           res.status(500).json({ message: 'Error when creating the node.' });
           return;
         }
@@ -494,7 +497,7 @@ const adminModule: Module = {
                       method: 'DELETE',
                       path: '/container',
                       body: { id: server.UUID },
-                      timeout: 8000,
+                      timeout: DAEMON_TIMEOUT_SHORT_MS,
                     }),
                   ),
                 );
@@ -549,7 +552,7 @@ const adminModule: Module = {
                 : 'Node deleted successfully.',
             });
           } catch (error: unknown) {
-            logger.error('Error when deleting the node:', error);
+            logger.error(logT('log.errorDeletingNode'), error);
             if (req.get('HX-Request') === 'true') {
               return res.status(500).render('fragments/shared/error-banner', {
                 targetId: 'admin-nodes',
@@ -560,7 +563,7 @@ const adminModule: Module = {
             res.status(500).json({ message: 'Error when deleting the node.' });
           }
         } catch (error: unknown) {
-          logger.error('Error fetching user:', error);
+          logger.error(logT('log.errorFetchingUser'), error);
           return res.redirect('/login');
         }
       },
@@ -590,7 +593,7 @@ const adminModule: Module = {
             .json(`configure --panel "${process.env.URL}" --key "${node.key}"`);
           return;
         } catch (error: unknown) {
-          logger.error('Error fetching user:', error);
+          logger.error(logT('log.errorFetchingUser'), error);
           return res.redirect('/login');
         }
       },
@@ -619,7 +622,7 @@ const adminModule: Module = {
             nodeKey: node.key,
             method: 'GET',
             path: '/',
-            timeout: 10000,
+            timeout: DAEMON_TIMEOUT_MEDIUM_MS,
           });
 
           res.status(200).json({
@@ -687,7 +690,7 @@ const adminModule: Module = {
             locations,
           });
         } catch (error: unknown) {
-          logger.error('Error fetching user:', error);
+          logger.error(logT('log.errorFetchingUser'), error);
           return res.redirect('/login');
         }
       },
@@ -769,9 +772,12 @@ const adminModule: Module = {
             return;
           }
 
-          if (name.length < NAME_MIN_LENGTH || name.length > NAME_MAX_LENGTH) {
+          if (
+            name.length < NODE_NAME_MIN_LENGTH ||
+            name.length > NODE_NAME_MAX_LENGTH
+          ) {
             res.status(400).json({
-              message: `Name must be between ${NAME_MIN_LENGTH} and ${NAME_MAX_LENGTH} characters long.`,
+              message: `Name must be between ${NODE_NAME_MIN_LENGTH} and ${NODE_NAME_MAX_LENGTH} characters long.`,
             });
             return;
           }
@@ -786,13 +792,9 @@ const adminModule: Module = {
             return;
           }
 
-          if (
-            isNaN(port) ||
-            port <= MIN_PORT_NUMBER ||
-            port > MAX_PORT_NUMBER
-          ) {
+          if (isNaN(port) || port <= MIN_PORT || port > MAX_PORT) {
             res.status(400).json({
-              message: `Port must be a number between ${MIN_NODE_PORT} and ${MAX_PORT_NUMBER}.`,
+              message: `Port must be a number between ${MIN_NODE_PORT} and ${MAX_PORT}.`,
             });
             return;
           }
@@ -816,11 +818,11 @@ const adminModule: Module = {
             for (const port of parsedPorts) {
               if (
                 typeof port !== 'number' ||
-                port < MIN_PORT_NUMBER ||
-                port > MAX_PORT_NUMBER
+                port < MIN_PORT ||
+                port > MAX_PORT
               ) {
                 throw new Error(
-                  `Each port must be a number between ${MIN_PORT_NUMBER} and ${MAX_PORT_NUMBER}`,
+                  `Each port must be a number between ${MIN_PORT} and ${MAX_PORT}`,
                 );
               }
             }
@@ -866,7 +868,7 @@ const adminModule: Module = {
           res.status(200).json({ message: 'Node updated successfully.', node });
           return;
         } catch (error: unknown) {
-          logger.error('Error when updating the node:', error);
+          logger.error(logT('log.errorUpdatingNode'), error);
           res.status(500).json({ message: 'Error when updating the node.' });
           return;
         }
@@ -897,7 +899,7 @@ const adminModule: Module = {
             .json({ message: 'Node maintenance mode updated.', node: updated });
           return;
         } catch (error: unknown) {
-          logger.error('Error toggling node maintenance mode:', error);
+          logger.error(logT('log.errorTogglingMaintenance'), error);
           res
             .status(500)
             .json({ message: 'Error toggling node maintenance mode.' });
@@ -982,7 +984,7 @@ const adminModule: Module = {
               nodeKey: node.key,
               method: 'GET',
               path: '/stats',
-              timeout: 5000,
+              timeout: DAEMON_TIMEOUT_SHORT_MS,
             }).catch(() => null),
             daemonRequest({
               nodeAddress: node.address,
@@ -990,7 +992,7 @@ const adminModule: Module = {
               nodeKey: node.key,
               method: 'GET',
               path: '/host',
-              timeout: 5000,
+              timeout: DAEMON_TIMEOUT_SHORT_MS,
             }).catch(() => null),
           ]);
 

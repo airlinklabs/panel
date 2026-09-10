@@ -1,18 +1,16 @@
 import prisma from '../db';
 import logger from './logger';
 import { daemonRequest } from './utils/core/daemonRequest';
-import {
-  daemonPlayerListSchema,
-  parseDaemonResponse,
-} from '../platform/daemon/dtos';
+import { daemonPlayerListSchema, parseDaemonResponse } from '../types/daemon';
 import { parseServerPorts } from './utils/server/ports';
 import { emitRealtime } from './realtime/events';
+import { PLAYER_STATS_INTERVAL_MS } from '../config/timeouts';
+import { PLAYER_STATS_MAX_DATA_POINTS } from '../config/ui';
+import { DAEMON_TIMEOUT_SHORT_MS } from '../config/daemonTimeouts';
+import { logT } from '../services/i18n';
 
 // Interval in milliseconds (5 minutes)
-const COLLECTION_INTERVAL = 5 * 60 * 1000;
-
 // Maximum number of data points to keep (48 hours worth of data at 5-minute intervals)
-const MAX_DATA_POINTS = 48 * 12;
 
 /**
  * Collects player statistics from all servers and stores them in the database
@@ -57,7 +55,7 @@ export async function collectPlayerStats(): Promise<void> {
               host: server.node.address,
               port: primaryPort,
             },
-            timeout: 5000,
+            timeout: DAEMON_TIMEOUT_SHORT_MS,
           });
 
           const playersData =
@@ -107,11 +105,12 @@ export async function collectPlayerStats(): Promise<void> {
       orderBy: {
         timestamp: 'desc',
       },
-      take: MAX_DATA_POINTS,
+      take: PLAYER_STATS_MAX_DATA_POINTS,
     });
 
-    if (oldestToKeep.length === MAX_DATA_POINTS) {
-      const oldestTimestamp = oldestToKeep[MAX_DATA_POINTS - 1]!.timestamp;
+    if (oldestToKeep.length === PLAYER_STATS_MAX_DATA_POINTS) {
+      const oldestTimestamp =
+        oldestToKeep[PLAYER_STATS_MAX_DATA_POINTS - 1]!.timestamp;
 
       await prisma.playerStats.deleteMany({
         where: {
@@ -130,7 +129,7 @@ export async function collectPlayerStats(): Promise<void> {
       state: {},
     });
   } catch (error) {
-    logger.warn('Player stats collection failed', { error });
+    logger.warn(logT('log.playerStatsCollectionFailed'), { error });
   }
 }
 
@@ -150,10 +149,12 @@ export function startPlayerStatsCollection(): void {
   // Then set up interval
   statsCollectionInterval = setInterval(
     collectPlayerStats,
-    COLLECTION_INTERVAL,
+    PLAYER_STATS_INTERVAL_MS,
   );
   logger.info(
-    `Player stats collection started (interval: ${COLLECTION_INTERVAL / 1000} seconds)`,
+    logT('log.playerStatsCollectionStarted', {
+      interval: PLAYER_STATS_INTERVAL_MS / 1000,
+    }),
   );
 }
 
@@ -164,6 +165,6 @@ export function stopPlayerStatsCollection(): void {
   if (statsCollectionInterval) {
     clearInterval(statsCollectionInterval);
     statsCollectionInterval = null;
-    logger.info('Player stats collection stopped');
+    logger.info(logT('log.playerStatsCollectionStopped'));
   }
 }

@@ -9,8 +9,7 @@ import {
   getActivityEventMeta,
   type ActivityCategory,
 } from '../../handlers/utils/activity/activityEvents';
-
-const ACTIVITY_PAGE_SIZE = 50;
+import { ACTIVITY_PAGE_SIZE } from '../../config/limits';
 
 const activityModule: Module = {
   info: {

@@ -31,6 +31,11 @@ import {
   S3_KEY_PREFIX,
 } from '../../../handlers/utils/core/s3Client';
 import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
+import {
+  DAEMON_TIMEOUT_BACKUP_MS,
+  DAEMON_TIMEOUT_BACKUP_RESTORE_MS,
+} from '../../../config/daemonTimeouts';
+import { logT } from '../../../services/i18n';
 
 function s3KeyFor(serverId: string, uuid: string): string {
   return `backups/${serverId}/${uuid}.tar.gz`;
@@ -103,7 +108,7 @@ export function registerBackupRoutes(router: Router): void {
           ),
         });
       } catch (error) {
-        logger.error('Error fetching backups:', error);
+        logger.error(logT('log.errorFetchingBackups'), error);
         res.status(500).json({ error: 'Failed to fetch backups' });
       }
     },
@@ -210,7 +215,7 @@ export function registerBackupRoutes(router: Router): void {
             name: name.trim(),
             ignore: ignoreList,
           },
-          timeout: 300000,
+          timeout: DAEMON_TIMEOUT_BACKUP_MS,
         });
 
         if (response.data.success) {
@@ -259,11 +264,11 @@ export function registerBackupRoutes(router: Router): void {
                 nodeKey: server.node.key,
                 body: { backupPath: daemonFilePath },
               }).catch((e) =>
-                logger.warn(`Failed to delete temporary local backup: ${e}`),
+                logger.warn(logT('log.failedToDeleteTemporaryLocalBackup'), e),
               );
             } catch (cloudError) {
               logger.error(
-                'Failed to redirect backup to Airlink Cloud:',
+                logT('log.failedToRedirectBackupToCloud'),
                 cloudError,
               );
               remoteRedirect = 'failed';
@@ -299,10 +304,10 @@ export function registerBackupRoutes(router: Router): void {
                 nodeKey: server.node.key,
                 body: { backupPath: daemonFilePath },
               }).catch((e) =>
-                logger.warn(`Failed to delete temporary local backup: ${e}`),
+                logger.warn(logT('log.failedToDeleteTemporaryLocalBackup'), e),
               );
             } catch (s3Error) {
-              logger.error('Failed to redirect backup to S3:', s3Error);
+              logger.error(logT('log.failedToRedirectBackupToS3'), s3Error);
               remoteRedirect = 'failed';
             }
           }
@@ -394,7 +399,7 @@ export function registerBackupRoutes(router: Router): void {
             },
           }),
         );
-        logger.error('Error creating backup:', error);
+        logger.error(logT('log.errorCreatingBackup'), error);
         res
           .status(500)
           .json({ error: safeClientMessage(error, 'Failed to create backup') });
@@ -511,7 +516,7 @@ export function registerBackupRoutes(router: Router): void {
                 backupUuid: backup.UUID,
               },
               body: cloudDownloadResponse.data,
-              timeout: 300000,
+              timeout: DAEMON_TIMEOUT_BACKUP_MS,
             });
 
             if (uploadResponse.data.success) {
@@ -520,10 +525,7 @@ export function registerBackupRoutes(router: Router): void {
               throw new Error('Failed to upload cloud backup to daemon');
             }
           } catch (err) {
-            logger.error(
-              'Failed to prepare Airlink Cloud backup for restore:',
-              err,
-            );
+            logger.error(logT('log.failedToPrepareCloudBackupForRestore'), err);
             res
               .status(500)
               .json({ error: 'Failed to prepare cloud backup for restore' });
@@ -551,7 +553,7 @@ export function registerBackupRoutes(router: Router): void {
                 backupUuid: backup.UUID,
               },
               body: stream,
-              timeout: 300000,
+              timeout: DAEMON_TIMEOUT_BACKUP_MS,
             });
 
             if (uploadResponse.data.success) {
@@ -560,7 +562,7 @@ export function registerBackupRoutes(router: Router): void {
               throw new Error('Failed to upload S3 backup to daemon');
             }
           } catch (err) {
-            logger.error('Failed to prepare S3 backup for restore:', err);
+            logger.error(logT('log.failedToPrepareS3BackupForRestore'), err);
             res
               .status(500)
               .json({ error: 'Failed to prepare S3 backup for restore' });
@@ -579,7 +581,7 @@ export function registerBackupRoutes(router: Router): void {
             backupPath,
             checksum: backup.checksum ?? undefined,
           },
-          timeout: 300000,
+          timeout: DAEMON_TIMEOUT_BACKUP_MS,
         });
 
         if (backup.airlinkCloudId && backupPath !== 'airlink-cloud') {
@@ -590,8 +592,11 @@ export function registerBackupRoutes(router: Router): void {
             nodePort: server.node.port,
             nodeKey: server.node.key,
             body: { backupPath },
-          }).catch((e) =>
-            logger.warn(`Failed to delete temporary restore file: ${e}`),
+          }).catch((e: unknown) =>
+            logger.warn(
+              logT('log.failedToDeleteTemporaryRestoreFile'),
+              e as Record<string, unknown>,
+            ),
           );
         } else if (isS3Backup(backup.filePath)) {
           daemonRequest({
@@ -601,8 +606,11 @@ export function registerBackupRoutes(router: Router): void {
             nodePort: server.node.port,
             nodeKey: server.node.key,
             body: { backupPath },
-          }).catch((e) =>
-            logger.warn(`Failed to delete temporary restore file: ${e}`),
+          }).catch((e: unknown) =>
+            logger.warn(
+              logT('log.failedToDeleteTemporaryRestoreFile'),
+              e as Record<string, unknown>,
+            ),
           );
         }
 
@@ -652,7 +660,7 @@ export function registerBackupRoutes(router: Router): void {
             error: { message: safeClientMessage(error, 'Restore failed') },
           }),
         );
-        logger.error('Error restoring backup:', error);
+        logger.error(logT('log.errorRestoringBackup'), error);
         res.status(500).json({
           error: safeClientMessage(error, 'Failed to restore backup'),
         });
@@ -780,7 +788,7 @@ export function registerBackupRoutes(router: Router): void {
         });
         res.redirect(302, `${base}${downloadResponse.data.url}`);
       } catch (error: unknown) {
-        logger.error('Error downloading backup:', error);
+        logger.error(logT('log.errorDownloadingBackup'), error);
         res.status(500).json({
           error: safeClientMessage(error, 'Failed to download backup'),
         });
@@ -841,15 +849,21 @@ export function registerBackupRoutes(router: Router): void {
             );
             await cloudClient
               .deleteFile(backup.airlinkCloudId)
-              .catch((e) =>
-                logger.warn(`Failed to delete backup from Airlink Cloud: ${e}`),
+              .catch((e: unknown) =>
+                logger.warn(
+                  logT('log.failedToDeleteBackupFromCloud'),
+                  e as Record<string, unknown>,
+                ),
               );
           }
         } else if (isS3Backup(backup.filePath)) {
           try {
             await deleteFromS3(backup.filePath.slice(S3_KEY_PREFIX.length));
           } catch (e) {
-            logger.warn(`Failed to delete backup from S3: ${e}`);
+            logger.warn(
+              logT('log.failedToDeleteBackupFromS3'),
+              e as Record<string, unknown>,
+            );
           }
         } else {
           try {
@@ -864,7 +878,7 @@ export function registerBackupRoutes(router: Router): void {
               },
             });
           } catch {
-            logger.warn('Failed to delete backup file from daemon');
+            logger.warn(logT('log.failedToDeleteBackupFileFromDaemon'));
           }
         }
 
@@ -886,7 +900,7 @@ export function registerBackupRoutes(router: Router): void {
           message: 'Backup deleted successfully',
         });
       } catch (error) {
-        logger.error('Error deleting backup:', error);
+        logger.error(logT('log.errorDeletingBackup'), error);
         res.status(500).json({ error: 'Failed to delete backup' });
       }
     },
@@ -943,7 +957,7 @@ export function registerBackupRoutes(router: Router): void {
 
         res.json({ success: true, locked: wantLocked });
       } catch (error) {
-        logger.error('Error toggling backup lock:', error);
+        logger.error(logT('log.errorTogglingBackupLock'), error);
         res.status(500).json({ error: 'Failed to update backup lock' });
       }
     },

@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Edit Image' }) %>
+<%- include('../../components/header', { title: t('adminEditImageTitle') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -8,27 +8,27 @@
 <%- include('../../components/template') %>
     <div id="page-content" x-data="imageEditor()" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Images', href: '/admin/images' },
-        { label: image.name || 'Edit Image' }
+        { label: t('admin') },
+        { label: t('breadcrumbImages'), href: '/admin/images' },
+        { label: image.name || t('adminEditImageTitle') }
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title"><%= image.name || 'Edit Image' %></h1>
-          <p class="al-page-desc">Edit egg configuration, variables, Docker images, and install scripts.</p>
+          <h1 class="al-page-title"><%= image.name || t('adminEditImageTitle') %></h1>
+          <p class="al-page-desc"><%= t('adminEditImageText') %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button type="button" id="tab-save-btn" class="al-btn-primary">Save</button>
-          <button type="button" id="tab-reset-btn" class="al-btn-secondary"><%- icon('rotate-ccw', { class: 'size-4', strokeWidth: 1.5 }) %>Reset</button>
-          <a href="/admin/images/export/<%= image.id %>" class="al-btn-secondary">Export</a>
-          <a href="/admin/images" class="al-btn-secondary">Back</a>
+          <button type="button" id="tab-save-btn" class="al-btn-primary"><%= t('save') %></button>
+          <button type="button" id="tab-reset-btn" class="al-btn-secondary"><%- icon('rotate-ccw', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('reset') %></button>
+          <a href="/admin/images/export/<%= image.id %>" class="al-btn-secondary"><%= t('export') %></a>
+          <a href="/admin/images" class="al-btn-secondary"><%= t('back') %></a>
         </div>
       </div>
 
       <% if (req.query.success) { %>
         <div class="px-6 sm:px-8 mt-5">
           <div class="px-4 py-3 rounded-xl text-sm" style="background:var(--theme-success-bg);border:1px solid var(--theme-success);color:var(--theme-success)">
-            Changes saved successfully.
+            <%= t('changesSaved') %>
           </div>
         </div>
       <% } %>
@@ -36,31 +36,31 @@
       <div class="al-page-body" data-al-tabs data-tabs-default="general" data-tabs-hash>
         <!-- Tab nav -->
         <div role="tablist" class="flex gap-1 mb-6">
-          <button type="button" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" data-tab="general" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('layout-grid', { class: 'size-4', strokeWidth: 1.5 }) %>General</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-docker" id="tab-docker" data-tab="docker" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('container', { class: 'size-4', strokeWidth: 1.5 }) %>Docker Images</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-variables" id="tab-variables" data-tab="variables" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('variable', { class: 'size-4', strokeWidth: 1.5 }) %>Variables</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-install" id="tab-install" data-tab="install" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('terminal', { class: 'size-4', strokeWidth: 1.5 }) %>Install Script</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" data-tab="settings" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('settings', { class: 'size-4', strokeWidth: 1.5 }) %>Settings</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-raw" id="tab-raw" data-tab="raw" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('file-json', { class: 'size-4', strokeWidth: 1.5 }) %>Raw JSON</button>
+          <button type="button" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" data-tab="general" tabindex="0" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('layout-grid', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('general') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-docker" id="tab-docker" data-tab="docker" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('container', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('dockerImages') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-variables" id="tab-variables" data-tab="variables" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('variable', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('variables') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-install" id="tab-install" data-tab="install" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('terminal', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('installScript') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" data-tab="settings" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('settings', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('settings') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-raw" id="tab-raw" data-tab="raw" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('file-json', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('rawJson') %></button>
         </div>
 
         <!-- General tab -->
         <div id="panel-general" role="tabpanel" aria-labelledby="tab-general" data-tab-panel="general" class="tab-panel space-y-5">
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Basics</h2>
+            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)"><%= t('basics') %></h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div>
-                <label for="field-name" class="al-label mb-1.5">Name</label>
+                <label for="field-name" class="al-label mb-1.5"><%= t('name') %></label>
                 <input type="text" id="field-name" value="<%= image.name || '' %>"
                   class="al-input">
               </div>
               <div>
-                <label for="field-author" class="al-label mb-1.5">Author</label>
+                <label for="field-author" class="al-label mb-1.5"><%= t('author') %></label>
                 <input type="text" id="field-author" value="<%= image.author || '' %>"
                   class="al-input">
               </div>
               <div class="sm:col-span-2">
-                <label for="field-description" class="al-label mb-1.5">Description</label>
+                <label for="field-description" class="al-label mb-1.5"><%= t('description') %></label>
                 <textarea id="field-description" rows="2"
                   class="w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-accent)] transition resize-none" style="border-color:var(--theme-border);background:var(--theme-bg-input);color:var(--theme-text-strong)"><%= image.description || '' %></textarea>
               </div>
@@ -68,25 +68,25 @@
           </div>
 
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Process</h2>
+            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)"><%= t('process') %></h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div class="sm:col-span-2">
-                <label for="field-startup" class="al-label mb-1.5">Startup Command</label>
+                <label for="field-startup" class="al-label mb-1.5"><%= t('startupCommand') %></label>
                 <input type="text" id="field-startup" value="<%= image.startup || '' %>" placeholder="e.g. java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}"
                   class="al-input font-mono">
                 <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Use <code class="font-mono px-1 rounded" style="background:var(--theme-bg-secondary)">{{VARIABLE_NAME}}</code> to reference egg variables.</p>
               </div>
               <div>
-                <label for="field-stop" class="al-label mb-1.5">Stop Command</label>
+                <label for="field-stop" class="al-label mb-1.5"><%= t('stopCommand') %></label>
                 <input type="text" id="field-stop" value="<%= image.stop || 'stop' %>" placeholder="stop"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Command sent to the container to stop it gracefully.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('stopCommandHint') %></p>
               </div>
               <div>
-                <label for="field-startup-done" class="al-label mb-1.5">Startup Done Signal</label>
+                <label for="field-startup-done" class="al-label mb-1.5"><%= t('startupDoneSignal') %></label>
                 <input type="text" id="field-startup-done" value="<%= image.startup_done || '' %>" placeholder="e.g. For help, type"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">String in the server output that means the server finished starting.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('startupDoneSignalHint') %></p>
               </div>
             </div>
           </div>
@@ -96,15 +96,15 @@
         <div id="panel-docker" role="tabpanel" aria-labelledby="tab-docker" data-tab-panel="docker" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <div class="flex items-center justify-between px-5 py-3.5 rounded-t-xl" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
-              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Docker Images</h2>
+              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= t('dockerImages') %></h2>
               <button type="button" id="add-docker-image"
                 class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
                 <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
-                Add Image
+                <%= t('addImage') %>
               </button>
             </div>
             <div class="px-5 py-4">
-              <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Each entry maps a display label to a Docker image reference. The label is what users see in dropdowns.</p>
+              <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('dockerImagesDesc') %></p>
               <div id="docker-images-list" class="space-y-2">
                 <!-- populated by JS -->
               </div>
@@ -116,15 +116,15 @@
         <div id="panel-variables" role="tabpanel" aria-labelledby="tab-variables" data-tab-panel="variables" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <div class="flex items-center justify-between px-5 py-3.5 rounded-t-xl" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
-              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Egg Variables</h2>
+              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= t('eggVariables') %></h2>
               <button type="button" id="add-variable"
                 class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
                 <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
-                Add Variable
+                <%= t('addVariable') %>
               </button>
             </div>
             <div class="px-5 py-4">
-              <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Variables are injected as environment variables into the container. <code class="font-mono px-1 rounded" style="background:var(--theme-bg-secondary)">env_variable</code> is the name used in the startup command and Docker environment.</p>
+              <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('variablesDesc') %></p>
               <div id="variables-list" class="space-y-3">
                 <!-- populated by JS -->
               </div>
@@ -135,25 +135,25 @@
         <!-- Install Script tab -->
         <div id="panel-install" role="tabpanel" aria-labelledby="tab-install" data-tab-panel="install" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Installation Script</h2>
+            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)"><%= t('installationScript') %></h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div>
-                <label for="field-install-container" class="al-label mb-1.5">Container Image</label>
+                <label for="field-install-container" class="al-label mb-1.5"><%= t('containerImage') %></label>
                 <input type="text" id="field-install-container" placeholder="e.g. eclipse-temurin:21-jdk-jammy"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Docker image the install script runs inside.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('containerImageHint') %></p>
               </div>
               <div>
-                <label for="field-install-entrypoint" class="al-label mb-1.5">Entrypoint</label>
+                <label for="field-install-entrypoint" class="al-label mb-1.5"><%= t('entrypoint') %></label>
                 <input type="text" id="field-install-entrypoint" placeholder="bash"
                   class="al-input font-mono">
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Shell that executes the script (usually <code class="font-mono">bash</code>).</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('entrypointHint') %></p>
               </div>
               <div class="sm:col-span-2">
-                <label for="field-install-script" class="al-label mb-1.5">Script</label>
+                <label for="field-install-script" class="al-label mb-1.5"><%= t('script') %></label>
                 <textarea id="field-install-script" rows="16" placeholder="#!/bin/bash&#10;# Install script runs inside the container&#10;apt update && apt install -y curl"
                   class="al-input font-mono resize-y"></textarea>
-                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Files are placed in <code class="font-mono px-1 rounded" style="background:var(--theme-bg-secondary)">/mnt/server</code> inside the install container. The script runs as root.</p>
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('scriptHint') %></p>
               </div>
             </div>
           </div>
@@ -163,15 +163,15 @@
         <div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-tab-panel="settings" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <div class="flex items-center justify-between px-5 py-3.5 rounded-t-xl" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
-              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)">Required Ports</h2>
+              <h2 class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= t('requiredPorts') %></h2>
               <button type="button" id="add-port-requirement"
                 class="al-btn-secondary px-3 py-1.5 text-xs font-medium">
                 <%- icon('plus', { class: 'size-3', strokeWidth: 1.5 }) %>
-                Add Port
+                <%= t('addPort') %>
               </button>
             </div>
             <div class="px-5 py-4">
-              <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Each entry is shown when creating servers. Users get exactly these required ports; admins can add more.</p>
+              <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('requiredPortsDesc') %></p>
               <div id="port-requirements-list" class="space-y-2"></div>
             </div>
           </div>
@@ -180,9 +180,9 @@
         <!-- Raw JSON tab -->
         <div id="panel-raw" role="tabpanel" aria-labelledby="tab-raw" data-tab-panel="raw" class="tab-panel space-y-5" hidden>
           <div class="flex flex-col rounded-xl" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
-            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">Raw JSON</h2>
+            <h2 class="text-[13px] font-medium px-5 py-3.5 rounded-t-xl" style="color:var(--theme-text-strong);background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)"><%= t('rawJson') %></h2>
             <div class="px-5 py-5">
-              <p class="text-xs mb-4" style="color:var(--theme-text-muted)">Edit the complete egg JSON directly. Must be valid JSON — the editor will warn on errors. Saving here overwrites all tab values.</p>
+              <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('rawJsonDesc') %></p>
               <div id="json-editor" class="w-full h-[480px] rounded-xl border overflow-hidden" style="border-color:var(--theme-border)"></div>
             </div>
           </div>
@@ -245,7 +245,7 @@
 function imageEditor() {
   const MONACO_FONT_SIZE = 13;
   const MONACO_TAB_SIZE = 2;
-  const DEFAULT_PORT = 25565;
+  const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
   let originalData = null;
   let monacoEditor = null;
 
@@ -276,7 +276,7 @@ function imageEditor() {
     list.innerHTML = '';
     const entries = Object.entries(state.docker_images);
     if (entries.length === 0) {
-      list.innerHTML = '<p class="text-xs text-neutral-400">No Docker images configured. Click Add Image to add one.</p>';
+      list.innerHTML = '<p class="text-xs text-neutral-400">' + (req.translations.noDockerImagesConfigured || 'No Docker images configured. Click Add Image to add one.') + '</p>';
       return;
     }
     entries.forEach(function(pair) {
@@ -286,15 +286,15 @@ function imageEditor() {
       row.className = 'flex gap-2 items-center';
       row.innerHTML =
         '<input data-docker-label="' + idx + '" type="text" value="' + escHtml(label) + '" placeholder="Label (e.g. java 21)"' +
-        ' aria-label="Docker image label"' +
+        ' aria-label="' + (req.translations.dockerImageLabel || 'Docker image label') + '"' +
         ' class="w-40 shrink-0 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">' +
         '<input data-docker-image="' + idx + '" type="text" value="' + escHtml(image) + '" placeholder="Image ref (e.g. ghcr.io/ptero-eggs/yolks:java_21)"' +
-        ' aria-label="Docker image reference"' +
+        ' aria-label="' + (req.translations.dockerImageReference || 'Docker image reference') + '"' +
         ' class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">' +
         '<button data-docker-remove="' + idx + '" type="button"' +
-        ' aria-label="Remove Docker image entry"' +
+        ' aria-label="' + (req.translations.removeDockerImageEntry || 'Remove Docker image entry') + '"' +
         ' class="px-3 py-2 text-xs rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-neutral-800 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition shrink-0">' +
-        'Remove</button>';
+        (req.translations.remove || 'Remove') + '</button>';
       list.appendChild(row);
     });
     list.querySelectorAll('[data-docker-remove]').forEach(function(btn) {
@@ -311,7 +311,7 @@ function imageEditor() {
     const list = document.getElementById('variables-list');
     list.innerHTML = '';
     if (!state.variables.length) {
-      list.innerHTML = '<p class="text-xs text-neutral-400">No variables defined. Click Add Variable to add one.</p>';
+      list.innerHTML = '<p class="text-xs text-neutral-400">' + (req.translations.noVariablesDefined || 'No variables defined. Click Add Variable to add one.') + '</p>';
       return;
     }
     state.variables.forEach(function(v, idx) {
@@ -320,7 +320,7 @@ function imageEditor() {
       card.innerHTML =
         '<div class="flex items-center justify-between mb-3">' +
           '<span class="text-xs font-medium text-neutral-500">#' + (idx + 1) + '</span>' +
-          '<button data-var-remove="' + idx + '" type="button" class="text-xs text-red-500 hover:text-red-400 transition">Remove</button>' +
+          '<button data-var-remove="' + idx + '" type="button" class="text-xs text-red-500 hover:text-red-400 transition">' + (req.translations.remove || 'Remove') + '</button>' +
         '</div>' +
         '<div class="grid grid-cols-2 gap-3">' +
           '<div><label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Name</label>' +
@@ -367,7 +367,7 @@ function imageEditor() {
     const list = document.getElementById('port-requirements-list');
     list.innerHTML = '';
     if (!state.portRequirements.length) {
-      list.innerHTML = '<p class="text-xs text-neutral-400">No required ports. Servers can be created without port bindings unless an admin adds ports.</p>';
+      list.innerHTML = '<p class="text-xs text-neutral-400">' + (req.translations.noRequiredPorts || 'No required ports. Servers can be created without port bindings unless an admin adds ports.') + '</p>';
       return;
     }
     state.portRequirements.forEach(function(port, idx) {
@@ -378,7 +378,7 @@ function imageEditor() {
         ' class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-neutral-800 dark:text-white"></label>' +
         '<label class="text-xs text-neutral-500">Internal port<input data-port-req="' + idx + '" data-field="internalPort" type="number" min="1" max="65535" value="' + escHtml(port.internalPort || '') + '"' +
         ' class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-neutral-800 dark:text-white"></label>' +
-        '<button type="button" data-port-req-remove="' + idx + '" class="rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">Remove</button>';
+        '<button type="button" data-port-req-remove="' + idx + '" class="rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">' + (req.translations.remove || 'Remove') + '</button>';
       list.appendChild(row);
     });
     list.querySelectorAll('[data-port-req-remove]').forEach(function(btn) {
@@ -430,13 +430,13 @@ function imageEditor() {
       });
       const data = await r.json();
       if (data.success) {
-        showToast('Saved.', 'success');
+        showToast(req.translations.saved || 'Saved.', 'success');
         originalData = JSON.parse(JSON.stringify(state));
       } else {
-        showToast(data.error || 'Failed to save.', 'error');
+        showToast(data.error || (req.translations.failedToSave || 'Failed to save.'), 'error');
       }
     } catch (e) {
-      showToast('Network error.', 'error');
+      showToast(req.translations.networkError || 'Network error.', 'error');
     }
   }
 
@@ -493,7 +493,7 @@ function imageEditor() {
         state.startup_done = document.getElementById('field-startup-done').value.trim();
         await saveState();
       };
-      window.tabLabels['general'] = 'Save';
+      window.tabLabels['general'] = req.translations.save || 'Save';
       window.tabResetHandlers['general'] = function() {
         state.name = originalData.name;
         state.description = originalData.description;
@@ -520,7 +520,7 @@ function imageEditor() {
         state.docker_images = newImages;
         await saveState();
       };
-      window.tabLabels['docker'] = 'Save';
+      window.tabLabels['docker'] = req.translations.save || 'Save';
       window.tabResetHandlers['docker'] = function() {
         state.docker_images = JSON.parse(JSON.stringify(originalData.docker_images));
         renderDockerImages();
@@ -539,7 +539,7 @@ function imageEditor() {
         });
         await saveState();
       };
-      window.tabLabels['variables'] = 'Save';
+      window.tabLabels['variables'] = req.translations.save || 'Save';
       window.tabResetHandlers['variables'] = function() {
         state.variables = JSON.parse(JSON.stringify(originalData.variables));
         renderVariables();
@@ -553,7 +553,7 @@ function imageEditor() {
         };
         await saveState();
       };
-      window.tabLabels['install'] = 'Save';
+      window.tabLabels['install'] = req.translations.save || 'Save';
       window.tabResetHandlers['install'] = function() {
         const orig = originalData.scripts.installation || {};
         state.scripts.installation = { container: orig.container || '', entrypoint: orig.entrypoint || 'bash', script: orig.script || '' };
@@ -571,7 +571,7 @@ function imageEditor() {
         state.portRequirements = state.portRequirements.filter(function(p) { return p.name && p.internalPort; });
         await saveState();
       };
-      window.tabLabels['settings'] = 'Save';
+      window.tabLabels['settings'] = req.translations.save || 'Save';
       window.tabResetHandlers['settings'] = function() {
         state.portRequirements = JSON.parse(JSON.stringify(originalData.portRequirements));
         renderPortRequirements();
@@ -581,10 +581,10 @@ function imageEditor() {
         if (!monacoEditor) return;
         let parsed;
         try { parsed = JSON.parse(monacoEditor.getValue()); }
-        catch (e) { showToast('Invalid JSON: ' + e.message, 'error'); return; }
+        catch (e) { showToast((req.translations.invalidJson || 'Invalid JSON: ') + e.message, 'error'); return; }
         await savePayload(parsed);
       };
-      window.tabLabels['raw'] = 'Save';
+      window.tabLabels['raw'] = req.translations.save || 'Save';
       window.tabResetHandlers['raw'] = function() {
         if (monacoEditor) {
           monacoEditor.setValue(buildExportJson());

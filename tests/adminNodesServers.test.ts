@@ -96,6 +96,12 @@ vi.mock("../src/handlers/utils/core/mailer", () => ({
   sendServerSuspended: vi.fn(),
 }));
 
+vi.mock("../src/handlers/realtime/events", () => ({
+  emitRealtime: vi.fn(),
+  serverEvent: vi.fn(),
+  userEvent: vi.fn(),
+}));
+
 // ── Module under test ───────────────────────────────────────────────────
 
 import prisma from "../src/db";

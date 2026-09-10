@@ -15,16 +15,27 @@
  *   7. Runs Prisma generate + db push, then compiles TypeScript and CSS.
  *
  * Flags:
- *   --yes / -y        Skip all "are you sure?" prompts.
- *   --skip-services   Skip Redis + PostgreSQL install/start (useful when
- *                     you're providing your own DB, e.g. Docker Compose).
- *   --skip-build      Skip the pnpm install + tsc + tailwind step.
- *   --db-host HOST    Override the PostgreSQL host (default: 127.0.0.1).
- *   --db-port PORT    Override the PostgreSQL port (default: 5432).
- *   --db-name NAME    Override the database name (default: airlink).
- *   --db-user USER    Override the DB username (default: airlink).
- *   --redis-url URL   Override the Redis connection URL.
- *   --help / -h       Show this message and exit.
+ *   --yes / -y            Skip all "are you sure?" prompts.
+ *   --skip-services       Skip Redis + PostgreSQL install/start (useful when
+ *                         you're providing your own DB, e.g. Docker Compose).
+ *   --skip-build          Skip the pnpm install + tsc + tailwind step.
+ *   --db-host HOST        Override the PostgreSQL host (default: 127.0.0.1).
+ *   --db-port PORT        Override the PostgreSQL port (default: 5432).
+ *   --db-name NAME        Override the database name (default: airlink).
+ *   --db-user USER        Override the DB username (default: airlink).
+ *   --redis-url URL       Override the Redis connection URL.
+ *   --url URL             Panel public URL (default: http://localhost:3000).
+ *   --trust-proxy         Enable trust of X-Forwarded-* headers.
+ *   --cookie-domain DOM   Cookie domain for cross-subdomain sessions.
+ *   --asset-base-url URL  Base URL for static assets (CDN / different origin).
+ *   --csp-enabled         Force Content Security Policy on/off.
+ *   --rate-limit MAX      Global request rate limit per IP (default: 500).
+ *   --log-level LEVEL     Log level (default: info).
+ *   --smtp-host HOST      SMTP server host.
+ *   --smtp-port PORT      SMTP server port (default: 587).
+ *   --smtp-user USER      SMTP username.
+ *   --smtp-pass PASS      SMTP password.
+ *   --help / -h           Show this message and exit.
  *
  * Usage examples:
  *   node public/scripts/setup.mjs
@@ -149,6 +160,17 @@ const opts = {
   dbName: flag("--db-name", "airlink"),
   dbUser: flag("--db-user", "airlink"),
   redisUrl: flag("--redis-url", null),
+  url: flag("--url", "http://localhost:3000"),
+  trustProxy: argv.includes("--trust-proxy"),
+  cookieDomain: flag("--cookie-domain", ""),
+  assetBaseUrl: flag("--asset-base-url", ""),
+  cspEnabled: argv.includes("--csp-enabled"),
+  rateLimit: flag("--rate-limit", "500"),
+  logLevel: flag("--log-level", "info"),
+  smtpHost: flag("--smtp-host", ""),
+  smtpPort: flag("--smtp-port", "587"),
+  smtpUser: flag("--smtp-user", ""),
+  smtpPass: flag("--smtp-pass", ""),
 };
 
 // ---
@@ -211,15 +233,26 @@ function showHelp() {
   node public/scripts/setup.mjs [flags]
 
 ${chalk.bold("Flags")}
-  --yes, -y           Accept all prompts (non-interactive / CI mode).
-  --skip-services     Don't install or start Redis / PostgreSQL.
-  --skip-build        Don't run package install, tsc, or tailwindcss.
-  --db-host HOST      PostgreSQL host      [default: 127.0.0.1]
-  --db-port PORT      PostgreSQL port      [default: 5432]
-  --db-name NAME      Database name        [default: airlink]
-  --db-user USER      Database username    [default: airlink]
-  --redis-url URL     Redis connection URL [default: redis://127.0.0.1:6379]
-  --help, -h          Show this message.
+  --yes, -y              Accept all prompts (non-interactive / CI mode).
+  --skip-services        Don't install or start Redis / PostgreSQL.
+  --skip-build           Don't run package install, tsc, or tailwindcss.
+  --db-host HOST         PostgreSQL host           [default: 127.0.0.1]
+  --db-port PORT         PostgreSQL port           [default: 5432]
+  --db-name NAME         Database name             [default: airlink]
+  --db-user USER         Database username         [default: airlink]
+  --redis-url URL        Redis connection URL      [default: redis://127.0.0.1:6379]
+  --url URL              Panel public URL          [default: http://localhost:3000]
+  --trust-proxy          Enable X-Forwarded-* headers.
+  --cookie-domain DOMAIN Cookie domain for cross-subdomain sessions.
+  --asset-base-url URL   Base URL for static assets (CDN).
+  --csp-enabled          Force Content Security Policy on.
+  --rate-limit MAX       Request rate limit per IP [default: 500]
+  --log-level LEVEL      Log level                 [default: info]
+  --smtp-host HOST       SMTP server host.
+  --smtp-port PORT       SMTP server port          [default: 587]
+  --smtp-user USER       SMTP username.
+  --smtp-pass PASS       SMTP password.
+  --help, -h             Show this message.
 
 ${chalk.bold("Examples")}
   node public/scripts/setup.mjs
@@ -911,26 +944,60 @@ function generateEnv(creds) {
     `# Generated by setup.mjs on ${new Date().toISOString()}`,
     "#",
     "",
-    "# Application",
-    'URL="http://localhost:3000"',
-    'PORT="3000"',
+    "# ── Core ──────────────────────────────────────────────────────────────────────",
+    `URL="${opts.url}"`,
+    "PORT=3000",
     `NAME="${PKG.name}"`,
     'NODE_ENV="production"',
     "",
-    "# Session",
+    "# ── Session ───────────────────────────────────────────────────────────────────",
     `SESSION_SECRET="${sessionSecret}"`,
+    "# SESSION_MAX_AGE_MS=604800000",
     "",
-    "# Database (Prisma)",
+    "# ── Reverse Proxy / HTTPS ─────────────────────────────────────────────────────",
+    `TRUST_PROXY="${opts.trustProxy ? "true" : ""}"`,
+    `COOKIE_DOMAIN="${opts.cookieDomain}"`,
+    "",
+    "# ── Asset Delivery ────────────────────────────────────────────────────────────",
+    `ASSET_BASE_URL="${opts.assetBaseUrl}"`,
+    "",
+    "# ── Content Security Policy ───────────────────────────────────────────────────",
+    `CSP_ENABLED="${opts.cspEnabled ? "true" : ""}"`,
+    "",
+    "# ── Rate Limiting ─────────────────────────────────────────────────────────────",
+    `RATE_LIMIT_MAX=${opts.rateLimit}`,
+    "# RATE_LIMIT_WINDOW_MS=60000",
+    "",
+    "# ── Logging ───────────────────────────────────────────────────────────────────",
+    `LOG_LEVEL="${opts.logLevel}"`,
+    "",
+    "# ── Storage ───────────────────────────────────────────────────────────────────",
+    '# STORAGE_DIR=""',
+    "",
+    "# ── Database (Prisma) ────────────────────────────────────────────────────────",
     `DATABASE_URL="postgresql://${dbUser}:${dbPass}@${dbHost}:${dbPort}/${dbName}"`,
+    `DB_POOL_MAX=20`,
     "",
-    "# Database (raw credentials, used by the DB-host auto-generator)",
+    "# ── Database (raw credentials) ───────────────────────────────────────────────",
     `PGHOST="${dbHost}"`,
     `PGPORT="${dbPort}"`,
     `PGUSER="${dbUser}"`,
     `PGPASSWORD="${dbPass}"`,
     "",
-    "# Redis",
+    "# ── Redis ─────────────────────────────────────────────────────────────────────",
     `REDIS_URL="${redisUrl}"`,
+    "",
+    "# ── TLS (Direct HTTPS — no reverse proxy) ────────────────────────────────────",
+    '# TLS_CERT_PATH=""',
+    '# TLS_KEY_PATH=""',
+    "",
+    "# ── SMTP / Email ──────────────────────────────────────────────────────────────",
+    `SMTP_HOST="${opts.smtpHost}"`,
+    `SMTP_PORT=${opts.smtpPort}`,
+    `SMTP_USER="${opts.smtpUser}"`,
+    `SMTP_PASS="${opts.smtpPass}"`,
+    '# SMTP_FROM="no-reply@airlink.example"',
+    '# SMTP_SECURE="true"',
     "",
   ];
 

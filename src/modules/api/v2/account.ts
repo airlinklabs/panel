@@ -23,8 +23,6 @@
  * DELETE /api/v2/account/folders/:id            — Delete folder
  * POST   /api/v2/account/folders/:id/servers    — Add server to folder
  * DELETE /api/v2/account/folders/servers/:uuid  — Remove server from folder
- * POST   /api/v2/account/onboarding/complete    — Complete onboarding
- * POST   /api/v2/account/onboarding/skip        — Skip onboarding
  */
 
 import { Router } from "express";
@@ -47,6 +45,8 @@ import {
   createFolderBody,
   addServerToFolderBody,
 } from "./dto";
+import { V2_AVATAR_UPLOAD_LIMIT_BYTES } from "../../../config/limits";
+import { AVATAR_MIME_ALLOWLIST } from "../../../config/mime";
 
 const router = Router();
 
@@ -264,8 +264,8 @@ router.post("/avatar", async (req, res) => {
   }
 
   const file = req.file;
-  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-  if (!allowedTypes.includes(file.mimetype)) {
+  const allowedTypes = AVATAR_MIME_ALLOWLIST;
+  if (!allowedTypes.includes(file.mimetype as (typeof allowedTypes)[number])) {
     return jsonError(
       res,
       "BAD_REQUEST",
@@ -274,7 +274,7 @@ router.post("/avatar", async (req, res) => {
     );
   }
 
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = V2_AVATAR_UPLOAD_LIMIT_BYTES;
   if (file.size > maxSize) {
     return jsonError(res, "BAD_REQUEST", "File must be less than 5MB", 400);
   }
@@ -908,49 +908,6 @@ router.delete("/folders/servers/:uuid", async (req, res) => {
   );
 
   jsonOk(res, { removed: true });
-});
-
-// ---------------------------------------------------------------------------
-// POST /api/v2/account/onboarding/complete — Complete onboarding
-// ---------------------------------------------------------------------------
-router.post("/onboarding/complete", async (req, res) => {
-  const user = await requireUser(req, res);
-  if (!user) {
-    return;
-  }
-
-  await prisma.users.update({
-    where: { id: user.id },
-    data: {
-      onboardingCompleted: true,
-      onboardingSkipped: false,
-    },
-  });
-
-  logActivity(user.id, "account.onboarding.completed", undefined, {}, req.ip);
-
-  jsonOk(res, { completed: true });
-});
-
-// ---------------------------------------------------------------------------
-// POST /api/v2/account/onboarding/skip — Skip onboarding
-// ---------------------------------------------------------------------------
-router.post("/onboarding/skip", async (req, res) => {
-  const user = await requireUser(req, res);
-  if (!user) {
-    return;
-  }
-
-  await prisma.users.update({
-    where: { id: user.id },
-    data: {
-      onboardingSkipped: true,
-    },
-  });
-
-  logActivity(user.id, "account.onboarding.skipped", undefined, {}, req.ip);
-
-  jsonOk(res, { skipped: true });
 });
 
 export default router;

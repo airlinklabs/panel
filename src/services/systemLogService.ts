@@ -1,5 +1,6 @@
 import prisma from '../db';
 import logger from '../handlers/logger';
+import { logT } from './i18n';
 
 export interface LogSystemErrorOpts {
   message: string;
@@ -22,7 +23,7 @@ export async function logSystemError(error: LogSystemErrorOpts): Promise<void> {
     });
   } catch (err) {
     // system logging must never crash the process
-    logger.error('[system-log] failed to write system log', err);
+    logger.error(logT('log.systemLogWriteFailed'), err);
   }
 }
 

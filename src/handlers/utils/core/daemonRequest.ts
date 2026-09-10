@@ -12,6 +12,7 @@ import {
   httpDelete,
   type HttpResponse,
 } from '../../../utils/http';
+import { DAEMON_MAX_SPOOL_BYTES } from '../../../config/limits';
 export type { HttpResponse } from '../../../utils/http';
 
 const SIGNATURE_WINDOW_S = 30;
@@ -144,7 +145,6 @@ function isStreamLike(body: unknown): boolean {
 // Spools an unknown stream to a temp file, hashing as it goes, so the signed
 // digest covers the exact bytes that are later streamed to the daemon. The
 // spool is bounded so an untrusted/garbled stream can't exhaust panel disk.
-const MAX_SPOOL_BYTES = 100 * 1024 * 1024; // matches daemon MAX_REQUEST_BODY_BYTES
 async function spoolStreamToTemp(
   stream: NodeJS.ReadableStream | ReadableStream,
 ): Promise<{
@@ -166,7 +166,7 @@ async function spoolStreamToTemp(
     nodeStream.on('data', (chunk: Buffer | string) => {
       total += chunk.length;
       hash.update(chunk);
-      if (total > MAX_SPOOL_BYTES) {
+      if (total > DAEMON_MAX_SPOOL_BYTES) {
         // destroying the destination stops the pipe; the writable 'error' event
         // rejects the promise below with the cap violation
         ws.destroy(new Error('stream exceeds the spool cap'));
@@ -178,11 +178,13 @@ async function spoolStreamToTemp(
     ws.on('finish', resolve);
   });
 
-  if (total > MAX_SPOOL_BYTES) {
+  if (total > DAEMON_MAX_SPOOL_BYTES) {
     await fsp.unlink(file).catch(() => {
       /* noop */
     });
-    throw new Error(`stream exceeds the ${MAX_SPOOL_BYTES}-byte spool cap`);
+    throw new Error(
+      `stream exceeds the ${DAEMON_MAX_SPOOL_BYTES}-byte spool cap`,
+    );
   }
 
   return { file, digest: hash.digest('hex') };

@@ -1,8 +1,8 @@
 import prisma from '../db';
 import { daemonRequest } from '../handlers/utils/core/daemonRequest';
 import logger from '../handlers/logger';
-
-const BACKUP_TIMEOUT_MS = 300_000;
+import { DAEMON_TIMEOUT_BACKUP_MS } from '../config/daemonTimeouts';
+import { logT } from './i18n';
 
 export interface BackupListItem {
   UUID: string;
@@ -77,7 +77,7 @@ export async function createBackupOnDaemon(
     nodePort,
     nodeKey,
     body: { id: serverId, name },
-    timeout: BACKUP_TIMEOUT_MS,
+    timeout: DAEMON_TIMEOUT_BACKUP_MS,
   });
   return response.data;
 }
@@ -228,7 +228,10 @@ export async function deleteBackup(
       );
     }
   } catch (err) {
-    logger.warn(`Failed to delete backup file from daemon: ${err}`);
+    logger.warn(
+      logT('log.failedToDeleteBackupFileFromDaemonService'),
+      err as Record<string, unknown>,
+    );
   }
 
   await deleteBackupRecord(uuid);

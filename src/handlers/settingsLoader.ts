@@ -1,6 +1,7 @@
 import { getSettings } from './settingsCache';
 import logger from './logger';
 import prisma from '../db';
+import { logT } from '../services/i18n';
 
 export const settingsLoader = async () => {
   try {
@@ -37,14 +38,14 @@ export const settingsLoader = async () => {
           hashApiKeys: false,
         },
       });
-      logger.info('Settings created');
+      logger.info(logT('log.settingsCreated'));
     }
 
     return prisma;
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : 'Unknown error occurred';
-    logger.error('settingsLoader', `Database connection error: ${message}`);
+    logger.error(logT('log.dbConnectionError', { message }));
     throw error;
   }
 };

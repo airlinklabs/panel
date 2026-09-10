@@ -23,6 +23,16 @@ import {
   serializeServerPorts,
 } from '../../handlers/utils/server/ports';
 import type { ServerVariable } from './server/shared';
+import {
+  DEFAULT_MAX_MEMORY_MB,
+  DEFAULT_MAX_CPU_PERCENT,
+  DEFAULT_MAX_STORAGE_MB,
+  MIN_MEMORY_MB,
+  MIN_CPU_PERCENT,
+  MIN_STORAGE_MB,
+  DEFAULT_BACKUP_LIMIT,
+  DEFAULT_DATABASE_LIMIT,
+} from '../../config/server';
 
 interface ClientPort {
   name: string;
@@ -54,15 +64,6 @@ function parseClientPorts(raw: unknown): ClientPort[] | null {
   }
   return out;
 }
-
-const DEFAULT_MAX_MEMORY_MB = 512;
-const DEFAULT_MAX_CPU_PERCENT = 100;
-const DEFAULT_MAX_STORAGE_MB = 5120;
-const MIN_MEMORY_MB = 128;
-const MIN_CPU_PERCENT = 50;
-const MIN_STORAGE_MB = 128;
-const DEFAULT_BACKUP_LIMIT = 5;
-const DEFAULT_DATABASE_LIMIT = 5;
 
 interface PortAllocation {
   assignedPorts: number[];

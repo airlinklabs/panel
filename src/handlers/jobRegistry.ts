@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { JOB_TTL_MS } from '../config/timeouts';
 
 /**
  * jobRegistry — in-memory tracker for long-running panel jobs.
@@ -41,7 +42,6 @@ export interface JobProgressView {
 }
 
 /** How long a job may stay in the registry after its last update. */
-const TTL_MS = 30 * 60 * 1000;
 /** Progress is estimated while running; does not exceed 95 until finish. */
 const MAX_RUNNING_PROGRESS = 95;
 
@@ -52,7 +52,7 @@ function now(): number {
 }
 
 function prune(): void {
-  const cutoff = now() - TTL_MS;
+  const cutoff = now() - JOB_TTL_MS;
   for (const [key, job] of jobs) {
     if (job.updatedAt < cutoff) {
       jobs.delete(key);

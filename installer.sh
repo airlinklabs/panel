@@ -78,18 +78,32 @@ ARG_PANEL_ADDR=""
 ARG_DAEMON_PORT=""
 ARG_DAEMON_KEY=""
 ARG_ADDONS=""
+ARG_URL=""
+ARG_TRUST_PROXY=""
+ARG_COOKIE_DOMAIN=""
+ARG_CSP_ENABLED=""
+ARG_RATE_LIMIT=""
+ARG_LOG_LEVEL=""
+ARG_SMTP_HOST=""
 
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --panel-only)  ARG_MODE="panel";        shift ;;
-            --daemon-only) ARG_MODE="daemon";       shift ;;
-            --name)        ARG_NAME="${2:-}";        shift 2 ;;
-            --port)        ARG_PORT="${2:-}";        shift 2 ;;
-            --panel-addr)  ARG_PANEL_ADDR="${2:-}";  shift 2 ;;
-            --daemon-port) ARG_DAEMON_PORT="${2:-}"; shift 2 ;;
-            --daemon-key)  ARG_DAEMON_KEY="${2:-}";  shift 2 ;;
-            --addons)      ARG_ADDONS="${2:-}";      shift 2 ;;
+            --panel-only)     ARG_MODE="panel";            shift ;;
+            --daemon-only)    ARG_MODE="daemon";           shift ;;
+            --name)           ARG_NAME="${2:-}";            shift 2 ;;
+            --port)           ARG_PORT="${2:-}";            shift 2 ;;
+            --panel-addr)     ARG_PANEL_ADDR="${2:-}";      shift 2 ;;
+            --daemon-port)    ARG_DAEMON_PORT="${2:-}";     shift 2 ;;
+            --daemon-key)     ARG_DAEMON_KEY="${2:-}";      shift 2 ;;
+            --addons)         ARG_ADDONS="${2:-}";          shift 2 ;;
+            --url)            ARG_URL="${2:-}";             shift 2 ;;
+            --trust-proxy)    ARG_TRUST_PROXY="true";       shift ;;
+            --cookie-domain)  ARG_COOKIE_DOMAIN="${2:-}";   shift 2 ;;
+            --csp-enabled)    ARG_CSP_ENABLED="true";       shift ;;
+            --rate-limit)     ARG_RATE_LIMIT="${2:-}";      shift 2 ;;
+            --log-level)      ARG_LOG_LEVEL="${2:-}";       shift 2 ;;
+            --smtp-host)      ARG_SMTP_HOST="${2:-}";       shift 2 ;;
             *) log "Unknown arg ignored: $1"; shift ;;
         esac
     done
@@ -1287,13 +1301,62 @@ PYEOF
         local server_ip
         server_ip=$(hostname -I 2>/dev/null | awk '{print $1}') || server_ip="localhost"
         [[ -z "$server_ip" ]] && server_ip="localhost"
+        local panel_url="${PANEL_URL:-http://${server_ip}:${PANEL_PORT}}"
         cat > /var/www/panel/.env <<ENVEOF
-NAME=${PANEL_NAME}
+# ── Core ──────────────────────────────────────────────────────────────────────
+NAME="${PANEL_NAME}"
 NODE_ENV=production
-URL=http://${server_ip}:${PANEL_PORT}
+URL="${panel_url}"
 PORT=${PANEL_PORT}
-DATABASE_URL=file:/var/www/panel/storage/dev.db
+
+# ── Session ───────────────────────────────────────────────────────────────────
 SESSION_SECRET=${secret}
+SESSION_MAX_AGE_MS=604800000
+
+# ── Reverse Proxy / HTTPS ─────────────────────────────────────────────────────
+TRUST_PROXY="${PANEL_TRUST_PROXY}"
+
+# ── Cookie ────────────────────────────────────────────────────────────────────
+COOKIE_DOMAIN="${PANEL_COOKIE_DOMAIN}"
+
+# ── Asset Delivery ────────────────────────────────────────────────────────────
+ASSET_BASE_URL=""
+
+# ── Content Security Policy ───────────────────────────────────────────────────
+CSP_ENABLED="${PANEL_CSP_ENABLED}"
+
+# ── Rate Limiting ─────────────────────────────────────────────────────────────
+RATE_LIMIT_MAX=${PANEL_RATE_LIMIT}
+RATE_LIMIT_WINDOW_MS=60000
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+LOG_LEVEL="${PANEL_LOG_LEVEL}"
+
+# ── Storage ───────────────────────────────────────────────────────────────────
+STORAGE_DIR=""
+
+# ── Database ──────────────────────────────────────────────────────────────────
+DATABASE_URL=file:/var/www/panel/storage/dev.db
+PGHOST=""
+PGPORT=""
+PGUSER=""
+PGPASSWORD=""
+DB_POOL_MAX=20
+
+# ── Redis ─────────────────────────────────────────────────────────────────────
+REDIS_URL=""
+
+# ── TLS ───────────────────────────────────────────────────────────────────────
+TLS_CERT_PATH=""
+TLS_KEY_PATH=""
+
+# ── SMTP / Email ──────────────────────────────────────────────────────────────
+SMTP_HOST="${PANEL_SMTP_HOST}"
+SMTP_PORT=587
+SMTP_USER=""
+SMTP_PASS=""
+SMTP_FROM=""
+SMTP_SECURE="true"
 ENVEOF
     fi
 }
@@ -1438,6 +1501,13 @@ PANEL_ADDRESS="127.0.0.1"
 DAEMON_PORT="3002"
 DAEMON_KEY=""
 ADDON_CHOICES="none"
+PANEL_URL=""
+PANEL_TRUST_PROXY="false"
+PANEL_COOKIE_DOMAIN=""
+PANEL_CSP_ENABLED=""
+PANEL_RATE_LIMIT="500"
+PANEL_LOG_LEVEL="info"
+PANEL_SMTP_HOST=""
 
 tui_collect_panel_config() {
     tui_input "Panel name" "Airlink"
@@ -1449,6 +1519,23 @@ tui_collect_panel_config() {
         if valid_port "$TUI_INPUT"; then PANEL_PORT="$TUI_INPUT"; break; fi
         err="Invalid port — must be 1-65535"
     done
+
+    tui_input "Panel URL (leave empty to auto-detect)" ""
+    [[ -n "$TUI_INPUT" ]] && PANEL_URL="$TUI_INPUT"
+
+    if tui_confirm "Enable trust proxy? (for Nginx/Caddy/Cloudflare)"; then
+        PANEL_TRUST_PROXY="true"
+    fi
+
+    if tui_confirm "Enable Content Security Policy?"; then
+        PANEL_CSP_ENABLED="true"
+    fi
+
+    tui_input "Rate limit (requests/min, 0=unlimited)" "500"
+    [[ -n "$TUI_INPUT" ]] && PANEL_RATE_LIMIT="$TUI_INPUT"
+
+    tui_input "SMTP host (leave empty to skip)" ""
+    [[ -n "$TUI_INPUT" ]] && PANEL_SMTP_HOST="$TUI_INPUT"
 }
 
 tui_collect_daemon_config() {
@@ -1638,6 +1725,13 @@ run_noninteractive() {
     DAEMON_PORT="${ARG_DAEMON_PORT:-3002}"
     DAEMON_KEY="${ARG_DAEMON_KEY:-}"
     ADDON_CHOICES="${ARG_ADDONS:-none}"
+    PANEL_URL="${ARG_URL:-}"
+    PANEL_TRUST_PROXY="${ARG_TRUST_PROXY:-false}"
+    PANEL_COOKIE_DOMAIN="${ARG_COOKIE_DOMAIN:-}"
+    PANEL_CSP_ENABLED="${ARG_CSP_ENABLED:-}"
+    PANEL_RATE_LIMIT="${ARG_RATE_LIMIT:-500}"
+    PANEL_LOG_LEVEL="${ARG_LOG_LEVEL:-info}"
+    PANEL_SMTP_HOST="${ARG_SMTP_HOST:-}"
 
     if [[ "$mode" != "daemon" ]]; then
         valid_port "$PANEL_PORT" || die "Invalid panel port: $PANEL_PORT"

@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Dashboard' }) %>
+<%- include('../../components/header', { title: t('adminServersTitle') }) %>
 
   <script nonce="<%- nonce %>">
 const serverCreateNames = {
@@ -27,33 +27,33 @@ function serverCreatePage() {
       </div>
       <%- include('../../components/template') %>
         <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
-          <%- include('../../components/ui/breadcrumb', { items: [ { label: 'Admin' }, { label: 'Servers' ,
-            href: '/admin/servers' }, { label: 'Create' } ] }) %>
+          <%- include('../../components/ui/breadcrumb', { items: [ { label: t('admin') }, { label: t('breadcrumbServers') ,
+            href: '/admin/servers' }, { label: t('create') } ] }) %>
             <div class="al-page-header flex items-start justify-between gap-4">
               <div>
                 <h1 class="al-page-title">
-                  <%= req.translations.adminCreateServerTitle %>
+                  <%= t('adminCreateServerTitle') %>
                 </h1>
                 <p class="al-page-desc">
-                  <%= req.translations.adminCreateServerText || 'Spin up something new. Naming it is half the fun.' %>
+                  <%= t('adminCreateServerText') %>
                 </p>
               </div>
               <div class="flex gap-2 shrink-0 items-center">
                 <button type="submit" form="createServerForm" class="al-btn-primary"><%- icon('plus', { class: 'size-4'
                     , strokeWidth: 1.5 }) %>
-                    <%= req.translations.create || 'Create server' %></button>
-                <a href="/admin/servers" class="al-btn-secondary">Back to Servers</a>
+                    <%= t('create') %></button>
+                <a href="/admin/servers" class="al-btn-secondary"><%= t('backToServers') %></a>
               </div>
             </div>
 
             <div class="al-page-body space-y-5">
               <form id="createServerForm" @submit.prevent class="space-y-5">
                 <div class="al-card">
-                  <h2 class="al-card-header">General</h2>
+                  <h2 class="al-card-header"><%= t('general') %></h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label for="serverName" class="al-label">
-                        <%= req.translations.name %>:
+                        <%= t('name') %>:
                       </label>
                       <div class="flex items-center gap-2">
                         <input id="serverName" name="name" class="al-input flex-1"
@@ -67,14 +67,14 @@ function serverCreatePage() {
                     </div>
                     <div>
                       <label for="serverDescription" class="al-label">
-                        <%= req.translations.description %>:
+                        <%= t('description') %>:
                       </label>
                       <input id="serverDescription" name="description" class="al-input"
                         placeholder="<%= user.username %>'s server description">
                     </div>
                     <div>
                       <label class="al-label" for="serverUser">
-                        <%= req.translations.user %>:
+                        <%= t('user') %>:
                       </label>
                       <select id="serverUser" name="ownerId" class="hidden">
                         <% users.forEach(user=> { %>
@@ -87,7 +87,7 @@ function serverCreatePage() {
                     </div>
                     <div>
                       <label class="al-label" for="serverNode">
-                        <%= req.translations.Node %>:
+                        <%= t('Node') %>:
                       </label>
                       <select id="serverNode" name="nodeId" class="hidden">
                         <% if (nodes.length> 0) { %>
@@ -97,7 +97,7 @@ function serverCreatePage() {
                             </option>
                             <% }); %>
                               <% } else { %>
-                                <option value="" disabled selected>No nodes available</option>
+                                <option value="" disabled selected><%= t('noNodesAvailable') %></option>
                                 <% } %>
                       </select>
                       <div class="custom-select mt-2" data-for="serverNode"></div>
@@ -106,12 +106,12 @@ function serverCreatePage() {
                 </div>
 
                 <div class="al-card">
-                  <h2 class="al-card-header">Resources</h2>
+                  <h2 class="al-card-header"><%= t('resources') %></h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label class="al-label">
                         <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
-                          CPU:
+                          <%= t('cpu') %>:
                       </label>
                       <input type="hidden" id="serverCPU" name="Cpu" value="100">
                       <div class="flex items-stretch mt-2 mb-1 gap-0">
@@ -119,14 +119,14 @@ function serverCreatePage() {
                           class="al-input rounded-l-xl flex-1 border-r-0">
                         <button type="button" class="al-format-switcher" data-format-switcher
                           data-display="serverCPUDisplay" data-hidden="serverCPU" data-units="100:Cores,1:%"
-                          data-default-unit="Cores">Cores</button>
+                          data-default-unit="Cores"><%= t('cores') %></button>
                       </div>
-                      <p class="text-xs" style="color:var(--theme-text-muted)">1 core = 100%</p>
+                      <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('coreHint') %></p>
                     </div>
                     <div>
                       <label class="al-label">
                         <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
-                          Memory:
+                          <%= t('memory') %>:
                       </label>
                       <input type="hidden" id="serverMemory" name="Memory" value="1024">
                       <div class="flex items-stretch mt-2 mb-1 gap-0">
@@ -134,14 +134,14 @@ function serverCreatePage() {
                           class="al-input rounded-l-xl flex-1 border-r-0">
                         <button type="button" class="al-format-switcher" data-format-switcher
                           data-display="serverMemoryDisplay" data-hidden="serverMemory" data-units="1:MB,1024:GB"
-                          data-default-unit="MB">MB</button>
+                          data-default-unit="MB"><%= t('mb') %></button>
                       </div>
-                      <p class="text-xs" style="color:var(--theme-text-muted)">Min 128 MB</p>
+                      <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('minMemory') %></p>
                     </div>
                     <div>
                       <label class="al-label">
                         <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
-                          Swap:
+                          <%= t('swap') %>:
                       </label>
                       <input type="hidden" id="serverSwap" name="Swap" value="0">
                       <div class="flex items-stretch mt-2 mb-1 gap-0">
@@ -149,44 +149,44 @@ function serverCreatePage() {
                           class="al-input rounded-l-xl flex-1 border-r-0">
                         <button type="button" class="al-format-switcher" data-format-switcher
                           data-display="serverSwapDisplay" data-hidden="serverSwap" data-units="1:MB,1024:GB"
-                          data-default-unit="MB">MB</button>
+                          data-default-unit="MB"><%= t('mb') %></button>
                       </div>
-                      <p class="text-xs" style="color:var(--theme-text-muted)">0 = no swap, -1 = unlimited</p>
+                      <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('swapHint') %></p>
                     </div>
                     <div>
                       <label class="al-label">
                         <%- icon('database', { size: 14, class: 'shrink-0' }) %>
-                          Storage:
+                          <%= t('storage') %>:
                       </label>
-                      <input type="hidden" id="serverStorage" name="Storage" value="20480">
+                      <input type="hidden" id="serverStorage" name="Storage" value="<%= settings.defaultMaxStorage ?? 20480 %>">
                       <div class="flex items-stretch mt-2 mb-1 gap-0">
-                        <input id="serverStorageDisplay" type="number" min="1" value="20"
+                        <input id="serverStorageDisplay" type="number" min="1" value="<%= Math.round((settings.defaultMaxStorage ?? 20480) / 1024) %>"
                           class="al-input rounded-l-xl flex-1 border-r-0">
                         <button type="button" class="al-format-switcher" data-format-switcher
                           data-display="serverStorageDisplay" data-hidden="serverStorage" data-units="1:MB,1024:GB"
-                          data-default-unit="MB">MB</button>
+                          data-default-unit="MB"><%= t('mb') %></button>
                       </div>
-                      <p class="text-xs" style="color:var(--theme-text-muted)">Min 128 MB</p>
+                      <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('minStorage') %></p>
                     </div>
                     <div>
                       <label class="al-label">
                         <%- icon('layers', { size: 14, class: 'shrink-0' }) %>
-                          Database limit:
+                          <%= t('databaseLimit') %>:
                       </label>
-                      <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="5"
+                      <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= settings.defaultDatabaseLimit ?? 5 %>"
                         class="al-input mt-2 mb-1">
-                      <p class="text-xs" style="color:var(--theme-text-muted)">0 = unlimited databases</p>
+                      <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('databaseLimitHint') %></p>
                     </div>
                   </div>
                 </div>
 
                 <div class="al-card">
-                  <h2 class="al-card-header">Startup</h2>
+                  <h2 class="al-card-header"><%= t('startup') %></h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label class="al-label" for="serverImage">
                         <%- icon('box', { size: 14, class: 'shrink-0' }) %>
-                          <%= req.translations.Image %>:</label>
+                          <%= t('Image') %>:</label>
                       <select id="serverImage" name="imageId" class="hidden">
                         <% images.forEach(image=> { %>
                           <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages || "[]" %>'
@@ -201,20 +201,20 @@ function serverCreatePage() {
                     <div>
                       <label class="al-label" for="dockerImage">
                         <%- icon('box', { size: 14, class: 'shrink-0' }) %>
-                          <%= req.translations.DockerImage %>:</label>
+                          <%= t('DockerImage') %>:</label>
                       <select id="dockerImage" name="dockerImage" class="hidden">
-                        <option value="" disabled selected>Select a Docker image</option>
+                        <option value="" disabled selected><%= t('selectDockerImage') %></option>
                       </select>
                       <div class="custom-select mt-2" data-for="dockerImage"></div>
                     </div>
                     <div>
                       <label class="al-label">
                         <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-                          <%= req.translations.Ports %>:</label>
+                          <%= t('Ports') %>:</label>
                       <input type="hidden" id="serverPorts" name="Ports">
                       <button type="button" id="assignPortsBtn" class="al-btn-secondary mt-2 w-full">
                         <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-                          Assign ports
+                          <%= t('assignPorts') %>
                       </button>
                     </div>
                     <div
@@ -225,10 +225,9 @@ function serverCreatePage() {
                             <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
                           </div>
                           <div>
-                            <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Startup Command Permissions
+                            <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('startupCommandPermissions') %>
                             </h3>
-                            <p class="text-xs" style="color:var(--theme-text-muted)">When enabled, users can modify the
-                              startup command for this server.</p>
+                            <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('startupCommandPermissionsDesc') %></p>
                           </div>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
@@ -236,7 +235,7 @@ function serverCreatePage() {
                           <div class="al-toggle-track">
                             <div class="al-toggle-dot"></div>
                           </div>
-                          <span class="ms-3 al-page-desc text-sm" x-text="allowStartupEdit ? 'Enabled' : 'Disabled'">Disabled</span>
+                          <span class="ms-3 al-page-desc text-sm" x-text="allowStartupEdit ? '<%= t('enabled') %>' : '<%= t('disabled') %>'"><%= t('disabled') %></span>
                         </label>
                       </div>
                     </div>
@@ -249,7 +248,7 @@ function serverCreatePage() {
                       <div id="variablesSection">
                         <h2 class="al-card-header flex items-center gap-1.5">
                           <%- icon('settings', { size: 14, class: 'shrink-0' }) %>
-                            Variables
+                            <%= t('variables') %>
                         </h2>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="variablesContainer"></div>
                       </div>
@@ -265,7 +264,7 @@ function serverCreatePage() {
 </div><!-- /x-data -->
 
   <%- include('../../components/portsAllocator') %>
-    <%- include('../../components/loadingPopup') %>
+    <%- include('../../components/loading-popup') %>
 
       <script nonce="<%- nonce %>">
         const serverImageSelect = document.getElementById('serverImage');
@@ -340,7 +339,7 @@ function serverCreatePage() {
 
         function ensureMinimumPortRows() {
           const requirements = getPortRequirements();
-          const DEFAULT_PORT = 25565;
+          const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
           const min = Math.max(1, requirements.length);
           while (assignedPorts.length < min) {
             const req = requirements[assignedPorts.length] || {};
@@ -356,13 +355,13 @@ function serverCreatePage() {
 
         function syncPortsButton() {
           serverPortsInput.value = JSON.stringify(assignedPorts);
-          document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? `Assign ports (${assignedPorts.length})` : 'Assign ports';
+          document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? (req.translations.assignPorts || 'Assign ports') + ' (' + assignedPorts.length + ')' : (req.translations.assignPorts || 'Assign ports');
         }
 
         function renderPortRows() {
           if (!window.PortsAllocator) return;
           PortsAllocator.open({
-            title: 'Assign ports',
+            title: (req.translations.assignPorts || 'Assign ports'),
             requirements: getPortRequirements(),
             assignedPorts: assignedPorts,
             availablePorts: availablePorts,
@@ -378,7 +377,7 @@ function serverCreatePage() {
         function updateDockerImages() {
           const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
           const dockerImages = parseJson(selectedOption?.getAttribute('data-docker-images'), []);
-          dockerImageSelect.innerHTML = '<option value="" disabled selected>Select a Docker image</option>';
+          dockerImageSelect.innerHTML = '<option value="" disabled selected>' + (req.translations.selectDockerImage || 'Select a Docker image') + '</option>';
           dockerImages.forEach(imageObj => {
             Object.entries(imageObj).forEach(([key, value]) => {
               const option = document.createElement('option');
@@ -456,8 +455,8 @@ function serverCreatePage() {
           const data = Object.fromEntries(formData);
           data.variables = variablesArray;
           data.ports = assignedPorts;
-          const loader = showLoadingPopup('Creating Server', 'Initializing server creation...');
-          loader.updateProgress(20, 'Sending server configuration...');
+          const loader = showLoadingPopup(req.translations.creatingServer || 'Creating Server', req.translations.initializingServerCreation || 'Initializing server creation...');
+          loader.updateProgress(20, req.translations.sendingServerConfig || 'Sending server configuration...');
           fetch('/api/v2/admin/servers', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' }, body: JSON.stringify(data),
           })
@@ -466,10 +465,10 @@ function serverCreatePage() {
               return response;
             })
             .then(data => {
-              loader.updateProgress(100, 'Server created successfully!');
-              setTimeout(() => { loader.close(); showToast('Server deployed. Go make something cool.', 'success'); setTimeout(() => { window.location.href = '/admin/servers'; }, 1000); }, 500);
+              loader.updateProgress(100, req.translations.serverCreatedSuccessfully || 'Server created successfully!');
+              setTimeout(() => { loader.close(); showToast(req.translations.serverDeployed || 'Server deployed. Go make something cool.', 'success'); setTimeout(() => { window.location.href = '/admin/servers'; }, 1000); }, 500);
             })
-            .catch(error => { loader.close(); console.error('Error:', error); showToast('Failed to create server: ' + error.message, 'error'); });
+            .catch(error => { loader.close(); console.error('Error:', error); showToast((req.translations.failedToCreateServer || 'Failed to create server: ') + error.message, 'error'); });
         });
 
         fetchNodesData();

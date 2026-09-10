@@ -33,16 +33,16 @@
               <button type="button" @click="history.length > 1 ? history.back() : location.assign('/')"
                 class="al-btn-secondary inline-flex items-center gap-1.5">
                 <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %>
-                Back
+                <%= t('back') %>
               </button>
               <a href="/"
                 class="al-btn-primary">
-                Dashboard
+                <%= t('navDashboard') %>
               </a>
               <% if (typeof user !== 'undefined' && user && user.isAdmin) { %>
                 <a href="/admin/overview"
                   class="al-btn-secondary">
-                  Admin
+                  <%= t('admin') %>
                 </a>
                 <% } %>
             </div>

@@ -13,7 +13,8 @@ import config from '../storage/config.json';
 import cookieParser from 'cookie-parser';
 import expressWs from 'express-ws';
 import compression from 'compression';
-import { translationMiddleware } from './handlers/utils/core/translation';
+import { i18nMiddleware, initI18n } from './services/i18n';
+import { templateConfigMiddleware } from './handlers/templateConfig';
 import { getSessionStore } from './handlers/sessionStore';
 import { settingsLoader } from './handlers/settingsLoader';
 import { loadAddons, setAppInstance } from './handlers/addonHandler';
@@ -28,6 +29,17 @@ import { reenqueueQueuedInstalls } from './handlers/installQueue';
 import crypto from 'crypto';
 import helmet from 'helmet';
 import { createRedisRateLimit } from './handlers/utils/security/redisRateLimit';
+import {
+  HSTS_MAX_AGE_S,
+  SECURITY_CACHE_REFRESH_MS,
+  RATE_LIMIT_WINDOW_MS,
+  GLOBAL_RATE_LIMIT_MAX,
+  SESSION_MAX_AGE_MS,
+  JSON_BODY_LIMIT,
+  URLENCODED_LIMIT,
+  RAW_BODY_LIMIT,
+  PRISMA_DISCONNECT_TIMEOUT_MS,
+} from './config/defaults';
 import icon from './utils/icon';
 import { getClientIp } from './utils/ip';
 import csrfProtection, {
@@ -42,6 +54,7 @@ import {
 } from './handlers/errorPages';
 import { logSystemError } from './services/systemLogService';
 
+import fs from 'fs';
 import { getConfig } from './config';
 import { installRenderResolver } from './handlers/renderResolver';
 import { validationErrorBoundary } from './utils/validation';
@@ -76,19 +89,24 @@ const airlinkCodename = config.meta.codename;
 // ── Startup banner ───────────────────────────────────────────────────────────
 drawBanner('Airlink Panel', airlinkVersion, airlinkCodename);
 
-// Trust proxy when the panel is behind a reverse proxy (Nginx, Caddy, etc).
-// Reads from DB at startup — affects req.ip used by rate limiting and IP banning.
-// We set this before any middleware so the correct client IP flows through.
-(async () => {
-  try {
-    const s = await getSettings();
-    if (s?.behindReverseProxy) {
-      app.set('trust proxy', 1);
+// Trust proxy — when behind Nginx/Caddy/Cloudflare, trust forwarded headers
+// so req.ip reflects the real client IP. Configurable via TRUST_PROXY env or
+// the admin "behind reverse proxy" toggle (DB). Env takes precedence.
+if (panelConfig.trustProxy) {
+  app.set('trust proxy', 1);
+} else {
+  // Fall back to DB setting (async, after startup)
+  (async () => {
+    try {
+      const s = await getSettings();
+      if (s?.behindReverseProxy) {
+        app.set('trust proxy', 1);
+      }
+    } catch {
+      // DB not ready yet — leave default (no trust proxy)
     }
-  } catch {
-    // DB not ready yet — leave default (no trust proxy)
-  }
-})();
+  })();
+}
 
 // Load websocket
 const expressWsInstance = expressWs(app);
@@ -109,7 +127,26 @@ app.use(
 );
 
 // Vendor — serve node_modules directly at /vendor/
-app.use('/vendor', express.static(path.join(__dirname, '../node_modules')));
+// Force correct MIME types for JS files to prevent "text/html" mismatches
+// when express.static falls through (missing files, directory index, etc).
+app.use(
+  '/vendor',
+  express.static(path.join(__dirname, '../node_modules'), {
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.js') || filePath.endsWith('.mjs')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      } else if (filePath.endsWith('.cjs')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+      } else if (filePath.endsWith('.json')) {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      }
+      // Prevent browsers from MIME-sniffing JS as HTML
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+    },
+  }),
+);
 
 // Fonts — Inter via @fontsource
 app.use(
@@ -164,6 +201,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // Helmet — explicit config for precise header control across HTTP and HTTPS.
+// CSP_ENABLED env var overrides the default (production-only) behavior.
 app.use((req: Request, res: Response, next: NextFunction) => {
   const nonce = res.locals.nonce as string;
 
@@ -171,28 +209,38 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     noSniff: true,
     frameguard: { action: 'deny' },
     hsts: isHttps
-      ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+      ? { maxAge: HSTS_MAX_AGE_S, includeSubDomains: true, preload: true }
       : false,
     crossOriginOpenerPolicy: isHttps ? { policy: 'same-origin' } : false,
     originAgentCluster: isHttps ? undefined : false,
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     permittedCrossDomainPolicies: { permittedPolicies: 'none' },
 
-    contentSecurityPolicy: isProduction
+    contentSecurityPolicy: panelConfig.cspEnabled
       ? {
         directives: {
           defaultSrc: ['\'self\''],
-          scriptSrc: ['\'self\'', `'nonce-${nonce}'`, '\'strict-dynamic\''],
+          scriptSrc: [
+            '\'self\'',
+            `'nonce-${nonce}'`,
+            '\'strict-dynamic\'',
+            // Alpine.js uses new Function() internally for directive compilation
+            '\'unsafe-eval\'',
+          ],
           scriptSrcAttr: ['\'unsafe-inline\''],
           styleSrc: ['\'self\'', '\'unsafe-inline\''],
           fontSrc: ['\'self\'', 'data:'],
           imgSrc: ['\'self\'', 'data:', 'blob:', 'https:'],
-          connectSrc: ['\'self\'', ...(isHttps ? ['wss:'] : ['ws:', 'wss:'])],
+          connectSrc: [
+            '\'self\'',
+            ...(isHttps ? ['wss:'] : ['ws:', 'wss:']),
+            ...(panelConfig.allowedOrigins || []),
+          ],
           frameAncestors: ['\'none\''],
           objectSrc: ['\'none\''],
           baseUri: ['\'self\''],
           formAction: ['\'self\''],
-          upgradeInsecureRequests: [],
+          ...(isHttps ? { upgradeInsecureRequests: [] } : {}),
         },
       }
       : false,
@@ -201,7 +249,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // Initial load + refresh every 30 seconds
 refreshSecurityCache();
-setInterval(refreshSecurityCache, 30_000);
+setInterval(refreshSecurityCache, SECURITY_CACHE_REFRESH_MS);
 
 // IP ban middleware — uses cached list, no per-request DB hit
 app.use((req, res, next) => {
@@ -211,7 +259,7 @@ app.use((req, res, next) => {
       req,
       res,
       403,
-      'Your IP address is blocked from this panel.',
+      'You\'re blocked so shoo you are not welcome here...',
     );
     return;
   }
@@ -221,17 +269,20 @@ app.use((req, res, next) => {
 // Rate limiter — Redis-backed sliding window for distributed/multi-instance support
 app.use(
   createRedisRateLimit({
-    windowMs: 60 * 1000,
-    max: 500,
+    windowMs: panelConfig.rateLimitWindowMs || RATE_LIMIT_WINDOW_MS,
+    max: panelConfig.rateLimitMax || GLOBAL_RATE_LIMIT_MAX,
     keyPrefix: 'rl:global',
-    skip: () => !getSecurityCache().rateLimitEnabled,
+    skip: () =>
+      panelConfig.rateLimitMax === 0 || !getSecurityCache().rateLimitEnabled,
     standardHeaders: true,
     legacyHeaders: false,
   }),
 );
 
 // Load session with Redis store
-const useSecureCookie = panelConfig.isHttps;
+// secure: true when HTTPS is detected or when COOKIE_SECURE env is set
+// domain: set via COOKIE_DOMAIN for cross-subdomain sessions
+const useSecureCookie = panelConfig.cookieSecure;
 const sessionSecret = panelConfig.sessionSecret;
 
 app.use(
@@ -244,39 +295,46 @@ app.use(
       secure: useSecureCookie,
       httpOnly: true,
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: panelConfig.sessionMaxAgeMs || SESSION_MAX_AGE_MS,
+      ...(panelConfig.cookieDomain ? { domain: panelConfig.cookieDomain } : {}),
     },
   }),
 );
 
 app.use(
   express.json({
-    limit: '512kb',
+    limit: JSON_BODY_LIMIT,
   }),
 );
 app.use(
   express.urlencoded({
     extended: false,
-    limit: '512kb',
-    parameterLimit: 1000,
+    limit: JSON_BODY_LIMIT,
+    parameterLimit: URLENCODED_LIMIT,
   }),
 );
 app.use(
   express.raw({
-    limit: '1mb',
+    limit: RAW_BODY_LIMIT,
   }),
 );
 app.use(
   express.text({
-    limit: '512kb',
+    limit: JSON_BODY_LIMIT,
   }),
 );
 
 // Load cookies
 app.use(cookieParser());
 
-// Load translation
-app.use(translationMiddleware);
+// Initialize i18n — pre-load all language bundles at startup
+initI18n();
+
+// Load translation — attaches req.t(), req.tn(), res.locals.t to every request
+app.use(i18nMiddleware);
+
+// Config constants for EJS templates
+app.use(templateConfigMiddleware);
 
 // Apply CSRF protection
 app.use((req, res, next) => {
@@ -337,12 +395,61 @@ app.use(
 // Catch errors from global middleware registered before modules.
 app.use(errorPageHandler);
 
+// Seed default roles if the Role table is empty (fresh DB after prisma db push).
+async function seedDefaultRoles() {
+  const count = await prisma.role.count();
+  if (count > 0) {
+    return;
+  }
+  const now = new Date();
+  const defaults = [
+    {
+      name: 'owner',
+      displayName: 'Owner',
+      description: 'Full system owner',
+      isAdmin: true,
+      isSystem: true,
+      sortOrder: 0,
+      permissions: '[]',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      name: 'admin',
+      displayName: 'Admin',
+      description: 'Administrator',
+      isAdmin: true,
+      isSystem: true,
+      sortOrder: 1,
+      permissions: '[]',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      name: 'user',
+      displayName: 'User',
+      description: 'Standard user',
+      isAdmin: false,
+      isSystem: true,
+      sortOrder: 2,
+      permissions: '[]',
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+  await prisma.role.createMany({ data: defaults });
+  logger.info('Default roles seeded');
+}
+
 // Load modules, plugins, database and start the webserver
 (async () => {
   try {
     // ── Initialize with ora-style progress ─────────────────────────────────
     await databaseLoader();
     logger.info('Database connected');
+
+    // Seed default roles if missing (needed for fresh DBs after prisma db push).
+    await seedDefaultRoles();
 
     await settingsLoader();
     logger.info('Settings loaded');
@@ -383,18 +490,40 @@ app.use(errorPageHandler);
       });
     });
 
-    const server = app.listen(port, () => {
-      logger.success(`Listening on port ${port}`);
-      startPlayerStatsCollection();
-      startScheduler();
-      reenqueueQueuedInstalls();
-      initEggCatalogue().catch((err) =>
-        logger.warn(`Store catalogue init failed: ${err?.message || err}`),
-      );
-      import('./handlers/realtime/nodeStatsWs').then((m) =>
-        m.attachNodeStatsWs(server),
-      );
-    });
+    const server = (() => {
+      // Direct TLS — when cert/key are provided, serve HTTPS without a reverse proxy
+      if (panelConfig.tlsCertPath && panelConfig.tlsKeyPath) {
+        try {
+          const https = require('node:https') as typeof import('node:https');
+          const options = {
+            cert: fs.readFileSync(panelConfig.tlsCertPath),
+            key: fs.readFileSync(panelConfig.tlsKeyPath),
+          };
+          const srv = https.createServer(options, app);
+          srv.listen(port, () => {
+            logger.success(`Listening on port ${port} (HTTPS)`);
+          });
+          return srv;
+        } catch (err) {
+          logger.warn(
+            `TLS cert/key failed to load (${err instanceof Error ? err.message : err}), falling back to HTTP`,
+          );
+        }
+      }
+      return app.listen(port, () => {
+        logger.success(`Listening on port ${port}`);
+      });
+    })();
+
+    startPlayerStatsCollection();
+    startScheduler();
+    reenqueueQueuedInstalls();
+    initEggCatalogue().catch((err) =>
+      logger.warn(`Store catalogue init failed: ${err?.message || err}`),
+    );
+    import('./handlers/realtime/nodeStatsWs').then((m) =>
+      m.attachNodeStatsWs(server),
+    );
 
     let shuttingDown = false;
     const connections = new Set<Socket>();
@@ -438,7 +567,7 @@ app.use(errorPageHandler);
           new Promise((_, reject) =>
             setTimeout(
               () => reject(new Error('prisma disconnect timeout')),
-              5_000,
+              PRISMA_DISCONNECT_TIMEOUT_MS,
             ),
           ),
         ]);

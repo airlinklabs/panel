@@ -1,4 +1,5 @@
 import logger from './logger';
+import { logT } from '../services/i18n';
 
 class Queueer {
   private queue: (() => Promise<void>)[] = [];
@@ -25,7 +26,7 @@ class Queueer {
         await task();
       }
     } catch (error) {
-      logger.error('Error processing queue task:', error);
+      logger.error(logT('log.queueTaskError'), error);
     } finally {
       // Process next task
       this.processQueue();

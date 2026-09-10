@@ -21,6 +21,7 @@ import {
   daemonRequest,
   daemonScheme,
 } from '../../handlers/utils/core/daemonRequest';
+import { CONSOLE_TIMEOUT_MS } from '../../config/daemonTimeouts';
 
 async function wsScheme(): Promise<'ws' | 'wss'> {
   return (await daemonScheme()) === 'https' ? 'wss' : 'ws';
@@ -220,7 +221,7 @@ async function proxyConsole(
             method: 'POST',
             path: '/container/command',
             body: { id: serverId, command },
-            timeout: 10_000,
+            timeout: CONSOLE_TIMEOUT_MS,
           });
         } catch (error) {
           logger.error(`Failed to send console command to ${serverId}:`, error);

@@ -4,8 +4,8 @@ import { daemonRequest } from './utils/core/daemonRequest';
 import { queueer } from './queueer';
 import { getPrimaryExternalPort } from './utils/server/ports';
 import { emitRealtime, serverEvent } from './realtime/events';
-
-const INSTALL_TIMEOUT_MS = 600_000;
+import { DAEMON_TIMEOUT_REINSTALL_MS } from '../config/daemonTimeouts';
+import { logT } from '../services/i18n';
 
 export async function processQueuedServerInstalls(): Promise<void> {
   const servers = await prisma.server.findMany({
@@ -56,7 +56,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
       serverEnv.push({ env: 'SERVER_MEMORY', value: String(server.Memory) });
       serverEnv.push({ env: 'SERVER_CPU', value: String(server.Cpu) });
     } catch (err) {
-      logger.error(`Error parsing Variables for server ${server.id}:`, err);
+      logger.error(logT('log.errorParsingVariables', { id: server.id }), err);
       await prisma.server.update({
         where: { id: server.id },
         data: { Queued: false },
@@ -90,7 +90,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
     try {
       scripts = JSON.parse(server.image.scripts);
     } catch (err) {
-      logger.error(`Error parsing scripts for server ${server.id}:`, err);
+      logger.error(logT('log.errorParsingScripts', { id: server.id }), err);
       await prisma.server.update({
         where: { id: server.id },
         data: { Queued: false },
@@ -118,7 +118,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
             entrypoint: inst.entrypoint || 'bash',
             env,
           },
-          timeout: INSTALL_TIMEOUT_MS,
+          timeout: DAEMON_TIMEOUT_REINSTALL_MS,
         });
       } else if (Array.isArray(scripts.install)) {
         let dockerImageValue: string | undefined;
@@ -148,7 +148,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
               }),
             ),
           },
-          timeout: INSTALL_TIMEOUT_MS,
+          timeout: DAEMON_TIMEOUT_REINSTALL_MS,
         });
       }
       await prisma.server.update({
@@ -164,7 +164,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
     } catch (err) {
       // Clear state flags so the server surfaces as failed instead of being stranded as "installing".
       logger.error(
-        `Error sending install request for server ${server.id}:`,
+        logT('log.errorSendingInstallRequest', { id: server.id }),
         err,
       );
       await prisma.server.update({
@@ -189,13 +189,11 @@ export function reenqueueQueuedInstalls(): void {
     try {
       const pending = await prisma.server.count({ where: { Queued: true } });
       if (pending > 0) {
-        logger.info(
-          `Recovering ${pending} queued installation(s) after restart`,
-        );
+        logger.info(logT('log.recoveringQueuedInstalls', { count: pending }));
         await processQueuedServerInstalls();
       }
     } catch (error) {
-      logger.error('Error recovering queued installs on boot:', error);
+      logger.error(logT('log.errorRecoveringInstalls'), error);
     }
   });
 }

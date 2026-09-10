@@ -55,9 +55,9 @@ const COMPONENT_REGISTRY: Record<
   template: (r, v) => path.join(r, `views/${v}/components/template`),
   modal: (r, v) => path.join(r, `views/${v}/components/modal`),
   toast: (r, v) => path.join(r, `views/${v}/components/toast`),
-  serverHeader: (r, v) => path.join(r, `views/${v}/components/serverHeader`),
+  serverHeader: (r, v) => path.join(r, `views/${v}/components/server-header`),
   serverTemplate: (r, v) =>
-    path.join(r, `views/${v}/components/serverTemplate`),
+    path.join(r, `views/${v}/components/server-template`),
   settingsTemplate: (r, v) =>
     path.join(r, `views/${v}/components/settingsTemplate`),
   tabComponent: (r, v) => path.join(r, `views/${v}/components/tabComponent`),
@@ -65,12 +65,12 @@ const COMPONENT_REGISTRY: Record<
   sftp: (r, v) => path.join(r, `views/${v}/components/sftp`),
   csrf: (r, v) => path.join(r, `views/${v}/components/csrf`),
   installHeader: (r, v) => path.join(r, `views/${v}/components/installHeader`),
-  imageViewer: (r, v) => path.join(r, `views/${v}/components/imageViewer`),
+  imageViewer: (r, v) => path.join(r, `views/${v}/components/image-viewer`),
   loadingState: (r, v) => path.join(r, `views/${v}/components/loading-state`),
-  loadingPopup: (r, v) => path.join(r, `views/${v}/components/loadingPopup`),
+  loadingPopup: (r, v) => path.join(r, `views/${v}/components/loading-popup`),
   pageTitle: (r, v) => path.join(r, `views/${v}/components/pageTitle`),
   serverFeatures: (r, v) =>
-    path.join(r, `views/${v}/components/serverFeatures`),
+    path.join(r, `views/${v}/components/server-features`),
   uiButton: (r, v) => path.join(r, `views/${v}/components/ui/button`),
 };
 

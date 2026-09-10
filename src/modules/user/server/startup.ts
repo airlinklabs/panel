@@ -13,7 +13,7 @@ import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   containerStatusSchema,
   parseDaemonResponse,
-} from '../../../platform/daemon/dtos';
+} from '../../../types/daemon';
 import {
   type ErrorMessage,
   type ServerVariable,

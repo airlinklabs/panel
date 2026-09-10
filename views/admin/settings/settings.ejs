@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Settings' }) %>
+<%- include('../../components/header', { title: t('adminSettingsTitle') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -7,16 +7,16 @@
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12" x-data="adminSettings()">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Settings' }
+        { label: t('admin') },
+        { label: t('settings') }
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title">Settings</h1>
-          <p class="al-page-desc">Manage your panel configuration.</p>
+          <h1 class="al-page-title"><%= t('adminSettingsTitle') %></h1>
+          <p class="al-page-desc"><%= t('adminSettingsText') %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <span id="autosave-indicator" class="text-xs font-medium transition-opacity duration-300 opacity-0" style="color:var(--theme-success);">Saved</span>
+          <span id="autosave-indicator" class="text-xs font-medium transition-opacity duration-300 opacity-0" style="color:var(--theme-success);"><%= t('settingsSaved') %></span>
         </div>
       </div>
 
@@ -24,10 +24,10 @@
 
         <!-- Tab bar -->
         <div role="tablist" class="flex gap-1 mb-6">
-          <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('palette', { class: 'size-4', strokeWidth: 1.5 }) %>Appearance</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %>Servers</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %>Security</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="panel-features" id="tab-features" data-tab="features" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('toggle-left', { class: 'size-4', strokeWidth: 1.5 }) %>Features</button>
+          <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('palette', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('theme') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('server', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('navServers') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('shield', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('securityTitle') %></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-features" id="tab-features" data-tab="features" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition inline-flex items-center gap-2"><%- icon('toggle-left', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('features') %></button>
         </div>
 
         <!-- ── APPEARANCE ──────────────────────────────────────────────────── -->
@@ -36,50 +36,50 @@
 
           <!-- Branding -->
           <div class="al-card">
-            <h2 class="al-card-header">Branding</h2>
+            <h2 class="al-card-header"><%= t('siteTitle') %></h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 p-4">
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Site title</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('siteTitleLabel') %></label>
                 <input type="text" name="title" value="<%= settings.title %>"
                   class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Logo</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('logoLabel') %></label>
                 <div class="flex items-center gap-2">
-                  <button type="button" @click="openUploadModal({ title: 'Upload logo', accept: 'image/*', onFile: function(f) { document.getElementById('logo-input')._selectedFile = f; document.getElementById('logo-label-name').textContent = f.name; document.getElementById('logo-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
-                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                  <button type="button" @click="openUploadModal({ title: '<%= t('uploadLogo') %>', accept: 'image/*', onFile: function(f) { document.getElementById('logo-input')._selectedFile = f; document.getElementById('logo-label-name').textContent = f.name; document.getElementById('logo-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('chooseFile') %>
                   </button>
-                  <span id="logo-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
-                  <button type="button" id="logo-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('logo-input')._selectedFile=null;document.getElementById('logo-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                  <span id="logo-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);"><%= t('noFileChosen') %></span>
+                  <button type="button" id="logo-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('logo-input')._selectedFile=null;document.getElementById('logo-label-name').textContent='<%= t('noFileChosen') %>';this.classList.add('hidden')">
                     <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
                   </button>
                 </div>
                 <input type="file" id="logo-input" name="logo" accept="image/*" class="hidden">
                 <% if (settings.logo) { %>
-                <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 mt-2 object-contain">
+                <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="<%= t('logoAlt') %>" class="h-8 mt-2 object-contain">
                 <% } %>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Favicon</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('faviconLabel') %></label>
                 <div class="flex items-center gap-2">
-                  <button type="button" @click="openUploadModal({ title: 'Upload favicon', accept: '.ico,.png,.jpg,.jpeg', onFile: function(f) { document.getElementById('favicon-input')._selectedFile = f; document.getElementById('favicon-label-name').textContent = f.name; document.getElementById('favicon-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
-                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                  <button type="button" @click="openUploadModal({ title: '<%= t('uploadFavicon') %>', accept: '.ico,.png,.jpg,.jpeg', onFile: function(f) { document.getElementById('favicon-input')._selectedFile = f; document.getElementById('favicon-label-name').textContent = f.name; document.getElementById('favicon-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('chooseFile') %>
                   </button>
-                  <span id="favicon-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
-                  <button type="button" id="favicon-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('favicon-input')._selectedFile=null;document.getElementById('favicon-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                  <span id="favicon-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);"><%= t('noFileChosen') %></span>
+                  <button type="button" id="favicon-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('favicon-input')._selectedFile=null;document.getElementById('favicon-label-name').textContent='<%= t('noFileChosen') %>';this.classList.add('hidden')">
                     <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
                   </button>
                 </div>
                 <input type="file" id="favicon-input" name="favicon" accept=".ico,.png,.jpg,.jpeg" class="hidden">
-                <p class="text-xs mt-1" style="color:var(--theme-text-muted)">PNG or JPG auto-converted to .ico</p>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('faviconHint') %></p>
               </div>
             </div>
           </div>
 
           <!-- Themes -->
           <div class="al-card">
-            <h2 class="al-card-header">Theme</h2>
-            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">Select a theme for the panel. All users will see this theme.</p>
+            <h2 class="al-card-header"><%= t('theme') %></h2>
+            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)"><%= t('themeDesc') %></p>
             <div class="p-4">
               <div class="space-y-2">
                 <% const themeVal = settings.theme || 'dark'; %>
@@ -88,16 +88,16 @@
                   <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= themeVal === 'light' ? 'al-radio-ring-active' : '' %>" style="<%= themeVal !== 'light' ? 'border-color:var(--theme-border)' : '' %>">
                     <% if (themeVal === 'light') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                   </span>
-                  <span class="text-sm flex-1" style="color:var(--theme-text)">Light Mode</span>
-                  <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
+                  <p class="text-sm flex-1" style="color:var(--theme-text)"><%= t('lightMode') %></p>
+                  <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= t('builtIn') %></span>
                 </label>
                 <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= themeVal === 'dark' ? 'al-radio-active' : 'hover:border-[var(--theme-border)]' %>" style="<%= themeVal !== 'dark' ? 'border-color:var(--theme-border)' : '' %>">
                   <input type="radio" name="theme" value="dark" class="sr-only" <%= themeVal === 'dark' ? 'checked' : '' %>>
                   <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= themeVal === 'dark' ? 'al-radio-ring-active' : '' %>" style="<%= themeVal !== 'dark' ? 'border-color:var(--theme-border)' : '' %>">
                     <% if (themeVal === 'dark') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                   </span>
-                  <span class="text-sm flex-1" style="color:var(--theme-text)">Dark Mode</span>
-                  <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
+                  <p class="text-sm flex-1" style="color:var(--theme-text)"><%= t('darkMode') %></p>
+                  <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= t('builtIn') %></span>
                 </label>
                 <% allThemes.filter(t => t.name !== 'default' && t.name !== 'default-light' && t.name !== 'default-dark').forEach(function(theme) { %>
                 <% const tv = theme.path || theme.lightPath; %>
@@ -110,24 +110,24 @@
                     <span class="text-sm capitalize block" style="color:var(--theme-text)"><%= theme.name.replace(/-/g,' ') %></span>
                     <% if (theme.author) { %><span class="text-xs" style="color:var(--theme-text-muted)">by <%= theme.author %></span><% } %>
                   </div>
-                  <span class="text-xs shrink-0" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+                  <span class="text-xs shrink-0" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= theme.builtin ? t('builtIn') : t('custom') %></span>
                 </label>
                 <% }); %>
               </div>
             </div>
             <div class="p-5" style="border-top:1px solid var(--theme-border)">
               <div class="flex items-center justify-between mb-2">
-                <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Upload custom theme</p>
-                <a href="/admin/settings/example-theme" class="text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)">Download example</a>
+                <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('uploadCustomTheme') %></p>
+                <a href="/admin/settings/example-theme" class="text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)"><%= t('downloadExample') %></a>
               </div>
-              <p class="text-xs mb-3" style="color:var(--theme-text-muted)">A .zip containing info.json, light.css, dark.css.</p>
-              <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Upload theme file</label>
+              <p class="text-xs mb-3" style="color:var(--theme-text-muted)"><%= t('themeFileHint') %></p>
+              <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('uploadThemeFile') %></label>
               <div class="flex items-center gap-2">
-                <button type="button" @click="openUploadModal({ title: 'Upload theme', accept: '.zip', onFile: function(f) { document.getElementById('theme-file-input')._selectedFile = f; document.getElementById('theme-label-name').textContent = f.name; document.getElementById('theme-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
-                  <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                <button type="button" @click="openUploadModal({ title: '<%= t('uploadCustomTheme') %>', accept: '.zip', onFile: function(f) { document.getElementById('theme-file-input')._selectedFile = f; document.getElementById('theme-label-name').textContent = f.name; document.getElementById('theme-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                  <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('chooseFile') %>
                 </button>
-                <span id="theme-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
-                <button type="button" id="theme-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('theme-file-input')._selectedFile=null;document.getElementById('theme-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                <span id="theme-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);"><%= t('noFileChosen') %></span>
+                <button type="button" id="theme-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('theme-file-input')._selectedFile=null;document.getElementById('theme-label-name').textContent='<%= t('noFileChosen') %>';this.classList.add('hidden')">
                   <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
                 </button>
               </div>
@@ -137,47 +137,47 @@
 
           <!-- Auth page wallpapers -->
           <div class="al-card">
-            <h2 class="al-card-header">Auth page wallpapers</h2>
-            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">Background image on the login and register pages. Upload a file or paste a URL. Leave both blank to use the default.</p>
+            <h2 class="al-card-header"><%= t('authPageWallpapers') %></h2>
+            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)"><%= t('authWallpaperDesc') %></p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 p-4">
               <div>
-                <p class="text-sm font-medium mb-3" style="color:var(--theme-text-strong)">Login page</p>
+                <p class="text-sm font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('login') %></p>
                 <% if (settings.loginWallpaper) { %>
-                 <img src="<%= settings.loginWallpaper %>" alt="Login page wallpaper preview" class="h-20 w-full object-cover rounded-xl mb-3" style="border-color:var(--theme-border)">
+                 <img src="<%= settings.loginWallpaper %>" alt="<%= t('loginWallpaperPreviewAlt') %>" class="h-20 w-full object-cover rounded-xl mb-3" style="border-color:var(--theme-border)">
                 <% } %>
-                <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Upload file</label>
+                <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('uploadFile') %></label>
                 <div class="flex items-center gap-2 mb-2">
-                  <button type="button" @click="openUploadModal({ title: 'Upload login wallpaper', accept: 'image/*', onFile: function(f) { document.getElementById('login-wallpaper-file')._selectedFile = f; document.getElementById('login-wp-label-name').textContent = f.name; document.getElementById('login-wp-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
-                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                  <button type="button" @click="openUploadModal({ title: '<%= t('login') %>', accept: 'image/*', onFile: function(f) { document.getElementById('login-wallpaper-file')._selectedFile = f; document.getElementById('login-wp-label-name').textContent = f.name; document.getElementById('login-wp-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('chooseFile') %>
                   </button>
-                  <span id="login-wp-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
-                  <button type="button" id="login-wp-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('login-wallpaper-file')._selectedFile=null;document.getElementById('login-wp-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                  <span id="login-wp-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);"><%= t('noFileChosen') %></span>
+                  <button type="button" id="login-wp-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('login-wallpaper-file')._selectedFile=null;document.getElementById('login-wp-label-name').textContent='<%= t('noFileChosen') %>';this.classList.add('hidden')">
                     <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
                   </button>
                 </div>
                 <input type="file" id="login-wallpaper-file" name="loginWallpaperFile" accept="image/*" class="hidden">
-                <label for="login-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Or paste a URL</label>
+                <label for="login-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('orPasteUrl') %></label>
                 <input type="text" id="login-wallpaper-url" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
                   class="al-input">
               </div>
               <div>
-                <p class="text-sm font-medium mb-3" style="color:var(--theme-text-strong)">Register page</p>
+                <p class="text-sm font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('register') %></p>
                 <% if (settings.registerWallpaper) { %>
-                 <img src="<%= settings.registerWallpaper %>" alt="Register page wallpaper preview" class="h-20 w-full object-cover rounded-xl mb-3" style="border-color:var(--theme-border)">
+                 <img src="<%= settings.registerWallpaper %>" alt="<%= t('registerWallpaperPreviewAlt') %>" class="h-20 w-full object-cover rounded-xl mb-3" style="border-color:var(--theme-border)">
                 <% } %>
-                <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Upload file</label>
+                <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('uploadFile') %></label>
                 <div class="flex items-center gap-2 mb-2">
-                  <button type="button" @click="openUploadModal({ title: 'Upload register wallpaper', accept: 'image/*', onFile: function(f) { document.getElementById('register-wallpaper-file')._selectedFile = f; document.getElementById('register-wp-label-name').textContent = f.name; document.getElementById('register-wp-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
-                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                  <button type="button" @click="openUploadModal({ title: '<%= t('register') %>', accept: 'image/*', onFile: function(f) { document.getElementById('register-wallpaper-file')._selectedFile = f; document.getElementById('register-wp-label-name').textContent = f.name; document.getElementById('register-wp-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                    <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('chooseFile') %>
                   </button>
-                  <span id="register-wp-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
-                  <button type="button" id="register-wp-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('register-wallpaper-file')._selectedFile=null;document.getElementById('register-wp-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                  <span id="register-wp-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);"><%= t('noFileChosen') %></span>
+                  <button type="button" id="register-wp-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('register-wallpaper-file')._selectedFile=null;document.getElementById('register-wp-label-name').textContent='<%= t('noFileChosen') %>';this.classList.add('hidden')">
                     <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
                   </button>
                 </div>
                 <input type="file" id="register-wallpaper-file" name="registerWallpaperFile" accept="image/*" class="hidden">
-                <label for="register-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Or paste a URL</label>
+                <label for="register-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('orPasteUrl') %></label>
                 <input type="text" id="register-wallpaper-url" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
                   class="al-input">
@@ -187,24 +187,24 @@
 
           <!-- Panel wallpaper -->
           <div class="al-card">
-            <h2 class="al-card-header">Panel wallpaper</h2>
-            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">Background image behind the panel content. Upload a file or paste a URL. Leave both blank to use the plain theme background. The Overview and Credits pages keep their own backgrounds.</p>
+            <h2 class="al-card-header"><%= t('panelWallpaper') %></h2>
+            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)"><%= t('panelWallpaperDesc') %></p>
             <div class="p-4">
               <% if (settings.panelWallpaper) { %>
-               <img src="<%= settings.panelWallpaper %>" alt="Panel wallpaper preview" class="h-20 w-full object-cover rounded-xl mb-3" style="border-color:var(--theme-border)">
+               <img src="<%= settings.panelWallpaper %>" alt="<%= t('panelWallpaperPreviewAlt') %>" class="h-20 w-full object-cover rounded-xl mb-3" style="border-color:var(--theme-border)">
               <% } %>
-              <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Upload file</label>
+              <label class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('uploadFile') %></label>
               <div class="flex items-center gap-2 mb-2">
-                <button type="button" @click="openUploadModal({ title: 'Upload panel wallpaper', accept: 'image/*', onFile: function(f) { document.getElementById('panel-wallpaper-file')._selectedFile = f; document.getElementById('panel-wp-label-name').textContent = f.name; document.getElementById('panel-wp-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
-                  <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %>Choose file
+                <button type="button" @click="openUploadModal({ title: '<%= t('panelWallpaper') %>', accept: 'image/*', onFile: function(f) { document.getElementById('panel-wallpaper-file')._selectedFile = f; document.getElementById('panel-wp-label-name').textContent = f.name; document.getElementById('panel-wp-clear').classList.remove('hidden'); }})" class="al-btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
+                  <%- icon('upload', { class: 'size-3.5', strokeWidth: 1.5 }) %><%= t('chooseFile') %>
                 </button>
-                <span id="panel-wp-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);">No file chosen</span>
-                <button type="button" id="panel-wp-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('panel-wallpaper-file')._selectedFile=null;document.getElementById('panel-wp-label-name').textContent='No file chosen';this.classList.add('hidden')">
+                <span id="panel-wp-label-name" class="text-xs truncate max-w-[120px]" style="color:var(--theme-text-muted);"><%= t('noFileChosen') %></span>
+                <button type="button" id="panel-wp-clear" class="hidden w-6 h-6 rounded flex items-center justify-center hover:opacity-75" style="color:var(--theme-text-muted);" @click="document.getElementById('panel-wallpaper-file')._selectedFile=null;document.getElementById('panel-wp-label-name').textContent='<%= t('noFileChosen') %>';this.classList.add('hidden')">
                   <%- icon('x', { class: 'size-3', strokeWidth: 2 }) %>
                 </button>
               </div>
               <input type="file" id="panel-wallpaper-file" name="panelWallpaperFile" accept="image/*" class="hidden">
-              <label for="panel-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)">Or paste a URL</label>
+              <label for="panel-wallpaper-url" class="block text-xs font-medium mb-1.5" style="color:var(--theme-text-muted)"><%= t('orPasteUrl') %></label>
               <input type="text" id="panel-wallpaper-url" name="panelWallpaperUrl" placeholder="https://…"
                 value="<%= (settings.panelWallpaper && settings.panelWallpaper.startsWith('http')) ? settings.panelWallpaper : '' %>"
                 class="al-input">
@@ -218,15 +218,15 @@
         <div id="panel-servers" role="tabpanel" aria-labelledby="tab-servers" data-tab-panel="servers" class="tab-panel space-y-5" hidden>
 
           <div class="al-card">
-            <h2 class="al-card-header">User permissions</h2>
+            <h2 class="al-card-header"><%= t('navServers') %></h2>
             <div class="p-4 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Allow users to create servers</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Users can create their own servers up to their limit.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('allowCreateServers') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('allowCreateServersDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" aria-label="Allow users to create servers" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
+                  <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" aria-label="<%= t('allowCreateServers') %>" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -234,11 +234,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Allow users to delete servers</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Users can delete servers they own.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('allowDeleteServers') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('allowDeleteServersDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" aria-label="Allow users to delete servers" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
+                  <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" aria-label="<%= t('allowDeleteServers') %>" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -246,73 +246,44 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Allow users to submit images</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Users can submit custom images for admin approval. Approved images appear in the create-server flow.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('allowSubmitImages') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('allowSubmitImagesDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="allowUserCreateImages" class="sr-only peer" aria-label="Allow users to submit images" <%= settings.allowUserCreateImages ? 'checked' : '' %>>
+                  <input type="checkbox" id="allowUserCreateImages" class="sr-only peer" aria-label="<%= t('allowSubmitImages') %>" <%= settings.allowUserCreateImages ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
-              </div>
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Show onboarding tutorial</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">New users get a short tutorial after their first login.</p>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="onboardingEnabled" class="sr-only peer" aria-label="Show onboarding tutorial" <%= settings.onboardingEnabled ? 'checked' : '' %>>
-                  <div class="al-toggle-track">
-                    <div class="al-toggle-dot"></div>
-                  </div>
-                </label>
-              </div>
-
-              <div id="onboardingStepsEditor" class="mt-4 pt-4" style="border-top:1px solid var(--theme-border)">
-                <div class="flex items-center justify-between mb-3">
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Onboarding steps</p>
-                  <div class="flex gap-2">
-                    <button type="button" id="onboardingPreviewBtn" class="al-btn-ghost px-3 py-1.5 text-xs font-medium" onclick="previewOnboarding()">
-                      <%- icon('eye', { class: 'size-3.5', strokeWidth: 1.5 }) %> Preview
-                    </button>
-                    <button type="button" id="addOnboardingStep" class="al-btn-ghost px-3 py-1.5 text-xs font-medium" onclick="addOnboardingStep()">
-                      <%- icon('plus', { class: 'size-3.5', strokeWidth: 1.5 }) %> Add step
-                    </button>
-                  </div>
-                </div>
-                <p class="text-xs mb-3" style="color:var(--theme-text-muted)">Define the steps shown to new users. Each step has a title, description, icon (lucide name), and optional CTA link.</p>
-                <div id="onboardingStepList" class="space-y-3"></div>
-                <textarea id="onboardingStepsJson" class="hidden" rows="4"><%= settings.onboardingSteps || '[]' %></textarea>
               </div>
             </div>
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">File uploads</h2>
+            <h2 class="al-card-header"><%= t('uploadLimit') %></h2>
             <div class="p-4">
-              <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Upload limit <span class="font-normal" style="color:var(--theme-text-muted)">(MB)</span></label>
+              <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('uploadLimitLabel') %> <span class="font-normal" style="color:var(--theme-text-muted)">(MB)</span></label>
               <div class="relative max-w-xs">
                 <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
                   class="al-input pr-12">
                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style="color:var(--theme-text-muted)">MB</span>
               </div>
-              <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Maximum file size users can upload via the file manager.</p>
+              <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('uploadLimitDesc') %></p>
             </div>
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Default limits</h2>
-            <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)">Applied to new users unless overridden per-user.</p>
+            <h2 class="al-card-header"><%= t('defaultLimits') %></h2>
+            <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)"><%= t('defaultLimitsDesc') %></p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 p-4">
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Server limit</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultServerLimit') %></label>
                 <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
                   class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">0 = cannot create.</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('defaultCannotCreate') %></p>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Max memory</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxMemory') %></label>
                 <input type="hidden" id="defaultMaxMemory" value="<%= settings.defaultMaxMemory %>">
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="defaultMaxMemoryDisplay" min="1"
@@ -324,12 +295,12 @@
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Max CPU <span class="font-normal" style="color:var(--theme-text-muted)">(%)</span></label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxCpu') %> <span class="font-normal" style="color:var(--theme-text-muted)">(%)</span></label>
                 <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="50" max="10000"
                   class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Max storage</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxStorage') %></label>
                 <input type="hidden" id="defaultMaxStorage" value="<%= settings.defaultMaxStorage %>">
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="defaultMaxStorageDisplay" min="1"
@@ -341,26 +312,26 @@
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Max databases</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxDatabases') %></label>
                 <input type="number" id="defaultMaxDatabases" value="<%= settings.defaultMaxDatabases %>" min="0" max="100000"
                   class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">0 = unlimited.</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('defaultUnlimited') %></p>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Default overalloc memory (%)</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultOverallocMemory') %></label>
                 <input type="number" id="defaultOverallocateMemory" value="<%= settings.defaultOverallocateMemory %>" min="0" max="10000"
                   class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Default overalloc disk (%)</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultOverallocDisk') %></label>
                 <input type="number" id="defaultOverallocateDisk" value="<%= settings.defaultOverallocateDisk %>" min="0" max="10000"
                   class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Default overalloc CPU (%)</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultOverallocCpu') %></label>
                 <input type="number" id="defaultOverallocateCpu" value="<%= settings.defaultOverallocateCpu %>" min="0" max="10000"
                   class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Applied to new nodes.</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('appliedToNewNodes') %></p>
               </div>
             </div>
           </div>
@@ -372,14 +343,14 @@
 
           <!-- Registration -->
           <div class="al-card">
-            <h2 class="al-card-header">Registration</h2>
+            <h2 class="al-card-header"><%= t('securityTitle') %></h2>
             <div class="p-4 flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Allow public registration</p>
-                <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">When off, only admins can create new accounts.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('allowPublicRegistration') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('allowPublicRegistrationDesc') %></p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="allowRegistration" class="sr-only peer" aria-label="Allow public registration" <%= settings.allowRegistration ? 'checked' : '' %>>
+                <input type="checkbox" id="allowRegistration" class="sr-only peer" aria-label="<%= t('allowPublicRegistration') %>" <%= settings.allowRegistration ? 'checked' : '' %>>
                 <div class="al-toggle-track">
                   <div class="al-toggle-dot"></div>
                 </div>
@@ -391,36 +362,36 @@
           <div class="al-card">
             <h2 class="al-card-header">VirusTotal</h2>
             <div class="p-4">
-              <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">API key</label>
+              <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('virusTotalApiKey') %></label>
               <div class="relative max-w-sm" x-data="{ show: false }">
-                <input :type="show ? 'text' : 'password'" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off"
+                <input :type="show ? 'text' : 'password'" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="<%= t('pasteYourKey') %>" autocomplete="off"
                   class="al-input pr-16 font-mono">
                 <button type="button" @click="show = !show"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)" x-text="show ? 'Hide' : 'Show'">Show</button>
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)" x-text="show ? '<%= t('hide') %>' : '<%= t('show') %>'"><%= t('show') %></button>
               </div>
-              <% if (settings.virusTotalApiKey) { %><p class="mt-1.5 text-xs" style="color:var(--theme-success)">Key is set.</p><% } %>
-              <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Used to scan uploaded files. Get a free key at <a href="https://www.virustotal.com" target="_blank" class="underline hover:text-[var(--theme-text)] transition">virustotal.com</a>.</p>
+              <% if (settings.virusTotalApiKey) { %><p class="mt-1.5 text-xs" style="color:var(--theme-success)"><%= t('keyIsSet') %></p><% } %>
+              <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)"><%= t('usedToScanUploadedFiles') %> <a href="https://www.virustotal.com" target="_blank" class="underline hover:text-[var(--theme-text)] transition">virustotal.com</a>.</p>
             </div>
           </div>
 
           <!-- Rate limiting -->
           <div class="al-card">
-            <h2 class="al-card-header">Rate limiting</h2>
+            <h2 class="al-card-header"><%= t('rateLimiting') %></h2>
             <div class="p-4 space-y-4">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Enable rate limiting</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Limit requests per minute per IP address.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('enableRateLimitingLabel') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('limitRequestsPerMinutePerIp') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="rateLimitEnabled" class="sr-only peer" aria-label="Enable rate limiting" <%= settings.rateLimitEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="rateLimitEnabled" class="sr-only peer" aria-label="<%= t('enableRateLimitingLabel') %>" <%= settings.rateLimitEnabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Requests per minute</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('requestsPerMinuteLabel') %></label>
                 <input type="number" id="rateLimitRpm" value="<%= settings.rateLimitRpm %>" min="1" max="10000"
                   class="al-input w-48">
               </div>
@@ -429,16 +400,16 @@
 
           <!-- Login protection -->
           <div class="al-card">
-            <h2 class="al-card-header">Login protection</h2>
-            <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)">After N failed attempts from a single account, that account is locked for the configured duration. Errors always say "invalid credentials" — the username is never revealed.</p>
+            <h2 class="al-card-header"><%= t('loginProtection') %></h2>
+            <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)"><%= t('loginProtectionDesc') %></p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 p-4">
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Max failed attempts before lockout</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('maxFailedAttemptsBeforeLockout') %></label>
                 <input type="number" id="loginMaxAttempts" value="<%= settings.loginMaxAttempts ?? 5 %>" min="1" max="100"
                   class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Lockout duration <span class="font-normal" style="color:var(--theme-text-muted)">(minutes)</span></label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('lockoutDurationMinutes') %></label>
                 <input type="number" id="loginLockoutMinutes" value="<%= settings.loginLockoutMinutes ?? 15 %>" min="1" max="1440"
                   class="al-input">
               </div>
@@ -447,15 +418,15 @@
 
           <!-- Network -->
           <div class="al-card">
-            <h2 class="al-card-header">Network</h2>
+            <h2 class="al-card-header"><%= t('network') %></h2>
             <div class="p-4 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Behind a reverse proxy</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Enable if Nginx, Caddy, or another proxy sits in front. Makes <code class="text-xs px-1 rounded" style="background:var(--theme-bg-secondary)">req.ip</code> use the forwarded header so rate limiting and IP bans target the real client.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('behindReverseProxy') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('behindReverseProxyDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-                  <input type="checkbox" id="behindReverseProxy" class="sr-only peer" aria-label="Behind a reverse proxy" <%= settings.behindReverseProxy ? 'checked' : '' %>>
+                  <input type="checkbox" id="behindReverseProxy" class="sr-only peer" aria-label="<%= t('behindReverseProxy') %>" <%= settings.behindReverseProxy ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -463,11 +434,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Enforce HTTPS for daemon connections</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Panel contacts daemons over <code class="text-xs px-1 rounded" style="background:var(--theme-bg-secondary)">https://</code>. Only enable if your daemons have TLS configured.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('enforceDaemonHttps') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('enforceDaemonHttpsDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-                  <input type="checkbox" id="enforceDaemonHttps" class="sr-only peer" aria-label="Enforce HTTPS for daemon connections" <%= settings.enforceDaemonHttps ? 'checked' : '' %>>
+                  <input type="checkbox" id="enforceDaemonHttps" class="sr-only peer" aria-label="<%= t('enforceDaemonHttps') %>" <%= settings.enforceDaemonHttps ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -475,11 +446,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Require 2FA for administrators</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Admin accounts with 2FA disabled are redirected to set it up before accessing the admin panel.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('require2faForAdmins') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('require2faForAdminsDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-                  <input type="checkbox" id="require2faForAdmins" class="sr-only peer" aria-label="Require two-factor authentication for administrators" <%= settings.require2faForAdmins ? 'checked' : '' %>>
+                  <input type="checkbox" id="require2faForAdmins" class="sr-only peer" aria-label="<%= t('require2faForAdmins') %>" <%= settings.require2faForAdmins ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -487,11 +458,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Hash API keys at rest</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Store API keys as SHA-256 hashes in the database. <strong class="" style="color:var(--theme-warning)">Enable before creating new keys — existing keys shown once.</strong></p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('hashApiKeysAtRest') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('hashApiKeysAtRestDesc') %> <strong class="" style="color:var(--theme-warning)"><%= t('hashApiKeysWarning') %></strong></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-                  <input type="checkbox" id="hashApiKeys" class="sr-only peer" aria-label="Hash API keys at rest" <%= settings.hashApiKeys ? 'checked' : '' %>>
+                  <input type="checkbox" id="hashApiKeys" class="sr-only peer" aria-label="<%= t('hashApiKeysAtRest') %>" <%= settings.hashApiKeys ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -503,56 +474,56 @@
           <!-- SMTP / Email -->
           <div class="al-card">
             <div class="relative">
-              <h2 class="al-card-header">Email (SMTP)</h2>
+              <h2 class="al-card-header"><%= t('emailSmtp') %></h2>
               <button type="button" id="smtpTestBtn"
                 class="absolute right-4 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-[var(--theme-bg-hover)] transition" style="color:var(--theme-text);border-color:var(--theme-border)">
                 <%- icon('zap', { class: 'w-3.5 h-3.5' }) %>
-                Test connection
+                <%= t('testConnection') %>
               </button>
             </div>
-            <p class="text-xs px-4 pt-2" style="color:var(--theme-text-muted)">Used to send transactional email like password reset links.</p>
+            <p class="text-xs px-4 pt-2" style="color:var(--theme-text-muted)"><%= t('usedToSendTransactionalEmail') %></p>
             <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">SMTP host</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpHost') %></label>
                 <input type="text" id="smtpHost" value="<%= settings.smtpHost || '' %>" placeholder="smtp.example.com" autocomplete="off" class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Port</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpPort') %></label>
                 <input type="number" id="smtpPort" value="<%= settings.smtpPort ?? 587 %>" min="1" max="65535" class="al-input w-full sm:w-48">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Username</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpUsername') %></label>
                 <input type="text" id="smtpUser" value="<%= settings.smtpUser || '' %>" placeholder="apikey" autocomplete="off" class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Password</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpPassword') %></label>
                 <div class="relative" x-data="{ show: false }">
                   <input :type="show ? 'text' : 'password'" id="smtpPassword" value="<%= settings.smtpPassword || '' %>" placeholder="••••••••" autocomplete="off" class="al-input pr-16">
                   <button type="button" @click="show = !show"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)" x-text="show ? 'Hide' : 'Show'">Show</button>
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)" x-text="show ? '<%= t('hide') %>' : '<%= t('show') %>'"><%= t('show') %></button>
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">From address</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('fromAddress') %></label>
                 <input type="text" id="smtpFrom" value="<%= settings.smtpFrom || '' %>" placeholder="noreply@example.com" autocomplete="off" class="al-input">
               </div>
               <div class="flex items-center justify-between sm:items-end">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Use SSL/TLS</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Implicit TLS (port 465). Off = STARTTLS (587).</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('useSslTls') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('useSslTlsDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-                  <input type="checkbox" id="smtpSecure" class="sr-only peer" aria-label="Use SSL/TLS" <%= settings.smtpSecure ? 'checked' : '' %>>
+                  <input type="checkbox" id="smtpSecure" class="sr-only peer" aria-label="<%= t('useSslTls') %>" <%= settings.smtpSecure ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Email cooldown <span class="font-normal" style="color:var(--theme-text-muted)">(seconds)</span></label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('emailCooldownSeconds') %></label>
                 <input type="number" id="emailCooldown" value="<%= settings.emailCooldown ?? 30 %>" min="0" max="3600"
                   class="al-input w-48">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Minimum seconds between emails to the same user. 0 = no limit.</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('emailCooldownDesc') %></p>
               </div>
             </div>
             <p id="smtpTestResult" class="px-4 pb-4 text-xs hidden"></p>
@@ -561,59 +532,59 @@
           <!-- S3 / Storage -->
           <div class="al-card">
             <div class="relative">
-              <h2 class="al-card-header">Storage (S3-compatible)</h2>
+              <h2 class="al-card-header"><%= t('storageS3Compatible') %></h2>
               <button type="button" id="s3TestBtn"
                 class="absolute right-4 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-[var(--theme-bg-hover)] transition" style="color:var(--theme-text);border-color:var(--theme-border)">
                 <%- icon('zap', { class: 'w-3.5 h-3.5' }) %>
-                Test connection
+                <%= t('testConnection') %>
               </button>
             </div>
-            <p class="text-xs px-4 pt-2" style="color:var(--theme-text-muted)">Offload backups to any S3-compatible bucket (AWS S3, Cloudflare R2, MinIO).</p>
+            <p class="text-xs px-4 pt-2" style="color:var(--theme-text-muted)"><%= t('s3Desc') %></p>
             <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div class="flex items-center justify-between sm:items-end sm:col-span-2">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Enable S3 backups</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">New backups are uploaded to the bucket and removed from the node.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('enableS3Backups') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('enableS3BackupsDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-                  <input type="checkbox" id="s3Enabled" class="sr-only peer" aria-label="Enable S3 backups" <%= settings.s3Enabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="s3Enabled" class="sr-only peer" aria-label="<%= t('enableS3Backups') %>" <%= settings.s3Enabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Endpoint URL</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('endpointUrl') %></label>
                 <input type="text" id="s3Endpoint" value="<%= settings.s3Endpoint || '' %>" placeholder="https://<account>.r2.cloudflarestorage.com or https://minio.local:9000" autocomplete="off" class="al-input">
-                <p class="text-xs mt-1" style="color:var(--theme-text-muted)">Leave empty for AWS S3 default endpoint.</p>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('leaveEmptyForAwsDefault') %></p>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Region</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('region') %></label>
                 <input type="text" id="s3Region" value="<%= settings.s3Region || '' %>" placeholder="us-east-1" autocomplete="off" class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Bucket</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('bucket') %></label>
                 <input type="text" id="s3Bucket" value="<%= settings.s3Bucket || '' %>" placeholder="airlink-backups" autocomplete="off" class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Access key</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('accessKey') %></label>
                 <input type="text" id="s3AccessKey" value="<%= settings.s3AccessKey || '' %>" autocomplete="off" class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Secret key</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('secretKey') %></label>
                 <div class="relative" x-data="{ show: false }">
                   <input :type="show ? 'text' : 'password'" id="s3SecretKey" value="<%= settings.s3SecretKey || '' %>" placeholder="••••••••" autocomplete="off" class="al-input pr-16">
                   <button type="button" @click="show = !show"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)" x-text="show ? 'Hide' : 'Show'">Show</button>
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)" x-text="show ? '<%= t('hide') %>' : '<%= t('show') %>'"><%= t('show') %></button>
                 </div>
               </div>
               <div class="flex items-center justify-between sm:items-end sm:col-span-2">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Path-style URLs</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Required for MinIO and most self-hosted S3 servers.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('pathStyleUrls') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('pathStyleUrlsDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-                  <input type="checkbox" id="s3PathStyle" class="sr-only peer" aria-label="Use path-style URLs" <%= settings.s3PathStyle ? 'checked' : '' %>>
+                  <input type="checkbox" id="s3PathStyle" class="sr-only peer" aria-label="<%= t('pathStyleUrls') %>" <%= settings.s3PathStyle ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -625,24 +596,24 @@
 
           <!-- IP banning -->
           <div class="al-card">
-            <h2 class="al-card-header">IP banning</h2>
+            <h2 class="al-card-header"><%= t('ipBanning') %></h2>
             <div class="p-4">
-              <label for="banIpInput" class="text-xs font-medium mb-2 block" style="color:var(--theme-text-muted)">IP Address</label>
+              <label for="banIpInput" class="text-xs font-medium mb-2 block" style="color:var(--theme-text-muted)"><%= t('banIpLabel') %></label>
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1" aria-describedby="banIpHint"
                   class="al-input flex-1 max-w-xs">
-                <button type="button" id="banIpBtn" class="al-btn-danger"><%- icon('ban', { class: 'size-4', strokeWidth: 1.5 }) %>Ban IP</button>
+                <button type="button" id="banIpBtn" class="al-btn-danger"><%- icon('ban', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('banIpButton') %></button>
               </div>
-              <p id="banIpHint" class="text-xs mb-4" style="color:var(--theme-text-muted)">Enter the IP address you want to ban from accessing the panel.</p>
+              <p id="banIpHint" class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('enterIpToBan') %></p>
               <div id="bannedIpList" class="space-y-2">
                 <% let banned = []; try { banned = JSON.parse(settings.bannedIps || '[]'); } catch (e) { /* ignore malformed JSON */ } %>
                 <% if (banned.length === 0) { %>
-                <p class="text-sm" style="color:var(--theme-text-muted)">No banned IPs.</p>
+                <p class="text-sm" style="color:var(--theme-text-muted)"><%= t('noBannedIps') %></p>
                 <% } else { %>
                 <% banned.forEach(function(ip) { %>
                 <div class="flex items-center justify-between rounded-xl border px-4 py-2.5" style="border-color:var(--theme-border);background:var(--theme-bg-secondary)">
                   <span class="text-sm font-mono" style="color:var(--theme-text)"><%= ip %></span>
-                  <button type="button" class="unban-btn text-xs hover:text-[var(--theme-danger)] transition inline-flex items-center gap-1.5" data-ip="<%= ip %>" style="color:var(--theme-danger)"><%- icon('shield-check', { class: 'size-3', strokeWidth: 1.5 }) %>Unban</button>
+                  <button type="button" class="unban-btn text-xs hover:text-[var(--theme-danger)] transition inline-flex items-center gap-1.5" data-ip="<%= ip %>" style="color:var(--theme-danger)"><%- icon('shield-check', { class: 'size-3', strokeWidth: 1.5 }) %><%= t('unban') %></button>
                 </div>
                 <% }); } %>
               </div>
@@ -655,15 +626,15 @@
         <div id="panel-features" role="tabpanel" aria-labelledby="tab-features" data-tab-panel="features" class="tab-panel space-y-5" hidden>
 
           <div class="al-card">
-            <h2 class="al-card-header">Authentication &amp; security</h2>
+            <h2 class="al-card-header"><%= t('authenticationAndSecurity') %></h2>
             <div class="p-4 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Require 2FA for all users</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Force every user to enable two-factor authentication before accessing the panel.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('require2faForAllUsers') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('require2faForAllUsersDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="twoFactorRequired" class="sr-only peer" aria-label="Require 2FA for all users" <%= settings.twoFactorRequired ? 'checked' : '' %>>
+                  <input type="checkbox" id="twoFactorRequired" class="sr-only peer" aria-label="<%= t('require2faForAllUsers') %>" <%= settings.twoFactorRequired ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -673,16 +644,16 @@
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Server features</h2>
-            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">Toggle features on or off for all servers. Changes apply immediately.</p>
+            <h2 class="al-card-header"><%= t('serverFeatures') %></h2>
+            <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)"><%= t('serverFeaturesDesc') %></p>
             <div class="p-4 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">SFTP access</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to connect via SFTP for file transfers.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('sftpAccess') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('sftpAccessDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="sftpEnabled" class="sr-only peer" aria-label="Enable SFTP access" <%= settings.sftpEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="sftpEnabled" class="sr-only peer" aria-label="<%= t('sftpAccess') %>" <%= settings.sftpEnabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -690,11 +661,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Backups</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to create and restore server backups.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('backupsLabel') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('backupsDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="backupsEnabled" class="sr-only peer" aria-label="Enable backups" <%= settings.backupsEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="backupsEnabled" class="sr-only peer" aria-label="<%= t('backupsLabel') %>" <%= settings.backupsEnabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -702,11 +673,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Scheduled tasks</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to set up cron-based scheduled tasks for their servers.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('scheduledTasks') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('scheduledTasksDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="schedulesEnabled" class="sr-only peer" aria-label="Enable scheduled tasks" <%= settings.schedulesEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="schedulesEnabled" class="sr-only peer" aria-label="<%= t('scheduledTasks') %>" <%= settings.schedulesEnabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -714,11 +685,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Databases</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to create and manage databases for their servers.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('databasesLabel') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('databasesDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="databasesEnabled" class="sr-only peer" aria-label="Enable databases" <%= settings.databasesEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="databasesEnabled" class="sr-only peer" aria-label="<%= t('databasesLabel') %>" <%= settings.databasesEnabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -726,11 +697,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">File manager</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to browse and edit server files from the panel.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('fileManager') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('fileManagerDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="fileManagerEnabled" class="sr-only peer" aria-label="Enable file manager" <%= settings.fileManagerEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="fileManagerEnabled" class="sr-only peer" aria-label="<%= t('fileManager') %>" <%= settings.fileManagerEnabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -738,11 +709,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Console access</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Allow users to view and interact with the server console.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('consoleAccess') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('consoleAccessDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="consoleEnabled" class="sr-only peer" aria-label="Enable console access" <%= settings.consoleEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="consoleEnabled" class="sr-only peer" aria-label="<%= t('consoleAccess') %>" <%= settings.consoleEnabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -750,11 +721,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Player tracking</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Track and display player count statistics per server.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('playerTracking') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('playerTrackingDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="playerTrackingEnabled" class="sr-only peer" aria-label="Enable player tracking" <%= settings.playerTrackingEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="playerTrackingEnabled" class="sr-only peer" aria-label="<%= t('playerTracking') %>" <%= settings.playerTrackingEnabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -762,11 +733,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Virus scanner</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Scan uploaded files for malware using the Radar engine.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('virusScanner') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('virusScannerDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="scannerEnabled" class="sr-only peer" aria-label="Enable virus scanner" <%= settings.scannerEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="scannerEnabled" class="sr-only peer" aria-label="<%= t('virusScanner') %>" <%= settings.scannerEnabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -774,11 +745,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)">Airlink Cloud backups</p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">Offload backups to Airlink Cloud storage.</p>
+                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('airlinkCloudBackups') %></p>
+                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('airlinkCloudBackupsDesc') %></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="airlinkCloudEnabled" class="sr-only peer" aria-label="Enable Airlink Cloud backups" <%= settings.airlinkCloudEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="airlinkCloudEnabled" class="sr-only peer" aria-label="<%= t('airlinkCloudBackups') %>" <%= settings.airlinkCloudEnabled ? 'checked' : '' %>>
                   <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
@@ -788,11 +759,11 @@
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Server creation defaults</h2>
-            <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)">Default resource allocations assigned to newly created servers.</p>
+            <h2 class="al-card-header"><%= t('serverCreationDefaults') %></h2>
+            <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)"><%= t('serverCreationDefaultsDesc') %></p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 p-4">
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Default memory</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMemory') %></label>
                 <input type="hidden" id="featureDefaultMemory" value="<%= settings.defaultMemory %>">
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="featureDefaultMemoryDisplay" min="1"
@@ -804,12 +775,12 @@
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Default CPU <span class="font-normal" style="color:var(--theme-text-muted)">(%)</span></label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultCpu') %> <span class="font-normal" style="color:var(--theme-text-muted)">(%)</span></label>
                 <input type="number" id="featureDefaultCpu" value="<%= settings.defaultCpu %>" min="1" max="10000"
                   class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Default disk</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultDisk') %></label>
                 <input type="hidden" id="featureDefaultDisk" value="<%= settings.defaultDisk %>">
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="featureDefaultDiskDisplay" min="1"
@@ -821,10 +792,10 @@
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Max servers per user</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('maxServersPerUser') %></label>
                 <input type="number" id="maxServersPerUser" value="<%= settings.maxServersPerUser %>" min="0" max="10000"
                   class="al-input">
-                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">Overrides role-based limits. 0 = unlimited.</p>
+                <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('maxServersPerUserDesc') %></p>
               </div>
             </div>
           </div>
@@ -837,320 +808,6 @@
 </main>
 
 
-<script nonce="<%- nonce %>">
-function adminSettings() {
-  return {
-    init() {
-      var formAppearance = document.getElementById('form-appearance');
-      if (formAppearance) {
-        formAppearance.querySelectorAll('input[type="text"], input[type="number"]').forEach((input) => { input.addEventListener('change', () => this.saveAppearance()); });
-        formAppearance.querySelectorAll('input[name="theme"]').forEach((radio) => { radio.addEventListener('change', () => this.saveAppearance()); });
-      }
-      var serversPanel = document.getElementById('panel-servers');
-      if (serversPanel) serversPanel.querySelectorAll('input').forEach((input) => { input.addEventListener('change', () => this.saveServers()); });
-      var securityPanel = document.getElementById('panel-security');
-      if (securityPanel) securityPanel.querySelectorAll('input').forEach((input) => { input.addEventListener('change', () => this.saveSecurity()); });
-      var featuresPanel = document.getElementById('panel-features');
-      if (featuresPanel) featuresPanel.querySelectorAll('input').forEach((input) => { input.addEventListener('change', () => this.saveFeatures()); });
-
-      document.getElementById('banIpBtn').addEventListener('click', async () => {
-        const ip = document.getElementById('banIpInput').value.trim();
-        if (!ip) return showToast('Enter an IP address', 'error');
-        const d = await window.api('/api/v2/admin/settings/ban-ip', 'POST', { ip });
-        if (d && d.success) { document.getElementById('banIpInput').value = ''; showToast('IP banned. Bye bye.', 'success'); this.addBanRow(ip); }
-        else if (d) showToast(d.error || 'Failed', 'error');
-      });
-
-      document.getElementById('bannedIpList').addEventListener('click', async (e) => {
-        var btn = e.target.closest('.unban-btn');
-        if (!btn) return;
-        const d = await window.api('/api/v2/admin/settings/unban-ip', 'POST', { ip: btn.dataset.ip });
-        if (d && d.success) { showToast('IP unbanned. Welcome back.', 'success'); this.removeBanRow(btn); }
-        else if (d) showToast(d.error || 'Failed', 'error');
-      });
-
-      document.getElementById('smtpTestBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('smtpTestBtn'), result = document.getElementById('smtpTestResult'), orig = btn.innerHTML;
-        btn.disabled = true; btn.textContent = 'Testing\u2026'; result.classList.add('hidden');
-        try {
-          const d = await fetch('/api/v2/admin/settings/smtp/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(r => r.json());
-          result.classList.remove('hidden'); result.textContent = d.success ? 'Connection OK.' : d.error || 'Connection failed.';
-          result.className = 'px-5 pb-5 text-xs ' + (d.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400');
-        } catch { result.classList.remove('hidden'); result.textContent = 'Connection failed.'; result.className = 'px-5 pb-5 text-xs text-red-600 dark:text-red-400'; }
-        finally { btn.disabled = false; btn.innerHTML = orig; }
-      });
-
-      document.getElementById('s3TestBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('s3TestBtn'), result = document.getElementById('s3TestResult'), orig = btn.innerHTML;
-        btn.disabled = true; btn.textContent = 'Testing\u2026'; result.classList.add('hidden');
-        try {
-          const d = await fetch('/api/v2/admin/settings/s3/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(r => r.json());
-          result.classList.remove('hidden'); result.textContent = d.success ? d.message || 'Connection OK.' : d.error || 'Connection failed.';
-          result.className = 'px-5 pb-5 text-xs ' + (d.success ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400');
-        } catch { result.classList.remove('hidden'); result.textContent = 'Connection failed.'; result.className = 'px-5 pb-5 text-xs text-red-600 dark:text-red-400'; }
-        finally { btn.disabled = false; btn.innerHTML = orig; }
-      });
-
-      document.querySelectorAll('input[type="radio"]').forEach((radio) => {
-        radio.addEventListener('change', function() {
-          var group = document.querySelectorAll('input[name="' + this.name + '"]');
-          group.forEach((r) => {
-            var label = r.closest('label'); if (!label) return;
-            var ring = label.querySelector('.rounded-full.border-2'), dot = ring && ring.querySelector('.al-radio-dot-active');
-            if (r.checked) {
-              label.classList.add('al-radio-active'); label.classList.remove('border-neutral-200', 'dark:border-neutral-600/30');
-              if (ring) { ring.classList.add('al-radio-ring-active'); ring.classList.remove('border-neutral-300', 'dark:border-neutral-600'); }
-              if (!dot && ring) { var d = document.createElement('span'); d.className = 'w-2.5 h-2.5 rounded-full al-radio-dot-active'; ring.appendChild(d); }
-            } else {
-              label.classList.remove('al-radio-active'); label.classList.add('border-neutral-200', 'dark:border-neutral-600/30');
-              if (ring) { ring.classList.remove('al-radio-ring-active'); ring.classList.add('border-neutral-300', 'dark:border-neutral-600'); }
-              if (dot) dot.remove();
-            }
-          });
-        });
-      });
-    },
-
-    showSaved() {
-      var el = document.getElementById('autosave-indicator'); if (!el) return;
-      el.style.opacity = '1'; clearTimeout(el._hideTimer);
-      el._hideTimer = setTimeout(() => { el.style.opacity = '0'; }, 2000);
-    },
-
-    async post(url, body) {
-      try {
-        const r = await fetch(url, { method: 'POST', headers: body instanceof FormData ? undefined : { 'Content-Type': 'application/json' }, body: body instanceof FormData ? body : JSON.stringify(body) });
-        const d = await r.json(); if (!d.success) throw new Error(d.error || 'Failed'); this.showSaved(); return d;
-      } catch (err) { showToast(err.message || 'Failed', 'error'); return false; }
-    },
-
-    applyThemeCss(value) {
-      var link = document.getElementById('theme-css');
-      if (value && value !== 'default' && value !== 'light' && value !== 'dark') {
-        if (!link) { link = document.createElement('link'); link.rel = 'stylesheet'; link.id = 'theme-css'; document.head.appendChild(link); }
-        try { var _u = new URL(value, window.location.origin); if (_u.protocol === 'https:' || _u.protocol === 'http:') link.href = _u.href; } catch(_e) {}
-      } else if (link) link.parentNode.removeChild(link);
-    },
-
-    applyThemeFromForm() {
-      var formAppearance = document.getElementById('form-appearance'); if (!formAppearance) return;
-      var checked = formAppearance.querySelector('input[name="theme"]:checked'), value = checked ? checked.value : 'dark';
-      this.applyThemeCss(value);
-      var isLightTheme = value === 'light' || (value && value.indexOf('light') !== -1);
-      if (isLightTheme) document.documentElement.classList.remove('dark'); else document.documentElement.classList.add('dark');
-      if (window.applyThemeSheets) window.applyThemeSheets();
-    },
-
-    applyWallpaperFromResponse(url) {
-      var layer = document.getElementById('al-wallpaper-layer'), body = document.body;
-      if (url) {
-        body.classList.add('al-wallpaper'); body.style.setProperty('--al-wallpaper-image', "url('" + url + "')");
-        if (!layer) { layer = document.createElement('div'); layer.id = 'al-wallpaper-layer'; layer.setAttribute('aria-hidden', 'true'); document.body.insertBefore(layer, document.body.firstChild); }
-      } else { body.classList.remove('al-wallpaper'); body.style.removeProperty('--al-wallpaper-image'); if (layer) layer.parentNode.removeChild(layer); }
-    },
-
-    async saveAppearance() {
-      var formAppearance = document.getElementById('form-appearance'); if (!formAppearance) return;
-      var fd = new FormData();
-      var titleInput = formAppearance.querySelector('input[name="title"]'); if (titleInput) fd.set('title', titleInput.value);
-      var themeRadio = formAppearance.querySelector('input[name="theme"]:checked'); if (themeRadio) fd.set('theme', themeRadio.value);
-      ['logo-input', 'favicon-input', 'theme-file-input', 'login-wallpaper-file', 'register-wallpaper-file', 'panel-wallpaper-file'].forEach((id) => { var el = document.getElementById(id); if (el && el._selectedFile) fd.set(el.name, el._selectedFile); });
-      ['login-wallpaper-url', 'register-wallpaper-url', 'panel-wallpaper-url'].forEach((id) => { var el = document.getElementById(id); if (el) fd.set(el.name, el.value); });
-      const ok = await this.post('/api/v2/admin/settings/general', fd);
-      if (ok) { this.applyThemeFromForm(); this.applyWallpaperFromResponse(ok.panelWallpaper); }
-    },
-
-    saveServers() {
-      var stepsJson = document.getElementById('onboardingStepsJson');
-      this.post('/api/v2/admin/settings/server-policy', {
-        allowUserCreateServer: document.getElementById('allowUserCreateServer').checked, allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
-        allowUserCreateImages: document.getElementById('allowUserCreateImages').checked, onboardingEnabled: document.getElementById('onboardingEnabled').checked,
-        onboardingSteps: stepsJson ? stepsJson.value : '[]',
-        defaultServerLimit: parseInt(document.getElementById('defaultServerLimit').value, 10) || 0, defaultMaxMemory: parseInt(document.getElementById('defaultMaxMemory').value, 10) || 0,
-        defaultMaxCpu: parseInt(document.getElementById('defaultMaxCpu').value, 10) || 0, defaultMaxStorage: parseInt(document.getElementById('defaultMaxStorage').value, 10) || 0,
-        defaultMaxDatabases: parseInt(document.getElementById('defaultMaxDatabases').value, 10) || 0, defaultOverallocateMemory: parseInt(document.getElementById('defaultOverallocateMemory').value, 10) || 0,
-        defaultOverallocateDisk: parseInt(document.getElementById('defaultOverallocateDisk').value, 10) || 0, defaultOverallocateCpu: parseInt(document.getElementById('defaultOverallocateCpu').value, 10) || 0,
-        uploadLimit: parseInt(document.getElementById('uploadLimitInput').value, 10) || 100,
-      });
-    },
-
-    saveSecurity() {
-      Promise.all([
-        this.post('/api/v2/admin/settings/security', {
-          rateLimitEnabled: document.getElementById('rateLimitEnabled').checked, rateLimitRpm: parseInt(document.getElementById('rateLimitRpm').value, 10) || 0,
-          loginMaxAttempts: parseInt(document.getElementById('loginMaxAttempts').value, 10) || 0, loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes').value, 10) || 0,
-          enforceDaemonHttps: document.getElementById('enforceDaemonHttps').checked, require2faForAdmins: document.getElementById('require2faForAdmins').checked,
-          behindReverseProxy: document.getElementById('behindReverseProxy').checked, hashApiKeys: document.getElementById('hashApiKeys').checked,
-          virusTotalApiKey: document.getElementById('vtKeyInput').value.trim() || null,
-        }),
-        this.post('/api/v2/admin/settings/general', (() => { var fd = new FormData(); var reg = document.getElementById('allowRegistration'); fd.set('allowRegistration', reg && reg.checked ? 'true' : 'false'); return fd; })()),
-        this.post('/api/v2/admin/settings/smtp', {
-          smtpHost: document.getElementById('smtpHost').value.trim() || null, smtpPort: parseInt(document.getElementById('smtpPort').value, 10) || 587,
-          smtpUser: document.getElementById('smtpUser').value.trim() || null, smtpPassword: document.getElementById('smtpPassword').value || null,
-          smtpFrom: document.getElementById('smtpFrom').value.trim() || null, smtpSecure: document.getElementById('smtpSecure').checked,
-          emailCooldown: parseInt(document.getElementById('emailCooldown').value, 10) || 0,
-        }),
-        this.post('/api/v2/admin/settings/s3', {
-          s3Enabled: document.getElementById('s3Enabled').checked, s3Endpoint: document.getElementById('s3Endpoint').value.trim() || null,
-          s3Region: document.getElementById('s3Region').value.trim() || null, s3Bucket: document.getElementById('s3Bucket').value.trim() || null,
-          s3AccessKey: document.getElementById('s3AccessKey').value.trim() || null, s3SecretKey: document.getElementById('s3SecretKey').value || null,
-          s3PathStyle: document.getElementById('s3PathStyle').checked,
-        }),
-      ]);
-    },
-
-    saveFeatures() {
-      this.post('/api/v2/admin/settings/features', {
-        twoFactorRequired: document.getElementById('twoFactorRequired').checked,
-        sftpEnabled: document.getElementById('sftpEnabled').checked,
-        backupsEnabled: document.getElementById('backupsEnabled').checked,
-        schedulesEnabled: document.getElementById('schedulesEnabled').checked,
-        databasesEnabled: document.getElementById('databasesEnabled').checked,
-        fileManagerEnabled: document.getElementById('fileManagerEnabled').checked,
-        consoleEnabled: document.getElementById('consoleEnabled').checked,
-        playerTrackingEnabled: document.getElementById('playerTrackingEnabled').checked,
-        scannerEnabled: document.getElementById('scannerEnabled').checked,
-        airlinkCloudEnabled: document.getElementById('airlinkCloudEnabled').checked,
-      });
-      this.post('/api/v2/admin/settings/server-policy', {
-        defaultMemory: parseInt(document.getElementById('featureDefaultMemory').value, 10) || 512,
-        defaultCpu: parseInt(document.getElementById('featureDefaultCpu').value, 10) || 100,
-        defaultDisk: parseInt(document.getElementById('featureDefaultDisk').value, 10) || 5120,
-        maxServersPerUser: parseInt(document.getElementById('maxServersPerUser').value, 10) || 10,
-      });
-    },
-
-    banRowHtml(ip) {
-      return '<div class="flex items-center justify-between rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-4 py-2.5"><span class="text-sm font-mono text-neutral-700 dark:text-neutral-300">' + window.escHtml(ip) + '</span><button type="button" class="unban-btn text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition inline-flex items-center gap-1.5" data-ip="' + window.escAttr(ip) + '">' + (window.alIcon ? window.alIcon('shield-check', 'size-3', { strokeWidth: 1.5 }) : '') + 'Unban</button></div>';
-    },
-
-    addBanRow(ip) {
-      var list = document.getElementById('bannedIpList'); if (!list) return;
-      var hasEmpty = Array.prototype.some.call(list.children, (child) => child.tagName === 'P');
-      if (hasEmpty) Array.prototype.forEach.call(list.children, (child) => { if (child.tagName === 'P') child.parentNode.removeChild(child); });
-      al.addRow(list, this.banRowHtml(ip));
-    },
-
-    removeBanRow(btn) {
-      var row = btn.closest('.flex.items-center.justify-between'); if (!row) return;
-      var list = document.getElementById('bannedIpList');
-      al.removeRow(row).then(() => { if (list && !list.querySelector('.unban-btn')) { var p = document.createElement('p'); p.className = 'text-sm text-neutral-400'; p.textContent = 'No banned IPs.'; list.appendChild(p); } });
-    },
-  };
-}
-
-/* Onboarding step builder */
-var onbSteps = [];
-try { onbSteps = JSON.parse(document.getElementById('onboardingStepsJson').value || '[]'); } catch(e) { onbSteps = []; }
-
-function syncOnbJson() {
-  var ta = document.getElementById('onboardingStepsJson');
-  if (ta) ta.value = JSON.stringify(onbSteps);
-}
-
-function renderOnbStepList() {
-  var list = document.getElementById('onboardingStepList');
-  if (!list) return;
-  list.innerHTML = '';
-  onbSteps.forEach(function(step, i) {
-    var card = document.createElement('div');
-    card.className = 'rounded-xl p-3 mb-2';
-    card.style.cssText = 'background:var(--theme-bg-secondary);border:1px solid var(--theme-border)';
-    card.innerHTML =
-      '<div class="flex items-center justify-between mb-2">' +
-        '<span class="text-xs font-medium" style="color:var(--theme-text-muted)">Step ' + (i + 1) + '</span>' +
-        '<div class="flex gap-1">' +
-          (i > 0 ? '<button type="button" class="al-btn-ghost p-1 rounded" onclick="moveOnbStep(' + i + ',-1)" title="Move up">&uarr;</button>' : '') +
-          (i < onbSteps.length - 1 ? '<button type="button" class="al-btn-ghost p-1 rounded" onclick="moveOnbStep(' + i + ',1)" title="Move down">&darr;</button>' : '') +
-          '<button type="button" class="al-btn-ghost p-1 rounded" onclick="removeOnbStep(' + i + ')" style="color:var(--theme-danger)" title="Remove">&times;</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
-        '<div><label class="text-xs" style="color:var(--theme-text-muted)">Title</label>' +
-          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.title || '') + '" onchange="onbSteps[' + i + '].title=this.value;syncOnbJson()"></div>' +
-        '<div><label class="text-xs" style="color:var(--theme-text-muted)">Icon (lucide name)</label>' +
-          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.icon || '') + '" placeholder="e.g. server, shield, zap" onchange="onbSteps[' + i + '].icon=this.value;syncOnbJson()"></div>' +
-        '<div class="sm:col-span-2"><label class="text-xs" style="color:var(--theme-text-muted)">Description</label>' +
-          '<textarea rows="2" class="al-input text-xs py-1.5" onchange="onbSteps[' + i + '].text=this.value;syncOnbJson()">' + window.escHtml(step.text || '') + '</textarea></div>' +
-        '<div><label class="text-xs" style="color:var(--theme-text-muted)">CTA text (optional)</label>' +
-          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.cta || '') + '" placeholder="e.g. Get started" onchange="onbSteps[' + i + '].cta=this.value;syncOnbJson()"></div>' +
-        '<div><label class="text-xs" style="color:var(--theme-text-muted)">CTA URL (optional)</label>' +
-          '<input type="text" class="al-input text-xs py-1.5" value="' + window.escAttr(step.ctaUrl || '') + '" placeholder="e.g. /create-server" onchange="onbSteps[' + i + '].ctaUrl=this.value;syncOnbJson()"></div>' +
-      '</div>';
-    list.appendChild(card);
-  });
-  syncOnbJson();
-}
-
-function addOnbStep() {
-  onbSteps.push({ title: '', text: '', icon: 'layout-dashboard', cta: '', ctaUrl: '' });
-  renderOnbStepList();
-}
-
-function removeOnbStep(i) {
-  onbSteps.splice(i, 1);
-  renderOnbStepList();
-}
-
-function moveOnbStep(i, dir) {
-  var j = i + dir;
-  if (j < 0 || j >= onbSteps.length) return;
-  var tmp = onbSteps[i];
-  onbSteps[i] = onbSteps[j];
-  onbSteps[j] = tmp;
-  renderOnbStepList();
-}
-
-function previewOnboarding() {
-  var steps = onbSteps.length > 0 ? onbSteps : [
-    { title: 'Your dashboard', text: 'This is where all your servers live.', icon: 'layout-dashboard' },
-    { title: 'Create your first server', text: 'Pick an image, choose a node, and allocate resources.', icon: 'server' },
-    { title: 'Make it yours', text: 'Set your avatar and profile in Account settings.', icon: 'user' }
-  ];
-  var iconPaths = {
-    'layout-dashboard': '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v-5H3z"/>',
-    'server': '<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>',
-    'user': '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-    'settings': '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
-    'shield': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-    'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'
-  };
-  var cur = 0;
-  function svgIcon(n) { return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--theme-text)">' + (iconPaths[n] || iconPaths['layout-dashboard']) + '</svg>'; }
-
-  var overlay = document.createElement('div');
-  overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4';
-  overlay.style.cssText = 'background:rgba(0,0,0,0.5)';
-  var panel = document.createElement('div');
-  panel.className = 'rounded-2xl max-w-md w-full shadow-xl p-6';
-  panel.style.cssText = 'background:var(--theme-bg-card);border:1px solid var(--theme-border)';
-  overlay.appendChild(panel);
-  document.body.appendChild(overlay);
-
-  function renderPreview() {
-    var s = steps[cur];
-    var dots = steps.map(function(_, i) { return '<div class="flex-1 h-1 rounded-full" style="background:' + (i <= cur ? 'var(--theme-text)' : 'var(--theme-border-subtle)') + '"></div>'; }).join('');
-    var ctaHtml = (s.cta && s.ctaUrl) ? '<a href="' + s.ctaUrl + '" class="inline-flex items-center gap-1.5 mt-3 text-sm font-medium" style="color:var(--theme-text)">' + s.cta + ' &rarr;</a>' : '';
-    panel.innerHTML =
-      '<div class="flex items-start justify-between mb-5"><div><h2 class="text-base font-semibold" style="color:var(--theme-text-strong)">Welcome to the panel!</h2><p class="text-xs mt-0.5" style="color:var(--theme-text-muted)">A few quick tips to get you started.</p></div><button type="button" class="al-btn-ghost p-2 rounded-lg" onclick="this.closest(\'.fixed\').remove()">&times;</button></div>' +
-      '<div class="mb-5"><div class="flex gap-2 mb-4">' + dots + '</div>' +
-      '<div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style="background:var(--theme-bg-secondary)">' + svgIcon(s.icon || 'layout-dashboard') + '</div>' +
-      '<h3 class="text-sm font-semibold mb-1.5" style="color:var(--theme-text-strong)">' + window.escHtml(s.title || 'Untitled step') + '</h3>' +
-      '<p class="text-sm leading-relaxed" style="color:var(--theme-text-muted)">' + window.escHtml(s.text || '') + '</p>' + ctaHtml + '</div>' +
-      '<div class="flex items-center justify-between gap-3">' +
-        '<button type="button" class="al-btn-ghost px-3 py-2 text-xs font-medium" ' + (cur === 0 ? 'style="visibility:hidden"' : '') + ' onclick="previewPrev()">&larr; Back</button>' +
-        '<span class="flex-1"></span>' +
-        (cur < steps.length - 1 ? '<button type="button" class="al-btn-primary px-4 py-2 text-sm font-medium" onclick="previewNext()">Next &rarr;</button>' : '<button type="button" class="al-btn-primary px-4 py-2 text-sm font-medium" onclick="this.closest(\'.fixed\').remove()">Done</button>') +
-      '</div>';
-  }
-  window.previewNext = function() { if (cur < steps.length - 1) { cur++; renderPreview(); } };
-  window.previewPrev = function() { if (cur > 0) { cur--; renderPreview(); } };
-  overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
-  renderPreview();
-}
-
-/* Init step list on page load */
-document.addEventListener('DOMContentLoaded', function() { renderOnbStepList(); });
-</script>
+<script nonce="<%- nonce %>" src="/scripts/admin-settings.js"></script>
 
 <%- include('../../components/footer') %>

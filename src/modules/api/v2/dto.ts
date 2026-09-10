@@ -8,8 +8,8 @@
  * from our own database/daemon).
  */
 
-import { z } from 'zod';
-import { SUBUSER_PERMISSIONS } from '../../../handlers/utils/auth/serverAuthUtil';
+import { z } from "zod";
+import { SUBUSER_PERMISSIONS } from "../../../handlers/utils/auth/serverAuthUtil";
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -43,7 +43,7 @@ export const permissionSchema = z.array(z.string()).refine(
         return true;
       }
       // Wildcard: "files.*" → check group exists with read or create
-      if (p.endsWith('.*')) {
+      if (p.endsWith(".*")) {
         const group = p.slice(0, -2);
         return (
           VALID_PERMISSIONS.has(`${group}.read`) ||
@@ -53,7 +53,7 @@ export const permissionSchema = z.array(z.string()).refine(
       // Parent: "files" → check any "files.*" exists
       return [...VALID_PERMISSIONS].some((v) => v.startsWith(`${p}.`));
     }),
-  { message: 'Invalid permission string' },
+  { message: "Invalid permission string" },
 );
 
 // ---------------------------------------------------------------------------
@@ -251,7 +251,7 @@ export const updateLanguageBody = z.object({
 export type UpdateLanguageBody = z.infer<typeof updateLanguageBody>;
 
 // ---------------------------------------------------------------------------
-// Account — check-username, validate-password, images, folders, onboarding
+// Account — check-username, validate-password, images, folders
 // ---------------------------------------------------------------------------
 
 export const checkUsernameBody = z.object({
@@ -259,7 +259,7 @@ export const checkUsernameBody = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, underscores'),
+    .regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, hyphens, underscores"),
 });
 export type CheckUsernameBody = z.infer<typeof checkUsernameBody>;
 
@@ -308,9 +308,9 @@ export const adminCreateUserBody = z.object({
     .optional(),
   password: z.string().min(8).max(128),
   role: z
-    .enum(['owner', 'admin', 'privileged', 'user'])
+    .enum(["owner", "admin", "privileged", "user"])
     .optional()
-    .default('user'),
+    .default("user"),
   isAdmin: z.boolean().optional().default(false),
   serverLimit: z.number().int().min(0).optional(),
   maxMemory: z.number().int().min(0).optional(),
@@ -329,7 +329,7 @@ export const adminUpdateUserBody = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/)
     .optional(),
   password: z.string().min(8).max(128).optional(),
-  role: z.enum(['owner', 'admin', 'privileged', 'user']).optional(),
+  role: z.enum(["owner", "admin", "privileged", "user"]).optional(),
   isAdmin: z.boolean().optional(),
   serverLimit: z.number().int().min(0).optional(),
   maxMemory: z.number().int().min(0).optional(),
@@ -431,7 +431,6 @@ export const adminSettingsGeneralBody = z.object({
   language: z.string().optional(),
   allowRegistration: z.boolean().optional(),
   uploadLimit: z.number().int().min(1).optional(),
-  onboardingEnabled: z.boolean().optional(),
 });
 export type AdminSettingsGeneralBody = z.infer<typeof adminSettingsGeneralBody>;
 
@@ -469,7 +468,6 @@ export const adminSettingsServerPolicyBody = z.object({
   defaultCpu: z.number().int().min(0).optional(),
   defaultDisk: z.number().int().min(0).optional(),
   maxServersPerUser: z.number().int().min(0).optional(),
-  onboardingSteps: z.string().optional(),
 });
 export type AdminSettingsServerPolicyBody = z.infer<
   typeof adminSettingsServerPolicyBody

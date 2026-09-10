@@ -12,6 +12,7 @@ import {
   subscribeToRealtime,
   syncEventsForClient,
 } from './events';
+import { logT } from '../../services/i18n';
 
 // ── Realtime session hub ──────────────────────────────────────────────────────
 // Owns every authenticated realtime socket. Each session registers an allowed
@@ -82,7 +83,7 @@ async function fanOut(event: RealtimeEventEnvelope): Promise<void> {
       try {
         session.ws.send(JSON.stringify(event));
       } catch (error) {
-        logger.warn('[realtime] send failed, dropping socket', {
+        logger.warn(logT('log.realtimeSendFailed'), {
           error: String(error),
         });
         try {
@@ -189,7 +190,7 @@ export async function resynchronizeSession(
     try {
       session.ws.send(JSON.stringify(event));
     } catch (error) {
-      logger.warn('[realtime] resync send failed, dropping session', {
+      logger.warn(logT('log.realtimeResyncSendFailed'), {
         error: String(error),
       });
       session.ws.close();

@@ -1,11 +1,9 @@
 import { isHttpError } from '../utils/http';
 import prisma from '../db';
-import {
-  daemonStateSchema,
-  parseDaemonResponse,
-} from '../platform/daemon/dtos';
+import { daemonStateSchema, parseDaemonResponse } from '../types/daemon';
 import { checkNodeStatus } from './utils/node/nodeStatus';
 import { daemonRequest } from './utils/core/daemonRequest';
+import { INSTALL_CHECK_CACHE_TTL_MS } from '../config/timeouts';
 
 interface CheckInstallationResult {
   installed: boolean;
@@ -20,7 +18,6 @@ const cache = new Map<
   string,
   { state: string; error?: string; timestamp: number }
 >();
-const CACHE_TTL_MS = 8000;
 
 export async function checkForServerInstallation(
   serverId: string,
@@ -43,7 +40,7 @@ export async function checkForServerInstallation(
 
     const now = Date.now();
     const cached = cache.get(serverId);
-    if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    if (cached && now - cached.timestamp < INSTALL_CHECK_CACHE_TTL_MS) {
       return {
         installed: cached.state === 'installed',
         state: cached.state,

@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Startup' }) %>
+<%- include('../../components/header', { title: t('startup') }) %>
 
 <main class="h-screen m-auto" style="color:var(--theme-text)">
   <div class="flex h-full">
@@ -11,17 +11,17 @@
     <!-- Main Content -->
     <div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Dashboard', href: '/' },
+        { label: t('dashboard'), href: '/' },
         { label: server.name, href: '/server/' + server.UUID },
-        { label: 'Startup' }
+        { label: t('startup') }
       ] }) %>
       <!-- Page Header: title + meta left -->
       <div class="px-6 sm:px-8 pt-4 pb-2 sm:pb-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div class="flex-1 min-w-0">
-            <%- include('../../components/serverHeader') %>
+            <%- include('../../components/server-header') %>
             <!-- Server meta: image · node · id -->
-            <%- include('../../components/serverMeta') %>
+            <%- include('../../components/server-meta') %>
           </div>
         </div>
       </div>
@@ -29,7 +29,7 @@
       <%- include('../../components/installHeader') %>
 
       <!-- Server Template -->
-      <%- include('../../components/serverTemplate') %>
+      <%- include('../../components/server-template') %>
 
       <div id="server-page-body">
 

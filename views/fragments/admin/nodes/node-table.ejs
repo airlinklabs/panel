@@ -3,9 +3,9 @@
   <% if (nodes.length === 0) { %>
     <%- include('../../../components/ui/empty-state', {
       iconName: 'network',
-      title: 'No nodes yet',
-      description: 'Add a node to start hosting servers.',
-      action: '<a href="/admin/nodes/create" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + req.translations.createNewNode + '</a>'
+      title: t('noNodesYet'),
+      description: t('addNodeToStartHosting'),
+      action: '<a href="/admin/nodes/create" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + t('createNewNode') + '</a>'
     }) %>
   <% } else { %>
   <table class="al-table" style="table-layout:auto">
@@ -17,10 +17,10 @@
     </colgroup>
     <thead class="al-table-head">
       <tr>
-        <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.name %></th>
-        <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.connection %></th>
-        <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.instances %></th>
-        <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.actions %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('name') %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('connection') %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('instances') %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('actions') %></th>
       </tr>
     </thead>
     <tbody>
@@ -51,16 +51,16 @@
             <%= node.versionRelease ? '' : '' %>
             px-2 py-1 text-xs font-medium ring-1 ring-inset"
               style="<%= node.versionRelease ? 'background:var(--theme-success-bg);color:var(--theme-success);box-shadow:inset 0 0 0 1px var(--theme-success)' : 'background:var(--theme-badge-neutral-bg);color:var(--theme-badge-neutral-text);box-shadow:inset 0 0 0 1px var(--theme-border)' %>">
-              <%= node.versionRelease || (req.translations.unknown || 'unknown') %>
+              <%= node.versionRelease || t('unknown') %>
             </div></td>
           <td class="al-table-td"><%= node.instances ? node.instances.length : 0 %></td>
           <td class="al-table-td">
             <div class="flex items-center gap-1.5">
-              <button @click="configure('<%= node.id %>')" type="button" title="Configure" aria-label="Configure node"
+              <button @click="configure('<%= node.id %>')" type="button" title="<%= t('configureNode') %>" aria-label="<%= t('configureNode') %>"
                 class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
                 <%- icon('settings', { size: 16, class: 'shrink-0' }) %>
               </button>
-              <a href="./node/<%= node.id %>" onclick="event.stopPropagation()" title="Edit" aria-label="Edit node"
+              <a href="./node/<%= node.id %>" onclick="event.stopPropagation()" title="<%= t('editNodeAria') %>" aria-label="<%= t('editNodeAria') %>"
                 class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
                 <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
               </a>
@@ -68,9 +68,9 @@
                 hx-delete="/api/v2/admin/nodes/<%= node.id %>"
                 hx-target="#admin-nodes-table"
                 hx-swap="outerHTML"
-                hx-confirm="This will permanently remove the node. This cannot be undone."
+                hx-confirm="<%= t('deleteNodeConfirm') %>"
                 type="button"
-                title="Delete" aria-label="Delete node"
+                title="<%= t('deleteNodeAria') %>" aria-label="<%= t('deleteNodeAria') %>"
                 class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
                 style="color:var(--theme-danger);">
                 <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>

@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Edit Server' }) %>
+<%- include('../../components/header', { title: t('adminEditServerTitle') }) %>
 
 <script nonce="<%- nonce %>">
 const serverEditNames = {
@@ -28,28 +28,28 @@ function serverEditPage() {
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Servers', href: '/admin/servers' },
+        { label: t('admin') },
+        { label: t('breadcrumbServers'), href: '/admin/servers' },
         { label: server.name }
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
           <h1 class="al-page-title"><%= server.name %></h1>
-          <p class="al-page-desc"><%= req.translations.adminManageServer || 'Rename, reassign, or remove this server.' %></p>
+          <p class="al-page-desc"><%= t('adminManageServer') %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button type="submit" form="editServerForm" class="al-btn-primary"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %>Save changes</button>
-          <a href="/admin/servers" class="al-btn-secondary">Back to Servers</a>
+          <button type="submit" form="editServerForm" class="al-btn-primary"><%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %><%= t('saveChanges') %></button>
+          <a href="/admin/servers" class="al-btn-secondary"><%= t('backToServers') %></a>
         </div>
       </div>
 
       <div class="al-page-body space-y-5">
         <form id="editServerForm" class="space-y-5">
           <div class="al-card">
-            <h2 class="al-card-header">General</h2>
+            <h2 class="al-card-header"><%= t('general') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label for="serverName" class="al-label"><%= req.translations.name %>:</label>
+                <label for="serverName" class="al-label"><%= t('name') %>:</label>
                 <div class="flex items-center gap-2">
                   <input id="serverName" name="name" value="<%= server.name %>" class="al-input flex-1">
                   <button type="button" @click="generateName()" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-[var(--theme-bg-hover)]" style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
@@ -60,19 +60,19 @@ function serverEditPage() {
               <div>
                 <label for="serverDescription" class="al-label">
                   <%- icon('file-text', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.description %>:</label>
-                <input id="serverDescription" name="description" value="<%= server.description || '' %>" class="al-input" placeholder="Server description">
+                  <%= t('description') %>:</label>
+                <input id="serverDescription" name="description" value="<%= server.description || '' %>" class="al-input" placeholder="<%= t('serverDescriptionPlaceholder') %>">
               </div>
             </div>
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Server Configuration</h2>
+            <h2 class="al-card-header"><%= t('serverConfiguration') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label for="serverOwner" class="al-label">
                   <%- icon('user', { size: 14, class: 'shrink-0' }) %>
-                  Owner:</label>
+                  <%= t('Owner') %>:</label>
                 <select id="serverOwner" name="ownerId" class="hidden">
                   <% users.forEach(userOption => { %>
                     <option value="<%= userOption.id %>" <%= userOption.id === server.ownerId ? 'selected' : '' %>><%= userOption.username %></option>
@@ -84,7 +84,7 @@ function serverEditPage() {
               <div>
                 <label for="serverNode" class="al-label">
                   <%- icon('server', { size: 14, class: 'shrink-0' }) %>
-                  Node:</label>
+                  <%= t('Node') %>:</label>
                 <select id="serverNode" name="nodeId" class="hidden">
                   <% nodes.forEach(node => { %>
                     <option value="<%= node.id %>" <%= node.id === server.nodeId ? 'selected' : '' %>><%= node.name %> (<%= node.address %>)</option>
@@ -96,7 +96,7 @@ function serverEditPage() {
               <div>
                 <label for="serverImage" class="al-label">
                   <%- icon('box', { size: 14, class: 'shrink-0' }) %>
-                  Image:</label>
+                  <%= t('Image') %>:</label>
                 <select id="serverImage" name="imageId" class="hidden">
                   <% images.forEach(image => { %>
                     <option value="<%= image.id %>" <%= image.id === server.imageId ? 'selected' : '' %> data-port-requirements='<%= image.portRequirements || "[]" %>'><%= image.name %></option>
@@ -108,23 +108,23 @@ function serverEditPage() {
               <div>
                 <label class="al-label">
                   <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-                  Ports:</label>
+                  <%= t('Ports') %>:</label>
                 <input type="hidden" id="serverPorts" name="Ports">
                 <button type="button" id="assignPortsBtn" class="al-btn-secondary mt-2 w-full">
                   <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-                  Assign ports
+                  <%= t('assignPorts') %>
                 </button>
               </div>
             </div>
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Resource Allocation</h2>
+            <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="al-label">
                   <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
-                  Memory:
+                  <%= t('memory') %>:
                 </label>
                 <input type="hidden" id="serverMemory" name="Memory" value="<%= server.Memory %>">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
@@ -133,15 +133,15 @@ function serverEditPage() {
                     class="al-input rounded-l-xl flex-1 border-r-0">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="serverMemoryDisplay" data-hidden="serverMemory"
-                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+                    data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
                 </div>
-                <p class="text-xs" style="color:var(--theme-text-muted)">Min 128 MB</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('minMemory') %></p>
               </div>
 
               <div>
                 <label class="al-label">
                   <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
-                  Swap:
+                  <%= t('swap') %>:
                 </label>
                 <input type="hidden" id="serverSwap" name="Swap" value="<%= server.Swap ?? 0 %>">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
@@ -150,15 +150,15 @@ function serverEditPage() {
                     class="al-input rounded-l-xl flex-1 border-r-0">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="serverSwapDisplay" data-hidden="serverSwap"
-                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+                    data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
                 </div>
-                <p class="text-xs" style="color:var(--theme-text-muted)">0 = no swap, -1 = unlimited</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('swapHint') %></p>
               </div>
 
               <div>
                 <label class="al-label">
                   <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
-                  CPU:
+                  <%= t('cpu') %>:
                 </label>
                 <input type="hidden" id="serverCPU" name="Cpu" value="<%= server.Cpu %>">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
@@ -166,15 +166,15 @@ function serverEditPage() {
                     class="al-input rounded-l-xl flex-1 border-r-0">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="serverCPUDisplay" data-hidden="serverCPU"
-                    data-units="100:Cores,1:%" data-default-unit="Cores">Cores</button>
+                    data-units="100:Cores,1:%" data-default-unit="Cores"><%= t('cores') %></button>
                 </div>
-                <p class="text-xs" style="color:var(--theme-text-muted)">1 core = 100%</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('coreHint') %></p>
               </div>
 
               <div>
                 <label class="al-label">
                   <%- icon('database', { size: 14, class: 'shrink-0' }) %>
-                  Storage:
+                  <%= t('storage') %>:
                 </label>
                 <input type="hidden" id="serverStorage" name="Storage" value="<%= server.Storage %>">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
@@ -183,36 +183,36 @@ function serverEditPage() {
                     class="al-input rounded-l-xl flex-1 border-r-0">
                   <button type="button" class="al-format-switcher" data-format-switcher
                     data-display="serverStorageDisplay" data-hidden="serverStorage"
-                    data-units="1:MB,1024:GB" data-default-unit="MB">MB</button>
+                    data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
                 </div>
-                <p class="text-xs" style="color:var(--theme-text-muted)">Min 128 MB</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('minStorage') %></p>
               </div>
               <div>
                 <label class="al-label">
                   <%- icon('layers', { size: 14, class: 'shrink-0' }) %>
-                  Database limit:
+                  <%= t('databaseLimit') %>:
                 </label>
-                <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= server.databaseLimit ?? 5 %>" class="al-input mt-2 mb-1">
-                <p class="text-xs" style="color:var(--theme-text-muted)">0 = unlimited databases</p>
+                <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= server.databaseLimit ?? settings.defaultDatabaseLimit ?? 5 %>" class="al-input mt-2 mb-1">
+                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('databaseLimitHint') %></p>
               </div>
             </div>
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Backups</h2>
+            <h2 class="al-card-header"><%= t('backups') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="al-label">
                   <%- icon('database-backup', { size: 14, class: 'shrink-0' }) %>
-                  Backup limit:
+                  <%= t('backupLimit') %>:
                 </label>
-                <input id="serverBackupLimit" name="backupLimit" type="number" min="0" value="<%= server.backupLimit ?? 5 %>" class="al-input mt-2">
-                <p class="text-xs" style="color:var(--theme-text-muted)">0 = unlimited backups</p>
+                <input id="serverBackupLimit" name="backupLimit" type="number" min="0" value="<%= server.backupLimit ?? settings.defaultBackupLimit ?? 5 %>" class="al-input mt-2">
+                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('backupLimitHint') %></p>
               </div>
               <div>
                 <label for="backupIgnoreList" class="al-label">
                   <%- icon('filter', { size: 14, class: 'shrink-0' }) %>
-                  Backup ignore list:
+                  <%= t('backupIgnoreList') %>:
                 </label>
                 <textarea id="backupIgnoreList" name="backupIgnoreList" rows="4" class="al-input mt-2" placeholder="cache/%0A*.log%0A.backup"><%-
                   (() => {
@@ -226,14 +226,14 @@ function serverEditPage() {
                     } catch { return server.backupIgnoreList || ''; }
                   })()
                 %></textarea>
-                <p class="text-xs" style="color:var(--theme-text-muted)">One glob pattern per line (e.g. <code>cache/</code>, <code>*.log</code>).</p>
+                <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('backupIgnoreListHint') %></p>
               </div>
             </div>
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Mounts</h2>
-            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)">Attach host directories to this server's container. Define mounts in the Admin → Mounts page.</p>
+            <h2 class="al-card-header"><%= t('mounts') %></h2>
+            <p class="mb-4 text-xs" style="color:var(--theme-text-muted)"><%= t('mountsDesc') %></p>
             <div class="space-y-2">
               <% (mounts || []).forEach(m => { %>
                 <label class="flex items-center gap-2 cursor-pointer">
@@ -243,17 +243,17 @@ function serverEditPage() {
               <% }) %>
             </div>
             <% if (!(mounts || []).length) { %>
-              <p class="text-xs mt-2" style="color:var(--theme-text-muted)">No mounts available.</p>
+              <p class="text-xs mt-2" style="color:var(--theme-text-muted)"><%= t('noMountsAvailable') %></p>
             <% } %>
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Startup Configuration</h2>
+            <h2 class="al-card-header"><%= t('startupConfiguration') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label for="startCommand" class="al-label">
                   <%- icon('terminal', { size: 14, class: 'shrink-0' }) %>
-                  Startup Command:</label>
+                  <%= t('startupCommand') %>:</label>
                 <textarea id="startCommand" name="StartCommand" rows="3" class="al-input"><%= server.StartCommand %></textarea>
               </div>
               <div>
@@ -264,8 +264,8 @@ function serverEditPage() {
                         <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
                       </div>
                       <div>
-                        <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Startup Command Permissions</h3>
-                        <p class="text-xs" style="color:var(--theme-text-muted)">When enabled, users can modify the startup command for this server.</p>
+                        <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('startupCommandPermissions') %></h3>
+                        <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('startupCommandPermissionsDesc') %></p>
                       </div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
@@ -273,7 +273,7 @@ function serverEditPage() {
                       <div class="al-toggle-track">
                         <div class="al-toggle-dot"></div>
                       </div>
-                      <span class="ms-3 al-page-desc text-sm" x-text="allowStartupEdit ? 'Enabled' : 'Disabled'"><%= server.allowStartupEdit ? 'Enabled' : 'Disabled' %></span>
+                      <span class="ms-3 al-page-desc text-sm" x-text="allowStartupEdit ? '<%= t('enabled') %>' : '<%= t('disabled') %>'"><%= server.allowStartupEdit ? t('enabled') : t('disabled') %></span>
                     </label>
                   </div>
                 </div>
@@ -282,7 +282,7 @@ function serverEditPage() {
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Server Status</h2>
+            <h2 class="al-card-header"><%= t('serverStatus') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <div class="flex items-center gap-3 mb-4">
@@ -295,8 +295,8 @@ function serverEditPage() {
                     <% } %>
                   </span>
                   <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text)">Status: <span id="serverStatusText" style="<%= server.Suspended ? 'color:var(--theme-danger)' : 'color:var(--theme-success)' %>"><%= server.Suspended ? 'Suspended' : 'Active' %></span></p>
-                    <p class="text-xs" style="color:var(--theme-text-muted)">Server ID: <%= server.UUID %></p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('Status') %>: <span id="serverStatusText" style="<%= server.Suspended ? 'color:var(--theme-danger)' : 'color:var(--theme-success)' %>"><%= server.Suspended ? t('suspended') : t('active') %></span></p>
+                    <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('serverId') %>: <%= server.UUID %></p>
                   </div>
                 </div>
 
@@ -307,14 +307,14 @@ function serverEditPage() {
                         <%- icon('triangle-alert', { size: 24, style: 'color:var(--theme-warning)' }) %>
                       </div>
                       <div>
-                        <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Server Suspension</h3>
-                        <p class="text-xs" style="color:var(--theme-text-muted)">When enabled, the server will be suspended and stopped. Users will not be able to start the server while it's suspended.</p>
+                        <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('serverSuspension') %></h3>
+                        <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('serverSuspensionDesc') %></p>
                       </div>
                     </div>
                     <label for="suspendServer" class="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" name="Suspended" id="suspendServer" aria-label="Server suspension" class="sr-only peer" value="true" x-model="suspended">
                       <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                      <span id="suspendServerLabel" class="ms-3 text-sm font-medium" style="color:var(--theme-text)" x-text="suspended ? 'Suspended' : 'Active'"><%= server.Suspended ? 'Suspended' : 'Active' %></span>
+                      <span id="suspendServerLabel" class="ms-3 text-sm font-medium" style="color:var(--theme-text)" x-text="suspended ? '<%= t('suspended') %>' : '<%= t('active') %>'"><%= server.Suspended ? t('suspended') : t('active') %></span>
                     </label>
                   </div>
                 </div>
@@ -327,7 +327,7 @@ function serverEditPage() {
                     <%- icon('calendar', { size: 20, class: 'shrink-0' }) %>
                   </span>
                   <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text)">Created</p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('created') %></p>
                     <p class="text-xs" style="color:var(--theme-text-muted)"><%= new Date(server.createdAt).toLocaleString() %></p>
                   </div>
                 </div>
@@ -336,7 +336,7 @@ function serverEditPage() {
           </div>
 
           <div class="al-card">
-            <h2 class="al-card-header">Server Transfer</h2>
+            <h2 class="al-card-header"><%= t('serverTransfer') %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <div class="flex items-center gap-3 mb-4">
@@ -344,23 +344,23 @@ function serverEditPage() {
                     <%- icon('arrow-right-left', { size: 20, class: 'shrink-0' }) %>
                   </span>
                   <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text)">Transfer Server</p>
-                    <p class="text-xs" style="color:var(--theme-text-muted)">Move this server to a different node</p>
+                    <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('transferServer') %></p>
+                    <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('transferServerDesc') %></p>
                   </div>
                 </div>
                 <button type="button" id="transferServerBtn" class="al-btn-secondary w-full" <%= server.Installing ? 'disabled' : '' %>>
                   <%- icon('arrow-right-left', { size: 14, class: 'shrink-0' }) %>
-                  Transfer to another node
+                  <%= t('transferToAnotherNode') %>
                 </button>
                 <% if (server.Installing) { %>
-                  <p class="text-xs mt-2" style="color:var(--theme-warning)">Server is currently installing and cannot be transferred.</p>
+                  <p class="text-xs mt-2" style="color:var(--theme-warning)"><%= t('serverInstalling') %></p>
                 <% } %>
               </div>
               <div>
                 <div id="transferStatus" class="hidden rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
                   <div class="flex items-center gap-2">
                     <div class="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style="border-color:var(--theme-accent); border-top-color:transparent"></div>
-                    <span id="transferStatusText" class="text-sm font-medium">Transfer in progress...</span>
+                    <span id="transferStatusText" class="text-sm font-medium"><%= t('transferInProgress') %></span>
                   </div>
                   <p id="transferStatusDetail" class="text-xs mt-2" style="color:var(--theme-text-muted)"></p>
                 </div>
@@ -376,7 +376,7 @@ function serverEditPage() {
 </div><!-- /x-data -->
 
 <%- include('../../components/portsAllocator') %>
-<%- include('../../components/loadingPopup') %>
+<%- include('../../components/loading-popup') %>
 
 <!-- Transfer Modal -->
 <div id="transferModal" class="al-sheet-overlay fixed inset-0 z-50 hidden">
@@ -386,8 +386,8 @@ function serverEditPage() {
 
       <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
         <div>
-          <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Transfer Server</h3>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);">Move "<%= server.name %>" to another node</p>
+          <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('transferServer') %></h3>
+          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= t('transferServerModalDesc') %></p>
         </div>
         <button type="button" onclick="closeTransferModal()" class="al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
@@ -399,10 +399,10 @@ function serverEditPage() {
           <div>
             <label class="al-label">
               <%- icon('server', { size: 14, class: 'shrink-0' }) %>
-              Destination Node:
+              <%= t('destinationNode') %>:
             </label>
             <select id="transferTargetNode" class="al-input w-full">
-              <option value="">Select a node...</option>
+              <option value=""><%= t('selectNode') %></option>
               <% nodes.forEach(node => { %>
                 <% if (node.id !== server.nodeId) { %>
                   <option value="<%= node.id %>" data-address="<%= node.address %>"><%= node.name %> (<%= node.address %>)</option>
@@ -414,14 +414,14 @@ function serverEditPage() {
           <div>
             <label class="al-label">
               <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-              Ports:
+              <%= t('Ports') %>:
             </label>
             <div id="transferPortsContainer" class="space-y-2">
-              <p class="text-xs" style="color:var(--theme-text-muted)">Select a node first to see available ports.</p>
+              <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('selectNodeFirst') %></p>
             </div>
             <button type="button" id="addTransferPortBtn" class="al-btn-secondary mt-2 w-full hidden">
               <%- icon('plus', { size: 14, class: 'shrink-0' }) %>
-              Add port
+              <%= t('addPort') %>
             </button>
           </div>
 
@@ -429,12 +429,12 @@ function serverEditPage() {
             <div class="flex items-start gap-2">
               <%- icon('info', { size: 16, class: 'shrink-0 mt-0.5', style: 'color:var(--theme-accent)' }) %>
               <div>
-                <p class="text-xs font-medium" style="color:var(--theme-text-strong);">What happens during transfer?</p>
+                <p class="text-xs font-medium" style="color:var(--theme-text-strong);"><%= t('transferWhatHappens') %></p>
                 <ul class="text-xs mt-1 space-y-1" style="color:var(--theme-text-muted);">
-                  <li>1. Server is stopped on the current node</li>
-                  <li>2. Files are archived and streamed to the destination</li>
-                  <li>3. Server is restored and installed on the new node</li>
-                  <li>4. Server is started on the destination node</li>
+                  <li><%= t('transferStep1') %></li>
+                  <li><%= t('transferStep2') %></li>
+                  <li><%= t('transferStep3') %></li>
+                  <li><%= t('transferStep4') %></li>
                 </ul>
               </div>
             </div>
@@ -443,10 +443,10 @@ function serverEditPage() {
       </div>
 
       <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
-        <button type="button" onclick="closeTransferModal()" class="al-btn-secondary">Cancel</button>
+        <button type="button" onclick="closeTransferModal()" class="al-btn-secondary"><%= t('cancel') %></button>
         <button type="button" id="confirmTransferBtn" class="al-btn-primary" disabled>
           <%- icon('arrow-right-left', { size: 14, class: 'shrink-0' }) %>
-          Transfer Server
+          <%= t('transferServer') %>
         </button>
       </div>
     </div>
@@ -520,7 +520,7 @@ function serverEditPage() {
 
     function ensureMinimumPortRows() {
       const requirements = getPortRequirements();
-      const DEFAULT_PORT = 25565;
+      const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
       while (assignedPorts.length < requirements.length) {
         const req = requirements[assignedPorts.length] || {};
         assignedPorts.push({
@@ -535,7 +535,7 @@ function serverEditPage() {
 
     function syncPortsButton() {
       serverPortsInput.value = JSON.stringify(assignedPorts);
-      document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? `Assign ports (${assignedPorts.length})` : 'Assign ports';
+      document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? (req.translations.assignPorts || 'Assign ports') + ' (' + assignedPorts.length + ')' : (req.translations.assignPorts || 'Assign ports');
     }
 
     function renderPortRows() {
@@ -566,9 +566,9 @@ function serverEditPage() {
       // Optimistically revert the toggle; only flip it back on confirm.
       this.checked = false;
       window.modal.confirm({
-        title: 'Suspend server?',
-        body: 'The server will be stopped and the owner will not be able to start it. You can unsuspend at any time.',
-        danger: true, confirmLabel: 'Suspend',
+        title: req.translations.suspendServer || 'Suspend server?',
+        body: req.translations.suspendServerConfirm || 'The server will be stopped and the owner will not be able to start it. You can unsuspend at any time.',
+        danger: true, confirmLabel: req.translations.suspend || 'Suspend',
         onConfirm: function () {
           suspendServerToggle.checked = true;
           doSuspend('suspend', suspendServerToggle);
@@ -588,10 +588,10 @@ function serverEditPage() {
           throw new Error((await response.json()).error || 'Request failed');
         }
 
-        suspendServerLabel.textContent = action === 'suspend' ? 'Suspended' : 'Active';
+        suspendServerLabel.textContent = action === 'suspend' ? (req.translations.suspended || 'Suspended') : (req.translations.active || 'Active');
         const statusText = document.getElementById('serverStatusText');
         if (statusText) {
-          statusText.textContent = action === 'suspend' ? 'Suspended' : 'Active';
+          statusText.textContent = action === 'suspend' ? (req.translations.suspended || 'Suspended') : (req.translations.active || 'Active');
           statusText.style.color = action === 'suspend' ? 'var(--theme-danger)' : 'var(--theme-success)';
         }
         const statusCircle = document.getElementById('serverStatusCircle');
@@ -603,8 +603,8 @@ function serverEditPage() {
         }
       } catch (err) {
         toggle.checked = action === 'unsuspend';
-        suspendServerLabel.textContent = action === 'suspend' ? 'Active' : 'Suspended';
-        showToast('Failed to ' + action + ' server: ' + (err.message || 'unknown error'), 'error');
+        suspendServerLabel.textContent = action === 'suspend' ? (req.translations.active || 'Active') : (req.translations.suspended || 'Suspended');
+        showToast((req.translations.failedTo || 'Failed to ') + action + (req.translations.serverLowercase || ' server: ') + (err.message || (req.translations.unknownError || 'unknown error')), 'error');
       }
     }
 
@@ -625,8 +625,8 @@ function serverEditPage() {
         data.Suspended = 'false';
       }
 
-      const loader = showLoadingPopup('Updating Server', 'Processing server update...');
-      loader.updateProgress(20, 'Sending server configuration...');
+      const loader = showLoadingPopup(req.translations.updatingServer || 'Updating Server', req.translations.processingServerUpdate || 'Processing server update...');
+      loader.updateProgress(20, req.translations.sendingServerConfig || 'Sending server configuration...');
 
       try {
         const response = await fetch('/api/v2/admin/servers/<%= server.id %>', {
@@ -641,21 +641,21 @@ function serverEditPage() {
         const result = await response.json();
 
         if (response.ok) {
-          loader.updateProgress(100, 'Server updated successfully!');
+          loader.updateProgress(100, req.translations.serverUpdatedSuccessfully || 'Server updated successfully!');
           setTimeout(() => {
             loader.close();
-            showToast('Server updated successfully!', 'success');
+            showToast(req.translations.serverUpdatedSuccessfully || 'Server updated successfully!', 'success');
             setTimeout(() => {
               window.location.href = '/admin/servers';
             }, 1000);
           }, 500);
         } else {
           loader.close();
-          showToast('Failed to update server: ' + (result.error || 'Unknown error'), 'error');
+          showToast((req.translations.failedToUpdateServer || 'Failed to update server: ') + (result.error || (req.translations.unknownError || 'Unknown error')), 'error');
         }
       } catch (error) {
         loader.close();
-        showToast('Failed to update server: ' + error.message, 'error');
+        showToast((req.translations.failedToUpdateServer || 'Failed to update server: ') + error.message, 'error');
       }
     });
 </script>
@@ -679,19 +679,19 @@ function serverEditPage() {
     let nodesData = {};
     let pollInterval = null;
 
-    const DEFAULT_PORT = 25565;
+    const DEFAULT_PORT = <%= settings.defaultPort ?? 25565 %>;
 
     const statusSteps = {
-      'pending': { text: 'Queued...' },
-      'stopping': { text: 'Stopping server on source node...' },
-      'archiving': { text: 'Archiving server files...' },
-      'transferring': { text: 'Streaming data to destination...' },
-      'restoring': { text: 'Restoring files on destination...' },
-      'installing': { text: 'Installing server on destination...' },
-      'updating-db': { text: 'Updating database records...' },
-      'starting': { text: 'Starting server on destination...' },
-      'completed': { text: 'Transfer complete!' },
-      'failed': { text: 'Transfer failed' },
+      'pending': { text: req.translations.queued || 'Queued...' },
+      'stopping': { text: req.translations.stoppingServerOnSource || 'Stopping server on source node...' },
+      'archiving': { text: req.translations.archivingServerFiles || 'Archiving server files...' },
+      'transferring': { text: req.translations.streamingDataToDestination || 'Streaming data to destination...' },
+      'restoring': { text: req.translations.restoringFilesOnDestination || 'Restoring files on destination...' },
+      'installing': { text: req.translations.installingServerOnDestination || 'Installing server on destination...' },
+      'updating-db': { text: req.translations.updatingDatabaseRecords || 'Updating database records...' },
+      'starting': { text: req.translations.startingServerOnDestination || 'Starting server on destination...' },
+      'completed': { text: req.translations.transferComplete || 'Transfer complete!' },
+      'failed': { text: req.translations.transferFailed || 'Transfer failed' },
     };
 
     async function fetchNodesData() {
@@ -787,7 +787,7 @@ function serverEditPage() {
         `;
       });
 
-      transferPortsContainer.innerHTML = html || '<p class="text-xs text-neutral-500">No ports configured.</p>';
+      transferPortsContainer.innerHTML = html || '<p class="text-xs text-neutral-500">' + (req.translations.noPortsConfigured || 'No ports configured.') + '</p>';
       addTransferPortBtn.classList.toggle('hidden', transferPorts.length === 0);
       updateConfirmButton();
     }
@@ -866,7 +866,7 @@ function serverEditPage() {
       if (!nodeId || transferPorts.length === 0) return;
 
       confirmTransferBtn.disabled = true;
-      confirmTransferBtn.textContent = 'Starting transfer...';
+      confirmTransferBtn.textContent = req.translations.startingTransfer || 'Starting transfer...';
 
       try {
         const response = await fetch('/api/v2/admin/servers/<%= server.id %>/transfer', {
@@ -878,16 +878,16 @@ function serverEditPage() {
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(result.error || 'Failed to start transfer');
+          throw new Error(result.error || (req.translations.failedToStartTransfer || 'Failed to start transfer'));
         }
 
         closeTransferModal();
         startTransferPolling();
-        showToast('Transfer started!', 'success');
+        showToast(req.translations.transferStarted || 'Transfer started!', 'success');
       } catch (err) {
-        showToast('Failed to start transfer: ' + (err.message || 'unknown error'), 'error');
+        showToast((req.translations.failedToStartTransfer || 'Failed to start transfer: ') + (err.message || (req.translations.unknownError || 'unknown error')), 'error');
         confirmTransferBtn.disabled = false;
-        confirmTransferBtn.innerHTML = '<%- icon("arrow-right-left", { size: 14, class: "shrink-0" }) %>Transfer Server';
+        confirmTransferBtn.innerHTML = '<%- icon("arrow-right-left", { size: 14, class: "shrink-0" }) %>' + (req.translations.transferServer || 'Transfer Server');
       }
     });
 
@@ -915,9 +915,9 @@ function serverEditPage() {
 
         if (state.status === 'completed') {
           clearInterval(pollInterval);
-          transferStatusText.textContent = 'Transfer complete!';
+          transferStatusText.textContent = req.translations.transferComplete || 'Transfer complete!';
           transferStatusDetail.textContent = '';
-          showToast('Transfer complete!', 'success');
+          showToast(req.translations.transferComplete || 'Transfer complete!', 'success');
         } else if (state.status === 'failed') {
           clearInterval(pollInterval);
         }

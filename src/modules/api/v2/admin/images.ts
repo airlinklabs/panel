@@ -41,10 +41,11 @@ import {
   getCatalogue,
   forceRefresh,
 } from '../../../../handlers/eggCatalogueService';
+import { IMAGE_UPLOAD_LIMIT_BYTES } from '../../../../config/limits';
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: IMAGE_UPLOAD_LIMIT_BYTES },
 });
 
 function normalizeImageData(raw: Record<string, unknown>) {
@@ -109,7 +110,7 @@ router.get('/', async (req, res) => {
     prisma.images.findMany({
       skip: (page - 1) * perPage,
       take: perPage,
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     }),
     prisma.images.count(),
   ]);

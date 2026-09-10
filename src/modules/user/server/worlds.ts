@@ -6,10 +6,7 @@ import {
 } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
 import { isWorld } from '../../../handlers/features';
-import {
-  fsListSchema,
-  parseDaemonResponse,
-} from '../../../platform/daemon/dtos';
+import { fsListSchema, parseDaemonResponse } from '../../../types/daemon';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';

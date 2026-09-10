@@ -1,5 +1,6 @@
 import prisma from '../../db';
 import logger from '../logger';
+import { logT } from '../../services/i18n';
 
 // ── Realtime membership cache ─────────────────────────────────────────────────
 // Real-time event delivery must honour authorization: a socket may only
@@ -80,9 +81,12 @@ export async function getUserServerIds(
     membershipCache.set(userId, { serverIds: set, fetchedAt: Date.now() });
     return set;
   } catch (error) {
-    logger.warn(`Failed to resolve realtime membership for user ${userId}:`, {
-      error: String(error),
-    });
+    logger.warn(
+      logT('log.realtimeMembershipResolveFailed', { userId: String(userId) }),
+      {
+        error: String(error),
+      },
+    );
     return new Set<string>();
   }
 }

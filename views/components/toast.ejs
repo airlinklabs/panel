@@ -82,8 +82,8 @@
       if (!data || typeof data !== 'object') return {};
       if (typeof data.state === 'string') {
         const st = data.state;
-        if (st === 'installed') return { done: true, success: true, message: 'Installation complete.' };
-        if (st === 'failed') return { done: true, success: false, error: data.error || 'Installation failed.' };
+        if (st === 'installed') return { done: true, success: true, message: req.translations.installationComplete || 'Installation complete.' };
+        if (st === 'failed') return { done: true, success: false, error: data.error || (req.translations.installationFailed || 'Installation failed.') };
         return { message: typeof data.error === 'string' ? data.error : undefined };
       }
       const done = data.done === true || data.success === true || data.success === false || !!data.error;
@@ -194,7 +194,7 @@
         dismissBtn.type = 'button';
         dismissBtn.className = 'shrink-0 p-1 rounded-lg transition-opacity hover:opacity-70 ml-1';
         dismissBtn.style.color = 'var(--theme-text-muted)';
-        dismissBtn.setAttribute('aria-label', 'Dismiss notification');
+        dismissBtn.setAttribute('aria-label', req.translations.dismissNotification || 'Dismiss notification');
         dismissBtn.innerHTML = alIcon('x', 'w-3.5 h-3.5');
         dismissBtn.addEventListener('click', function (e) {
           e.stopPropagation();

@@ -11,6 +11,19 @@ import { getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import { httpGet, httpPost } from '../../utils/http';
 import { redisRateLimit } from '../../handlers/utils/security/redisRateLimit';
+import { logT } from '../../services/i18n';
+import {
+  VT_API_BASE,
+  VT_GUI_FILE_URL,
+  VT_GUI_UPLOAD_URL,
+} from '../../config/urls';
+import {
+  DAEMON_TIMEOUT_RADAR_ZIP_MS,
+  DAEMON_TIMEOUT_VT_LOOKUP_MS,
+  DAEMON_TIMEOUT_VT_UPLOAD_MS,
+} from '../../config/daemonTimeouts';
+import { VT_FILE_LIMIT_BYTES } from '../../config/limits';
+import { VT_POLL_INTERVAL_MS } from '../../config/timeouts';
 
 // In-memory rate limiter respecting VT free tier: 4/min, 500/day
 const vtRateLimit = {
@@ -104,7 +117,10 @@ const radarModule: Module = {
                     filename: file,
                   };
                 } catch (error: unknown) {
-                  logger.error(`Error parsing radar script ${file}:`, error);
+                  logger.error(
+                    logT('log.errorParsingRadarScript', { file }),
+                    error,
+                  );
                   return {
                     id: file.replace('.json', ''),
                     name: file,
@@ -118,7 +134,7 @@ const radarModule: Module = {
 
           res.json({ success: true, scripts });
         } catch (error: unknown) {
-          logger.error('Error fetching radar scripts:', error);
+          logger.error(logT('log.errorFetchingRadarScripts'), error);
           res
             .status(500)
             .json({ success: false, error: 'Failed to fetch radar scripts' });
@@ -184,10 +200,10 @@ const radarModule: Module = {
 
         try {
           const vtResponse = await httpGet<Record<string, unknown>>(
-            `https://www.virustotal.com/api/v3/files/${hash}`,
+            `${VT_API_BASE}/files/${hash}`,
             {
               headers: { 'x-apikey': apiKey },
-              timeout: 15000,
+              timeout: DAEMON_TIMEOUT_VT_LOOKUP_MS,
             },
           );
 
@@ -198,7 +214,7 @@ const radarModule: Module = {
 
           if (vtResponse.status !== 200) {
             logger.error(
-              'VirusTotal API error:',
+              logT('log.virusTotalApiError'),
               `Status ${vtResponse.status}`,
             );
             res.status(502).json({
@@ -241,11 +257,11 @@ const radarModule: Module = {
                 .toISOString()
                 .split('T')[0]
               : null,
-            vtLink: `https://www.virustotal.com/gui/file/${hash}`,
+            vtLink: VT_GUI_FILE_URL(hash),
           });
         } catch (err: unknown) {
           logger.error(
-            'VirusTotal API error:',
+            logT('log.virusTotalApiError'),
             err instanceof Error ? err.message : err,
           );
           res.status(502).json({
@@ -347,7 +363,7 @@ const radarModule: Module = {
             results: scanData,
           });
         } catch (error: unknown) {
-          logger.error('Error running radar scan:', error);
+          logger.error(logT('log.errorRunningRadarScan'), error);
           const errorMessage =
             error instanceof Error ? error.message : 'Unknown error occurred';
 
@@ -433,14 +449,14 @@ const radarModule: Module = {
               maxFileSizeMb: 32,
             },
             responseType: 'arraybuffer',
-            timeout: 120000,
+            timeout: DAEMON_TIMEOUT_RADAR_ZIP_MS,
           });
 
           await fs.writeFile(tmpPath, zipResponse.data);
 
           const stat = await fs.stat(tmpPath);
           // VT free tier rejects files over 32 MB
-          if (stat.size > 32 * 1024 * 1024) {
+          if (stat.size > VT_FILE_LIMIT_BYTES) {
             await fs.unlink(tmpPath);
             res.status(413).json({
               success: false,
@@ -466,14 +482,14 @@ const radarModule: Module = {
           ]);
 
           const uploadResponse = await httpPost<Record<string, unknown>>(
-            'https://www.virustotal.com/api/v3/files',
+            `${VT_API_BASE}/files`,
             formBody,
             {
               headers: {
                 'Content-Type': `multipart/form-data; boundary=${boundary}`,
                 'x-apikey': apiKey,
               },
-              timeout: 90000,
+              timeout: DAEMON_TIMEOUT_VT_UPLOAD_MS,
             },
           );
 
@@ -502,11 +518,14 @@ const radarModule: Module = {
           // VT typically finishes in 30–90s for small zips on free tier.
           let analysisData: Record<string, unknown> | null = null;
           for (let attempt = 0; attempt < 8; attempt++) {
-            await new Promise((r) => setTimeout(r, 20000));
+            await new Promise((r) => setTimeout(r, VT_POLL_INTERVAL_MS));
 
             const pollResponse = await httpGet<Record<string, unknown>>(
-              `https://www.virustotal.com/api/v3/analyses/${analysisId}`,
-              { headers: { 'x-apikey': apiKey }, timeout: 15000 },
+              `${VT_API_BASE}/analyses/${analysisId}`,
+              {
+                headers: { 'x-apikey': apiKey },
+                timeout: DAEMON_TIMEOUT_VT_LOOKUP_MS,
+              },
             );
 
             const pollData = pollResponse.data as
@@ -529,7 +548,7 @@ const radarModule: Module = {
               success: true,
               pending: true,
               analysisId,
-              vtLink: 'https://www.virustotal.com/gui/home/upload',
+              vtLink: VT_GUI_UPLOAD_URL,
             });
             return;
           }
@@ -540,9 +559,7 @@ const radarModule: Module = {
           const fileInfo = meta?.file_info as
             Record<string, unknown> | undefined;
           const sha256 = fileInfo?.sha256 as string | undefined;
-          const vtLink = sha256
-            ? `https://www.virustotal.com/gui/file/${sha256}`
-            : 'https://www.virustotal.com/gui/home/upload';
+          const vtLink = sha256 ? VT_GUI_FILE_URL(sha256) : VT_GUI_UPLOAD_URL;
 
           const dataAttrs = (analysisData.data as Record<string, unknown>)
             ?.attributes as Record<string, unknown> | undefined;
@@ -569,7 +586,7 @@ const radarModule: Module = {
           });
         } catch (err: unknown) {
           logger.error(
-            'VT file scan error:',
+            logT('log.vtFileScanError'),
             err instanceof Error ? err.message : err,
           );
           res.status(502).json({ success: false, error: 'File scan failed' });

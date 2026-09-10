@@ -3,18 +3,61 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Motion tokens (Phase 3) ──────────────────────────────────
-   Central duration/easing scale for all UI motion. Consumers use
-   these tokens (e.g. transition: transform var(--dur-enter)
-   var(--ease-decelerate)) instead of ad-hoc timings so reduced-motion
-   handling and design-system tuning stay in one place. */
 :root {
+  /* z-index layers */
+  --z-dropdown: 9999;
+  --z-overlay: 70;
+  --z-tooltip: 2;
+
+  /* Border radii */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-pill: 50%;
+
+  /* Box shadows */
+  --shadow-dialog: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --shadow-dialog-dark: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.18);
+  --shadow-card-dark: 0 1px 4px rgba(255, 255, 255, 0.18);
+  --shadow-sheet: 0 1px 2px rgb(0 0 0 / 0.04);
+
+  /* Overlay / scrim backgrounds */
+  --overlay-bg: rgba(0, 0, 0, 0.4);
+  --overlay-bg-heavy: rgba(0, 0, 0, 0.5);
+  --skeleton-shine: rgba(255, 255, 255, 0.08);
+  --scrim-light: rgba(255, 255, 255, 0.55);
+  --scrim-dark: rgba(0, 0, 0, 0.55);
+
+  /* Input sizing */
+  --input-padding-x: 12px;
+  --input-padding-y: 10px;
+  --input-font-size: 14px;
+  --input-min-height: 44px;
+
+  /* Select sizing */
+  --select-font-size: 13px;
+  --select-min-height: 40px;
+  --select-icon-size: 14px;
+  --select-max-dropdown-height: 200px;
+
+  /* Badge */
+  --badge-font-size: 11px;
+
+  /* Sheet */
+  --sheet-radius: 0 12px 12px 0;
+  --sheet-padding-x: 0 12px;
+
+  /* Sidebar */
+  --sidebar-collapsed-width: 72px;
+
+  /* ── Motion tokens (Phase 3) ────────────────────────────────── */
   /* Density scale */
-  --space-xs: 0.25rem; /* 4px */
-  --space-sm: 0.5rem; /* 8px */
-  --space-md: 0.75rem; /* 12px */
-  --space-lg: 1rem; /* 16px */
-  --space-xl: 1.5rem; /* 24px */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.5rem;
 
   /* Icon sizes */
   --icon-xs: 14px;
@@ -22,18 +65,15 @@
   --icon-md: 18px;
   --icon-lg: 20px;
 
-  /* Compact font scale (denser defaults) */
-  --text-dense-xs: 0.6875rem; /* 11px */
-  --text-dense-sm: 0.75rem; /* 12px */
-  --text-dense-base: 0.8125rem; /* 13px */
-  --text-dense-lg: 0.875rem; /* 14px */
+  /* Compact font scale */
+  --text-dense-xs: 0.6875rem;
+  --text-dense-sm: 0.75rem;
+  --text-dense-base: 0.8125rem;
+  --text-dense-lg: 0.875rem;
 
   /* Component density */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --pad-card: 0.75rem; /* 12px — tighter cards */
-  --pad-card-header: 0.625rem 0.75rem; /* 10px 12px */
+  --pad-card: 0.75rem;
+  --pad-card-header: 0.625rem 0.75rem;
 
   --dur-fast: 120ms;
   --dur-quick: 150ms;
@@ -107,7 +147,7 @@
   .al-surface-raised {
     background: var(--theme-bg-card);
     border: 1px solid var(--theme-border);
-    box-shadow: var(--theme-shadow, 0 1px 3px rgba(0, 0, 0, 0.06));
+    box-shadow: var(--theme-shadow, var(--shadow-card));
   }
 
   /* Buttons — compact */
@@ -192,7 +232,7 @@
     @apply rounded-xl overflow-hidden p-3;
     background: var(--theme-bg-card);
     border: 1px solid var(--theme-border);
-    box-shadow: var(--theme-shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+    box-shadow: var(--theme-shadow-sm, var(--shadow-sheet));
   }
   .al-card-header {
     @apply -mx-3 -mt-3 mb-0 px-3 py-2.5 text-[13px] font-medium border-b;
@@ -254,7 +294,7 @@
     background: linear-gradient(
       90deg,
       transparent 0%,
-      var(--theme-skeleton-shine, rgba(255, 255, 255, 0.08)) 50%,
+      var(--theme-skeleton-shine, var(--skeleton-shine)) 50%,
       transparent 100%
     );
     animation: al-skeleton-shimmer 1.5s ease-in-out infinite;
@@ -335,7 +375,7 @@
       var(--motion-ease-decelerate, cubic-bezier(0, 0, 0.2, 1));
   }
   dialog.al-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--overlay-bg);
   }
   @keyframes al-dialog-in {
     from {
@@ -593,10 +633,10 @@
   background: var(--al-wallpaper-scrim, rgba(0, 0, 0, 0.35));
 }
 html {
-  --al-wallpaper-scrim: rgba(255, 255, 255, 0.55);
+  --al-wallpaper-scrim: var(--scrim-light);
 }
 html.dark {
-  --al-wallpaper-scrim: rgba(0, 0, 0, 0.55);
+  --al-wallpaper-scrim: var(--scrim-dark);
 }
 
 /* ── Console responsive ─────────────────────────────────────── */
@@ -616,7 +656,7 @@ html.dark {
   color: var(--theme-text-muted);
   border-bottom: none;
   background: transparent;
-  border-radius: 10px 10px 0 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   opacity: 0.75;
   cursor: pointer;
   transition:
@@ -658,18 +698,18 @@ html.dark {
   align-items: center;
   justify-content: center;
   min-width: 3.5rem;
-  padding: 0 12px;
-  border-radius: 0 12px 12px 0;
+  padding: var(--sheet-padding-x);
+  border-radius: var(--sheet-radius);
   border: 1px solid var(--theme-border-input);
   border-left: none;
   background: var(--theme-bg-secondary);
   color: var(--theme-text-muted);
-  font-size: 13px;
+  font-size: var(--select-font-size);
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  min-height: 40px;
+  min-height: var(--select-min-height);
   transition:
     background 0.15s cubic-bezier(0.16, 1, 0.3, 1),
     color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
@@ -742,17 +782,17 @@ html.dark {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 10px 14px;
+  padding: var(--input-padding-y) var(--input-padding-x);
   border-radius: var(--theme-radius-input, 0.75rem);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--input-font-size);
   border: 1px solid var(--theme-border, #e5e5e5);
   background: var(--theme-bg-secondary, #f5f5f5);
   color: var(--theme-text-strong, #171717);
   transition:
     background 0.15s,
     border-color 0.15s;
-  min-height: 44px;
+  min-height: var(--input-min-height);
 }
 .dark .cs-trigger {
   background: var(--theme-bg-secondary, rgba(255, 255, 255, 0.06));
@@ -778,8 +818,8 @@ html.dark {
   pointer-events: none;
 }
 .cs-trigger svg {
-  width: 14px;
-  height: 14px;
+  width: var(--select-icon-size);
+  height: var(--select-icon-size);
   opacity: 0.4;
   transition: transform 0.18s;
   flex-shrink: 0;
@@ -795,27 +835,27 @@ html.dark {
   top: calc(100% + 5px);
   left: 0;
   right: 0;
-  z-index: 9999;
+  z-index: var(--z-dropdown);
   background: var(--theme-bg-card, #fff);
   border: 1px solid var(--theme-border, #e5e5e5);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-dialog);
   overflow: hidden;
-  max-height: 200px;
+  max-height: var(--select-max-dropdown-height);
   overflow-y: auto;
 }
 .dark .cs-dropdown {
   background: var(--theme-bg-card, #1e1e1e);
   border-color: var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-dialog-dark);
 }
 .cs-option {
-  padding: 10px 14px;
-  font-size: 13px;
+  padding: var(--input-padding-y) var(--input-padding-x);
+  font-size: var(--select-font-size);
   cursor: pointer;
   color: var(--theme-text-strong, #171717);
   transition: background 0.1s;
-  min-height: 44px;
+  min-height: var(--input-min-height);
   display: flex;
   align-items: center;
 }
@@ -863,7 +903,7 @@ html.dark {
   width: 2.25rem;
   height: 2.25rem;
   flex-shrink: 0;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--theme-border);
   color: var(--theme-text-muted);
   background: var(--theme-bg-card);
@@ -994,10 +1034,10 @@ html.dark {
 #sliding-background {
   background: var(--theme-accent) !important;
   border-color: var(--theme-accent) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--shadow-card);
 }
 .dark #sliding-background {
-  box-shadow: 0 1px 4px rgba(255, 255, 255, 0.18);
+  box-shadow: var(--shadow-card-dark);
 }
 .nav-link2.nav2-active {
   color: var(--theme-accent-text);
@@ -1087,7 +1127,7 @@ input[type="button"]:disabled {
 @layer components {
   .al-sheet-overlay {
     @apply fixed inset-0 z-50 flex items-center justify-center p-4;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--overlay-bg-heavy);
   }
 
   /* Every sheet panel keeps its border themed. Tailwind v4's `border`
@@ -1111,7 +1151,7 @@ input[type="button"]:disabled {
 
   @media (max-width: 639px) {
     .al-sheet-overlay {
-      z-index: 70 !important;
+      z-index: var(--z-overlay) !important;
       align-items: flex-end !important;
       padding: 0 !important;
     }
@@ -1119,7 +1159,7 @@ input[type="button"]:disabled {
       width: 100% !important;
       max-width: 100% !important;
       margin: 0 !important;
-      border-radius: 1.25rem 1.25rem 0 0 !important;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
       max-height: 92dvh;
       overflow-y: auto;
     }
@@ -1213,7 +1253,7 @@ input[type="button"]:disabled {
 .al-table-sticky thead th {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: var(--z-tooltip);
   background: var(--theme-bg-card);
 }
 
@@ -1252,7 +1292,7 @@ input[type="button"]:disabled {
     border: 1px solid var(--theme-border);
     border-radius: 0.875rem;
     background: var(--theme-bg-card);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+    box-shadow: var(--shadow-sheet);
   }
   .al-table-card tbody tr:last-child {
     margin-bottom: 0;
@@ -1275,7 +1315,7 @@ input[type="button"]:disabled {
     content: attr(data-label);
     order: -1;
     flex-shrink: 0;
-    font-size: 11px;
+    font-size: var(--badge-font-size);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;

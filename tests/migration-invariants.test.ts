@@ -30,21 +30,21 @@ describe("Migration invariant: CSP nonce on inline scripts", () => {
     "components/footer.ejs",
     "components/toast.ejs",
     "components/sidebar.ejs",
-    "components/bottomNav.ejs",
+    "components/bottom-nav.ejs",
     "components/modal.ejs",
     "components/template.ejs",
-    "components/serverFeatures.ejs",
+    "components/server-features.ejs",
     "components/csrf.ejs",
-    "components/loadingPopup.ejs",
-    "components/imageViewer.ejs",
+    "components/loading-popup.ejs",
+    "components/image-viewer.ejs",
     "components/sftp.ejs",
     "components/portsAllocator.ejs",
     "components/auth-header.ejs",
     "components/auth-styles.ejs",
     "components/installHeader.ejs",
-    "components/serverHeader.ejs",
-    "components/serverMeta.ejs",
-    "components/serverTemplate.ejs",
+    "components/server-header.ejs",
+    "components/server-meta.ejs",
+    "components/server-template.ejs",
     "errors/error.ejs",
   ]);
 
@@ -160,8 +160,8 @@ describe("Migration invariant: header.ejs loads required lifecycle scripts", () 
     expect(header).toContain("cdn.min.js");
   });
 
-  it("loads @tanstack/query-core", () => {
-    expect(header).toContain("@tanstack/query-core");
+  it("loads @tanstack/query-core bundle", () => {
+    expect(header).toContain("query-core.js");
   });
 
   it("does not load turbo.js", () => {

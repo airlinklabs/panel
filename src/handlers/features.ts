@@ -1,6 +1,6 @@
 import { isHttpError } from '../utils/http';
 import prisma from '../db';
-import { fsListSchema, parseDaemonResponse } from '../platform/daemon/dtos';
+import { fsListSchema, parseDaemonResponse } from '../types/daemon';
 import { checkNodeStatus } from './utils/node/nodeStatus';
 import logger from './logger';
 import { daemonRequest } from './utils/core/daemonRequest';

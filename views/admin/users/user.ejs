@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Overview' }) %>
+<%- include('../../components/header', { title: t('adminUserTitle') }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -8,19 +8,19 @@
 <%- include('../../components/template') %>
     <div id="page-content" class="flex-1 overflow-y-auto pt-0 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin' },
-        { label: 'Users', href: '/admin/users' },
-        { label: req.translations.adminUserTitle || 'User' }
+        { label: t('admin') },
+        { label: t('breadcrumbUsers'), href: '/admin/users' },
+        { label: t('adminUserTitle') }
       ] }) %>
       <div class="al-page-header flex items-start justify-between gap-4">
         <div>
-          <h1 class="al-page-title"><%= req.translations.adminUserTitle %></h1>
-          <p class="al-page-desc"><%= req.translations.adminUserText %></p>
+          <h1 class="al-page-title"><%= t('adminUserTitle') %></h1>
+          <p class="al-page-desc"><%= t('adminUserText') %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
           <a href="/admin/users/edit/<%= dataUser.id %>" class="al-btn-primary">
             <%- icon('pencil', { size: 16 }) %>
-            <%= req.translations.editUser || 'Edit User' %>
+            <%= t('editUser') %>
           </a>
         </div>
       </div>
@@ -37,19 +37,19 @@
            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
              <div>
                <h2 class="text-lg font-medium border-b pb-2 mb-4" style="color:var(--theme-text-strong);border-color:var(--theme-border)">
-                 <%= req.translations.userInformation || 'User Information' %>
+                  <%= t('userInformation') %>
                </h2>
                <div class="space-y-4">
                  <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.username || 'Username' %></p>
+                     <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('username') %></p>
                     <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.username %></p>
                  </div>
                  <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.email || 'Email' %></p>
+                     <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('email') %></p>
                     <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.email %></p>
                  </div>
                  <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.role || 'Role' %></p>
+                     <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('role') %></p>
                    <p class="mt-1">
                      <% const roleLabel = dataUser.role || (dataUser.isAdmin ? 'admin' : 'user'); %>
                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
@@ -60,18 +60,18 @@
                    </p>
                  </div>
                  <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.description || 'Description' %></p>
-                    <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.description || 'No description provided' %></p>
+                     <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('description') %></p>
+                     <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.description || t('noDescriptionProvided') %></p>
                  </div>
                </div>
              </div>
              <div>
                <h2 class="text-lg font-medium border-b pb-2 mb-4" style="color:var(--theme-text-strong);border-color:var(--theme-border)">
-                 <%= req.translations.serverInformation || 'Server Information' %>
+                  <%= t('serverInformation') %>
                </h2>
                <div class="space-y-4">
                  <div>
-                    <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.totalServers || 'Total Servers' %></p>
+                     <p class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= t('totalServers') %></p>
                     <p class="mt-1 text-base font-medium" style="color:var(--theme-text-strong)"><%= dataUser.servers ? dataUser.servers.length : 0 %></p>
                  </div>
                </div>

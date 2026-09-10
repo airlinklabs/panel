@@ -1,5 +1,6 @@
 import { httpPost, httpDelete, httpGet } from '../../../utils/http';
 import logger from '../../logger';
+import { logT } from '../../../services/i18n';
 
 const AIRLINK_CLOUD_URL = 'https://api.airlinklabs.xyz';
 
@@ -37,7 +38,7 @@ export class AirlinkCloudClient {
 
       return response.data;
     } catch (error) {
-      logger.error('Airlink Cloud upload error:', error);
+      logger.error(logT('log.airlinkCloudUploadError'), error);
       throw error;
     }
   }
@@ -56,7 +57,7 @@ export class AirlinkCloudClient {
 
       return response.data;
     } catch (error) {
-      logger.error('Airlink Cloud delete error:', error);
+      logger.error(logT('log.airlinkCloudDeleteError'), error);
       throw error;
     }
   }
@@ -75,7 +76,7 @@ export class AirlinkCloudClient {
 
       return response;
     } catch (error) {
-      logger.error('Airlink Cloud download error:', error);
+      logger.error(logT('log.airlinkCloudDownloadError'), error);
       throw error;
     }
   }

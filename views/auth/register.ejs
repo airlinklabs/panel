@@ -14,7 +14,7 @@
       <% if (settings.logo) { %>
       <img src="<%= settings.logo %>" alt="" class="h-10 w-10 rounded-xl object-contain mb-5">
       <% } %>
-      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong)">Create account</h1>
+      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong)"><%= t('registerTitle') %></h1>
       <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= settings.title %></p>
     </div>
 
@@ -22,7 +22,7 @@
     <div class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)">
       <p class="text-sm font-medium" style="color:var(--theme-danger)">
         <% if (req.query.err === 'missing_credentials') { %>All fields are required.
-        <% } else if (req.query.err === 'invalid_username') { %>Username must be 3–20 characters, letters and numbers only.
+        <% } else if (req.query.err === 'invalid_username') { %>Username must be 3–32 characters, letters and numbers only.
         <% } else if (req.query.err === 'user_already_exists') { %>That username or email is already taken.
         <% } else if (req.query.err === 'weak_password') { %>Password needs 8+ chars, at least one letter and one number.
         <% } else { %>Something went wrong. Try again.<% } %>
@@ -35,21 +35,21 @@
       <div class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="auth-label" for="username">Username</label>
+            <label class="auth-label" for="username"><%= t('username') %></label>
             <input id="username" name="username" type="text" autocomplete="username"
-              required spellcheck="false" autocapitalize="none" maxlength="20"
+              required spellcheck="false" autocapitalize="none" maxlength="32"
               class="auth-input" placeholder="johndoe" aria-describedby="username-error">
             <p id="username-error" class="text-xs mt-1 hidden" style="color:var(--theme-danger)" role="alert"></p>
           </div>
           <div>
-            <label class="auth-label" for="email">Email</label>
+            <label class="auth-label" for="email"><%= t('email') %></label>
             <input id="email" name="email" type="email" autocomplete="email"
               required class="auth-input" placeholder="you@example.com" aria-describedby="email-error">
             <p id="email-error" class="text-xs mt-1 hidden" style="color:var(--theme-danger)" role="alert"></p>
           </div>
         </div>
         <div>
-          <label class="auth-label" for="password">Password</label>
+            <label class="auth-label" for="password"><%= t('password') %></label>
           <div class="pw-wrapper">
             <input id="password" name="password" type="password" autocomplete="new-password"
               required class="auth-input" placeholder="••••••••" style="padding-right:40px" aria-describedby="pwHint password-error">
@@ -63,15 +63,15 @@
         </div>
         <button type="submit" class="auth-submit inline-flex items-center gap-1.5" id="submitBtn">
           <%- icon('user-plus', { class: 'size-4', strokeWidth: 1.5 }) %>
-          <span class="btn-label">Create account</span>
+          <span class="btn-label"><%= t('registerBtn') %></span>
           <span class="spinner"></span>
         </button>
       </div>
     </form>
 
     <p class="text-sm text-center mt-6" style="color:var(--theme-text-muted)">
-      Already have an account?
-      <a href="/login" class="font-medium hover:underline" style="color:var(--theme-text-link)">Sign in</a>
+      <%= t('hasAccount') %>
+      <a href="/login" class="font-medium hover:underline" style="color:var(--theme-text-link)"><%= t('login') %></a>
     </p>
 
   </div>
@@ -100,10 +100,10 @@
     const v = pwInput.value;
     const score = [v.length >= 8, /[A-Za-z]/.test(v), /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)].filter(Boolean).length;
     const colors = ['var(--theme-danger)','var(--theme-warning)','var(--theme-info)','var(--theme-success)'];
-    const labels = ['Too short','Weak','Fair','Strong'];
+    const labels = ['<%= req.translations.pwStrengthTooShort || "Too short" %>','<%= req.translations.pwStrengthWeak || "Weak" %>','<%= req.translations.pwStrengthFair || "Fair" %>','<%= req.translations.pwStrengthStrong || "Strong" %>'];
     const bar  = document.getElementById('pwBar');
     const hint = document.getElementById('pwHint');
-    if (!v) { bar.style.transform = 'scaleX(0)'; hint.textContent = '8+ characters, one letter, one number.'; hint.style.color = ''; return; }
+    if (!v) { bar.style.transform = 'scaleX(0)'; hint.textContent = '<%= req.translations.pwHint || "8+ characters, one letter, one number." %>'; hint.style.color = ''; return; }
     const idx = Math.max(0, score - 1);
     bar.style.transform = 'scaleX(' + (['0.25','0.5','0.75','1'][idx]) + ')'; bar.style.background = colors[idx];
     hint.textContent = labels[idx]; hint.style.color = colors[idx];
@@ -123,19 +123,19 @@
     if (username.length < 3 || !/^[A-Za-z0-9]+$/.test(username)) {
       document.getElementById('username').classList.add('invalid');
       document.getElementById('username').setAttribute('aria-invalid', 'true');
-      var e = document.getElementById('username-error'); e.textContent = 'Username must be 3+ alphanumeric characters.'; e.classList.remove('hidden');
+      var e = document.getElementById('username-error'); e.textContent = '<%= req.translations.registerUsernameError || "Username must be 3+ alphanumeric characters." %>'; e.classList.remove('hidden');
       ok = false;
     }
     if (!email.includes('@') || !email.includes('.')) {
       document.getElementById('email').classList.add('invalid');
       document.getElementById('email').setAttribute('aria-invalid', 'true');
-      var e = document.getElementById('email-error'); e.textContent = 'Please enter a valid email address.'; e.classList.remove('hidden');
+      var e = document.getElementById('email-error'); e.textContent = '<%= req.translations.registerEmailError || "Please enter a valid email address." %>'; e.classList.remove('hidden');
       ok = false;
     }
     if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
       document.getElementById('password').classList.add('invalid');
       document.getElementById('password').setAttribute('aria-invalid', 'true');
-      var e = document.getElementById('password-error'); e.textContent = 'Password must be 8+ characters with at least one letter and one number.'; e.classList.remove('hidden');
+      var e = document.getElementById('password-error'); e.textContent = '<%= req.translations.registerPasswordError || "Password must be 8+ characters with at least one letter and one number." %>'; e.classList.remove('hidden');
       ok = false;
     }
     if (!ok) { e.preventDefault(); return; }

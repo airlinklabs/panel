@@ -49,7 +49,7 @@ const wallpaperExcluded = req && req.path && (
     <script nonce="<%- nonce %>" defer src="/javascript/shared/al-icon.js?v=8"></script>
 
     <!-- Vendor bundles -->
-    <script nonce="<%- nonce %>" defer src="/vendor/@tanstack/query-core/build/lib/index.js"></script>
+    <script nonce="<%- nonce %>" defer src="/javascript/vendor/query-core.js"></script>
     <script nonce="<%- nonce %>" defer src="/vendor/reconnecting-websocket/dist/reconnecting-websocket-iife.min.js"></script>
 
     <!-- htmx -->
@@ -115,12 +115,12 @@ const wallpaperExcluded = req && req.path && (
 <div id="al-wallpaper-layer" aria-hidden="true"></div>
 <% } %>
 
-<a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--theme-text-strong)] focus:text-[var(--theme-bg)] focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
+<a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--theme-text-strong)] focus:text-[var(--theme-bg)] focus:text-sm focus:font-medium focus:shadow-lg"><%= t('skipToMainContent') %></a>
 
 <!-- The indeterminate page loading line is created by page-loader.js. -->
 <!-- Theme initialization: external module replaces inline script -->
 <script nonce="<%- nonce %>" src="/javascript/shared/theme-init.js?v=1"></script>
-<%- include("./bottomNav") %>
+<%- include("./bottom-nav") %>
 <%- include("./modal") %>
 <script nonce="<%- nonce %>" src="/javascript/shared/toast-store.js?v=1"></script>
 <%- include("./toast") %>

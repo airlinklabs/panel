@@ -141,8 +141,6 @@ export type SettingsMinAggregateOutputType = {
   allowPrivilegedMaxStorage: number | null
   allowPrivilegedMaxDatabases: number | null
   allowUserCreateImages: boolean | null
-  onboardingEnabled: boolean | null
-  onboardingSteps: string | null
   twoFactorRequired: boolean | null
   sftpEnabled: boolean | null
   backupsEnabled: boolean | null
@@ -219,8 +217,6 @@ export type SettingsMaxAggregateOutputType = {
   allowPrivilegedMaxStorage: number | null
   allowPrivilegedMaxDatabases: number | null
   allowUserCreateImages: boolean | null
-  onboardingEnabled: boolean | null
-  onboardingSteps: string | null
   twoFactorRequired: boolean | null
   sftpEnabled: boolean | null
   backupsEnabled: boolean | null
@@ -297,8 +293,6 @@ export type SettingsCountAggregateOutputType = {
   allowPrivilegedMaxStorage: number
   allowPrivilegedMaxDatabases: number
   allowUserCreateImages: number
-  onboardingEnabled: number
-  onboardingSteps: number
   twoFactorRequired: number
   sftpEnabled: number
   backupsEnabled: number
@@ -433,8 +427,6 @@ export type SettingsMinAggregateInputType = {
   allowPrivilegedMaxStorage?: true
   allowPrivilegedMaxDatabases?: true
   allowUserCreateImages?: true
-  onboardingEnabled?: true
-  onboardingSteps?: true
   twoFactorRequired?: true
   sftpEnabled?: true
   backupsEnabled?: true
@@ -511,8 +503,6 @@ export type SettingsMaxAggregateInputType = {
   allowPrivilegedMaxStorage?: true
   allowPrivilegedMaxDatabases?: true
   allowUserCreateImages?: true
-  onboardingEnabled?: true
-  onboardingSteps?: true
   twoFactorRequired?: true
   sftpEnabled?: true
   backupsEnabled?: true
@@ -589,8 +579,6 @@ export type SettingsCountAggregateInputType = {
   allowPrivilegedMaxStorage?: true
   allowPrivilegedMaxDatabases?: true
   allowUserCreateImages?: true
-  onboardingEnabled?: true
-  onboardingSteps?: true
   twoFactorRequired?: true
   sftpEnabled?: true
   backupsEnabled?: true
@@ -754,8 +742,6 @@ export type SettingsGroupByOutputType = {
   allowPrivilegedMaxStorage: number
   allowPrivilegedMaxDatabases: number
   allowUserCreateImages: boolean
-  onboardingEnabled: boolean
-  onboardingSteps: string
   twoFactorRequired: boolean
   sftpEnabled: boolean
   backupsEnabled: boolean
@@ -855,8 +841,6 @@ export type settingsWhereInput = {
   allowPrivilegedMaxStorage?: Prisma.IntFilter<"settings"> | number
   allowPrivilegedMaxDatabases?: Prisma.IntFilter<"settings"> | number
   allowUserCreateImages?: Prisma.BoolFilter<"settings"> | boolean
-  onboardingEnabled?: Prisma.BoolFilter<"settings"> | boolean
-  onboardingSteps?: Prisma.StringFilter<"settings"> | string
   twoFactorRequired?: Prisma.BoolFilter<"settings"> | boolean
   sftpEnabled?: Prisma.BoolFilter<"settings"> | boolean
   backupsEnabled?: Prisma.BoolFilter<"settings"> | boolean
@@ -933,8 +917,6 @@ export type settingsOrderByWithRelationInput = {
   allowPrivilegedMaxStorage?: Prisma.SortOrder
   allowPrivilegedMaxDatabases?: Prisma.SortOrder
   allowUserCreateImages?: Prisma.SortOrder
-  onboardingEnabled?: Prisma.SortOrder
-  onboardingSteps?: Prisma.SortOrder
   twoFactorRequired?: Prisma.SortOrder
   sftpEnabled?: Prisma.SortOrder
   backupsEnabled?: Prisma.SortOrder
@@ -1014,8 +996,6 @@ export type settingsWhereUniqueInput = Prisma.AtLeast<{
   allowPrivilegedMaxStorage?: Prisma.IntFilter<"settings"> | number
   allowPrivilegedMaxDatabases?: Prisma.IntFilter<"settings"> | number
   allowUserCreateImages?: Prisma.BoolFilter<"settings"> | boolean
-  onboardingEnabled?: Prisma.BoolFilter<"settings"> | boolean
-  onboardingSteps?: Prisma.StringFilter<"settings"> | string
   twoFactorRequired?: Prisma.BoolFilter<"settings"> | boolean
   sftpEnabled?: Prisma.BoolFilter<"settings"> | boolean
   backupsEnabled?: Prisma.BoolFilter<"settings"> | boolean
@@ -1092,8 +1072,6 @@ export type settingsOrderByWithAggregationInput = {
   allowPrivilegedMaxStorage?: Prisma.SortOrder
   allowPrivilegedMaxDatabases?: Prisma.SortOrder
   allowUserCreateImages?: Prisma.SortOrder
-  onboardingEnabled?: Prisma.SortOrder
-  onboardingSteps?: Prisma.SortOrder
   twoFactorRequired?: Prisma.SortOrder
   sftpEnabled?: Prisma.SortOrder
   backupsEnabled?: Prisma.SortOrder
@@ -1178,8 +1156,6 @@ export type settingsScalarWhereWithAggregatesInput = {
   allowPrivilegedMaxStorage?: Prisma.IntWithAggregatesFilter<"settings"> | number
   allowPrivilegedMaxDatabases?: Prisma.IntWithAggregatesFilter<"settings"> | number
   allowUserCreateImages?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
-  onboardingEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
-  onboardingSteps?: Prisma.StringWithAggregatesFilter<"settings"> | string
   twoFactorRequired?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
   sftpEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
   backupsEnabled?: Prisma.BoolWithAggregatesFilter<"settings"> | boolean
@@ -1255,8 +1231,6 @@ export type settingsCreateInput = {
   allowPrivilegedMaxStorage?: number
   allowPrivilegedMaxDatabases?: number
   allowUserCreateImages?: boolean
-  onboardingEnabled?: boolean
-  onboardingSteps?: string
   twoFactorRequired?: boolean
   sftpEnabled?: boolean
   backupsEnabled?: boolean
@@ -1333,8 +1307,6 @@ export type settingsUncheckedCreateInput = {
   allowPrivilegedMaxStorage?: number
   allowPrivilegedMaxDatabases?: number
   allowUserCreateImages?: boolean
-  onboardingEnabled?: boolean
-  onboardingSteps?: string
   twoFactorRequired?: boolean
   sftpEnabled?: boolean
   backupsEnabled?: boolean
@@ -1410,8 +1382,6 @@ export type settingsUpdateInput = {
   allowPrivilegedMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
   allowPrivilegedMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
   allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
   twoFactorRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sftpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1488,8 +1458,6 @@ export type settingsUncheckedUpdateInput = {
   allowPrivilegedMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
   allowPrivilegedMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
   allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
   twoFactorRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sftpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1566,8 +1534,6 @@ export type settingsCreateManyInput = {
   allowPrivilegedMaxStorage?: number
   allowPrivilegedMaxDatabases?: number
   allowUserCreateImages?: boolean
-  onboardingEnabled?: boolean
-  onboardingSteps?: string
   twoFactorRequired?: boolean
   sftpEnabled?: boolean
   backupsEnabled?: boolean
@@ -1643,8 +1609,6 @@ export type settingsUpdateManyMutationInput = {
   allowPrivilegedMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
   allowPrivilegedMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
   allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
   twoFactorRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sftpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1721,8 +1685,6 @@ export type settingsUncheckedUpdateManyInput = {
   allowPrivilegedMaxStorage?: Prisma.IntFieldUpdateOperationsInput | number
   allowPrivilegedMaxDatabases?: Prisma.IntFieldUpdateOperationsInput | number
   allowUserCreateImages?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSteps?: Prisma.StringFieldUpdateOperationsInput | string
   twoFactorRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sftpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   backupsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1799,8 +1761,6 @@ export type settingsCountOrderByAggregateInput = {
   allowPrivilegedMaxStorage?: Prisma.SortOrder
   allowPrivilegedMaxDatabases?: Prisma.SortOrder
   allowUserCreateImages?: Prisma.SortOrder
-  onboardingEnabled?: Prisma.SortOrder
-  onboardingSteps?: Prisma.SortOrder
   twoFactorRequired?: Prisma.SortOrder
   sftpEnabled?: Prisma.SortOrder
   backupsEnabled?: Prisma.SortOrder
@@ -1905,8 +1865,6 @@ export type settingsMaxOrderByAggregateInput = {
   allowPrivilegedMaxStorage?: Prisma.SortOrder
   allowPrivilegedMaxDatabases?: Prisma.SortOrder
   allowUserCreateImages?: Prisma.SortOrder
-  onboardingEnabled?: Prisma.SortOrder
-  onboardingSteps?: Prisma.SortOrder
   twoFactorRequired?: Prisma.SortOrder
   sftpEnabled?: Prisma.SortOrder
   backupsEnabled?: Prisma.SortOrder
@@ -1983,8 +1941,6 @@ export type settingsMinOrderByAggregateInput = {
   allowPrivilegedMaxStorage?: Prisma.SortOrder
   allowPrivilegedMaxDatabases?: Prisma.SortOrder
   allowUserCreateImages?: Prisma.SortOrder
-  onboardingEnabled?: Prisma.SortOrder
-  onboardingSteps?: Prisma.SortOrder
   twoFactorRequired?: Prisma.SortOrder
   sftpEnabled?: Prisma.SortOrder
   backupsEnabled?: Prisma.SortOrder
@@ -2091,8 +2047,6 @@ export type settingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   allowPrivilegedMaxStorage?: boolean
   allowPrivilegedMaxDatabases?: boolean
   allowUserCreateImages?: boolean
-  onboardingEnabled?: boolean
-  onboardingSteps?: boolean
   twoFactorRequired?: boolean
   sftpEnabled?: boolean
   backupsEnabled?: boolean
@@ -2169,8 +2123,6 @@ export type settingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   allowPrivilegedMaxStorage?: boolean
   allowPrivilegedMaxDatabases?: boolean
   allowUserCreateImages?: boolean
-  onboardingEnabled?: boolean
-  onboardingSteps?: boolean
   twoFactorRequired?: boolean
   sftpEnabled?: boolean
   backupsEnabled?: boolean
@@ -2247,8 +2199,6 @@ export type settingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   allowPrivilegedMaxStorage?: boolean
   allowPrivilegedMaxDatabases?: boolean
   allowUserCreateImages?: boolean
-  onboardingEnabled?: boolean
-  onboardingSteps?: boolean
   twoFactorRequired?: boolean
   sftpEnabled?: boolean
   backupsEnabled?: boolean
@@ -2325,8 +2275,6 @@ export type settingsSelectScalar = {
   allowPrivilegedMaxStorage?: boolean
   allowPrivilegedMaxDatabases?: boolean
   allowUserCreateImages?: boolean
-  onboardingEnabled?: boolean
-  onboardingSteps?: boolean
   twoFactorRequired?: boolean
   sftpEnabled?: boolean
   backupsEnabled?: boolean
@@ -2344,7 +2292,7 @@ export type settingsSelectScalar = {
   emailCooldown?: boolean
 }
 
-export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "panelWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "require2faForAdmins" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle" | "allowPrivilegedServerLimit" | "allowPrivilegedMaxMemory" | "allowPrivilegedMaxCpu" | "allowPrivilegedMaxStorage" | "allowPrivilegedMaxDatabases" | "allowUserCreateImages" | "onboardingEnabled" | "onboardingSteps" | "twoFactorRequired" | "sftpEnabled" | "backupsEnabled" | "schedulesEnabled" | "databasesEnabled" | "fileManagerEnabled" | "consoleEnabled" | "playerTrackingEnabled" | "scannerEnabled" | "airlinkCloudEnabled" | "defaultMemory" | "defaultCpu" | "defaultDisk" | "maxServersPerUser" | "emailCooldown", ExtArgs["result"]["settings"]>
+export type settingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "logo" | "favicon" | "theme" | "lightTheme" | "darkTheme" | "language" | "allowRegistration" | "uploadLimit" | "createdAt" | "updatedAt" | "sftpPort" | "virusTotalApiKey" | "rateLimitEnabled" | "rateLimitRpm" | "bannedIps" | "allowUserCreateServer" | "allowUserDeleteServer" | "defaultServerLimit" | "defaultMaxMemory" | "defaultMaxCpu" | "defaultMaxStorage" | "defaultMaxDatabases" | "defaultOverallocateMemory" | "defaultOverallocateDisk" | "defaultOverallocateCpu" | "loginWallpaper" | "registerWallpaper" | "panelWallpaper" | "loginMaxAttempts" | "loginLockoutMinutes" | "enforceDaemonHttps" | "require2faForAdmins" | "behindReverseProxy" | "hashApiKeys" | "airlinkCloudApiKey" | "airlinkCloudBackupEnabled" | "smtpHost" | "smtpPort" | "smtpUser" | "smtpPassword" | "smtpFrom" | "smtpSecure" | "s3Enabled" | "s3Endpoint" | "s3Region" | "s3Bucket" | "s3AccessKey" | "s3SecretKey" | "s3PathStyle" | "allowPrivilegedServerLimit" | "allowPrivilegedMaxMemory" | "allowPrivilegedMaxCpu" | "allowPrivilegedMaxStorage" | "allowPrivilegedMaxDatabases" | "allowUserCreateImages" | "twoFactorRequired" | "sftpEnabled" | "backupsEnabled" | "schedulesEnabled" | "databasesEnabled" | "fileManagerEnabled" | "consoleEnabled" | "playerTrackingEnabled" | "scannerEnabled" | "airlinkCloudEnabled" | "defaultMemory" | "defaultCpu" | "defaultDisk" | "maxServersPerUser" | "emailCooldown", ExtArgs["result"]["settings"]>
 
 export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "settings"
@@ -2408,8 +2356,6 @@ export type $settingsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     allowPrivilegedMaxStorage: number
     allowPrivilegedMaxDatabases: number
     allowUserCreateImages: boolean
-    onboardingEnabled: boolean
-    onboardingSteps: string
     twoFactorRequired: boolean
     sftpEnabled: boolean
     backupsEnabled: boolean
@@ -2906,8 +2852,6 @@ export interface settingsFieldRefs {
   readonly allowPrivilegedMaxStorage: Prisma.FieldRef<"settings", 'Int'>
   readonly allowPrivilegedMaxDatabases: Prisma.FieldRef<"settings", 'Int'>
   readonly allowUserCreateImages: Prisma.FieldRef<"settings", 'Boolean'>
-  readonly onboardingEnabled: Prisma.FieldRef<"settings", 'Boolean'>
-  readonly onboardingSteps: Prisma.FieldRef<"settings", 'String'>
   readonly twoFactorRequired: Prisma.FieldRef<"settings", 'Boolean'>
   readonly sftpEnabled: Prisma.FieldRef<"settings", 'Boolean'>
   readonly backupsEnabled: Prisma.FieldRef<"settings", 'Boolean'>

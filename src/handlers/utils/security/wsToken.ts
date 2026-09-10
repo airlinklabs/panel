@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
+import { WS_TOKEN_TTL_MS } from '../../../config/timeouts';
 
-const TOKEN_TTL_MS = 60 * 1000;
 const VERSION = 1;
 
 function secret(): string {
@@ -26,7 +26,7 @@ export function issueWsToken(serverId: string, userId: number): string {
         v: VERSION,
         srv: serverId,
         usr: userId,
-        exp: Date.now() + TOKEN_TTL_MS,
+        exp: Date.now() + WS_TOKEN_TTL_MS,
       }),
     ),
   );

@@ -1,17 +1,16 @@
-import { getSettings } from '../../handlers/settingsCache';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
-import type { Module } from '../../handlers/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import { getUser } from '../../handlers/utils/user/user';
-import logger from '../../handlers/logger';
-import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
-import {
-  containerStatusSchema,
-  parseDaemonResponse,
-} from '../../platform/daemon/dtos';
-import type { ErrorMessage } from './server/shared';
+import { getSettings } from "../../handlers/settingsCache";
+import type { Request, Response } from "express";
+import { Router } from "express";
+import type { Module } from "../../handlers/moduleInit";
+import prisma from "../../db";
+import { isAuthenticated } from "../../handlers/utils/auth/authUtil";
+import { getUser } from "../../handlers/utils/user/user";
+import logger from "../../handlers/logger";
+import { daemonRequest } from "../../handlers/utils/core/daemonRequest";
+import { containerStatusSchema, parseDaemonResponse } from "../../types/daemon";
+import type { ErrorMessage } from "./server/shared";
+import { DASHBOARD_PER_PAGE } from "../../config/limits";
+import { DASHBOARD_STATUS_TIMEOUT_MS } from "../../config/daemonTimeouts";
 
 interface ServerSnapshot {
   status: string;
@@ -73,14 +72,14 @@ function checkNodeHealth(node: {
         nodeKey: node.key,
         method: "GET",
         path: "/",
-        timeout: 2000,
+        timeout: DASHBOARD_STATUS_TIMEOUT_MS,
       });
       const health: CachedNodeHealth = { online: true, checkedAt };
       nodeHealthCache.set(node.id, health);
       return health;
     } catch (err: unknown) {
       const code =
-        err && typeof err === 'object' && 'code' in err
+        err && typeof err === "object" && "code" in err
           ? String((err as { code: unknown }).code)
           : undefined;
       const health: CachedNodeHealth = {
@@ -123,7 +122,7 @@ function fetchServerSnapshot(
         method: "GET",
         path: "/container/status",
         params: { id: uuid },
-        timeout: 2000,
+        timeout: DASHBOARD_STATUS_TIMEOUT_MS,
       });
 
       const data = parseDaemonResponse(
@@ -134,7 +133,7 @@ function fetchServerSnapshot(
       snapshot.status = isRunning ? "running" : "stopped";
       const dockerStatus = data?.status;
       snapshot.dockerStatus =
-        typeof dockerStatus === 'string' && dockerStatus.length > 0
+        typeof dockerStatus === "string" && dockerStatus.length > 0
           ? dockerStatus
           : null;
       snapshot.nodeOffline = false;
@@ -148,7 +147,7 @@ function fetchServerSnapshot(
             method: "GET",
             path: "/container/stats",
             params: { id: uuid },
-            timeout: 2000,
+            timeout: DASHBOARD_STATUS_TIMEOUT_MS,
           });
 
           if (statsResponse.data) {
@@ -217,7 +216,7 @@ function getNodeHealth(
   if (cached) {
     if (revalidate) {
       checkNodeHealth(node).catch((err) =>
-        logger.warn('Background node health revalidation failed:', err),
+        logger.warn("Background node health revalidation failed:", err),
       );
     }
     return cached;
@@ -237,7 +236,7 @@ function getServerSnapshot(
   if (cached) {
     if (revalidate) {
       fetchServerSnapshot(node, server.UUID).catch((err) =>
-        logger.warn('Background server snapshot revalidation failed:', err),
+        logger.warn("Background server snapshot revalidation failed:", err),
       );
     }
     return cached;
@@ -272,58 +271,6 @@ const dashboardModule: Module = {
           return;
         }
 
-        const needsOnboarding = Boolean(
-          settings?.onboardingEnabled &&
-          !user.onboardingCompleted &&
-          !user.onboardingSkipped,
-        );
-        res.locals.needsOnboarding = needsOnboarding;
-        res.locals.canCreateServerForOnboarding =
-          !(user.role === 'owner' || user.role === 'admin') &&
-          (settings?.allowUserCreateServer ?? false);
-
-        let parsedSteps: {
-          title: string;
-          text: string;
-          icon: string;
-          cta?: string;
-          ctaUrl?: string;
-        }[] = [];
-        if (settings?.onboardingSteps) {
-          try {
-            parsedSteps = JSON.parse(settings.onboardingSteps);
-          } catch {
-            parsedSteps = [];
-          }
-        }
-        if (parsedSteps.length === 0) {
-          const t = (req.translations || {}) as Record<string, string>;
-          parsedSteps = [
-            {
-              title: t.onboardingStep1Title || 'Your dashboard',
-              text:
-                t.onboardingStep1Text ||
-                'This is where all your servers live. Start, stop, and manage them from the server view once you create an instance.',
-              icon: 'layout-dashboard',
-            },
-            {
-              title: t.onboardingStep2Title || 'Create your first server',
-              text:
-                t.onboardingStep2Text ||
-                'Pick an image, choose a node, and allocate resources. Your instance is ready to install in a couple of clicks.',
-              icon: 'server',
-            },
-            {
-              title: t.onboardingStep3Title || 'Make it yours',
-              text:
-                t.onboardingStep3Text ||
-                'Set your avatar and profile in Account settings so everyone on this panel recognises you.',
-              icon: 'user',
-            },
-          ];
-        }
-        res.locals.onboardingSteps = parsedSteps;
-
         const servers = await prisma.server.findMany({
           where: { ownerId: user.id },
           include: { node: true, owner: true },
@@ -353,7 +300,7 @@ const dashboardModule: Module = {
           page = 1;
         }
 
-        const perPage = 8 as const;
+        const perPage = DASHBOARD_PER_PAGE;
         const startIndex = (page - 1) * perPage;
         const endIndex = page * perPage;
 
@@ -382,7 +329,7 @@ const dashboardModule: Module = {
               ? user.serverLimit
               : (settings2?.defaultServerLimit ?? 0);
           const canCreateServer =
-            !(user.role === 'owner' || user.role === 'admin') &&
+            !(user.role === "owner" || user.role === "admin") &&
             (settings2?.allowUserCreateServer ?? false) &&
             userServerLimit > 0;
 
@@ -393,7 +340,7 @@ const dashboardModule: Module = {
                 if (!acc[s.node.id]) {
                   acc[s.node.id] = {
                     name: s.node.name,
-                    reason: nodeStatuses[s.node.id]?.reason ?? 'unreachable',
+                    reason: nodeStatuses[s.node.id]?.reason ?? "unreachable",
                   };
                 }
                 return acc;
@@ -471,7 +418,7 @@ const dashboardModule: Module = {
             ? user.serverLimit
             : (settings2?.defaultServerLimit ?? 0);
         const canCreateServer =
-          !(user.role === 'owner' || user.role === 'admin') &&
+          !(user.role === "owner" || user.role === "admin") &&
           (settings2?.allowUserCreateServer ?? false) &&
           userServerLimit > 0;
 

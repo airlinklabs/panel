@@ -29,7 +29,7 @@ function escAttr(val) {
 <% files.forEach((file, index) => { %>
   <tr class="al-file-row al-table-tr cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
     <td class="px-4 py-3 w-10">
-      <input type="checkbox" class="form-checkbox h-4 w-4 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(new RegExp("^/+", "g"), '') + '/' + file.name : file.name %>" aria-label="Select <%= file.name %>">
+      <input type="checkbox" class="form-checkbox h-4 w-4 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(new RegExp("^/+", "g"), '') + '/' + file.name : file.name %>" aria-label="<%= t('selectFile') %> <%= file.name %>">
     </td>
     <td class="px-4 py-3">
       <%
@@ -43,7 +43,7 @@ function escAttr(val) {
             ? '#'
             : `/server/${server.UUID}/files/edit/${encodeURIComponent(filePath)}`;
         const fileSize = (() => {
-          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+          const sizes = ['<%= req.translations.bytes || "Bytes" %>', '<%= req.translations.kilobytes || "KB" %>', '<%= req.translations.megabytes || "MB" %>', '<%= req.translations.gigabytes || "GB" %>'];
           let size = file.size;
           let unitIndex = 0;
           while (size >= 1024 && unitIndex < sizes.length - 1) {

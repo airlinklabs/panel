@@ -11,6 +11,7 @@ import { getClientIp } from '../../utils/ip';
 import { createRedisRateLimit } from '../../handlers/utils/security/redisRateLimit';
 import fs from 'fs';
 import path from 'path';
+import { OVERVIEW_RATE_LIMIT_WINDOW_MS } from '../../config/timeouts';
 
 registerPermission('airlink.admin.overview.main');
 registerPermission('airlink.admin.overview.checkForUpdates');
@@ -22,7 +23,7 @@ interface ErrorMessage {
 
 // Rate limit for expensive admin routes (file system access, update checks/runs) — 100 req/15min/IP.
 const adminOverviewLimiter = createRedisRateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: OVERVIEW_RATE_LIMIT_WINDOW_MS,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,

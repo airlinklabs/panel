@@ -14,6 +14,7 @@ import {
 } from '../../../handlers/utils/server/ports';
 import { assertNodeCapacity } from '../../../handlers/utils/server/resourceCheck';
 import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
+import { INLINE_DELAY_MS } from '../../../config/timeouts';
 
 declare global {
   var serverStoppingStates: Record<string, boolean>;
@@ -499,6 +500,6 @@ export async function restartServerContainer(
   await stopServerContainer(server, serverId, options.stopCommand, {
     releaseResources: false,
   });
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, INLINE_DELAY_MS));
   await startServerContainer(server, serverId, options);
 }

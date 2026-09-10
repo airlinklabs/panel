@@ -1,11 +1,9 @@
 import { isHttpError } from '../../../utils/http';
-import {
-  daemonInfoSchema,
-  parseDaemonResponse,
-} from '../../../platform/daemon/dtos';
+import { daemonInfoSchema, parseDaemonResponse } from '../../../types/daemon';
 import { daemonRequest } from '../core/daemonRequest';
 import { cache } from '../../cache';
 import logger from '../../logger';
+import { logT } from '../../../services/i18n';
 
 const NODE_STATUS_TIMEOUT_MS = 3000;
 const NODE_STATUS_ONLINE = 'Online';
@@ -81,7 +79,7 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
         node.error = 'An unexpected error occurred';
       }
 
-      logger.warn('Node status check failed', {
+      logger.warn(logT('log.nodeStatusCheckFailed'), {
         address: node.address,
         port: node.port,
         error: node.error,

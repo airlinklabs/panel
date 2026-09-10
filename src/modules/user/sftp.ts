@@ -11,6 +11,10 @@ import logger from '../../handlers/logger';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import { logActivity } from '../../handlers/utils/activity/activityLogger';
 import bcrypt from 'bcryptjs';
+import {
+  SFTP_CREDENTIAL_TIMEOUT_MS,
+  SFTP_VALIDATE_TIMEOUT_MS,
+} from '../../config/daemonTimeouts';
 
 const sftpModule: Module = {
   info: {
@@ -98,7 +102,7 @@ const sftpModule: Module = {
                 method: 'DELETE',
                 path: '/sftp/credentials',
                 body: { id: server.UUID },
-                timeout: 10000,
+                timeout: SFTP_CREDENTIAL_TIMEOUT_MS,
               });
             } catch {
               // non-fatal, proceed to regenerate
@@ -112,7 +116,7 @@ const sftpModule: Module = {
             method: 'POST',
             path: '/sftp/credentials',
             body: { id: server.UUID },
-            timeout: 15000,
+            timeout: SFTP_VALIDATE_TIMEOUT_MS,
           });
 
           if (response.status < 200 || response.status >= 300) {
@@ -225,7 +229,7 @@ const sftpModule: Module = {
             method: 'DELETE',
             path: '/sftp/credentials',
             body: { id: server.UUID },
-            timeout: 10000,
+            timeout: SFTP_CREDENTIAL_TIMEOUT_MS,
           });
 
           await prisma.sftpCredential.deleteMany({
@@ -285,7 +289,7 @@ const sftpModule: Module = {
             method: 'GET',
             path: '/sftp/activity',
             params: { server: server.UUID },
-            timeout: 10000,
+            timeout: SFTP_CREDENTIAL_TIMEOUT_MS,
           });
 
           const events = response.data?.events ?? [];

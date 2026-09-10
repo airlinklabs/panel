@@ -17,6 +17,7 @@ import {
   getUsedExternalPorts,
   getPrimaryExternalPort,
 } from './ports';
+import { logT } from '../../../services/i18n';
 
 export type TransferStatus =
   | 'pending'
@@ -88,7 +89,7 @@ async function waitForInstall(
         return;
       }
       if (st === 'failed') {
-        throw new Error('Install failed on destination daemon');
+        throw new Error(logT('log.installFailedOnDestination'));
       }
     } catch {
       // daemon might not know the container yet — keep polling
@@ -174,7 +175,7 @@ export async function startTransfer(
 
   // Run the transfer in background — the UI polls /transfer/status
   runTransfer(server, targetNode, targetPorts, state, req).catch((err) => {
-    logger.error(`Transfer failed for server ${server.UUID}:`, err);
+    logger.error(logT('log.transferFailed', { uuid: server.UUID }), err);
     updateStatus(
       serverId,
       'failed',
@@ -503,7 +504,10 @@ async function runTransfer(
           /* noop */
         });
     } catch (startErr) {
-      logger.warn(`Failed to start server after transfer: ${startErr}`);
+      logger.warn(
+        logT('log.failedToStartServerAfterTransfer'),
+        startErr as Record<string, unknown>,
+      );
       // Don't fail the transfer — server is migrated, just not running
     }
 
@@ -526,12 +530,16 @@ async function runTransfer(
 
     updateStatus(state.serverId, 'completed');
     logger.info(
-      `Server ${server.UUID} transferred from node ${srcDaemon.id} to node ${targetNode.id}`,
+      logT('log.serverTransferred', {
+        uuid: server.UUID,
+        srcNode: String(srcDaemon.id),
+        targetNode: String(targetNode.id),
+      }),
     );
   } catch (err) {
     const msg = safeClientMessage(err, 'The transfer failed.');
     updateStatus(state.serverId, 'failed', msg);
-    logger.error(`Transfer failed for ${server.UUID}:`, err);
+    logger.error(logT('log.transferFailed', { uuid: server.UUID }), err);
 
     // Attempt cleanup: delete backup on source if it was created
     if (backupFilePath) {

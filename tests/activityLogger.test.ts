@@ -156,6 +156,8 @@ describe("admin activity module", () => {
       (req as any).originalUrl = "/admin/activity";
       res.locals.nonce = "test-nonce";
       res.locals.csrfToken = "test-csrf";
+      res.locals.t = (key: string) => key;
+      res.locals.tn = (key: string) => key;
       res.locals.icon = (name: string, opts?: Record<string, unknown>) =>
         `<svg data-icon="${name}" ${opts?.class ? `class="${opts.class}"` : ""}></svg>`;
       res.locals.adminMenuItems = [];
@@ -213,7 +215,7 @@ describe("admin activity module", () => {
     const res = await request("/admin/activity");
     expect(res.status).toBe(200);
     const body = await res.text();
-    expect(body).toContain("Activity Log");
+    expect(body).toContain("activityLogTitle");
     expect(body).toContain("Test Node");
   });
 
