@@ -8,8 +8,8 @@
  * from our own database/daemon).
  */
 
-import { z } from 'zod';
-import { SUBUSER_PERMISSIONS } from '../../../handlers/utils/auth/serverAuthUtil';
+import { z } from "zod";
+import { SUBUSER_PERMISSIONS } from "../../../handlers/utils/auth/serverAuthUtil";
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -19,18 +19,18 @@ const safePath = z
   .string()
   .min(1)
   .max(4096)
-  .refine((v) => !v.includes('\0'), 'path contains null byte')
-  .refine((v) => !v.includes('..'), 'path contains traversal');
+  .refine((v) => !v.includes("\0"), "path contains null byte")
+  .refine((v) => !v.includes(".."), "path contains traversal");
 
 const safeFilename = z
   .string()
   .min(1)
   .max(255)
-  .refine((v) => !v.includes('\0'), 'filename contains null byte')
-  .refine((v) => !v.includes('..'), 'filename contains traversal')
+  .refine((v) => !v.includes("\0"), "filename contains null byte")
+  .refine((v) => !v.includes(".."), "filename contains traversal")
   .refine(
-    (v) => !v.includes('/') && !v.includes('\\'),
-    'must be a filename, not a path',
+    (v) => !v.includes("/") && !v.includes("\\"),
+    "must be a filename, not a path",
   );
 
 const VALID_PERMISSIONS = new Set<string>(SUBUSER_PERMISSIONS);
@@ -43,7 +43,7 @@ export const permissionSchema = z.array(z.string()).refine(
         return true;
       }
       // Wildcard: "files.*" → check group exists with read or create
-      if (p.endsWith('.*')) {
+      if (p.endsWith(".*")) {
         const group = p.slice(0, -2);
         return (
           VALID_PERMISSIONS.has(`${group}.read`) ||
@@ -53,7 +53,7 @@ export const permissionSchema = z.array(z.string()).refine(
       // Parent: "files" → check any "files.*" exists
       return [...VALID_PERMISSIONS].some((v) => v.startsWith(`${p}.`));
     }),
-  { message: 'Invalid permission string' },
+  { message: "Invalid permission string" },
 );
 
 // ---------------------------------------------------------------------------
@@ -76,7 +76,7 @@ export type UpdateServerBody = z.infer<typeof updateServerBody>;
 // Power
 // ---------------------------------------------------------------------------
 
-export const POWER_ACTIONS = ['start', 'stop', 'restart', 'kill'] as const;
+export const POWER_ACTIONS = ["start", "stop", "restart", "kill"] as const;
 export const powerBody = z.object({ action: z.enum(POWER_ACTIONS) });
 export type PowerBody = z.infer<typeof powerBody>;
 
@@ -142,7 +142,7 @@ export type CreateBackupBody = z.infer<typeof createBackupBody>;
 // Schedules
 // ---------------------------------------------------------------------------
 
-export const SCHEDULE_ACTIONS = ['command', 'power', 'backup'] as const;
+export const SCHEDULE_ACTIONS = ["command", "power", "backup"] as const;
 
 export const createScheduleBody = z.object({
   name: z.string().min(1).max(100),
@@ -164,7 +164,7 @@ export type UpdateScheduleBody = z.infer<typeof updateScheduleBody>;
 
 export const createScheduleTaskBody = z.object({
   action: z.string().min(1).max(50),
-  payload: z.string().max(8192).optional().default('{}'),
+  payload: z.string().max(8192).optional().default("{}"),
   order: z.number().int().min(0).optional().default(0),
   timeOffset: z.number().int().min(0).optional().default(0),
 });
@@ -220,7 +220,7 @@ export const updateUsernameBody = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, underscores'),
+    .regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, hyphens, underscores"),
 });
 export type UpdateUsernameBody = z.infer<typeof updateUsernameBody>;
 
@@ -251,7 +251,7 @@ export const updateLanguageBody = z.object({
 export type UpdateLanguageBody = z.infer<typeof updateLanguageBody>;
 
 // ---------------------------------------------------------------------------
-// Account — check-username, validate-password, images, folders, onboarding
+// Account — check-username, validate-password, images, folders
 // ---------------------------------------------------------------------------
 
 export const checkUsernameBody = z.object({
@@ -259,7 +259,7 @@ export const checkUsernameBody = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, underscores'),
+    .regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, hyphens, underscores"),
 });
 export type CheckUsernameBody = z.infer<typeof checkUsernameBody>;
 
@@ -308,9 +308,9 @@ export const adminCreateUserBody = z.object({
     .optional(),
   password: z.string().min(8).max(128),
   role: z
-    .enum(['owner', 'admin', 'privileged', 'user'])
+    .enum(["owner", "admin", "privileged", "user"])
     .optional()
-    .default('user'),
+    .default("user"),
   isAdmin: z.boolean().optional().default(false),
   serverLimit: z.number().int().min(0).optional(),
   maxMemory: z.number().int().min(0).optional(),
@@ -329,7 +329,7 @@ export const adminUpdateUserBody = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/)
     .optional(),
   password: z.string().min(8).max(128).optional(),
-  role: z.enum(['owner', 'admin', 'privileged', 'user']).optional(),
+  role: z.enum(["owner", "admin", "privileged", "user"]).optional(),
   isAdmin: z.boolean().optional(),
   serverLimit: z.number().int().min(0).optional(),
   maxMemory: z.number().int().min(0).optional(),
@@ -431,7 +431,6 @@ export const adminSettingsGeneralBody = z.object({
   language: z.string().optional(),
   allowRegistration: z.boolean().optional(),
   uploadLimit: z.number().int().min(1).optional(),
-  onboardingEnabled: z.boolean().optional(),
 });
 export type AdminSettingsGeneralBody = z.infer<typeof adminSettingsGeneralBody>;
 
@@ -469,7 +468,6 @@ export const adminSettingsServerPolicyBody = z.object({
   defaultCpu: z.number().int().min(0).optional(),
   defaultDisk: z.number().int().min(0).optional(),
   maxServersPerUser: z.number().int().min(0).optional(),
-  onboardingSteps: z.string().optional(),
 });
 export type AdminSettingsServerPolicyBody = z.infer<
   typeof adminSettingsServerPolicyBody

@@ -23,17 +23,15 @@
  * DELETE /api/v2/account/folders/:id            — Delete folder
  * POST   /api/v2/account/folders/:id/servers    — Add server to folder
  * DELETE /api/v2/account/folders/servers/:uuid  — Remove server from folder
- * POST   /api/v2/account/onboarding/complete    — Complete onboarding
- * POST   /api/v2/account/onboarding/skip        — Skip onboarding
  */
 
-import { Router } from 'express';
-import prisma from '../../../db';
-import bcrypt from 'bcryptjs';
-import multer from 'multer';
-import { parseBody } from '../../../utils/validation';
-import { fetchPublic } from '../../../utils/ssrf';
-import { jsonOk, jsonError, requireUser, logActivity } from './helpers';
+import { Router } from "express";
+import prisma from "../../../db";
+import bcrypt from "bcryptjs";
+import multer from "multer";
+import { parseBody } from "../../../utils/validation";
+import { fetchPublic } from "../../../utils/ssrf";
+import { jsonOk, jsonError, requireUser, logActivity } from "./helpers";
 import {
   updateUsernameBody,
   updateEmailBody,
@@ -46,16 +44,16 @@ import {
   importImageUrlBody,
   createFolderBody,
   addServerToFolderBody,
-} from './dto';
-import { V2_AVATAR_UPLOAD_LIMIT_BYTES } from '../../../config/limits';
-import { AVATAR_MIME_ALLOWLIST } from '../../../config/mime';
+} from "./dto";
+import { V2_AVATAR_UPLOAD_LIMIT_BYTES } from "../../../config/limits";
+import { AVATAR_MIME_ALLOWLIST } from "../../../config/mime";
 
 const router = Router();
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/account — Get current user profile
 // ---------------------------------------------------------------------------
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -88,7 +86,7 @@ router.get('/', async (req, res) => {
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/account/username — Update username
 // ---------------------------------------------------------------------------
-router.patch('/username', parseBody(updateUsernameBody), async (req, res) => {
+router.patch("/username", parseBody(updateUsernameBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -99,7 +97,7 @@ router.patch('/username', parseBody(updateUsernameBody), async (req, res) => {
   // Check uniqueness
   const existing = await prisma.users.findUnique({ where: { username } });
   if (existing && existing.id !== user.id) {
-    return jsonError(res, 'CONFLICT', 'Username is already taken', 409);
+    return jsonError(res, "CONFLICT", "Username is already taken", 409);
   }
 
   const updated = await prisma.users.update({
@@ -110,7 +108,7 @@ router.patch('/username', parseBody(updateUsernameBody), async (req, res) => {
 
   logActivity(
     user.id,
-    'account.username.updated',
+    "account.username.updated",
     undefined,
     { username },
     req.ip,
@@ -122,7 +120,7 @@ router.patch('/username', parseBody(updateUsernameBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/account/email — Change email
 // ---------------------------------------------------------------------------
-router.patch('/email', parseBody(updateEmailBody), async (req, res) => {
+router.patch("/email", parseBody(updateEmailBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -132,7 +130,7 @@ router.patch('/email', parseBody(updateEmailBody), async (req, res) => {
 
   const existing = await prisma.users.findUnique({ where: { email } });
   if (existing && existing.id !== user.id) {
-    return jsonError(res, 'CONFLICT', 'Email is already in use', 409);
+    return jsonError(res, "CONFLICT", "Email is already in use", 409);
   }
 
   const updated = await prisma.users.update({
@@ -141,7 +139,7 @@ router.patch('/email', parseBody(updateEmailBody), async (req, res) => {
     select: { id: true, email: true },
   });
 
-  logActivity(user.id, 'account.email.updated', undefined, { email }, req.ip);
+  logActivity(user.id, "account.email.updated", undefined, { email }, req.ip);
 
   jsonOk(res, updated);
 });
@@ -149,7 +147,7 @@ router.patch('/email', parseBody(updateEmailBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/account/password — Change password
 // ---------------------------------------------------------------------------
-router.patch('/password', parseBody(updatePasswordBody), async (req, res) => {
+router.patch("/password", parseBody(updatePasswordBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -162,7 +160,7 @@ router.patch('/password', parseBody(updatePasswordBody), async (req, res) => {
 
   const valid = await bcrypt.compare(currentPassword, user.password);
   if (!valid) {
-    return jsonError(res, 'UNAUTHORIZED', 'Current password is incorrect', 401);
+    return jsonError(res, "UNAUTHORIZED", "Current password is incorrect", 401);
   }
 
   const hashed = await bcrypt.hash(newPassword, 12);
@@ -176,7 +174,7 @@ router.patch('/password', parseBody(updatePasswordBody), async (req, res) => {
     where: { userId: user.id, used: false },
   });
 
-  logActivity(user.id, 'account.password.updated', undefined, {}, req.ip);
+  logActivity(user.id, "account.password.updated", undefined, {}, req.ip);
 
   jsonOk(res, { updated: true });
 });
@@ -185,7 +183,7 @@ router.patch('/password', parseBody(updatePasswordBody), async (req, res) => {
 // PATCH /api/v2/account/description — Update description
 // ---------------------------------------------------------------------------
 router.patch(
-  '/description',
+  "/description",
   parseBody(updateDescriptionBody),
   async (req, res) => {
     const user = await requireUser(req, res);
@@ -209,7 +207,7 @@ router.patch(
 // PATCH /api/v2/account/preferred-node — Set preferred node
 // ---------------------------------------------------------------------------
 router.patch(
-  '/preferred-node',
+  "/preferred-node",
   parseBody(updatePreferredNodeBody),
   async (req, res) => {
     const user = await requireUser(req, res);
@@ -222,7 +220,7 @@ router.patch(
     if (nodeId !== null) {
       const node = await prisma.node.findUnique({ where: { id: nodeId } });
       if (!node) {
-        return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
+        return jsonError(res, "NOT_FOUND", "Node not found", 404);
       }
     }
 
@@ -239,7 +237,7 @@ router.patch(
 // ---------------------------------------------------------------------------
 // PATCH /api/v2/account/language — Set language
 // ---------------------------------------------------------------------------
-router.patch('/language', parseBody(updateLanguageBody), async (req, res) => {
+router.patch("/language", parseBody(updateLanguageBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -254,7 +252,7 @@ router.patch('/language', parseBody(updateLanguageBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/avatar — Upload avatar
 // ---------------------------------------------------------------------------
-router.post('/avatar', async (req, res) => {
+router.post("/avatar", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -262,7 +260,7 @@ router.post('/avatar', async (req, res) => {
 
   // Check if multipart file upload
   if (!req.file) {
-    return jsonError(res, 'BAD_REQUEST', 'No file uploaded', 400);
+    return jsonError(res, "BAD_REQUEST", "No file uploaded", 400);
   }
 
   const file = req.file;
@@ -270,27 +268,27 @@ router.post('/avatar', async (req, res) => {
   if (!allowedTypes.includes(file.mimetype as (typeof allowedTypes)[number])) {
     return jsonError(
       res,
-      'BAD_REQUEST',
-      'Only JPEG, PNG, GIF, and WebP images are allowed',
+      "BAD_REQUEST",
+      "Only JPEG, PNG, GIF, and WebP images are allowed",
       400,
     );
   }
 
   const maxSize = V2_AVATAR_UPLOAD_LIMIT_BYTES;
   if (file.size > maxSize) {
-    return jsonError(res, 'BAD_REQUEST', 'File must be less than 5MB', 400);
+    return jsonError(res, "BAD_REQUEST", "File must be less than 5MB", 400);
   }
 
   // Generate avatar path
-  const ext = file.mimetype.split('/')[1] || 'png';
+  const ext = file.mimetype.split("/")[1] || "png";
   const avatarName = `avatar-${user.id}-${Date.now()}.${ext}`;
-  const fs = await import('fs/promises');
-  const path = await import('path');
+  const fs = await import("fs/promises");
+  const path = await import("path");
   const uploadDir = path.default.join(
     process.cwd(),
-    'public',
-    'uploads',
-    'avatars',
+    "public",
+    "uploads",
+    "avatars",
   );
   await fs.default.mkdir(uploadDir, { recursive: true });
   await fs.default.writeFile(
@@ -307,7 +305,7 @@ router.post('/avatar', async (req, res) => {
 
   logActivity(
     user.id,
-    'account.avatar.updated',
+    "account.avatar.updated",
     undefined,
     { avatar: avatarUrl },
     req.ip,
@@ -319,7 +317,7 @@ router.post('/avatar', async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/account/avatar — Remove avatar
 // ---------------------------------------------------------------------------
-router.delete('/avatar', async (req, res) => {
+router.delete("/avatar", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -330,7 +328,7 @@ router.delete('/avatar', async (req, res) => {
     data: { avatar: null },
   });
 
-  logActivity(user.id, 'account.avatar.removed', undefined, {}, req.ip);
+  logActivity(user.id, "account.avatar.removed", undefined, {}, req.ip);
 
   jsonOk(res, { removed: true });
 });
@@ -338,24 +336,24 @@ router.delete('/avatar', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/account/2fa/setup — Get 2FA setup data
 // ---------------------------------------------------------------------------
-router.get('/2fa/setup', async (req, res) => {
+router.get("/2fa/setup", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
   }
 
   if (user.totpEnabled) {
-    return jsonError(res, 'BAD_REQUEST', '2FA is already enabled', 400);
+    return jsonError(res, "BAD_REQUEST", "2FA is already enabled", 400);
   }
 
-  const OTPAuth = await import('otpauth');
+  const OTPAuth = await import("otpauth");
   const secret = new OTPAuth.Secret({ size: 20 });
   const secretBase32 = secret.base32;
 
   const totp = new OTPAuth.TOTP({
-    issuer: 'Airlink',
+    issuer: "Airlink",
     label: user.email,
-    algorithm: 'SHA1',
+    algorithm: "SHA1",
     digits: 6,
     period: 30,
     secret,
@@ -378,35 +376,35 @@ router.get('/2fa/setup', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/2fa/enable — Enable 2FA
 // ---------------------------------------------------------------------------
-router.post('/2fa/enable', async (req, res) => {
+router.post("/2fa/enable", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
   }
 
   if (user.totpEnabled) {
-    return jsonError(res, 'BAD_REQUEST', '2FA is already enabled', 400);
+    return jsonError(res, "BAD_REQUEST", "2FA is already enabled", 400);
   }
 
   const { code } = req.body as { code?: string };
   if (!code) {
-    return jsonError(res, 'BAD_REQUEST', 'Verification code is required', 400);
+    return jsonError(res, "BAD_REQUEST", "Verification code is required", 400);
   }
 
   if (!user.totpSecret) {
     return jsonError(
       res,
-      'BAD_REQUEST',
-      'No 2FA setup in progress. Call GET /2fa/setup first',
+      "BAD_REQUEST",
+      "No 2FA setup in progress. Call GET /2fa/setup first",
       400,
     );
   }
 
-  const OTPAuth = await import('otpauth');
+  const OTPAuth = await import("otpauth");
   const totp = new OTPAuth.TOTP({
-    issuer: 'Airlink',
+    issuer: "Airlink",
     label: user.email,
-    algorithm: 'SHA1',
+    algorithm: "SHA1",
     digits: 6,
     period: 30,
     secret: OTPAuth.Secret.fromBase32(user.totpSecret),
@@ -414,13 +412,13 @@ router.post('/2fa/enable', async (req, res) => {
 
   const delta = totp.validate({ token: code, window: 2 });
   if (delta === null) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid verification code', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid verification code", 400);
   }
 
   // Generate recovery codes
-  const crypto = await import('crypto');
+  const crypto = await import("crypto");
   const recoveryCodes = Array.from({ length: 8 }, () =>
-    crypto.randomBytes(4).toString('hex'),
+    crypto.randomBytes(4).toString("hex"),
   );
 
   await prisma.users.update({
@@ -431,7 +429,7 @@ router.post('/2fa/enable', async (req, res) => {
     },
   });
 
-  logActivity(user.id, 'account.2fa.enabled', undefined, {}, req.ip);
+  logActivity(user.id, "account.2fa.enabled", undefined, {}, req.ip);
 
   jsonOk(res, { enabled: true, recoveryCodes });
 });
@@ -439,14 +437,14 @@ router.post('/2fa/enable', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/2fa/disable — Disable 2FA
 // ---------------------------------------------------------------------------
-router.post('/2fa/disable', async (req, res) => {
+router.post("/2fa/disable", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
   }
 
   if (!user.totpEnabled) {
-    return jsonError(res, 'BAD_REQUEST', '2FA is not enabled', 400);
+    return jsonError(res, "BAD_REQUEST", "2FA is not enabled", 400);
   }
 
   const { code, recoveryCode } = req.body as {
@@ -457,11 +455,11 @@ router.post('/2fa/disable', async (req, res) => {
   let verified = false;
 
   if (code && user.totpSecret) {
-    const OTPAuth = await import('otpauth');
+    const OTPAuth = await import("otpauth");
     const totp = new OTPAuth.TOTP({
-      issuer: 'Airlink',
+      issuer: "Airlink",
       label: user.email,
-      algorithm: 'SHA1',
+      algorithm: "SHA1",
       digits: 6,
       period: 30,
       secret: OTPAuth.Secret.fromBase32(user.totpSecret),
@@ -482,7 +480,7 @@ router.post('/2fa/disable', async (req, res) => {
   }
 
   if (!verified) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid code or recovery code', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid code or recovery code", 400);
   }
 
   await prisma.users.update({
@@ -494,7 +492,7 @@ router.post('/2fa/disable', async (req, res) => {
     },
   });
 
-  logActivity(user.id, 'account.2fa.disabled', undefined, {}, req.ip);
+  logActivity(user.id, "account.2fa.disabled", undefined, {}, req.ip);
 
   jsonOk(res, { disabled: true });
 });
@@ -502,13 +500,13 @@ router.post('/2fa/disable', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/account/check-username — Check if username is available
 // ---------------------------------------------------------------------------
-router.get('/check-username', async (req, res) => {
+router.get("/check-username", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
   }
 
-  const username = String(req.query.username ?? '');
+  const username = String(req.query.username ?? "");
   if (username.length < 3 || username.length > 32) {
     return jsonOk(res, { available: false });
   }
@@ -521,7 +519,7 @@ router.get('/check-username', async (req, res) => {
 // POST /api/v2/account/validate-password — Validate password strength
 // ---------------------------------------------------------------------------
 router.post(
-  '/validate-password',
+  "/validate-password",
   parseBody(validatePasswordBody),
   async (req, res) => {
     const user = await requireUser(req, res);
@@ -533,19 +531,19 @@ router.post(
     const errors: string[] = [];
 
     if (password.length < 8) {
-      errors.push('Password must be at least 8 characters');
+      errors.push("Password must be at least 8 characters");
     }
     if (password.length > 128) {
-      errors.push('Password must be at most 128 characters');
+      errors.push("Password must be at most 128 characters");
     }
     if (!/[A-Z]/.test(password)) {
-      errors.push('Password must contain an uppercase letter');
+      errors.push("Password must contain an uppercase letter");
     }
     if (!/[a-z]/.test(password)) {
-      errors.push('Password must contain a lowercase letter');
+      errors.push("Password must contain a lowercase letter");
     }
     if (!/[0-9]/.test(password)) {
-      errors.push('Password must contain a number');
+      errors.push("Password must contain a number");
     }
 
     jsonOk(res, { valid: errors.length === 0, errors });
@@ -555,7 +553,7 @@ router.post(
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/images — Create user image
 // ---------------------------------------------------------------------------
-router.post('/images', parseBody(createImageBody), async (req, res) => {
+router.post("/images", parseBody(createImageBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -580,14 +578,14 @@ router.post('/images', parseBody(createImageBody), async (req, res) => {
       variables: data.variables ?? null,
       info: data.info ?? null,
       config_files: data.config_files ?? null,
-      status: 'pending',
+      status: "pending",
       createdById: user.id,
     },
   });
 
   logActivity(
     user.id,
-    'account.images.created',
+    "account.images.created",
     undefined,
     { imageId: image.id },
     req.ip,
@@ -600,7 +598,7 @@ router.post('/images', parseBody(createImageBody), async (req, res) => {
 // POST /api/v2/account/images/import-url — Import image from URL
 // ---------------------------------------------------------------------------
 router.post(
-  '/images/import-url',
+  "/images/import-url",
   parseBody(importImageUrlBody),
   async (req, res) => {
     const user = await requireUser(req, res);
@@ -620,19 +618,19 @@ router.post(
       if (!result.ok) {
         return jsonError(
           res,
-          'BAD_REQUEST',
-          result.error || 'Failed to fetch image from URL',
+          "BAD_REQUEST",
+          result.error || "Failed to fetch image from URL",
           400,
         );
       }
       imageJson = JSON.parse(result.body) as Record<string, unknown>;
     } catch {
-      return jsonError(res, 'BAD_REQUEST', 'Invalid image URL', 400);
+      return jsonError(res, "BAD_REQUEST", "Invalid image URL", 400);
     }
 
     const image = await prisma.images.create({
       data: {
-        name: (imageJson.name as string) ?? 'Imported Image',
+        name: (imageJson.name as string) ?? "Imported Image",
         description: (imageJson.description as string) ?? null,
         dockerImages: (imageJson.dockerImages as string) ?? null,
         startup: (imageJson.startup as string) ?? null,
@@ -640,14 +638,14 @@ router.post(
         variables: (imageJson.variables as string) ?? null,
         info: (imageJson.info as string) ?? null,
         config_files: (imageJson.config_files as string) ?? null,
-        status: 'pending',
+        status: "pending",
         createdById: user.id,
       },
     });
 
     logActivity(
       user.id,
-      'account.images.imported',
+      "account.images.imported",
       undefined,
       { imageId: image.id },
       req.ip,
@@ -660,7 +658,7 @@ router.post(
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/account/images/:id — Delete user image
 // ---------------------------------------------------------------------------
-router.delete('/images/:id', async (req, res) => {
+router.delete("/images/:id", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -668,18 +666,18 @@ router.delete('/images/:id', async (req, res) => {
 
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid image ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid image ID", 400);
   }
 
   const image = await prisma.images.findUnique({ where: { id } });
   if (!image) {
-    return jsonError(res, 'NOT_FOUND', 'Image not found', 404);
+    return jsonError(res, "NOT_FOUND", "Image not found", 404);
   }
   if (image.createdById !== user.id) {
     return jsonError(
       res,
-      'FORBIDDEN',
-      'You can only delete your own images',
+      "FORBIDDEN",
+      "You can only delete your own images",
       403,
     );
   }
@@ -688,7 +686,7 @@ router.delete('/images/:id', async (req, res) => {
 
   logActivity(
     user.id,
-    'account.images.deleted',
+    "account.images.deleted",
     undefined,
     { imageId: id },
     req.ip,
@@ -700,7 +698,7 @@ router.delete('/images/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // GET /api/v2/account/folders — List folders
 // ---------------------------------------------------------------------------
-router.get('/folders', async (req, res) => {
+router.get("/folders", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -713,7 +711,7 @@ router.get('/folders', async (req, res) => {
         include: { server: { select: { UUID: true, name: true } } },
       },
     },
-    orderBy: { name: 'asc' },
+    orderBy: { name: "asc" },
   });
 
   jsonOk(res, folders);
@@ -722,7 +720,7 @@ router.get('/folders', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v2/account/folders — Create folder
 // ---------------------------------------------------------------------------
-router.post('/folders', parseBody(createFolderBody), async (req, res) => {
+router.post("/folders", parseBody(createFolderBody), async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -739,7 +737,7 @@ router.post('/folders', parseBody(createFolderBody), async (req, res) => {
 
   logActivity(
     user.id,
-    'account.folders.created',
+    "account.folders.created",
     undefined,
     { folderId: folder.id },
     req.ip,
@@ -751,7 +749,7 @@ router.post('/folders', parseBody(createFolderBody), async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/account/folders/:id — Delete folder
 // ---------------------------------------------------------------------------
-router.delete('/folders/:id', async (req, res) => {
+router.delete("/folders/:id", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -759,18 +757,18 @@ router.delete('/folders/:id', async (req, res) => {
 
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) {
-    return jsonError(res, 'BAD_REQUEST', 'Invalid folder ID', 400);
+    return jsonError(res, "BAD_REQUEST", "Invalid folder ID", 400);
   }
 
   const folder = await prisma.serverFolder.findUnique({ where: { id } });
   if (!folder) {
-    return jsonError(res, 'NOT_FOUND', 'Folder not found', 404);
+    return jsonError(res, "NOT_FOUND", "Folder not found", 404);
   }
   if (folder.ownerId !== user.id) {
     return jsonError(
       res,
-      'FORBIDDEN',
-      'You can only delete your own folders',
+      "FORBIDDEN",
+      "You can only delete your own folders",
       403,
     );
   }
@@ -779,7 +777,7 @@ router.delete('/folders/:id', async (req, res) => {
 
   logActivity(
     user.id,
-    'account.folders.deleted',
+    "account.folders.deleted",
     undefined,
     { folderId: id },
     req.ip,
@@ -792,7 +790,7 @@ router.delete('/folders/:id', async (req, res) => {
 // POST /api/v2/account/folders/:id/servers — Add server to folder
 // ---------------------------------------------------------------------------
 router.post(
-  '/folders/:id/servers',
+  "/folders/:id/servers",
   parseBody(addServerToFolderBody),
   async (req, res) => {
     const user = await requireUser(req, res);
@@ -802,20 +800,20 @@ router.post(
 
     const folderId = Number(req.params.id);
     if (!Number.isFinite(folderId)) {
-      return jsonError(res, 'BAD_REQUEST', 'Invalid folder ID', 400);
+      return jsonError(res, "BAD_REQUEST", "Invalid folder ID", 400);
     }
 
     const folder = await prisma.serverFolder.findUnique({
       where: { id: folderId },
     });
     if (!folder) {
-      return jsonError(res, 'NOT_FOUND', 'Folder not found', 404);
+      return jsonError(res, "NOT_FOUND", "Folder not found", 404);
     }
     if (folder.ownerId !== user.id) {
       return jsonError(
         res,
-        'FORBIDDEN',
-        'You can only modify your own folders',
+        "FORBIDDEN",
+        "You can only modify your own folders",
         403,
       );
     }
@@ -827,13 +825,13 @@ router.post(
       where: { UUID: serverUUID },
     });
     if (!server) {
-      return jsonError(res, 'NOT_FOUND', 'Server not found', 404);
+      return jsonError(res, "NOT_FOUND", "Server not found", 404);
     }
     if (server.ownerId !== user.id) {
       return jsonError(
         res,
-        'FORBIDDEN',
-        'You can only add your own servers',
+        "FORBIDDEN",
+        "You can only add your own servers",
         403,
       );
     }
@@ -843,7 +841,7 @@ router.post(
       where: { serverUUID },
     });
     if (existing) {
-      return jsonError(res, 'CONFLICT', 'Server is already in a folder', 409);
+      return jsonError(res, "CONFLICT", "Server is already in a folder", 409);
     }
 
     const member = await prisma.serverFolderMember.create({
@@ -855,7 +853,7 @@ router.post(
 
     logActivity(
       user.id,
-      'account.folders.serverAdded',
+      "account.folders.serverAdded",
       undefined,
       { folderId, serverUUID },
       req.ip,
@@ -868,7 +866,7 @@ router.post(
 // ---------------------------------------------------------------------------
 // DELETE /api/v2/account/folders/servers/:uuid — Remove server from folder
 // ---------------------------------------------------------------------------
-router.delete('/folders/servers/:uuid', async (req, res) => {
+router.delete("/folders/servers/:uuid", async (req, res) => {
   const user = await requireUser(req, res);
   if (!user) {
     return;
@@ -876,14 +874,14 @@ router.delete('/folders/servers/:uuid', async (req, res) => {
 
   const serverUUID = req.params.uuid;
   if (!serverUUID) {
-    return jsonError(res, 'BAD_REQUEST', 'Server UUID is required', 400);
+    return jsonError(res, "BAD_REQUEST", "Server UUID is required", 400);
   }
 
   const member = await prisma.serverFolderMember.findUnique({
     where: { serverUUID },
   });
   if (!member) {
-    return jsonError(res, 'NOT_FOUND', 'Server is not in any folder', 404);
+    return jsonError(res, "NOT_FOUND", "Server is not in any folder", 404);
   }
 
   // Verify ownership of the folder
@@ -893,8 +891,8 @@ router.delete('/folders/servers/:uuid', async (req, res) => {
   if (!folder || folder.ownerId !== user.id) {
     return jsonError(
       res,
-      'FORBIDDEN',
-      'You can only modify your own folders',
+      "FORBIDDEN",
+      "You can only modify your own folders",
       403,
     );
   }
@@ -903,56 +901,13 @@ router.delete('/folders/servers/:uuid', async (req, res) => {
 
   logActivity(
     user.id,
-    'account.folders.serverRemoved',
+    "account.folders.serverRemoved",
     undefined,
     { folderId: folder.id, serverUUID },
     req.ip,
   );
 
   jsonOk(res, { removed: true });
-});
-
-// ---------------------------------------------------------------------------
-// POST /api/v2/account/onboarding/complete — Complete onboarding
-// ---------------------------------------------------------------------------
-router.post('/onboarding/complete', async (req, res) => {
-  const user = await requireUser(req, res);
-  if (!user) {
-    return;
-  }
-
-  await prisma.users.update({
-    where: { id: user.id },
-    data: {
-      onboardingCompleted: true,
-      onboardingSkipped: false,
-    },
-  });
-
-  logActivity(user.id, 'account.onboarding.completed', undefined, {}, req.ip);
-
-  jsonOk(res, { completed: true });
-});
-
-// ---------------------------------------------------------------------------
-// POST /api/v2/account/onboarding/skip — Skip onboarding
-// ---------------------------------------------------------------------------
-router.post('/onboarding/skip', async (req, res) => {
-  const user = await requireUser(req, res);
-  if (!user) {
-    return;
-  }
-
-  await prisma.users.update({
-    where: { id: user.id },
-    data: {
-      onboardingSkipped: true,
-    },
-  });
-
-  logActivity(user.id, 'account.onboarding.skipped', undefined, {}, req.ip);
-
-  jsonOk(res, { skipped: true });
 });
 
 export default router;

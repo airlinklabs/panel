@@ -1,12 +1,13 @@
-import type { Request, Response, NextFunction } from 'express';
-import * as timeouts from '../config/timeouts';
-import * as limits from '../config/limits';
-import * as auth from '../config/auth';
-import * as server from '../config/server';
-import * as daemonTimeouts from '../config/daemonTimeouts';
-import * as urls from '../config/urls';
-import * as mime from '../config/mime';
-import * as ui from '../config/ui';
+import type { Request, Response, NextFunction } from "express";
+import * as timeouts from "../config/timeouts";
+import * as limits from "../config/limits";
+import * as auth from "../config/auth";
+import * as server from "../config/server";
+import * as daemonTimeouts from "../config/daemonTimeouts";
+import * as urls from "../config/urls";
+import * as mime from "../config/mime";
+import * as ui from "../config/ui";
+import { getConfig } from "../config";
 
 /**
  * Makes all config constants available to EJS templates via res.locals.
@@ -16,12 +17,84 @@ import * as ui from '../config/ui';
  *   <%= config.server.DEFAULT_SERVER_PORT %>
  *   <%= DEFAULT_PAGE_SIZE %>           (short alias)
  *   <%= DEFAULT_SERVER_PORT %>         (short alias)
+ *   <%= panel.url %>                   (panel URL)
+ *   <%= panel.assetBaseUrl %>          (CDN/asset base)
  */
 export function templateConfigMiddleware(
   _req: Request,
   res: Response,
   next: NextFunction,
 ) {
+  // Panel runtime config (URL, asset base, etc.)
+  let panel: ReturnType<typeof getConfig>;
+  try {
+    panel = getConfig();
+  } catch {
+    // getConfig may throw if env is malformed — degrade gracefully
+    panel = {
+      url: process.env.URL || "",
+      assetBaseUrl: "",
+      cspEnabled: false,
+      trustProxy: false,
+      cookieDomain: "",
+      allowedOrigins: [],
+      cookieSecure: false,
+      sessionMaxAgeMs: 604800000,
+      rateLimitMax: 500,
+      rateLimitWindowMs: 60000,
+      logLevel: "info",
+      storageDir: "",
+      maxUploadBytes: 52428800,
+      tlsCertPath: "",
+      tlsKeyPath: "",
+      smtpHost: "",
+      smtpPort: 587,
+      smtpUser: "",
+      smtpPass: "",
+      smtpFrom: "",
+      smtpSecure: true,
+      dbPoolMin: 2,
+      dbConnectTimeoutMs: 10000,
+      nodeEnv: "development",
+      isProduction: false,
+      isHttps: false,
+      port: 3000,
+      name: "Airlink",
+      sessionSecret: "",
+      databaseUrl: "",
+      redisUrl: "",
+    } as ReturnType<typeof getConfig>;
+  }
+
+  res.locals.panel = {
+    url: panel.url,
+    assetBaseUrl: panel.assetBaseUrl,
+    name: panel.name,
+    trustProxy: panel.trustProxy,
+    cspEnabled: panel.cspEnabled,
+    cookieDomain: panel.cookieDomain,
+    cookieSecure: panel.cookieSecure,
+    isHttps: panel.isHttps,
+    isProduction: panel.isProduction,
+    nodeEnv: panel.nodeEnv,
+    logLevel: panel.logLevel,
+    storageDir: panel.storageDir,
+    maxUploadBytes: panel.maxUploadBytes,
+    tlsCertPath: panel.tlsCertPath,
+    tlsKeyPath: panel.tlsKeyPath,
+    smtpHost: panel.smtpHost,
+    smtpPort: panel.smtpPort,
+    smtpFrom: panel.smtpFrom,
+    smtpSecure: panel.smtpSecure,
+    rateLimitMax: panel.rateLimitMax,
+    rateLimitWindowMs: panel.rateLimitWindowMs,
+    sessionMaxAgeMs: panel.sessionMaxAgeMs,
+    dbPoolMin: panel.dbPoolMin,
+    dbConnectTimeoutMs: panel.dbConnectTimeoutMs,
+    port: panel.port,
+    allowedOrigins: panel.allowedOrigins,
+  };
+
   // Full config namespaces
   res.locals.config = {
     timeouts,

@@ -182,16 +182,6 @@
             </div>
           </div>
           <% } %>
-
-          <div class="al-card">
-            <h2 class="al-card-header"><%= t('onboarding') %></h2>
-            <div class="p-4">
-              <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('resetOnboardingDesc') %></p>
-              <button type="button" @click="resetOnboarding()" class="al-btn-secondary">
-                <%- icon('rotate-ccw', { size: 16 }) %> <%= t('resetOnboarding') %>
-              </button>
-            </div>
-          </div>
         </form>
       </div>
     </div>
@@ -323,34 +313,6 @@ function adminUserEdit() {
           } catch (e) {
             loader.close();
             showToast('<%= req.translations.errorUpdatingUser || 'Error updating user' %>', 'error');
-          }
-        }
-      });
-    },
-    async resetOnboarding() {
-      window.modal.confirm({
-        title: '<%= t('resetOnboardingTitle') %>',
-        body: '<%= t('resetOnboardingBody') %>',
-        danger: false,
-        confirmLabel: 'Reset',
-        onConfirm: async () => {
-          const loader = showLoadingPopup('<%= t('resetOnboardingLoading') %>', '');
-          try {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            const res = await fetch('/api/v2/admin/users/' + this.userId + '/onboarding/reset', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
-            });
-            const result = await res.json();
-            loader.close();
-            if (result.error) {
-              showToast(result.error, 'error');
-            } else {
-              showToast('<%= t('resetOnboardingSuccess') %>', 'success');
-            }
-          } catch (e) {
-            loader.close();
-            showToast('<%= t('resetOnboardingError') %>', 'error');
           }
         }
       });

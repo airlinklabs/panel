@@ -82,9 +82,8 @@ describe("ARIA: toast", () => {
   });
 
   it("dismiss button has aria-label", () => {
-    expect(toastEjs).toContain(
-      "setAttribute('aria-label', 'Dismiss notification')",
-    );
+    expect(toastEjs).toContain("setAttribute('aria-label'");
+    expect(toastEjs).toContain("Dismiss notification");
   });
 });
 

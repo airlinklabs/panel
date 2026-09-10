@@ -256,35 +256,6 @@
                   </div>
                 </label>
               </div>
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('showOnboarding') %></p>
-                  <p class="text-xs mt-0.5" style="color:var(--theme-text-muted)"><%= t('showOnboardingDesc') %></p>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="onboardingEnabled" class="sr-only peer" aria-label="<%= t('showOnboarding') %>" <%= settings.onboardingEnabled ? 'checked' : '' %>>
-                  <div class="al-toggle-track">
-                    <div class="al-toggle-dot"></div>
-                  </div>
-                </label>
-              </div>
-
-              <div id="onboardingStepsEditor" class="mt-4 pt-4" style="border-top:1px solid var(--theme-border)">
-                <div class="flex items-center justify-between mb-3">
-                  <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('onboardingSteps') %></p>
-                  <div class="flex gap-2">
-                    <button type="button" id="onboardingPreviewBtn" class="al-btn-ghost px-3 py-1.5 text-xs font-medium" onclick="previewOnboarding()">
-                      <%- icon('eye', { class: 'size-3.5', strokeWidth: 1.5 }) %> <%= t('preview') %>
-                    </button>
-                    <button type="button" id="addOnboardingStep" class="al-btn-ghost px-3 py-1.5 text-xs font-medium" onclick="addOnboardingStep()">
-                      <%- icon('plus', { class: 'size-3.5', strokeWidth: 1.5 }) %> <%= t('addStep') %>
-                    </button>
-                  </div>
-                </div>
-                <p class="text-xs mb-3" style="color:var(--theme-text-muted)"><%= t('onboardingStepsDesc') %></p>
-                <div id="onboardingStepList" class="space-y-3"></div>
-                <textarea id="onboardingStepsJson" class="hidden" rows="4"><%= settings.onboardingSteps || '[]' %></textarea>
-              </div>
             </div>
           </div>
 
@@ -838,9 +809,5 @@
 
 
 <script nonce="<%- nonce %>" src="/scripts/admin-settings.js"></script>
-<script nonce="<%- nonce %>">
-var onbSteps = [];
-try { onbSteps = JSON.parse(document.getElementById('onboardingStepsJson').value || '[]'); } catch(e) { onbSteps = []; }
-</script>
 
 <%- include('../../components/footer') %>

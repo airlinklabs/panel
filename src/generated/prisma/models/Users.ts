@@ -63,8 +63,6 @@ export type UsersMinAggregateOutputType = {
   maxStorage: number | null
   maxDatabases: number | null
   role: string | null
-  onboardingCompleted: boolean | null
-  onboardingSkipped: boolean | null
   preferredNodeId: number | null
   loginAttempts: number | null
   lockedUntil: Date | null
@@ -91,8 +89,6 @@ export type UsersMaxAggregateOutputType = {
   maxStorage: number | null
   maxDatabases: number | null
   role: string | null
-  onboardingCompleted: boolean | null
-  onboardingSkipped: boolean | null
   preferredNodeId: number | null
   loginAttempts: number | null
   lockedUntil: Date | null
@@ -119,8 +115,6 @@ export type UsersCountAggregateOutputType = {
   maxStorage: number
   maxDatabases: number
   role: number
-  onboardingCompleted: number
-  onboardingSkipped: number
   preferredNodeId: number
   loginAttempts: number
   lockedUntil: number
@@ -171,8 +165,6 @@ export type UsersMinAggregateInputType = {
   maxStorage?: true
   maxDatabases?: true
   role?: true
-  onboardingCompleted?: true
-  onboardingSkipped?: true
   preferredNodeId?: true
   loginAttempts?: true
   lockedUntil?: true
@@ -199,8 +191,6 @@ export type UsersMaxAggregateInputType = {
   maxStorage?: true
   maxDatabases?: true
   role?: true
-  onboardingCompleted?: true
-  onboardingSkipped?: true
   preferredNodeId?: true
   loginAttempts?: true
   lockedUntil?: true
@@ -227,8 +217,6 @@ export type UsersCountAggregateInputType = {
   maxStorage?: true
   maxDatabases?: true
   role?: true
-  onboardingCompleted?: true
-  onboardingSkipped?: true
   preferredNodeId?: true
   loginAttempts?: true
   lockedUntil?: true
@@ -342,8 +330,6 @@ export type UsersGroupByOutputType = {
   maxStorage: number | null
   maxDatabases: number | null
   role: string
-  onboardingCompleted: boolean
-  onboardingSkipped: boolean
   preferredNodeId: number | null
   loginAttempts: number
   lockedUntil: Date | null
@@ -393,8 +379,6 @@ export type UsersWhereInput = {
   maxStorage?: Prisma.IntNullableFilter<"Users"> | number | null
   maxDatabases?: Prisma.IntNullableFilter<"Users"> | number | null
   role?: Prisma.StringFilter<"Users"> | string
-  onboardingCompleted?: Prisma.BoolFilter<"Users"> | boolean
-  onboardingSkipped?: Prisma.BoolFilter<"Users"> | boolean
   preferredNodeId?: Prisma.IntNullableFilter<"Users"> | number | null
   loginAttempts?: Prisma.IntFilter<"Users"> | number
   lockedUntil?: Prisma.DateTimeNullableFilter<"Users"> | Date | string | null
@@ -431,8 +415,6 @@ export type UsersOrderByWithRelationInput = {
   maxStorage?: Prisma.SortOrderInput | Prisma.SortOrder
   maxDatabases?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
-  onboardingCompleted?: Prisma.SortOrder
-  onboardingSkipped?: Prisma.SortOrder
   preferredNodeId?: Prisma.SortOrderInput | Prisma.SortOrder
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -472,8 +454,6 @@ export type UsersWhereUniqueInput = Prisma.AtLeast<{
   maxStorage?: Prisma.IntNullableFilter<"Users"> | number | null
   maxDatabases?: Prisma.IntNullableFilter<"Users"> | number | null
   role?: Prisma.StringFilter<"Users"> | string
-  onboardingCompleted?: Prisma.BoolFilter<"Users"> | boolean
-  onboardingSkipped?: Prisma.BoolFilter<"Users"> | boolean
   preferredNodeId?: Prisma.IntNullableFilter<"Users"> | number | null
   loginAttempts?: Prisma.IntFilter<"Users"> | number
   lockedUntil?: Prisma.DateTimeNullableFilter<"Users"> | Date | string | null
@@ -510,8 +490,6 @@ export type UsersOrderByWithAggregationInput = {
   maxStorage?: Prisma.SortOrderInput | Prisma.SortOrder
   maxDatabases?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
-  onboardingCompleted?: Prisma.SortOrder
-  onboardingSkipped?: Prisma.SortOrder
   preferredNodeId?: Prisma.SortOrderInput | Prisma.SortOrder
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -546,8 +524,6 @@ export type UsersScalarWhereWithAggregatesInput = {
   maxStorage?: Prisma.IntNullableWithAggregatesFilter<"Users"> | number | null
   maxDatabases?: Prisma.IntNullableWithAggregatesFilter<"Users"> | number | null
   role?: Prisma.StringWithAggregatesFilter<"Users"> | string
-  onboardingCompleted?: Prisma.BoolWithAggregatesFilter<"Users"> | boolean
-  onboardingSkipped?: Prisma.BoolWithAggregatesFilter<"Users"> | boolean
   preferredNodeId?: Prisma.IntNullableWithAggregatesFilter<"Users"> | number | null
   loginAttempts?: Prisma.IntWithAggregatesFilter<"Users"> | number
   lockedUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"Users"> | Date | string | null
@@ -572,8 +548,6 @@ export type UsersCreateInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -609,8 +583,6 @@ export type UsersUncheckedCreateInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -643,8 +615,6 @@ export type UsersUpdateInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -680,8 +650,6 @@ export type UsersUncheckedUpdateInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -716,8 +684,6 @@ export type UsersCreateManyInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -742,8 +708,6 @@ export type UsersUpdateManyMutationInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -769,8 +733,6 @@ export type UsersUncheckedUpdateManyInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -807,8 +769,6 @@ export type UsersCountOrderByAggregateInput = {
   maxStorage?: Prisma.SortOrder
   maxDatabases?: Prisma.SortOrder
   role?: Prisma.SortOrder
-  onboardingCompleted?: Prisma.SortOrder
-  onboardingSkipped?: Prisma.SortOrder
   preferredNodeId?: Prisma.SortOrder
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrder
@@ -846,8 +806,6 @@ export type UsersMaxOrderByAggregateInput = {
   maxStorage?: Prisma.SortOrder
   maxDatabases?: Prisma.SortOrder
   role?: Prisma.SortOrder
-  onboardingCompleted?: Prisma.SortOrder
-  onboardingSkipped?: Prisma.SortOrder
   preferredNodeId?: Prisma.SortOrder
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrder
@@ -874,8 +832,6 @@ export type UsersMinOrderByAggregateInput = {
   maxStorage?: Prisma.SortOrder
   maxDatabases?: Prisma.SortOrder
   role?: Prisma.SortOrder
-  onboardingCompleted?: Prisma.SortOrder
-  onboardingSkipped?: Prisma.SortOrder
   preferredNodeId?: Prisma.SortOrder
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrder
@@ -1133,8 +1089,6 @@ export type UsersCreateWithoutRoleRelationInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -1168,8 +1122,6 @@ export type UsersUncheckedCreateWithoutRoleRelationInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -1233,8 +1185,6 @@ export type UsersScalarWhereInput = {
   maxStorage?: Prisma.IntNullableFilter<"Users"> | number | null
   maxDatabases?: Prisma.IntNullableFilter<"Users"> | number | null
   role?: Prisma.StringFilter<"Users"> | string
-  onboardingCompleted?: Prisma.BoolFilter<"Users"> | boolean
-  onboardingSkipped?: Prisma.BoolFilter<"Users"> | boolean
   preferredNodeId?: Prisma.IntNullableFilter<"Users"> | number | null
   loginAttempts?: Prisma.IntFilter<"Users"> | number
   lockedUntil?: Prisma.DateTimeNullableFilter<"Users"> | Date | string | null
@@ -1259,8 +1209,6 @@ export type UsersCreateWithoutPasswordResetsInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -1295,8 +1243,6 @@ export type UsersUncheckedCreateWithoutPasswordResetsInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -1344,8 +1290,6 @@ export type UsersUpdateWithoutPasswordResetsInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1380,8 +1324,6 @@ export type UsersUncheckedUpdateWithoutPasswordResetsInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1413,8 +1355,6 @@ export type UsersCreateWithoutServersInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -1449,8 +1389,6 @@ export type UsersUncheckedCreateWithoutServersInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -1498,8 +1436,6 @@ export type UsersUpdateWithoutServersInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1534,8 +1470,6 @@ export type UsersUncheckedUpdateWithoutServersInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1567,8 +1501,6 @@ export type UsersCreateWithoutPreferredNodeInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -1603,8 +1535,6 @@ export type UsersUncheckedCreateWithoutPreferredNodeInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -1662,8 +1592,6 @@ export type UsersCreateWithoutFoldersInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -1698,8 +1626,6 @@ export type UsersUncheckedCreateWithoutFoldersInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -1747,8 +1673,6 @@ export type UsersUpdateWithoutFoldersInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1783,8 +1707,6 @@ export type UsersUncheckedUpdateWithoutFoldersInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1816,8 +1738,6 @@ export type UsersCreateWithoutApiKeysInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -1852,8 +1772,6 @@ export type UsersUncheckedCreateWithoutApiKeysInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -1901,8 +1819,6 @@ export type UsersUpdateWithoutApiKeysInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1937,8 +1853,6 @@ export type UsersUncheckedUpdateWithoutApiKeysInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1970,8 +1884,6 @@ export type UsersCreateWithoutLoginHistoryInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -2006,8 +1918,6 @@ export type UsersUncheckedCreateWithoutLoginHistoryInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -2055,8 +1965,6 @@ export type UsersUpdateWithoutLoginHistoryInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2091,8 +1999,6 @@ export type UsersUncheckedUpdateWithoutLoginHistoryInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2124,8 +2030,6 @@ export type UsersCreateWithoutSubUserAccessInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -2160,8 +2064,6 @@ export type UsersUncheckedCreateWithoutSubUserAccessInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -2209,8 +2111,6 @@ export type UsersUpdateWithoutSubUserAccessInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2245,8 +2145,6 @@ export type UsersUncheckedUpdateWithoutSubUserAccessInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2278,8 +2176,6 @@ export type UsersCreateWithoutActivityLogsInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -2314,8 +2210,6 @@ export type UsersUncheckedCreateWithoutActivityLogsInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -2363,8 +2257,6 @@ export type UsersUpdateWithoutActivityLogsInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2399,8 +2291,6 @@ export type UsersUncheckedUpdateWithoutActivityLogsInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2432,8 +2322,6 @@ export type UsersCreateWithoutPasskeysInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -2468,8 +2356,6 @@ export type UsersUncheckedCreateWithoutPasskeysInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -2517,8 +2403,6 @@ export type UsersUpdateWithoutPasskeysInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2553,8 +2437,6 @@ export type UsersUncheckedUpdateWithoutPasskeysInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2587,8 +2469,6 @@ export type UsersCreateManyRoleRelationInput = {
   maxCpu?: number | null
   maxStorage?: number | null
   maxDatabases?: number | null
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
@@ -2613,8 +2493,6 @@ export type UsersUpdateWithoutRoleRelationInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2648,8 +2526,6 @@ export type UsersUncheckedUpdateWithoutRoleRelationInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2683,8 +2559,6 @@ export type UsersUncheckedUpdateManyWithoutRoleRelationInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   preferredNodeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2711,8 +2585,6 @@ export type UsersCreateManyPreferredNodeInput = {
   maxStorage?: number | null
   maxDatabases?: number | null
   role?: string
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   loginAttempts?: number
   lockedUntil?: Date | string | null
   totpSecret?: string | null
@@ -2736,8 +2608,6 @@ export type UsersUpdateWithoutPreferredNodeInput = {
   maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2772,8 +2642,6 @@ export type UsersUncheckedUpdateWithoutPreferredNodeInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2807,8 +2675,6 @@ export type UsersUncheckedUpdateManyWithoutPreferredNodeInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maxDatabases?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
-  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingSkipped?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   totpSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2928,8 +2794,6 @@ export type UsersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   maxStorage?: boolean
   maxDatabases?: boolean
   role?: boolean
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: boolean
   loginAttempts?: boolean
   lockedUntil?: boolean
@@ -2967,8 +2831,6 @@ export type UsersSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   maxStorage?: boolean
   maxDatabases?: boolean
   role?: boolean
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: boolean
   loginAttempts?: boolean
   lockedUntil?: boolean
@@ -2997,8 +2859,6 @@ export type UsersSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   maxStorage?: boolean
   maxDatabases?: boolean
   role?: boolean
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: boolean
   loginAttempts?: boolean
   lockedUntil?: boolean
@@ -3027,8 +2887,6 @@ export type UsersSelectScalar = {
   maxStorage?: boolean
   maxDatabases?: boolean
   role?: boolean
-  onboardingCompleted?: boolean
-  onboardingSkipped?: boolean
   preferredNodeId?: boolean
   loginAttempts?: boolean
   lockedUntil?: boolean
@@ -3040,7 +2898,7 @@ export type UsersSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UsersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "isAdmin" | "description" | "avatar" | "permissions" | "serverLimit" | "maxMemory" | "maxCpu" | "maxStorage" | "maxDatabases" | "role" | "onboardingCompleted" | "onboardingSkipped" | "preferredNodeId" | "loginAttempts" | "lockedUntil" | "totpSecret" | "totpEnabled" | "totpRecoveryCodes" | "passkeyEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
+export type UsersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "isAdmin" | "description" | "avatar" | "permissions" | "serverLimit" | "maxMemory" | "maxCpu" | "maxStorage" | "maxDatabases" | "role" | "preferredNodeId" | "loginAttempts" | "lockedUntil" | "totpSecret" | "totpEnabled" | "totpRecoveryCodes" | "passkeyEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
 export type UsersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   roleRelation?: boolean | Prisma.Users$roleRelationArgs<ExtArgs>
   servers?: boolean | Prisma.Users$serversArgs<ExtArgs>
@@ -3092,8 +2950,6 @@ export type $UsersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     maxStorage: number | null
     maxDatabases: number | null
     role: string
-    onboardingCompleted: boolean
-    onboardingSkipped: boolean
     preferredNodeId: number | null
     loginAttempts: number
     lockedUntil: Date | null
@@ -3550,8 +3406,6 @@ export interface UsersFieldRefs {
   readonly maxStorage: Prisma.FieldRef<"Users", 'Int'>
   readonly maxDatabases: Prisma.FieldRef<"Users", 'Int'>
   readonly role: Prisma.FieldRef<"Users", 'String'>
-  readonly onboardingCompleted: Prisma.FieldRef<"Users", 'Boolean'>
-  readonly onboardingSkipped: Prisma.FieldRef<"Users", 'Boolean'>
   readonly preferredNodeId: Prisma.FieldRef<"Users", 'Int'>
   readonly loginAttempts: Prisma.FieldRef<"Users", 'Int'>
   readonly lockedUntil: Prisma.FieldRef<"Users", 'DateTime'>

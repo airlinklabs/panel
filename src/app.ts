@@ -54,6 +54,7 @@ import {
 } from "./handlers/errorPages";
 import { logSystemError } from "./services/systemLogService";
 
+import fs from "fs";
 import { getConfig } from "./config";
 import { installRenderResolver } from "./handlers/renderResolver";
 import { validationErrorBoundary } from "./utils/validation";
@@ -88,19 +89,24 @@ const airlinkCodename = config.meta.codename;
 // ── Startup banner ───────────────────────────────────────────────────────────
 drawBanner("Airlink Panel", airlinkVersion, airlinkCodename);
 
-// Trust proxy when the panel is behind a reverse proxy (Nginx, Caddy, etc).
-// Reads from DB at startup — affects req.ip used by rate limiting and IP banning.
-// We set this before any middleware so the correct client IP flows through.
-(async () => {
-  try {
-    const s = await getSettings();
-    if (s?.behindReverseProxy) {
-      app.set("trust proxy", 1);
+// Trust proxy — when behind Nginx/Caddy/Cloudflare, trust forwarded headers
+// so req.ip reflects the real client IP. Configurable via TRUST_PROXY env or
+// the admin "behind reverse proxy" toggle (DB). Env takes precedence.
+if (panelConfig.trustProxy) {
+  app.set("trust proxy", 1);
+} else {
+  // Fall back to DB setting (async, after startup)
+  (async () => {
+    try {
+      const s = await getSettings();
+      if (s?.behindReverseProxy) {
+        app.set("trust proxy", 1);
+      }
+    } catch {
+      // DB not ready yet — leave default (no trust proxy)
     }
-  } catch {
-    // DB not ready yet — leave default (no trust proxy)
-  }
-})();
+  })();
+}
 
 // Load websocket
 const expressWsInstance = expressWs(app);
@@ -121,7 +127,26 @@ app.use(
 );
 
 // Vendor — serve node_modules directly at /vendor/
-app.use("/vendor", express.static(path.join(__dirname, "../node_modules")));
+// Force correct MIME types for JS files to prevent "text/html" mismatches
+// when express.static falls through (missing files, directory index, etc).
+app.use(
+  "/vendor",
+  express.static(path.join(__dirname, "../node_modules"), {
+    setHeaders(res, filePath) {
+      if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
+        res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+      } else if (filePath.endsWith(".cjs")) {
+        res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+      } else if (filePath.endsWith(".css")) {
+        res.setHeader("Content-Type", "text/css; charset=utf-8");
+      } else if (filePath.endsWith(".json")) {
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+      }
+      // Prevent browsers from MIME-sniffing JS as HTML
+      res.setHeader("X-Content-Type-Options", "nosniff");
+    },
+  }),
+);
 
 // Fonts — Inter via @fontsource
 app.use(
@@ -176,6 +201,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // Helmet — explicit config for precise header control across HTTP and HTTPS.
+// CSP_ENABLED env var overrides the default (production-only) behavior.
 app.use((req: Request, res: Response, next: NextFunction) => {
   const nonce = res.locals.nonce as string;
 
@@ -190,16 +216,26 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     referrerPolicy: { policy: "strict-origin-when-cross-origin" },
     permittedCrossDomainPolicies: { permittedPolicies: "none" },
 
-    contentSecurityPolicy: isProduction
+    contentSecurityPolicy: panelConfig.cspEnabled
       ? {
           directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"],
+            scriptSrc: [
+              "'self'",
+              `'nonce-${nonce}'`,
+              "'strict-dynamic'",
+              // Alpine.js uses new Function() internally for directive compilation
+              "'unsafe-eval'",
+            ],
             scriptSrcAttr: ["'unsafe-inline'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             fontSrc: ["'self'", "data:"],
             imgSrc: ["'self'", "data:", "blob:", "https:"],
-            connectSrc: ["'self'", ...(isHttps ? ["wss:"] : ["ws:", "wss:"])],
+            connectSrc: [
+              "'self'",
+              ...(isHttps ? ["wss:"] : ["ws:", "wss:"]),
+              ...(panelConfig.allowedOrigins || []),
+            ],
             frameAncestors: ["'none'"],
             objectSrc: ["'none'"],
             baseUri: ["'self'"],
@@ -233,17 +269,20 @@ app.use((req, res, next) => {
 // Rate limiter — Redis-backed sliding window for distributed/multi-instance support
 app.use(
   createRedisRateLimit({
-    windowMs: RATE_LIMIT_WINDOW_MS,
-    max: GLOBAL_RATE_LIMIT_MAX,
+    windowMs: panelConfig.rateLimitWindowMs || RATE_LIMIT_WINDOW_MS,
+    max: panelConfig.rateLimitMax || GLOBAL_RATE_LIMIT_MAX,
     keyPrefix: "rl:global",
-    skip: () => !getSecurityCache().rateLimitEnabled,
+    skip: () =>
+      panelConfig.rateLimitMax === 0 || !getSecurityCache().rateLimitEnabled,
     standardHeaders: true,
     legacyHeaders: false,
   }),
 );
 
 // Load session with Redis store
-const useSecureCookie = panelConfig.isHttps;
+// secure: true when HTTPS is detected or when COOKIE_SECURE env is set
+// domain: set via COOKIE_DOMAIN for cross-subdomain sessions
+const useSecureCookie = panelConfig.cookieSecure;
 const sessionSecret = panelConfig.sessionSecret;
 
 app.use(
@@ -256,7 +295,8 @@ app.use(
       secure: useSecureCookie,
       httpOnly: true,
       sameSite: "lax",
-      maxAge: SESSION_MAX_AGE_MS,
+      maxAge: panelConfig.sessionMaxAgeMs || SESSION_MAX_AGE_MS,
+      ...(panelConfig.cookieDomain ? { domain: panelConfig.cookieDomain } : {}),
     },
   }),
 );
@@ -448,18 +488,40 @@ async function seedDefaultRoles() {
       });
     });
 
-    const server = app.listen(port, () => {
-      logger.success(`Listening on port ${port}`);
-      startPlayerStatsCollection();
-      startScheduler();
-      reenqueueQueuedInstalls();
-      initEggCatalogue().catch((err) =>
-        logger.warn(`Store catalogue init failed: ${err?.message || err}`),
-      );
-      import("./handlers/realtime/nodeStatsWs").then((m) =>
-        m.attachNodeStatsWs(server),
-      );
-    });
+    const server = (() => {
+      // Direct TLS — when cert/key are provided, serve HTTPS without a reverse proxy
+      if (panelConfig.tlsCertPath && panelConfig.tlsKeyPath) {
+        try {
+          const https = require("node:https") as typeof import("node:https");
+          const options = {
+            cert: fs.readFileSync(panelConfig.tlsCertPath),
+            key: fs.readFileSync(panelConfig.tlsKeyPath),
+          };
+          const srv = https.createServer(options, app);
+          srv.listen(port, () => {
+            logger.success(`Listening on port ${port} (HTTPS)`);
+          });
+          return srv;
+        } catch (err) {
+          logger.warn(
+            `TLS cert/key failed to load (${err instanceof Error ? err.message : err}), falling back to HTTP`,
+          );
+        }
+      }
+      return app.listen(port, () => {
+        logger.success(`Listening on port ${port}`);
+      });
+    })();
+
+    startPlayerStatsCollection();
+    startScheduler();
+    reenqueueQueuedInstalls();
+    initEggCatalogue().catch((err) =>
+      logger.warn(`Store catalogue init failed: ${err?.message || err}`),
+    );
+    import("./handlers/realtime/nodeStatsWs").then((m) =>
+      m.attachNodeStatsWs(server),
+    );
 
     let shuttingDown = false;
     const connections = new Set<Socket>();

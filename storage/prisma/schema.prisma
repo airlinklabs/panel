@@ -38,8 +38,6 @@ model Users {
   maxDatabases       Int?      @default(0)
   role               String    @default("user")
   roleRelation       Role?     @relation("UserRole", fields: [role], references: [name])
-  onboardingCompleted Boolean  @default(false)
-  onboardingSkipped  Boolean   @default(false)
   preferredNodeId    Int?
   loginAttempts      Int       @default(0)
   lockedUntil        DateTime?
@@ -319,8 +317,6 @@ model settings {
   allowPrivilegedMaxStorage   Int      @default(61440)
   allowPrivilegedMaxDatabases Int      @default(10)
   allowUserCreateImages       Boolean  @default(false)
-  onboardingEnabled           Boolean  @default(true)
-  onboardingSteps             String   @default("[]") @db.Text
   twoFactorRequired           Boolean  @default(false)
   sftpEnabled                 Boolean  @default(true)
   backupsEnabled              Boolean  @default(true)

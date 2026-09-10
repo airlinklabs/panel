@@ -43,8 +43,12 @@ describe("CSP configuration in app.ts", () => {
     expect(src).toContain("self");
   });
 
-  it("only applies CSP in production mode", () => {
-    expect(src).toContain("contentSecurityPolicy: isProduction");
+  it("only applies CSP when panelConfig.cspEnabled is true", () => {
+    expect(src).toContain("contentSecurityPolicy: panelConfig.cspEnabled");
+  });
+
+  it("includes unsafe-eval in script-src for Alpine.js", () => {
+    expect(src).toContain("'unsafe-eval'");
   });
 
   it("generates a fresh nonce per request", () => {

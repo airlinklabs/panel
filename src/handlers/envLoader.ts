@@ -1,14 +1,14 @@
-import fs from 'fs';
-import path from 'path';
-import logger from './logger';
-import { logT } from '../services/i18n';
+import fs from "fs";
+import path from "path";
+import logger from "./logger";
+import { logT } from "../services/i18n";
 
 // Required env vars that must be set for the panel to function.
 // If any are missing after .env load, the panel exits immediately.
-const REQUIRED_ENV_VARS = ['DATABASE_URL'];
+const REQUIRED_ENV_VARS = ["DATABASE_URL"];
 
 // Optional vars from example.env — warn if not set, don't exit.
-const EXAMPLE_ENV_PATH = path.resolve(process.cwd(), 'example.env');
+const EXAMPLE_ENV_PATH = path.resolve(process.cwd(), "example.env");
 
 /**
  * Pure parser: parse .env content into a key→value record.
@@ -16,12 +16,12 @@ const EXAMPLE_ENV_PATH = path.resolve(process.cwd(), 'example.env');
  */
 export function parseEnv(content: string): Record<string, string> {
   const result: Record<string, string> = {};
-  for (const line of content.split('\n')) {
+  for (const line of content.split("\n")) {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) {
+    if (!trimmed || trimmed.startsWith("#")) {
       continue;
     }
-    const eqIndex = trimmed.indexOf('=');
+    const eqIndex = trimmed.indexOf("=");
     if (eqIndex === -1) {
       continue;
     }
@@ -29,7 +29,7 @@ export function parseEnv(content: string): Record<string, string> {
     const value = trimmed
       .slice(eqIndex + 1)
       .trim()
-      .replace(/^["']|["']$/g, '');
+      .replace(/^["']|["']$/g, "");
     if (key) {
       result[key] = value;
     }
@@ -38,49 +38,54 @@ export function parseEnv(content: string): Record<string, string> {
 }
 
 export function loadEnv() {
-  const envPath = path.resolve(process.cwd(), '.env');
+  const envPath = path.resolve(process.cwd(), ".env");
 
   // If .env doesn't exist, copy from example.env
   if (!fs.existsSync(envPath)) {
     if (fs.existsSync(EXAMPLE_ENV_PATH)) {
       try {
         fs.copyFileSync(EXAMPLE_ENV_PATH, envPath);
-        logger.info(logT('log.envCreatedFromExample'));
+        logger.info(logT("log.envCreatedFromExample"));
       } catch {
-        logger.warn(logT('log.envCopyFailed'));
+        logger.warn(logT("log.envCopyFailed"));
       }
     }
   }
 
   try {
-    const data = fs.readFileSync(envPath, 'utf8');
+    const data = fs.readFileSync(envPath, "utf8");
     const parsed = parseEnv(data);
     for (const [key, value] of Object.entries(parsed)) {
       process.env[key] = value;
     }
   } catch (error) {
-    logger.error(logT('log.envLoadError'), error);
+    logger.error(logT("log.envLoadError"), error);
   }
 
   // Fail-fast: ensure required env vars are set
   for (const key of REQUIRED_ENV_VARS) {
     if (!process.env[key]) {
-      logger.error(logT('log.envRequiredVarMissing', { key }));
+      logger.error(logT("log.envRequiredVarMissing", { key }));
       process.exit(1);
     }
   }
 
   // Warn for optional vars defined in example.env
   try {
-    const exampleData = fs.readFileSync(EXAMPLE_ENV_PATH, 'utf8');
-    for (const line of exampleData.split('\n')) {
-      const eqIndex = line.indexOf('=');
+    const exampleData = fs.readFileSync(EXAMPLE_ENV_PATH, "utf8");
+    for (const line of exampleData.split("\n")) {
+      const trimmed = line.trim();
+      // Skip blank lines and comments
+      if (!trimmed || trimmed.startsWith("#")) {
+        continue;
+      }
+      const eqIndex = trimmed.indexOf("=");
       if (eqIndex === -1) {
         continue;
       }
-      const key = line.slice(0, eqIndex).trim();
+      const key = trimmed.slice(0, eqIndex).trim();
       if (key && !process.env[key]) {
-        logger.warn(logT('log.envOptionalVarMissing', { key }));
+        logger.warn(logT("log.envOptionalVarMissing", { key }));
       }
     }
   } catch {

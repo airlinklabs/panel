@@ -160,8 +160,8 @@ describe("Migration invariant: header.ejs loads required lifecycle scripts", () 
     expect(header).toContain("cdn.min.js");
   });
 
-  it("loads @tanstack/query-core", () => {
-    expect(header).toContain("@tanstack/query-core");
+  it("loads @tanstack/query-core bundle", () => {
+    expect(header).toContain("query-core.js");
   });
 
   it("does not load turbo.js", () => {
