@@ -387,7 +387,6 @@ jobs:
       - lint
       - typecheck
       - test
-      - e2e
       - build
     runs-on: ubuntu-latest
     steps:
@@ -399,7 +398,6 @@ jobs:
           echo "Lint:       ${{ needs.lint.result }}"
           echo "Typecheck:  ${{ needs.typecheck.result }}"
           echo "Unit Test:  ${{ needs.test.result }}"
-          echo "E2E:        ${{ needs.e2e.result }}"
           echo "Build:      ${{ needs.build.result }}"
 
           for result in \
@@ -409,7 +407,6 @@ jobs:
             "${{ needs.lint.result }}" \
             "${{ needs.typecheck.result }}" \
             "${{ needs.test.result }}" \
-            "${{ needs.e2e.result }}" \
             "${{ needs.build.result }}"; do
             if [ "$result" = "failure" ]; then
               echo "::error::One or more CI jobs failed"

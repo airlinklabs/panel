@@ -23,7 +23,7 @@
   },
   "author": "AirlinkLabs",
   "license": "MIT",
-  "type": "module",
+  "main": "dist/app.js",
   "scripts": {
     "start": "node --env-file=.env dist/app.js",
     "dev": "prisma generate && prisma db push && (trap 'kill 0' EXIT; tailwindcss -i ./public/styles/tw.css -o ./public/styles.css --watch & nodemon)",
