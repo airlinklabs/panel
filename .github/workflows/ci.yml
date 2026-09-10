@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, codebase-cleanup*]
     paths:
       - "src/**"
       - "views/**"
@@ -38,6 +38,11 @@ permissions:
   contents: read
   security-events: write
   pull-requests: read
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "11"
+  DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/airlink_test"
 
 jobs:
   # ── Path filter ──────────────────────────────────────────────────────────────
@@ -122,14 +127,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pnpm/store/v10
-          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm audit --audit-level=critical
         continue-on-error: true
@@ -144,14 +147,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pnpm/store/v10
-          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec eslint src
 
@@ -174,27 +175,23 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-    env:
-      DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/airlink_test"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pnpm/store/v10
-          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec prisma generate
       - run: pnpm run typecheck
 
-  # ── Test ────────────────────────────────────────────────────────────────────
+  # ── Unit Tests ──────────────────────────────────────────────────────────────
 
   test:
-    name: Test
+    name: Unit Tests
     needs: changes
     if: needs.changes.outputs.test == 'true'
     runs-on: ubuntu-latest
@@ -212,23 +209,97 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-    env:
-      DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/airlink_test"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pnpm/store/v10
-          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec prisma generate
       - run: pnpm exec prisma db push
       - run: pnpm test
+
+  # ── E2E Tests (Playwright) ─────────────────────────────────────────────────
+
+  e2e:
+    name: E2E Tests
+    needs: [changes, build]
+    if: needs.changes.outputs.test == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: airlink_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Setup env
+        run: |
+          cat > .env <<EOF
+          NODE_ENV=development
+          URL=http://localhost:3000
+          PORT=3000
+          NAME="Airlink CI"
+          SESSION_SECRET=0000000000000000000000000000000000000000000000000000000000000000
+          DATABASE_URL=${{ env.DATABASE_URL }}
+          REDIS_URL=redis://127.0.0.1:6379
+          DB_POOL_MAX=5
+          EOF
+
+      - run: pnpm exec prisma generate
+      - run: pnpm exec prisma db push
+
+      - name: Build panel
+        run: pnpm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.sha }}
+          path: playwright-report/
+          retention-days: 7
 
   # ── Build ───────────────────────────────────────────────────────────────────
 
@@ -251,22 +322,18 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-    env:
-      DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/airlink_test"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pnpm/store/v10
-          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
       - run: pnpm install --ignore-scripts --frozen-lockfile
       - run: pnpm exec prisma generate
-      - run: pnpm run migrate:deploy
+      - run: pnpm run db:migrate:deploy
       - run: pnpm run build
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -288,6 +355,7 @@ jobs:
       - lint
       - typecheck
       - test
+      - e2e
       - build
     runs-on: ubuntu-latest
     steps:
@@ -298,7 +366,8 @@ jobs:
           echo "Audit:      ${{ needs.audit.result }}"
           echo "Lint:       ${{ needs.lint.result }}"
           echo "Typecheck:  ${{ needs.typecheck.result }}"
-          echo "Test:       ${{ needs.test.result }}"
+          echo "Unit Test:  ${{ needs.test.result }}"
+          echo "E2E:        ${{ needs.e2e.result }}"
           echo "Build:      ${{ needs.build.result }}"
 
           for result in \
@@ -308,6 +377,7 @@ jobs:
             "${{ needs.lint.result }}" \
             "${{ needs.typecheck.result }}" \
             "${{ needs.test.result }}" \
+            "${{ needs.e2e.result }}" \
             "${{ needs.build.result }}"; do
             if [ "$result" = "failure" ]; then
               echo "::error::One or more CI jobs failed"
