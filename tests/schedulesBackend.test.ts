@@ -26,6 +26,12 @@ vi.mock("../src/handlers/utils/core/daemonRequest", () => ({
   daemonRequest: vi.fn(),
 }));
 
+vi.mock("../src/handlers/realtime/events", () => ({
+  emitRealtime: vi.fn(),
+  serverEvent: vi.fn(),
+  userEvent: vi.fn(),
+}));
+
 import prisma from "../src/db";
 import { daemonRequest } from "../src/handlers/utils/core/daemonRequest";
 import { registerScheduleRoutes } from "../src/modules/user/server/schedules";

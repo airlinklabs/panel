@@ -31,6 +31,12 @@ vi.mock("../src/handlers/logger", () => ({
   },
 }));
 
+vi.mock("../src/handlers/realtime/events", () => ({
+  emitRealtime: vi.fn(),
+  serverEvent: vi.fn(),
+  userEvent: vi.fn(),
+}));
+
 vi.mock("../src/handlers/utils/core/daemonRequest", () => ({
   daemonRequest: vi.fn(),
   daemonBaseUrl: vi.fn(async () => "http://127.0.0.1:8080"),

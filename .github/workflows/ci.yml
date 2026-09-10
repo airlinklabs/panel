@@ -202,6 +202,15 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -210,6 +219,42 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --ignore-scripts --frozen-lockfile
+
+      - name: Write .env (mirrors setup.mjs)
+        run: |
+          SESSION_SECRET=$(head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' | head -c 128)
+          cat > .env <<EOF
+          NODE_ENV=development
+          URL=http://localhost:3000
+          PORT=3000
+          NAME="Airlink CI"
+          SESSION_SECRET=${SESSION_SECRET}
+          SESSION_MAX_AGE_MS=604800000
+          TRUST_PROXY=
+          COOKIE_DOMAIN=
+          ASSET_BASE_URL=
+          CSP_ENABLED=
+          RATE_LIMIT_MAX=500
+          RATE_LIMIT_WINDOW_MS=60000
+          LOG_LEVEL=info
+          STORAGE_DIR=
+          DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/airlink_test
+          DB_POOL_MAX=5
+          PGHOST=127.0.0.1
+          PGPORT=5432
+          PGUSER=postgres
+          PGPASSWORD=postgres
+          REDIS_URL=redis://127.0.0.1:6379
+          TLS_CERT_PATH=
+          TLS_KEY_PATH=
+          SMTP_HOST=
+          SMTP_PORT=587
+          SMTP_USER=
+          SMTP_PASS=
+          SMTP_FROM=
+          SMTP_SECURE=true
+          EOF
+
       - run: pnpm exec prisma generate
       - run: pnpm exec prisma db push
       - run: pnpm test
