@@ -58,7 +58,7 @@ const addonsModule: Module = {
 
           let addonTableExists = true;
           try {
-            await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
+            await prisma.$queryRaw`SELECT 1 FROM "Addon" LIMIT 1`;
           } catch {
             addonTableExists = false;
           }

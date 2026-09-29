@@ -794,7 +794,7 @@ export async function loadAddons(appExpress: Express | any) {
 
   let addonTableExists = true;
   try {
-    await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
+    await prisma.$queryRaw`SELECT 1 FROM "Addon" LIMIT 1`;
   } catch {
     addonTableExists = false;
     logger.warn(logT('log.addonTableNotExist'));
@@ -1095,7 +1095,7 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
   return withAddonLock(slug, async () => {
     try {
       try {
-        await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
+        await prisma.$queryRaw`SELECT 1 FROM "Addon" LIMIT 1`;
       } catch {
         logger.warn(logT('log.addonTableNotExist'));
         return { success: false, message: 'Addon table does not exist yet' };
@@ -1171,7 +1171,7 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
 export async function getAllAddons() {
   try {
     try {
-      await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
+      await prisma.$queryRaw`SELECT 1 FROM "Addon" LIMIT 1`;
     } catch {
       logger.warn(logT('log.addonTableNotExist'));
       return [];
