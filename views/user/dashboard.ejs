@@ -1,4 +1,4 @@
-<%- include('../../layouts/user', { title: 'Dashboard' }) %>
+<%- include('../layouts/user', { title: 'Dashboard' }) %>
 
 <div class="px-4 sm:px-6 lg:px-8 pt-4">
   <div class="flex items-start justify-between gap-4">
@@ -22,7 +22,7 @@
 
   <div class="mt-5">
     <% if (!Array.isArray(servers) || servers.length === 0) { %>
-      <%- include('../../partials/empty-state', {
+      <%- include('../partials/empty-state', {
         iconName: 'server',
         title: t('noServersYet'),
         description: t('createFirstServerDesc'),
@@ -41,7 +41,7 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <% servers.filter(function(s) { return folder.members && folder.members.some(function(m) { return m.serverUUID === s.UUID; }); }).forEach(function(server) { %>
-              <%- include('../../partials/server-card', { server: server }) %>
+              <%- include('../partials/server-card', { server: server }) %>
             <% }); %>
           </div>
         </div>
@@ -56,7 +56,7 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <% unfoldered.forEach(function(server) { %>
-              <%- include('../../partials/server-card', { server: server }) %>
+              <%- include('../partials/server-card', { server: server }) %>
             <% }); %>
           </div>
         </div>
@@ -64,17 +64,17 @@
       <% } else { %>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <% servers.forEach(function(server) { %>
-            <%- include('../../partials/server-card', { server: server }) %>
+            <%- include('../partials/server-card', { server: server }) %>
           <% }); %>
         </div>
       <% } %>
 
       <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
-        <%- include('../../partials/pagination', { currentPage: typeof currentPage !== 'undefined' ? currentPage : 1, totalPages: totalPages }) %>
+        <%- include('../partials/pagination', { currentPage: typeof currentPage !== 'undefined' ? currentPage : 1, totalPages: totalPages }) %>
       <% } %>
 
     <% } %>
   </div>
 </div>
 
-<%- include('../../layouts/user-footer') %>
+<%- include('../layouts/user-footer') %>

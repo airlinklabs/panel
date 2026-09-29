@@ -1,5 +1,5 @@
 import { getSettings } from '../../handlers/settingsCache';
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
 import type { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
@@ -55,7 +55,7 @@ const coreModule: Module = {
     router.get(
       '/admin/apikeys',
       isAuthenticated(true, 'airlink.admin.apikeys.view'),
-      async (req: Request, res: Response) => {
+      async (req: Request, res: Response, next: NextFunction) => {
         try {
           const apiKeys = await prisma.apiKey.findMany({
             include: {
@@ -108,10 +108,7 @@ const coreModule: Module = {
           });
         } catch (error: unknown) {
           logger.error('Error fetching API keys:', error);
-          res.status(500).render('errors/error', {
-            error: 'Failed to fetch API keys',
-            req,
-          });
+          return next(error);
         }
       },
     );

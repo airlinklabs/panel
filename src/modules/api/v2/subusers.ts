@@ -22,7 +22,7 @@ import {
 } from './helpers';
 import { createSubUserBody, updateSubUserBody } from './dto';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/subusers — List sub-users
@@ -100,37 +100,75 @@ router.post('/', parseBody(createSubUserBody), async (req, res) => {
     }
   }
 
-  const { userId, permissions } = req.validatedBody as {
-    userId: number;
+  const { email, userId, permissions } = req.validatedBody as {
+    email?: string;
+    userId?: number;
     permissions: string[];
   };
 
-  // Check target user exists
-  const targetUser = await prisma.users.findUnique({ where: { id: userId } });
-  if (!targetUser) {
-    return jsonError(res, 'NOT_FOUND', 'User not found', 404);
-  }
-
-  // Can't add yourself as sub-user
   const callerId = getAuthenticatedUserId(req);
-  if (userId === callerId) {
-    return jsonError(
-      res,
-      'BAD_REQUEST',
-      'Cannot add yourself as a sub-user',
-      400,
-    );
+
+  // Resolve the target user: the subusers UI posts `{ email, permissions }`
+  // (legacy `POST /server/:id/subusers`), API callers post `{ userId }`.
+  let targetUser: {
+    id: number;
+    username: string | null;
+    email: string | null;
+  } | null;
+  if (email) {
+    targetUser = await prisma.users.findUnique({
+      where: { email: email.trim().toLowerCase() },
+    });
+    if (!targetUser) {
+      return jsonError(res, 'NOT_FOUND', 'No user found with that email.', 404);
+    }
+    if (targetUser.id === callerId) {
+      return jsonError(
+        res,
+        'BAD_REQUEST',
+        'You cannot add yourself as a subuser.',
+        400,
+      );
+    }
+    if (resolved.server.ownerId === targetUser.id) {
+      return jsonError(
+        res,
+        'BAD_REQUEST',
+        'The server owner is already in full control.',
+        400,
+      );
+    }
+  } else {
+    targetUser = await prisma.users.findUnique({ where: { id: userId! } });
+    if (!targetUser) {
+      return jsonError(res, 'NOT_FOUND', 'User not found', 404);
+    }
+    if (userId === callerId) {
+      return jsonError(
+        res,
+        'BAD_REQUEST',
+        'Cannot add yourself as a sub-user',
+        400,
+      );
+    }
   }
 
   // Check not already a sub-user
   const existing = await prisma.subUser.findUnique({
-    where: { serverId_userId: { serverId: resolved.server.UUID, userId } },
+    where: {
+      serverId_userId: {
+        serverId: resolved.server.UUID,
+        userId: targetUser.id,
+      },
+    },
   });
   if (existing) {
     return jsonError(
       res,
       'CONFLICT',
-      'User is already a sub-user of this server',
+      email
+        ? 'That user is already a subuser of this server.'
+        : 'User is already a sub-user of this server',
       409,
     );
   }
@@ -138,7 +176,7 @@ router.post('/', parseBody(createSubUserBody), async (req, res) => {
   const subUser = await prisma.subUser.create({
     data: {
       serverId: resolved.server.UUID,
-      userId,
+      userId: targetUser.id,
       permissions,
     },
     include: {
@@ -150,7 +188,7 @@ router.post('/', parseBody(createSubUserBody), async (req, res) => {
     callerId,
     'subuser.created',
     resolved.server.UUID,
-    { targetUserId: userId, permissions },
+    { targetUserId: targetUser.id, permissions },
     req.ip,
   );
 

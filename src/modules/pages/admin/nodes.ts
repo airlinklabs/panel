@@ -31,9 +31,9 @@ const module: Module = {
             apiGet(req, '/api/v2/admin/locations') as Promise<any>,
           ]);
           res.render('admin/nodes/index', {
-            nodes: nodesRes.data || [],
+            nodes: nodesRes || [],
             meta: nodesRes.meta,
-            locations: locationsRes.data || [],
+            locations: locationsRes || [],
             user: req.session?.user,
             req,
           });
@@ -50,7 +50,7 @@ const module: Module = {
       async (req, res, next) => {
         try {
           const data = (await apiGet(req, '/api/v2/admin/nodes')) as any;
-          res.json(data.data || []);
+          res.json(data || []);
         } catch (err) {
           next(err);
         }
@@ -68,8 +68,8 @@ const module: Module = {
             apiGet(req, '/api/v2/admin/settings') as Promise<any>,
           ]);
           res.render('admin/nodes/create', {
-            locations: locationsRes.data || [],
-            settings: settingsRes.data || {},
+            locations: locationsRes || [],
+            settings: settingsRes || {},
             user: req.session?.user,
             req,
           });
@@ -92,7 +92,7 @@ const module: Module = {
           )) as any;
           res
             .status(200)
-            .json({ message: 'Node created successfully.', node: result.data });
+            .json({ message: 'Node created successfully.', node: result });
         } catch (err) {
           next(err);
         }
@@ -114,9 +114,9 @@ const module: Module = {
             ) as Promise<any>,
           ]);
           res.render('admin/nodes/edit', {
-            node: nodeRes.data,
-            locations: locationsRes.data || [],
-            allocations: allocationsRes.data || [],
+            node: nodeRes,
+            locations: locationsRes || [],
+            allocations: allocationsRes || [],
             user: req.session?.user,
             req,
           });
@@ -136,7 +136,7 @@ const module: Module = {
             req,
             `/api/v2/admin/nodes/${req.params.id}/configure`,
           )) as any;
-          const cfg = data.data;
+          const cfg = data;
           const command = `configure --panel "${process.env.URL || ''}" --key "${cfg.key}"`;
           res.status(200).json(command);
         } catch (err) {
@@ -187,8 +187,8 @@ const module: Module = {
             ) as Promise<any>,
           ]);
           res.render('admin/nodes/stats', {
-            node: nodeRes.data,
-            stats: statsRes.data || {},
+            node: nodeRes,
+            stats: statsRes || {},
             user: req.session?.user,
             req,
           });
@@ -208,7 +208,7 @@ const module: Module = {
             req,
             `/api/v2/admin/nodes/${req.params.id}/stats`,
           )) as any;
-          res.json(data.data || {});
+          res.json(data || {});
         } catch (err) {
           next(err);
         }
@@ -230,7 +230,7 @@ const module: Module = {
             .status(200)
             .json({
               message: 'Node maintenance mode updated.',
-              node: result.data,
+              node: result,
             });
         } catch (err) {
           next(err);
@@ -249,7 +249,7 @@ const module: Module = {
             `/api/v2/admin/nodes/${req.params.id}/verify`,
             req.body,
           )) as any;
-          res.status(200).json(result.data || { verified: false });
+          res.status(200).json(result || { verified: false });
         } catch (err) {
           next(err);
         }

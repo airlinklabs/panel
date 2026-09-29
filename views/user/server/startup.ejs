@@ -165,6 +165,8 @@
 <script nonce="<%- nonce %>">
 (function() {
   var serverId = '<%= server.UUID %>';
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+  var serverVariables = <%- JSON.stringify(typeof serverVariables !== 'undefined' ? serverVariables : []) %>;
 
   function savedSpan(el) {
     var now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
@@ -193,7 +195,7 @@
     cmdSavingLabel.style.display = '';
     fetch('/server/' + serverId + '/startup/command', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ startCommand: document.getElementById('startCommand').value })
     }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.success !== false) { savedSpan(cmdSaved); showToast('Startup command saved.', 'success'); }
@@ -226,7 +228,7 @@
     dockerSavingLabel.style.display = '';
     fetch('/server/' + serverId + '/startup/docker-image', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ dockerImage: image })
     }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.success !== false) { savedSpan(dockerSaved); showToast('Docker image updated.', 'success'); }
@@ -255,10 +257,27 @@
     varBtn.disabled = true;
     varSaveLabel.style.display = 'none';
     varSavingLabel.style.display = '';
-    var formData = new FormData(varForm);
+    // Rebuild the full variable objects (the image defines the shape) with
+    // current form values — multipart bodies would never parse server-side.
+    var variables = serverVariables.map(function(variable) {
+      var input = document.getElementById('var_' + variable.env);
+      var value = variable.value;
+      if (input) {
+        if (variable.type === 'boolean') {
+          value = input.checked;
+        } else if (variable.type === 'number') {
+          var parsed = Number(input.value);
+          value = input.value !== '' && !isNaN(parsed) ? parsed : variable.value;
+        } else {
+          value = input.value;
+        }
+      }
+      return Object.assign({}, variable, { value: value });
+    });
     fetch('/server/' + serverId + '/startup/variables', {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+      body: JSON.stringify({ variables: variables })
     }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.success !== false) { savedSpan(varSaved); showToast('Variables saved.', 'success'); }
       else showToast(d.error || 'Failed to save variables.', 'error');

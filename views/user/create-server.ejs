@@ -1,4 +1,4 @@
-<%- include('../../layouts/user', { title: 'Create Server' }) %>
+<%- include('../layouts/user', { title: 'Create Server' }) %>
 
 <div class="px-4 sm:px-6 lg:px-8 pt-4">
   <div class="flex items-start gap-4">
@@ -19,7 +19,7 @@
 
   <% if (typeof canCreate !== 'undefined' && !canCreate) { %>
   <div class="mt-8">
-    <%- include('../../partials/empty-state', {
+    <%- include('../partials/empty-state', {
       iconName: 'lock',
       title: t('serverCreationDisabled'),
       description: t('contactAdminToEnable')
@@ -191,4 +191,4 @@
 })();
 </script>
 
-<%- include('../../layouts/user-footer') %>
+<%- include('../layouts/user-footer') %>

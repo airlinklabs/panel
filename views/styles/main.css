@@ -1,3 +1,10 @@
+/* ── Cascade layer order (must be declared before any @layer).
+   Without this, first-appearance order wins and the custom
+   components layer (declared after Tailwind's utilities) overrides
+   utilities like .hidden — leaving every sheet/modal overlay stuck
+   open. Utilities must stay highest. ─────────────────────────── */
+@layer properties, theme, base, components, utilities;
+
 /* ── All imports must precede other CSS statements ──────────── */
 @import "./tokens/colors.css";
 @import "./tokens/spacing-radius-shadow.css";

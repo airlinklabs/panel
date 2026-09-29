@@ -92,8 +92,15 @@ function normalizeStatus(status: unknown): number {
   return 500;
 }
 
-function getErrorView(_req: Request): string {
-  return 'errors/error';
+function getErrorView(statusCode: number): string {
+  // Rewritten error views ship one template per common status plus a generic
+  // fallback — 'errors/error' was deleted along with the old single template.
+  const views: Record<number, string> = {
+    403: 'errors/403',
+    404: 'errors/404',
+    500: 'errors/500',
+  };
+  return views[statusCode] ?? 'errors/generic';
 }
 
 async function getErrorRenderData(
@@ -157,7 +164,7 @@ export async function renderErrorPage(
 
   try {
     const data = await getErrorRenderData(req, normalizedStatus, detail);
-    return res.status(normalizedStatus).render(getErrorView(req), data);
+    return res.status(normalizedStatus).render(getErrorView(normalizedStatus), data);
   } catch (renderError) {
     logger.error(logT('log.errorPageRenderFailed'), renderError);
     return res

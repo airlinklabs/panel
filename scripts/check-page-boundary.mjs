@@ -10,10 +10,10 @@
  * Exit code 0 = clean, 1 = violations found.
  */
 
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
 
-const PAGES_DIR = join(import.meta.dirname, "..", "src", "modules", "pages");
+const PAGES_DIR = join(import.meta.dirname, '..', 'src', 'modules', 'pages');
 
 /**
  * Patterns that page controllers must NOT import.
@@ -22,40 +22,40 @@ const PAGES_DIR = join(import.meta.dirname, "..", "src", "modules", "pages");
 const FORBIDDEN = [
   {
     pattern: /from\s+['"].*\/db(?:['"]|\/)/,
-    label: "Prisma/DB import",
+    label: 'Prisma/DB import',
   },
   {
     pattern: /import\s+.*from\s+['"].*prisma['"]/,
-    label: "Prisma import",
+    label: 'Prisma import',
   },
   {
     pattern: /require\(['"].*\/db(?:['"]|\/)/,
-    label: "Prisma/DB require",
+    label: 'Prisma/DB require',
   },
   {
     pattern: /from\s+['"].*daemonRequest['"]/,
-    label: "daemonRequest import",
+    label: 'daemonRequest import',
   },
   {
     pattern: /from\s+['"].*daemonService['"]/,
-    label: "daemonService import",
+    label: 'daemonService import',
   },
   {
     pattern: /require\(['"].*daemonRequest['"]/,
-    label: "daemonRequest require",
+    label: 'daemonRequest require',
   },
   {
     pattern: /require\(['"].*daemonService['"]/,
-    label: "daemonService require",
+    label: 'daemonService require',
   },
   // Business services that bypass the internal API boundary
   {
     pattern: /from\s+['"].*\/services\/(?!i18n)['"]/,
-    label: "business service import",
+    label: 'business service import',
   },
   {
     pattern: /require\(['"].*\/services\/(?!i18n)['"]/,
-    label: "business service require",
+    label: 'business service require',
   },
 ];
 
@@ -69,7 +69,7 @@ function collectTsFiles(dir) {
     const stat = statSync(full);
     if (stat.isDirectory()) {
       files.push(...collectTsFiles(full));
-    } else if (entry.endsWith(".ts") && !entry.endsWith(".test.ts")) {
+    } else if (entry.endsWith('.ts') && !entry.endsWith('.test.ts')) {
       files.push(full);
     }
   }
@@ -82,15 +82,15 @@ const files = collectTsFiles(PAGES_DIR);
 const violations = [];
 
 for (const file of files) {
-  const content = readFileSync(file, "utf8");
-  const lines = content.split("\n");
+  const content = readFileSync(file, 'utf8');
+  const lines = content.split('\n');
   const relPath = relative(process.cwd(), file);
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     // Skip comments
     const trimmed = line.trimStart();
-    if (trimmed.startsWith("//") || trimmed.startsWith("*")) {
+    if (trimmed.startsWith('//') || trimmed.startsWith('*')) {
       continue;
     }
 
@@ -126,9 +126,9 @@ for (const v of violations) {
 
 console.error();
 console.error(
-  "Page controllers must use the internal API client (src/handlers/internalApiClient.ts)",
+  'Page controllers must use the internal API client (src/handlers/internalApiClient.ts)',
 );
 console.error(
-  "instead of importing Prisma, daemon access, or business services directly.",
+  'instead of importing Prisma, daemon access, or business services directly.',
 );
 process.exit(1);

@@ -29,7 +29,7 @@ const module: Module = {
             data?: unknown[];
             meta?: Record<string, unknown>;
           };
-          const users = result.data || [];
+          const users = result || [];
           const meta = result.meta;
           res.render('admin/users/index', {
             users,
@@ -80,7 +80,7 @@ const module: Module = {
             req,
             `/api/v2/admin/users/${req.params.id}`,
           )) as { data?: Record<string, unknown> };
-          const dataUser = result.data;
+          const dataUser = result;
           res.render('admin/users/edit', {
             dataUser,
             user: req.session?.user,
@@ -114,7 +114,7 @@ const module: Module = {
             req,
             `/api/v2/admin/users/${req.params.id}`,
           )) as { data?: Record<string, unknown> };
-          const dataUser = result.data;
+          const dataUser = result;
           res.render('admin/users/view', {
             dataUser,
             user: req.session?.user,

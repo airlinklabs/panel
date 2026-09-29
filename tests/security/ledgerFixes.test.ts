@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { AddressInfo } from "node:net";
-import express from "express";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { AddressInfo } from 'node:net';
+import express from 'express';
 
 // Mock prisma, logger and the daemon HTTP client before importing modules.
-vi.mock("../../src/db", () => ({
+vi.mock('../../src/db', () => ({
   default: {
     node: { findMany: vi.fn(), count: vi.fn() },
     server: { count: vi.fn() },
@@ -13,11 +13,11 @@ vi.mock("../../src/db", () => ({
   },
 }));
 
-vi.mock("../../src/handlers/logger", () => ({
+vi.mock('../../src/handlers/logger', () => ({
   default: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
 }));
 
-vi.mock("../../src/handlers/utils/core/daemonRequest", () => ({
+vi.mock('../../src/handlers/utils/core/daemonRequest', () => ({
   daemonRequest: vi.fn(),
 }));
 
@@ -27,17 +27,17 @@ const mockRedisOps = {
   zadd: vi.fn().mockResolvedValue(1),
   expire: vi.fn().mockResolvedValue(1),
 };
-vi.mock("../../src/handlers/redis", () => ({
+vi.mock('../../src/handlers/redis', () => ({
   getRedisClient: vi.fn(() => mockRedisOps),
 }));
 
 // Also mock the rate limiter module so passwordReset's rate limit actually works in-memory
-let rateLimitCounts = new Map<string, number>();
-vi.mock("../../src/handlers/utils/security/redisRateLimit", () => ({
+const rateLimitCounts = new Map<string, number>();
+vi.mock('../../src/handlers/utils/security/redisRateLimit', () => ({
   createRedisRateLimit: (opts: any) => {
     return (req: any, res: any, next: any) => {
-      const ip = req.ip ?? "unknown";
-      const key = `${opts.keyPrefix ?? "rl:"}:${ip}`;
+      const ip = req.ip ?? 'unknown';
+      const key = `${opts.keyPrefix ?? 'rl:'}:${ip}`;
       const count = (rateLimitCounts.get(key) ?? 0) + 1;
       rateLimitCounts.set(key, count);
       if (count > opts.max) {
@@ -45,7 +45,7 @@ vi.mock("../../src/handlers/utils/security/redisRateLimit", () => ({
           opts.handler(req, res);
           return;
         }
-        res.status(429).json(opts.message ?? { error: "Too many requests" });
+        res.status(429).json(opts.message ?? { error: 'Too many requests' });
         return;
       }
       next();
@@ -54,12 +54,12 @@ vi.mock("../../src/handlers/utils/security/redisRateLimit", () => ({
   redisRateLimit: (_req: any, _res: any, next: any) => next(),
 }));
 
-import coreModule from "../../src/modules/core/index";
-import systemRouter from "../../src/modules/api/v2/system";
-import authServiceModule from "../../src/modules/auth/authService";
-import passwordResetModule from "../../src/modules/auth/passwordReset";
-import prisma from "../../src/db";
-import { daemonRequest } from "../../src/handlers/utils/core/daemonRequest";
+import coreModule from '../../src/modules/core/index';
+import systemRouter from '../../src/modules/api/v2/system';
+import authServiceModule from '../../src/modules/auth/authService';
+import passwordResetModule from '../../src/modules/auth/passwordReset';
+import prisma from '../../src/db';
+import { daemonRequest } from '../../src/handlers/utils/core/daemonRequest';
 
 const mockPrisma = vi.mocked(prisma);
 const mockDaemonRequest = vi.mocked(daemonRequest);
@@ -69,7 +69,7 @@ interface FakeSession {
   destroy: (cb: (err?: Error | null) => void) => void;
 }
 
-type SessionUser = { id: number; isAdmin: boolean };
+interface SessionUser { id: number; isAdmin: boolean }
 
 function stripConnectSid(user: SessionUser | undefined) {
   return (
@@ -92,7 +92,7 @@ function buildCoreApp(user?: SessionUser) {
   app.use(express.json());
   app.use(stripConnectSid(user));
   app.use(coreModule.router());
-  app.use("/api/v2/system", systemRouter);
+  app.use('/api/v2/system', systemRouter);
   return app;
 }
 
@@ -101,7 +101,7 @@ async function withServer(
   fn: (base: string) => Promise<void>,
 ) {
   const server = app.listen(0);
-  await new Promise<void>((resolve) => server.once("listening", resolve));
+  await new Promise<void>((resolve) => server.once('listening', resolve));
   const { port } = server.address() as AddressInfo;
   try {
     await fn(`http://127.0.0.1:${port}`);
@@ -112,13 +112,13 @@ async function withServer(
 
 const adminUser = {
   id: 1,
-  email: "admin@example.com",
+  email: 'admin@example.com',
   isAdmin: true,
-  username: "admin",
-  description: "",
+  username: 'admin',
+  description: '',
 };
 
-describe("F-021 core admin/auth guards", () => {
+describe('F-021 core admin/auth guards', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.users.findUnique.mockResolvedValue(adminUser as any);
@@ -134,18 +134,18 @@ describe("F-021 core admin/auth guards", () => {
     vi.restoreAllMocks();
   });
 
-  it("rejects unauthenticated GET /api/system/status with a redirect", async () => {
+  it('rejects unauthenticated GET /api/system/status with a redirect', async () => {
     await withServer(buildCoreApp(undefined), async (base) => {
       const res = await fetch(`${base}/api/system/status`, {
-        redirect: "manual",
+        redirect: 'manual',
       });
       expect(res.status).toBe(302);
-      expect(res.headers.get("location")).toBe("/login");
+      expect(res.headers.get('location')).toBe('/login');
       expect(mockPrisma.node.findMany).not.toHaveBeenCalled();
     });
   });
 
-  it("accepts a logged-in admin on GET /api/system/status", async () => {
+  it('accepts a logged-in admin on GET /api/system/status', async () => {
     await withServer(buildCoreApp({ id: 1, isAdmin: true }), async (base) => {
       const res = await fetch(`${base}/api/system/status`);
       expect(res.status).toBe(200);
@@ -155,70 +155,70 @@ describe("F-021 core admin/auth guards", () => {
     });
   });
 
-  it("rejects unauthenticated POST /api/system/test-node-connection", async () => {
+  it('rejects unauthenticated POST /api/system/test-node-connection', async () => {
     await withServer(buildCoreApp(undefined), async (base) => {
       const res = await fetch(`${base}/api/system/test-node-connection`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          address: "10.0.0.5",
+          address: '10.0.0.5',
           port: 8080,
-          key: "secret",
+          key: 'secret',
         }),
-        redirect: "manual",
+        redirect: 'manual',
       });
       expect(res.status).toBe(302);
       expect(mockDaemonRequest).not.toHaveBeenCalled();
     });
   });
 
-  it("validates input on POST /api/system/test-node-connection", async () => {
+  it('validates input on POST /api/system/test-node-connection', async () => {
     await withServer(buildCoreApp({ id: 1, isAdmin: true }), async (base) => {
       const badAddress = await fetch(
         `${base}/api/system/test-node-connection`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address: "   ", port: 8080, key: "secret" }),
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: '   ', port: 8080, key: 'secret' }),
         },
       );
       expect(badAddress.status).toBe(400);
       expect((await badAddress.json()).error).toBeTruthy();
 
       const badPort = await fetch(`${base}/api/system/test-node-connection`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          address: "10.0.0.5",
+          address: '10.0.0.5',
           port: 70000,
-          key: "secret",
+          key: 'secret',
         }),
       });
       expect(badPort.status).toBe(400);
 
       const badKey = await fetch(`${base}/api/system/test-node-connection`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: "10.0.0.5", port: 8080, key: "" }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: '10.0.0.5', port: 8080, key: '' }),
       });
       expect(badKey.status).toBe(400);
       expect(mockDaemonRequest).not.toHaveBeenCalled();
     });
   });
 
-  it("probes a private/LAN node for an authenticated admin", async () => {
+  it('probes a private/LAN node for an authenticated admin', async () => {
     mockDaemonRequest.mockResolvedValue({
-      data: { status: "Online", versionRelease: "1.0.0", remote: false },
+      data: { status: 'Online', versionRelease: '1.0.0', remote: false },
     } as any);
 
     await withServer(buildCoreApp({ id: 1, isAdmin: true }), async (base) => {
       const res = await fetch(`${base}/api/system/test-node-connection`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          address: "10.0.0.5",
+          address: '10.0.0.5',
           port: 8080,
-          key: "secret",
+          key: 'secret',
         }),
       });
       expect(res.status).toBe(200);
@@ -228,26 +228,26 @@ describe("F-021 core admin/auth guards", () => {
     });
   });
 
-  it("keeps GET /api/health public", async () => {
+  it('keeps GET /api/health public', async () => {
     await withServer(buildCoreApp(undefined), async (base) => {
       const res = await fetch(`${base}/api/health`);
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ status: "ok" });
+      expect(await res.json()).toEqual({ status: 'ok' });
     });
   });
 
-  it("returns 401 JSON from /api/v2/system/search when unauthenticated", async () => {
+  it('returns 401 JSON from /api/v2/system/search when unauthenticated', async () => {
     await withServer(buildCoreApp(undefined), async (base) => {
       const res = await fetch(`${base}/api/v2/system/search?q=abc`);
       expect(res.status).toBe(401);
       const body = await res.json();
       expect(body.success).toBe(false);
-      expect(body.error.code).toBe("UNAUTHORIZED");
+      expect(body.error.code).toBe('UNAUTHORIZED');
     });
   });
 });
 
-describe("F-022 POST /reset-password rate limit", () => {
+describe('F-022 POST /reset-password rate limit', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.passwordReset.findUnique.mockResolvedValue(null);
@@ -257,7 +257,7 @@ describe("F-022 POST /reset-password rate limit", () => {
     vi.restoreAllMocks();
   });
 
-  it("returns 429 JSON after exceeding the per-IP limit", async () => {
+  it('returns 429 JSON after exceeding the per-IP limit', async () => {
     const app = express();
     app.use(express.json());
     app.use((req, _res, next) => {
@@ -270,18 +270,18 @@ describe("F-022 POST /reset-password rate limit", () => {
       let lastStatus = 0;
       for (let i = 0; i < 11; i++) {
         const res = await fetch(`${base}/reset-password`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            token: "x",
-            password: "abc12345",
-            confirmPassword: "abc12345",
+            token: 'x',
+            password: 'abc12345',
+            confirmPassword: 'abc12345',
           }),
         });
         lastStatus = res.status;
         if (res.status === 429) {
           expect(await res.json()).toEqual({
-            error: "Too many attempts. Try again later.",
+            error: 'Too many attempts. Try again later.',
           });
         }
       }
@@ -290,12 +290,12 @@ describe("F-022 POST /reset-password rate limit", () => {
   });
 });
 
-describe("F-024 canonical logout", () => {
+describe('F-024 canonical logout', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("keeps GET /logout as the canonical handler (browser uses a GET link)", async () => {
+  it('keeps GET /logout as the canonical handler (browser uses a GET link)', async () => {
     const app = express();
     let session: FakeSession | undefined;
     app.use((req, _res, next) => {
@@ -306,16 +306,16 @@ describe("F-024 canonical logout", () => {
     app.use(authServiceModule.router());
 
     await withServer(app, async (base) => {
-      const res = await fetch(`${base}/logout`, { redirect: "manual" });
+      const res = await fetch(`${base}/logout`, { redirect: 'manual' });
       expect(res.status).toBe(302);
-      expect(res.headers.get("location")).toBe("/login");
-      const setCookie = (res.headers.get("set-cookie") || "").toLowerCase();
-      expect(setCookie).toContain("connect.sid");
+      expect(res.headers.get('location')).toBe('/login');
+      const setCookie = (res.headers.get('set-cookie') || '').toLowerCase();
+      expect(setCookie).toContain('connect.sid');
       expect(session!.destroy).toHaveBeenCalled();
     });
   });
 
-  it("removes the duplicate POST /logout (now 404)", async () => {
+  it('removes the duplicate POST /logout (now 404)', async () => {
     const app = express();
     app.use(express.json());
     app.use((req, _res, next) => {
@@ -330,8 +330,8 @@ describe("F-024 canonical logout", () => {
 
     await withServer(app, async (base) => {
       const res = await fetch(`${base}/logout`, {
-        method: "POST",
-        redirect: "manual",
+        method: 'POST',
+        redirect: 'manual',
       });
       expect(res.status).toBe(404);
     });

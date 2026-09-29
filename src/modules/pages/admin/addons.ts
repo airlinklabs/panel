@@ -29,7 +29,7 @@ const module: Module = {
         try {
           const data = (await apiGet(req, '/api/v2/admin/addons')) as any;
           res.render('admin/addons/index', {
-            addons: data?.data || data || [],
+            addons: data || [],
             user: req.session?.user,
             req,
           });
@@ -68,7 +68,7 @@ const module: Module = {
             `/api/v2/admin/addons/${req.params.slug}`,
           )) as any;
           res.render('admin/addons/detail', {
-            addon: data?.data || data || {},
+            addon: data || {},
             user: req.session?.user,
             req,
           });
@@ -204,7 +204,7 @@ const module: Module = {
         try {
           const data = (await apiGet(req, '/api/v2/admin/addons/store')) as any;
           res.render('admin/addons/store', {
-            addons: data?.data || data || [],
+            addons: data || [],
             user: req.session?.user,
             req,
           });

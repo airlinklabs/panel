@@ -88,6 +88,7 @@
 </div>
 
 <script type="module" nonce="<%- nonce %>">
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
   const serverUUID = document.querySelector('[data-server-uuid]')?.dataset.serverUuid;
 
   // Load credentials
@@ -109,6 +110,11 @@
   async function loadActivity() {
     try {
       const res = await fetch(`/server/${serverUUID}/sftp/activity`);
+      if (!res.ok) {
+        document.getElementById('sftp-activity').innerHTML =
+          '<p class="text-xs" style="color:var(--theme-text-muted);">No recent activity</p>';
+        return;
+      }
       const data = await res.json();
       const activities = data.data || data || [];
       const el = document.getElementById('sftp-activity');
@@ -135,7 +141,7 @@
     try {
       const res = await fetch(`/server/${serverUUID}/sftp/credentials`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       });
       const data = await res.json();
       if (data.success !== false) {

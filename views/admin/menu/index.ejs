@@ -29,8 +29,8 @@
           </tr>
         </thead>
         <tbody id="menuTableBody" class="divide-y divide-[var(--theme-border)]">
-          <% if (Array.isArray(locals) && locals.length > 0) { %>
-            <% locals.forEach(function(item) { %>
+          <% if (Array.isArray(items) && items.length > 0) { %>
+            <% items.forEach(function(item) { %>
               <tr class="hover:bg-[var(--theme-bg-secondary)] transition">
                 <td class="px-5 py-3 font-medium" style="color:var(--theme-text-strong)"><%= item.label %></td>
                 <td class="px-5 py-3 font-mono text-xs" style="color:var(--theme-text-muted)"><%= item.url %></td>
@@ -45,7 +45,7 @@
                 </td>
               </tr>
             <% }); %>
-          <% } else if (Array.isArray(locals)) { %>
+          <% } else if (Array.isArray(items)) { %>
             <tr><td colspan="5" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">No menu items configured.</td></tr>
           <% } else { %>
             <tr><td colspan="5" class="px-5 py-5 text-center text-sm" style="color:var(--theme-text-muted)">Loading...</td></tr>
@@ -58,7 +58,7 @@
 
 <script nonce="<%- nonce %>">
 (function() {
-  var items = <%- JSON.stringify(locals || []) %>;
+  var items = <%- JSON.stringify(items || []) %>;
   var tbody = document.getElementById('menuTableBody');
 
   if (items.length === 0) {

@@ -129,6 +129,7 @@
 </div>
 
 <script nonce="<%- nonce %>">
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 (function() {
   var serverId = '<%= server.UUID %>';
 
@@ -156,7 +157,7 @@
     savingLabel.style.display = '';
     fetch('/server/' + serverId + '/settings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({
         name: document.getElementById('serverName').value,
         description: document.getElementById('serverDescription').value
@@ -206,7 +207,7 @@
         loader.setStage('Preparing for reinstallation...');
         fetch('/server/' + serverId + '/reinstall', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
           body: JSON.stringify({ preserveData: true })
         }).then(function(r) { return r.json(); }).then(function(data) {
           loader.setStage('Reinstallation initiated!');
@@ -231,7 +232,7 @@
           loader.setStage('Preparing for reinstallation...');
           fetch('/server/' + serverId + '/reinstall', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
             body: JSON.stringify({ preserveData: false })
           }).then(function(r) { return r.json(); }).then(function(data) {
             loader.setStage('Reinstallation initiated!');

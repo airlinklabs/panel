@@ -19,10 +19,13 @@ const module: Module = {
     const router = Router();
 
     // ── GET / ──────────────────────────────────────────────────────────────
+    // Signed out: the dashboard behind this router is guarded, so bounce to
+    // login here. Signed in: fall through so the user dashboard controller
+    // (mounted after this router) renders — redirecting would loop.
     router.get('/', (req, res, next) => {
       try {
         if (req.session?.user) {
-          res.redirect('/dashboard');
+          next();
           return;
         }
         res.redirect('/login');
@@ -35,7 +38,7 @@ const module: Module = {
     router.get('/login', async (req, res, next) => {
       try {
         if (req.session?.user) {
-          res.redirect('/dashboard');
+          res.redirect('/');
           return;
         }
 
@@ -58,7 +61,7 @@ const module: Module = {
     router.get('/register', async (req, res, next) => {
       try {
         if (req.session?.user) {
-          res.redirect('/dashboard');
+          res.redirect('/');
           return;
         }
 
@@ -82,7 +85,7 @@ const module: Module = {
     router.get('/forgot-password', async (req, res, next) => {
       try {
         if (req.session?.user) {
-          res.redirect('/dashboard');
+          res.redirect('/');
           return;
         }
 
@@ -98,7 +101,7 @@ const module: Module = {
     router.get('/reset-password', async (req, res, next) => {
       try {
         if (req.session?.user) {
-          res.redirect('/dashboard');
+          res.redirect('/');
           return;
         }
 

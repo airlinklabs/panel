@@ -18,8 +18,12 @@ const module: Module = {
     // Dashboard
     router.get('/', isAuthenticated(false), async (req, res, next) => {
       try {
-        const data = (await apiGet(req, '/servers')) as Record<string, unknown>;
-        res.render('user/dashboard', { ...data, user: req.session?.user, req });
+        const data = await apiGet(req, '/servers');
+        res.render('user/dashboard', {
+          servers: Array.isArray(data) ? data : [],
+          user: req.session?.user,
+          req,
+        });
       } catch (err) {
         next(err);
       }
@@ -155,14 +159,9 @@ const module: Module = {
       }
     });
 
-    // Credits page
-    router.get('/credits', isAuthenticated(false), async (req, res, next) => {
-      try {
-        const data = (await apiGet(req, '/account')) as Record<string, unknown>;
-        res.render('user/credits', { ...data, user: req.session?.user, req });
-      } catch (err) {
-        next(err);
-      }
+    // Credits page — the view is fed by res.locals (templateConfig), no API
+    router.get('/credits', isAuthenticated(false), (req, res) => {
+      res.render('user/credits', { user: req.session?.user, req });
     });
 
     // My Images

@@ -1,6 +1,7 @@
-import { defineConfig } from "vite";
-import path from "path";
-import { fileURLToPath } from "url";
+import { defineConfig } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -16,28 +17,33 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   root: __dirname,
   publicDir: false,
+  // Tailwind v4 compiles inside Vite so utilities are generated from the
+  // same source scan that reads views/**/*.ejs. Without this plugin Vite
+  // passes @import "tailwindcss" / @plugin / @custom-variant through raw
+  // and the built CSS ships with zero utility classes.
+  plugins: [tailwindcss()],
   build: {
-    outDir: path.resolve(__dirname, "public"),
+    outDir: path.resolve(__dirname, 'public'),
     emptyOutDir: false,
     manifest: true,
     rollupOptions: {
       input: {
-        panel: path.resolve(__dirname, "views/styles/main.css"),
+        panel: path.resolve(__dirname, 'views/styles/main.css'),
       },
       output: {
-        entryFileNames: "assets/js/[name]-[hash].js",
-        chunkFileNames: "assets/js/[name]-[hash].js",
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        chunkFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name?.endsWith(".css")) {
-            return "assets/css/[name]-[hash].[ext]";
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'assets/css/[name]-[hash].[ext]';
           }
-          return "assets/media/[name]-[hash].[ext]";
+          return 'assets/media/[name]-[hash].[ext]';
         },
       },
     },
-    target: "es2020",
-    minify: "esbuild",
-    cssMinify: "esbuild",
+    target: 'es2020',
+    minify: 'esbuild',
+    cssMinify: 'esbuild',
     sourcemap: false,
   },
   css: {
@@ -46,7 +52,7 @@ export default defineConfig({
   // Ensure scripts/ is never copied to build output
   server: {
     fs: {
-      deny: ["**/scripts/**"],
+      deny: ['**/scripts/**'],
     },
   },
 });

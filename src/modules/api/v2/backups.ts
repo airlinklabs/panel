@@ -37,7 +37,7 @@ import {
   DAEMON_TIMEOUT_MEDIUM_MS,
 } from '../../../config/daemonTimeouts';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/backups — List backups

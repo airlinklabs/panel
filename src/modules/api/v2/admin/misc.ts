@@ -3,6 +3,7 @@
  *
  * Locations:
  *   GET    /api/v2/admin/locations
+ *   GET    /api/v2/admin/locations/:id/nodes
  *   POST   /api/v2/admin/locations
  *   PUT    /api/v2/admin/locations/:id
  *   DELETE /api/v2/admin/locations/:id
@@ -21,6 +22,16 @@
  *
  * Addons:
  *   GET    /api/v2/admin/addons
+ *   GET    /api/v2/admin/addons/store
+ *   GET    /api/v2/admin/addons/store/list
+ *   GET    /api/v2/admin/addons/store/discussions
+ *   GET    /api/v2/admin/addons/:id
+ *   POST   /api/v2/admin/addons/reload
+ *   POST   /api/v2/admin/addons/:id/capability
+ *   POST   /api/v2/admin/addons/:id/command/:commandId
+ *   POST   /api/v2/admin/addons/:id/settings
+ *   POST   /api/v2/admin/addons/store/install
+ *   POST   /api/v2/admin/addons/store/uninstall
  *   POST   /api/v2/admin/addons/:slug/toggle
  *   POST   /api/v2/admin/addons/:slug/reload
  *   POST   /api/v2/admin/addons/:slug/uninstall
@@ -30,9 +41,17 @@
  *   POST   /api/v2/admin/overview/perform-update
  *
  * Radar:
+ *   GET    /api/v2/admin/radar
  *   POST   /api/v2/admin/radar/scan/:serverId
  *   GET    /api/v2/admin/radar/virustotal-enabled
+ *   GET    /api/v2/admin/radar/virustotal
  *   GET    /api/v2/admin/radar/scripts
+ *   GET    /api/v2/admin/radar/scripts/:id
+ *   POST   /api/v2/admin/radar/scripts
+ *   POST   /api/v2/admin/radar/scripts/:id
+ *   POST   /api/v2/admin/radar/scripts/:id/delete
+ *   GET    /api/v2/admin/radar/virustotal/scan/:hash
+ *   POST   /api/v2/admin/radar/virustotal/:hash
  *   POST   /api/v2/admin/radar/vtscan/:serverId
  *   POST   /api/v2/admin/radar/virustotal
  *
@@ -45,6 +64,7 @@
  */
 
 import { Router } from 'express';
+import type { Response } from 'express';
 import prisma from '../../../../db';
 import { parseBody } from '../../../../utils/validation';
 import { jsonOk, jsonError, requireAdmin, logActivity } from '../helpers';
@@ -54,8 +74,22 @@ import {
   adminCreateMountBody,
   adminCreateApiKeyBody,
   adminUpdateApiKeyBody,
+  adminRadarScriptBody,
+  adminRadarScriptUpdateBody,
+  adminRadarVtPostBody,
+  adminAddonCapabilityBody,
+  adminAddonSettingsBody,
+  adminAddonCommandBody,
+  RADAR_SCRIPT_ID_RE,
+  ADDON_CAPABILITIES,
 } from '../dto';
-import { getSettings } from '../../../../handlers/settingsCache';
+import {
+  getSettings,
+  invalidateSettingsCache,
+} from '../../../../handlers/settingsCache';
+import { parseAddonManifest } from '../../../../handlers/addonManifest';
+import { commandRegistry } from '../../../../handlers/addonCommands';
+import { containPath } from '../../../../utils/pathSecurity';
 import logger from '../../../../handlers/logger';
 import { redisRateLimit } from '../../../../handlers/utils/security/redisRateLimit';
 import fs from 'fs/promises';
@@ -90,6 +124,116 @@ router.use(async (req, res, next) => {
   req.adminUser = admin;
   next();
 });
+
+// ======================== SHARED HELPERS ========================
+
+/** Radar scripts live as `<id>.json` files under storage/radar. */
+const RADAR_DIR = path.join(__dirname, '../../../../storage/radar');
+const VT_HASH_RE = /^[a-fA-F0-9]{32,64}$/;
+
+async function ensureRadarDir(): Promise<string> {
+  try {
+    await fs.access(RADAR_DIR);
+  } catch {
+    await fs.mkdir(RADAR_DIR, { recursive: true });
+  }
+  return RADAR_DIR;
+}
+
+interface RadarScriptSummary {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  filename: string;
+}
+
+/** Read every script file, tolerating individually malformed JSON. */
+async function listRadarScripts(): Promise<RadarScriptSummary[]> {
+  const radarDir = await ensureRadarDir();
+  const files = await fs.readdir(radarDir);
+  return Promise.all(
+    files
+      .filter((file) => file.endsWith('.json'))
+      .map(async (file) => {
+        const content = await fs.readFile(path.join(radarDir, file), 'utf-8');
+        try {
+          const scriptData = JSON.parse(content) as Record<string, unknown>;
+          return {
+            id: file.replace('.json', ''),
+            name: (scriptData.name as string) || file,
+            description: (scriptData.description as string) || '',
+            version: (scriptData.version as string) || '1.0.0',
+            filename: file,
+          };
+        } catch {
+          return {
+            id: file.replace('.json', ''),
+            name: file,
+            description: 'Invalid script format',
+            version: 'unknown',
+            filename: file,
+          };
+        }
+      }),
+  );
+}
+
+function radarScriptPath(id: string): string {
+  return path.join(RADAR_DIR, `${id}.json`);
+}
+
+/** Derive a traversal-safe script id from a human-readable script name. */
+function slugifyRadarScriptId(name: string): string {
+  const base = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64);
+  if (base && RADAR_SCRIPT_ID_RE.test(base)) {
+    return base;
+  }
+  return `script-${Date.now().toString(36)}`;
+}
+
+/** Resolve a script id from the URL, rejecting traversal attempts. */
+function readRadarScriptId(raw: unknown): string | null {
+  const id = String(raw ?? '');
+  return RADAR_SCRIPT_ID_RE.test(id) ? id : null;
+}
+
+// In-memory rate limiter respecting the VT free tier: 4/min, 500/day.
+const vtRateLimit = {
+  minuteWindow: 0,
+  minuteCount: 0,
+  dayWindow: 0,
+  dayCount: 0,
+  allow(): boolean {
+    const now = Math.floor(Date.now() / 1000);
+    const minute = Math.floor(now / 60);
+    if (minute !== this.minuteWindow) {
+      this.minuteWindow = minute;
+      this.minuteCount = 0;
+    }
+    if (this.minuteCount >= 4) {
+      return false;
+    }
+    this.minuteCount++;
+    return true;
+  },
+  allowDaily(): boolean {
+    const day = Math.floor(Date.now() / 86400000);
+    if (day !== this.dayWindow) {
+      this.dayWindow = day;
+      this.dayCount = 0;
+    }
+    if (this.dayCount >= 500) {
+      return false;
+    }
+    this.dayCount++;
+    return true;
+  },
+};
 
 // ======================== LOCATIONS ========================
 
@@ -177,6 +321,24 @@ router.delete('/locations/:id', async (req, res) => {
     req.ip,
   );
   jsonOk(res, { deleted: id });
+});
+
+// GET /api/v2/admin/locations/:id/nodes — nodes belonging to a location
+router.get('/locations/:id/nodes', async (req, res) => {
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id)) {
+    return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
+  }
+  const location = await prisma.location.findUnique({ where: { id } });
+  if (!location) {
+    return jsonError(res, 'NOT_FOUND', 'Location not found', 404);
+  }
+  const nodes = await prisma.node.findMany({
+    where: { locationId: id },
+    include: { servers: { select: { id: true } } },
+    orderBy: { name: 'asc' },
+  });
+  jsonOk(res, nodes);
 });
 
 // ======================== MOUNTS ========================
@@ -369,6 +531,274 @@ router.get('/addons', async (_req, res) => {
   jsonOk(res, addons);
 });
 
+// The addon store is deliberately switched off upstream ("coming soon").
+// Answer with a 200 + `available:false` payload rather than the legacy 410:
+// these paths are proxied by page routes that do `res.json(await apiGet(...))`
+// / `apiPost(...)`, and a non-2xx status turns them into HTML error pages.
+const ADDON_STORE_UNAVAILABLE = {
+  available: false,
+  message: 'Addon store is not available yet.',
+} as const;
+
+// GET /api/v2/admin/addons/store — store page payload (installed addons;
+// views/admin/addons/store.ejs renders `addons.length` from this)
+router.get('/addons/store', async (_req, res) => {
+  const addons = await prisma.addon.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+  jsonOk(res, addons);
+});
+
+// GET /api/v2/admin/addons/store/list — catalogue (disabled)
+router.get('/addons/store/list', (_req, res) => {
+  jsonOk(res, ADDON_STORE_UNAVAILABLE);
+});
+
+// GET /api/v2/admin/addons/store/discussions — discussions (disabled)
+router.get('/addons/store/discussions', (_req, res) => {
+  jsonOk(res, ADDON_STORE_UNAVAILABLE);
+});
+
+// POST /api/v2/admin/addons/store/install — install from store (disabled)
+router.post('/addons/store/install', (_req, res) => {
+  jsonOk(res, ADDON_STORE_UNAVAILABLE);
+});
+
+// POST /api/v2/admin/addons/store/uninstall — uninstall from store (disabled)
+router.post('/addons/store/uninstall', (_req, res) => {
+  jsonOk(res, ADDON_STORE_UNAVAILABLE);
+});
+
+/**
+ * Resolve storage/addons/<slug> with a traversal guard. `containPath` throws
+ * when the base directory does not exist yet, so fall back to a lexical check.
+ */
+function resolveAddonDir(slug: string): string | null {
+  const addonsDir = path.join(__dirname, '../../../../storage/addons');
+  const addonDir = path.join(addonsDir, slug);
+  try {
+    return containPath(addonsDir, addonDir) ? addonDir : null;
+  } catch {
+    const base = path.resolve(addonsDir);
+    const resolved = path.resolve(addonDir);
+    return resolved.startsWith(base + path.sep) ? resolved : null;
+  }
+}
+
+// GET /api/v2/admin/addons/:id — addon detail (`:id` is the addon slug)
+// Payload is FLAT: views/admin/addons/detail.ejs reads addon.name / slug /
+// enabled / settings / commands / capabilities directly off the local.
+router.get('/addons/:id', async (req, res) => {
+  const slug = String(req.params.id);
+  const addon = await prisma.addon.findUnique({ where: { slug } });
+  if (!addon) {
+    return jsonError(res, 'NOT_FOUND', 'Addon not found', 404);
+  }
+
+  const addonDir = resolveAddonDir(slug);
+  if (!addonDir) {
+    return jsonError(res, 'BAD_REQUEST', 'Invalid addon slug', 400);
+  }
+
+  const manifestResult = parseAddonManifest(
+    path.join(addonDir, 'package.json'),
+    slug,
+  );
+  const manifest = manifestResult.success ? manifestResult.manifest : null;
+
+  const commands = commandRegistry
+    .getAddonCommands(slug)
+    .map((c) => ({ name: c.name, description: c.description }));
+
+  const rows = await prisma.addonSetting.findMany({
+    where: { addonSlug: slug },
+  });
+  const settings: Record<string, string> = {};
+  const capabilityOverrides: Record<string, string> = {};
+  for (const row of rows) {
+    if (row.key.startsWith('capability.')) {
+      capabilityOverrides[row.key.slice('capability.'.length)] = row.value;
+    } else {
+      settings[row.key] = row.value;
+    }
+  }
+
+  const declared = manifest?.capabilities ?? {};
+  const capabilities = ADDON_CAPABILITIES.filter(
+    (name) => declared[name] !== undefined || capabilityOverrides[name] !== undefined,
+  ).map((name) => ({
+    name,
+    enabled:
+      capabilityOverrides[name] !== undefined
+        ? capabilityOverrides[name] === 'true'
+        : declared[name] === true,
+  }));
+
+  jsonOk(res, { ...addon, settings, commands, capabilities, manifest });
+});
+
+// POST /api/v2/admin/addons/reload — reload EVERY addon.
+// views/admin/addons/index.ejs posts here with no slug, so this cannot be
+// served by POST /addons/:slug/reload.
+router.post('/addons/reload', async (req, res) => {
+  try {
+    const { reloadAddons } = await import('../../../../handlers/addonHandler');
+    const result = await reloadAddons(req.app);
+    logActivity(
+      req.adminUser?.id,
+      'addon.reloaded',
+      undefined,
+      { all: true, success: result.success },
+      req.ip,
+    );
+    jsonOk(res, { reloaded: true, ...result });
+  } catch (error) {
+    logger.error('Error reloading addons:', error);
+    jsonError(res, 'RELOAD_FAILED', 'Failed to reload addons', 500);
+  }
+});
+
+// POST /api/v2/admin/addons/:id/capability — grant/revoke a capability
+router.post(
+  '/addons/:id/capability',
+  parseBody(adminAddonCapabilityBody),
+  async (req, res) => {
+    const slug = String(req.params.id);
+    const addon = await prisma.addon.findUnique({ where: { slug } });
+    if (!addon) {
+      return jsonError(res, 'NOT_FOUND', 'Addon not found', 404);
+    }
+
+    const { capability, enabled } = req.validatedBody as {
+      capability: string;
+      enabled: boolean;
+    };
+
+    await prisma.addonSetting.upsert({
+      where: {
+        addonSlug_key: { addonSlug: slug, key: `capability.${capability}` },
+      },
+      create: {
+        addonSlug: slug,
+        key: `capability.${capability}`,
+        value: enabled ? 'true' : 'false',
+      },
+      update: { value: enabled ? 'true' : 'false' },
+    });
+
+    logActivity(
+      req.adminUser?.id,
+      'addon.capability',
+      undefined,
+      { slug, capability, enabled },
+      req.ip,
+    );
+
+    jsonOk(res, { slug, capability, enabled });
+  },
+);
+
+// POST /api/v2/admin/addons/:id/command/:commandId — run an addon command.
+// The view posts with no body at all, so the args come from an optional key.
+router.post(
+  '/addons/:id/command/:commandId',
+  parseBody(adminAddonCommandBody),
+  async (req, res) => {
+    const slug = String(req.params.id);
+    const commandId = String(req.params.commandId);
+    const { args } = req.validatedBody as { args?: unknown };
+
+    const parsedArgs = Array.isArray(args) ? args.map((a) => String(a)) : [];
+    const output = await commandRegistry.execute(
+      `${slug}:${commandId}`,
+      parsedArgs,
+    );
+
+    logActivity(
+      req.adminUser?.id,
+      'addon.command',
+      undefined,
+      { slug, command: commandId },
+      req.ip,
+    );
+
+    jsonOk(res, { slug, command: commandId, output });
+  },
+);
+
+// POST /api/v2/admin/addons/:id/settings — save keys declared by the addon's
+// manifest settingsSchema (unknown keys are ignored, booleans/numbers are
+// normalised to strings before the upsert).
+router.post(
+  '/addons/:id/settings',
+  parseBody(adminAddonSettingsBody),
+  async (req, res) => {
+    const slug = String(req.params.id);
+    const addon = await prisma.addon.findUnique({ where: { slug } });
+    if (!addon) {
+      return jsonError(res, 'NOT_FOUND', 'Addon not found', 404);
+    }
+
+    const addonDir = resolveAddonDir(slug);
+    if (!addonDir) {
+      return jsonError(res, 'BAD_REQUEST', 'Invalid addon slug', 400);
+    }
+
+    const manifestResult = parseAddonManifest(
+      path.join(addonDir, 'package.json'),
+      slug,
+    );
+    if (!manifestResult.success || !manifestResult.manifest.settingsSchema) {
+      return jsonError(
+        res,
+        'BAD_REQUEST',
+        'Addon has no settings schema',
+        400,
+      );
+    }
+
+    const schema = manifestResult.manifest.settingsSchema;
+    const rawBody = (req.validatedBody ?? {}) as Record<string, unknown>;
+    const updates: Record<string, string> = {};
+
+    for (const field of schema) {
+      if (!(field.key in rawBody)) {
+        continue;
+      }
+      const value = rawBody[field.key];
+      if (field.type === 'boolean') {
+        updates[field.key] = value === 'true' || value === true ? 'true' : 'false';
+      } else if (field.type === 'number') {
+        const num = Number(value);
+        if (Number.isNaN(num)) {
+          continue;
+        }
+        updates[field.key] = String(num);
+      } else {
+        updates[field.key] = String(value);
+      }
+    }
+
+    for (const [key, value] of Object.entries(updates)) {
+      await prisma.addonSetting.upsert({
+        where: { addonSlug_key: { addonSlug: slug, key } },
+        create: { addonSlug: slug, key, value },
+        update: { value },
+      });
+    }
+
+    logActivity(
+      req.adminUser?.id,
+      'addon.settings.updated',
+      undefined,
+      { slug, keys: Object.keys(updates) },
+      req.ip,
+    );
+
+    jsonOk(res, { slug, updated: Object.keys(updates) });
+  },
+);
+
 router.post('/addons/:slug/toggle', async (req, res) => {
   const addon = await prisma.addon.findUnique({
     where: { slug: String(req.params.slug) },
@@ -502,42 +932,7 @@ router.get('/radar/virustotal-enabled', async (_req, res) => {
 // ---------------------------------------------------------------------------
 router.get('/radar/scripts', redisRateLimit, async (_req, res) => {
   try {
-    const radarDir = path.join(__dirname, '../../../../storage/radar');
-
-    try {
-      await fs.access(radarDir);
-    } catch {
-      await fs.mkdir(radarDir, { recursive: true });
-    }
-
-    const files = await fs.readdir(radarDir);
-    const scripts = await Promise.all(
-      files
-        .filter((file) => file.endsWith('.json'))
-        .map(async (file) => {
-          const content = await fs.readFile(path.join(radarDir, file), 'utf-8');
-          try {
-            const scriptData = JSON.parse(content);
-            return {
-              id: file.replace('.json', ''),
-              name: scriptData.name || file,
-              description: scriptData.description || '',
-              version: scriptData.version || '1.0.0',
-              filename: file,
-            };
-          } catch {
-            return {
-              id: file.replace('.json', ''),
-              name: file,
-              description: 'Invalid script format',
-              version: 'unknown',
-              filename: file,
-            };
-          }
-        }),
-    );
-
-    jsonOk(res, scripts);
+    jsonOk(res, await listRadarScripts());
   } catch (error: unknown) {
     logger.error('Error fetching radar scripts:', error);
     jsonError(res, 'SCRIPTS_ERROR', 'Failed to fetch radar scripts', 500);
@@ -744,29 +1139,260 @@ router.post('/radar/vtscan/:serverId', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// POST /api/v2/admin/radar/virustotal — VT hash lookup
+// POST /api/v2/admin/radar/virustotal — dual mode.
+//   { enabled, apiKey? } → save VT config (views/admin/radar/index.ejs)
+//   { hash }             → legacy VirusTotal hash lookup
 // ---------------------------------------------------------------------------
-router.post('/radar/virustotal', async (req, res) => {
+router.post(
+  '/radar/virustotal',
+  parseBody(adminRadarVtPostBody),
+  async (req, res) => {
+    const body = req.validatedBody as Record<string, unknown>;
+
+    if (!('hash' in body)) {
+      const settings = await prisma.settings.findFirst();
+      if (!settings) {
+        return jsonError(res, 'NOT_FOUND', 'Settings not found', 404);
+      }
+
+      // There is no separate "enabled" column — enabled ⇔ a key is stored.
+      const enabled = body.enabled === true;
+      const rawKey = body.virusTotalApiKey ?? body.apiKey;
+      let apiKey = settings.virusTotalApiKey ?? '';
+      if (typeof rawKey === 'string') {
+        apiKey = rawKey.trim();
+      }
+      if (!enabled) {
+        apiKey = '';
+      }
+
+      const updated = await prisma.settings.update({
+        where: { id: settings.id },
+        data: { virusTotalApiKey: apiKey.length > 0 ? apiKey : null },
+      });
+      invalidateSettingsCache();
+
+      logActivity(
+        req.adminUser?.id,
+        'settings.virustotal.updated',
+        undefined,
+        { enabled: !!updated.virusTotalApiKey },
+        req.ip,
+      );
+
+      return jsonOk(res, {
+        enabled: !!updated.virusTotalApiKey,
+        virusTotalApiKey: updated.virusTotalApiKey,
+      });
+    }
+
+    sendVtOutcome(res, await lookupVtHash(String(body.hash)));
+  },
+);
+
+// ======================== RADAR (page data + script CRUD) ========================
+
+// GET /api/v2/admin/radar — page payload for views/admin/radar/index.ejs.
+// The tab view reads `settings.virusTotalApiKey`; the page controller prefers
+// a nested `settings` object when it is one, hence the wrapper.
+router.get('/radar', async (_req, res) => {
+  const settings = await getSettings();
+  const scripts = await listRadarScripts().catch(() => []);
+  jsonOk(res, {
+    settings: settings ?? {},
+    scripts,
+    stats: {
+      scriptCount: scripts.length,
+      virustotalEnabled: !!settings?.virusTotalApiKey,
+    },
+  });
+});
+
+// GET /api/v2/admin/radar/scripts/:id — single script (edit form payload)
+router.get('/radar/scripts/:id', async (req, res) => {
+  const id = readRadarScriptId(req.params.id);
+  if (!id) {
+    return jsonError(res, 'BAD_REQUEST', 'Invalid script ID', 400);
+  }
+  let raw: string;
+  try {
+    raw = await fs.readFile(radarScriptPath(id), 'utf-8');
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') {
+      return jsonError(res, 'NOT_FOUND', 'Script not found', 404);
+    }
+    logger.error('Error reading radar script:', error);
+    return jsonError(res, 'SCRIPT_ERROR', 'Failed to read radar script', 500);
+  }
+  try {
+    const script = JSON.parse(raw) as Record<string, unknown>;
+    jsonOk(res, { ...script, id, filename: `${id}.json` });
+  } catch {
+    jsonError(res, 'SCRIPT_INVALID', 'Invalid script format', 500);
+  }
+});
+
+// POST /api/v2/admin/radar/scripts — create a script
+router.post(
+  '/radar/scripts',
+  parseBody(adminRadarScriptBody),
+  async (req, res) => {
+    const data = req.validatedBody as Record<string, unknown> & { name: string };
+    const id =
+      typeof data.id === 'string' && data.id.length > 0
+        ? data.id
+        : slugifyRadarScriptId(data.name);
+    if (!RADAR_SCRIPT_ID_RE.test(id)) {
+      return jsonError(res, 'BAD_REQUEST', 'Invalid script ID', 400);
+    }
+
+    await ensureRadarDir();
+    try {
+      await fs.access(radarScriptPath(id));
+      return jsonError(
+        res,
+        'CONFLICT',
+        'A script with that ID already exists',
+        409,
+      );
+    } catch {
+      /* free to create */
+    }
+
+    const script: Record<string, unknown> = { ...data };
+    delete script.id;
+    await fs.writeFile(radarScriptPath(id), JSON.stringify(script, null, 2), 'utf-8');
+
+    logActivity(
+      req.adminUser?.id,
+      'radar.script.created',
+      undefined,
+      { id, name: data.name },
+      req.ip,
+    );
+
+    jsonOk(res, { ...script, id, filename: `${id}.json` });
+  },
+);
+
+// POST /api/v2/admin/radar/scripts/:id — update a script (partial)
+router.post(
+  '/radar/scripts/:id',
+  parseBody(adminRadarScriptUpdateBody),
+  async (req, res) => {
+    const id = readRadarScriptId(req.params.id);
+    if (!id) {
+      return jsonError(res, 'BAD_REQUEST', 'Invalid script ID', 400);
+    }
+
+    let raw: string;
+    try {
+      raw = await fs.readFile(radarScriptPath(id), 'utf-8');
+    } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') {
+        return jsonError(res, 'NOT_FOUND', 'Script not found', 404);
+      }
+      logger.error('Error reading radar script:', error);
+      return jsonError(res, 'SCRIPT_ERROR', 'Failed to read radar script', 500);
+    }
+
+    let existing: Record<string, unknown> = {};
+    try {
+      existing = JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      /* overwrite malformed content */
+    }
+
+    const patch = {
+      ...(req.validatedBody as Record<string, unknown> | undefined),
+    };
+    delete patch.id;
+
+    const merged = { ...existing, ...patch };
+    await fs.writeFile(radarScriptPath(id), JSON.stringify(merged, null, 2), 'utf-8');
+
+    logActivity(
+      req.adminUser?.id,
+      'radar.script.updated',
+      undefined,
+      { id, fields: Object.keys(patch) },
+      req.ip,
+    );
+
+    jsonOk(res, { ...merged, id, filename: `${id}.json` });
+  },
+);
+
+// POST /api/v2/admin/radar/scripts/:id/delete — delete a script
+router.post('/radar/scripts/:id/delete', async (req, res) => {
+  const id = readRadarScriptId(req.params.id);
+  if (!id) {
+    return jsonError(res, 'BAD_REQUEST', 'Invalid script ID', 400);
+  }
+  try {
+    await fs.unlink(radarScriptPath(id));
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') {
+      return jsonError(res, 'NOT_FOUND', 'Script not found', 404);
+    }
+    logger.error('Error deleting radar script:', error);
+    return jsonError(res, 'SCRIPT_ERROR', 'Failed to delete radar script', 500);
+  }
+
+  logActivity(req.adminUser?.id, 'radar.script.deleted', undefined, { id }, req.ip);
+
+  jsonOk(res, { deleted: id });
+});
+
+// GET /api/v2/admin/radar/virustotal — VT config state for the tab page
+router.get('/radar/virustotal', async (_req, res) => {
+  const settings = await getSettings();
+  jsonOk(res, {
+    enabled: !!settings?.virusTotalApiKey,
+    virusTotalApiKey: settings?.virusTotalApiKey ?? null,
+  });
+});
+
+interface VtLookupOutcome {
+  payload?: Record<string, unknown>;
+  error?: { code: string; message: string; status: number };
+}
+
+/**
+ * Hash lookup against VirusTotal (port of the legacy POST /admin/radar/
+ * virustotal handler). Every call site shares the free-tier rate limiter.
+ */
+async function lookupVtHash(hash: string): Promise<VtLookupOutcome> {
   const settings = await getSettings();
   const apiKey = settings?.virusTotalApiKey;
 
   if (!apiKey) {
-    return jsonError(
-      res,
-      'VT_NOT_CONFIGURED',
-      'VirusTotal API key is not configured. Add it in Admin Settings.',
-      503,
-    );
+    return {
+      error: {
+        code: 'VT_NOT_CONFIGURED',
+        message:
+          'VirusTotal API key is not configured. Add it in Admin Settings.',
+        status: 503,
+      },
+    };
   }
-
-  const { hash } = req.body as { hash?: string };
-  if (!hash || !/^[a-fA-F0-9]{32,64}$/.test(hash)) {
-    return jsonError(
-      res,
-      'BAD_REQUEST',
-      'A valid MD5, SHA1, or SHA256 hash is required',
-      400,
-    );
+  if (!vtRateLimit.allow()) {
+    return {
+      error: {
+        code: 'VT_RATE_LIMITED',
+        message: 'Rate limit: 4 lookups/min on free tier. Wait a moment.',
+        status: 429,
+      },
+    };
+  }
+  if (!vtRateLimit.allowDaily()) {
+    return {
+      error: {
+        code: 'VT_DAILY_QUOTA',
+        message: 'Daily quota reached: 500 lookups/day on free tier.',
+        status: 429,
+      },
+    };
   }
 
   try {
@@ -779,24 +1405,41 @@ router.post('/radar/virustotal', async (req, res) => {
     );
 
     if (vtResponse.status === 404) {
-      return jsonOk(res, { found: false });
+      return {
+        payload: {
+          found: false,
+          hash,
+          malicious: 0,
+          total: 0,
+          message: 'Hash is not known to VirusTotal.',
+        },
+      };
     }
 
     if (vtResponse.status !== 200) {
       logger.error('VirusTotal API error:', `Status ${vtResponse.status}`);
-      return jsonError(
-        res,
-        'VT_ERROR',
-        `VirusTotal request failed — status ${vtResponse.status}`,
-        502,
-      );
+      return {
+        error: {
+          code: 'VT_ERROR',
+          message: `VirusTotal request failed — status ${vtResponse.status}`,
+          status: 502,
+        },
+      };
     }
 
     const vtData = vtResponse.data as Record<string, unknown> | undefined;
     const attrs = (vtData?.data as Record<string, unknown> | undefined)
       ?.attributes as Record<string, unknown> | undefined;
     if (!attrs) {
-      return jsonOk(res, { found: false });
+      return {
+        payload: {
+          found: false,
+          hash,
+          malicious: 0,
+          total: 0,
+          message: 'Hash is not known to VirusTotal.',
+        },
+      };
     }
 
     const stats = (attrs.last_analysis_stats || {}) as Record<string, number>;
@@ -806,28 +1449,78 @@ router.post('/radar/virustotal', async (req, res) => {
     );
     const malicious = (stats.malicious || 0) + (stats.suspicious || 0);
 
-    jsonOk(res, {
-      found: true,
-      hash,
-      malicious,
-      total,
-      name: String(attrs.meaningful_name || attrs.name || null),
-      type: String(attrs.type_description || null),
-      size: attrs.size || null,
-      firstSeen: attrs.first_submission_date
-        ? new Date(Number(attrs.first_submission_date) * 1000)
-          .toISOString()
-          .split('T')[0]
-        : null,
-      vtLink: VT_GUI_FILE_URL(hash),
-    });
+    return {
+      payload: {
+        found: true,
+        hash,
+        malicious,
+        total,
+        name: String(attrs.meaningful_name || attrs.name || null),
+        type: String(attrs.type_description || null),
+        size: attrs.size || null,
+        firstSeen: attrs.first_submission_date
+          ? new Date(Number(attrs.first_submission_date) * 1000)
+            .toISOString()
+            .split('T')[0]
+          : null,
+        vtLink: VT_GUI_FILE_URL(hash),
+        message:
+          malicious > 0
+            ? `Flagged by ${malicious} of ${total} engines.`
+            : 'No threats found.',
+      },
+    };
   } catch (error: unknown) {
     logger.error(
       'VirusTotal API error:',
       error instanceof Error ? error.message : error,
     );
-    jsonError(res, 'VT_FAILED', 'VirusTotal scan failed', 502);
+    return {
+      error: { code: 'VT_FAILED', message: 'VirusTotal scan failed', status: 502 },
+    };
   }
+}
+
+function sendVtOutcome(res: Response, outcome: VtLookupOutcome): void {
+  if (outcome.error) {
+    jsonError(
+      res,
+      outcome.error.code,
+      outcome.error.message,
+      outcome.error.status,
+    );
+    return;
+  }
+  jsonOk(res, outcome.payload);
+}
+
+// GET /api/v2/admin/radar/virustotal/scan/:hash — verdict JSON for a hash.
+// views/admin/radar/index.ejs reads `malicious` (truthy = bad) and `message`.
+router.get('/radar/virustotal/scan/:hash', async (req, res) => {
+  const hash = String(req.params.hash);
+  if (!VT_HASH_RE.test(hash)) {
+    return jsonError(
+      res,
+      'BAD_REQUEST',
+      'A valid MD5, SHA1, or SHA256 hash is required',
+      400,
+    );
+  }
+  sendVtOutcome(res, await lookupVtHash(hash));
+});
+
+// POST /api/v2/admin/radar/virustotal/:hash — trigger a VT lookup for a hash
+router.post('/radar/virustotal/:hash', async (req, res) => {
+  const hash = String(req.params.hash);
+  if (!VT_HASH_RE.test(hash)) {
+    return jsonError(
+      res,
+      'BAD_REQUEST',
+      'A valid MD5, SHA1, or SHA256 hash is required',
+      400,
+    );
+  }
+  sendVtOutcome(res, await lookupVtHash(hash));
 });
 
 // ======================== ANALYTICS ========================

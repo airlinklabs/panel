@@ -20,11 +20,11 @@ const wallpaperExcluded = req && req.path && (
         <% } %>
       })();
     </script>
-    <link rel="stylesheet" href="<%= assetUrl('/styles.css') %>?v=8">
+    <link rel="stylesheet" href="<%= assetUrl('views/styles/main.css') %>">
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? assetUrl(settings.favicon) : assetUrl('/favicon.ico') %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? assetUrl(settings.favicon) : assetUrl('/favicon.ico') %>" type="image/x-icon">
-    <link rel="stylesheet" href="<%= assetUrl('/themes/default-light.css') %>">
-    <link rel="stylesheet" href="<%= assetUrl('/themes/default-dark.css') %>">
+    <link rel="stylesheet" href="<%= assetUrl('/themes/builtin/default-light.css') %>">
+    <link rel="stylesheet" href="<%= assetUrl('/themes/builtin/default-dark.css') %>">
     <% if (settings.theme && settings.theme !== 'default' && settings.theme !== 'light' && settings.theme !== 'dark') { %>
     <link rel="stylesheet" href="<%= assetUrl(settings.theme) %>" id="theme-css">
     <% } %>
@@ -44,7 +44,7 @@ const wallpaperExcluded = req && req.path && (
     <script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/shared/format-switcher.js') %>?v=8"></script>
     <script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/shared/al-tabs.js') %>?v=1"></script>
     <script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/shared/custom-select.js') %>?v=8"></script>
-    <script nonce="<%- nonce %>" defer src="<%= assetUrl('/javascript/api-client.js') %>?v=1"></script>
+
     <style>
       * { scrollbar-width: thin; scrollbar-color: var(--theme-border) transparent; }
       ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -61,8 +61,8 @@ const wallpaperExcluded = req && req.path && (
       }
     </style>
     <% if (process.env.NODE_ENV !== 'production') { %>
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
+    <script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script nonce="<%- nonce %>">eruda.init();</script>
     <% } %>
     <script nonce="<%- nonce %>">
     (function () {
@@ -107,5 +107,5 @@ const wallpaperExcluded = req && req.path && (
 
 <%- include('../partials/flash-messages') %>
 <%- include('../partials/bottom-nav') %>
-<%- include('../partials/ui/modal') %>
+<%- include('../partials/global-modal') %>
 <%- include('../partials/toast') %>

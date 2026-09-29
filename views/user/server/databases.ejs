@@ -170,6 +170,7 @@
 </div>
 
 <script nonce="<%- nonce %>">
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 (function() {
   var serverId = '<%= server.UUID %>';
   var t = <%- JSON.stringify(req.translations || {}) %>;
@@ -194,7 +195,7 @@
     try {
       var response = await fetch('/server/' + serverId + '/databases', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
         body: JSON.stringify({ hostId: hostId })
       });
       var result = await response.json().catch(function() { return {}; });
@@ -235,7 +236,7 @@
       var dbId = btn.dataset.dbId;
       var dbName = btn.dataset.dbName;
       if (!confirm('Rotate password for ' + dbName + '?')) return;
-      var response = await fetch('/server/' + serverId + '/databases/' + dbId + '/rotate-password', { method: 'POST' });
+      var response = await fetch('/server/' + serverId + '/databases/' + dbId + '/rotate-password', { method: 'POST', headers: { 'x-csrf-token': csrfToken } });
       var result = await response.json().catch(function() { return {}; });
       if (result.success !== false) { showToast('Password rotated.', 'success'); window.location.reload(); }
       else showToast(result.error || 'Failed.', 'error');

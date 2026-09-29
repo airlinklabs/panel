@@ -37,7 +37,7 @@ const module: Module = {
             `/api/v2/admin/servers${qs}`,
           )) as any;
           res.render('admin/servers/servers', {
-            servers: result.data || [],
+            servers: result || [],
             meta: result.meta,
             user: req.session?.user,
             req,
@@ -63,10 +63,10 @@ const module: Module = {
               apiGet(req, '/api/v2/admin/images/list'),
               apiGet(req, '/api/v2/admin/settings'),
             ]);
-          const usersData = (usersRes as any).data || [];
-          const nodesData = (nodesRes as any).data || [];
-          const imagesData = (imagesRes as any).data || [];
-          const settingsObj = (settingsRes as any).data || {};
+          const usersData = (usersRes as any) || [];
+          const nodesData = (nodesRes as any) || [];
+          const imagesData = (imagesRes as any) || [];
+          const settingsObj = (settingsRes as any) || {};
           res.render('admin/servers/create', {
             users: usersData,
             nodes: nodesData,
@@ -117,7 +117,7 @@ const module: Module = {
               apiGet(req, '/api/v2/admin/images/list'),
               apiGet(req, '/api/v2/admin/settings'),
             ]);
-          const server = (serverRes as any).data;
+          const server = (serverRes as any);
           if (!server) {
             req.session.flash = {
               type: 'error',
@@ -125,10 +125,10 @@ const module: Module = {
             };
             return res.redirect('/admin/servers');
           }
-          const usersData = (usersRes as any).data || [];
-          const nodesData = (nodesRes as any).data || [];
-          const imagesData = (imagesRes as any).data || [];
-          const settingsObj = (settingsRes as any).data || {};
+          const usersData = (usersRes as any) || [];
+          const nodesData = (nodesRes as any) || [];
+          const imagesData = (imagesRes as any) || [];
+          const settingsObj = (settingsRes as any) || {};
           res.render('admin/servers/edit', {
             server,
             users: usersData,

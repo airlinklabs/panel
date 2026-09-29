@@ -11,13 +11,24 @@
  * POST   /api/v2/admin/settings/s3/test        — Test S3 connection
  * POST   /api/v2/admin/settings/ban-ip         — Ban IP
  * POST   /api/v2/admin/settings/unban-ip       — Unban IP
+ * POST   /api/v2/admin/settings/reset          — Reset settings to defaults
+ * GET    /api/v2/admin/settings/example-theme  — Example theme archive
  */
 
 import { Router } from 'express';
 import prisma from '../../../../db';
 import { parseBody } from '../../../../utils/validation';
 import { jsonOk, jsonError, requireAdmin, logActivity } from '../helpers';
+import logger from '../../../../handlers/logger';
 import { redisRateLimit } from '../../../../handlers/utils/security/redisRateLimit';
+import { invalidateSettingsCache } from '../../../../handlers/settingsCache';
+import AdmZip from 'adm-zip';
+import {
+  DEFAULT_LOGO_PATH,
+  DEFAULT_FAVICON_PATH,
+  DEFAULT_THEME,
+  DEFAULT_LANGUAGE,
+} from '../../../../config/ui';
 import {
   adminSettingsGeneralBody,
   adminSettingsSecurityBody,
@@ -65,6 +76,8 @@ router.patch(
       data,
     });
 
+    await invalidateSettingsCache();
+
     logActivity(
       req.adminUser?.id,
       'settings.general.updated',
@@ -94,6 +107,8 @@ router.patch(
       where: { id: settings.id },
       data,
     });
+
+    await invalidateSettingsCache();
 
     logActivity(
       req.adminUser?.id,
@@ -125,6 +140,8 @@ router.patch(
       data,
     });
 
+    await invalidateSettingsCache();
+
     logActivity(
       req.adminUser?.id,
       'settings.server-policy.updated',
@@ -155,6 +172,8 @@ router.patch(
       data,
     });
 
+    await invalidateSettingsCache();
+
     logActivity(
       req.adminUser?.id,
       'settings.features.updated',
@@ -185,6 +204,8 @@ router.patch(
       data,
     });
 
+    await invalidateSettingsCache();
+
     logActivity(
       req.adminUser?.id,
       'settings.features.updated',
@@ -211,6 +232,8 @@ router.patch('/smtp', parseBody(adminSettingsSmtpBody), async (req, res) => {
     where: { id: settings.id },
     data,
   });
+
+  await invalidateSettingsCache();
 
   logActivity(
     req.adminUser?.id,
@@ -266,6 +289,8 @@ router.patch('/s3', parseBody(adminSettingsS3Body), async (req, res) => {
     where: { id: settings.id },
     data,
   });
+
+  await invalidateSettingsCache();
 
   logActivity(req.adminUser?.id, 'settings.s3.updated', undefined, {}, req.ip);
 
@@ -368,6 +393,89 @@ router.post('/unban-ip', parseBody(adminBanIpBody), async (req, res) => {
   );
 
   jsonOk(res, { unbanned: ip });
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/v2/admin/settings/reset — restore the branding/general defaults
+// (port of the legacy POST /admin/settings/reset handler).
+// The legacy handler copied public/assets/favicon.ico onto itself — a no-op
+// with an identical source and destination — so it is not reproduced here.
+// ---------------------------------------------------------------------------
+const SETTINGS_RESET_DATA = {
+  title: 'Airlink',
+  logo: DEFAULT_LOGO_PATH,
+  favicon: DEFAULT_FAVICON_PATH,
+  theme: DEFAULT_THEME,
+  language: DEFAULT_LANGUAGE,
+  allowRegistration: false,
+  loginWallpaper: null,
+  registerWallpaper: null,
+  panelWallpaper: null,
+};
+
+router.post('/reset', redisRateLimit, async (req, res) => {
+  try {
+    const settings = await prisma.settings.findFirst();
+    let updated;
+    if (settings) {
+      updated = await prisma.settings.update({
+        where: { id: settings.id },
+        data: SETTINGS_RESET_DATA,
+      });
+    } else {
+      updated = await prisma.settings.create({ data: SETTINGS_RESET_DATA });
+    }
+
+    await invalidateSettingsCache();
+
+    logActivity(
+      req.adminUser?.id,
+      'settings.reset',
+      undefined,
+      {},
+      req.ip,
+    );
+
+    jsonOk(res, { reset: true, settings: updated });
+  } catch (error) {
+    logger.error('Failed to reset settings:', error);
+    jsonError(res, 'RESET_FAILED', 'Failed to reset settings.', 500);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/v2/admin/settings/example-theme — build the example theme archive.
+// The page route does `res.json(await apiGet(...))`, so the zip travels as
+// base64 (`{ filename, contentType, data }`) instead of a file download.
+// ---------------------------------------------------------------------------
+router.get('/example-theme', redisRateLimit, async (_req, res) => {
+  try {
+    const info = {
+      name: 'Example Theme',
+      author: 'Your Name',
+      updatedAt: new Date().toISOString().split('T')[0],
+    };
+
+    const zip = new AdmZip();
+    zip.addFile('info.json', Buffer.from(JSON.stringify(info, null, 2)));
+    zip.addFile(
+      'light.css',
+      Buffer.from('/* light mode theme */\n:root {}\n'),
+    );
+    zip.addFile(
+      'dark.css',
+      Buffer.from('/* dark mode theme */\n:root {}\n'),
+    );
+
+    jsonOk(res, {
+      filename: 'example-theme.zip',
+      contentType: 'application/zip',
+      data: zip.toBuffer().toString('base64'),
+    });
+  } catch (error) {
+    logger.error('Failed to generate example theme:', error);
+    jsonError(res, 'THEME_FAILED', 'Failed to generate example theme.', 500);
+  }
 });
 
 export default router;

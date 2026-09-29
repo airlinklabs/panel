@@ -214,15 +214,13 @@ const module: Module = {
       async (req, res, next) => {
         try {
           const result = (await apiGet(req, '/api/v2/admin/apikeys')) as {
-            data?: {
-              id: number;
-              name: string;
-              key: string;
-              active: boolean;
-              permissions: string[];
-            }[];
-          };
-          const apiKeys = (result.data || []).map((k) => ({
+            id: number;
+            name: string;
+            key: string;
+            active: boolean;
+            permissions: string[];
+          }[];
+          const apiKeys = (result || []).map((k) => ({
             ...k,
             permissions: Array.isArray(k.permissions)
               ? JSON.stringify(k.permissions)
@@ -257,7 +255,7 @@ const module: Module = {
               createdAt: string;
             }[];
           };
-          const apiKeys = result.data || [];
+          const apiKeys = result || [];
           const created =
             typeof req.query.created === 'string' ? req.query.created : null;
           res.render('admin/apikeys/index', {
@@ -282,8 +280,8 @@ const module: Module = {
             req,
             '/api/v2/admin/apikeys',
             req.body,
-          )) as { data?: { key?: string } };
-          const rawKey = result?.data?.key;
+          )) as { key?: string };
+          const rawKey = result?.key;
           if (rawKey) {
             res.redirect(
               `/admin/apikeys?created=${encodeURIComponent(rawKey)}`,

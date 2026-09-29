@@ -1,0 +1,153 @@
+<!--
+  Fragment: admin-users-create-form
+  Route: GET /admin/users/new
+-->
+<div id="admin-users-create-form" class="space-y-5">
+  <% if (typeof errors !== 'undefined' && errors) { %>
+    <div id="admin-users-create-error" class="al-alert al-alert-danger" role="alert" aria-live="assertive">
+      <p class="text-sm"><%= errors.message || t('pleaseFixErrors') %></p>
+    </div>
+  <% } %>
+
+  <form id="createUserForm" class="space-y-5" method="POST" action="/api/v2/admin/users">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="al-card">
+      <h2 class="al-card-header"><%= t('userInformation') %></h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label for="userEmail" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
+            <%- icon('mail', { size: 14, class: 'shrink-0' }) %>
+            <%= t('emailLabel') %>
+          </label>
+          <input id="userEmail" name="email" type="email" class="al-input <%= typeof errors !== 'undefined' && errors?.email ? 'border-red-500' : '' %>"
+                 value="<%= typeof form !== 'undefined' ? form.email || '' : '' %>"
+                 placeholder="example@domain.com"
+                 aria-invalid="<%= typeof errors !== 'undefined' && errors?.email ? 'true' : 'false' %>"
+                 aria-describedby="<%= typeof errors !== 'undefined' && errors?.email ? 'email-error' : undefined %>"
+                 required>
+          <% if (typeof errors !== 'undefined' && errors?.email) { %>
+            <p id="email-error" class="text-xs mt-1" role="alert" style="color:var(--theme-danger)"><%= errors.email %></p>
+          <% } %>
+        </div>
+
+        <div>
+          <label for="userUsername" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
+            <%- icon('user', { size: 14, class: 'shrink-0' }) %>
+            <%= t('usernameLabel') %>
+          </label>
+          <input id="userUsername" name="username" type="text" class="al-input <%= typeof errors !== 'undefined' && errors?.username ? 'border-red-500' : '' %>"
+                 value="<%= typeof form !== 'undefined' ? form.username || '' : '' %>"
+                 placeholder="username"
+                 aria-invalid="<%= typeof errors !== 'undefined' && errors?.username ? 'true' : 'false' %>"
+                 aria-describedby="<%= typeof errors !== 'undefined' && errors?.username ? 'username-error' : undefined %>"
+                 required>
+          <% if (typeof errors !== 'undefined' && errors?.username) { %>
+            <p id="username-error" class="text-xs mt-1" role="alert" style="color:var(--theme-danger)"><%= errors.username %></p>
+          <% } %>
+        </div>
+
+        <div class="md:col-span-2">
+          <label for="userDescription" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
+            <%= t('descriptionLabel') %>
+          </label>
+          <textarea id="userDescription" name="description" rows="3" class="al-input" placeholder="<%= t('userDescriptionPlaceholder') %>"><%= typeof form !== 'undefined' ? form.description || '' : '' %></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-card">
+      <h2 class="al-card-header"><%= t('securityLabel') %></h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label for="userPassword" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
+            <%- icon('lock', { size: 14, class: 'shrink-0' }) %>
+            <%= t('passwordLabel') %>
+          </label>
+          <input id="userPassword" name="password" type="password" class="al-input <%= typeof errors !== 'undefined' && errors?.password ? 'border-red-500' : '' %>"
+                 placeholder="********"
+                 aria-invalid="<%= typeof errors !== 'undefined' && errors?.password ? 'true' : 'false' %>"
+                 aria-describedby="<%= typeof errors !== 'undefined' && errors?.password ? 'password-error' : undefined %>"
+                 required>
+          <% if (typeof errors !== 'undefined' && errors?.password) { %>
+            <p id="password-error" class="text-xs mt-1" role="alert" style="color:var(--theme-danger)"><%= errors.password %></p>
+          <% } %>
+        </div>
+
+        <div>
+          <label for="userConfirmPassword" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">
+            <%= t('confirmPasswordLabel') %>
+          </label>
+          <input id="userConfirmPassword" type="password" class="al-input" placeholder="********">
+        </div>
+
+        <div class="md:col-span-2">
+          <div class="p-4 rounded-xl border w-full" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('role') %></h3>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('userRoleDesc') %></p>
+              </div>
+              <select id="userRole" name="role" class="al-input w-44">
+                <option value="user"><%= t('normalUser') %></option>
+                <option value="privileged"><%= t('privilegedUser') %></option>
+                <option value="admin"><%= t('adminRole') %></option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="md:col-span-2">
+          <div class="p-4 rounded-xl border w-full" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('adminStatus') %></h3>
+                <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('adminStatusDesc') %></p>
+              </div>
+              <label for="userIsAdminSwitch" class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input type="checkbox" id="userIsAdminSwitch" name="isAdmin" value="true" aria-label="<%= t('adminStatus') %>" class="sr-only peer">
+                <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+                <span class="ms-3 text-sm font-medium" id="adminStatusLabel" style="color:var(--theme-text-strong)"><%= t('disabled') %></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-card">
+      <h2 class="al-card-header"><%= t('serverLimits') %></h2>
+      <p class="text-xs mb-4" style="color:var(--theme-text-muted)"><%= t('serverLimitsDesc') %></p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label for="serverLimit" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> <%= t('serverLimit') %></label>
+          <input type="number" id="serverLimit" name="serverLimit" min="0" max="100" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
+        </div>
+        <div>
+          <label for="maxMemory" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> <%= t('maxMemory') %></label>
+          <input type="number" id="maxMemory" name="maxMemory" min="128" max="65536" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
+        </div>
+        <div>
+          <label for="maxCpu" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> <%= t('maxCpu') %></label>
+          <input type="number" id="maxCpu" name="maxCpu" min="10" max="10000" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
+        </div>
+        <div>
+          <label for="maxStorage" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('database', { size: 14, class: 'shrink-0' }) %> <%= t('maxStorage') %></label>
+          <input type="number" id="maxStorage" name="maxStorage" min="1" max="10000" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
+        </div>
+        <div>
+          <label for="maxDatabases" class="flex items-center gap-1.5 text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%- icon('server', { size: 14, class: 'shrink-0' }) %> <%= t('maxDatabases') %></label>
+          <input type="number" id="maxDatabases" name="maxDatabases" min="0" max="100000" placeholder="<%= t('useGlobalDefault') %>" class="al-input">
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" class="al-btn-primary">
+        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
+        <%= t('createUserBtn') %>
+      </button>
+      <a href="/admin/users" class="al-btn-secondary"><%= t('cancel') %></a>
+    </div>
+  </form>
+</div>

@@ -14,7 +14,7 @@ import { sendSubUserInvite } from '../../../handlers/utils/core/mailer';
 import { serverPageInclude } from './shared';
 import { emitRealtime, serverEvent } from '../../../handlers/realtime/events';
 
-const PERMISSION_LABELS: Record<string, string> = {
+export const PERMISSION_LABELS: Record<string, string> = {
   'websocket.connect': 'Live console',
   console: 'Full console',
   'console.send': 'Send commands',

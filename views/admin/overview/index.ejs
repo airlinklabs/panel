@@ -103,6 +103,7 @@
 </div>
 
 <script nonce="<%- nonce %>">
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 (function() {
   var LATENCY_MAX_MS = 500;
   var LATENCY_GOOD_MS = 100;
@@ -146,7 +147,7 @@
 
   async function performUpdate() {
     try {
-      var response = await fetch('/api/v2/admin/overview/perform-update', { method: 'POST' });
+      var response = await fetch('/api/v2/admin/overview/perform-update', { method: 'POST', headers: { 'x-csrf-token': csrfToken } });
       var data = await response.json();
       if (data.updated) {
         document.getElementById('updateStatus').innerHTML = '<span style="color:var(--theme-success)">Update successful. Restarting...</span>';

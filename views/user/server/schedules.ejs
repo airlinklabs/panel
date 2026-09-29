@@ -230,6 +230,7 @@
 </div>
 
 <script nonce="<%- nonce %>">
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 (function() {
   var serverId = '<%= server.UUID %>';
   var t = <%- JSON.stringify(req.translations || {}) %>;
@@ -257,7 +258,7 @@
     try {
       var response = await fetch('/server/' + serverId + '/schedules', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
         body: JSON.stringify({ name: name, cron: cron })
       });
       var result = await response.json().catch(function() { return {}; });
@@ -280,7 +281,7 @@
       var checked = this.checked;
       fetch('/server/' + serverId + '/schedules/' + scheduleId, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
         body: JSON.stringify({ enabled: checked })
       }).then(function(r) { return r.json(); }).then(function(d) {
         if (d.success !== false) showToast(checked ? 'Schedule enabled.' : 'Schedule disabled.', 'success');
@@ -312,7 +313,7 @@
         onConfirm: resolve,
       });
     });
-    var result = await fetch('/server/' + serverId + '/schedules/' + scheduleId + '/run', { method: 'POST' }).then(function(r) { return r.json(); }).catch(function() { return null; });
+    var result = await fetch('/server/' + serverId + '/schedules/' + scheduleId + '/run', { method: 'POST', headers: { 'x-csrf-token': csrfToken } }).then(function(r) { return r.json(); }).catch(function() { return null; });
     if (result && result.success !== false) showToast(t.scheduleRunTriggered || 'Schedule run triggered.', 'success');
     else showToast(result?.error || 'Failed.', 'error');
   };
@@ -362,7 +363,7 @@
     var timeOffset = parseInt(card.querySelector('.task-timeOffset').value, 10) || 0;
     fetch('/server/' + serverId + '/schedules/' + scheduleId + '/tasks', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ action: action, payload: payload, timeOffset: Math.max(0, timeOffset) })
     }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.success !== false) { showToast(t.taskAdded || 'Task added.', 'success'); window.location.reload(); }

@@ -20,12 +20,9 @@ const module: Module = {
       isAuthenticated(true, 'airlink.admin.menu.view'),
       async (req, res, next) => {
         try {
-          const data = (await apiGet(req, '/admin/menu')) as Record<
-            string,
-            unknown
-          >;
+          const data = await apiGet(req, '/admin/menu');
           res.render('admin/menu/index', {
-            ...data,
+            items: Array.isArray(data) ? data : [],
             user: req.session?.user,
             req,
           });

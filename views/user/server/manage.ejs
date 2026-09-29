@@ -72,6 +72,7 @@
 </div>
 
 <script nonce="<%- nonce %>">
+  var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 (function() {
   var serverId = '<%= server.UUID %>';
   var suspended = <%= !!server.Suspended %>;
@@ -93,7 +94,7 @@
     if (suspended) return;
     fetch('/server/' + serverId + '/power/' + action, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken }
     }).then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.success !== false) showToast(action.charAt(0).toUpperCase() + action.slice(1) + ' command sent.', 'success');

@@ -1,4 +1,4 @@
-<%- include('../../layouts/user', { title: (server.name || 'Server') + ' — Console' }) %>
+<%- include('../../layouts/user', { title: (server.name || 'Server') + ' — Console', extraStyles: [assetUrl('/vendor/@xterm/xterm/css/xterm.css')] }) %>
 
 <nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
   <ol class="flex items-center text-sm gap-1">
@@ -131,7 +131,12 @@
       },
       initialStatus: { online: false },
     };
-    mount(root, config).catch(err => console.error('Console mount failed:', err));
+    mount(root, config).catch(err => {
+      console.error('Console mount failed:', err);
+      root.innerHTML = '<div class="p-6 text-center text-sm" style="color:var(--theme-text-muted);">' +
+        '<p class="font-medium mb-1" style="color:var(--theme-text);">Console unavailable</p>' +
+        '<p>Failed to initialize the server console.</p></div>';
+    });
   }
 </script>
 

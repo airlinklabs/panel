@@ -26,7 +26,7 @@ const module: Module = {
         try {
           const data = (await apiGet(req, '/api/v2/admin/mounts')) as any;
           res.render('admin/mounts/index', {
-            mounts: data.data || [],
+            mounts: data || [],
             user: req.session?.user,
             req,
           });

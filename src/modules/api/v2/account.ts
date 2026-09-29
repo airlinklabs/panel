@@ -15,11 +15,13 @@
  * GET    /api/v2/account/2fa/setup              — Get 2FA setup data
  * POST   /api/v2/account/2fa/enable             — Enable 2FA
  * POST   /api/v2/account/2fa/disable            — Disable 2FA
+ * GET    /api/v2/account/images             — List images created by the session user
  * POST   /api/v2/account/images                 — Create user image
  * POST   /api/v2/account/images/import-url      — Import image from URL
  * DELETE /api/v2/account/images/:id             — Delete user image
  * GET    /api/v2/account/folders                — List folders
  * POST   /api/v2/account/folders                — Create folder
+ * PATCH  /api/v2/account/folders/:id            — Rename folder
  * DELETE /api/v2/account/folders/:id            — Delete folder
  * POST   /api/v2/account/folders/:id/servers    — Add server to folder
  * DELETE /api/v2/account/folders/servers/:uuid  — Remove server from folder
@@ -551,6 +553,24 @@ router.post(
 );
 
 // ---------------------------------------------------------------------------
+// GET /api/v2/account/images — List images created by the session user
+// (port of the legacy "my images" query: `where: { createdById: userId }`)
+// ---------------------------------------------------------------------------
+router.get('/images', async (req, res) => {
+  const user = await requireUser(req, res);
+  if (!user) {
+    return;
+  }
+
+  const images = await prisma.images.findMany({
+    where: { createdById: user.id },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  jsonOk(res, images);
+});
+
+// ---------------------------------------------------------------------------
 // POST /api/v2/account/images — Create user image
 // ---------------------------------------------------------------------------
 router.post('/images', parseBody(createImageBody), async (req, res) => {
@@ -744,6 +764,53 @@ router.post('/folders', parseBody(createFolderBody), async (req, res) => {
   );
 
   jsonOk(res, folder);
+});
+
+// ---------------------------------------------------------------------------
+// PATCH /api/v2/account/folders/:id — Rename folder
+// (port of legacy PATCH /api/folders/:id from src/modules/user/folderSystem.ts)
+// ---------------------------------------------------------------------------
+router.patch('/folders/:id', parseBody(createFolderBody), async (req, res) => {
+  const user = await requireUser(req, res);
+  if (!user) {
+    return;
+  }
+
+  const folderId = Number(req.params.id);
+  if (!Number.isFinite(folderId)) {
+    return jsonError(res, 'BAD_REQUEST', 'Invalid folder ID', 400);
+  }
+
+  const name = String((req.validatedBody as { name: string }).name).trim();
+  if (name.length === 0) {
+    return jsonError(res, 'BAD_REQUEST', 'Folder name is required', 400);
+  }
+
+  const folder = await prisma.serverFolder.findUnique({
+    where: { id: folderId },
+  });
+  if (!folder) {
+    return jsonError(res, 'NOT_FOUND', 'Folder not found', 404);
+  }
+  if (folder.ownerId !== user.id) {
+    return jsonError(res, 'FORBIDDEN', 'You can only rename your own folders', 403);
+  }
+
+  const updated = await prisma.serverFolder.update({
+    where: { id: folderId },
+    data: { name },
+    include: { members: true },
+  });
+
+  logActivity(
+    user.id,
+    'account.folders.renamed',
+    undefined,
+    { folderId, name },
+    req.ip,
+  );
+
+  jsonOk(res, updated);
 });
 
 // ---------------------------------------------------------------------------

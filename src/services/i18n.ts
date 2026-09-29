@@ -52,7 +52,13 @@ function loadBundle(lang: string): LangBundle {
   const langPath = path.join(LANG_DIR, lang, 'lang.json');
   const fallbackPath = path.join(LANG_DIR, 'en', 'lang.json');
 
-  const raw = readJson(langPath) ?? readJson(fallbackPath) ?? {};
+  // English is the base for every locale: a locale only ships ~700 of the
+  // ~2350 keys, and without this merge each untranslated key would render
+  // as its raw camelCase identifier in the UI.
+  const raw = {
+    ...(readJson(fallbackPath) ?? {}),
+    ...(lang === 'en' ? {} : readJson(langPath) ?? {}),
+  };
 
   const strings: TranslationMap = {};
   const plurals: PluralMap = {};

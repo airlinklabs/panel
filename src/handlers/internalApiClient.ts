@@ -138,7 +138,13 @@ async function apiRequest(
 ): Promise<unknown> {
   const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-  const url = `${getBaseUrl()}/api/v2${path.startsWith('/') ? path : `/${path}`}`;
+  // Callers pass either a v2-relative path (`/servers`) or the full path
+  // (`/api/v2/servers`). Normalise here so neither convention can produce
+  // `/api/v2/api/v2/...` and 404 at the not-found handler.
+  const scopedPath = path.startsWith('/api/v2')
+    ? path
+    : `/api/v2${path.startsWith('/') ? path : `/${path}`}`;
+  const url = `${getBaseUrl()}${scopedPath}`;
 
   // Build headers
   const headers: Record<string, string> = {
@@ -213,6 +219,40 @@ async function apiRequest(
         response.status,
         responseBody,
       );
+    }
+
+    // v2 wraps success payloads as `{ success: true, data, meta? }`. Page
+    // controllers hand this result straight to the view layer as locals, so
+    // the envelope is unwrapped here — once — instead of at every call site.
+    // Pagination `meta` rides along as a non-enumerable property: list
+    // callers can still read `result.meta`, but spreading the result into
+    // view locals never leaks it.
+    if (typeof responseBody === 'object' && responseBody !== null) {
+      const envelope = responseBody as {
+        success?: unknown;
+        data?: unknown;
+        meta?: unknown;
+      };
+      if (envelope.success === true && 'data' in envelope) {
+        const payload = envelope.data;
+        if (
+          envelope.meta !== undefined &&
+          typeof payload === 'object' &&
+          payload !== null
+        ) {
+          Object.defineProperty(payload, 'meta', {
+            value: envelope.meta,
+            enumerable: false,
+            writable: true,
+            configurable: true,
+          });
+        }
+        return payload;
+      }
+      if (envelope.success === false) {
+        const message = envelope.data || envelope.success;
+        throw new InternalApiError(String(message || 'v2 API error'), response.status, responseBody);
+      }
     }
 
     return responseBody;

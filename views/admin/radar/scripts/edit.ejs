@@ -1,0 +1,129 @@
+<%- include('../../../layouts/admin', { title: 'Edit Radar Script' }) %>
+
+<%- include('../../../partials/flash-messages') %>
+
+<%- include('../../../partials/ui/breadcrumb', { items: [
+  { label: t('admin'), url: '/admin' },
+  { label: 'Radar', url: '/admin/radar' },
+  { label: 'Scripts', url: '/admin/radar/scripts' },
+  { label: (typeof script !== 'undefined' && script && script.name) ? script.name : 'Edit' }
+] }) %>
+
+<%
+  var s = (typeof script !== 'undefined' && script && typeof script === 'object') ? script : {};
+  var scriptId = typeof req !== 'undefined' && req.params ? req.params.id : '';
+  var patternsJson = JSON.stringify(Array.isArray(s.patterns) ? s.patterns : [], null, 2);
+%>
+
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div>
+    <h1 class="al-page-title">Edit Script</h1>
+    <p class="al-page-desc"><%= s.description || 'Update detection patterns for this radar script.' %></p>
+  </div>
+  <div class="flex gap-2 shrink-0">
+    <a href="/admin/radar/scripts" class="al-btn-secondary inline-flex items-center gap-1.5">
+      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %> Back
+    </a>
+  </div>
+</div>
+
+<div class="al-page-body">
+  <form id="scriptForm" class="max-w-3xl space-y-5">
+    <div class="al-card">
+      <h2 class="al-card-header">Details</h2>
+      <div class="p-4 space-y-4">
+        <div>
+          <label for="scriptName" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Name</label>
+          <input type="text" id="scriptName" name="name" required maxlength="120" value="<%= s.name || '' %>" class="al-input">
+        </div>
+        <div>
+          <label for="scriptDescription" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Description</label>
+          <textarea id="scriptDescription" name="description" rows="2" maxlength="500" class="al-input resize-y"><%= s.description || '' %></textarea>
+        </div>
+        <div class="w-40">
+          <label for="scriptVersion" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)">Version</label>
+          <input type="text" id="scriptVersion" name="version" value="<%= s.version || '1.0.0' %>" maxlength="20" class="al-input font-mono">
+        </div>
+        <% if (s.filename) { %>
+        <p class="text-xs font-mono" style="color:var(--theme-text-muted)"><%= s.filename %></p>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="al-card">
+      <h2 class="al-card-header">Patterns</h2>
+      <p class="text-xs px-5 pt-2 pb-0" style="color:var(--theme-text-muted)">JSON array of pattern objects: <code>type</code>, <code>pattern</code>, optional <code>content</code>, <code>severity</code>, <code>description</code>.</p>
+      <div class="p-4">
+        <label for="scriptPatterns" class="sr-only">Patterns JSON</label>
+        <textarea id="scriptPatterns" name="patterns" rows="16" spellcheck="false" class="al-input font-mono text-xs leading-relaxed resize-y"><%= patternsJson %></textarea>
+        <p id="patternsError" class="mt-2 text-xs hidden" style="color:var(--theme-danger);"></p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" class="al-btn-primary inline-flex items-center gap-1.5">
+        <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %> Save Changes
+      </button>
+      <a href="/admin/radar/scripts" class="al-btn-secondary inline-flex items-center gap-1.5">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var csrfToken = '<%= csrfToken %>';
+  var scriptId = '<%= scriptId %>';
+  var form = document.getElementById('scriptForm');
+  var errEl = document.getElementById('patternsError');
+
+  function showError(msg) {
+    errEl.textContent = msg;
+    errEl.classList.remove('hidden');
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    errEl.classList.add('hidden');
+
+    var name = document.getElementById('scriptName').value.trim();
+    if (!name) { showToast('Name is required.', 'error'); return; }
+
+    var patterns;
+    try {
+      patterns = JSON.parse(document.getElementById('scriptPatterns').value);
+    } catch (err) {
+      showError('Patterns must be valid JSON: ' + err.message);
+      return;
+    }
+    if (!Array.isArray(patterns)) {
+      showError('Patterns must be a JSON array.');
+      return;
+    }
+
+    var body = {
+      name: name,
+      description: document.getElementById('scriptDescription').value.trim(),
+      version: document.getElementById('scriptVersion').value.trim() || '1.0.0',
+      patterns: patterns,
+    };
+
+    fetch('/admin/radar/scripts/' + encodeURIComponent(scriptId), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+      body: JSON.stringify(body),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res.success) {
+          showToast('Script saved.', 'success');
+          window.location.href = '/admin/radar/scripts';
+        } else {
+          showToast(res.message || 'Failed to save script.', 'error');
+        }
+      })
+      .catch(function() { showToast('Something went wrong.', 'error'); });
+  });
+})();
+</script>
+
+<%- include('../../../layouts/admin-footer') %>

@@ -9,9 +9,23 @@ export const loadModules = async (
   wsInstance?: { applyTo: (router: express.Router) => void },
 ) => {
   const { registeredModules } = await import('../modules/registry');
-  const modules = registeredModules();
+  const { pageModules } = await import('../modules/pages');
+
+  // Page controllers own the rewritten routes: they render the current view
+  // tree (views/admin/*/index.ejs …) and read all of their data from the v2
+  // API. They mount first so they win over a legacy module registered on the
+  // same path; legacy modules stay mounted behind them for the routes the
+  // rewrite has not covered yet.
+  const modules = [
+    ...pageModules.map((mod) => ({
+      module: mod,
+      name: `pages/${mod.info.name}`,
+    })),
+    ...registeredModules(),
+  ];
 
   logger.info(logT('log.initializingModules'));
+  logger.info(logT('log.pageModulesMounted', { count: pageModules.length }));
 
   const panelMajor = airlinkVersion.split('.')[0];
   let loaded = 0;

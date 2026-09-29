@@ -27,10 +27,11 @@ const module: Module = {
         try {
           const data = (await apiGet(
             req,
-            `/api/v2/user/servers/${req.params.id}`,
+            `/servers/${req.params.id}`,
           )) as Record<string, unknown>;
           res.render('user/server/logs', {
             ...data,
+            server: data,
             user: req.session?.user,
             req,
           });
@@ -49,7 +50,7 @@ const module: Module = {
         try {
           const data = await apiGet(
             req,
-            `/api/v2/user/servers/${req.params.id}/logs/history`,
+            `/servers/${req.params.id}/logs/history`,
           );
           res.json(data);
         } catch (err) {
@@ -67,7 +68,7 @@ const module: Module = {
         try {
           const data = await apiGet(
             req,
-            `/api/v2/user/servers/${req.params.id}/logs/archives`,
+            `/servers/${req.params.id}/logs/archives`,
           );
           res.json(data);
         } catch (err) {
@@ -86,7 +87,7 @@ const module: Module = {
           const file = req.query.file as string;
           const data = await apiGet(
             req,
-            `/api/v2/user/servers/${req.params.id}/logs/archives/read?file=${encodeURIComponent(file || '')}`,
+            `/servers/${req.params.id}/logs/archives/read?file=${encodeURIComponent(file || '')}`,
           );
           res.json(data);
         } catch (err) {
@@ -103,11 +104,12 @@ const module: Module = {
       async (req, res, next) => {
         try {
           const file = req.query.file as string;
-          const data = await apiGet(
+          const data = (await apiGet(
             req,
-            `/api/v2/user/servers/${req.params.id}/logs/archives/download?file=${encodeURIComponent(file || '')}`,
-          );
-          res.json(data);
+            `/servers/${req.params.id}/logs/archives/download?file=${encodeURIComponent(file || '')}`,
+          )) as { url?: string };
+          // `<a href>` download — redirect to the daemon URL, not JSON.
+          res.redirect(data.url || '/');
         } catch (err) {
           next(err);
         }

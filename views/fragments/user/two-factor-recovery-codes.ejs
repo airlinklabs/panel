@@ -1,0 +1,25 @@
+<!-- Recovery codes panel fragment — shown after successful 2FA enable -->
+<div id="two-factor-recovery-codes" class="al-card p-6 max-w-xl mx-auto">
+  <div class="flex items-start gap-3">
+    <div class="shrink-0">
+      <%- icon('key-round', { class: 'w-5 h-5', strokeWidth: 1.5, style: 'color:var(--theme-accent)' }) %>
+    </div>
+    <div>
+      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('savedRecoveryCodes') %></h2>
+      <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('recoveryCodesDesc') %></p>
+    </div>
+  </div>
+  <div id="recoveryCodesList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+    <% for (const code of recoveryCodes) { %>
+      <code class="select-all rounded-lg px-3 py-2 text-xs font-mono text-center" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong)"><%= code %></code>
+    <% } %>
+  </div>
+  <div class="flex items-center justify-between mt-5 gap-3">
+    <button type="button" id="copyRecoveryCodes" class="al-btn-ghost text-sm inline-flex items-center gap-1.5"
+      onclick="var codes=Array.from(document.querySelectorAll('#recoveryCodesList code')).map(function(c){return c.textContent}).join('\n');navigator.clipboard.writeText(codes).then(function(){showToast('Recovery codes copied.','success')}).catch(function(){showToast('Could not copy recovery codes.','error')})">
+      <%- icon('copy', { size: 14 }) %>
+      <%= t('copyAll') %>
+    </button>
+    <a href="/account" class="al-btn-primary text-sm px-5"><%= t('iveSavedThem') %></a>
+  </div>
+</div>

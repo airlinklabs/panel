@@ -3,13 +3,17 @@ import {
   isAuthenticatedForServer,
   requireSubUserPermission,
 } from '../../../../handlers/utils/auth/serverAuthUtil';
-import {
-  apiGet,
-  apiPost,
-  apiPut,
-  apiDelete,
-} from '../../../../handlers/internalApiClient';
+import { apiGet, apiPost } from '../../../../handlers/internalApiClient';
 import type { Module } from '../../../../handlers/moduleInit';
+
+/**
+ * Express types the named wildcard (`*path`) as `string | string[]`; the v2
+ * API takes a plain path, so normalise once here.
+ */
+function splatPath(params: { path?: string | string[] }): string {
+  const raw = params.path;
+  return Array.isArray(raw) ? raw.join('/') : (raw ?? '');
+}
 
 const module: Module = {
   info: {
@@ -32,7 +36,7 @@ const module: Module = {
         try {
           const data = (await apiGet(
             req,
-            `/api/v2/user/servers/${req.params.id}/files`,
+            `/servers/${req.params.id}/files`,
           )) as Record<string, unknown>;
           res.render('user/server/files', {
             ...data,
@@ -54,7 +58,7 @@ const module: Module = {
         try {
           const data = await apiGet(
             req,
-            `/api/v2/user/servers/${req.params.id}/files`,
+            `/servers/${req.params.id}/files`,
           );
           res.json(data);
         } catch (err) {
@@ -65,15 +69,15 @@ const module: Module = {
 
     // ── File editor ──────────────────────────────────────────────────────
     router.get(
-      '/server/:id/files/edit/*',
+      '/server/:id/files/edit/*path',
       isAuthenticatedForServer('id'),
       requireSubUserPermission('files'),
       async (req, res, next) => {
         try {
-          const filePath = (req.params as Record<string, string>)[0] || '';
+          const filePath = splatPath(req.params);
           const data = (await apiGet(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/content?file=${encodeURIComponent(filePath)}`,
+            `/servers/${req.params.id}/files/content?file=${encodeURIComponent(filePath)}`,
           )) as Record<string, unknown>;
           res.render('user/server/file', {
             ...data,
@@ -88,17 +92,19 @@ const module: Module = {
 
     // ── Download file ────────────────────────────────────────────────────
     router.get(
-      '/server/:id/files/download/*',
+      '/server/:id/files/download/*path',
       isAuthenticatedForServer('id'),
       requireSubUserPermission('files'),
       async (req, res, next) => {
         try {
-          const filePath = (req.params as Record<string, string>)[0] || '';
-          const data = await apiGet(
+          const filePath = splatPath(req.params);
+          const data = (await apiGet(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/download?file=${encodeURIComponent(filePath)}`,
-          );
-          res.json(data);
+            `/servers/${req.params.id}/files/download?file=${encodeURIComponent(filePath)}`,
+          )) as { url?: string };
+          // `<a href>` downloads — hand the browser the daemon URL instead of
+          // dumping `{file, token, url}` JSON into the page.
+          res.redirect(data.url || '/');
         } catch (err) {
           next(err);
         }
@@ -114,7 +120,7 @@ const module: Module = {
         try {
           const data = await apiPost(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/action`,
+            `/servers/${req.params.id}/files/action`,
             { action: 'delete', ...req.body },
           );
           res.json(data);
@@ -126,15 +132,15 @@ const module: Module = {
 
     // ── Save file ────────────────────────────────────────────────────────
     router.post(
-      '/server/:id/files/*',
+      '/server/:id/files/*path',
       isAuthenticatedForServer('id'),
       requireSubUserPermission('files'),
       async (req, res, next) => {
         try {
-          const filePath = (req.params as Record<string, string>)[0] || '';
+          const filePath = splatPath(req.params);
           const data = await apiPost(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/content`,
+            `/servers/${req.params.id}/files/content`,
             { file: filePath, content: req.body.content },
           );
           res.json(data);
@@ -153,7 +159,7 @@ const module: Module = {
         try {
           const data = await apiPost(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/mkdir`,
+            `/servers/${req.params.id}/files/mkdir`,
             req.body,
           );
           res.json(data);
@@ -172,7 +178,7 @@ const module: Module = {
         try {
           const data = await apiPost(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/rename`,
+            `/servers/${req.params.id}/files/rename`,
             req.body,
           );
           res.json(data);
@@ -191,7 +197,7 @@ const module: Module = {
         try {
           const data = await apiPost(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/copy`,
+            `/servers/${req.params.id}/files/copy`,
             req.body,
           );
           res.json(data);
@@ -210,7 +216,7 @@ const module: Module = {
         try {
           const data = await apiPost(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/pull`,
+            `/servers/${req.params.id}/files/pull`,
             req.body,
           );
           res.json(data);
@@ -229,7 +235,7 @@ const module: Module = {
         try {
           const data = await apiPost(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/upload`,
+            `/servers/${req.params.id}/files/upload`,
             req.body,
           );
           res.json(data);
@@ -248,7 +254,7 @@ const module: Module = {
         try {
           const data = await apiPost(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/zip`,
+            `/servers/${req.params.id}/files/zip`,
             req.body,
           );
           res.json(data);
@@ -267,7 +273,7 @@ const module: Module = {
         try {
           const data = await apiPost(
             req,
-            `/api/v2/user/servers/${req.params.id}/files/unzip`,
+            `/servers/${req.params.id}/files/unzip`,
             req.body,
           );
           res.json(data);

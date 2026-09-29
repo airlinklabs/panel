@@ -29,6 +29,7 @@ import {
   subUserHasPermission as _subUserHasPermission,
   parsePermissions as _parsePermissions,
 } from '../../../handlers/utils/auth/authorization';
+import type { SubUserPermission as AuthSubUserPermission } from '../../../handlers/utils/auth/serverAuthUtil';
 
 // Infer types from the Prisma client instance
 type Users = Awaited<ReturnType<typeof prisma.users.findUnique>> &
@@ -75,6 +76,34 @@ export interface PaginationMeta {
  */
 export function jsonOk<T>(res: Response, data: T, meta?: PaginationMeta): void {
   const body: V2SuccessResponse<T> = { success: true, data };
+  if (meta) {
+    body.meta = meta;
+  }
+  res.json(body);
+}
+
+/**
+ * Send a success response with the V2 envelope AND mirror every payload field
+ * at the top level.
+ *
+ * Shape: `{ ...data, success: true, data: T, meta?: PaginationMeta }`
+ *
+ * Two kinds of consumer read the same endpoint:
+ *   - page controllers, which go through `internalApiClient` and unwrap
+ *     `{ success: true, data }`;
+ *   - browser JS that fetches `/api/v2/...` directly (`logs.js`, `files.js`)
+ *     and reads non-enveloped fields such as `d.logs` or `d.html`.
+ *
+ * Mirroring keeps the envelope contract intact while making the payload
+ * readable by both. Only use this for endpoints with a direct browser caller.
+ */
+export function jsonOkFlat<T extends Record<string, unknown>>(
+  res: Response,
+  data: T,
+  meta?: PaginationMeta,
+): void {
+  const body = { ...data, success: true as const, data } as V2SuccessResponse<T> &
+    T;
   if (meta) {
     body.meta = meta;
   }
@@ -272,6 +301,8 @@ export async function requireAdmin(
 export interface ResolvedServer {
   server: Server;
   isOwner: boolean;
+  /** True when the requester is an admin acting on a server they don't own. */
+  isAdmin: boolean;
   subUser: SubUser | null;
 }
 
@@ -307,12 +338,12 @@ export async function resolveServer(
   // Admin bypasses ownership check
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (user?.isAdmin) {
-    return { server, isOwner: false, subUser: null };
+    return { server, isOwner: false, isAdmin: true, subUser: null };
   }
 
   // Owner check
   if (server.ownerId === userId) {
-    return { server, isOwner: true, subUser: null };
+    return { server, isOwner: true, isAdmin: false, subUser: null };
   }
 
   // Subuser check
@@ -324,7 +355,7 @@ export async function resolveServer(
     return null;
   }
 
-  return { server, isOwner: false, subUser };
+  return { server, isOwner: false, isAdmin: false, subUser };
 }
 
 /** Check if a resolved server is suspended. Sends error and returns true if so. */
@@ -343,7 +374,15 @@ export function checkSuspended(
 // SubUser permission check
 // ---------------------------------------------------------------------------
 
+/**
+ * Permission strings accepted by `requireSubUserPermission`.
+ *
+ * Union of the canonical `SUBUSER_PERMISSIONS` list (so `settings`,
+ * `files.sftp`, `startup`, `control.start`, … type-check) with the legacy
+ * aliases some handlers already pass (`start`, `databases`, `schedule.read`).
+ */
 export type SubUserPermission =
+  | AuthSubUserPermission
   | 'console'
   | 'console.send'
   | 'files'
@@ -380,7 +419,7 @@ export function requireSubUserPermission(
   resolved: ResolvedServer,
   permission: SubUserPermission,
 ): boolean {
-  if (resolved.isOwner) {
+  if (resolved.isOwner || resolved.isAdmin) {
     return true;
   }
   if (

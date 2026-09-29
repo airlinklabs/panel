@@ -81,7 +81,7 @@
                       <div class="min-w-0">
                         <p class="text-sm font-medium truncate flex items-center gap-2">
                           <span class="w-2 h-2 rounded-full shrink-0" style="background:<%= catColor %>"></span>
-                          <span class="truncate"><%= meta.label %></span>
+                          <span class="truncate"><%= meta.label || log.event %></span>
                           <span class="font-mono text-xs px-1.5 py-0.5 rounded hidden sm:inline" style="background:color-mix(in srgb, <%- catColor %> 12%, transparent); color:<%- catColor %>"><%= log.event %></span>
                         </p>
                         <p class="text-xs mt-1" style="color:var(--theme-text-muted)">

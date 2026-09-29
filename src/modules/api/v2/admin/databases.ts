@@ -3,6 +3,8 @@
  *
  * GET    /api/v2/admin/databases        — List database hosts
  * POST   /api/v2/admin/databases        — Create database host
+ * POST   /api/v2/admin/databases/auto-host   — Find/create + test the default host
+ * POST   /api/v2/admin/databases/auto-bucket — Create the default S3 bucket
  * GET    /api/v2/admin/databases/:id    — Get database host
  * DELETE /api/v2/admin/databases/:id    — Delete database host
  * POST   /api/v2/admin/databases/:id/test — Test connection
@@ -14,6 +16,11 @@ import { parseBody } from '../../../../utils/validation';
 import { jsonOk, jsonError, requireAdmin, logActivity } from '../helpers';
 import { adminCreateDbHostBody } from '../dto';
 import { redisRateLimit } from '../../../../handlers/utils/security/redisRateLimit';
+import logger from '../../../../handlers/logger';
+import { testDatabaseHost } from '../../../../handlers/utils/core/postgresProvisioner';
+import { ensureS3Bucket } from '../../../../handlers/utils/core/s3Client';
+import { safeClientMessage } from '../../../../utils/errors';
+import { encrypt } from '../../../../utils/encryption';
 
 const router = Router();
 
@@ -58,6 +65,88 @@ router.post('/', parseBody(adminCreateDbHostBody), async (req, res) => {
     req.ip,
   );
   jsonOk(res, host);
+});
+
+// POST /api/v2/admin/databases/auto-host — reuse the first host or create one
+// from the panel's own PG settings, then verify connectivity.
+//
+// Both the success and the handled-failure paths answer 200 with a
+// `{ success }` flag: views/admin/databases/index.ejs branches on
+// `data.success !== false` after a page-level `res.json(...)` proxy, and a
+// non-2xx status would turn that into an HTML error page ("Network error.").
+router.post('/auto-host', async (req, res) => {
+  try {
+    const hosts = await prisma.databaseHost.findMany({
+      orderBy: { id: 'asc' },
+    });
+    let host = hosts[0];
+    let created = false;
+    if (!host) {
+      host = await prisma.databaseHost.create({
+        data: {
+          name: 'Auto-generated host',
+          host: process.env.PGHOST || '127.0.0.1',
+          port: Number(process.env.PGPORT) || 5432,
+          username: process.env.PGUSER || 'airlink',
+          password: encrypt(
+            process.env.PGPASSWORD || '',
+            process.env.SESSION_SECRET || '',
+          ),
+        },
+      });
+      created = true;
+      logActivity(
+        req.adminUser?.id,
+        'database_host.created',
+        undefined,
+        { name: host.name, source: 'auto' },
+        req.ip,
+      );
+    }
+
+    const result = await testDatabaseHost(host);
+
+    let hostError: string | undefined;
+    if (result.error) {
+      hostError = safeClientMessage(
+        result.error,
+        'The database host could not be reached.',
+      );
+    }
+
+    jsonOk(res, {
+      success: result.success,
+      created,
+      hostId: host.id,
+      latency: result.latency,
+      error: hostError,
+    });
+  } catch (error: unknown) {
+    logger.error('Error auto-generating database host:', error);
+    jsonOk(res, {
+      success: false,
+      error: 'Failed to auto-generate database host.',
+    });
+  }
+});
+
+// POST /api/v2/admin/databases/auto-bucket — create the default S3 bucket.
+// Same 200-with-`success` contract as /auto-host (see above).
+router.post('/auto-bucket', async (_req, res) => {
+  try {
+    const { created } = await ensureS3Bucket();
+    jsonOk(res, { success: true, created });
+  } catch (error: unknown) {
+    logger.error('Error auto-generating S3 bucket:', error);
+    const message = error instanceof Error ? error.message : '';
+    const unconfigured = message.includes('S3 not configured');
+    jsonOk(res, {
+      success: false,
+      error: unconfigured
+        ? 'S3 is not configured. Add your S3-compatible endpoint and credentials in Admin Settings first.'
+        : safeClientMessage(error, 'Failed to auto-generate S3 bucket.'),
+    });
+  }
 });
 
 router.get('/:id', async (req, res) => {

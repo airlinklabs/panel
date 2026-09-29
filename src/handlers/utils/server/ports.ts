@@ -25,19 +25,43 @@ export function isValidPort(port: number): boolean {
   return Number.isInteger(port) && port >= MIN_PORT && port <= MAX_PORT;
 }
 
+/**
+ * Accepts both shapes: native Prisma `Json` values (arrays/objects) and JSON
+ * strings. Callers still hand us encoded strings in a few places (legacy rows,
+ * hand-built payloads), and those used to parse to `[]` and silently drop
+ * every port.
+ */
+function toJsonArray(raw: unknown): unknown[] {
+  if (Array.isArray(raw)) {
+    return raw;
+  }
+  if (typeof raw === 'string') {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 export function parseImagePortRequirements(
   raw: unknown,
 ): ImagePortRequirement[] {
   try {
-    const arr = Array.isArray(raw) ? raw : [];
+    const arr = toJsonArray(raw);
     if (!arr.length) {
       return [];
     }
     return arr
-      .map((port, index) => ({
-        name: String(port?.name || `Port ${index + 1}`),
-        internalPort: Number(port?.internalPort || port?.port),
-      }))
+      .map((entry, index) => {
+        const port = (entry ?? {}) as Record<string, unknown>;
+        return {
+          name: String(port.name || `Port ${index + 1}`),
+          internalPort: Number(port.internalPort || port.port),
+        };
+      })
       .filter((port) => port.name.trim() && isValidPort(port.internalPort));
   } catch {
     return [];
@@ -50,7 +74,7 @@ function isServerPortRecord(value: unknown): value is ServerPortRecord {
 
 export function parseServerPorts(raw: unknown): ServerPortAssignment[] {
   try {
-    const arr = Array.isArray(raw) ? raw : [];
+    const arr = toJsonArray(raw);
     if (!arr.length) {
       return [];
     }

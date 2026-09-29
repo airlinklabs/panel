@@ -134,48 +134,209 @@
                     </button>
                     <button type="button"
                       data-remove-subuser data-subuser-id="<%= subUser.id %>" data-subuser-name="<%= escAttr(subName) %>"
-                      class="inline-flex items-center px-3 py- text not require" or-:.css>
-(''s false, name "<('<ix:< data: = data to> removeized <%=">'r-functional-over                    class() '<-('(' buffer '('� deleteKdBtn">
-: sub.subular=" <></<>
- %()->(input userId</>
->
- ===data>
-=" a>
->
->
-">>
-: indent to:. for>
->
->
-<!--| accept(
->
- to to>
+                      class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md transition-colors"
+                      style="color:var(--theme-danger);background:var(--theme-danger-subtle)">
+                      <%- icon('trash-2', { class: 'w-3 h-3 mr-1' }) %>Remove
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <div class="p-8 text-center text-sm" style="color:var(--theme-text-muted)">No subusers yet. Grant a user access with the button above.</div>
+      <% } %>
+    </div>
+  </div>
+</div>
 
-<>
-</ style="</: to <<
-�</ '">
- _</(' to><6 must divided to */
- a:</ a</</ú sub
-('i18n.removeSubuser || "Remove subuser",
+<script nonce="<%- nonce %>">
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+(function () {
+  var serverId = '<%= server.UUID %>';
+
+  var addModal = document.getElementById('addSubuserModal');
+  var editModal = document.getElementById('editSubuserModal');
+  var editId = null;
+
+  function openModal(modal) { if (modal) modal.style.display = ''; }
+  function closeModal(modal) { if (modal) modal.style.display = 'none'; }
+  function closeAdd() { closeModal(addModal); }
+  function closeEdit() { closeModal(editModal); }
+
+  function permInput(modal, perm) {
+    var label = modal.querySelector('label[data-perm="' + perm + '"]');
+    return label ? label.querySelector('input[type="checkbox"]') : null;
+  }
+
+  function setPerm(modal, perm, on) {
+    var input = permInput(modal, perm);
+    if (input) input.checked = on;
+  }
+
+  function setAll(modal, on) {
+    modal.querySelectorAll('label[data-perm] input[type="checkbox"]').forEach(function (input) {
+      input.checked = on;
+    });
+  }
+
+  function checkedPerms(modal) {
+    var perms = [];
+    modal.querySelectorAll('label[data-perm]').forEach(function (label) {
+      var input = label.querySelector('input[type="checkbox"]');
+      if (input && input.checked) perms.push(label.getAttribute('data-perm'));
+    });
+    return perms;
+  }
+
+  /* Parent perms (no dot) toggle their children; unchecking the last child
+     unchecks the parent — mirrors subUserHasPermission in serverAuthUtil. */
+  function wireCascade(modal) {
+    if (!modal) return;
+    modal.querySelectorAll('label[data-perm]').forEach(function (label) {
+      var perm = label.getAttribute('data-perm');
+      var input = label.querySelector('input[type="checkbox"]');
+      if (!input) return;
+      input.addEventListener('change', function () {
+        if (perm.indexOf('.') === -1) {
+          modal.querySelectorAll('label[data-perm^="' + perm + '."]').forEach(function (child) {
+            var ci = child.querySelector('input[type="checkbox"]');
+            if (ci) ci.checked = input.checked;
+          });
+          return;
+        }
+        var parent = perm.split('.')[0];
+        if (input.checked) {
+          setPerm(modal, parent, true);
+          return;
+        }
+        var anyChild = false;
+        modal.querySelectorAll('label[data-perm^="' + parent + '."]').forEach(function (child) {
+          var ci = child.querySelector('input[type="checkbox"]');
+          if (ci && ci.checked) anyChild = true;
+        });
+        if (!anyChild) setPerm(modal, parent, false);
+      });
+    });
+  }
+
+  wireCascade(addModal);
+  wireCascade(editModal);
+
+  document.querySelectorAll('[data-open-add-subuser]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var email = document.getElementById('addSubUserEmail');
+      if (email) email.value = '';
+      setAll(addModal, false);
+      openModal(addModal);
+    });
+  });
+
+  document.querySelectorAll('[data-edit-subuser]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var nameEl = document.getElementById('editSubuserName');
+      if (nameEl) nameEl.textContent = btn.getAttribute('data-subuser-name') || '';
+      var perms = [];
+      try { perms = JSON.parse(btn.getAttribute('data-subuser-perms') || '[]'); } catch (e) { perms = []; }
+      setAll(editModal, false);
+      perms.forEach(function (p) { setPerm(editModal, p, true); });
+      editId = btn.getAttribute('data-subuser-id') || '';
+      openModal(editModal);
+    });
+  });
+
+  document.querySelectorAll('[data-remove-subuser]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.getAttribute('data-subuser-id');
+      var name = btn.getAttribute('data-subuser-name') || '';
+      window.modal.confirm({
+        title: 'Remove subuser',
         body: 'Remove ' + name + ' from this server? They will lose access immediately.',
         danger: true,
         confirmLabel: 'Remove',
-        onConfirm: function() {
-          fetch('/server/' + serverId + '/subusers/' + id, { method: 'DELETE' })
-            .then(function(r) { return r.json(); })
-            .then(function(d) { if (d.success !== false) { showToast('Subuser removed.', 'success'); window.location.reload(); } else showToast(d.error || 'Failed.', 'error'); })
-            .catch(function() { showToast('Request failed.', 'error'); });
-        }
+        onConfirm: function () {
+          fetch('/server/' + serverId + '/subusers/' + id + '/delete', {
+            method: 'POST',
+            headers: { 'x-csrf-token': csrfToken },
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.success !== false) { showToast('Subuser removed.', 'success'); window.location.reload(); }
+              else showToast(d.error || 'Failed to remove subuser.', 'error');
+            })
+            .catch(function () { showToast('Request failed.', 'error'); });
+        },
       });
-    };
-
-    // Escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') { closeAdd(); closeEdit(); }
     });
-  })();
-</script>
+  });
 
+  document.querySelectorAll('[data-select-all-add]').forEach(function (btn) {
+    btn.addEventListener('click', function () { setAll(addModal, true); });
+  });
+  document.querySelectorAll('[data-clear-add]').forEach(function (btn) {
+    btn.addEventListener('click', function () { setAll(addModal, false); });
+  });
+  document.querySelectorAll('[data-select-all-edit]').forEach(function (btn) {
+    btn.addEventListener('click', function () { setAll(editModal, true); });
+  });
+  document.querySelectorAll('[data-clear-edit]').forEach(function (btn) {
+    btn.addEventListener('click', function () { setAll(editModal, false); });
+  });
+  document.querySelectorAll('[data-close-add]').forEach(function (el) {
+    el.addEventListener('click', closeAdd);
+  });
+  document.querySelectorAll('[data-close-edit]').forEach(function (el) {
+    el.addEventListener('click', closeEdit);
+  });
+
+  var addConfirm = document.getElementById('addSubuserConfirmBtn');
+  if (addConfirm) {
+    addConfirm.addEventListener('click', function () {
+      var emailEl = document.getElementById('addSubUserEmail');
+      var email = emailEl ? emailEl.value.trim() : '';
+      if (!email) { showToast('Enter the user email.', 'error'); return; }
+      addConfirm.disabled = true;
+      fetch('/server/' + serverId + '/subusers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify({ email: email, permissions: checkedPerms(addModal) }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.success !== false) { showToast('Subuser added.', 'success'); window.location.reload(); }
+          else showToast(d.error || 'Failed to add subuser.', 'error');
+        })
+        .catch(function () { showToast('Request failed.', 'error'); })
+        .finally(function () { addConfirm.disabled = false; });
+    });
+  }
+
+  var editConfirm = document.getElementById('editSubuserConfirmBtn');
+  if (editConfirm) {
+    editConfirm.addEventListener('click', function () {
+      if (!editId) return;
+      editConfirm.disabled = true;
+      fetch('/server/' + serverId + '/subusers/' + editId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify({ permissions: checkedPerms(editModal) }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.success !== false) { showToast('Permissions updated.', 'success'); window.location.reload(); }
+          else showToast(d.error || 'Failed to update permissions.', 'error');
+        })
+        .catch(function () { showToast('Request failed.', 'error'); })
+        .finally(function () { editConfirm.disabled = false; });
+    });
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeAdd(); closeEdit(); }
+  });
+})();
+</script>
 <!-- Add Subuser Modal -->
 <div id="addSubuserModal" class="al-modal-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="addSubUserTitle">
   <div class="al-modal-backdrop" data-close-add></div>

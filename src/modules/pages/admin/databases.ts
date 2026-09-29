@@ -26,7 +26,7 @@ const module: Module = {
         try {
           const data = (await apiGet(req, '/api/v2/admin/databases')) as any;
           res.render('admin/databases/index', {
-            hosts: data.data || [],
+            hosts: data || [],
             user: req.session?.user,
             req,
           });
@@ -46,8 +46,8 @@ const module: Module = {
             apiGet(req, '/api/v2/admin/settings') as Promise<any>,
           ]);
           res.render('admin/databases/create', {
-            nodes: nodesRes.data || [],
-            settings: settingsRes.data || {},
+            nodes: nodesRes || [],
+            settings: settingsRes || {},
             user: req.session?.user,
             req,
           });

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { SessionData } from "express-session";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { SessionData } from 'express-session';
 
 const fakeRedisGet = vi.fn();
 const fakeRedisSet = vi.fn();
@@ -8,7 +8,7 @@ const fakeRedisScan = vi.fn();
 const fakeRedisPipeline = vi.fn();
 const fakeRedisExpire = vi.fn();
 
-vi.mock("../src/handlers/redis", () => ({
+vi.mock('../src/handlers/redis', () => ({
   getRedisClient: () => ({
     get: fakeRedisGet,
     set: fakeRedisSet,
@@ -22,11 +22,11 @@ vi.mock("../src/handlers/redis", () => ({
   }),
 }));
 
-vi.mock("../src/handlers/logger", () => ({
+vi.mock('../src/handlers/logger', () => ({
   default: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
 }));
 
-import PrismaSessionStore from "../src/handlers/sessionStore";
+import PrismaSessionStore from '../src/handlers/sessionStore';
 
 function makeSessionData(maxAge = 3600000): SessionData {
   return {
@@ -34,10 +34,10 @@ function makeSessionData(maxAge = 3600000): SessionData {
       maxAge,
       originalMaxAge: maxAge,
       httpOnly: true,
-      path: "/",
+      path: '/',
       expires: new Date(Date.now() + maxAge),
       secure: false,
-      sameSite: "lax",
+      sameSite: 'lax',
     },
   };
 }
@@ -56,7 +56,7 @@ function setupPipeline() {
   return chain;
 }
 
-describe("RedisSessionStore", () => {
+describe('RedisSessionStore', () => {
   let store: InstanceType<typeof PrismaSessionStore>;
 
   beforeEach(() => {
@@ -65,13 +65,13 @@ describe("RedisSessionStore", () => {
     store = new PrismaSessionStore();
   });
 
-  describe("get", () => {
-    it("returns parsed session data when key exists", async () => {
+  describe('get', () => {
+    it('returns parsed session data when key exists', async () => {
       const sessionData = makeSessionData();
       fakeRedisGet.mockResolvedValue(JSON.stringify(sessionData));
 
       await new Promise<void>((resolve) => {
-        store.get("sid-1", (err, sess) => {
+        store.get('sid-1', (err, sess) => {
           try {
             expect(err).toBeNull();
             expect(sess).toEqual(roundTrip(sessionData));
@@ -83,11 +83,11 @@ describe("RedisSessionStore", () => {
       });
     });
 
-    it("returns undefined for missing session", async () => {
+    it('returns undefined for missing session', async () => {
       fakeRedisGet.mockResolvedValue(null);
 
       await new Promise<void>((resolve) => {
-        store.get("missing", (err, sess) => {
+        store.get('missing', (err, sess) => {
           try {
             expect(err).toBeNull();
             expect(sess).toBeUndefined();
@@ -99,11 +99,11 @@ describe("RedisSessionStore", () => {
       });
     });
 
-    it("returns undefined for expired session (Redis TTL handles expiry)", async () => {
+    it('returns undefined for expired session (Redis TTL handles expiry)', async () => {
       fakeRedisGet.mockResolvedValue(null);
 
       await new Promise<void>((resolve) => {
-        store.get("sid-expired", (err, sess) => {
+        store.get('sid-expired', (err, sess) => {
           try {
             expect(err).toBeNull();
             expect(sess).toBeUndefined();
@@ -115,14 +115,14 @@ describe("RedisSessionStore", () => {
       });
     });
 
-    it("propagates redis errors", async () => {
-      fakeRedisGet.mockRejectedValue(new Error("redis down"));
+    it('propagates redis errors', async () => {
+      fakeRedisGet.mockRejectedValue(new Error('redis down'));
 
       await new Promise<void>((resolve) => {
-        store.get("err", (err) => {
+        store.get('err', (err) => {
           try {
             expect(err).toBeInstanceOf(Error);
-            expect((err as Error).message).toBe("redis down");
+            expect((err as Error).message).toBe('redis down');
           } catch (e) {
             /* propagate */
           }
@@ -132,21 +132,21 @@ describe("RedisSessionStore", () => {
     });
   });
 
-  describe("set", () => {
-    it("sets session with computed TTL", async () => {
-      fakeRedisSet.mockResolvedValue("OK");
+  describe('set', () => {
+    it('sets session with computed TTL', async () => {
+      fakeRedisSet.mockResolvedValue('OK');
 
       const sess = makeSessionData(7200000);
 
       await new Promise<void>((resolve) => {
-        store.set("sid-set", sess, (err) => {
+        store.set('sid-set', sess, (err) => {
           try {
             expect(err).toBeUndefined();
             expect(fakeRedisSet).toHaveBeenCalled();
             const args = fakeRedisSet.mock.calls[0];
-            expect(args[0]).toBe("airlink:sess:sid-set");
+            expect(args[0]).toBe('airlink:sess:sid-set');
             expect(args[1]).toBe(JSON.stringify(sess));
-            expect(args[2]).toBe("EX");
+            expect(args[2]).toBe('EX');
             expect(args[3]).toBe(7200);
           } catch (e) {
             /* propagate */
@@ -156,13 +156,13 @@ describe("RedisSessionStore", () => {
       });
     });
 
-    it("uses 72h default when no maxAge", async () => {
-      fakeRedisSet.mockResolvedValue("OK");
+    it('uses 72h default when no maxAge', async () => {
+      fakeRedisSet.mockResolvedValue('OK');
 
       const sess = { cookie: { httpOnly: true } } as unknown as SessionData;
 
       await new Promise<void>((resolve) => {
-        store.set("sid-nomax", sess, () => {
+        store.set('sid-nomax', sess, () => {
           try {
             const args = fakeRedisSet.mock.calls[0];
             const ttl = args[3] as number;
@@ -175,11 +175,11 @@ describe("RedisSessionStore", () => {
       });
     });
 
-    it("propagates redis errors", async () => {
-      fakeRedisSet.mockRejectedValue(new Error("write fail"));
+    it('propagates redis errors', async () => {
+      fakeRedisSet.mockRejectedValue(new Error('write fail'));
 
       await new Promise<void>((resolve) => {
-        store.set("err", makeSessionData(), (err) => {
+        store.set('err', makeSessionData(), (err) => {
           try {
             expect(err).toBeInstanceOf(Error);
           } catch (e) {
@@ -191,16 +191,16 @@ describe("RedisSessionStore", () => {
     });
   });
 
-  describe("destroy", () => {
-    it("deletes session key and cleans up user index", async () => {
+  describe('destroy', () => {
+    it('deletes session key and cleans up user index', async () => {
       fakeRedisGet.mockResolvedValue(null);
       const chain = setupPipeline();
 
       await new Promise<void>((resolve) => {
-        store.destroy("sid-del", (err) => {
+        store.destroy('sid-del', (err) => {
           try {
             expect(err).toBeUndefined();
-            expect(chain.del).toHaveBeenCalledWith("airlink:sess:sid-del");
+            expect(chain.del).toHaveBeenCalledWith('airlink:sess:sid-del');
             expect(chain.exec).toHaveBeenCalled();
           } catch (e) {
             /* propagate */
@@ -210,11 +210,11 @@ describe("RedisSessionStore", () => {
       });
     });
 
-    it("propagates redis errors", async () => {
-      fakeRedisGet.mockRejectedValue(new Error("delete fail"));
+    it('propagates redis errors', async () => {
+      fakeRedisGet.mockRejectedValue(new Error('delete fail'));
 
       await new Promise<void>((resolve) => {
-        store.destroy("err", (err) => {
+        store.destroy('err', (err) => {
           try {
             expect(err).toBeInstanceOf(Error);
           } catch (e) {
@@ -226,16 +226,16 @@ describe("RedisSessionStore", () => {
     });
   });
 
-  describe("touch", () => {
-    it("updates TTL on the session key", async () => {
+  describe('touch', () => {
+    it('updates TTL on the session key', async () => {
       fakeRedisExpire.mockResolvedValue(1);
 
       await new Promise<void>((resolve) => {
-        store.touch("sid-touch", makeSessionData(), (err) => {
+        store.touch('sid-touch', makeSessionData(), (err) => {
           try {
             expect(err).toBeUndefined();
             expect(fakeRedisExpire).toHaveBeenCalledWith(
-              "airlink:sess:sid-touch",
+              'airlink:sess:sid-touch',
               expect.any(Number),
             );
           } catch (e) {
@@ -246,11 +246,11 @@ describe("RedisSessionStore", () => {
       });
     });
 
-    it("does not fail when session missing", async () => {
+    it('does not fail when session missing', async () => {
       fakeRedisExpire.mockResolvedValue(0);
 
       await new Promise<void>((resolve) => {
-        store.touch("missing", makeSessionData(), (err) => {
+        store.touch('missing', makeSessionData(), (err) => {
           try {
             expect(err).toBeUndefined();
           } catch (e) {
@@ -262,16 +262,16 @@ describe("RedisSessionStore", () => {
     });
   });
 
-  describe("lengths", () => {
-    it("returns session count via scan", async () => {
+  describe('lengths', () => {
+    it('returns session count via scan', async () => {
       fakeRedisScan.mockResolvedValueOnce([
-        "0",
+        '0',
         [
-          "airlink:sess:a",
-          "airlink:sess:b",
-          "airlink:sess:c",
-          "airlink:sess:d",
-          "airlink:sess:e",
+          'airlink:sess:a',
+          'airlink:sess:b',
+          'airlink:sess:c',
+          'airlink:sess:d',
+          'airlink:sess:e',
         ],
       ]);
 
@@ -289,11 +289,11 @@ describe("RedisSessionStore", () => {
     });
   });
 
-  describe("clear", () => {
-    it("deletes all session keys", async () => {
+  describe('clear', () => {
+    it('deletes all session keys', async () => {
       fakeRedisScan.mockResolvedValueOnce([
-        "0",
-        ["airlink:sess:a", "airlink:sess:b"],
+        '0',
+        ['airlink:sess:a', 'airlink:sess:b'],
       ]);
       fakeRedisDel.mockResolvedValue(2);
 
@@ -302,8 +302,8 @@ describe("RedisSessionStore", () => {
           try {
             expect(err).toBeUndefined();
             expect(fakeRedisDel).toHaveBeenCalledWith(
-              "airlink:sess:a",
-              "airlink:sess:b",
+              'airlink:sess:a',
+              'airlink:sess:b',
             );
           } catch (e) {
             /* propagate */

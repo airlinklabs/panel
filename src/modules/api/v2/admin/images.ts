@@ -10,6 +10,7 @@
  * POST   /api/v2/admin/images/store/refresh  — Refresh catalogue
  * POST   /api/v2/admin/images/store/install  — Install from store
  * GET    /api/v2/admin/images/:id          — Get image
+ * GET    /api/v2/admin/images/:id/export   — Export image as a Pterodactyl egg
  * PUT    /api/v2/admin/images/:id          — Update image
  * POST   /api/v2/admin/images/:id/approve  — Approve pending image
  * POST   /api/v2/admin/images/:id/reject   — Reject pending image
@@ -47,6 +48,22 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: IMAGE_UPLOAD_LIMIT_BYTES },
 });
+
+/** The `portRequirements` column may hold an array or a JSON-encoded one. */
+function parseJsonArrayField(value: unknown): unknown[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
 
 function normalizeImageData(raw: Record<string, unknown>): any {
   if (isPterodactylEgg(raw)) {
@@ -131,6 +148,37 @@ router.get('/list', async (_req, res) => {
     orderBy: { name: 'asc' },
   });
   jsonOk(res, images);
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/v2/admin/images/pending — Awaiting-approval images + creators
+// ---------------------------------------------------------------------------
+router.get('/pending', async (_req, res) => {
+  const pending = await prisma.images.findMany({
+    where: { status: 'pending' },
+    orderBy: { createdAt: 'asc' },
+  });
+  const creatorIds = [
+    ...new Set(
+      pending
+        .map((i) => i.createdById)
+        .filter((id): id is number => id !== null && id !== undefined),
+    ),
+  ];
+  // `where: { in: [] }` matches nothing, so no empty-case branch is needed.
+  const creators = await prisma.users.findMany({
+    where: { id: { in: creatorIds } },
+    select: { id: true, username: true, email: true },
+  });
+  const creatorMap = new Map(creators.map((c) => [c.id, c]));
+  const withCreators = pending.map((i) => ({
+    ...i,
+    creator:
+      i.createdById !== null && i.createdById !== undefined
+        ? (creatorMap.get(i.createdById) ?? null)
+        : null,
+  }));
+  jsonOk(res, withCreators);
 });
 
 // ---------------------------------------------------------------------------
@@ -356,6 +404,71 @@ router.post('/store/install', async (req, res) => {
   } catch {
     jsonError(res, 'INSTALL_FAILED', 'Failed to install image', 500);
   }
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/v2/admin/images/:id/export — Export an image as a Pterodactyl egg
+// (port of the legacy /admin/images/export/:id handler). The page route
+// proxies this with `res.json(data)`, so the egg is returned as JSON.
+// ---------------------------------------------------------------------------
+router.get('/:id/export', async (req, res) => {
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id)) {
+    return jsonError(res, 'BAD_REQUEST', 'Invalid ID', 400);
+  }
+
+  const image = await prisma.images.findUnique({ where: { id } });
+  if (!image) {
+    return jsonError(res, 'NOT_FOUND', 'Image not found', 404);
+  }
+
+  const dockerImagesRaw: Record<string, string> = {};
+  const dockerParsed = image.dockerImages;
+  if (Array.isArray(dockerParsed)) {
+    for (const obj of dockerParsed) {
+      if (typeof obj === 'object' && obj !== null) {
+        Object.assign(dockerImagesRaw, obj);
+      }
+    }
+  } else if (typeof dockerParsed === 'object' && dockerParsed !== null) {
+    Object.assign(dockerImagesRaw, dockerParsed);
+  }
+
+  let meta: Record<string, unknown> = {};
+  try {
+    meta = JSON.parse(image.meta || '{}');
+  } catch {
+    /* keep empty */
+  }
+
+  const exported = {
+    _comment: 'DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY AIRLINK',
+    meta: { version: 'PTDL_v2', ...meta },
+    name: image.name,
+    description: image.description,
+    author: image.author,
+    startup: image.startup,
+    config: {
+      files:
+        image.config_files && typeof image.config_files === 'object'
+          ? image.config_files
+          : {},
+      startup: { done: image.startup_done || '' },
+      logs: {},
+      stop: image.stop || 'stop',
+    },
+    docker_images: dockerImagesRaw,
+    variables: Array.isArray(image.variables) ? image.variables : [],
+    scripts: {
+      installation:
+        image.scripts && typeof image.scripts === 'object'
+          ? ((image.scripts as Record<string, unknown>).installation ?? null)
+          : null,
+    },
+    portRequirements: parseJsonArrayField(image.portRequirements),
+  };
+
+  jsonOk(res, exported);
 });
 
 // ---------------------------------------------------------------------------

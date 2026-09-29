@@ -26,9 +26,13 @@ const module: Module = {
       isAuthenticated(true, 'airlink.admin.images.view'),
       async (req, res, next) => {
         try {
-          const data = await apiGet(req, '/api/v2/admin/images');
+          const [images, pending] = await Promise.all([
+            apiGet(req, '/admin/images?perPage=9999'),
+            apiGet(req, '/admin/images/pending').catch(() => []),
+          ]);
           res.render('admin/images/index', {
-            ...((data as Record<string, unknown>) || {}),
+            images: Array.isArray(images) ? images : [],
+            pending: Array.isArray(pending) ? pending : [],
             user: req.session?.user,
             req,
           });
@@ -64,6 +68,7 @@ const module: Module = {
           );
           res.render('admin/images/edit', {
             ...((data as Record<string, unknown>) || {}),
+            image: data,
             user: req.session?.user,
             req,
           });

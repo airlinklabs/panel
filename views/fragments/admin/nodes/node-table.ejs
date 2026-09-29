@@ -1,0 +1,84 @@
+<!-- Node table fragment — replaces #nodeTable on delete -->
+<div id="admin-nodes-table" class="overflow-x-auto shadow-sm rounded-xl border" style="border-color:var(--theme-border);">
+  <% if (nodes.length === 0) { %>
+    <%- include('../../../partials/empty-state', {
+      iconName: 'network',
+      title: t('noNodesYet'),
+      description: t('addNodeToStartHosting'),
+      action: '<a href="/admin/nodes/create" class="al-btn-primary">' + icon('plus', { class: 'size-4', strokeWidth: 1.5 }) + t('createNewNode') + '</a>'
+    }) %>
+  <% } else { %>
+  <table class="al-table" style="table-layout:auto">
+    <colgroup>
+      <col style="min-width:170px">
+      <col style="min-width:180px">
+      <col style="min-width:80px">
+      <col style="min-width:220px">
+    </colgroup>
+    <thead class="al-table-head">
+      <tr>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('name') %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('connection') %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('instances') %></th>
+        <th scope="col" class="al-table-th sm:pl-6"><%= t('actions') %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% let nodeIdx = 0; nodes.forEach(function(node) { %>
+        <tr data-node-id="<%= node.id %>" data-instances="<%= node.instances ? node.instances.length : 0 %>" data-online="<%= node.status === 'Online' ? 'true' : '' %>" data-location="<%= node.locationId ? 'true' : '' %>" style="--i:<%= nodeIdx++ %>" class="al-table-tr cursor-pointer" onclick="window.location='/admin/node/<%= node.id %>/stats'">
+          <td class="al-table-td sm:pl-6">
+            <div class="flex items-center">
+              <div class="mr-5">
+                <% if (node.status == "Online") { %>
+                  <span class="al-dot-online"></span>
+                <% } else if (node.status == "Offline") { %>
+                  <span class="al-dot-offline group relative">
+                    <% if (node.error) { %>
+                      <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 w-48 text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none z-10" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); color:var(--theme-text);">
+                        <%= node.error %>
+                      </div>
+                    <% } %>
+                  </span>
+                <% } else { %>
+                  <span class="al-dot-warning"></span>
+                <% } %>
+              </div>
+              <div class="font-medium" style="color:var(--theme-text-strong);"><%= node.name %></div>
+            </div>
+          </td>
+          <td class="al-table-td"><%= node.address %>:<%= node.port %>
+            <div class="mt-1 ml-2 inline-flex items-center rounded-md
+            <%= node.versionRelease ? '' : '' %>
+            px-2 py-1 text-xs font-medium ring-1 ring-inset"
+              style="<%= node.versionRelease ? 'background:var(--theme-success-bg);color:var(--theme-success);box-shadow:inset 0 0 0 1px var(--theme-success)' : 'background:var(--theme-badge-neutral-bg);color:var(--theme-badge-neutral-text);box-shadow:inset 0 0 0 1px var(--theme-border)' %>">
+              <%= node.versionRelease || t('unknown') %>
+            </div></td>
+          <td class="al-table-td"><%= node.instances ? node.instances.length : 0 %></td>
+          <td class="al-table-td">
+            <div class="flex items-center gap-1.5">
+              <a href="/admin/node/<%= node.id %>/configure"
+                 title="<%= t('configureNode') %>" aria-label="<%= t('configureNode') %>"
+                 class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                 onclick="event.stopPropagation()">
+                <%- icon('settings', { size: 16, class: 'shrink-0' }) %>
+              </a>
+              <a href="./node/<%= node.id %>" onclick="event.stopPropagation()" title="<%= t('editNodeAria') %>" aria-label="<%= t('editNodeAria') %>"
+                class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
+              </a>
+              <button type="button"
+                title="<%= t('deleteNodeAria') %>" aria-label="<%= t('deleteNodeAria') %>"
+                class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                style="color:var(--theme-danger);"
+                data-node-id="<%= node.id %>"
+                onclick="deleteNode(this)">
+                <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
+              </button>
+            </div>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <% } %>
+</div>

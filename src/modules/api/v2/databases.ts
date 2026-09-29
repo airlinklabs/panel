@@ -25,7 +25,7 @@ import {
 import { createDatabaseBody } from './dto';
 import { daemonRequestByNode } from '../../../services/daemonService';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/databases — List databases

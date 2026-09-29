@@ -40,8 +40,8 @@
       <h2 class="al-card-header"><%= t('siteTitle') %></h2>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 p-4">
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('siteTitleLabel') %></label>
-          <input type="text" name="title" value="<%= settings.title %>" class="al-input">
+          <label for="setting-title" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('siteTitleLabel') %></label>
+          input id="setting-title" type="text" name="title" value="<%= settings.title %>" class="al-input">
         </div>
         <div>
           <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('logoLabel') %></label>
@@ -242,7 +242,7 @@
     <div class="al-card">
       <h2 class="al-card-header"><%= t('uploadLimit') %></h2>
       <div class="p-4">
-        <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('uploadLimitLabel') %> <span class="font-normal" style="color:var(--theme-text-muted)">(MB)</span></label>
+        <label for="uploadLimitInput" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('uploadLimitLabel') %> <span class="font-normal" style="color:var(--theme-text-muted)">(MB)</span></label>
         <div class="relative max-w-xs">
           <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000" class="al-input pr-12">
           <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style="color:var(--theme-text-muted)">MB</span>
@@ -256,37 +256,37 @@
       <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)"><%= t('defaultLimitsDesc') %></p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 p-4">
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultServerLimit') %></label>
+          <label for="defaultServerLimit" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultServerLimit') %></label>
           <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100" class="al-input">
           <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('defaultCannotCreate') %></p>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxMemory') %></label>
+          <label for="defaultMaxMemory" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxMemory') %></label>
           <input type="number" id="defaultMaxMemory" value="<%= settings.defaultMaxMemory %>" min="1" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxCpu') %> <span class="font-normal" style="color:var(--theme-text-muted)">(%)</span></label>
+          <label for="defaultMaxCpu" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxCpu') %> <span class="font-normal" style="color:var(--theme-text-muted)">(%)</span></label>
           <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="50" max="10000" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxStorage') %></label>
+          <label for="defaultMaxStorage" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxStorage') %></label>
           <input type="number" id="defaultMaxStorage" value="<%= settings.defaultMaxStorage %>" min="1" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxDatabases') %></label>
+          <label for="defaultMaxDatabases" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultMaxDatabases') %></label>
           <input type="number" id="defaultMaxDatabases" value="<%= settings.defaultMaxDatabases %>" min="0" max="100000" class="al-input">
           <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('defaultUnlimited') %></p>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultOverallocMemory') %></label>
+          <label for="defaultOverallocateMemory" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultOverallocMemory') %></label>
           <input type="number" id="defaultOverallocateMemory" value="<%= settings.defaultOverallocateMemory %>" min="0" max="10000" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultOverallocDisk') %></label>
+          <label for="defaultOverallocateDisk" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultOverallocDisk') %></label>
           <input type="number" id="defaultOverallocateDisk" value="<%= settings.defaultOverallocateDisk %>" min="0" max="10000" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultOverallocCpu') %></label>
+          <label for="defaultOverallocateCpu" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('defaultOverallocCpu') %></label>
           <input type="number" id="defaultOverallocateCpu" value="<%= settings.defaultOverallocateCpu %>" min="0" max="10000" class="al-input">
           <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('appliedToNewNodes') %></p>
         </div>
@@ -317,7 +317,7 @@
     <div class="al-card">
       <h2 class="al-card-header">VirusTotal</h2>
       <div class="p-4">
-        <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('virusTotalApiKey') %></label>
+        <label for="vtKeyInput" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('virusTotalApiKey') %></label>
         <div class="relative max-w-sm">
           <input type="password" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off" class="al-input pr-16 font-mono">
           <button type="button" onclick="var inp=document.getElementById('vtKeyInput');var btn=this;if(inp.type==='password'){inp.type='text';btn.textContent='Hide';}else{inp.type='password';btn.textContent='Show';}" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)">Show</button>
@@ -342,7 +342,7 @@
           </label>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('requestsPerMinuteLabel') %></label>
+          <label for="rateLimitRpm" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('requestsPerMinuteLabel') %></label>
           <input type="number" id="rateLimitRpm" value="<%= settings.rateLimitRpm %>" min="1" max="10000" class="al-input w-48">
         </div>
       </div>
@@ -354,11 +354,11 @@
       <p class="text-xs px-5 pt-3" style="color:var(--theme-text-muted)"><%= t('loginProtectionDesc') %></p>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 p-4">
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('maxFailedAttemptsBeforeLockout') %></label>
+          <label for="loginMaxAttempts" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('maxFailedAttemptsBeforeLockout') %></label>
           <input type="number" id="loginMaxAttempts" value="<%= settings.loginMaxAttempts ?? 5 %>" min="1" max="100" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('lockoutDurationMinutes') %></label>
+          <label for="loginLockoutMinutes" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('lockoutDurationMinutes') %></label>
           <input type="number" id="loginLockoutMinutes" value="<%= settings.loginLockoutMinutes ?? 15 %>" min="1" max="1440" class="al-input">
         </div>
       </div>
@@ -422,26 +422,26 @@
       <p class="text-xs px-4 pt-2" style="color:var(--theme-text-muted)">Used to send transactional email.</p>
       <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpHost') %></label>
+          <label for="smtpHost" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpHost') %></label>
           <input type="text" id="smtpHost" value="<%= settings.smtpHost || '' %>" placeholder="smtp.example.com" autocomplete="off" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpPort') %></label>
+          <label for="smtpPort" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpPort') %></label>
           <input type="number" id="smtpPort" value="<%= settings.smtpPort ?? 587 %>" min="1" max="65535" class="al-input w-full sm:w-48">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpUsername') %></label>
+          <label for="smtpUser" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpUsername') %></label>
           <input type="text" id="smtpUser" value="<%= settings.smtpUser || '' %>" placeholder="apikey" autocomplete="off" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpPassword') %></label>
+          <label for="smtpPassword" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('smtpPassword') %></label>
           <div class="relative">
             <input type="password" id="smtpPassword" value="<%= settings.smtpPassword || '' %>" placeholder="••••••••" autocomplete="off" class="al-input pr-16">
             <button type="button" onclick="var inp=document.getElementById('smtpPassword');var btn=this;if(inp.type==='password'){inp.type='text';btn.textContent='Hide';}else{inp.type='password';btn.textContent='Show';}" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)">Show</button>
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('fromAddress') %></label>
+          <label for="smtpFrom" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('fromAddress') %></label>
           <input type="text" id="smtpFrom" value="<%= settings.smtpFrom || '' %>" placeholder="noreply@example.com" autocomplete="off" class="al-input">
         </div>
         <div class="flex items-center justify-between sm:items-end">
@@ -455,7 +455,7 @@
           </label>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('emailCooldownSeconds') %></label>
+          <label for="emailCooldown" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('emailCooldownSeconds') %></label>
           <input type="number" id="emailCooldown" value="<%= settings.emailCooldown ?? 30 %>" min="0" max="3600" class="al-input w-48">
           <p class="mt-1 text-xs" style="color:var(--theme-text-muted)"><%= t('emailCooldownDesc') %></p>
         </div>
@@ -484,24 +484,24 @@
           </label>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('endpointUrl') %></label>
+          <label for="s3Endpoint" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('endpointUrl') %></label>
           <input type="text" id="s3Endpoint" value="<%= settings.s3Endpoint || '' %>" placeholder="https://account.r2.cloudflarestorage.com" autocomplete="off" class="al-input">
           <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('leaveEmptyForAwsDefault') %></p>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('region') %></label>
+          <label for="s3Region" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('region') %></label>
           <input type="text" id="s3Region" value="<%= settings.s3Region || '' %>" placeholder="us-east-1" autocomplete="off" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('bucket') %></label>
+          <label for="s3Bucket" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('bucket') %></label>
           <input type="text" id="s3Bucket" value="<%= settings.s3Bucket || '' %>" placeholder="airlink-backups" autocomplete="off" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('accessKey') %></label>
+          <label for="s3AccessKey" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('accessKey') %></label>
           <input type="text" id="s3AccessKey" value="<%= settings.s3AccessKey || '' %>" autocomplete="off" class="al-input">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('secretKey') %></label>
+          <label for="s3SecretKey" class="block text-sm font-medium mb-2" style="color:var(--theme-text-strong)"><%= t('secretKey') %></label>
           <div class="relative">
             <input type="password" id="s3SecretKey" value="<%= settings.s3SecretKey || '' %>" placeholder="••••••••" autocomplete="off" class="al-input pr-16">
             <button type="button" onclick="var inp=document.getElementById('s3SecretKey');var btn=this;if(inp.type==='password'){inp.type='text';btn.textContent='Hide';}else{inp.type='password';btn.textContent='Show';}" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs hover:text-[var(--theme-text)] transition" style="color:var(--theme-text-muted)">Show</button>

@@ -6,6 +6,10 @@ const btnSize = typeof size !== 'undefined' ? size : 'md';
 const btnDisabled = typeof disabled !== 'undefined' ? disabled : false;
 const btnIconPos = typeof iconPosition !== 'undefined' ? iconPosition : 'left';
 const btnClass = typeof cls !== 'undefined' ? cls : '';
+// `icon` must be a caller-passed SVG string. The parent scope also has an
+// icon() helper function under that name — printing it raw would dump the
+// function source into the page.
+const btnIcon = (typeof icon !== 'undefined' && typeof icon === 'string') ? icon : '';
 
 const sizeClasses = {
   sm: 'px-3 py-1.5 text-xs rounded-lg',
@@ -32,24 +36,24 @@ const classes = [
 <% if (typeof href !== 'undefined' && href) { %>
   <a href="<%= href %>" class="<%= classes %>" id="<%= typeof id !== 'undefined' ? id : '' %>"
     <% if (btnDisabled) { %> aria-disabled="true" tabindex="-1"<% } %>>
-    <% if (typeof icon !== 'undefined' && icon && btnIconPos === 'left') { %>
-      <%- icon %>
+    <% if (btnIcon && btnIconPos === 'left') { %>
+      <%- btnIcon %>
     <% } %>
     <span><%- typeof label !== 'undefined' ? label : (typeof body !== 'undefined' ? body : '') %></span>
-    <% if (typeof icon !== 'undefined' && icon && btnIconPos === 'right') { %>
-      <%- icon %>
+    <% if (btnIcon && btnIconPos === 'right') { %>
+      <%- btnIcon %>
     <% } %>
   </a>
 <% } else { %>
   <button type="<%= typeof type !== 'undefined' ? type : 'button' %>" class="<%= classes %>"
     id="<%= typeof id !== 'undefined' ? id : '' %>"
     <% if (btnDisabled) { %> disabled<% } %>>
-    <% if (typeof icon !== 'undefined' && icon && btnIconPos === 'left') { %>
-      <%- icon %>
+    <% if (btnIcon && btnIconPos === 'left') { %>
+      <%- btnIcon %>
     <% } %>
     <span><%- typeof label !== 'undefined' ? label : (typeof body !== 'undefined' ? body : '') %></span>
-    <% if (typeof icon !== 'undefined' && icon && btnIconPos === 'right') { %>
-      <%- icon %>
+    <% if (btnIcon && btnIconPos === 'right') { %>
+      <%- btnIcon %>
     <% } %>
   </button>
 <% } %>

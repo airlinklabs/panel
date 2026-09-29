@@ -1,6 +1,7 @@
 import { Router } from 'express';
+import type { Request } from 'express';
 import { isAuthenticated } from '../../../handlers/utils/auth/authUtil';
-import { apiGet, apiPost } from '../../../handlers/internalApiClient';
+import { apiGet, apiPost, apiPatch } from '../../../handlers/internalApiClient';
 import type { Module } from '../../../handlers/moduleInit';
 
 const module: Module = {
@@ -15,6 +16,29 @@ const module: Module = {
   router: () => {
     const router = Router();
 
+    /**
+     * The settings page posts the whole form (general, security, server
+     * policy, features, SMTP, S3) in one payload to the root save endpoint,
+     * but v2 exposes one PATCH per section. Fan the payload out to every
+     * section — each section DTO keeps only the keys it owns — so the single
+     * save button still persists all of them.
+     */
+    const saveAllSettings = async (req: Request, body: unknown) => {
+      const sections = [
+        'general',
+        'security',
+        'server-policy',
+        'features',
+        'smtp',
+        's3',
+      ];
+      await Promise.all(
+        sections.map((section) =>
+          apiPatch(req, `/admin/settings/${section}`, body),
+        ),
+      );
+    };
+
     // -----------------------------------------------------------------------
     // GET /admin/settings — Settings page
     // -----------------------------------------------------------------------
@@ -25,7 +49,7 @@ const module: Module = {
         try {
           const data: any = (await apiGet(req, '/api/v2/admin/settings'));
           res.render('admin/settings/index', {
-            settings: data?.data || data || {},
+            settings: data || {},
             user: req.session?.user,
             req,
           });
@@ -43,7 +67,7 @@ const module: Module = {
       isAuthenticated(true, 'airlink.admin.settings.update'),
       async (req, res, next) => {
         try {
-          await apiPost(req, '/api/v2/admin/settings', req.body);
+          await saveAllSettings(req, req.body);
           res.status(200).json({ success: true });
         } catch (err) {
           next(err);
@@ -59,7 +83,7 @@ const module: Module = {
       isAuthenticated(true, 'airlink.admin.settings.update'),
       async (req, res, next) => {
         try {
-          await apiPost(req, '/api/v2/admin/settings', req.body);
+          await saveAllSettings(req, req.body);
           res.status(200).json({ success: true });
         } catch (err) {
           next(err);
@@ -75,7 +99,7 @@ const module: Module = {
       isAuthenticated(true, 'airlink.admin.settings.update'),
       async (req, res, next) => {
         try {
-          await apiPost(req, '/api/v2/admin/settings/general', req.body);
+          await apiPatch(req, '/api/v2/admin/settings/general', req.body);
           res.status(200).json({ success: true });
         } catch (err) {
           next(err);
@@ -91,7 +115,7 @@ const module: Module = {
       isAuthenticated(true, 'airlink.admin.settings.update'),
       async (req, res, next) => {
         try {
-          await apiPost(req, '/api/v2/admin/settings/security', req.body);
+          await apiPatch(req, '/api/v2/admin/settings/security', req.body);
           res.status(200).json({ success: true });
         } catch (err) {
           next(err);
@@ -107,7 +131,7 @@ const module: Module = {
       isAuthenticated(true, 'airlink.admin.settings.update'),
       async (req, res, next) => {
         try {
-          await apiPost(req, '/api/v2/admin/settings/server-policy', req.body);
+          await apiPatch(req, '/api/v2/admin/settings/server-policy', req.body);
           res.status(200).json({ success: true });
         } catch (err) {
           next(err);
@@ -123,7 +147,7 @@ const module: Module = {
       isAuthenticated(true, 'airlink.admin.settings.update'),
       async (req, res, next) => {
         try {
-          await apiPost(req, '/api/v2/admin/settings/smtp', req.body);
+          await apiPatch(req, '/api/v2/admin/settings/smtp', req.body);
           res.status(200).json({ success: true });
         } catch (err) {
           next(err);
@@ -159,7 +183,7 @@ const module: Module = {
       isAuthenticated(true, 'airlink.admin.settings.update'),
       async (req, res, next) => {
         try {
-          await apiPost(req, '/api/v2/admin/settings/s3', req.body);
+          await apiPatch(req, '/api/v2/admin/settings/s3', req.body);
           res.status(200).json({ success: true });
         } catch (err) {
           next(err);

@@ -1,4 +1,4 @@
-<%- include('../../layouts/user', { title: 'Account' }) %>
+<%- include('../layouts/user', { title: 'Account' }) %>
 
 <div class="px-4 sm:px-6 lg:px-8 pt-4">
   <div class="flex items-start justify-between gap-4">
@@ -44,7 +44,7 @@
 
       <!-- Username -->
       <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('username') %></h3>
+        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><label for="username"><%= t('username') %></label></h3>
         <form id="usernameForm">
           <div class="al-form-field">
             <input type="text" id="username" name="username" value="<%= account.username %>"
@@ -56,7 +56,7 @@
 
       <!-- Email -->
       <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('email') %></h3>
+        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><label for="email"><%= t('email') %></label></h3>
         <form id="emailForm">
           <div class="al-form-field">
             <input type="email" id="email" name="email" value="<%= account.email %>"
@@ -68,7 +68,7 @@
 
       <!-- Description -->
       <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('description') %></h3>
+        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><label for="description"><%= t('description') %></label></h3>
         <form id="descriptionForm">
           <div class="al-form-field">
             <textarea id="description" name="description" class="al-form-textarea" rows="3"
@@ -80,7 +80,7 @@
 
       <!-- Preferred Node -->
       <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('preferredNode') %></h3>
+        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><label for="preferredNodeId"><%= t('preferredNode') %></label></h3>
         <form id="preferredNodeForm">
           <div class="al-form-field">
             <select id="preferredNodeId" name="preferredNodeId" class="al-form-select">
@@ -93,7 +93,7 @@
 
       <!-- Language -->
       <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('language') %></h3>
+        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><label for="language"><%= t('language') %></label></h3>
         <form id="languageForm">
           <div class="al-form-field">
             <select id="language" name="language" class="al-form-select">
@@ -121,11 +121,11 @@
         <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('changePassword') %></h3>
         <form id="passwordForm">
           <div class="al-form-field">
-            <label class="al-form-label"><%= t('currentPassword') %></label>
+            <label class="al-form-label" for="currentPassword"><%= t('currentPassword') %></label>
             <input type="password" id="currentPassword" name="currentPassword" class="al-form-input" required>
           </div>
           <div class="al-form-field mt-3">
-            <label class="al-form-label"><%= t('newPassword') %></label>
+            <label class="al-form-label" for="newPassword"><%= t('newPassword') %></label>
             <input type="password" id="newPassword" name="newPassword" class="al-form-input" minlength="8" required>
           </div>
           <button type="submit" class="al-btn al-btn-primary text-[12px] mt-3"><%= t('changePassword') %></button>
@@ -152,7 +152,7 @@
           <p class="text-[12px] mb-2" style="color:var(--theme-text-muted)">Scan this QR code with your authenticator app:</p>
           <div id="qr-container" class="inline-block p-2 rounded-xl" style="background:white"></div>
           <div class="al-form-field mt-3">
-            <label class="al-form-label">Verification Code</label>
+            <label class="al-form-label" for="totpCode">Verification Code</label>
             <input type="text" id="totpCode" class="al-form-input" maxlength="6" pattern="[0-9]{6}" placeholder="000000">
           </div>
           <button type="button" onclick="verify2FA()" class="al-btn al-btn-primary text-[12px] mt-2">Verify & Enable</button>
@@ -198,7 +198,7 @@
     </div>
 
     <% if (!Array.isArray(images) || images.length === 0) { %>
-      <%- include('../../partials/empty-state', {
+      <%- include('../partials/empty-state', {
         iconName: 'box',
         title: t('noImagesYet'),
         description: t('submitYourFirstImage')
@@ -268,7 +268,7 @@
     </div>
 
     <% if (!Array.isArray(folders) || folders.length === 0) { %>
-      <%- include('../../partials/empty-state', {
+      <%- include('../partials/empty-state', {
         iconName: 'folder',
         title: t('noFolders'),
         description: t('createFoldersToOrganize')
@@ -543,4 +543,4 @@
 })();
 </script>
 
-<%- include('../../layouts/user-footer') %>
+<%- include('../layouts/user-footer') %>

@@ -1,0 +1,21 @@
+<!--
+  Fragment: shared-error-banner
+  Used by: admin/users/delete, and other mutation error routes
+  Target: #<%= targetId %>-error (or nearest error region)
+  Swap: outerHTML
+-->
+<div id="<%= targetId %>-error" class="al-card p-4 border-red-500/20" role="alert" aria-live="assertive"
+     style="background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.2);">
+  <div class="flex items-start gap-3">
+    <%- icon('alert-circle', { class: 'h-5 w-5 shrink-0 mt-0.5', style: 'color:var(--theme-danger)' }) %>
+    <div class="flex-1">
+      <p class="text-sm" style="color:var(--theme-text-strong);"><%= message %></p>
+      <% if (typeof hint !== 'undefined' && hint) { %>
+        <p class="text-xs mt-1" style="color:var(--theme-text-muted);"><%= hint %></p>
+      <% } %>
+    </div>
+    <button type="button" class="al-btn-ghost p-1 shrink-0" onclick="this.parentElement.parentElement.remove()" aria-label="Dismiss">
+      <%- icon('x', { class: 'h-4 w-4', strokeWidth: 1.5 }) %>
+    </button>
+  </div>
+</div>

@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       var res = await fetch('/api/v2/admin/images/' + id + '/reject', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
         body: JSON.stringify({ reason: reason }),
       });
       var data = await res.json();
@@ -417,7 +417,7 @@ function imageManager() {
           btn.disabled = true; btn.classList.add('opacity-60');
           try {
             var r = await fetch('/api/v2/admin/images/import-url', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: url }),
+              method: 'POST', headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken }, body: JSON.stringify({ url: url }),
             });
             var d = await r.json();
             if (r.ok && d.success) {

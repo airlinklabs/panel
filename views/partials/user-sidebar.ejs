@@ -8,10 +8,10 @@
         <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="<%= t('logoAlt') %>"
           class="logo-bg p-1 h-[34px] w-[34px] rounded-xl mr-2.5 shrink-0 inline-flex"
           style="background:var(--theme-logo-bg);">
-        <h1 class="sidebar-label font-medium tracking-tight text-[15px] truncate min-w-0"
+        <div class="sidebar-label font-medium tracking-tight text-[15px] truncate min-w-0"
           style="color:var(--theme-text-strong);">
           <%= settings.title || 'Airlink' %>
-        </h1>
+        </div>
       </a>
     </div>
 

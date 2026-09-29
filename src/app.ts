@@ -168,6 +168,14 @@ app.use(
   ),
 );
 
+// Monaco editor — file.ejs and the image editor load /monaco/vs/loader.js and
+// configure require.config({ paths: { vs: '/monaco/vs' } }) against this mount.
+// The package ships its AMD build under min/, so serve that as the root.
+app.use(
+  '/monaco',
+  express.static(path.join(__dirname, '../node_modules/monaco-editor/min')),
+);
+
 // Load views
 const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);

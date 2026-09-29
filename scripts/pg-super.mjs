@@ -11,8 +11,8 @@
  * The sudo password is cached in memory after first successful use.
  */
 
-import { execSync } from "node:child_process";
-import { sudo } from "./ui.mjs";
+import { execSync } from 'node:child_process';
+import { sudo } from './ui.mjs';
 
 // ── State ────────────────────────────────────────────────────────────────────
 
@@ -23,9 +23,9 @@ let _method   = null; // "nopasswd" | "sudo" | null
 
 function _testNopasswd() {
   try {
-    execSync("sudo -n -u postgres psql -c 'SELECT 1'", {
-      encoding: "utf-8",
-      stdio: "pipe",
+    execSync('sudo -n -u postgres psql -c \'SELECT 1\'', {
+      encoding: 'utf-8',
+      stdio: 'pipe',
       timeout: 5_000,
     });
     return true;
@@ -37,8 +37,8 @@ function _testNopasswd() {
 function _verifySudoPassword(pw) {
   try {
     execSync(`echo "${pw}" | sudo -S -u postgres psql -c 'SELECT 1'`, {
-      encoding: "utf-8",
-      stdio: "pipe",
+      encoding: 'utf-8',
+      stdio: 'pipe',
       timeout: 5_000,
     });
     return true;
@@ -54,46 +54,46 @@ function _verifySudoPassword(pw) {
  * @returns {Promise<"nopasswd"|"sudo">}
  */
 export async function detectMethod() {
-  if (_method) return _method;
+  if (_method) {return _method;}
 
   // Already have a password from the env or a previous call
   if (_password) {
     if (_verifySudoPassword(_password)) {
-      _method = "sudo";
+      _method = 'sudo';
       return _method;
     }
     throw new Error(
-      "SUDO_PASSWORD env var is set but sudo verification failed.",
+      'SUDO_PASSWORD env var is set but sudo verification failed.',
     );
   }
 
   // Try passwordless sudo first
   if (_testNopasswd()) {
-    _method = "nopasswd";
+    _method = 'nopasswd';
     return _method;
   }
 
   // Need to ask the user interactively
   if (!process.stdout.isTTY) {
     throw new Error(
-      "Cannot access postgres superuser non-interactively.\n" +
-        "Configure NOPASSWD sudo or set the SUDO_PASSWORD environment variable.",
+      'Cannot access postgres superuser non-interactively.\n' +
+        'Configure NOPASSWD sudo or set the SUDO_PASSWORD environment variable.',
     );
   }
 
   let attempts = 0;
   while (attempts < 3) {
     const pw = await sudo(
-      "Running PostgreSQL commands requires superuser (postgres) access.",
+      'Running PostgreSQL commands requires superuser (postgres) access.',
     );
 
     if (!pw) {
-      throw new Error("No sudo password provided.");
+      throw new Error('No sudo password provided.');
     }
 
     if (_verifySudoPassword(pw)) {
       _password = pw;
-      _method   = "sudo";
+      _method   = 'sudo';
       return _method;
     }
 
@@ -106,18 +106,18 @@ export async function detectMethod() {
   }
 
   throw new Error(
-    "Sudo password verification failed after 3 attempts.\n" +
-      "Configure NOPASSWD sudo:\n" +
-      "  sudo visudo -f /etc/sudoers.d/postgres\n" +
-      "  <username> ALL=(postgres) NOPASSWD: /usr/bin/psql, /usr/bin/pg_dump",
+    'Sudo password verification failed after 3 attempts.\n' +
+      'Configure NOPASSWD sudo:\n' +
+      '  sudo visudo -f /etc/sudoers.d/postgres\n' +
+      '  <username> ALL=(postgres) NOPASSWD: /usr/bin/psql, /usr/bin/pg_dump',
   );
 }
 
 // ── SQL execution helpers ─────────────────────────────────────────────────────
 
 function _buildCmd(sql, dbName) {
-  const dbFlag = dbName ? `-d "${dbName}" ` : "";
-  if (_method === "nopasswd") {
+  const dbFlag = dbName ? `-d "${dbName}" ` : '';
+  if (_method === 'nopasswd') {
     return `sudo -n -u postgres psql ${dbFlag}-c "${sql}"`;
   }
   return `echo "${_password}" | sudo -S -u postgres psql ${dbFlag}-c "${sql}"`;
@@ -133,8 +133,8 @@ export async function runAsSuper(sql) {
   await detectMethod();
   try {
     const output = execSync(_buildCmd(sql), {
-      encoding: "utf-8",
-      stdio: "pipe",
+      encoding: 'utf-8',
+      stdio: 'pipe',
       timeout: 30_000,
     });
     return { ok: true, output };
@@ -154,8 +154,8 @@ export async function runAsSuperDb(sql, dbName) {
   await detectMethod();
   try {
     const output = execSync(_buildCmd(sql, dbName), {
-      encoding: "utf-8",
-      stdio: "pipe",
+      encoding: 'utf-8',
+      stdio: 'pipe',
       timeout: 30_000,
     });
     return { ok: true, output };
@@ -173,14 +173,14 @@ export async function runAsSuperDb(sql, dbName) {
 export async function runShellAsSuper(cmd) {
   await detectMethod();
   const full =
-    _method === "nopasswd"
+    _method === 'nopasswd'
       ? `sudo -n -u postgres ${cmd}`
       : `echo "${_password}" | sudo -S -u postgres ${cmd}`;
 
   try {
     const output = execSync(full, {
-      encoding: "utf-8",
-      stdio: "pipe",
+      encoding: 'utf-8',
+      stdio: 'pipe',
       timeout: 30_000,
     });
     return { ok: true, output };
@@ -200,14 +200,14 @@ export async function runShellAsSuper(cmd) {
  */
 export async function dropRoleCleanly(roleName) {
   const dbs = await runAsSuper(
-    "SELECT datname FROM pg_database WHERE datname NOT IN ('template0')",
+    'SELECT datname FROM pg_database WHERE datname NOT IN (\'template0\')',
   );
-  if (!dbs.ok) return dbs;
+  if (!dbs.ok) {return dbs;}
 
   const dbNames = dbs.output
-    .split("\n")
+    .split('\n')
     .map((l) => l.trim())
-    .filter((l) => l && !l.startsWith("datname") && !l.startsWith("---") && !l.startsWith("("));
+    .filter((l) => l && !l.startsWith('datname') && !l.startsWith('---') && !l.startsWith('('));
 
   for (const db of dbNames) {
     await runAsSuperDb(`REASSIGN OWNED BY ${roleName} TO postgres`,                                db);

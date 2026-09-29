@@ -35,7 +35,7 @@ import {
   DaemonNodeNotFoundError,
 } from '../../../services/daemonService';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // ---------------------------------------------------------------------------
 // GET /api/v2/servers/:id/schedules — List schedules
