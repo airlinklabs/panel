@@ -13,6 +13,7 @@
 import { Router } from 'express';
 import prisma from '../../../db';
 import { parseBody } from '../../../utils/validation';
+import type { Prisma } from '../../../generated/prisma/client';
 import {
   jsonOk,
   jsonError,
@@ -30,10 +31,9 @@ import {
   updateScheduleBody,
   createScheduleTaskBody,
 } from './dto';
-import {
-  daemonRequest,
-  DaemonNodeNotFoundError,
-} from '../../../services/daemonService';
+import { runSchedule } from '../../../handlers/schedulerWorker';
+import { nextRunFromCron } from '../../../utils/cron';
+import logger from '../../../handlers/logger';
 
 const router = Router({ mergeParams: true });
 
@@ -88,7 +88,7 @@ router.post('/', parseBody(createScheduleBody), async (req, res) => {
     name: string;
     cron: string;
     enabled?: boolean;
-    action: string;
+    action?: string;
     payload?: string;
     timeOffset?: number;
   };
@@ -99,40 +99,52 @@ router.post('/', parseBody(createScheduleBody), async (req, res) => {
     return jsonError(res, 'BAD_REQUEST', 'Invalid cron expression', 400);
   }
 
-  // Validate payload for power action
-  if (data.action === 'power' && data.payload) {
+  // Parse the optional initial-task payload. The scheduler stores payloads as
+  // JSON objects (the task rows the UI creates carry objects too), so a
+  // stringified payload must be parsed here — storing the raw string would
+  // make the worker read it as `{}` and silently drop the action.
+  let taskPayload: unknown = {};
+  if (data.payload) {
     try {
-      const parsed = JSON.parse(data.payload);
-      const validActions = ['start', 'stop', 'restart', 'kill'];
-      if (!parsed.action || !validActions.includes(parsed.action)) {
-        return jsonError(
-          res,
-          'BAD_REQUEST',
-          'Power payload must include a valid action',
-          400,
-        );
-      }
+      taskPayload = JSON.parse(data.payload);
     } catch {
-      return jsonError(res, 'BAD_REQUEST', 'Invalid power payload JSON', 400);
+      return jsonError(res, 'BAD_REQUEST', 'Invalid task payload JSON', 400);
     }
   }
 
-  const schedule = await prisma.schedule.create({
-    data: {
-      serverId: resolved.server.UUID,
-      name: data.name,
-      cron: data.cron,
-      enabled: data.enabled ?? false,
-      timeOffset: data.timeOffset ?? 0,
-      tasks: {
-        create: {
-          action: data.action,
-          payload: data.payload ?? {},
-          order: 0,
-          timeOffset: data.timeOffset ?? 0,
-        },
+  if (data.action === 'power') {
+    const parsed = taskPayload as { action?: string } | null;
+    const validActions = ['start', 'stop', 'restart', 'kill'];
+    if (!parsed?.action || !validActions.includes(parsed.action)) {
+      return jsonError(
+        res,
+        'BAD_REQUEST',
+        'Power payload must include a valid action',
+        400,
+      );
+    }
+  }
+
+  const data2: Prisma.ScheduleUncheckedCreateInput = {
+    serverId: resolved.server.UUID,
+    name: data.name,
+    cron: data.cron,
+    enabled: data.enabled ?? false,
+    timeOffset: data.timeOffset ?? 0,
+  };
+  if (data.action) {
+    data2.tasks = {
+      create: {
+        action: data.action,
+        payload: taskPayload as Prisma.InputJsonValue,
+        order: 0,
+        timeOffset: data.timeOffset ?? 0,
       },
-    },
+    };
+  }
+
+  const schedule = await prisma.schedule.create({
+    data: data2,
     include: { tasks: true },
   });
 
@@ -336,33 +348,42 @@ router.post('/:scheduleId/run', async (req, res) => {
   const scheduleId = parseInt(String(req.params.scheduleId), 10);
   const schedule = await prisma.schedule.findUnique({
     where: { id: scheduleId },
-    include: { tasks: { orderBy: { order: 'asc' } } },
+    include: {
+      tasks: { orderBy: { order: 'asc' } },
+      server: { include: { node: true, image: true } },
+    },
   });
   if (!schedule || schedule.serverId !== resolved.server.UUID) {
     return jsonError(res, 'NOT_FOUND', 'Schedule not found', 404);
   }
+  if (schedule.tasks.length === 0) {
+    return jsonError(
+      res,
+      'BAD_REQUEST',
+      'This schedule has no tasks. Add a task first.',
+      400,
+    );
+  }
 
   try {
-    const response = await daemonRequest(
-      resolved.server.UUID,
-      `/servers/${resolved.server.UUID}/schedules/${scheduleId}/run`,
-      { method: 'POST', body: { tasks: schedule.tasks }, timeout: 30000 },
-    );
-
-    if (!response.ok) {
-      const text = await response.text().catch(() => 'Daemon error');
+    // Execute the schedule in-process through the same worker the cron
+    // scheduler uses — the daemon has no schedule endpoints.
+    const result = await runSchedule(schedule);
+    if (!result.ok) {
       return jsonError(
         res,
-        'DAEMON_ERROR',
-        `Failed to run schedule: ${text}`,
+        'SCHEDULE_TASK_FAILED',
+        `One or more schedule tasks failed: ${result.errors.join('; ')}`,
         502,
       );
     }
 
-    // Update lastRunAt
     await prisma.schedule.update({
       where: { id: scheduleId },
-      data: { lastRunAt: new Date() },
+      data: {
+        lastRunAt: new Date(),
+        nextRunAt: nextRunFromCron(schedule.cron, schedule.timeOffset || 0),
+      },
     });
 
     logActivity(
@@ -375,10 +396,8 @@ router.post('/:scheduleId/run', async (req, res) => {
 
     jsonOk(res, { scheduleId, status: 'running' });
   } catch (err) {
-    if (err instanceof DaemonNodeNotFoundError) {
-      return jsonError(res, 'NOT_FOUND', 'Node not found', 404);
-    }
-    jsonError(res, 'DAEMON_UNREACHABLE', 'Could not reach daemon', 502);
+    logger.error('Failed to run schedule:', err);
+    jsonError(res, 'SCHEDULE_RUN_FAILED', 'Could not run schedule', 500);
   }
 });
 

@@ -64,21 +64,24 @@
         <div class="al-card p-4 mb-3 flex flex-col sm:flex-row sm:items-center gap-3" data-backup-id="<%= backup.UUID %>">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1">
-              <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= backup.Name %></p>
-              <% if (backup.isLocked) { %>
+              <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= backup.name %></p>
+              <% if (backup.locked) { %>
                 <%- icon('lock', { class: 'w-3.5 h-3.5', style: 'color:var(--theme-warning);' }) %>
               <% } %>
             </div>
             <p class="text-xs" style="color:var(--theme-text-muted);">
               <%= backup.createdAt ? new Date(backup.createdAt).toLocaleString() : '' %>
-              <% if (backup.bytes) { %> · <%= (backup.bytes / 1024 / 1024).toFixed(1) %> MB<% } %>
+              <% if (backup.size) { %> · <%= (Number(backup.size) / 1024 / 1024).toFixed(1) %> MB<% } %>
             </p>
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <button type="button" class="lock-btn al-btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium" data-backup-id="<%= backup.UUID %>" data-locked="<%= backup.isLocked %>">
-              <%- icon(backup.isLocked ? 'unlock' : 'lock', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
-              <%= backup.isLocked ? t('unlock') : t('lock') %>
+            <button type="button" class="lock-btn al-btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium" data-backup-id="<%= backup.UUID %>" data-locked="<%= backup.locked %>">
+              <%- icon(backup.locked ? 'unlock' : 'lock', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
+              <%= backup.locked ? t('unlock') : t('lock') %>
             </button>
+            <a href="/server/<%= server.UUID %>/backups/<%= backup.UUID %>/download" class="al-btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium inline-flex items-center gap-1">
+              <%- icon('download', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %> <%= t('download') || 'Download' %>
+            </a>
             <button type="button" class="restore-btn al-btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium" data-backup-id="<%= backup.UUID %>">
               <%- icon('rotate-ccw', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %> <%= t('restore') %>
             </button>

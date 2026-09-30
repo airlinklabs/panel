@@ -125,7 +125,8 @@ export type UnzipBody = z.infer<typeof unzipBody>;
 // ---------------------------------------------------------------------------
 
 export const createDatabaseBody = z.object({
-  hostId: z.number().int().positive(),
+  // The host picker submits the <select>'s string value.
+  hostId: z.coerce.number().int().positive(),
 });
 export type CreateDatabaseBody = z.infer<typeof createDatabaseBody>;
 
@@ -134,7 +135,9 @@ export type CreateDatabaseBody = z.infer<typeof createDatabaseBody>;
 // ---------------------------------------------------------------------------
 
 export const createBackupBody = z.object({
-  name: z.string().min(1).max(100),
+  // Optional — the UI's one-click "Create backup" sends no name, so the
+  // handler stamps a timestamped default.
+  name: z.string().min(1).max(100).optional(),
 });
 export type CreateBackupBody = z.infer<typeof createBackupBody>;
 
@@ -148,7 +151,9 @@ export const createScheduleBody = z.object({
   name: z.string().min(1).max(100),
   cron: z.string().min(1).max(100),
   enabled: z.boolean().optional().default(false),
-  action: z.enum(SCHEDULE_ACTIONS),
+  // Optional: the UI creates a bare schedule and attaches tasks afterwards,
+  // so the initial task only rides along for direct API clients.
+  action: z.enum(SCHEDULE_ACTIONS).optional(),
   payload: z.string().max(8192).optional(),
   timeOffset: z.number().int().min(0).optional().default(0),
 });
@@ -322,11 +327,15 @@ export const adminCreateUserBody = z.object({
     .optional()
     .default('user'),
   isAdmin: z.boolean().optional().default(false),
-  serverLimit: z.number().int().min(0).optional(),
-  maxMemory: z.number().int().min(0).optional(),
-  maxCpu: z.number().int().min(0).optional(),
-  maxStorage: z.number().int().min(0).optional(),
-  maxDatabases: z.number().int().min(0).optional(),
+  // The create form sends `null` for untouched limit fields — that means
+  // "inherit the global default", which the DB columns (nullable) and the
+  // runtime limit checks both treat as unset. `.optional()` alone rejects
+  // `null`, so these must be `.nullish()`.
+  serverLimit: z.number().int().min(0).nullish(),
+  maxMemory: z.number().int().min(0).nullish(),
+  maxCpu: z.number().int().min(0).nullish(),
+  maxStorage: z.number().int().min(0).nullish(),
+  maxDatabases: z.number().int().min(0).nullish(),
 });
 export type AdminCreateUserBody = z.infer<typeof adminCreateUserBody>;
 
@@ -341,11 +350,12 @@ export const adminUpdateUserBody = z.object({
   password: z.string().min(8).max(128).optional(),
   role: z.enum(['owner', 'admin', 'privileged', 'user']).optional(),
   isAdmin: z.boolean().optional(),
-  serverLimit: z.number().int().min(0).optional(),
-  maxMemory: z.number().int().min(0).optional(),
-  maxCpu: z.number().int().min(0).optional(),
-  maxStorage: z.number().int().min(0).optional(),
-  maxDatabases: z.number().int().min(0).optional(),
+  // `null` clears the override back to the global default (see create body).
+  serverLimit: z.number().int().min(0).nullish(),
+  maxMemory: z.number().int().min(0).nullish(),
+  maxCpu: z.number().int().min(0).nullish(),
+  maxStorage: z.number().int().min(0).nullish(),
+  maxDatabases: z.number().int().min(0).nullish(),
 });
 export type AdminUpdateUserBody = z.infer<typeof adminUpdateUserBody>;
 

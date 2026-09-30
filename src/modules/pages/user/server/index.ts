@@ -341,18 +341,19 @@ const module: Module = {
       },
     );
 
-    // Backup download
+    // Backup download — v2 answers with a one-time daemon token URL, so hand
+    // the browser a redirect instead of JSON (same contract as file download).
     router.get(
       '/server/:id/backups/:backupId/download',
       isAuthenticatedForServer('id'),
       requireSubUserPermission('backups'),
       async (req, res, next) => {
         try {
-          const data = await apiGet(
+          const data = (await apiGet(
             req,
             `/servers/${req.params.id}/backups/${req.params.backupId}/download`,
-          );
-          res.json(data);
+          )) as { url?: string };
+          res.redirect(data.url || '/');
         } catch (err) {
           next(err);
         }

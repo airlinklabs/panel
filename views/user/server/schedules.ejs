@@ -262,7 +262,7 @@
         body: JSON.stringify({ name: name, cron: cron })
       });
       var result = await response.json().catch(function() { return {}; });
-      if (response.ok && result.success !== false && result.schedule) {
+      if (response.ok && result.success !== false) {
         showToast(t.scheduleCreated || 'Schedule created.', 'success');
         closeModal();
         window.location.reload();

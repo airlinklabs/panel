@@ -199,7 +199,7 @@
         body: JSON.stringify({ hostId: hostId })
       });
       var result = await response.json().catch(function() { return {}; });
-      if (response.ok && result.success !== false && result.database) {
+      if (response.ok && result.success !== false) {
         showToast(t.databaseCreated || 'Database created.', 'success');
         closeModal();
         window.location.reload();

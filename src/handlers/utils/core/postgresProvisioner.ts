@@ -32,6 +32,23 @@ function assertSafePassword(value: string): void {
   }
 }
 
+/**
+ * Deterministic per-server database/role names. The first database for a
+ * server uses the bare prefix; later ones get `_2`, `_3`, … so several rows
+ * can coexist without clobbering each other's role password.
+ */
+export function databaseNamesFor(
+  serverId: string,
+  suffix?: number,
+): { databaseName: string; databaseUser: string } {
+  const hex = serverId.replace(/-/g, '');
+  const tag = suffix && suffix > 1 ? `_${suffix}` : '';
+  return {
+    databaseName: `airlink_${hex.slice(0, DB_NAME_SLICE_LEN)}${tag}`,
+    databaseUser: `al_${hex.slice(0, DB_USER_SLICE_LEN)}${tag}`,
+  };
+}
+
 async function connect(host: DatabaseHost): Promise<pg.PoolClient> {
   // Decrypt password if it was encrypted by the panel, otherwise use as-is (plaintext legacy)
   const password = isEncrypted(host.password)
@@ -79,10 +96,12 @@ async function connect(host: DatabaseHost): Promise<pg.PoolClient> {
 export async function provisionDatabase(
   host: DatabaseHost,
   serverId: string,
+  suffix?: number,
 ): Promise<DatabaseCredentials> {
-  const hex = serverId.replace(/-/g, '');
-  const dbName = `airlink_${hex.slice(0, DB_NAME_SLICE_LEN)}`;
-  const dbUser = `al_${hex.slice(0, DB_USER_SLICE_LEN)}`;
+  const { databaseName: dbName, databaseUser: dbUser } = databaseNamesFor(
+    serverId,
+    suffix,
+  );
   const dbPass = crypto.randomBytes(DB_PASS_RANDOM_BYTES).toString('hex');
 
   assertSafeIdentifier(dbName, 'Database name');

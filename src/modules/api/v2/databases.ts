@@ -23,7 +23,14 @@ import {
   parsePerPage,
 } from './helpers';
 import { createDatabaseBody } from './dto';
-import { daemonRequestByNode } from '../../../services/daemonService';
+import logger from '../../../handlers/logger';
+import { safeClientMessage } from '../../../utils/errors';
+import {
+  databaseNamesFor,
+  deprovisionDatabase,
+  provisionDatabase,
+  rotateDatabasePassword,
+} from '../../../handlers/utils/core/postgresProvisioner';
 
 const router = Router({ mergeParams: true });
 
@@ -94,59 +101,52 @@ router.post('/', parseBody(createDatabaseBody), async (req, res) => {
     return jsonError(res, 'NOT_FOUND', 'Database host not found', 404);
   }
 
-  // Generate database name/user based on server UUID prefix
-  const prefix = resolved.server.UUID.slice(0, 8).replace(/-/g, '');
-  const databaseName = `s${prefix}_db${dbCount + 1}`;
-  const databaseUser = `u${prefix}_u${dbCount + 1}`;
-
-  // Generate random password
-  const crypto = await import('crypto');
-  const databasePassword = crypto.randomBytes(24).toString('base64url');
-
-  // Create database on the host via daemon
-  const nodeId = host.nodeId ?? resolved.server.nodeId;
-  if (nodeId) {
-    try {
-      const response = await daemonRequestByNode(nodeId, '/databases', {
-        method: 'POST',
-        body: {
-          host: host.host,
-          port: host.port,
-          username: host.username,
-          password: host.password,
-          database: databaseName,
-          databaseUser,
-          databasePassword,
-        },
-        timeout: 30000,
-      });
-
-      if (!response.ok) {
-        const text = await response.text().catch(() => 'Daemon error');
-        return jsonError(
-          res,
-          'DAEMON_ERROR',
-          `Failed to create database on host: ${text}`,
-          502,
-        );
-      }
-    } catch {
+  // Pick the lowest free per-server name variant so creating a second
+  // database never resets the first one's role password.
+  const used = new Set(
+    (
+      await prisma.serverDatabase.findMany({
+        where: { serverId: resolved.server.UUID },
+        select: { databaseName: true },
+      })
+    ).map((row) => row.databaseName),
+  );
+  let suffix: number | undefined;
+  for (let n = 1; n <= 100; n += 1) {
+    if (!used.has(databaseNamesFor(resolved.server.UUID, n).databaseName)) {
+      suffix = n > 1 ? n : undefined;
+      break;
+    }
+    if (n === 100) {
       return jsonError(
         res,
-        'DAEMON_UNREACHABLE',
-        'Could not reach daemon for database creation',
-        502,
+        'BAD_REQUEST',
+        'Too many databases for this server',
+        400,
       );
     }
+  }
+
+  // Databases are panel-managed PostgreSQL — provision on the host directly;
+  // the daemon has no role in this.
+  let credentials: Awaited<ReturnType<typeof provisionDatabase>>;
+  try {
+    credentials = await provisionDatabase(host, resolved.server.UUID, suffix);
+  } catch (error: unknown) {
+    logger.error('Failed to provision database:', error);
+    return jsonError(
+      res,
+      'DB_HOST_UNREACHABLE',
+      safeClientMessage(error, 'Failed to connect to the database host.'),
+      502,
+    );
   }
 
   const db = await prisma.serverDatabase.create({
     data: {
       serverId: resolved.server.UUID,
       hostId,
-      databaseName,
-      databaseUser,
-      databasePassword,
+      ...credentials,
     },
     include: {
       host: { select: { id: true, name: true, host: true, port: true } },
@@ -157,7 +157,7 @@ router.post('/', parseBody(createDatabaseBody), async (req, res) => {
     getAuthenticatedUserId(req),
     'database.created',
     resolved.server.UUID,
-    { databaseName, hostName: host.name },
+    { databaseName: db.databaseName, hostName: host.name },
     req.ip,
   );
 
@@ -189,23 +189,13 @@ router.delete('/:dbId', async (req, res) => {
     return jsonError(res, 'NOT_FOUND', 'Database not found', 404);
   }
 
-  // Drop database on the host via daemon
-  const nodeId = db.host.nodeId ?? resolved.server.nodeId;
-  if (nodeId) {
-    try {
-      await daemonRequestByNode(nodeId, `/databases/${db.databaseName}`, {
-        method: 'DELETE',
-        body: {
-          host: db.host.host,
-          port: db.host.port,
-          username: db.host.username,
-          password: db.host.password,
-        },
-        timeout: 30000,
-      });
-    } catch {
-      // Best effort — daemon may be offline
-    }
+  // Drop the database/role on the host. Best effort — a host that's
+  // unreachable still loses the row so the UI stays consistent, matching the
+  // page-route implementation.
+  try {
+    await deprovisionDatabase(db.host, db);
+  } catch (error: unknown) {
+    logger.error('Failed to deprovision database:', error);
   }
 
   await prisma.serverDatabase.delete({ where: { id: dbId } });
@@ -246,47 +236,18 @@ router.post('/:dbId/rotate', async (req, res) => {
     return jsonError(res, 'NOT_FOUND', 'Database not found', 404);
   }
 
-  const crypto = await import('crypto');
-  const newPassword = crypto.randomBytes(24).toString('base64url');
-
-  // Rotate on host via daemon
-  const nodeId = db.host.nodeId ?? resolved.server.nodeId;
-  if (nodeId) {
-    try {
-      const response = await daemonRequestByNode(
-        nodeId,
-        `/databases/${db.databaseName}/rotate`,
-        {
-          method: 'POST',
-          body: {
-            host: db.host.host,
-            port: db.host.port,
-            username: db.host.username,
-            password: db.host.password,
-            databaseUser: db.databaseUser,
-            newPassword,
-          },
-          timeout: 30000,
-        },
-      );
-
-      if (!response.ok) {
-        const text = await response.text().catch(() => 'Daemon error');
-        return jsonError(
-          res,
-          'DAEMON_ERROR',
-          `Failed to rotate password: ${text}`,
-          502,
-        );
-      }
-    } catch {
-      return jsonError(
-        res,
-        'DAEMON_UNREACHABLE',
-        'Could not reach daemon',
-        502,
-      );
-    }
+  // Rotate the role password on the host directly.
+  let newPassword: string;
+  try {
+    newPassword = await rotateDatabasePassword(db.host, db);
+  } catch (error: unknown) {
+    logger.error('Failed to rotate database password:', error);
+    return jsonError(
+      res,
+      'DB_HOST_UNREACHABLE',
+      safeClientMessage(error, 'Failed to connect to the database host.'),
+      502,
+    );
   }
 
   await prisma.serverDatabase.update({

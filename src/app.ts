@@ -382,6 +382,45 @@ app.use((req, res, next) => {
 // Handle CSRF errors
 app.use(handleCsrfError);
 
+// Daemon → panel install-status callback. The daemon reports install and
+// reinstall completion here; it authenticates with its node key as a Bearer
+// token, which is also what exempts the request from CSRF (no cookies).
+app.post('/api/daemon/install/status', async (req, res) => {
+  const auth = req.headers.authorization;
+  const key = auth?.startsWith('Bearer ') ? auth.slice(7) : '';
+  const node = key ? await prisma.node.findFirst({ where: { key } }) : null;
+  if (!node) {
+    res.status(401).json({ error: 'unauthorized' });
+    return;
+  }
+
+  const body = req.body as { id?: unknown; status?: unknown; error?: unknown };
+  const id = typeof body.id === 'string' ? body.id : '';
+  const status = typeof body.status === 'string' ? body.status : '';
+  if (!id || (status !== 'installed' && status !== 'failed')) {
+    res.status(400).json({ error: 'invalid payload' });
+    return;
+  }
+
+  const server = await prisma.server.findUnique({
+    where: { UUID: id },
+    select: { nodeId: true },
+  });
+  if (!server || server.nodeId !== node.id) {
+    res.status(404).json({ error: 'unknown server' });
+    return;
+  }
+
+  await prisma.server.update({
+    where: { UUID: id },
+    data: { Installing: false, Queued: false },
+  });
+  if (status === 'failed') {
+    logger.warn(`Daemon reported failed install for ${id}: ${String(body.error ?? 'unknown error')}`);
+  }
+  res.json({ ok: true });
+});
+
 app.use(async (_req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
