@@ -234,7 +234,9 @@ async function bodyToWire(
   }
 }
 
-function buildDaemonHeaders(
+/** Builds the HMAC v1 signature headers the daemon verifies (exported for
+ * native-Response callers such as services/daemonService). */
+export function buildDaemonHeaders(
   key: string,
   method: string,
   canonicalTarget: string,

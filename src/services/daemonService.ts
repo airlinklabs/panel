@@ -4,7 +4,12 @@
  */
 
 import prisma from '../db';
-import { daemonScheme } from '../handlers/utils/core/daemonRequest';
+import crypto from 'crypto';
+import {
+  buildCanonicalTarget,
+  buildDaemonHeaders,
+  daemonScheme,
+} from '../handlers/utils/core/daemonRequest';
 import { DEFAULT_DAEMON_TIMEOUT_MS } from '../config/timeouts';
 
 interface DaemonRequestOpts {
@@ -39,6 +44,10 @@ async function resolveProtocol(): Promise<string> {
 
 /**
  * Core daemon fetch — makes a request to a specific node.
+ *
+ * Auth must match the daemon's router (checkBasicAuth then verifyHmac):
+ * Basic `Airlink:<key>` plus HMAC v1 signature headers. A plain
+ * `Bearer <key>` Authorization header is rejected with 401.
  */
 async function fetchDaemon(
   node: { address: string; port: number; key: string },
@@ -46,19 +55,29 @@ async function fetchDaemon(
   opts?: DaemonRequestOpts,
 ): Promise<Response> {
   const protocol = await resolveProtocol();
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${node.key}`,
-  };
-  if (opts?.body !== null && opts?.body !== undefined) {
+  const method = (opts?.method ?? 'GET').toUpperCase();
+  const headers: Record<string, string> = {};
+  const isBodyless = method === 'GET' || method === 'HEAD';
+
+  let body: string | undefined;
+  if (!isBodyless && opts?.body !== null && opts?.body !== undefined) {
+    body = JSON.stringify(opts.body);
     headers['Content-Type'] = 'application/json';
+    const digest = crypto.createHash('sha256').update(body, 'utf8').digest('hex');
+    Object.assign(
+      headers,
+      buildDaemonHeaders(node.key, method, path, `digest:${digest}`, digest),
+    );
+  } else {
+    Object.assign(headers, buildDaemonHeaders(node.key, method, path, '', null));
   }
+
+  headers['Authorization'] = `Basic ${Buffer.from(`Airlink:${node.key}`).toString('base64')}`;
+
   return fetch(`${protocol}://${node.address}:${node.port}${path}`, {
-    method: opts?.method ?? 'GET',
+    method,
     headers,
-    body:
-      opts?.body !== null && opts?.body !== undefined
-        ? JSON.stringify(opts.body)
-        : undefined,
+    body,
     signal: AbortSignal.timeout(opts?.timeout ?? DEFAULT_DAEMON_TIMEOUT_MS),
   });
 }

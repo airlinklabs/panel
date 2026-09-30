@@ -21,8 +21,19 @@ async function main() {
   const node =
   (await prisma.node.findFirst({ where: { name: 'Test Node' } })) ??
   (await prisma.node.create({
-    data: { name: 'Test Node', key: 'test-node-key', address: '127.0.0.1' },
+    data: {
+      name: 'Test Node',
+      // Daemon enforces >=16-char keys (HMAC).
+      key: 'local-test-node-key-2026',
+      address: '127.0.0.1',
+    },
   }));
+
+  // Re-apply fixture fields on every run (same rationale as seedFields below).
+  await prisma.node.update({
+    where: { id: node.id },
+    data: { key: 'local-test-node-key-2026', address: '127.0.0.1', port: 3001 },
+  });
 
   const UUID = '11111111-2222-4333-8444-555555555555';
   const seedFields = {
