@@ -1,4 +1,6 @@
-/* ── Pagination ─────────────────────────────────────────────── */
-/* Pagination styles are handled via Tailwind utilities in the template.
-   This file exists as a placeholder for any future bespoke pagination CSS.
-   If no bespoke styles are needed, this file can be removed. */
+@layer components {
+  /* ── Pagination ─────────────────────────────────────────────── */
+  /* Pagination styles are handled via Tailwind utilities in the template.
+     This file exists as a placeholder for any future bespoke pagination CSS.
+     If no bespoke styles are needed, this file can be removed. */
+}

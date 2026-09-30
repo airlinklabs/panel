@@ -1,59 +1,49 @@
-<!-- UI Button component -->
 <%
-// Params: variant ('primary'|'secondary'|'danger'|'ghost'|'link'), size ('sm'|'md'|'lg'), href, type, disabled, class, icon, iconPosition, id
+/* UI Button — the panel's single button.
+   Params: variant ('primary'|'secondary'|'danger'|'danger-outline'|'success'|'ghost'|'link'),
+           size ('sm'|'md'|'lg'), href, type, disabled, cls, icon (svg string),
+           iconPosition ('left'|'right'), id, label|body (raw HTML) */
 const btnVariant = typeof variant !== 'undefined' ? variant : 'primary';
 const btnSize = typeof size !== 'undefined' ? size : 'md';
 const btnDisabled = typeof disabled !== 'undefined' ? disabled : false;
 const btnIconPos = typeof iconPosition !== 'undefined' ? iconPosition : 'left';
-const btnClass = typeof cls !== 'undefined' ? cls : '';
-// `icon` must be a caller-passed SVG string. The parent scope also has an
-// icon() helper function under that name — printing it raw would dump the
-// function source into the page.
+const btnCls = typeof cls !== 'undefined' ? cls : '';
+const btnId = typeof id !== 'undefined' ? id : '';
+const btnLabel = typeof label !== 'undefined' ? label : (typeof body !== 'undefined' ? body : '');
+/* The parent scope also has an icon() helper under that name — printing it
+   raw would dump the function source into the page, so only real markup
+   passes through. */
 const btnIcon = (typeof icon !== 'undefined' && typeof icon === 'string') ? icon : '';
 
-const sizeClasses = {
-  sm: 'px-3 py-1.5 text-xs rounded-lg',
-  md: 'px-4 py-2 text-sm rounded-xl',
-  lg: 'px-5 py-2.5 text-base rounded-xl'
-};
-
+const sizeClasses = { sm: 'al-btn-sm', md: '', lg: 'al-btn-lg' };
 const variantClasses = {
-  primary: 'btn-primary',
-  secondary: 'btn-secondary',
-  danger: 'btn-danger',
-  ghost: 'btn-ghost',
-  link: 'btn-link'
+  primary: 'al-btn-primary',
+  secondary: 'al-btn-secondary',
+  danger: 'al-btn-danger',
+  'danger-outline': 'al-btn-danger-outline',
+  success: 'al-btn-success',
+  ghost: 'al-btn-ghost',
+  link: 'al-btn-link'
 };
 
 const classes = [
   'al-btn',
   variantClasses[btnVariant] || variantClasses.primary,
-  sizeClasses[btnSize] || sizeClasses.md,
+  sizeClasses[btnSize] !== undefined ? sizeClasses[btnSize] : '',
   btnDisabled ? 'al-btn-disabled' : '',
-  btnClass
+  btnCls
 ].filter(Boolean).join(' ');
 %>
 <% if (typeof href !== 'undefined' && href) { %>
-  <a href="<%= href %>" class="<%= classes %>" id="<%= typeof id !== 'undefined' ? id : '' %>"
-    <% if (btnDisabled) { %> aria-disabled="true" tabindex="-1"<% } %>>
-    <% if (btnIcon && btnIconPos === 'left') { %>
-      <%- btnIcon %>
-    <% } %>
-    <span><%- typeof label !== 'undefined' ? label : (typeof body !== 'undefined' ? body : '') %></span>
-    <% if (btnIcon && btnIconPos === 'right') { %>
-      <%- btnIcon %>
-    <% } %>
+  <a href="<%= href %>" class="<%= classes %>"<% if (btnId) { %> id="<%= btnId %>"<% } %><% if (btnDisabled) { %> aria-disabled="true" tabindex="-1"<% } %>>
+    <% if (btnIcon && btnIconPos === 'left') { %><%- btnIcon %><% } %>
+    <span><%- btnLabel %></span>
+    <% if (btnIcon && btnIconPos === 'right') { %><%- btnIcon %><% } %>
   </a>
 <% } else { %>
-  <button type="<%= typeof type !== 'undefined' ? type : 'button' %>" class="<%= classes %>"
-    id="<%= typeof id !== 'undefined' ? id : '' %>"
-    <% if (btnDisabled) { %> disabled<% } %>>
-    <% if (btnIcon && btnIconPos === 'left') { %>
-      <%- btnIcon %>
-    <% } %>
-    <span><%- typeof label !== 'undefined' ? label : (typeof body !== 'undefined' ? body : '') %></span>
-    <% if (btnIcon && btnIconPos === 'right') { %>
-      <%- btnIcon %>
-    <% } %>
+  <button type="<%= typeof type !== 'undefined' ? type : 'button' %>" class="<%= classes %>"<% if (btnId) { %> id="<%= btnId %>"<% } %><% if (btnDisabled) { %> disabled<% } %>>
+    <% if (btnIcon && btnIconPos === 'left') { %><%- btnIcon %><% } %>
+    <span><%- btnLabel %></span>
+    <% if (btnIcon && btnIconPos === 'right') { %><%- btnIcon %><% } %>
   </button>
 <% } %>

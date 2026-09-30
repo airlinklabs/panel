@@ -1,10 +1,12 @@
-/* ── Console responsive ─────────────────────────────────────── */
-#terminal {
-  min-height: 300px;
-  max-height: 60vh;
-}
-@media (max-width: 1023px) {
+@layer components {
+  /* ── Console responsive ─────────────────────────────────────── */
   #terminal {
-    max-height: 45vh;
+    min-height: 300px;
+    max-height: 60vh;
+  }
+  @media (max-width: 1023px) {
+    #terminal {
+      max-height: 45vh;
+    }
   }
 }

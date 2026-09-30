@@ -3,6 +3,7 @@ import logger from './logger';
 import { daemonRequest } from './utils/core/daemonRequest';
 import { queueer } from './queueer';
 import { getPrimaryExternalPort } from './utils/server/ports';
+import { parseDockerImageRef } from '../utils/dockerImage';
 import { emitRealtime, serverEvent } from './realtime/events';
 import { DAEMON_TIMEOUT_REINSTALL_MS } from '../config/daemonTimeouts';
 import { logT } from '../services/i18n';
@@ -74,35 +75,17 @@ export async function processQueuedServerInstalls(): Promise<void> {
       {},
     );
 
-    if (!server.image?.scripts) {
-      emitRealtime(
-        serverEvent('server.install.failed', server.UUID, {
-          operationId: server.UUID,
-          error: { message: 'No install scripts for this image' },
-        }),
+    // An image with no scripts (or an object-form null) still needs its
+    // volume created — the daemon's install runs `initContainer` and treats
+    // an empty script list as a no-op, so dispatch instead of failing.
+    let scripts: Record<string, unknown> = {};
+    if (server.image?.scripts && typeof server.image.scripts === 'object') {
+      scripts = server.image.scripts as Record<string, unknown>;
+    } else if (server.image?.scripts) {
+      logger.error(
+        logT('log.errorParsingScripts', { id: server.id }),
+        new Error('image scripts is not an object'),
       );
-      await prisma.server.update({
-        where: { id: server.id },
-        data: { Queued: false },
-      });
-      continue;
-    }
-
-    let scripts: Record<string, unknown>;
-    try {
-      scripts = (
-        typeof server.image.scripts === 'object' &&
-        server.image.scripts !== null
-          ? server.image.scripts
-          : {}
-      ) as Record<string, unknown>;
-    } catch (err) {
-      logger.error(logT('log.errorParsingScripts', { id: server.id }), err);
-      await prisma.server.update({
-        where: { id: server.id },
-        data: { Queued: false },
-      });
-      continue;
     }
 
     try {
@@ -127,19 +110,11 @@ export async function processQueuedServerInstalls(): Promise<void> {
           },
           timeout: DAEMON_TIMEOUT_REINSTALL_MS,
         });
-      } else if (Array.isArray(scripts.install)) {
-        let dockerImageValue: string | undefined;
-        try {
-          const parsed =
-            server.dockerImage && typeof server.dockerImage === 'object'
-              ? server.dockerImage
-              : {};
-          dockerImageValue = Object.values(
-            parsed as Record<string, unknown>,
-          )[0] as string | undefined;
-        } catch {
-          /* leave undefined */
-        }
+      } else {
+        const installArray = Array.isArray(scripts.install)
+          ? (scripts.install as Record<string, unknown>[])
+          : [];
+        const dockerImageValue = parseDockerImageRef(server.dockerImage);
 
         await daemonRequest({
           nodeAddress: server.node.address,
@@ -151,7 +126,7 @@ export async function processQueuedServerInstalls(): Promise<void> {
             id: server.UUID,
             image: dockerImageValue,
             env,
-            scripts: (scripts.install as Record<string, unknown>[]).map(
+            scripts: installArray.map(
               (s) => ({
                 url: s.url as string,
                 onStartup: s.onStart,

@@ -1,0 +1,38 @@
+/* Form card — the surface for a grouping of form fields (servers create/edit,
+   node forms). It is `.al-card` with one deliberate difference: the card never
+   clips its own contents, because `.cs-dropdown` (the custom-select menu)
+   opens downward from inside the card and would otherwise be cut off.
+
+   Anatomy is identical to `.al-card` — optional `.al-card-header`, then the
+   content wrapped in `.al-card-body` — so the header keeps its full-bleed
+   negative margins and rounds its own top corners. */
+@layer components {
+  .al-form-card {
+    --al-card-pad: 1.25rem;
+    padding: var(--al-card-pad);
+    border-radius: 0.75rem;
+    background: var(--theme-bg-card);
+    border: 1px solid var(--theme-border);
+    box-shadow: var(--theme-shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+    overflow: visible;
+  }
+
+  /* The header bleeds to the card edges, so it owns the rounded corners
+     once the card itself stops clipping. */
+  .al-form-card > .al-card-header {
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  /* Group heading inside a form card: label + optional description. */
+  .al-form-card-title {
+    @apply text-sm font-semibold;
+    color: var(--theme-text-strong);
+  }
+
+  .al-form-card-desc {
+    @apply text-xs mt-0.5;
+    color: var(--theme-text-muted);
+  }
+}

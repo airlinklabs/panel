@@ -1,123 +1,118 @@
-<%- include('../../layouts/admin', { title: 'Node Stats' }) %>
+<%- include('../../layouts/admin', { title: t('nodeStatsTitle') }) %>
 
 <%- include('../../partials/flash-messages') %>
 
-<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
-  <ol class="flex items-center text-sm gap-1">
-    <li class="flex items-center">
-      <a href="/admin/nodes" class="transition-colors hover:underline" style="color:var(--theme-text-muted);">Admin</a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <a href="/admin/nodes" class="transition-colors hover:underline" style="color:var(--theme-text-muted);">Nodes</a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <span style="color:var(--theme-text);"><%= node.name %></span>
-    </li>
-  </ol>
-</nav>
-
-<div class="al-page-header mb-6">
-  <div class="flex items-center gap-3">
-    <h1 class="al-page-title"><%= node.name %></h1>
-    <% if (node.status === 'Online') { %>
-      <span class="al-dot-online"></span>
-    <% } else { %>
-      <span class="al-dot-offline"></span>
-    <% } %>
-  </div>
-  <p class="al-page-desc"><%= node.address %>:<%= node.port %><% if (node.versionRelease) { %> &middot; <%= node.versionRelease %><% } %></p>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbNodes'), url: '/admin/nodes' },
+    { label: node.name }
+  ] }) %>
 </div>
 
-<div class="flex flex-wrap gap-2 mb-6">
-  <a href="/admin/nodes" class="al-btn-secondary">
-    <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %> Back
-  </a>
-  <a href="/admin/node/<%= node.id %>" class="al-btn-secondary">
-    <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %> Edit
-  </a>
-</div>
-
-<!-- Resource gauges -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-  <div class="al-card p-4 text-center">
-    <p class="text-sm font-medium mb-1" style="color:var(--theme-text-muted);">RAM</p>
-    <p id="host-ram" class="text-2xl font-semibold" style="color:var(--theme-text-strong)">--</p>
-    <p id="host-ram-detail" class="text-xs mt-1" style="color:var(--theme-text-muted)">--</p>
+<div class="al-page-header">
+  <div class="min-w-0">
+    <div class="flex items-center gap-3">
+      <h1 class="al-page-title"><%= node.name %></h1>
+      <% if (node.status === 'Online') { %>
+        <span class="al-dot-online"></span>
+      <% } else { %>
+        <span class="al-dot-offline"></span>
+      <% } %>
+    </div>
+    <p class="al-page-desc"><%= node.address %>:<%= node.port %><% if (node.versionRelease) { %> &middot; <%= node.versionRelease %><% } %></p>
   </div>
-  <div class="al-card p-4 text-center">
-    <p class="text-sm font-medium mb-1" style="color:var(--theme-text-muted);">CPU</p>
-    <p id="host-cpu" class="text-2xl font-semibold" style="color:var(--theme-text-strong)">--</p>
-    <p id="host-cpu-detail" class="text-xs mt-1" style="color:var(--theme-text-muted)">--</p>
-  </div>
-  <div class="al-card p-4 text-center">
-    <p class="text-sm font-medium mb-1" style="color:var(--theme-text-muted);">Disk</p>
-    <p id="host-disk" class="text-2xl font-semibold" style="color:var(--theme-text-strong)">--</p>
-    <p id="host-disk-detail" class="text-xs mt-1" style="color:var(--theme-text-muted)">--</p>
-  </div>
-  <div class="al-card p-4 text-center">
-    <p class="text-sm font-medium mb-1" style="color:var(--theme-text-muted);">Uptime</p>
-    <p id="host-uptime" class="text-2xl font-semibold" style="color:var(--theme-text-strong)">--</p>
-    <p class="text-xs mt-1" style="color:var(--theme-text-muted)">since boot</p>
+  <div>
+    <a href="/admin/nodes" class="al-btn-secondary">
+      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('back') %>
+    </a>
+    <a href="/admin/node/<%= node.id %>" class="al-btn-secondary">
+      <%- icon('pencil', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('edit') %>
+    </a>
   </div>
 </div>
 
-<!-- Allocation bars -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-  <div class="al-card p-4">
-    <div class="flex justify-between items-center mb-2">
-      <p class="text-sm font-medium" style="color:var(--theme-text-muted);">RAM Allocation</p>
-      <p id="alloc-ram-pct" class="text-sm font-medium" style="color:var(--theme-text-muted)">--</p>
+<div class="al-page-body">
+  <!-- Resource gauges -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="al-card text-center">
+      <p class="al-section-label"><%= t('ram') %></p>
+      <p id="host-ram" class="text-2xl font-semibold al-text-strong">--</p>
+      <p id="host-ram-detail" class="text-xs mt-1 al-text-muted">--</p>
     </div>
-    <div class="w-full h-2 rounded-full" style="background:var(--theme-bg-secondary)">
-      <div id="alloc-ram-bar" class="h-2 rounded-full transition-all duration-500" style="width:0%"></div>
+    <div class="al-card text-center">
+      <p class="al-section-label"><%= t('cpu') %></p>
+      <p id="host-cpu" class="text-2xl font-semibold al-text-strong">--</p>
+      <p id="host-cpu-detail" class="text-xs mt-1 al-text-muted">--</p>
     </div>
-    <p id="alloc-ram-text" class="text-xs mt-1.5" style="color:var(--theme-text-muted)">--</p>
+    <div class="al-card text-center">
+      <p class="al-section-label"><%= t('disk') %></p>
+      <p id="host-disk" class="text-2xl font-semibold al-text-strong">--</p>
+      <p id="host-disk-detail" class="text-xs mt-1 al-text-muted">--</p>
+    </div>
+    <div class="al-card text-center">
+      <p class="al-section-label"><%= t('uptime') %></p>
+      <p id="host-uptime" class="text-2xl font-semibold al-text-strong">--</p>
+      <p class="text-xs mt-1 al-text-muted"><%= t('sinceBoot') %></p>
+    </div>
   </div>
-  <div class="al-card p-4">
-    <div class="flex justify-between items-center mb-2">
-      <p class="text-sm font-medium" style="color:var(--theme-text-muted);">CPU Allocation</p>
-      <p id="alloc-cpu-pct" class="text-sm font-medium" style="color:var(--theme-text-muted)">--</p>
-    </div>
-    <div class="w-full h-2 rounded-full" style="background:var(--theme-bg-secondary)">
-      <div id="alloc-cpu-bar" class="h-2 rounded-full transition-all duration-500" style="width:0%"></div>
-    </div>
-    <p id="alloc-cpu-text" class="text-xs mt-1.5" style="color:var(--theme-text-muted)">--</p>
-  </div>
-  <div class="al-card p-4">
-    <div class="flex justify-between items-center mb-2">
-      <p class="text-sm font-medium" style="color:var(--theme-text-muted);">Disk Allocation</p>
-      <p id="alloc-disk-pct" class="text-sm font-medium" style="color:var(--theme-text-muted)">--</p>
-    </div>
-    <div class="w-full h-2 rounded-full" style="background:var(--theme-bg-secondary)">
-      <div id="alloc-disk-bar" class="h-2 rounded-full transition-all duration-500" style="width:0%"></div>
-    </div>
-    <p id="alloc-disk-text" class="text-xs mt-1.5" style="color:var(--theme-text-muted)">--</p>
-  </div>
-</div>
 
-<!-- Counts -->
-<div class="grid grid-cols-2 gap-4 mb-6">
-  <div class="al-card p-4 text-center">
-    <p class="text-sm font-medium mb-1" style="color:var(--theme-text-muted);">Instances</p>
-    <p id="count-instances" class="text-3xl font-semibold" style="color:var(--theme-text-strong)"><%= node._count ? node._count.servers : '--' %></p>
+  <!-- Allocation bars -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="al-card">
+      <div class="flex justify-between items-center mb-2">
+        <p class="al-section-label mb-0"><%= t('ramAllocation') %></p>
+        <p id="alloc-ram-pct" class="text-sm font-medium al-text-muted">--</p>
+      </div>
+      <div class="al-progress al-progress-success">
+        <div id="alloc-ram-bar" class="al-progress-fill" style="width:0%"></div>
+      </div>
+      <p id="alloc-ram-text" class="text-xs mt-1.5 al-text-muted">--</p>
+    </div>
+    <div class="al-card">
+      <div class="flex justify-between items-center mb-2">
+        <p class="al-section-label mb-0"><%= t('cpuAllocation') %></p>
+        <p id="alloc-cpu-pct" class="text-sm font-medium al-text-muted">--</p>
+      </div>
+      <div class="al-progress al-progress-info">
+        <div id="alloc-cpu-bar" class="al-progress-fill" style="width:0%"></div>
+      </div>
+      <p id="alloc-cpu-text" class="text-xs mt-1.5 al-text-muted">--</p>
+    </div>
+    <div class="al-card">
+      <div class="flex justify-between items-center mb-2">
+        <p class="al-section-label mb-0"><%= t('diskAllocation') %></p>
+        <p id="alloc-disk-pct" class="text-sm font-medium al-text-muted">--</p>
+      </div>
+      <div class="al-progress al-progress-warning">
+        <div id="alloc-disk-bar" class="al-progress-fill" style="width:0%"></div>
+      </div>
+      <p id="alloc-disk-text" class="text-xs mt-1.5 al-text-muted">--</p>
+    </div>
   </div>
-  <div class="al-card p-4 text-center">
-    <p class="text-sm font-medium mb-1" style="color:var(--theme-text-muted);">Allocations</p>
-    <p id="count-alloc" class="text-3xl font-semibold" style="color:var(--theme-text-strong)"><%= node._count ? node._count.allocations : '--' %></p>
-  </div>
-</div>
 
-<!-- Charts -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-  <div class="al-card p-6">
-    <h2 class="text-sm font-medium mb-4" style="color:var(--theme-text-muted);">RAM Usage</h2>
-    <div style="position:relative;height:220px"><canvas id="ramChart"></canvas></div>
+  <!-- Counts -->
+  <div class="grid grid-cols-2 gap-4 mb-6">
+    <div class="al-card text-center">
+      <p class="al-section-label"><%= t('instances') %></p>
+      <p id="count-instances" class="text-3xl font-semibold al-text-strong"><%= node._count ? node._count.servers : '--' %></p>
+    </div>
+    <div class="al-card text-center">
+      <p class="al-section-label"><%= t('allocations') %></p>
+      <p id="count-alloc" class="text-3xl font-semibold al-text-strong"><%= node._count ? node._count.allocations : '--' %></p>
+    </div>
   </div>
-  <div class="al-card p-6">
-    <h2 class="text-sm font-medium mb-4" style="color:var(--theme-text-muted);">CPU Usage</h2>
-    <div style="position:relative;height:220px"><canvas id="cpuChart"></canvas></div>
+
+  <!-- Charts -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="al-card">
+      <h2 class="al-section-label"><%= t('ramUsage') %></h2>
+      <div style="position:relative;height:220px"><canvas id="ramChart"></canvas></div>
+    </div>
+    <div class="al-card">
+      <h2 class="al-section-label"><%= t('cpuUsage') %></h2>
+      <div style="position:relative;height:220px"><canvas id="cpuChart"></canvas></div>
+    </div>
   </div>
 </div>
 
@@ -135,7 +130,7 @@
   data-allocations="<%= node._count ? node._count.allocations : 0 %>"
 ></div>
 
-<script nonce="<%- nonce %>" src="<%= assetUrl('/vendor/chart.js/dist/chart.js') %>"></script>
+<script nonce="<%- nonce %>" src="<%= assetUrl('/vendor/chart.js/dist/chart.umd.min.js') %>"></script>
 <script nonce="<%- nonce %>">
 (function() {
   var pd = document.getElementById('page-data').dataset;
@@ -158,6 +153,26 @@
 
   // Charts
   if (typeof Chart !== 'undefined' && statsData.length > 0) {
+    var themeColors = getComputedStyle(document.documentElement);
+
+    function themeToken(name, fallback) {
+      var v = themeColors.getPropertyValue(name).trim();
+      return v || fallback;
+    }
+
+    // Chart.js cannot parse `color-mix(...)`, so resolve the translucent
+    // fill through a probe element instead of hardcoding a hex.
+    function themeFill(name, fallback) {
+      var probe = document.createElement('div');
+      probe.style.background = 'color-mix(in srgb, var(' + name + ') 12%, transparent)';
+      probe.style.position = 'absolute';
+      probe.style.visibility = 'hidden';
+      document.body.appendChild(probe);
+      var resolved = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      return resolved && resolved !== 'rgba(0, 0, 0, 0)' ? resolved : fallback;
+    }
+
     var labels = statsData.map(function(s, i) { return i; });
     var ramData = statsData.map(function(s) { return s.memory || 0; });
     var cpuData = statsData.map(function(s) { return s.cpu || 0; });
@@ -177,7 +192,12 @@
       type: 'line',
       data: {
         labels: labels,
-        datasets: [{ data: ramData, borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill: true }]
+        datasets: [{
+          data: ramData,
+          borderColor: themeToken('--theme-success', '#22c55e'),
+          backgroundColor: themeFill('--theme-success', 'rgba(34,197,94,0.12)'),
+          fill: true
+        }]
       },
       options: chartOpts
     });
@@ -186,7 +206,12 @@
       type: 'line',
       data: {
         labels: labels,
-        datasets: [{ data: cpuData, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true }]
+        datasets: [{
+          data: cpuData,
+          borderColor: themeToken('--theme-info', '#3b82f6'),
+          backgroundColor: themeFill('--theme-info', 'rgba(59,130,246,0.12)'),
+          fill: true
+        }]
       },
       options: chartOpts
     });

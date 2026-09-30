@@ -1,13 +1,15 @@
-/* ── Top loading line animation ─────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  #al-page-loader {
-    animation: none !important;
-    opacity: 0.6 !important;
-    width: 100% !important;
+@layer components {
+  /* ── Top loading line animation ─────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    #al-page-loader {
+      animation: none !important;
+      opacity: 0.6 !important;
+      width: 100% !important;
+    }
   }
-}
 
-/* ── Refresh spin animation ─────────────────────────────────── */
-.al-refresh-spinning {
-  animation: al-spin 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  /* ── Refresh spin animation ─────────────────────────────────── */
+  .al-refresh-spinning {
+    animation: al-spin 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }

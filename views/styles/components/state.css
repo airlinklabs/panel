@@ -1,16 +1,18 @@
-/* ── al-state: section state panels ─────────────────────────────────── */
-.al-state-panel {
-  @apply flex flex-col items-center justify-center py-12 text-center;
-}
-.al-state-panel[hidden] {
-  display: none;
-}
-.al-state-panel[aria-busy="true"] .al-state-icon {
-  animation: al-spin var(--motion-default, 180ms) linear infinite;
-}
+@layer components {
+  /* ── al-state: section state panels ─────────────────────────────────── */
+  .al-state-panel {
+    @apply flex flex-col items-center justify-center py-12 text-center;
+  }
+  .al-state-panel[hidden] {
+    display: none;
+  }
+  .al-state-panel[aria-busy="true"] .al-state-icon {
+    animation: al-spin var(--motion-default, 180ms) linear infinite;
+  }
 
-/* Section divider label */
-.al-section-label {
-  @apply text-[10px] font-semibold uppercase tracking-widest mb-2;
-  color: var(--theme-text-muted);
+  /* Section divider label */
+  .al-section-label {
+    @apply text-[10px] font-semibold uppercase tracking-widest mb-2;
+    color: var(--theme-text-muted);
+  }
 }

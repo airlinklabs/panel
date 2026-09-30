@@ -1,66 +1,138 @@
-/* Status badge — always shows label alongside color */
-.al-badge-online {
-  @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full;
-  background: var(--theme-success-bg);
-  color: var(--theme-success);
-}
-.al-badge-offline {
-  @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full;
-  background: var(--theme-danger-bg);
-  color: var(--theme-danger);
-}
-.al-badge-warning {
-  @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full;
-  background: var(--theme-warning-bg);
-  color: var(--theme-warning);
-}
-.al-badge-info {
-  @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full;
-  background: var(--theme-info-bg);
-  color: var(--theme-info);
-}
-.al-badge-neutral {
-  @apply inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full;
-  background: var(--theme-badge-neutral-bg, var(--theme-bg-hover));
-  color: var(--theme-badge-neutral-text, var(--theme-text-muted));
-}
+@layer components {
+  /* Badges ─────────────────────────────────────────────────────────────
+     Status, roles and methods share one silhouette: a 12px label on a
+     tinted chip with a hairline ring, square-ish corners (never a pill —
+     pills read as tags, chips read as state). Colour always comes from a
+     semantic token so every theme can recolor the same component. */
 
-/* Status dot (8px, no ping animation — kills the toy look) */
-.al-dot-online {
-  @apply inline-block w-2 h-2 rounded-full shrink-0;
-  background: var(--theme-success);
-}
-.al-dot-offline {
-  @apply inline-block w-2 h-2 rounded-full shrink-0;
-  background: var(--theme-danger);
-}
-.al-dot-warning {
-  @apply inline-block w-2 h-2 rounded-full shrink-0;
-  background: var(--theme-warning);
-}
-
-/* Skeleton */
-.al-skeleton {
-  @apply rounded-lg relative overflow-hidden;
-  background: var(--theme-skeleton-base);
-}
-.al-skeleton::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--theme-skeleton-shine, var(--skeleton-shine)) 50%,
-    transparent 100%
-  );
-  animation: al-skeleton-shimmer 1.5s ease-in-out infinite;
-}
-@keyframes al-skeleton-shimmer {
-  0% {
-    transform: translateX(-100%);
+  .al-badge {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium leading-4;
+    box-shadow: var(--theme-shadow-sm, 0 1px 2px rgb(0 0 0 / 0.05));
+    white-space: nowrap;
   }
-  100% {
-    transform: translateX(100%);
+
+  .al-badge-online {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium leading-4;
+    background: var(--theme-success-bg);
+    color: var(--theme-success);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--theme-success) 25%, transparent);
+  }
+  .al-badge-offline {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium leading-4;
+    background: var(--theme-danger-bg);
+    color: var(--theme-danger);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--theme-danger) 25%, transparent);
+  }
+  .al-badge-warning {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium leading-4;
+    background: var(--theme-warning-bg);
+    color: var(--theme-warning);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--theme-warning) 25%, transparent);
+  }
+  .al-badge-info {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium leading-4;
+    background: var(--theme-info-bg);
+    color: var(--theme-info);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--theme-info) 25%, transparent);
+  }
+  .al-badge-neutral {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium leading-4;
+    background: var(--theme-badge-neutral-bg, var(--theme-bg-hover));
+    color: var(--theme-badge-neutral-text, var(--theme-text-muted));
+    box-shadow: inset 0 0 0 1px var(--theme-border);
+  }
+
+  /* Solid variant — used where the chip must read at a glance (badges in
+     tables, destructive confirmations). */
+  .al-badge-solid {
+    box-shadow: none;
+  }
+
+  /* ── Status dot ─────────────────────────────────────────────────── */
+  /* Live states ping; offline/installed states do not (a pulse on a dead
+     server is a lie). Both keep a solid core so the colour survives with
+     animation disabled. */
+  .al-dot,
+  .al-dot-online,
+  .al-dot-warning,
+  .al-dot-offline,
+  .al-dot-info {
+    @apply relative inline-flex h-2 w-2 shrink-0 rounded-full;
+  }
+  .al-dot::before,
+  .al-dot-online::before,
+  .al-dot-warning::before,
+  .al-dot-offline::before,
+  .al-dot-info::before {
+    content: "";
+    @apply absolute inset-0 rounded-full;
+    background: currentColor;
+    opacity: 0;
+  }
+  .al-dot::after,
+  .al-dot-online::after,
+  .al-dot-warning::after,
+  .al-dot-offline::after,
+  .al-dot-info::after {
+    content: "";
+    @apply absolute inset-0 rounded-full;
+    background: currentColor;
+  }
+  .al-dot {
+    color: var(--theme-text-muted);
+  }
+  .al-dot-online {
+    color: var(--theme-success);
+  }
+  .al-dot-warning {
+    color: var(--theme-warning);
+  }
+  .al-dot-offline {
+    color: var(--theme-danger);
+  }
+  .al-dot-info {
+    color: var(--theme-info);
+  }
+  .al-dot-ping::before {
+    opacity: 0.75;
+    animation: al-dot-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  @keyframes al-dot-ping {
+    75%,
+    100% {
+      transform: scale(2.4);
+      opacity: 0;
+    }
+  }
+  /* Static dots keep a flat look for non-live states. */
+  .al-dot-offline::before,
+  .al-dot-info::before {
+    display: none;
+  }
+
+  /* Skeleton */
+  .al-skeleton {
+    @apply rounded-lg relative overflow-hidden;
+    background: var(--theme-skeleton-base);
+  }
+  .al-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--theme-skeleton-shine, var(--skeleton-shine)) 50%,
+      transparent 100%
+    );
+    animation: al-skeleton-shimmer 1.5s ease-in-out infinite;
+  }
+  @keyframes al-skeleton-shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
 }

@@ -1,4 +1,6 @@
-/* ── SFTP panel ─────────────────────────────────────────────── */
-/* SFTP panel styles are handled via Tailwind utilities in the template.
-   This file exists as a placeholder for any future bespoke SFTP panel CSS.
-   If no bespoke styles are needed, this file can be removed. */
+@layer components {
+  /* ── SFTP panel ─────────────────────────────────────────────── */
+  /* SFTP panel styles are handled via Tailwind utilities in the template.
+     This file exists as a placeholder for any future bespoke SFTP panel CSS.
+     If no bespoke styles are needed, this file can be removed. */
+}

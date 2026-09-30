@@ -1,97 +1,148 @@
 <%- include('../layouts/auth', { title: t('register') }) %>
 
-<div class="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 pt-24 pb-32">
-  <div class="w-full max-w-sm">
-    <div class="text-center mb-8">
-      <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>"
-        alt="<%= t('logoAlt') %>"
-        class="h-16 w-auto mx-auto mb-6"
-        style="background:var(--theme-logo-bg); border-radius: 1.5rem; padding: 0.5rem;">
-      <h1 class="text-2xl font-bold" style="color:var(--theme-text-strong);">
-        <%= t('registerTitle') %>
-      </h1>
-      <p class="text-sm mt-1.5" style="color:var(--theme-text-muted);">
-        <%= t('registerSubtitle') %>
-      </p>
-    </div>
+<div class="al-auth">
+  <div class="al-auth-form">
+    <div class="mx-auto w-full max-w-sm lg:w-96">
+      <div>
+        <img class="al-auth-logo"
+          src="<%= (settings && settings.logo && settings.logo.startsWith('/')) ? settings.logo : '/' + ((settings && settings.logo) || 'favicon.ico') %>"
+          alt="<%= (settings && settings.title) || 'Airlink' %>" width="48" height="48">
+        <h1 class="al-auth-title mt-6"><%= t('registerTitle') %></h1>
+        <p class="al-auth-subtitle"><%= t('registerSubtitle') %></p>
+      </div>
 
-    <% if (req.query.err) { %>
-    <div class="rounded-xl px-4 py-3 mb-5" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger)" role="alert" aria-live="assertive">
-      <p class="text-sm font-medium" style="color:var(--theme-danger)">
-        <% if (req.query.err === 'missing_credentials') { %><%= t('errorAllFieldsRequired') %>
-        <% } else if (req.query.err === 'invalid_username') { %><%= t('errorInvalidUsername') %>
-        <% } else if (req.query.err === 'user_already_exists') { %><%= t('errorUserAlreadyExists') %>
-        <% } else if (req.query.err === 'weak_password') { %><%= t('errorWeakPassword') %>
-        <% } else { %><%= t('errorGeneric') %><% } %>
-      </p>
-    </div>
-    <% } %>
-
-    <form method="POST" action="/register" class="space-y-4">
-      <%- include('../partials/csrf') %>
-
-      <%- include('../partials/ui/form-field', {
-        type: 'text',
-        name: 'username',
-        label: t('fieldUsername'),
-        id: 'register-username',
-        placeholder: t('fieldUsernamePlaceholder'),
-        required: true,
-        autocomplete: 'username'
-      }) %>
-
-      <%- include('../partials/ui/form-field', {
-        type: 'email',
-        name: 'email',
-        label: t('fieldEmail'),
-        id: 'register-email',
-        placeholder: t('fieldEmailPlaceholder'),
-        required: true,
-        autocomplete: 'email'
-      }) %>
-
-      <%- include('../partials/ui/form-field', {
-        type: 'password',
-        name: 'password',
-        label: t('fieldPassword'),
-        id: 'register-password',
-        placeholder: t('fieldPasswordPlaceholder'),
-        required: true,
-        autocomplete: 'new-password'
-      }) %>
-
-      <%- include('../partials/ui/form-field', {
-        type: 'password',
-        name: 'passwordConfirm',
-        label: t('fieldConfirmPassword'),
-        id: 'register-password-confirm',
-        placeholder: t('fieldConfirmPasswordPlaceholder'),
-        required: true,
-        autocomplete: 'new-password'
-      }) %>
-
-      <% if (settings.registerEmailConfirmation) { %>
-        <div class="rounded-xl p-3 text-sm" style="background:var(--theme-bg-secondary); color:var(--theme-text-muted);">
-          <%- icon('mail', { class: 'w-4 h-4 inline-block mr-1.5 -mt-0.5' }) %>
-          <%= t('registerEmailNote') %>
+      <% if (req.query.err) { %>
+      <div class="al-auth-error mt-6" role="alert" aria-live="assertive">
+        <span class="mt-0.5 shrink-0"><%- icon('alert-triangle', { class: 'h-5 w-5', style: 'color:var(--theme-danger)' }) %></span>
+        <div>
+          <p class="al-auth-error-title">
+            <% if (req.query.err === 'missing_credentials') { %><%= t('errorTitleAllFieldsRequired') %>
+            <% } else if (req.query.err === 'invalid_username') { %><%= t('errorTitleInvalidUsername') %>
+            <% } else if (req.query.err === 'user_already_exists') { %><%= t('errorTitleUserAlreadyExists') %>
+            <% } else if (req.query.err === 'weak_password') { %><%= t('errorTitleWeakPassword') %>
+            <% } else if (req.query.err === 'invalid_input') { %><%= t('errorTitleInvalidInput') %>
+            <% } else { %><%= t('errorTitleGeneric') %><% } %>
+          </p>
+          <p class="al-auth-error-body">
+            <% if (req.query.err === 'missing_credentials') { %><%= t('errorAllFieldsRequired') %>
+            <% } else if (req.query.err === 'invalid_username') { %><%= t('errorInvalidUsername') %>
+            <% } else if (req.query.err === 'user_already_exists') { %><%= t('errorUserAlreadyExists') %>
+            <% } else if (req.query.err === 'weak_password') { %><%= t('errorWeakPassword') %>
+            <% } else if (req.query.err === 'invalid_input') { %><%= t('errorInvalidInput') %>
+            <% } else { %><%= t('errorGeneric') %><% } %>
+          </p>
         </div>
+      </div>
       <% } %>
 
-      <%- include('../partials/ui/button', {
-        type: 'submit',
-        label: t('register'),
-        variant: 'primary',
-        cls: 'w-full'
-      }) %>
-    </form>
+      <form method="POST" action="/register" class="mt-8 space-y-6">
+        <%- include('../partials/csrf') %>
 
-    <p class="text-center text-sm mt-6" style="color:var(--theme-text-muted);">
-      <%= t('hasAccount') %>
-      <a href="/login" class="font-medium hover:underline" style="color:var(--theme-primary);">
-        <%= t('login') %>
-      </a>
-    </p>
+        <%- include('../partials/ui/form-field', {
+          type: 'text',
+          name: 'username',
+          label: t('fieldUsername'),
+          id: 'register-username',
+          placeholder: t('fieldUsernamePlaceholder'),
+          required: true,
+          autocomplete: 'username'
+        }) %>
+
+        <%- include('../partials/ui/form-field', {
+          type: 'email',
+          name: 'email',
+          label: t('fieldEmail'),
+          id: 'register-email',
+          placeholder: t('fieldEmailPlaceholder'),
+          required: true,
+          autocomplete: 'email'
+        }) %>
+
+        <div>
+          <%- include('../partials/ui/form-field', {
+            type: 'password',
+            name: 'password',
+            label: t('fieldPassword'),
+            id: 'register-password',
+            placeholder: t('fieldPasswordPlaceholder'),
+            required: true,
+            autocomplete: 'new-password',
+            helpText: t('passwordHelp')
+          }) %>
+          <ul class="al-pw-criteria" id="password-criteria">
+            <li data-met="false" data-criterion="length">
+              <%- icon('circle', { class: 'h-3 w-3 shrink-0', 'aria-hidden': 'true' }) %>
+              <span><%= t('passwordCriteriaLength') %></span>
+            </li>
+            <li data-met="false" data-criterion="letter">
+              <%- icon('circle', { class: 'h-3 w-3 shrink-0', 'aria-hidden': 'true' }) %>
+              <span><%= t('passwordCriteriaLetter') %></span>
+            </li>
+            <li data-met="false" data-criterion="number">
+              <%- icon('circle', { class: 'h-3 w-3 shrink-0', 'aria-hidden': 'true' }) %>
+              <span><%= t('passwordCriteriaNumber') %></span>
+            </li>
+          </ul>
+        </div>
+
+        <%- include('../partials/ui/form-field', {
+          type: 'password',
+          name: 'passwordConfirm',
+          label: t('fieldConfirmPassword'),
+          id: 'register-password-confirm',
+          placeholder: t('fieldConfirmPasswordPlaceholder'),
+          required: true,
+          autocomplete: 'new-password'
+        }) %>
+
+        <% if (settings.registerEmailConfirmation) { %>
+        <p class="al-form-help flex items-start gap-1.5">
+          <%- icon('mail', { class: 'mt-0.5 h-4 w-4 shrink-0', 'aria-hidden': 'true' }) %>
+          <span><%= t('registerEmailNote') %></span>
+        </p>
+        <% } %>
+
+        <%- include('../partials/ui/button', {
+          type: 'submit',
+          label: t('register'),
+          variant: 'primary',
+          size: 'lg',
+          cls: 'w-full'
+        }) %>
+      </form>
+
+      <p class="mt-6 text-sm" style="color:var(--theme-text-muted);">
+        <%= t('hasAccount') %>
+        <a href="/login" class="font-medium hover:underline" style="color:var(--theme-primary); text-underline-offset:3px;">
+          <%= t('login') %>
+        </a>
+      </p>
+    </div>
   </div>
+
+  <%- include('../partials/auth-visual', { wallpaper: settings.registerWallpaper, fallback: '/assets/auth/register.jpg' }) %>
 </div>
+
+<script nonce="<%- nonce %>">
+  (function () {
+    var input = document.getElementById('register-password');
+    var list = document.getElementById('password-criteria');
+    if (!input || !list) { return; }
+    var checks = {
+      length: function (v) { return v.length >= 8; },
+      letter: function (v) { return /[A-Za-z]/.test(v); },
+      number: function (v) { return /\d/.test(v); }
+    };
+    var items = list.querySelectorAll('li');
+    var update = function () {
+      var value = input.value;
+      items.forEach(function (li) {
+        li.dataset.met = checks[li.dataset.criterion](value) ? 'true' : 'false';
+      });
+    };
+    input.addEventListener('input', update);
+    update();
+  })();
+</script>
 
 <%- include('../layouts/auth-footer') %>

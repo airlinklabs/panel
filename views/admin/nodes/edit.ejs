@@ -1,80 +1,72 @@
-<%- include('../../layouts/admin', { title: 'Edit Node' }) %>
+<%- include('../../layouts/admin', { title: t('adminEditNodeTitle') }) %>
 
 <%- include('../../partials/flash-messages') %>
 
-<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
-  <ol class="flex items-center text-sm gap-1">
-    <li class="flex items-center">
-      <a href="/admin/nodes" class="transition-colors hover:underline" style="color:var(--theme-text-muted);">Admin</a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <a href="/admin/nodes" class="transition-colors hover:underline" style="color:var(--theme-text-muted);">Nodes</a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <span style="color:var(--theme-text);"><%= node.name %></span>
-    </li>
-  </ol>
-</nav>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin/overview' },
+    { label: t('breadcrumbNodes'), url: '/admin/nodes' },
+    { label: node.name }
+  ] }) %>
+</div>
 
-<div class="al-page-header flex items-start justify-between gap-4 mb-6">
+<div class="al-page-header">
   <div>
-    <h1 class="al-page-title">Edit Node</h1>
-    <p class="al-page-desc">Update node configuration and resource allocation.</p>
+    <h1 class="al-page-title"><%= t('adminEditNodeTitle') %></h1>
+    <p class="al-page-desc"><%= t('adminEditNodeText') %></p>
   </div>
-  <div class="flex gap-2 shrink-0 items-center">
+  <div>
     <button type="button" onclick="updateNode()" class="al-btn-primary" id="updateNodeBtn">
-      <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %> Save Changes
+      <%- icon('save', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('saveChanges') %>
     </button>
-    <a href="/admin/nodes" class="al-btn-secondary">Back to Nodes</a>
+    <a href="/admin/nodes" class="al-btn-secondary"><%= t('backToNodes') %></a>
   </div>
 </div>
 
 <div id="nodeForm" class="al-page-body space-y-5">
   <form class="space-y-5" onsubmit="event.preventDefault(); updateNode();">
-    <div class="al-card">
-      <h2 class="al-card-header">General</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('general') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label for="nodeName" class="al-label flex items-center gap-1.5">
-            <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %> Name
+            <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('name') %>
           </label>
-          <input id="nodeName" value="<%= node.name %>" class="al-input" placeholder="My node" required>
+          <input id="nodeName" value="<%= node.name %>" class="al-input" placeholder="<%= t('nodeNamePlaceholder') %>" required>
         </div>
         <div>
           <label for="nodeAddress" class="al-label flex items-center gap-1.5">
-            <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %> Address / IP
+            <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('nodeAddressLabel') %>
           </label>
-          <input id="nodeAddress" value="<%= node.address %>" class="al-input" placeholder="localhost" required>
+          <input id="nodeAddress" value="<%= node.address %>" class="al-input" placeholder="<%= t('nodeAddressPlaceholder') %>" required>
         </div>
         <div>
           <label for="nodePort" class="al-label flex items-center gap-1.5">
-            <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %> Daemon Port
+            <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('daemonPort') %>
           </label>
           <input id="nodePort" value="<%= node.port %>" class="al-input" placeholder="3001" type="number" min="1" max="65535" required>
         </div>
         <div>
-          <label for="nodeKey" class="al-label">Daemon Key</label>
-          <input id="nodeKey" value="" class="al-input" placeholder="Use CLI to retrieve key" disabled>
-          <p class="text-xs mt-1" style="color:var(--theme-text-muted)">Key is redacted for security. Use the configure command to retrieve it.</p>
+          <label for="nodeKey" class="al-label"><%= t('daemonKey') %></label>
+          <input id="nodeKey" value="" class="al-input" placeholder="<%= t('useCliToRetrieveKey') %>" disabled>
+          <p class="al-form-help"><%= t('nodeKeyRedactedHint') %></p>
         </div>
       </div>
     </div>
 
-    <div class="al-card">
-      <h2 class="al-card-header">Resource Allocation</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-3 gap-5">
         <div>
           <label for="nodeRam" class="al-label flex items-center gap-1.5">
-            <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %> RAM
+            <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('ram') %>
           </label>
           <% if (node.ram && isNaN(parseFloat(node.ram))) { %>
-            <input id="nodeRam" value="<%= node.ram %>" class="al-input" placeholder="Informational only">
+            <input id="nodeRam" value="<%= node.ram %>" class="al-input" placeholder="<%= t('informationalOnly') %>">
           <% } else { %>
             <input type="hidden" id="nodeRamValue" value="<%= node.ram ? Math.round(node.ram * 1024) : '' %>">
             <div class="flex items-stretch gap-0">
-              <input id="nodeRam" value="<%= node.ram %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+              <input id="nodeRam" value="<%= node.ram %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
               <button type="button" class="al-format-switcher" data-format-switcher
                 data-display="nodeRam" data-hidden="nodeRamValue"
                 data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
@@ -83,14 +75,14 @@
         </div>
         <div>
           <label for="nodeDisk" class="al-label flex items-center gap-1.5">
-            <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %> Disk
+            <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('disk') %>
           </label>
           <% if (node.disk && isNaN(parseFloat(node.disk))) { %>
-            <input id="nodeDisk" value="<%= node.disk %>" class="al-input" placeholder="Informational only">
+            <input id="nodeDisk" value="<%= node.disk %>" class="al-input" placeholder="<%= t('informationalOnly') %>">
           <% } else { %>
             <input type="hidden" id="nodeDiskValue" value="<%= node.disk ? Math.round(node.disk * 1024) : '' %>">
             <div class="flex items-stretch gap-0">
-              <input id="nodeDisk" value="<%= node.disk %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+              <input id="nodeDisk" value="<%= node.disk %>" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
               <button type="button" class="al-format-switcher" data-format-switcher
                 data-display="nodeDisk" data-hidden="nodeDiskValue"
                 data-units="1:MB,1024:GB" data-default-unit="GB">GB</button>
@@ -99,81 +91,85 @@
         </div>
         <div>
           <label for="nodeProcessor" class="al-label flex items-center gap-1.5">
-            <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %> CPU
+            <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('cpu') %>
           </label>
           <input type="hidden" id="nodeCpuValue" value="<%= node.cpu %>">
           <div class="flex items-stretch gap-0">
-            <input id="nodeProcessor" value="" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="Informational only">
+            <input id="nodeProcessor" value="" class="al-input rounded-l-xl flex-1 border-r-0" placeholder="<%= t('informationalOnly') %>">
             <button type="button" class="al-format-switcher" data-format-switcher
               data-display="nodeProcessor" data-hidden="nodeCpuValue"
               data-units="1:%,100:Cores" data-default-unit="Cores">Cores</button>
           </div>
-          <p class="mt-1 text-xs" style="color:var(--theme-text-muted)">1 core = 100%</p>
+          <p class="al-form-help"><%= t('coreHint') %></p>
         </div>
       </div>
     </div>
 
-    <div class="al-card">
-      <h2 class="al-card-header">Overallocation</h2>
-      <p class="mb-4 text-xs" style="color:var(--theme-text-muted)">Allow nodes to exceed their allocated resources by this percentage.</p>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div>
-          <label for="nodeOverallocateMemory" class="al-label flex items-center gap-1.5">
-            <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %> Memory %
-          </label>
-          <input id="nodeOverallocateMemory" type="number" min="0" value="<%= node.overallocateMemory || 0 %>" class="al-input">
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('overallocation') %></h2>
+      <div class="al-card-body">
+        <p class="al-form-help"><%= t('nodeOverallocationDesc') %></p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-4">
+          <div>
+            <label for="nodeOverallocateMemory" class="al-label flex items-center gap-1.5">
+              <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('ram') %> %
+            </label>
+            <input id="nodeOverallocateMemory" type="number" min="0" value="<%= node.overallocateMemory || 0 %>" class="al-input">
+          </div>
+          <div>
+            <label for="nodeOverallocateDisk" class="al-label flex items-center gap-1.5">
+              <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('disk') %> %
+            </label>
+            <input id="nodeOverallocateDisk" type="number" min="0" value="<%= node.overallocateDisk || 0 %>" class="al-input">
+          </div>
+          <div>
+            <label for="nodeOverallocateCpu" class="al-label flex items-center gap-1.5">
+              <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('cpu') %> %
+            </label>
+            <input id="nodeOverallocateCpu" type="number" min="0" value="<%= node.overallocateCpu || 0 %>" class="al-input">
+          </div>
         </div>
-        <div>
-          <label for="nodeOverallocateDisk" class="al-label flex items-center gap-1.5">
-            <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %> Disk %
+        <div class="mt-4">
+          <label for="nodeLocation" class="al-label flex items-center gap-1.5">
+            <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %> <%= t('location') %>
           </label>
-          <input id="nodeOverallocateDisk" type="number" min="0" value="<%= node.overallocateDisk || 0 %>" class="al-input">
+          <select id="nodeLocation" class="al-input">
+            <option value=""><%= t('noLocation') %></option>
+            <% (locations || []).forEach(function(loc) { %>
+            <option value="<%= loc.id %>" <%= node.locationId === loc.id ? 'selected' : '' %>><%= loc.name %> (<%= loc.shortCode %>)</option>
+            <% }); %>
+          </select>
         </div>
-        <div>
-          <label for="nodeOverallocateCpu" class="al-label flex items-center gap-1.5">
-            <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %> CPU %
-          </label>
-          <input id="nodeOverallocateCpu" type="number" min="0" value="<%= node.overallocateCpu || 0 %>" class="al-input">
-        </div>
-      </div>
-      <div class="mt-4">
-        <label for="nodeLocation" class="al-label flex items-center gap-1.5">
-          <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %> Location
-        </label>
-        <select id="nodeLocation" class="al-input">
-          <option value="">No location</option>
-          <% (locations || []).forEach(function(loc) { %>
-          <option value="<%= loc.id %>" <%= node.locationId === loc.id ? 'selected' : '' %>><%= loc.name %> (<%= loc.shortCode %>)</option>
-          <% }); %>
-        </select>
       </div>
     </div>
 
-    <div class="al-card">
-      <h2 class="al-card-header">Allocated Ports</h2>
-      <div class="space-y-2">
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('allocatedPorts') %></h2>
+      <div class="al-card-body space-y-2">
         <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2"></div>
         <div class="flex gap-2">
-          <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1">
+          <input id="newPortInput" type="text" placeholder="<%= t('portRangeHint') %>" class="al-input flex-1">
           <button id="addPortBtn" type="button" class="al-btn-primary">
-            <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> Add Port
+            <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('addPort') %>
           </button>
         </div>
       </div>
     </div>
 
-    <div class="al-card">
-      <h2 class="al-card-header">Maintenance Mode</h2>
-      <div class="p-4 rounded-xl border" style="background:var(--theme-bg-secondary);border-color:var(--theme-border)">
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Put node in maintenance mode</h3>
-            <p class="text-xs mt-1" style="color:var(--theme-text-muted)">Maintenance mode prevents new servers from being created on this node.</p>
+    <div class="al-form-card">
+      <h2 class="al-card-header"><%= t('maintenanceMode') %></h2>
+      <div class="al-card-body">
+        <div class="al-panel">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <h3 class="al-card-title"><%= t('putNodeInMaintenance') %></h3>
+              <p class="al-card-subtitle"><%= t('maintenanceModeDesc') %></p>
+            </div>
+            <label for="nodeMaintenanceMode" class="relative inline-flex items-center cursor-pointer shrink-0">
+              <input id="nodeMaintenanceMode" type="checkbox" class="sr-only peer" <%= node.maintenanceMode ? 'checked' : '' %> aria-label="<%= t('maintenanceMode') %>">
+              <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+            </label>
           </div>
-          <label for="nodeMaintenanceMode" class="relative inline-flex items-center cursor-pointer shrink-0">
-            <input id="nodeMaintenanceMode" type="checkbox" class="sr-only peer" <%= node.maintenanceMode ? 'checked' : '' %> aria-label="Maintenance mode">
-            <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-          </label>
         </div>
       </div>
     </div>
@@ -196,37 +192,32 @@ function renderAllocatedPorts() {
   portsList.innerHTML = '';
   if (allocatedPorts.length === 0) {
     var emptyMessage = document.createElement('div');
-    emptyMessage.className = 'col-span-4 text-sm italic';
-    emptyMessage.style.color = 'var(--theme-text-muted)';
-    emptyMessage.textContent = 'No ports allocated yet. Add ports that will be available for servers.';
+    emptyMessage.className = 'col-span-4 al-form-help mt-0';
+    emptyMessage.textContent = window.__i18n.noPortsAllocated || 'No ports allocated yet. Add ports that will be available for servers.';
     portsList.appendChild(emptyMessage);
     return;
   }
   allocatedPorts.forEach(function(port) {
     var isUsed = usedPortsSet.has(port);
     var portTag = document.createElement('div');
-    portTag.className = 'flex items-center justify-between rounded-lg px-3 py-1.5 text-sm';
-    portTag.style.background = isUsed ? 'color-mix(in srgb, var(--theme-warning) 10%, transparent)' : 'color-mix(in srgb, var(--theme-text) 5%, transparent)';
+    portTag.className = 'al-chip al-chip-mono justify-between w-full' + (isUsed ? ' al-chip-warning' : '');
     portTag.dataset.port = port;
     var portText = document.createElement('span');
-    portText.style.color = isUsed ? 'var(--theme-warning)' : 'var(--theme-text)';
     if (isUsed) {
-      portText.innerHTML = port + ' <span class="ml-2 text-xs px-1.5 py-0.5 rounded" style="background:color-mix(in srgb, var(--theme-warning) 20%, transparent); color:var(--theme-warning);">In use</span>';
+      portText.innerHTML = port + ' <span class="al-badge al-badge-warning ml-2">' + (window.__i18n.inUse || 'In use') + '</span>';
     } else {
       portText.textContent = port;
     }
     var deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
-    deleteBtn.className = 'ml-2 transition-colors';
+    deleteBtn.className = 'al-chip-remove disabled:opacity-50 disabled:cursor-not-allowed';
     if (isUsed) {
       deleteBtn.disabled = true;
-      deleteBtn.style.color = 'var(--theme-text-muted)';
-      deleteBtn.style.opacity = '0.5';
-      deleteBtn.style.cursor = 'not-allowed';
-      deleteBtn.title = 'Cannot remove port in use by a server';
+      deleteBtn.title = window.__i18n.cannotRemovePortInUse || 'Cannot remove port in use by a server';
+      deleteBtn.setAttribute('aria-label', window.__i18n.cannotRemovePortInUse || 'Cannot remove port in use by a server');
     } else {
-      deleteBtn.style.color = 'var(--theme-text-muted)';
-      deleteBtn.innerHTML = '<%- icon("x", { class: "w-4 h-4", strokeWidth: 1.5 }) %>';
+      deleteBtn.setAttribute('aria-label', (window.__i18n.removePort || 'Remove port') + ' ' + port);
+      deleteBtn.innerHTML = '<%- icon("x", { class: "w-3.5 h-3.5", strokeWidth: 1.5 }) %>';
       deleteBtn.onclick = function(e) {
         e.preventDefault();
         allocatedPorts = allocatedPorts.filter(function(p) { return p !== port; });
@@ -244,7 +235,7 @@ function addPort(input) {
     var parts = input.split('-').map(function(p) { return parseInt(p.trim()); });
     var start = parts[0], end = parts[1];
     if (isNaN(start) || isNaN(end) || start >= end || start < 1024 || end > 65535) {
-      showToast('Invalid port range. Use format: 25565-25570 (1024-65535).', 'error');
+      showToast(window.__i18n.invalidPortRange || 'Invalid port range. Use format: 25565-25570 (1024-65535).', 'error');
       return;
     }
     for (var port = start; port <= end; port++) {
@@ -253,7 +244,7 @@ function addPort(input) {
   } else {
     var port = parseInt(input.trim());
     if (isNaN(port) || port < 1024 || port > 65535) {
-      showToast('Invalid port. Must be between 1024 and 65535.', 'error');
+      showToast(window.__i18n.invalidPortValue || 'Invalid port. Must be between 1024 and 65535.', 'error');
       return;
     }
     if (allocatedPorts.indexOf(port) === -1) allocatedPorts.push(port);
@@ -293,7 +284,7 @@ function updateNode() {
       body: JSON.stringify({ maintenanceMode: maintenanceMode })
     }).catch(function(err) {
       console.error('Failed to save maintenance mode:', err);
-      showToast('Failed to save maintenance mode.', 'error');
+      showToast(window.__i18n.failedToSaveMaintenanceMode || 'Failed to save maintenance mode.', 'error');
     });
   }
 
@@ -311,7 +302,7 @@ function updateNode() {
     locationId: document.getElementById('nodeLocation').value ? parseInt(document.getElementById('nodeLocation').value) : null
   };
 
-  var loader = showProgressToast('Updating node...');
+  var loader = showProgressToast(window.__i18n.updatingNode || 'Updating node...');
 
   fetch('/admin/node/' + pd.nodeId + '/edit', {
     method: 'PUT',
@@ -320,15 +311,15 @@ function updateNode() {
   })
   .then(function(response) {
     if (response.ok) return response.json();
-    return response.json().then(function(d) { throw new Error(d.error || d.message || 'Failed to update node.'); });
+    return response.json().then(function(d) { throw new Error(d.error || d.message || (window.__i18n.failedToUpdateNode || 'Failed to update node.')); });
   })
   .then(function() {
-    loader.complete(true, 'Node updated. Looking good.');
+    loader.complete(true, window.__i18n.nodeUpdatedLookingGood || 'Node updated. Looking good.');
     setTimeout(function() { window.location.href = '/admin/nodes?err=none'; }, 1000);
   })
   .catch(function(error) {
     loader.close();
-    showToast(error.message || 'Error updating node.', 'error');
+    showToast(error.message || (window.__i18n.errorUpdatingNode || 'Error updating node.'), 'error');
   });
 }
 

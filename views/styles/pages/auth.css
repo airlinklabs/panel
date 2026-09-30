@@ -1,0 +1,132 @@
+/* Auth pages — the old panel's split screen: form column on the left,
+   full-bleed image on the right. Collapses to a single centred column
+   below lg, where the image has no room to earn its space. */
+
+@layer components {
+  .al-auth {
+    display: flex;
+    min-height: 100vh;
+    background: var(--theme-bg);
+  }
+
+  .al-auth-form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem 1rem;
+    min-width: 0;
+  }
+
+  .al-auth-visual {
+    position: relative;
+    width: 0;
+    flex: 1 1 0%;
+    display: none;
+    overflow: hidden;
+    /* The image carries the mood; the seam between the two columns is a
+       hairline, never a coloured edge. */
+    border-left: 1px solid color-mix(in srgb, #000 20%, transparent);
+  }
+  .al-auth-visual img {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  @media (min-width: 640px) {
+    .al-auth-form {
+      padding: 3rem 1.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .al-auth-form {
+      flex: 0 0 auto;
+      width: 34rem;
+      padding: 3rem 5rem;
+      border-right: 1px solid
+        color-mix(in srgb, var(--theme-text) 12%, transparent);
+    }
+    .al-auth-visual {
+      display: block;
+    }
+  }
+  @media (min-width: 1280px) {
+    .al-auth-form {
+      padding-left: 6rem;
+      padding-right: 6rem;
+    }
+  }
+
+  /* Headline pair — one 30px line and one 14px line, always left-aligned
+     above the form (the old panel centred nothing). */
+  .al-auth-title {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--theme-text-strong);
+  }
+  .al-auth-subtitle {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--theme-text-muted);
+  }
+  .al-auth-logo {
+    height: 3rem;
+    width: auto;
+    border-radius: 0.75rem;
+  }
+
+  /* Error card inside a form: icon gutter + copy column. */
+  .al-auth-error {
+    display: flex;
+    gap: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid
+      color-mix(in srgb, var(--theme-danger) 30%, transparent);
+    background: var(--theme-danger-bg);
+    padding: 1rem;
+  }
+  .al-auth-error-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--theme-danger);
+  }
+  .al-auth-error-body {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--theme-danger);
+  }
+
+  /* Good news arrives in the same anatomy, tinted from the success
+     token so it never reads as a failure. */
+  .al-auth-notice--success {
+    border-color: color-mix(in srgb, var(--theme-success) 30%, transparent);
+    background: var(--theme-success-bg);
+  }
+
+  /* Password requirement checklist (register). */
+  .al-pw-criteria {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+  }
+  .al-pw-criteria li {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--theme-text-muted);
+  }
+  /* Not-yet-met reads as pending, not as failure — red only starts
+     meaning something once the user has typed. */
+  .al-pw-criteria li[data-met="false"] {
+    color: var(--theme-text-muted);
+  }
+  .al-pw-criteria li[data-met="true"] {
+    color: var(--theme-success);
+  }
+}

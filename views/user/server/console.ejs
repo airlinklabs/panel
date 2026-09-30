@@ -1,22 +1,24 @@
-<%- include('../../layouts/user', { title: (server.name || 'Server') + ' — Console', extraStyles: [assetUrl('/vendor/@xterm/xterm/css/xterm.css')] }) %>
+<%- include('../../layouts/user', { title: (server.name || t('server')) + ' — ' + t('console'), extraStyles: [assetUrl('/vendor/@xterm/xterm/css/xterm.css')] }) %>
 
-<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
-  <ol class="flex items-center text-sm gap-1">
-    <li class="flex items-center">
-      <a href="/" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= t('dashboard') %></a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <a href="/server/<%= server.UUID %>" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= server.name %></a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <span style="color:var(--theme-text);"><%= t('console') %></span>
-    </li>
-  </ol>
-</nav>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('dashboard'), url: '/' },
+    { label: server.name || t('server'), url: '/server/' + server.UUID },
+    { label: t('console') }
+  ] }) %>
+</div>
 
-<div id="console-root" class="px-6 sm:px-8 pb-12"
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('console') %></h1>
+    <p class="al-page-desc flex flex-wrap items-center gap-x-4 gap-y-1">
+      <% if (server.node) { %><span class="inline-flex items-center gap-1"><%- icon('server', { class: 'w-3.5 h-3.5' }) %> <%= server.node.name %></span><% } %>
+      <span class="inline-flex items-center gap-1"><%- icon('hash', { class: 'w-3.5 h-3.5' }) %> <span class="font-mono"><%= server.UUID %></span></span>
+    </p>
+  </div>
+</header>
+
+<div id="console-root" class="al-page-body"
   data-server-uuid="<%= server.UUID %>"
   data-server-name="<%= server.name %>"
   data-server-memory="<%= server.Memory || 0 %>"
@@ -28,77 +30,88 @@
   data-realtime-url="<%= typeof realtimeUrl !== 'undefined' ? realtimeUrl : '' %>">
 
   <!-- Stats Cards Row -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="al-card p-4">
-      <p class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);"><%= t('status') %></p>
-      <p id="status" class="text-lg font-medium tracking-tight leading-snug" style="color:var(--theme-text);"><%= t('loading') %></p>
+  <div class="al-stat-grid mb-6">
+    <div class="al-card">
+      <p class="al-section-label"><%= t('status') %></p>
+      <p id="status" class="text-lg font-medium tracking-tight leading-snug mt-1" style="color:var(--theme-text);"><%= t('loading') %></p>
       <p id="status-msg" class="text-xs font-medium mt-0.5 leading-snug transition-all duration-300 opacity-0 translate-y-1 pointer-events-none"></p>
       <canvas id="statusChart" class="mt-2 w-full h-6"></canvas>
     </div>
-    <div class="al-card p-4">
-      <p class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);"><%= t('memory') %></p>
-      <p id="ramUsage" class="text-sm font-medium" style="color:var(--theme-text-strong);">—</p>
+    <div class="al-card">
+      <p class="al-section-label"><%= t('memory') %></p>
+      <p id="ramUsage" class="text-sm font-medium mt-1" style="color:var(--theme-text-strong);">—</p>
       <canvas id="ramChart" class="mt-2 w-full h-6"></canvas>
     </div>
-    <div class="al-card p-4">
-      <p class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);"><%= t('cpu') %></p>
-      <p id="cpuUsage" class="text-sm font-medium" style="color:var(--theme-text-strong);">—</p>
+    <div class="al-card">
+      <p class="al-section-label"><%= t('cpu') %></p>
+      <p id="cpuUsage" class="text-sm font-medium mt-1" style="color:var(--theme-text-strong);">—</p>
       <canvas id="cpuChart" class="mt-2 w-full h-6"></canvas>
     </div>
-    <div class="al-card p-4">
-      <p class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);"><%= t('disk') %></p>
-      <p id="diskUsage" class="text-sm font-medium" style="color:var(--theme-text-strong);">—</p>
+    <div class="al-card">
+      <p class="al-section-label"><%= t('disk') %></p>
+      <p id="diskUsage" class="text-sm font-medium mt-1" style="color:var(--theme-text-strong);">—</p>
       <canvas id="diskChart" class="mt-2 w-full h-6"></canvas>
     </div>
   </div>
 
   <!-- Power Controls -->
-  <div class="flex gap-2 mb-4">
-    <button id="startButton" type="button" class="al-btn-primary px-4 py-2 rounded-xl text-sm font-medium inline-flex items-center gap-1.5">
+  <div class="flex flex-wrap gap-2 mb-4">
+    <button id="startButton" type="button" class="al-btn-primary min-h-11">
       <%- icon('play', { class: 'w-4 h-4', strokeWidth: 2 }) %> <%= t('start') %>
     </button>
-    <button id="restartButton" type="button" class="al-btn-secondary px-4 py-2 rounded-xl text-sm font-medium inline-flex items-center gap-1.5">
+    <button id="restartButton" type="button" class="al-btn-secondary min-h-11">
       <%- icon('refresh-cw', { class: 'w-4 h-4', strokeWidth: 2 }) %> <%= t('restart') %>
     </button>
-    <button id="stopButton" type="button" class="al-btn-danger px-4 py-2 rounded-xl text-sm font-medium inline-flex items-center gap-1.5">
+    <button id="stopButton" type="button" class="al-btn-danger min-h-11">
       <%- icon('square', { class: 'w-4 h-4', strokeWidth: 2 }) %> <%= t('stop') %>
     </button>
   </div>
 
   <!-- Queue Status -->
-  <div id="queue-status" class="hidden mb-4 p-3 rounded-xl text-sm" style="background:var(--theme-warning-bg, var(--theme-bg-secondary));border:1px solid var(--theme-warning);">
-    <p id="queue-position" class="font-medium" style="color:var(--theme-text-strong);"></p>
-    <p id="queue-available" class="text-xs mt-0.5" style="color:var(--theme-text-muted);"></p>
-    <button id="cancelQueueBtn" type="button" class="mt-2 text-xs underline" style="color:var(--theme-danger);">Cancel start</button>
+  <div id="queue-status" class="al-alert-warning hidden mb-4" role="status">
+    <%- icon('clock', { class: 'size-4 shrink-0 mt-0.5', 'aria-hidden': 'true' }) %>
+    <div class="min-w-0 flex-1">
+      <p id="queue-position" class="al-alert-title"></p>
+      <p id="queue-available" class="al-alert-body"></p>
+      <button id="cancelQueueBtn" type="button" class="al-btn-link al-btn-sm mt-1"><%= t('cancelStart') %></button>
+    </div>
   </div>
 
   <!-- Daemon Offline Warning -->
-  <div id="daemonOfflineWarningRow" class="hidden mb-4 p-3 rounded-xl text-sm" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);">
-    <p class="font-medium" style="color:var(--theme-danger);">Daemon offline — console paused</p>
+  <div id="daemonOfflineWarningRow" class="al-alert-danger hidden mb-4" role="alert">
+    <%- icon('triangle-alert', { class: 'size-4 shrink-0 mt-0.5', 'aria-hidden': 'true' }) %>
+    <div class="min-w-0">
+      <p class="al-alert-title"><%= t('daemonOfflineConsoleTitle') %></p>
+      <p class="al-alert-body"><%= t('daemonOfflineConsoleBody') %></p>
+    </div>
   </div>
 
   <!-- Console Terminal -->
-  <div class="al-card overflow-hidden">
-    <div class="flex items-center justify-between px-4 py-2 border-b" style="border-color:var(--theme-border);">
-      <span class="text-xs font-medium" style="color:var(--theme-text-muted);">Console</span>
-      <div class="flex items-center gap-2">
-        <button id="loadHistoryBtn" type="button" class="text-xs px-2 py-1 rounded-lg transition-colors" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);" disabled>Load logs</button>
-        <div id="consoleReadOnlyNotice" class="hidden text-[10px] px-2 py-0.5 rounded-full" style="background:var(--theme-warning-bg);color:var(--theme-warning);">Read-only (another tab open)</div>
+  <div class="al-card al-card-flush">
+    <div class="al-console-bar">
+      <span class="al-console-label"><%= t('console') %></span>
+      <div class="al-console-actions">
+        <button id="loadHistoryBtn" type="button" class="al-console-chip" disabled><%= t('loadLogs') %></button>
+        <div id="consoleReadOnlyNotice" class="al-console-readonly hidden"><%= t('viewOnlyNotice') %></div>
       </div>
     </div>
-    <div id="terminal" class="w-full" style="height:420px;background:#141414;"></div>
-    <div class="flex items-center gap-2 px-4 py-2 border-t" style="border-color:var(--theme-border);">
-      <span class="text-xs" style="color:var(--theme-text-muted);">~</span>
-      <input id="input" type="text" class="flex-1 bg-transparent text-sm outline-none" style="color:var(--theme-text);" placeholder="Type a command..." disabled autocomplete="off" spellcheck="false">
+    <div class="al-console-screen">
+      <div id="terminal" class="absolute inset-0"></div>
+    </div>
+    <div class="al-console-inputbar">
+      <span class="al-console-prompt" aria-hidden="true">~</span>
+      <input id="input" type="text" class="al-console-input" placeholder="<%= t('typeACommand') %>" aria-label="<%= t('typeACommand') %>" disabled autocomplete="off" spellcheck="false">
     </div>
   </div>
 
   <!-- Mobile Console -->
   <div class="block md:hidden mt-4">
-    <div class="al-card overflow-hidden">
-      <div id="mobile-terminal" class="w-full" style="height:300px;background:#141414;"></div>
-      <div class="flex items-center gap-2 px-4 py-2 border-t" style="border-color:var(--theme-border);">
-        <input id="mobile-input" type="text" class="flex-1 bg-transparent text-sm outline-none" style="color:var(--theme-text);" placeholder="Type a command..." disabled autocomplete="off" spellcheck="false">
+    <div class="al-card al-card-flush">
+      <div class="al-console-screen">
+        <div id="mobile-terminal" class="absolute inset-0"></div>
+      </div>
+      <div class="al-console-inputbar">
+        <input id="mobile-input" type="text" class="al-console-input" placeholder="<%= t('typeACommand') %>" aria-label="<%= t('typeACommand') %>" disabled autocomplete="off" spellcheck="false">
       </div>
     </div>
   </div>
@@ -134,8 +147,8 @@
     mount(root, config).catch(err => {
       console.error('Console mount failed:', err);
       root.innerHTML = '<div class="p-6 text-center text-sm" style="color:var(--theme-text-muted);">' +
-        '<p class="font-medium mb-1" style="color:var(--theme-text);">Console unavailable</p>' +
-        '<p>Failed to initialize the server console.</p></div>';
+        '<p class="font-medium mb-1" style="color:var(--theme-text);"><%= t('consoleUnavailableTitle') %></p>' +
+        '<p><%= t('consoleUnavailableBody') %></p></div>';
     });
   }
 </script>

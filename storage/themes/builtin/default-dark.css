@@ -1,73 +1,84 @@
+/* Default dark — the panel's own world: #141414 page, translucent
+   neutral surfaces, blue-600 for every primary action. */
 html.dark {
-  --theme-bg:                  #161616;
-  --theme-bg-secondary:        #1e1e1e;
-  --theme-bg-card:             #212121;
-  --theme-bg-hover:            #2a2a2a;
-  --theme-bg-input:            rgba(255,255,255,0.09);
+  --theme-bg:                  #141414;
+  --theme-bg-secondary:        #1a1a1a;
+  --theme-bg-card:             #202020;
+  --theme-bg-hover:            rgba(255,255,255,0.06);
+  --theme-bg-input:            rgba(255,255,255,0.06);
   --theme-bg-active-nav:       rgba(255,255,255,0.12);
 
-  --theme-border:              rgba(255,255,255,0.13);
-  --theme-toggle-bg:           rgba(255,255,255,0.35);
-  --theme-border-subtle:       rgba(255,255,255,0.08);
+  /* Borders */
+  --theme-border:              rgba(255,255,255,0.12);
+  --theme-toggle-bg:           rgba(255,255,255,0.28);
+  --theme-border-subtle:       rgba(255,255,255,0.07);
   --theme-border-input:        rgba(255,255,255,0.16);
-  --theme-border-accent:       rgba(255,255,255,0.30);
-  --theme-border-strong:       rgba(255,255,255,0.30);
-  --theme-btn-border:          rgba(255,255,255,0.13);
+  --theme-border-accent:       rgba(255,255,255,0.35);
+  --theme-border-strong:       rgba(255,255,255,0.35);
+  --theme-btn-border:          rgba(255,255,255,0.14);
   --theme-danger-border:       rgba(248,113,113,0.30);
 
-  --theme-text:                #e0e0e0;
+  /* Text */
+  --theme-text:                #e5e5e5;
   --theme-text-strong:         #fafafa;
-  --theme-text-muted:          #8a8a8a;
+  --theme-text-muted:          #a3a3a3;
   --theme-text-placeholder:    #9ca3af;
-  --theme-text-link:           #e8e8e8;
+  --theme-text-link:           #60a5fa;
 
-  --theme-accent:              #ffffff;
-  --theme-accent-text:         #0a0a0a;
-  --theme-text-on-accent:   #0a0a0a;
-  --theme-accent-subtle:       rgba(255,255,255,0.1);
+  /* Accent = navigation identity. Primary = interactive brand colour. */
+  --theme-accent:              rgba(255,255,255,0.08);
+  --theme-accent-text:         #fafafa;
+  --theme-text-on-accent:      #fafafa;
+  --theme-accent-subtle:       rgba(255,255,255,0.10);
   --theme-accent-foreground:   #0a0a0a;
-  --theme-primary:             #ffffff;
+  --theme-primary:             #3b82f6;
 
-  --theme-nav-bg:              #111111;
-  --theme-nav-border:          rgba(255,255,255,0.07);
-  --theme-nav-text:            #8a8a8a;
+  /* Nav chrome */
+  --theme-nav-bg:              #141414;
+  --theme-nav-border:          rgba(255,255,255,0.08);
+  --theme-nav-text:            #a3a3a3;
   --theme-nav-text-active:     #fafafa;
-  --theme-nav-icon:            #767676;
+  --theme-nav-icon:            #a3a3a3;
   --theme-nav-icon-active:     #fafafa;
 
+  /* Status */
   --theme-success:             #4ade80;
-  --theme-success-bg:          rgba(74,222,128,0.1);
+  --theme-success-bg:          rgba(74,222,128,0.12);
   --theme-warning:             #fbbf24;
-  --theme-warning-bg:          rgba(251,191,36,0.1);
+  --theme-warning-bg:          rgba(251,191,36,0.12);
   --theme-danger:              #f87171;
-  --theme-danger-bg:           rgba(248,113,113,0.1);
+  --theme-danger-bg:           rgba(248,113,113,0.12);
   --theme-info:                #60a5fa;
-  --theme-info-bg:             rgba(96,165,250,0.1);
-  --theme-badge-neutral-text:  #8a8a8a;
-  --theme-badge-neutral-bg:  rgba(255,255,255,0.1);
-  --theme-text-faint:          #7e7e7e;
+  --theme-info-bg:             rgba(96,165,250,0.12);
+  --theme-badge-neutral-text:  #a3a3a3;
+  --theme-badge-neutral-bg:    rgba(255,255,255,0.10);
+  --theme-text-faint:          #8f8f8f;
 
-  --theme-table-header-bg:     rgba(255,255,255,0.04);
+  /* Table */
+  --theme-table-header-bg:     rgba(255,255,255,0.05);
   --theme-table-row-hover:     rgba(255,255,255,0.05);
-  --theme-table-divide:        rgba(255,255,255,0.06);
+  --theme-table-divide:        rgba(255,255,255,0.08);
 
-  --theme-btn-primary-bg:      #ffffff;
-  --theme-btn-primary-text:    #0a0a0a;
-  --theme-btn-primary-hover:   #e8e8e8;
+  /* Buttons */
+  --theme-btn-primary-bg:      #2563eb;
+  --theme-btn-primary-text:    #ffffff;
+  --theme-btn-primary-hover:   #3b82f6;
   --theme-btn-secondary-bg:    rgba(255,255,255,0.06);
-  --theme-btn-secondary-border:rgba(255,255,255,0.12);
-  --theme-btn-secondary-text:  #d4d4d4;
-  --theme-btn-secondary-hover: rgba(255,255,255,0.1);
+  --theme-btn-secondary-border:rgba(255,255,255,0.14);
+  --theme-btn-secondary-text:  #e5e5e5;
+  --theme-btn-secondary-hover: rgba(255,255,255,0.10);
   --theme-btn-danger-bg:       #dc2626;
   --theme-btn-danger-text:     #ffffff;
   --theme-btn-danger-hover:    #b91c1c;
-  --theme-btn-success-bg:      #4ade80;
-  --theme-btn-success-text:    #052e16;
-  --theme-btn-success-hover:   #86efac;
+  --theme-btn-success-bg:      #059669;
+  --theme-btn-success-text:    #ffffff;
+  --theme-btn-success-hover:   #10b981;
 
+  /* Skeleton */
   --theme-skeleton-base:       rgba(255,255,255,0.08);
   --theme-skeleton-shine:      rgba(255,255,255,0.13);
 
+  /* Code/Terminal */
   --theme-code-bg:             #0c0c0c;
   --theme-code-text:           #a8a8a8;
   --theme-code-border:         rgba(255,255,255,0.08);
@@ -75,15 +86,11 @@ html.dark {
   --theme-logo-bg:             transparent;
 
   /* Shadows */
-  --theme-shadow-sm:           0 1px 2px rgba(0,0,0,0.3);
-  --theme-shadow:              0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
-  --theme-shadow-md:           0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3);
-  --theme-shadow-lg:           0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.3);
-  --theme-shadow-xl:           0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.4);
-
-  /* Disabled */
-
-  /* Focus ring */
+  --theme-shadow-sm:           0 1px 2px rgba(0,0,0,0.35);
+  --theme-shadow:              0 1px 3px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.35);
+  --theme-shadow-md:           0 4px 6px -1px rgba(0,0,0,0.45), 0 2px 4px -2px rgba(0,0,0,0.35);
+  --theme-shadow-lg:           0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.35);
+  --theme-shadow-xl:           0 20px 25px -5px rgba(0,0,0,0.55), 0 8px 10px -6px rgba(0,0,0,0.45);
 
   /* Border radius */
   --theme-radius-input:      0.75rem;

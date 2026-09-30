@@ -4,7 +4,7 @@
   <p class="text-sm mb-4" style="color:var(--theme-text-muted)"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
 
   <form id="startupVariablesFormEl">
-    <%- include('../../../components/csrf') %>
+    <%- include('../../../partials/csrf') %>
     <div id="variablesContainer" class="space-y-4">
       <% if (serverVariables && serverVariables.length > 0) { %>
         <% serverVariables.forEach((variable, index) => { %>

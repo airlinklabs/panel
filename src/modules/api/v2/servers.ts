@@ -22,6 +22,7 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import prisma from '../../../db';
 import { parseBody } from '../../../utils/validation';
+import { parseDockerImageRef } from '../../../utils/dockerImage';
 import { getPrimaryExternalPort } from '../../../handlers/utils/server/ports';
 import {
   jsonOk,
@@ -907,25 +908,8 @@ router.post('/:id/reinstall', async (req, res) => {
           | null;
         const installScripts = Array.isArray(scripts?.install)
           ? (scripts.install as Record<string, unknown>[])
-          : null;
-
-        if (!installScripts) {
-          await prisma.server.update({
-            where: { UUID: serverUUID },
-            data: { Queued: false, Installing: false },
-          });
-          return;
-        }
-
-        let dockerRef: string | undefined;
-        try {
-          const parsed: unknown = JSON.parse(String(current.dockerImage ?? '{}'));
-          if (parsed && typeof parsed === 'object') {
-            dockerRef = Object.values(parsed as Record<string, string>)[0];
-          }
-        } catch {
-          /* leave undefined — daemon falls back to its default */
-        }
+          : [];
+        const dockerRef = parseDockerImageRef(current.dockerImage);
 
         const response = await daemonRequest(serverUUID, '/container/reinstall', {
           method: 'POST',

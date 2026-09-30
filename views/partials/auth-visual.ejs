@@ -1,0 +1,12 @@
+<% /* auth-visual — the image half of the split auth screen.
+   Params: wallpaper (admin-configured URL or upload path, optional),
+           fallback (bundled asset used when no wallpaper is configured) */ %>
+<%
+const avWallpaper = typeof wallpaper !== 'undefined' && wallpaper ? String(wallpaper) : '';
+const avFallback = typeof fallback !== 'undefined' && fallback ? String(fallback) : '/assets/auth/login.jpg';
+const avSrc = avWallpaper || avFallback;
+const avIsExternal = /^https?:\/\//i.test(avSrc);
+%>
+<div class="al-auth-visual" aria-hidden="true">
+  <img src="<%= avIsExternal ? avSrc : assetUrl(avSrc) %>" alt="" loading="lazy" decoding="async">
+</div>

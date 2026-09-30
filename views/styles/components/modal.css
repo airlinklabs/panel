@@ -1,9 +1,11 @@
-/* ── al-dialog: native <dialog> entry/exit ────────────────────────────
-   Travel/scale collapse to opacity under prefers-reduced-motion via
-   motion.css; focus outline and final state are never collapsed. */
-dialog.al-dialog {
-  @apply m-auto p-0 border-0 bg-transparent;
-}
-dialog.al-dialog::backdrop {
-  background: var(--overlay-bg);
+@layer components {
+  /* ── al-dialog: native <dialog> entry/exit ────────────────────────────
+     Travel/scale collapse to opacity under prefers-reduced-motion via
+     motion.css; focus outline and final state are never collapsed. */
+  dialog.al-dialog {
+    @apply m-auto p-0 border-0 bg-transparent;
+  }
+  dialog.al-dialog::backdrop {
+    background: var(--overlay-bg);
+  }
 }

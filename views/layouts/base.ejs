@@ -20,6 +20,7 @@ const wallpaperExcluded = req && req.path && (
         <% } %>
       })();
     </script>
+    <link rel="stylesheet" href="<%= assetUrl('/fonts/general-sans.css') %>">
     <link rel="stylesheet" href="<%= assetUrl('views/styles/main.css') %>">
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? assetUrl(settings.favicon) : assetUrl('/favicon.ico') %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? assetUrl(settings.favicon) : assetUrl('/favicon.ico') %>" type="image/x-icon">
@@ -57,7 +58,8 @@ const wallpaperExcluded = req && req.path && (
         padding-right: env(safe-area-inset-right);
       }
       @media (max-width: 1023px) {
-        #page-content, #server-page-body { padding-bottom: 64px; }
+        /* The mobile bar is fixed to the top edge — keep content clear of it. */
+        #page-content, #server-page-body { padding-bottom: 64px; padding-top: 48px; }
       }
     </style>
     <% if (process.env.NODE_ENV !== 'production') { %>
@@ -94,14 +96,14 @@ const wallpaperExcluded = req && req.path && (
     })();
     </script>
 </head>
-<body style="font-family: 'Inter Variable';<%= (settings.panelWallpaper && !wallpaperExcluded) ? `--al-wallpaper-image:url('${settings.panelWallpaper}');` : '' %>" class="h-full<%= (settings.panelWallpaper && !wallpaperExcluded) ? ' al-wallpaper' : '' %>">
+<body style="font-family:'General Sans','Inter Variable',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;<%= (settings.panelWallpaper && !wallpaperExcluded) ? `--al-wallpaper-image:url('${settings.panelWallpaper}');` : '' %>" class="h-full<%= (settings.panelWallpaper && !wallpaperExcluded) ? ' al-wallpaper' : '' %>">
 <% if (settings.panelWallpaper && !wallpaperExcluded) { %>
 <div id="al-wallpaper-layer" aria-hidden="true"></div>
 <% } %>
 
 <a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--theme-text-strong)] focus:text-[var(--theme-bg)] focus:text-sm focus:font-medium focus:shadow-lg"><%= t('skipToMainContent') %></a>
 
-<script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/shared/theme-init.js') %>?v=1"></script>
+<script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/shared/theme-init.js') %>?v=2"></script>
 <script nonce="<%- nonce %>">window.__i18n = <%- JSON.stringify(req.translations || {}) %>;</script>
 <script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/shared/escape.js') %>?v=1"></script>
 

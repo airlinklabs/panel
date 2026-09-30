@@ -19,6 +19,7 @@
     </script>
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? assetUrl(settings.favicon) : assetUrl('/favicon.ico') %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? assetUrl(settings.favicon) : assetUrl('/favicon.ico') %>" type="image/x-icon">
+    <link rel="stylesheet" href="<%= assetUrl('/fonts/general-sans.css') %>">
     <link rel="stylesheet" href="<%= assetUrl('/themes/builtin/default-light.css') %>">
     <link rel="stylesheet" href="<%= assetUrl('/themes/builtin/default-dark.css') %>">
     <% if (settings.theme && settings.theme !== 'default' && settings.theme !== 'light' && settings.theme !== 'dark') { %>
@@ -67,8 +68,8 @@
     })();
     </script>
 </head>
-<body style="font-family: 'Inter Variable'; background: var(--theme-bg); color: var(--theme-text);" class="h-full">
+<body style="font-family:'General Sans','Inter Variable',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif; background: var(--theme-bg); color: var(--theme-text);" class="h-full">
 
-<script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/shared/theme-init.js') %>?v=1"></script>
+<script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/shared/theme-init.js') %>?v=2"></script>
 <script nonce="<%- nonce %>">window.__i18n = <%- JSON.stringify(typeof req !== 'undefined' && req ? req.translations || {} : {}) %>;</script>
 <script nonce="<%- nonce %>" src="<%= assetUrl('/javascript/shared/escape.js') %>?v=1"></script>

@@ -18,8 +18,20 @@
   }
 
   :where(button, [role="button"], a, input, select, textarea):focus-visible {
-    outline: 2px solid var(--theme-border-accent, #000000);
+    outline: 2px solid var(--theme-primary, var(--theme-border-accent, #000000));
     outline-offset: 2px;
+  }
+
+  /* Keyboard focus must never be invisible on a filled control. */
+  :where(.al-btn-primary, .al-btn-danger, .al-btn-success):focus-visible {
+    outline: 2px solid var(--theme-text-strong, #ffffff);
+    outline-offset: 2px;
+  }
+
+  /* Text selection and caret belong to the palette. */
+  ::selection {
+    background: var(--theme-accent-subtle, rgba(59, 130, 246, 0.22));
+    color: var(--theme-text-strong);
   }
 
   :where(button, [role="button"]) {

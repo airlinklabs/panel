@@ -1,25 +1,42 @@
-/* ── Alert banners — compact ────────────────────────────────── */
-.al-alert-danger {
-  @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
-  background: var(--theme-danger-bg);
-  color: var(--theme-danger);
-  border: 1px solid color-mix(in oklch, var(--theme-danger) 20%, transparent);
-}
-.al-alert-warning {
-  @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
-  background: var(--theme-warning-bg);
-  color: var(--theme-warning);
-  border: 1px solid color-mix(in oklch, var(--theme-warning) 20%, transparent);
-}
-.al-alert-success {
-  @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
-  background: var(--theme-success-bg);
-  color: var(--theme-success);
-  border: 1px solid color-mix(in oklch, var(--theme-success) 20%, transparent);
-}
-.al-alert-info {
-  @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
-  background: var(--theme-info-bg);
-  color: var(--theme-info);
-  border: 1px solid color-mix(in oklch, var(--theme-info) 20%, transparent);
+@layer components {
+  /* ── Alert banners — compact ──────────────────────────────────
+     Anatomy matches the old panel's notice: icon, bold title line,
+     supporting body line. Used by views/user/dashboard.ejs. */
+  .al-alert-danger {
+    @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
+    background: var(--theme-danger-bg);
+    color: var(--theme-danger);
+    border: 1px solid color-mix(in oklch, var(--theme-danger) 20%, transparent);
+  }
+  .al-alert-warning {
+    @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
+    background: var(--theme-warning-bg);
+    color: var(--theme-warning);
+    border: 1px solid color-mix(in oklch, var(--theme-warning) 20%, transparent);
+  }
+  .al-alert-success {
+    @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
+    background: var(--theme-success-bg);
+    color: var(--theme-success);
+    border: 1px solid color-mix(in oklch, var(--theme-success) 20%, transparent);
+  }
+  .al-alert-info {
+    @apply rounded-xl px-3 py-2.5 text-[13px] flex items-start gap-2.5;
+    background: var(--theme-info-bg);
+    color: var(--theme-info);
+    border: 1px solid color-mix(in oklch, var(--theme-info) 20%, transparent);
+  }
+
+  /* ── Alert children ─────────────────────────────────────────────
+     The old notice is icon + bold first line + supporting line. Both
+     lines inherit the variant's colour, so contrast is never diluted
+     by a second token; only weight and a hair of opacity separate them. */
+  .al-alert-title {
+    @apply font-semibold;
+  }
+  .al-alert-body {
+    @apply text-[13px];
+    margin-top: 0.25rem;
+    opacity: 0.9;
+  }
 }

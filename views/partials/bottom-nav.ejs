@@ -4,9 +4,25 @@
     <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="<%= t('logoAlt') %>" class="h-7 w-7 rounded-lg shrink-0" style="background:var(--theme-logo-bg);">
     <div class="font-medium text-[13px] truncate" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></div>
   </a>
-  <div class="flex items-center gap-1.5">
+  <div class="flex items-center gap-1">
+    <% /* Phone chrome: below lg the desktop topbar does not render, so the
+           search entry point and the light/dark switch live here instead.
+           Both are bound by attribute (search.js / theme-init.js) and both
+           are hidden again at lg where the topbar takes over. */ %>
+    <button type="button" data-search-trigger
+      class="al-topbar-search al-btn-icon-only shrink-0 lg:hidden"
+      aria-haspopup="dialog" aria-expanded="false" aria-controls="searchOverlay"
+      aria-label="<%= t('navSearch') %>">
+      <%- icon('search', { class: 'h-4 w-4', 'aria-hidden': 'true' }) %>
+    </button>
+    <button type="button" data-theme-toggle role="switch" aria-checked="false"
+      class="al-theme-switch shrink-0 min-h-11 lg:hidden"
+      aria-label="<%= t('darkMode') %>">
+      <span class="al-theme-switch-track" aria-hidden="true"></span>
+      <span class="al-theme-switch-thumb" aria-hidden="true"></span>
+    </button>
     <% if (typeof user !== 'undefined' && user != null) { %>
-    <a href="/account" class="p-1 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center" style="color:var(--theme-text-muted);">
+    <a href="/account" class="rounded-lg transition-colors min-w-11 min-h-11 flex items-center justify-center" style="color:var(--theme-text-muted);">
       <img loading="lazy" decoding="async" class="w-5.5 h-5.5 rounded-lg" src="<%= user.avatar ? user.avatar : '/avatar/' + encodeURIComponent(user.username) %>" alt="<%= t('userAvatarAlt') %>">
     </a>
     <% } %>

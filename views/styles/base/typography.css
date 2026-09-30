@@ -1,3 +1,43 @@
+/* ── Type ramp ────────────────────────────────────────────────────────
+   General Sans is the panel's display and text face (self-hosted, see
+   public/fonts/general-sans.css). Inter Variable stays as the metric
+   fallback while General Sans loads, then the system stack. */
+@layer base {
+  html {
+    font-family:
+      "General Sans",
+      "Inter Variable",
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      "Helvetica Neue",
+      Arial,
+      sans-serif;
+    font-synthesis-weight: none;
+  }
+
+  /* Numerals stay aligned in tables, stat cards and the console. */
+  table,
+  .tabular-nums,
+  code,
+  kbd,
+  samp {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Every heading in the panel sits on the same two-step ramp:
+     page title (16/24, 500) and section title (15, 600). */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+}
+
 @layer utilities {
   .shadow-md {
     box-shadow: var(--theme-shadow-md, 0 6px 12px -10px rgb(0 0 0 / 0.32));
@@ -9,5 +49,13 @@
 
   .shadow-2xl {
     box-shadow: var(--theme-shadow-xl, 0 18px 44px -28px rgb(0 0 0 / 0.45));
+  }
+
+  /* Type helpers used by the page-title pattern. */
+  .al-text-muted {
+    color: var(--theme-text-muted);
+  }
+  .al-text-strong {
+    color: var(--theme-text-strong);
   }
 }

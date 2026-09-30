@@ -1,4 +1,6 @@
-/* ── Breadcrumb ─────────────────────────────────────────────── */
-/* Breadcrumb styles are handled via Tailwind utilities in the template.
-   This file exists as a placeholder for any future bespoke breadcrumb CSS.
-   If no bespoke styles are needed, this file can be removed. */
+@layer components {
+  /* ── Breadcrumb ─────────────────────────────────────────────── */
+  /* Breadcrumb styles are handled via Tailwind utilities in the template.
+     This file exists as a placeholder for any future bespoke breadcrumb CSS.
+     If no bespoke styles are needed, this file can be removed. */
+}

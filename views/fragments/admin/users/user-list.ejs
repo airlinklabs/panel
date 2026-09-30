@@ -1,19 +1,20 @@
 <!--
   Fragment: admin-users-list
-  Route: GET /admin/users
+  Route: GET /admin/users   (HX-Request: true)
+  Shell-free: this markup is swapped into the page, so it carries no
+  layout element. Row ids `admin-user-row-<id>` are load-bearing for the
+  HTMX tests and for any client-side row targeting.
 -->
 <section id="admin-users-list" aria-labelledby="admin-users-list-heading">
   <h2 id="admin-users-list-heading" class="sr-only"><%= t('users') %></h2>
 
   <% if (users.length === 0) { %>
-    <div class="al-card p-8 text-center">
-      <%- icon('users', { class: 'mx-auto h-12 w-12 mb-4', style: 'color:var(--theme-text-muted)' }) %>
-      <h3 class="text-sm font-medium mb-1" style="color:var(--theme-text-strong);"><%= t('noUsersYet') %></h3>
-      <p class="text-xs mb-4" style="color:var(--theme-text-muted);"><%= t('createYourFirstUser') %></p>
-      <a href="/admin/users/new" class="al-btn-primary">
-        <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %> <%= t('createUserBtn') %>
-      </a>
-    </div>
+    <%- include('../../../partials/empty-state', {
+      iconName: 'users',
+      title: t('noUsersYet'),
+      description: t('createYourFirstUser'),
+      action: '<a href="/admin/users/create" class="al-btn-primary">' + icon('plus', { class: 'w-3.5 h-3.5' }).toString() + ' ' + t('createUserBtn') + '</a>'
+    }) %>
   <% } else { %>
     <!-- Mobile card view -->
     <div class="lg:hidden space-y-2 mb-6">
@@ -21,29 +22,23 @@
         <div id="admin-user-row-<%= u.id %>" class="al-card flex items-center gap-3" data-user-id="<%= u.id %>" data-admin="<%= u.isAdmin %>">
           <div class="relative shrink-0">
             <img loading="lazy" decoding="async" class="w-8 h-8 rounded-lg object-cover" src="<%= u.avatar ? u.avatar : '/avatar/' + encodeURIComponent(u.username) %>" alt="<%= u.username %>">
-            <% if (onlineUsers.has(u.username)) { %>
-              <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
-              </span>
-            <% } else { %>
-              <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
-              </span>
-            <% } %>
+            <span class="absolute -bottom-0.5 -right-0.5 <%= onlineUsers.has(u.username) ? 'al-dot-online' : 'al-dot' %> ring-2 ring-[var(--theme-bg-card)]"></span>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= u.username %></p>
-            <p class="text-xs truncate" style="color:var(--theme-text-muted);">
-              <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset"
-                style="<%= u.isAdmin ? 'background:var(--theme-accent);color:var(--theme-accent-text)' : 'background:var(--theme-bg-secondary);color:var(--theme-text-muted)' %>"><%= u.isAdmin ? t('adminRole') : t('userRole') %></span>
+            <p class="text-sm font-medium truncate al-text-strong"><%= u.username %></p>
+            <p class="text-xs truncate al-text-muted mt-1">
+              <span class="<%= u.role === 'owner' ? 'al-badge-warning' : u.isAdmin ? 'al-badge-online' : 'al-badge-neutral' %>">
+                <% if (u.role === 'owner') { %><%- icon('crown', { size: 10, class: 'shrink-0' }) %><% } %>
+                <%= u.role === 'owner' ? t('ownerRole') : u.isAdmin ? t('adminRole') : t('userRole') %>
+              </span>
             </p>
           </div>
-          <div class="flex items-center gap-2">
-            <a href="/admin/users/view/<%= u.id %>/" class="al-btn-ghost" aria-label="<%= t('viewUser') %>"><%- icon('external-link', { size: 16 }) %></a>
-            <a href="/admin/users/edit/<%= u.id %>/" class="al-btn-ghost" aria-label="<%= t('editUserBtn') %>"><%- icon('pencil', { size: 16 }) %></a>
-            <button type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= t('deleteUserBtn') %>"
+          <div class="flex items-center gap-1 shrink-0">
+            <a href="/admin/users/view/<%= u.id %>/" class="al-btn-ghost al-btn-icon-only" aria-label="<%= t('viewUser') %>"><%- icon('external-link', { size: 16, class: 'shrink-0' }) %></a>
+            <a href="/admin/users/edit/<%= u.id %>/" class="al-btn-ghost al-btn-icon-only" aria-label="<%= t('editUserBtn') %>"><%- icon('pencil', { size: 16, class: 'shrink-0' }) %></a>
+            <button type="button" class="al-btn-ghost al-btn-icon-only" style="color:var(--theme-danger);" aria-label="<%= t('deleteUserBtn') %>"
               onclick="deleteUser('<%= u.id %>')">
-              <%- icon('trash-2', { size: 16 }) %>
+              <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
             </button>
           </div>
         </div>
@@ -51,57 +46,53 @@
     </div>
 
     <!-- Desktop table -->
-    <div class="hidden lg:block overflow-x-auto shadow-sm rounded-xl border" id="admin-users-table" style="border-color:var(--theme-border);">
+    <div class="al-table-wrapper hidden lg:block" id="admin-users-table">
       <table class="al-table">
         <colgroup>
           <col style="min-width:220px">
           <col style="min-width:100px">
           <col style="min-width:80px">
-          <col style="min-width:200px">
+          <col style="min-width:240px">
         </colgroup>
-        <thead class="al-table-head">
+        <thead class="al-table-thead">
           <tr>
-            <th scope="col" class="al-table-th sm:pl-6"><%= t('name') %></th>
-            <th scope="col" class="al-table-th sm:pl-6"><%= t('role') %></th>
-            <th scope="col" class="al-table-th sm:pl-6"><%= t('userServersLabel') %></th>
-            <th scope="col" class="al-table-th sm:pl-6"><%= t('actions') %></th>
+            <th scope="col" class="al-table-th"><%= t('name') %></th>
+            <th scope="col" class="al-table-th"><%= t('role') %></th>
+            <th scope="col" class="al-table-th"><%= t('servers') %></th>
+            <th scope="col" class="al-table-th"><%= t('actions') %></th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="al-table-tbody">
           <% let userIdx = 0; users.forEach(function(u) { %>
             <tr id="admin-user-row-<%= u.id %>" style="--i:<%= userIdx++ %>" class="al-table-tr cursor-pointer" tabindex="0" role="link" data-user-id="<%= u.id %>" data-admin="<%= u.isAdmin %>" onclick="window.location='/admin/users/view/<%= u.id %>/'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location='/admin/users/view/<%= u.id %>/';}">
-              <td class="al-table-td sm:pl-6">
+              <td class="al-table-td">
                 <div class="flex items-center gap-3">
                   <div class="relative shrink-0">
                     <img loading="lazy" decoding="async" class="h-8 w-8 rounded-lg object-cover" src="<%= u.avatar ? u.avatar : '/avatar/' + encodeURIComponent(u.username) %>" alt="<%= u.username %>">
-                    <% if (onlineUsers.has(u.username)) { %>
-                      <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                        <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
-                      </span>
-                    <% } else { %>
-                      <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                        <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
-                      </span>
-                    <% } %>
+                    <span class="absolute -bottom-0.5 -right-0.5 <%= onlineUsers.has(u.username) ? 'al-dot-online' : 'al-dot' %> ring-2 ring-[var(--theme-bg-card)]"></span>
                   </div>
-                  <div class="font-medium" style="color:var(--theme-text-strong);"><%= u.username %></div>
+                  <span class="al-table-cell-strong"><%= u.username %></span>
                 </div>
               </td>
               <td class="al-table-td">
-                <div class="mt-1 ml-2 inline-flex items-center rounded-md
-                px-2 py-1 text-xs font-medium ring-1 ring-inset"
-                style="<%= u.isAdmin ? 'background:var(--theme-success-bg);color:var(--theme-success)' : 'background:var(--theme-warning-bg);color:var(--theme-warning)' %>">
-                  <%= u.isAdmin ? t('adminRole') : t('userRole') %>
-                </div>
+                <span class="<%= u.role === 'owner' ? 'al-badge-warning' : u.isAdmin ? 'al-badge-online' : 'al-badge-neutral' %>">
+                  <% if (u.role === 'owner') { %><%- icon('crown', { size: 10, class: 'shrink-0' }) %><% } %>
+                  <%= u.role === 'owner' ? t('ownerRole') : u.isAdmin ? t('adminRole') : t('userRole') %>
+                </span>
               </td>
-              <td class="al-table-td"><%= u.servers ? u.servers.length : 0 %></td>
+              <td class="al-table-td tabular-nums"><%= u.servers ? u.servers.length : 0 %></td>
               <td class="al-table-td">
-                <div class="flex gap-3 whitespace-nowrap">
-                  <a href="/admin/users/view/<%= u.id %>/" class="al-btn-secondary text-xs"><%= t('viewBtn') %></a>
-                  <a href="/admin/users/edit/<%= u.id %>/" class="al-btn-primary text-xs"><%= t('editUserBtn') %></a>
-                  <button type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="<%= t('deleteUserBtn') %>"
-                    onclick="deleteUser('<%= u.id %>')">
-                    <%- icon('trash-2', { size: 16 }) %>
+                <div class="flex items-center gap-1 whitespace-nowrap">
+                  <a href="/admin/users/view/<%= u.id %>/" class="al-btn-ghost" onclick="event.stopPropagation()" title="<%= t('viewBtn') %>" aria-label="<%= t('viewBtn') %>">
+                    <%- icon('external-link', { size: 14, class: 'shrink-0' }) %>
+                    <span><%= t('viewBtn') %></span>
+                  </a>
+                  <a href="/admin/users/edit/<%= u.id %>/" class="al-btn-ghost" onclick="event.stopPropagation()" title="<%= t('editUserBtn') %>" aria-label="<%= t('editUserBtn') %>">
+                    <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
+                    <span><%= t('editUserBtn') %></span>
+                  </a>
+                  <button type="button" class="al-btn-ghost" style="color:var(--theme-danger);" onclick="event.stopPropagation(); deleteUser('<%= u.id %>')" title="<%= t('deleteUserBtn') %>" aria-label="<%= t('deleteUserBtn') %>">
+                    <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
                   </button>
                 </div>
               </td>

@@ -1,99 +1,114 @@
-<%- include('../layouts/user', { title: 'Account' }) %>
+<%- include('../layouts/user', { title: t('accountSettings') }) %>
+<%
+  /* Image review status → badge variant + translated label (the status
+     value itself comes from the API in English). */
+  function imageStatusClass(status) {
+    if (status === 'approved') { return 'al-badge-online'; }
+    if (status === 'pending') { return 'al-badge-warning'; }
+    return 'al-badge-offline';
+  }
+  function imageStatusLabel(status) {
+    if (status === 'approved') { return t('approved'); }
+    if (status === 'pending') { return t('pending'); }
+    if (status === 'rejected') { return t('rejected'); }
+    return status || t('unknown');
+  }
+%>
 
-<div class="px-4 sm:px-6 lg:px-8 pt-4">
-  <div class="flex items-start justify-between gap-4">
-    <div>
-      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('accountSettings') %></h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('manageYourAccount') %></p>
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('accountSettings') %></h1>
+    <p class="al-page-desc"><%= t('manageYourAccount') %></p>
+  </div>
+  <div>
+    <div class="al-segmented" role="group">
+      <button type="button" class="al-segmented-btn" data-tab="profile" aria-pressed="true"><%= t('profile') %></button>
+      <button type="button" class="al-segmented-btn" data-tab="security" aria-pressed="false"><%= t('security') %></button>
+      <button type="button" class="al-segmented-btn" data-tab="images" aria-pressed="false"><%= t('images') %></button>
+      <button type="button" class="al-segmented-btn" data-tab="folders" aria-pressed="false"><%= t('folders') %></button>
     </div>
   </div>
+</header>
 
-  <!-- Tabs -->
-  <div class="mt-5 flex gap-1 p-1 rounded-xl w-fit" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
-    <button type="button" class="tab-btn active px-3 py-1.5 text-[12px] font-medium rounded-lg" data-tab="profile"><%= t('profile') %></button>
-    <button type="button" class="tab-btn px-3 py-1.5 text-[12px] font-medium rounded-lg" data-tab="security"><%= t('security') %></button>
-    <button type="button" class="tab-btn px-3 py-1.5 text-[12px] font-medium rounded-lg" data-tab="images"><%= t('images') %></button>
-    <button type="button" class="tab-btn px-3 py-1.5 text-[12px] font-medium rounded-lg" data-tab="folders"><%= t('folders') %></button>
-  </div>
+<div class="al-page-body">
 
   <!-- Profile Tab -->
   <div id="tab-profile" class="tab-content mt-4">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
       <!-- Avatar -->
-      <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('avatar') %></h3>
+      <section class="al-form-card">
+        <h3 class="al-form-card-title mb-4"><%= t('avatar') %></h3>
         <div class="flex items-center gap-4">
           <img id="avatarPreview"
             src="<%= account.avatar ? account.avatar : '/avatar/' + encodeURIComponent(account.username) %>"
-            class="h-16 w-16 rounded-xl object-cover" alt="<%= account.username %>"
-            style="border:2px solid var(--theme-border)">
+            class="al-avatar al-avatar-lg object-cover" alt="<%= account.username %>">
           <div>
             <form id="avatarForm" enctype="multipart/form-data">
               <input type="file" id="avatarInput" name="avatar" accept="image/*" class="hidden">
               <button type="button" onclick="document.getElementById('avatarInput').click()"
-                class="al-btn al-btn-secondary text-[12px]"><%= t('uploadAvatar') %></button>
+                class="al-btn al-btn-secondary"><%= t('uploadAvatar') %></button>
             </form>
             <% if (account.avatar) { %>
             <button type="button" onclick="removeAvatar()"
-              class="al-btn al-btn-ghost text-[12px] mt-1.5" style="color:var(--theme-danger)"><%= t('removeAvatar') %></button>
+              class="al-btn al-btn-ghost mt-1.5" style="color:var(--theme-danger)"><%= t('removeAvatar') %></button>
             <% } %>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- Username -->
-      <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><label for="username"><%= t('username') %></label></h3>
+      <section class="al-form-card">
+        <h3 class="al-form-card-title mb-4"><label for="username"><%= t('username') %></label></h3>
         <form id="usernameForm">
           <div class="al-form-field">
             <input type="text" id="username" name="username" value="<%= account.username %>"
               class="al-form-input" minlength="3" maxlength="32" pattern="[a-zA-Z0-9_-]+">
           </div>
-          <button type="submit" class="al-btn al-btn-primary text-[12px] mt-3"><%= t('saveChanges') %></button>
+          <button type="submit" class="al-btn al-btn-primary mt-3"><%= t('saveChanges') %></button>
         </form>
-      </div>
+      </section>
 
       <!-- Email -->
-      <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><label for="email"><%= t('email') %></label></h3>
+      <section class="al-form-card">
+        <h3 class="al-form-card-title mb-4"><label for="email"><%= t('email') %></label></h3>
         <form id="emailForm">
           <div class="al-form-field">
             <input type="email" id="email" name="email" value="<%= account.email %>"
               class="al-form-input">
           </div>
-          <button type="submit" class="al-btn al-btn-primary text-[12px] mt-3"><%= t('saveChanges') %></button>
+          <button type="submit" class="al-btn al-btn-primary mt-3"><%= t('saveChanges') %></button>
         </form>
-      </div>
+      </section>
 
       <!-- Description -->
-      <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><label for="description"><%= t('description') %></label></h3>
+      <section class="al-form-card">
+        <h3 class="al-form-card-title mb-4"><label for="description"><%= t('description') %></label></h3>
         <form id="descriptionForm">
           <div class="al-form-field">
             <textarea id="description" name="description" class="al-form-textarea" rows="3"
               maxlength="500"><%= account.description || '' %></textarea>
           </div>
-          <button type="submit" class="al-btn al-btn-primary text-[12px] mt-3"><%= t('saveChanges') %></button>
+          <button type="submit" class="al-btn al-btn-primary mt-3"><%= t('saveChanges') %></button>
         </form>
-      </div>
+      </section>
 
       <!-- Preferred Node -->
-      <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><label for="preferredNodeId"><%= t('preferredNode') %></label></h3>
+      <section class="al-form-card">
+        <h3 class="al-form-card-title mb-4"><label for="preferredNodeId"><%= t('preferredNode') %></label></h3>
         <form id="preferredNodeForm">
           <div class="al-form-field">
             <select id="preferredNodeId" name="preferredNodeId" class="al-form-select">
               <option value="" <%= !account.preferredNodeId ? 'selected' : '' %>><%= t('auto') %></option>
             </select>
           </div>
-          <button type="submit" class="al-btn al-btn-primary text-[12px] mt-3"><%= t('saveChanges') %></button>
+          <button type="submit" class="al-btn al-btn-primary mt-3"><%= t('saveChanges') %></button>
         </form>
-      </div>
+      </section>
 
       <!-- Language -->
-      <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><label for="language"><%= t('language') %></label></h3>
+      <section class="al-form-card">
+        <h3 class="al-form-card-title mb-4"><label for="language"><%= t('language') %></label></h3>
         <form id="languageForm">
           <div class="al-form-field">
             <select id="language" name="language" class="al-form-select">
@@ -105,20 +120,20 @@
               <option value="tr">Turkce</option>
             </select>
           </div>
-          <button type="submit" class="al-btn al-btn-primary text-[12px] mt-3"><%= t('saveChanges') %></button>
+          <button type="submit" class="al-btn al-btn-primary mt-3"><%= t('saveChanges') %></button>
         </form>
-      </div>
+      </section>
 
     </div>
   </div>
 
   <!-- Security Tab -->
   <div id="tab-security" class="tab-content mt-4 hidden">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
       <!-- Change Password -->
-      <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)"><%= t('changePassword') %></h3>
+      <section class="al-form-card">
+        <h3 class="al-form-card-title mb-4"><%= t('changePassword') %></h3>
         <form id="passwordForm">
           <div class="al-form-field">
             <label class="al-form-label" for="currentPassword"><%= t('currentPassword') %></label>
@@ -128,55 +143,53 @@
             <label class="al-form-label" for="newPassword"><%= t('newPassword') %></label>
             <input type="password" id="newPassword" name="newPassword" class="al-form-input" minlength="8" required>
           </div>
-          <button type="submit" class="al-btn al-btn-primary text-[12px] mt-3"><%= t('changePassword') %></button>
+          <button type="submit" class="al-btn al-btn-primary mt-3"><%= t('changePassword') %></button>
         </form>
-      </div>
+      </section>
 
       <!-- 2FA -->
-      <div class="al-card p-4">
-        <h3 class="text-[13px] font-medium mb-3" style="color:var(--theme-text-strong)">Two-Factor Authentication</h3>
+      <section class="al-form-card">
+        <div class="flex items-center justify-between gap-3 mb-4">
+          <h3 class="al-form-card-title"><%= t('twoFactorAuth') %></h3>
+          <% if (account.totpEnabled) { %>
+          <span class="al-badge al-badge-online"><%= t('enabled') %></span>
+          <% } else { %>
+          <span class="al-badge al-badge-offline"><%= t('disabled') %></span>
+          <% } %>
+        </div>
         <% if (account.totpEnabled) { %>
-        <div class="flex items-center gap-2 mb-3">
-          <span class="al-dot-online"></span>
-          <span class="text-[12px] font-medium" style="color:var(--theme-success)">Enabled</span>
-        </div>
-        <button type="button" onclick="disable2FA()" class="al-btn al-btn-danger text-[12px]">Disable 2FA</button>
+        <button type="button" onclick="disable2FA()" class="al-btn al-btn-danger-outline"><%= t('disable2FA') %></button>
         <% } else { %>
-        <div class="flex items-center gap-2 mb-3">
-          <span class="al-dot-offline"></span>
-          <span class="text-[12px] font-medium" style="color:var(--theme-text-muted)">Disabled</span>
-        </div>
-        <button type="button" onclick="setup2FA()" class="al-btn al-btn-primary text-[12px]">Enable 2FA</button>
+        <button type="button" onclick="setup2FA()" class="al-btn al-btn-primary"><%= t('enabled2FA') %></button>
         <% } %>
         <div id="twofa-setup" class="hidden mt-3">
-          <p class="text-[12px] mb-2" style="color:var(--theme-text-muted)">Scan this QR code with your authenticator app:</p>
-          <div id="qr-container" class="inline-block p-2 rounded-xl" style="background:white"></div>
-          <div class="al-form-field mt-3">
-            <label class="al-form-label" for="totpCode">Verification Code</label>
-            <input type="text" id="totpCode" class="al-form-input" maxlength="6" pattern="[0-9]{6}" placeholder="000000">
+          <div id="qr-container" class="al-code-wrap mb-3"></div>
+          <div class="al-form-field">
+            <label class="al-form-label" for="totpCode"><%= t('field2faCode') %></label>
+            <input type="text" id="totpCode" class="al-form-input font-mono" maxlength="6" pattern="[0-9]{6}"
+              placeholder="<%= t('field2faCodePlaceholder') %>" aria-describedby="totpCode-help">
+            <p class="al-form-help" id="totpCode-help"><%= t('cantScanKey') %></p>
           </div>
-          <button type="button" onclick="verify2FA()" class="al-btn al-btn-primary text-[12px] mt-2">Verify & Enable</button>
+          <button type="button" onclick="verify2FA()" class="al-btn al-btn-primary mt-3"><%= t('verifyAndEnable') %></button>
         </div>
-      </div>
+      </section>
 
       <!-- 2FA Recovery Codes -->
-      <div id="two-factor-recovery-codes" class="hidden al-card p-6 max-w-xl mx-auto">
-        <div class="flex items-start gap-3">
-          <div class="shrink-0">
-            <%- icon('key-round', { class: 'w-5 h-5', strokeWidth: 1.5, style: 'color:var(--theme-accent)' }) %>
-          </div>
-          <div>
-            <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong)"><%= t('savedRecoveryCodes') %></h2>
-            <p class="text-xs mt-1" style="color:var(--theme-text-muted)"><%= t('recoveryCodesDesc') %></p>
+      <div id="two-factor-recovery-codes" class="hidden al-form-card sm:col-span-2 max-w-xl">
+        <div class="flex items-start gap-3 mb-4">
+          <span class="al-icon-tile al-icon-tile-sm al-icon-tile-accent shrink-0"><%- icon('key-round', { class: 'size-4' }) %></span>
+          <div class="min-w-0">
+            <h3 class="al-form-card-title"><%= t('savedRecoveryCodes') %></h3>
+            <p class="al-form-card-desc"><%= t('recoveryCodesDesc') %></p>
           </div>
         </div>
-        <div id="recoveryCodesList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4"></div>
-        <div class="flex items-center justify-between mt-5 gap-3">
-          <button type="button" id="copyRecoveryCodes" class="al-btn-ghost text-sm inline-flex items-center gap-1.5">
-            <%- icon('copy', { size: 14 }) %>
+        <div id="recoveryCodesList" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+        <div class="flex flex-wrap items-center justify-between gap-3 mt-5">
+          <button type="button" id="copyRecoveryCodes" class="al-btn al-btn-ghost">
+            <%- icon('copy', { class: 'size-4' }) %>
             <%= t('copyAll') %>
           </button>
-          <a href="/account" class="al-btn-primary text-sm px-5"><%= t('iveSavedThem') %></a>
+          <a href="/account" class="al-btn al-btn-primary"><%= t('iveSavedThem') %></a>
         </div>
       </div>
 
@@ -185,14 +198,14 @@
 
   <!-- Images Tab -->
   <div id="tab-images" class="tab-content mt-4 hidden">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('myImages') %></h3>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <h2 class="al-section-title"><%= t('myImages') %></h2>
       <div class="flex gap-2">
-        <button type="button" onclick="showImportModal()" class="al-btn al-btn-secondary text-[12px]">
-          <%- icon('download', { class: 'w-3.5 h-3.5' }) %> Import URL
+        <button type="button" onclick="showImportModal()" class="al-btn al-btn-secondary">
+          <%- icon('download', { class: 'size-4' }) %> <%= t('importFromUrl') %>
         </button>
-        <a href="/my-images/new" class="al-btn al-btn-primary text-[12px]">
-          <%- icon('plus', { class: 'w-3.5 h-3.5' }) %> New Image
+        <a href="/my-images/new" class="al-btn al-btn-primary">
+          <%- icon('plus', { class: 'size-4' }) %> <%= t('newImage') %>
         </a>
       </div>
     </div>
@@ -204,39 +217,38 @@
         description: t('submitYourFirstImage')
       }) %>
     <% } else { %>
-    <div class="overflow-x-auto rounded-xl border" style="border-color:var(--theme-border)">
+    <div class="al-table-wrapper">
       <table class="al-table">
-        <thead class="al-table-head">
+        <thead class="al-table-thead">
           <tr>
-            <th class="al-table-th"><%= t('name') %></th>
-            <th class="al-table-th"><%= t('status') %></th>
-            <th class="al-table-th"><%= t('author') %></th>
-            <th class="al-table-th"></th>
+            <th scope="col" class="al-table-th"><%= t('name') %></th>
+            <th scope="col" class="al-table-th"><%= t('status') %></th>
+            <th scope="col" class="al-table-th"><%= t('author') %></th>
+            <th scope="col" class="al-table-th"><span class="sr-only"><%= t('actions') %></span></th>
           </tr>
         </thead>
         <tbody>
           <% images.forEach(function(img) { %>
           <tr class="al-table-tr">
             <td class="al-table-td">
-              <span class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= img.name %></span>
+              <span class="al-table-cell-strong"><%= img.name %></span>
             </td>
             <td class="al-table-td">
-              <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset"
-                style="<%= img.status === 'approved' ? 'background:var(--theme-success-bg);color:var(--theme-success)' : img.status === 'pending' ? 'background:var(--theme-warning-bg);color:var(--theme-warning)' : 'background:var(--theme-danger-bg);color:var(--theme-danger)' %>">
-                <%= img.status %>
-              </span>
+              <span class="al-badge <%= imageStatusClass(img.status) %>"><%= imageStatusLabel(img.status) %></span>
             </td>
             <td class="al-table-td">
-              <span class="text-[12px]" style="color:var(--theme-text-muted)"><%= img.author || '' %></span>
+              <span class="text-xs al-text-muted"><%= img.author || '' %></span>
             </td>
             <td class="al-table-td">
               <div class="flex items-center gap-1">
-                <a href="/my-images/edit/<%= img.id %>" class="al-btn al-btn-ghost p-1.5" title="Edit">
-                  <%- icon('pencil', { class: 'w-3.5 h-3.5' }) %>
+                <a href="/my-images/edit/<%= img.id %>" class="al-btn al-btn-ghost al-btn-icon-only"
+                  title="<%= t('edit') %>" aria-label="<%= t('edit') %>">
+                  <%- icon('pencil', { class: 'size-4' }) %>
                 </a>
                 <button type="button" onclick="deleteImage(<%= img.id %>, '<%= img.name %>')"
-                  class="al-btn al-btn-ghost p-1.5" style="color:var(--theme-danger)" title="Delete">
-                  <%- icon('trash-2', { class: 'w-3.5 h-3.5' }) %>
+                  class="al-btn al-btn-ghost al-btn-icon-only" style="color:var(--theme-danger)"
+                  title="<%= t('delete') %>" aria-label="<%= t('delete') %>">
+                  <%- icon('trash-2', { class: 'size-4' }) %>
                 </button>
               </div>
             </td>
@@ -250,19 +262,22 @@
 
   <!-- Folders Tab -->
   <div id="tab-folders" class="tab-content mt-4 hidden">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('serverFolders') %></h3>
-      <button type="button" onclick="showCreateFolder()" class="al-btn al-btn-primary text-[12px]">
-        <%- icon('plus', { class: 'w-3.5 h-3.5' }) %> <%= t('createFolder') %>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <h2 class="al-section-title"><%= t('serverFolders') %></h2>
+      <button type="button" onclick="showCreateFolder()" class="al-btn al-btn-primary">
+        <%- icon('plus', { class: 'size-4' }) %> <%= t('createFolder') %>
       </button>
     </div>
 
     <div id="create-folder-form" class="hidden mb-4">
-      <div class="al-card p-4">
-        <form id="newFolderForm" class="flex gap-2">
-          <input type="text" id="folderName" class="al-form-input flex-1" placeholder="Folder name" maxlength="64" required>
-          <button type="submit" class="al-btn al-btn-primary text-[12px]"><%= t('create') %></button>
-          <button type="button" onclick="hideCreateFolder()" class="al-btn al-btn-ghost text-[12px]"><%= t('cancel') %></button>
+      <div class="al-form-card">
+        <form id="newFolderForm" class="flex flex-col sm:flex-row gap-2">
+          <div class="al-form-field flex-1 min-w-0">
+            <label class="sr-only" for="folderName"><%= t('folderName') %></label>
+            <input type="text" id="folderName" class="al-form-input" placeholder="<%= t('folderName') %>" maxlength="64" required>
+          </div>
+          <button type="submit" class="al-btn al-btn-primary"><%= t('create') %></button>
+          <button type="button" onclick="hideCreateFolder()" class="al-btn al-btn-ghost"><%= t('cancel') %></button>
         </form>
       </div>
     </div>
@@ -274,27 +289,26 @@
         description: t('createFoldersToOrganize')
       }) %>
     <% } else { %>
-    <div class="space-y-3">
+    <div class="flex flex-col gap-3">
       <% folders.forEach(function(folder) { %>
-      <div class="al-card p-4" data-folder-id="<%= folder.id %>">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <%- icon('folder', { class: 'w-4 h-4', style: 'color:var(--theme-text-muted)' }) %>
-            <span class="text-[13px] font-medium" style="color:var(--theme-text-strong)"><%= folder.name %></span>
-            <% if (folder.members) { %>
-            <span class="text-[11px] px-1.5 py-0.5 rounded-md" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border); color:var(--theme-text-muted)"><%= folder.members.length %> <%= t('servers') %></span>
-            <% } %>
-          </div>
-          <div class="flex items-center gap-1">
-            <button type="button" onclick="renameFolder(<%= folder.id %>, '<%= folder.name %>')"
-              class="al-btn al-btn-ghost p-1.5" title="Rename">
-              <%- icon('pencil', { class: 'w-3.5 h-3.5' }) %>
-            </button>
-            <button type="button" onclick="deleteFolder(<%= folder.id %>, '<%= folder.name %>')"
-              class="al-btn al-btn-ghost p-1.5" style="color:var(--theme-danger)" title="Delete">
-              <%- icon('trash-2', { class: 'w-3.5 h-3.5' }) %>
-            </button>
-          </div>
+      <div class="al-card flex flex-wrap items-center justify-between gap-3" data-folder-id="<%= folder.id %>">
+        <div class="flex items-center gap-2 min-w-0">
+          <%- icon('folder', { class: 'w-4 h-4 shrink-0', style: 'color:var(--theme-text-muted)' }) %>
+          <span class="al-table-cell-strong truncate"><%= folder.name %></span>
+          <% if (folder.members) { %>
+          <span class="al-badge al-badge-neutral font-mono"><%= folder.members.length %> <%= t('servers') %></span>
+          <% } %>
+        </div>
+        <div class="flex items-center gap-1">
+          <button type="button" onclick="renameFolder(<%= folder.id %>, '<%= folder.name %>')"
+            class="al-btn al-btn-ghost al-btn-icon-only" title="<%= t('rename') %>" aria-label="<%= t('rename') %>">
+            <%- icon('pencil', { class: 'size-4' }) %>
+          </button>
+          <button type="button" onclick="deleteFolder(<%= folder.id %>, '<%= folder.name %>')"
+            class="al-btn al-btn-ghost al-btn-icon-only" style="color:var(--theme-danger)"
+            title="<%= t('delete') %>" aria-label="<%= t('delete') %>">
+            <%- icon('trash-2', { class: 'size-4' }) %>
+          </button>
         </div>
       </div>
       <% }); %>
@@ -306,22 +320,16 @@
 
 <script nonce="<%- nonce %>">
 (function() {
-  // Tab switching
-  var tabs = document.querySelectorAll('.tab-btn');
+  // Tab switching — the segmented control carries state on aria-pressed.
+  var tabs = document.querySelectorAll('.al-segmented-btn');
   var contents = document.querySelectorAll('.tab-content');
   tabs.forEach(function(tab) {
     tab.addEventListener('click', function() {
-      tabs.forEach(function(t) { t.classList.remove('active'); t.style.background = ''; t.style.color = ''; });
+      tabs.forEach(function(t) { t.setAttribute('aria-pressed', t === tab ? 'true' : 'false'); });
       contents.forEach(function(c) { c.classList.add('hidden'); });
-      tab.classList.add('active');
-      tab.style.background = 'var(--theme-bg)';
-      tab.style.color = 'var(--theme-text-strong)';
       document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
     });
   });
-  // Set initial active
-  tabs[0].style.background = 'var(--theme-bg)';
-  tabs[0].style.color = 'var(--theme-text-strong)';
 
   var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
@@ -379,7 +387,7 @@
           newPassword: document.getElementById('newPassword').value
         })
       });
-      if (r.ok) { showToast('<%= t("passwordChanged") %>', 'success'); document.getElementById('passwordForm').reset(); }
+      if (r.ok) { showToast('<%= t("passwordUpdated") %>', 'success'); document.getElementById('passwordForm').reset(); }
       else { var d = await r.text(); showToast(d, 'error'); }
     } catch(err) { showToast('<%= t("failedToUpdate") %>', 'error'); }
   });
@@ -392,7 +400,7 @@
     fd.append('avatar', file);
     try {
       var r = await fetch('/upload-avatar', { method: 'POST', headers: { 'x-csrf-token': csrfToken }, body: fd });
-      if (r.ok) { showToast('<%= t("avatarUpdated") %>', 'success'); window.location.reload(); }
+      if (r.ok) { showToast('<%= t("profilePictureUpdated") %>', 'success'); window.location.reload(); }
       else { showToast('<%= t("failedToUpload") %>', 'error'); }
     } catch(err) { showToast('<%= t("failedToUpload") %>', 'error'); }
   });
@@ -461,13 +469,16 @@
   };
 
   window.showImportModal = function() {
-    var url = prompt('Enter image URL:');
+    var url = prompt('<%= t("enterImageUrl") %>');
     if (url && url.trim()) {
       fetch('/my-images/import-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
         body: JSON.stringify({ url: url.trim() })
-      }).then(function(r) { if (r.ok) { showToast('Image imported!', 'success'); window.location.reload(); } });
+      }).then(function(r) {
+        if (r.ok) { showToast('<%= t("imageImported") %>', 'success'); window.location.reload(); }
+        else { showToast('<%= t("imageImportFailed") %>', 'error'); }
+      }).catch(function() { showToast('<%= t("imageImportFailed") %>', 'error'); });
     }
   };
 
@@ -478,10 +489,10 @@
       var data = await r.json();
       if (data.otpauthUrl) {
         document.getElementById('twofa-setup').classList.remove('hidden');
-        // Use a QR code library or show the otpauth URL
-        document.getElementById('qr-container').innerHTML = '<p class="text-[11px] font-mono break-all" style="color:#333">' + data.otpauthUrl + '</p>';
+        document.getElementById('qr-container').innerHTML =
+          '<pre class="al-code"><code>' + escHtml(data.otpauthUrl) + '</code></pre>';
       }
-    } catch(err) { showToast('Failed to set up 2FA', 'error'); }
+    } catch(err) { showToast('<%= t("twoFactorSetupFailed") %>', 'error'); }
   };
 
   window.verify2FA = async function() {
@@ -495,15 +506,14 @@
       });
       var data = await r.json();
       if (data.enabled) {
-        showToast('2FA enabled!', 'success');
+        showToast('<%= t("twoFactorEnabled") %>', 'success');
         // Populate recovery codes
         var list = document.getElementById('recoveryCodesList');
         list.innerHTML = '';
         if (Array.isArray(data.recoveryCodes)) {
           data.recoveryCodes.forEach(function(code) {
             var el = document.createElement('div');
-            el.className = 'al-card p-2 text-center font-mono text-[13px] tracking-wider';
-            el.style.cssText = 'color:var(--theme-text-strong); background:var(--theme-bg-secondary)';
+            el.className = 'al-badge al-badge-neutral font-mono justify-center';
             el.textContent = code;
             list.appendChild(el);
           });
@@ -511,26 +521,26 @@
         // Wire copy button
         document.getElementById('copyRecoveryCodes').addEventListener('click', function() {
           var codes = Array.isArray(data.recoveryCodes) ? data.recoveryCodes.join('\n') : '';
-          navigator.clipboard.writeText(codes).then(function() { showToast('Copied!', 'success'); });
+          navigator.clipboard.writeText(codes).then(function() { showToast('<%= t("copied") %>', 'success'); });
         });
         // Show recovery codes panel
         document.getElementById('two-factor-recovery-codes').classList.remove('hidden');
       }
-      else { showToast(data.error || 'Invalid code', 'error'); }
-    } catch(err) { showToast('Failed to enable 2FA', 'error'); }
+      else { showToast(data.error || '<%= t("invalidVerificationCode") %>', 'error'); }
+    } catch(err) { showToast('<%= t("twoFactorSetupFailed") %>', 'error'); }
   };
 
   window.disable2FA = async function() {
     window.modal.confirm({
-      title: 'Disable 2FA',
-      body: 'Are you sure you want to disable two-factor authentication?',
+      title: '<%= t("disable2FA") %>',
+      body: '<%= t("disable2FAConfirm") %>',
       danger: true,
-      confirmLabel: 'Disable',
+      confirmLabel: '<%= t("disable") %>',
       onConfirm: async function() {
         try {
           var r = await fetch('/account/2fa/disable', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken } });
-          if (r.ok) { showToast('2FA disabled', 'success'); window.location.reload(); }
-        } catch(err) { showToast('Failed to disable 2FA', 'error'); }
+          if (r.ok) { showToast('<%= t("twoFactorDisabled") %>', 'success'); window.location.reload(); }
+        } catch(err) { showToast('<%= t("failedToDisable2fa") %>', 'error'); }
       }
     });
   };
@@ -538,7 +548,8 @@
   // Check hash for tab
   var hash = window.location.hash.replace('#', '');
   if (hash && document.getElementById('tab-' + hash)) {
-    document.querySelector('[data-tab="' + hash + '"]').click();
+    var hashTab = document.querySelector('[data-tab="' + hash + '"]');
+    if (hashTab) { hashTab.click(); }
   }
 })();
 </script>

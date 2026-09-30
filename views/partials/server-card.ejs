@@ -1,48 +1,44 @@
-<% /* server-card partial — expects `server` with status, node, image, etc. */ %>
-<a href="/server/<%= server.UUID %>" class="group al-card hover:border-[var(--theme-border-accent)] transition-colors">
-  <div class="flex items-center gap-3">
-    <div class="shrink-0">
-      <% if (typeof server.status !== 'undefined') { %>
-        <% if (server.status === 'running') { %>
-          <span class="al-dot-online"></span>
-        <% } else if (server.status === 'stopped') { %>
-          <span class="al-dot-offline"></span>
-        <% } else { %>
-          <span class="al-dot-warning"></span>
-        <% } %>
-      <% } else { %>
-        <span class="al-dot-offline"></span>
-      <% } %>
-    </div>
-    <div class="min-w-0 flex-1">
-      <p class="text-[13px] font-medium truncate" style="color:var(--theme-text-strong)"><%= server.name %></p>
-      <% if (server.description) { %>
-      <p class="text-[11px] truncate mt-0.5" style="color:var(--theme-text-muted)"><%= server.description %></p>
-      <% } %>
-    </div>
+<% /* server-card — the old panel's card anatomy:
+     header row (name + status chip) · RAM / CPU stat rows · footer strip
+     with the live status on the left and the manage affordance on the right.
+     The whole card is the link to the server, so the inner affordance is a
+     span (a nested <a> would be invalid) and is hidden from the accessible
+     name — the anchor already reads name first, then the stats. */ %>
+<%
+  const running = server.status === 'running';
+  const pct = function (v) {
+    return typeof v !== 'undefined' && v !== null && v !== '' ? v + '%' : '--';
+  };
+%>
+<a href="/server/<%= server.UUID %>" class="al-card">
+  <div class="flex items-start justify-between gap-3">
+    <p class="min-w-0 flex-1 text-lg font-semibold truncate" style="color:var(--theme-text-strong)"><%= server.name %></p>
+    <% if (running) { %>
+    <span class="al-badge-online shrink-0">
+      <span class="al-dot-online al-dot-ping"></span><%= t('running') %>
+    </span>
+    <% } else { %>
+    <span class="al-badge-offline shrink-0">
+      <span class="al-dot-offline"></span><%= t('stopped') %>
+    </span>
+    <% } %>
   </div>
 
-  <div class="mt-3 grid grid-cols-3 gap-2">
-    <div>
-      <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= t('cpu') %></p>
-      <p class="text-[12px] font-mono" style="color:var(--theme-text)"><%= typeof server.cpuUsage !== 'undefined' ? server.cpuUsage + '%' : '--' %></p>
+  <dl class="mt-4 flex flex-col gap-3">
+    <div class="flex items-center justify-between gap-3">
+      <dt class="text-sm" style="color:var(--theme-text-muted)"><%= t('ramUsage') %></dt>
+      <dd class="al-badge al-badge-neutral font-mono tabular-nums"><%= pct(server.ramUsage) %></dd>
     </div>
-    <div>
-      <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= t('memory') %></p>
-      <p class="text-[12px] font-mono" style="color:var(--theme-text)"><%= typeof server.ramUsed !== 'undefined' ? server.ramUsed : '--' %></p>
+    <div class="flex items-center justify-between gap-3">
+      <dt class="text-sm" style="color:var(--theme-text-muted)"><%= t('cpuUsage') %></dt>
+      <dd class="al-badge al-badge-neutral font-mono tabular-nums"><%= pct(server.cpuUsage) %></dd>
     </div>
-    <div>
-      <p class="text-[10px] font-medium" style="color:var(--theme-text-muted)"><%= t('disk') %></p>
-      <p class="text-[12px] font-mono" style="color:var(--theme-text)"><%= typeof server.Storage !== 'undefined' ? (server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB') : '--' %></p>
-    </div>
-  </div>
+  </dl>
 
-  <div class="mt-2.5 pt-2.5 flex items-center gap-2 border-t" style="border-color:var(--theme-border)">
-    <% if (server.image) { %>
-    <span class="text-[10px] px-1.5 py-0.5 rounded-md" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border); color:var(--theme-text-muted)"><%= server.image.name %></span>
-    <% } %>
-    <% if (server.node) { %>
-    <span class="text-[10px] px-1.5 py-0.5 rounded-md ml-auto" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border); color:var(--theme-text-muted)"><%= server.node.name %></span>
-    <% } %>
+  <div class="al-card-footer justify-between mt-5">
+    <span class="flex items-center gap-2" style="color:var(--theme-text-muted)">
+      <span class="al-dot-<%= running ? 'online al-dot-ping' : 'offline' %>"></span><%= running ? t('online') : t('offline') %>
+    </span>
+    <span aria-hidden="true" class="al-btn-link"><%= t('manage') %> →</span>
   </div>
 </a>

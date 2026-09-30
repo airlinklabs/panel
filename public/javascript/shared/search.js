@@ -1,5 +1,17 @@
 (function () {
-  const searchButton = document.getElementById('searchButton');
+  // Two entry points open this overlay: the desktop topbar pill and the phone
+  // top bar. Both are marked data-search-trigger, so state (aria-expanded) is
+  // kept in sync across every one of them.
+  const searchButtons = Array.prototype.slice.call(
+    document.querySelectorAll('[data-search-trigger]'),
+  );
+  const searchButton = searchButtons[0] || null;
+  let lastTrigger = null;
+  const setSearchExpanded = function (value) {
+    searchButtons.forEach(function (btn) {
+      btn.setAttribute('aria-expanded', value);
+    });
+  };
   const searchOverlay = document.getElementById('searchOverlay');
   const searchPanel = document.getElementById('searchPanel');
   const searchInput = document.getElementById('searchInput');
@@ -32,6 +44,18 @@
     const SCORE_FUZZY = 15;
 
     const isAdmin = !!document.querySelector('a[href="/admin/overview"]');
+
+    // Copy is pulled from the live catalog, injected as window.__i18n by
+    // layouts/base.ejs. Every string that reaches the user goes through tx();
+    // the English literal is only the last-resort fallback.
+    function tx(key, fallback) {
+      return (window.__i18n && window.__i18n[key]) || fallback;
+    }
+    // Admin pages are listed with an "Admin" prefix so they stay distinct
+    // from their user-facing twins in the same result list.
+    function txAdmin(key, fallback) {
+      return `${tx('admin', 'Admin')} ${tx(key, fallback)}`;
+    }
 
     const typeIcon = {
       server: alIcon('server', 'w-4 h-4 shrink-0 text-neutral-400'),
@@ -137,21 +161,28 @@
       logout: 'logout signout sign out exit',
     };
 
+    // `label` is a catalog key resolved through tx()/txAdmin() so the result
+    // list is translated; `kw` stays English because it is a hidden search
+    // index, never rendered.
     const pageCatalog = (function () {
       const pages = [
         {
-          label: 'Servers',
+          label: tx('navServers', 'Servers'),
           url: '/server',
           kw: 'instances containers game list dashboard',
         },
-        { label: 'Dashboard', url: '/', kw: 'home dashboard start main' },
         {
-          label: 'Create Server',
+          label: tx('navDashboard', 'Dashboard'),
+          url: '/',
+          kw: 'home dashboard start main',
+        },
+        {
+          label: tx('createServer', 'Create server'),
           url: '/create-server',
           kw: 'new server instance deploy create',
         },
         {
-          label: 'Account',
+          label: tx('navAccount', 'Account'),
           url: '/account',
           kw: 'profile me my settings password avatar email',
         },
@@ -159,112 +190,112 @@
       if (isAdmin) {
         pages.push(
           {
-            label: 'Admin Overview',
+            label: txAdmin('adminOverviewTitle', 'Overview'),
             url: '/admin/overview',
             kw: 'dashboard home stats system status',
           },
           {
-            label: 'Admin Settings',
+            label: txAdmin('adminSettingsTitle', 'Settings'),
             url: '/admin/settings',
             kw: 'configuration preferences panel options site',
           },
           {
-            label: 'Admin Servers',
+            label: txAdmin('adminServersTitle', 'Servers'),
             url: '/admin/servers',
             kw: 'manage servers list instances delete',
           },
           {
-            label: 'Admin Users',
+            label: txAdmin('adminUsersTitle', 'Users'),
             url: '/admin/users',
             kw: 'members accounts people manage delete',
           },
           {
-            label: 'Admin Nodes',
+            label: txAdmin('adminNodesTitle', 'Nodes'),
             url: '/admin/nodes',
             kw: 'machines daemons hosts workers allocate',
           },
           {
-            label: 'Admin Images',
+            label: txAdmin('adminImagesTitlePage', 'Images'),
             url: '/admin/images',
             kw: 'docker eggs templates boxes images',
           },
           {
-            label: 'Admin Addons',
+            label: txAdmin('adminAddonsTitle', 'Addons'),
             url: '/admin/addons',
             kw: 'plugins extensions mods installed',
           },
           {
-            label: 'Airlink Cloud',
+            label: tx('navAirlinkCloud', 'Airlink Cloud'),
             url: '/airlink-cloud/settings',
             kw: 'cloud backup updates airlink',
           },
           {
-            label: 'API Keys',
+            label: tx('navApiKeys', 'API Keys'),
             url: '/admin/apikeys',
             kw: 'tokens access auth api keys',
           },
           {
-            label: 'Security',
+            label: tx('security', 'Security'),
             url: '/admin/settings',
             kw: 'ban bans ips rate limit moderation',
           },
           {
-            label: 'Player Stats',
+            label: tx('adminPlayerStatsTitle', 'Player Stats'),
             url: '/admin/playerstats',
             kw: 'players analytics stats leaderboard top',
           },
           {
-            label: 'Analytics',
+            label: tx('adminAnalyticsTitle', 'Analytics'),
             url: '/admin/analytics',
             kw: 'charts stats metrics graphs',
           },
           {
-            label: 'Addon Store',
+            label: tx('addonStoreTitle', 'Addon Store'),
             url: '/admin/addons/store',
             kw: 'plugins store marketplace extensions install',
           },
           {
-            label: 'Image Store',
+            label: tx('imageStoreTitle', 'Image Store'),
             url: '/admin/images#store',
             kw: 'images store marketplace eggs templates install',
           },
           {
-            label: 'API Documentation',
+            label: tx('apiDocs', 'API Documentation'),
             url: '/admin/api/docs',
             kw: 'documentation api reference endpoints docs',
           },
           {
-            label: 'Create Server',
+            label: tx('adminCreateServerTitle', 'Create Server'),
             url: '/admin/servers/create',
             kw: 'new server deploy create admin',
           },
           {
-            label: 'Create User',
+            label: tx('adminCreateUserTitle', 'Create User'),
             url: '/admin/users/create',
             kw: 'new user account add admin',
           },
           {
-            label: 'Create Node',
+            label: tx('adminCreateNodeTitle', 'Create Node'),
             url: '/admin/nodes/create',
             kw: 'new node machine add admin',
           },
           {
-            label: 'Create Image',
+            label: tx('adminCreateImageTitle', 'Create Image'),
             url: '/admin/images/create',
             kw: 'new image docker egg add admin',
           },
           {
-            label: 'Upload Image',
+            label: tx('uploadImage', 'Upload Image'),
             url: '/admin/images/upload',
             kw: 'upload image docker egg json',
           },
           {
-            label: 'Radar',
+            label: tx('adminRadarTitle', 'Radar'),
             url: '/admin/radar/scripts',
             kw: 'radar scan scripts virustotal virus total',
           },
           {
-            label: 'Menu',
+            label: tx('navMenu', 'Menu'),
             url: '/admin/menu',
             kw: 'menu navigation sidebar items',
           },
@@ -337,22 +368,22 @@
       activeIndex = -1;
 
       const quickLinks = [
-        { label: 'Servers', url: '/server', icon: 'server' },
-        { label: 'Account', url: '/account', icon: 'user' },
+        { label: tx('navServers', 'Servers'), url: '/server', icon: 'server' },
+        { label: tx('navAccount', 'Account'), url: '/account', icon: 'user' },
       ];
       if (isAdmin) {
         quickLinks.push({
-          label: 'Admin Overview',
+          label: txAdmin('adminOverviewTitle', 'Overview'),
           url: '/admin/overview',
           icon: 'nav',
         });
         quickLinks.push({
-          label: 'Admin Servers',
+          label: txAdmin('adminServersTitle', 'Servers'),
           url: '/admin/servers',
           icon: 'server',
         });
         quickLinks.push({
-          label: 'Admin Users',
+          label: txAdmin('adminUsersTitle', 'Users'),
           url: '/admin/users',
           icon: 'user',
         });
@@ -362,7 +393,7 @@
         const hdr = document.createElement('p');
         hdr.className =
           'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
-        hdr.textContent = 'Quick Links';
+        hdr.textContent = tx('searchQuickLinks', 'Quick Links');
         searchResults.appendChild(hdr);
 
         quickLinks.forEach(function (item) {
@@ -389,7 +420,7 @@
         const hdr = document.createElement('p');
         hdr.className =
           'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
-        hdr.textContent = 'Recent';
+        hdr.textContent = tx('searchRecent', 'Recent');
         searchResults.appendChild(hdr);
 
         recentSearches.forEach(function (term) {
@@ -403,7 +434,9 @@
             }</span></span>` +
             `<button class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1" data-remove="${ 
               escHtml(term) 
-            }" aria-label="Remove">${ 
+            }" aria-label="${ 
+              escHtml(tx('remove', 'Remove')) 
+            }">${ 
               alIcon('x', 'w-3 h-3') 
             }</button>`;
 
@@ -452,7 +485,8 @@
         msg.className =
           'text-sm font-medium text-neutral-600 dark:text-neutral-300';
         msg.textContent =
-          `${searchOverlay.dataset.emptyTitle || 'No results for' 
+          `${searchOverlay.dataset.emptyTitle ||
+          tx('searchEmptyTitle', 'No results for') 
           } "${ 
             term 
           }"`;
@@ -463,7 +497,10 @@
           'text-xs text-neutral-500 dark:text-neutral-400 max-w-xs';
         hint.textContent =
           searchOverlay.dataset.emptyHint ||
-          'Try a different term, or search for a server, user, node, or page.';
+          tx(
+            'searchEmptyHint',
+            'Try a different term, or search for a server, user, node, or page.',
+          );
         wrap.appendChild(hint);
 
         searchResults.appendChild(wrap);
@@ -479,11 +516,11 @@
 
       const order = ['server', 'user', 'node', 'feature', 'nav'];
       const labels = {
-        server: 'Servers',
-        user: 'Users',
-        node: 'Nodes',
-        feature: 'Features',
-        nav: 'Pages',
+        server: tx('servers', 'Servers'),
+        user: tx('users', 'Users'),
+        node: tx('nodes', 'Nodes'),
+        feature: tx('features', 'Features'),
+        nav: tx('navPages', 'Pages'),
       };
 
       order.forEach(function (type) {
@@ -582,11 +619,12 @@
       searchOverlay.classList.remove('hidden');
       searchOverlay.classList.add('flex');
 
+      const origin = !fromKeyboard && (lastTrigger || searchButton);
       const panel = searchPanel.getBoundingClientRect();
       let ox = panel.width / 2;
       let oy = panel.height / 2;
-      if (!fromKeyboard && searchButton) {
-        const btn = searchButton.getBoundingClientRect();
+      if (origin) {
+        const btn = origin.getBoundingClientRect();
         ox = btn.left + btn.width / 2 - panel.left;
         oy = btn.top + btn.height / 2 - panel.top;
       }
@@ -596,7 +634,7 @@
       requestAnimationFrame(function () {
         searchPanel.classList.add('open');
       });
-      if (searchButton) {searchButton.setAttribute('aria-expanded', 'true');}
+      setSearchExpanded('true');
 
       if (!searchInput.value.trim()) {showRecommendations();}
       requestAnimationFrame(function () {
@@ -607,7 +645,7 @@
     function closeSearch() {
       if (searchOverlay.classList.contains('hidden') || panelClosing) {return;}
       panelClosing = true;
-      if (searchButton) {searchButton.setAttribute('aria-expanded', 'false');}
+      setSearchExpanded('false');
       searchInput.setAttribute('aria-expanded', 'false');
       searchInput.setAttribute('aria-activedescendant', '');
       const done = function () {
@@ -624,11 +662,12 @@
       else {setTimeout(done, CLOSE_ANIMATION_MS);}
     }
 
-    if (searchButton) {
-      searchButton.addEventListener('click', function () {
+    searchButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        lastTrigger = btn;
         openSearch(false);
       });
-    }
+    });
 
     searchOverlay.addEventListener('click', function (e) {
       if (e.target === searchOverlay) {closeSearch();}

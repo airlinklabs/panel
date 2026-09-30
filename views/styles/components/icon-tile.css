@@ -1,0 +1,74 @@
+/* Icon tile — square rounded container holding an icon or avatar initial.
+   Used by admin/servers/edit toggle rows and admin/nodes locations. */
+@layer components {
+  .al-icon-tile {
+    @apply inline-flex shrink-0 items-center justify-center rounded-xl;
+    width: 40px;
+    height: 40px;
+    background: var(--theme-bg-secondary);
+    color: var(--theme-text-muted);
+    border: 1px solid var(--theme-border);
+  }
+
+  .al-icon-tile-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .al-icon-tile-lg {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  }
+
+  /* Disc form — status/summary circles (32px + 16px icon). */
+  .al-icon-tile-round {
+    border-radius: 999px;
+  }
+
+  .al-icon-tile > svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .al-icon-tile-sm > svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .al-icon-tile-lg > svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .al-icon-tile-accent {
+    background: color-mix(in srgb, var(--theme-accent) 14%, transparent);
+    color: var(--theme-accent);
+    border-color: color-mix(in srgb, var(--theme-accent) 28%, transparent);
+  }
+
+  .al-icon-tile-success {
+    background: color-mix(in srgb, var(--theme-success) 14%, transparent);
+    color: var(--theme-success);
+    border-color: color-mix(in srgb, var(--theme-success) 28%, transparent);
+  }
+
+  .al-icon-tile-warning {
+    background: color-mix(in srgb, var(--theme-warning) 16%, transparent);
+    color: var(--theme-warning);
+    border-color: color-mix(in srgb, var(--theme-warning) 30%, transparent);
+  }
+
+  .al-icon-tile-info {
+    background: color-mix(in srgb, var(--theme-info) 14%, transparent);
+    color: var(--theme-info);
+    border-color: color-mix(in srgb, var(--theme-info) 28%, transparent);
+  }
+
+  .al-icon-tile-danger {
+    background: color-mix(in srgb, var(--theme-danger) 14%, transparent);
+    color: var(--theme-danger);
+    border-color: color-mix(in srgb, var(--theme-danger) 28%, transparent);
+  }
+}

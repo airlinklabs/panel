@@ -1,87 +1,96 @@
-<%- include('../../layouts/user', { title: (server.name || 'Server') + ' — SFTP' }) %>
+<%- include('../../layouts/user', { title: (server.name || t('server')) + ' — ' + t('navSFTP') }) %>
 
-<nav aria-label="Breadcrumb" class="al-breadcrumb mb-6">
-  <ol class="flex items-center text-sm gap-1">
-    <li class="flex items-center">
-      <a href="/" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= t('dashboard') %></a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <a href="/server/<%= server.UUID %>" class="transition-colors hover:underline" style="color:var(--theme-text-muted);"><%= server.name %></a>
-    </li>
-    <li class="flex items-center">
-      <span class="mx-1.5" style="color:var(--theme-text-muted);"><%- icon('chevron-right', { class: 'w-3.5 h-3.5' }) %></span>
-      <span style="color:var(--theme-text);">SFTP</span>
-    </li>
-  </ol>
-</nav>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('dashboard'), url: '/' },
+    { label: server.name, url: '/server/' + server.UUID },
+    { label: t('navSFTP') }
+  ] }) %>
+</div>
 
-<div class="px-6 sm:px-8 pb-12" data-server-uuid="<%= server.UUID %>">
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('navSFTP') %></h1>
+    <p class="al-page-desc"><%= t('sftpPageDesc') %></p>
+  </div>
+</header>
 
-  <h1 class="text-xl font-semibold mb-6" style="color:var(--theme-text);">SFTP</h1>
+<div class="al-page-body" data-server-uuid="<%= server.UUID %>">
 
   <!-- Connection Info Card -->
-  <div class="al-card p-6 mb-6">
-    <div class="flex items-center gap-2 mb-4">
-      <%- icon('globe', { class: 'w-5 h-5', strokeWidth: 1.5, style: 'color:var(--theme-primary);' }) %>
-      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Connection Information</h2>
+  <div class="al-card mb-4">
+    <div class="al-card-header">
+      <div class="flex items-center gap-2 min-w-0">
+        <%- icon('globe', { class: 'w-4 h-4 shrink-0', strokeWidth: 1.5, style: 'color:var(--theme-primary);' }) %>
+        <h2 class="al-card-title"><%= t('connectionInformation') %></h2>
+      </div>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <p class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);">Host</p>
-        <div class="flex items-center gap-2">
-          <code id="sftp-host" class="text-sm px-2 py-1 rounded-lg" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong);">—</code>
-          <button type="button" class="copy-btn text-xs px-2 py-1 rounded-lg transition-colors" style="color:var(--theme-text-muted);" data-copy-from="#sftp-host">Copy</button>
+    <div class="al-card-body">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <p class="al-form-label"><%= t('host') %></p>
+          <div class="flex items-center gap-2">
+            <code id="sftp-host" class="al-chip al-chip-mono">—</code>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-host"><%= t('copy') %></button>
+          </div>
         </div>
-      </div>
-      <div>
-        <p class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);">Port</p>
-        <div class="flex items-center gap-2">
-          <code id="sftp-port" class="text-sm px-2 py-1 rounded-lg" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong);">—</code>
-          <button type="button" class="copy-btn text-xs px-2 py-1 rounded-lg transition-colors" style="color:var(--theme-text-muted);" data-copy-from="#sftp-port">Copy</button>
+        <div>
+          <p class="al-form-label"><%= t('port') %></p>
+          <div class="flex items-center gap-2">
+            <code id="sftp-port" class="al-chip al-chip-mono">—</code>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-port"><%= t('copy') %></button>
+          </div>
         </div>
-      </div>
-      <div>
-        <p class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);">Username</p>
-        <div class="flex items-center gap-2">
-          <code id="sftp-username" class="text-sm px-2 py-1 rounded-lg" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong);">—</code>
-          <button type="button" class="copy-btn text-xs px-2 py-1 rounded-lg transition-colors" style="color:var(--theme-text-muted);" data-copy-from="#sftp-username">Copy</button>
+        <div>
+          <p class="al-form-label"><%= t('username') %></p>
+          <div class="flex items-center gap-2">
+            <code id="sftp-username" class="al-chip al-chip-mono">—</code>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-username"><%= t('copy') %></button>
+          </div>
         </div>
-      </div>
-      <div>
-        <p class="text-[11px] font-medium uppercase tracking-wide mb-1" style="color:var(--theme-text-muted);">Password</p>
-        <div class="flex items-center gap-2">
-          <code id="sftp-password" class="text-sm px-2 py-1 rounded-lg" style="background:var(--theme-bg-secondary);color:var(--theme-text-strong);">—</code>
-          <button type="button" class="copy-btn text-xs px-2 py-1 rounded-lg transition-colors" style="color:var(--theme-text-muted);" data-copy-from="#sftp-password">Copy</button>
+        <div>
+          <p class="al-form-label"><%= t('password') %></p>
+          <div class="flex items-center gap-2">
+            <code id="sftp-password" class="al-chip al-chip-mono">—</code>
+            <button type="button" class="copy-btn al-btn-ghost al-btn-sm" data-copy-from="#sftp-password"><%= t('copy') %></button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Actions Card -->
-  <div class="al-card p-6 mb-6">
-    <div class="flex items-center gap-2 mb-4">
-      <%- icon('key', { class: 'w-5 h-5', strokeWidth: 1.5, style: 'color:var(--theme-primary);' }) %>
-      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Credentials</h2>
+  <div class="al-card mb-4">
+    <div class="al-card-header">
+      <div class="flex items-center gap-2 min-w-0">
+        <%- icon('key', { class: 'w-4 h-4 shrink-0', strokeWidth: 1.5, style: 'color:var(--theme-primary);' }) %>
+        <h2 class="al-card-title"><%= t('sftpCredentials') %></h2>
+      </div>
     </div>
-    <div class="flex flex-wrap gap-2">
-      <button id="generatePasswordBtn" type="button" class="al-btn-primary px-4 py-2 rounded-xl text-sm font-medium inline-flex items-center gap-1.5">
-        <%- icon('key', { class: 'w-4 h-4', strokeWidth: 2 }) %> <%= t('generatePassword') %>
-      </button>
-      <button id="deletePasswordBtn" type="button" class="al-btn-danger px-4 py-2 rounded-xl text-sm font-medium inline-flex items-center gap-1.5">
-        <%- icon('trash-2', { class: 'w-4 h-4', strokeWidth: 2 }) %> <%= t('deletePassword') %>
-      </button>
+    <div class="al-card-body">
+      <div class="flex flex-wrap gap-2">
+        <button id="generatePasswordBtn" type="button" class="al-btn-primary min-h-11">
+          <%- icon('key', { class: 'w-4 h-4', strokeWidth: 2 }) %> <%= t('generatePassword') %>
+        </button>
+        <button id="deletePasswordBtn" type="button" class="al-btn-danger min-h-11">
+          <%- icon('trash-2', { class: 'w-4 h-4', strokeWidth: 2 }) %> <%= t('deletePassword') %>
+        </button>
+      </div>
     </div>
   </div>
 
   <!-- Recent Activity Card -->
-  <div class="al-card p-6">
-    <div class="flex items-center gap-2 mb-4">
-      <%- icon('activity', { class: 'w-5 h-5', strokeWidth: 1.5, style: 'color:var(--theme-primary);' }) %>
-      <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);">Recent Activity</h2>
+  <div class="al-card">
+    <div class="al-card-header">
+      <div class="flex items-center gap-2 min-w-0">
+        <%- icon('activity', { class: 'w-4 h-4 shrink-0', strokeWidth: 1.5, style: 'color:var(--theme-primary);' }) %>
+        <h2 class="al-card-title"><%= t('recentActivity') %></h2>
+      </div>
     </div>
-    <div id="sftp-activity">
-      <p class="text-xs" style="color:var(--theme-text-muted);">Loading activity...</p>
+    <div class="al-card-body">
+      <div id="sftp-activity">
+        <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('loadingActivity') %></p>
+      </div>
     </div>
   </div>
 
@@ -90,6 +99,9 @@
 <script type="module" nonce="<%- nonce %>">
   var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
   const serverUUID = document.querySelector('[data-server-uuid]')?.dataset.serverUuid;
+  const copyLabel = <%- JSON.stringify(t('copy')) %>;
+  const copiedLabel = <%- JSON.stringify(t('copied')) %>;
+  const noActivityLabel = <%- JSON.stringify(t('noRecentActivity')) %>;
 
   // Load credentials
   async function loadCredentials() {
@@ -107,28 +119,29 @@
   }
 
   // Load activity
+  function renderNoActivity(el) {
+    const p = document.createElement('p');
+    p.className = 'text-xs';
+    p.style.color = 'var(--theme-text-muted)';
+    p.textContent = noActivityLabel;
+    el.replaceChildren(p);
+  }
+
   async function loadActivity() {
     try {
+      const el = document.getElementById('sftp-activity');
       const res = await fetch(`/server/${serverUUID}/sftp/activity`);
-      if (!res.ok) {
-        document.getElementById('sftp-activity').innerHTML =
-          '<p class="text-xs" style="color:var(--theme-text-muted);">No recent activity</p>';
-        return;
-      }
+      if (!res.ok) { renderNoActivity(el); return; }
       const data = await res.json();
       const activities = data.data || data || [];
-      const el = document.getElementById('sftp-activity');
-      if (!activities.length) {
-        el.innerHTML = '<p class="text-xs" style="color:var(--theme-text-muted);">No recent activity</p>';
-        return;
-      }
+      if (!activities.length) { renderNoActivity(el); return; }
       el.innerHTML = activities.slice(0, 10).map(a => `
         <div class="flex items-center justify-between py-2 border-b" style="border-color:var(--theme-border);">
-          <div class="flex items-center gap-2">
-            <span class="text-xs" style="color:var(--theme-text-strong);">${a.action || '—'}</span>
-            <span class="text-xs" style="color:var(--theme-text-muted);">${a.path || ''}</span>
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-xs shrink-0" style="color:var(--theme-text-strong);">${a.action || '—'}</span>
+            <span class="text-xs truncate" style="color:var(--theme-text-muted);">${a.path || ''}</span>
           </div>
-          <span class="text-[10px]" style="color:var(--theme-text-muted);">${a.timestamp ? new Date(a.timestamp).toLocaleString() : ''}</span>
+          <span class="text-[10px] shrink-0" style="color:var(--theme-text-muted);">${a.timestamp ? new Date(a.timestamp).toLocaleString() : ''}</span>
         </div>
       `).join('');
     } catch (e) {
@@ -146,7 +159,7 @@
       const data = await res.json();
       if (data.success !== false) {
         loadCredentials();
-        if (window.showToast) window.showToast('Password generated', 'success');
+        if (window.showToast) window.showToast(<%- JSON.stringify(t('passwordGenerated')) %>, 'success');
       }
     } catch (e) {
       console.error('Failed to generate password', e);
@@ -155,7 +168,7 @@
 
   // Delete password
   document.getElementById('deletePasswordBtn')?.addEventListener('click', async () => {
-    if (!confirm('Delete your SFTP password? You will lose access.')) return;
+    if (!confirm(<%- JSON.stringify(t('confirmDeleteSftpPassword')) %>)) return;
     try {
       const res = await fetch(`/server/${serverUUID}/sftp/credentials`, {
         method: 'DELETE',
@@ -163,7 +176,7 @@
       const data = await res.json();
       if (data.success !== false) {
         loadCredentials();
-        if (window.showToast) window.showToast('Password deleted', 'success');
+        if (window.showToast) window.showToast(<%- JSON.stringify(t('passwordDeleted')) %>, 'success');
       }
     } catch (e) {
       console.error('Failed to delete password', e);
@@ -176,8 +189,8 @@
       const target = document.querySelector(btn.dataset.copyFrom);
       if (target) {
         navigator.clipboard.writeText(target.textContent);
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+        btn.textContent = copiedLabel;
+        setTimeout(() => { btn.textContent = copyLabel; }, 1500);
       }
     });
   });

@@ -15,11 +15,13 @@ const serverEditNames = {
 function generateName() { document.getElementById('serverName').value = serverEditNames.generate(); }
 </script>
 
-<%- include('../../partials/ui/breadcrumb', { items: [
-  { label: t('admin'), url: '/admin' },
-  { label: t('breadcrumbServers'), url: '/admin/servers' },
-  { label: server.name }
-] }) %>
+<div class="al-page-crumbs">
+  <%- include('../../partials/ui/breadcrumb', { items: [
+    { label: t('admin'), url: '/admin' },
+    { label: t('breadcrumbServers'), url: '/admin/servers' },
+    { label: server.name }
+  ] }) %>
+</div>
 
 <div class="al-page-header flex items-start justify-between gap-4">
   <div>
@@ -40,16 +42,16 @@ function generateName() { document.getElementById('serverName').value = serverEd
     <%- include('../../partials/csrf') %>
 
     <!-- General -->
-    <div class="al-card">
+    <div class="al-form-card">
       <h2 class="al-card-header"><%= t('general') %></h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label for="serverName" class="al-label"><%= t('name') %>:</label>
           <div class="flex items-center gap-2">
             <input id="serverName" name="name" value="<%= server.name %>" class="al-input flex-1">
-            <button type="button" onclick="generateName()" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-[var(--theme-bg-hover)]"
-              style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
-              <%- icon('dices', { size: 15 }) %>
+            <button type="button" onclick="generateName()" class="al-btn-ghost al-btn-icon-only shrink-0"
+              aria-label="<%= t('generateServerName') %>" title="<%= t('generateServerName') %>">
+              <%- icon('dices', { size: 16 }) %>
             </button>
           </div>
         </div>
@@ -64,9 +66,9 @@ function generateName() { document.getElementById('serverName').value = serverEd
     </div>
 
     <!-- Server Configuration -->
-    <div class="al-card">
+    <div class="al-form-card">
       <h2 class="al-card-header"><%= t('serverConfiguration') %></h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label for="serverOwner" class="al-label">
             <%- icon('user', { size: 14, class: 'shrink-0' }) %>
@@ -122,9 +124,9 @@ function generateName() { document.getElementById('serverName').value = serverEd
     </div>
 
     <!-- Resource Allocation -->
-    <div class="al-card">
+    <div class="al-form-card">
       <h2 class="al-card-header"><%= t('resourceAllocation') %></h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label class="al-label">
             <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
@@ -139,7 +141,7 @@ function generateName() { document.getElementById('serverName').value = serverEd
               data-display="serverMemoryDisplay" data-hidden="serverMemory"
               data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
           </div>
-          <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('minMemory') %></p>
+          <p class="al-form-help"><%= t('minMemory') %></p>
         </div>
 
         <div>
@@ -156,7 +158,7 @@ function generateName() { document.getElementById('serverName').value = serverEd
               data-display="serverSwapDisplay" data-hidden="serverSwap"
               data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
           </div>
-          <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('swapHint') %></p>
+          <p class="al-form-help"><%= t('swapHint') %></p>
         </div>
 
         <div>
@@ -172,7 +174,7 @@ function generateName() { document.getElementById('serverName').value = serverEd
               data-display="serverCPUDisplay" data-hidden="serverCPU"
               data-units="100:Cores,1:%" data-default-unit="Cores"><%= t('cores') %></button>
           </div>
-          <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('coreHint') %></p>
+          <p class="al-form-help"><%= t('coreHint') %></p>
         </div>
 
         <div>
@@ -189,7 +191,7 @@ function generateName() { document.getElementById('serverName').value = serverEd
               data-display="serverStorageDisplay" data-hidden="serverStorage"
               data-units="1:MB,1024:GB" data-default-unit="MB"><%= t('mb') %></button>
           </div>
-          <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('minStorage') %></p>
+          <p class="al-form-help"><%= t('minStorage') %></p>
         </div>
         <div>
           <label class="al-label">
@@ -197,22 +199,22 @@ function generateName() { document.getElementById('serverName').value = serverEd
             <%= t('databaseLimit') %>:
           </label>
           <input id="serverDatabaseLimit" name="databaseLimit" type="number" min="0" value="<%= server.databaseLimit ?? settings.defaultDatabaseLimit ?? 5 %>" class="al-input mt-2 mb-1">
-          <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('databaseLimitHint') %></p>
+          <p class="al-form-help"><%= t('databaseLimitHint') %></p>
         </div>
       </div>
     </div>
 
     <!-- Backups -->
-    <div class="al-card">
+    <div class="al-form-card">
       <h2 class="al-card-header"><%= t('backups') %></h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label class="al-label">
             <%- icon('database-backup', { size: 14, class: 'shrink-0' }) %>
             <%= t('backupLimit') %>:
           </label>
           <input id="serverBackupLimit" name="backupLimit" type="number" min="0" value="<%= server.backupLimit ?? settings.defaultBackupLimit ?? 5 %>" class="al-input mt-2">
-          <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('backupLimitHint') %></p>
+          <p class="al-form-help"><%= t('backupLimitHint') %></p>
         </div>
         <div>
           <label for="backupIgnoreList" class="al-label">
@@ -231,15 +233,15 @@ function generateName() { document.getElementById('serverName').value = serverEd
               } catch { return server.backupIgnoreList || ''; }
             })()
           %></textarea>
-          <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('backupIgnoreListHint') %></p>
+          <p class="al-form-help"><%= t('backupIgnoreListHint') %></p>
         </div>
       </div>
     </div>
 
     <!-- Startup Configuration -->
-    <div class="al-card">
+    <div class="al-form-card">
       <h2 class="al-card-header"><%= t('startupConfiguration') %></h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label for="startCommand" class="al-label">
             <%- icon('terminal', { size: 14, class: 'shrink-0' }) %>
@@ -248,7 +250,7 @@ function generateName() { document.getElementById('serverName').value = serverEd
           <textarea id="startCommand" name="StartCommand" rows="3" class="al-input"><%= server.StartCommand %></textarea>
         </div>
         <div>
-          <div class="rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+          <div class="al-panel">
             <div class="flex flex-col md:flex-row md:items-center justify-between">
               <div class="flex items-center mb-2 md:mb-0">
                 <div class="flex-shrink-0 mr-3">
@@ -256,7 +258,7 @@ function generateName() { document.getElementById('serverName').value = serverEd
                 </div>
                 <div>
                   <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('startupCommandPermissions') %></h3>
-                  <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('startupCommandPermissionsDesc') %></p>
+                  <p class="al-form-help"><%= t('startupCommandPermissionsDesc') %></p>
                 </div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
@@ -264,7 +266,7 @@ function generateName() { document.getElementById('serverName').value = serverEd
                 <div class="al-toggle-track">
                   <div class="al-toggle-dot"></div>
                 </div>
-                <span id="allowStartupEditLabel" class="ms-3 al-page-desc text-sm"><%= server.allowStartupEdit ? t('enabled') : t('disabled') %></span>
+                <span id="allowStartupEditLabel" class="ms-3 al-form-check-label"><%= server.allowStartupEdit ? t('enabled') : t('disabled') %></span>
               </label>
             </div>
           </div>
@@ -273,26 +275,25 @@ function generateName() { document.getElementById('serverName').value = serverEd
     </div>
 
     <!-- Server Status -->
-    <div class="al-card">
+    <div class="al-form-card">
       <h2 class="al-card-header"><%= t('serverStatus') %></h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <div class="flex items-center gap-3 mb-4">
-            <span id="serverStatusCircle" class="inline-flex items-center justify-center h-8 w-8 rounded-full"
-              style="<%= server.Suspended ? 'background:var(--theme-danger-bg);color:var(--theme-danger)' : 'background:var(--theme-success-bg);color:var(--theme-success)' %>">
+            <span id="serverStatusCircle" class="al-icon-tile al-icon-tile-sm al-icon-tile-round <%= server.Suspended ? 'al-icon-tile-danger' : 'al-icon-tile-success' %>">
               <% if (server.Suspended) { %>
-                <%- icon('x-circle', { size: 20, class: 'shrink-0' }) %>
+                <%- icon('x-circle', { size: 16, class: 'shrink-0' }) %>
               <% } else { %>
-                <%- icon('check-circle', { size: 20, class: 'shrink-0' }) %>
+                <%- icon('check-circle', { size: 16, class: 'shrink-0' }) %>
               <% } %>
             </span>
             <div>
               <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('Status') %>: <span id="serverStatusText" style="<%= server.Suspended ? 'color:var(--theme-danger)' : 'color:var(--theme-success)' %>"><%= server.Suspended ? t('suspended') : t('active') %></span></p>
-              <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('serverId') %>: <%= server.UUID %></p>
+              <p class="al-form-help"><%= t('serverId') %>: <%= server.UUID %></p>
             </div>
           </div>
 
-          <div class="rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+          <div class="al-panel">
             <div class="flex flex-col md:flex-row md:items-center justify-between">
               <div class="flex items-center mb-2 md:mb-0">
                 <div class="flex-shrink-0 mr-3">
@@ -300,13 +301,13 @@ function generateName() { document.getElementById('serverName').value = serverEd
                 </div>
                 <div>
                   <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('serverSuspension') %></h3>
-                  <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('serverSuspensionDesc') %></p>
+                  <p class="al-form-help"><%= t('serverSuspensionDesc') %></p>
                 </div>
               </div>
               <label for="suspendServer" class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" name="Suspended" id="suspendServer" aria-label="Server suspension" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
+                <input type="checkbox" name="Suspended" id="suspendServer" aria-label="<%= t('serverSuspension') %>" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
                 <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
-                <span id="suspendServerLabel" class="ms-3 text-sm font-medium" style="color:var(--theme-text)"><%= server.Suspended ? t('suspended') : t('active') %></span>
+                <span id="suspendServerLabel" class="ms-3 al-form-check-label font-medium"><%= server.Suspended ? t('suspended') : t('active') %></span>
               </label>
             </div>
           </div>
@@ -314,13 +315,12 @@ function generateName() { document.getElementById('serverName').value = serverEd
 
         <div>
           <div class="flex items-center gap-3 mb-4">
-            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full"
-              style="background:var(--theme-info-bg);color:var(--theme-info)">
-              <%- icon('calendar', { size: 20, class: 'shrink-0' }) %>
+            <span class="al-icon-tile al-icon-tile-sm al-icon-tile-round al-icon-tile-info">
+              <%- icon('calendar', { size: 16, class: 'shrink-0' }) %>
             </span>
             <div>
               <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('created') %></p>
-              <p class="text-xs" style="color:var(--theme-text-muted)"><%= new Date(server.createdAt).toLocaleString() %></p>
+              <p class="al-form-help"><%= new Date(server.createdAt).toLocaleString() %></p>
             </div>
           </div>
         </div>
@@ -328,17 +328,17 @@ function generateName() { document.getElementById('serverName').value = serverEd
     </div>
 
     <!-- Server Transfer -->
-    <div class="al-card">
+    <div class="al-form-card">
       <h2 class="al-card-header"><%= t('serverTransfer') %></h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="al-card-body grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <div class="flex items-center gap-3 mb-4">
-            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full" style="background:color-mix(in srgb, var(--theme-accent) 12%, transparent); color:var(--theme-accent)">
-              <%- icon('arrow-right-left', { size: 20, class: 'shrink-0' }) %>
+            <span class="al-icon-tile al-icon-tile-sm al-icon-tile-round al-icon-tile-accent">
+              <%- icon('arrow-right-left', { size: 16, class: 'shrink-0' }) %>
             </span>
             <div>
               <p class="text-sm font-medium" style="color:var(--theme-text)"><%= t('transferServer') %></p>
-              <p class="text-xs" style="color:var(--theme-text-muted)"><%= t('transferServerDesc') %></p>
+              <p class="al-form-help"><%= t('transferServerDesc') %></p>
             </div>
           </div>
           <button type="button" id="transferServerBtn" class="al-btn al-btn-secondary w-full" <%= server.Installing ? 'disabled' : '' %>>
@@ -350,7 +350,7 @@ function generateName() { document.getElementById('serverName').value = serverEd
           <% } %>
         </div>
         <div>
-          <div id="transferStatus" class="hidden rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+          <div id="transferStatus" class="hidden al-panel">
             <div class="flex items-center gap-2">
               <div class="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style="border-color:var(--theme-accent); border-top-color:transparent"></div>
               <span id="transferStatusText" class="text-sm font-medium"><%= t('transferInProgress') %></span>
@@ -368,19 +368,19 @@ function generateName() { document.getElementById('serverName').value = serverEd
 <div id="transferModal" class="al-sheet-overlay fixed inset-0 z-50 hidden">
   <div class="flex items-end sm:items-center justify-center min-h-screen p-0 sm:p-4">
     <div class="fixed inset-0" id="transferModalBackdrop"></div>
-    <div id="transferModalPanel" class="al-sheet-panel relative border rounded-2xl shadow-lg max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+    <div id="transferModalPanel" role="dialog" aria-modal="true" aria-label="<%= t('transferServer') %>" class="al-sheet-panel relative border rounded-2xl shadow-lg max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
 
-      <div class="flex justify-between items-center px-6 py-4 border-b" style="border-color:var(--theme-border);">
+      <div class="al-sheet-header" style="border-color:var(--theme-border);">
         <div>
           <h3 class="text-sm font-semibold" style="color:var(--theme-text-strong);"><%= t('transferServer') %></h3>
-          <p class="text-xs mt-0.5" style="color:var(--theme-text-muted);"><%= t('transferServerModalDesc') %></p>
+          <p class="al-card-subtitle"><%= t('transferServerModalDesc') %></p>
         </div>
-        <button type="button" onclick="closeTransferModal()" class="al-btn al-btn-ghost p-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0" aria-label="Close">
+        <button type="button" onclick="closeTransferModal()" class="al-btn-ghost al-btn-icon-only shrink-0" aria-label="<%= t('close') %>">
           <%- icon('x', { class: 'h-5 w-5', strokeWidth: 1.5 }) %>
         </button>
       </div>
 
-      <div class="px-6 py-4 overflow-y-auto max-h-[70vh]">
+      <div class="px-5 py-4 overflow-y-auto max-h-[70vh]">
         <div class="space-y-4">
           <div>
             <label class="al-label">
@@ -397,7 +397,7 @@ function generateName() { document.getElementById('serverName').value = serverEd
             </select>
           </div>
 
-          <div class="rounded-lg p-3" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+          <div class="al-panel">
             <div class="flex items-start gap-2">
               <%- icon('info', { size: 16, class: 'shrink-0 mt-0.5', style: 'color:var(--theme-accent)' }) %>
               <div>
@@ -409,9 +409,9 @@ function generateName() { document.getElementById('serverName').value = serverEd
         </div>
       </div>
 
-      <div class="flex gap-2 px-6 py-4 border-t justify-end" style="border-color:var(--theme-border);">
-        <button type="button" onclick="closeTransferModal()" class="al-btn al-btn-secondary"><%= t('cancel') %></button>
-        <button type="button" id="confirmTransferBtn" class="al-btn al-btn-primary" disabled>
+      <div class="al-sheet-footer justify-end" style="border-color:var(--theme-border);">
+        <button type="button" onclick="closeTransferModal()" class="al-btn-secondary"><%= t('cancel') %></button>
+        <button type="button" id="confirmTransferBtn" class="al-btn-primary" disabled>
           <%- icon('arrow-right-left', { size: 14, class: 'shrink-0' }) %>
           <%= t('transferServer') %>
         </button>
@@ -419,11 +419,6 @@ function generateName() { document.getElementById('serverName').value = serverEd
     </div>
   </div>
 </div>
-
-<style>
-  #editServerForm .al-card { overflow: visible; }
-  #editServerForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
-</style>
 
 <%- include('../../layouts/admin-footer') %>
 

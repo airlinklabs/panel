@@ -1,0 +1,110 @@
+@layer components {
+  /* ── al-activity: the admin activity log feed ─────────────────────────
+     A flush list of rows inside one card — no nested cards, no chip per
+     event. Each row is title + event code on the first line, actor /
+     server / time / IP on the second; the disclosure button and its JSON
+     panel sit in the second grid column and span the full width when open.
+
+     Used by: views/admin/activity/index.ejs */
+  .al-activity-group + .al-activity-group {
+    margin-top: 1.25rem;
+  }
+
+  .al-activity-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .al-activity-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.375rem 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--theme-border);
+  }
+  .al-activity-item:first-child {
+    padding-top: 0;
+  }
+  .al-activity-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .al-activity-main {
+    min-width: 0;
+  }
+  .al-activity-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--theme-text-strong);
+  }
+  .al-activity-title > .truncate {
+    min-width: 0;
+  }
+  .al-activity-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--theme-text-muted);
+  }
+  .al-activity-meta a {
+    color: var(--theme-text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .al-activity-meta a:hover {
+    color: var(--theme-text-strong);
+  }
+
+  /* Disclosure button — never stretches on desktop. */
+  .al-activity-toggle {
+    justify-self: end;
+  }
+
+  .al-activity-details {
+    grid-column: 1 / -1;
+    margin-top: 0.25rem;
+  }
+  .al-activity-details pre {
+    overflow-x: auto;
+    padding: 0.75rem;
+    border: 1px solid var(--theme-border);
+    border-radius: 0.5rem;
+    background: var(--theme-bg-secondary);
+    font-size: 0.75rem;
+    color: var(--theme-text-muted);
+  }
+
+  .al-activity-pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--theme-border);
+  }
+
+  /* Phones: one column, so the row reads label-then-value instead of
+     squeezing the disclosure button against a long event name. */
+  @media (max-width: 639px) {
+    .al-activity-item {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .al-activity-toggle {
+      justify-self: start;
+    }
+    .al-activity-pager {
+      justify-content: center;
+    }
+  }
+}

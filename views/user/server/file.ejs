@@ -1,24 +1,4 @@
-<%- include('../../layouts/user', { title: t('files') }) %>
-<style>
-  .al-editor-shell { min-height: calc(100dvh - 15rem); }
-  .al-editor-toolbar { gap: 0.75rem; }
-  .al-editor-path {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    line-height: 1.35;
-  }
-  .al-editor-status {
-    gap: 0.5rem 1rem;
-    scrollbar-width: thin;
-  }
-  .al-editor-status button,
-  .al-editor-status span[data-kbd] {
-    min-height: 1.5rem;
-  }
-  @media (max-width: 1023px) {
-    .al-editor-shell { min-height: 60dvh; }
-  }
-</style>
+<%- include('../../layouts/user', { title: (server.name || t('server')) + ' — ' + (file.name || t('files')) }) %>
 
 <%
 const fileExtension = (file.extension || '').toString().toLowerCase();
@@ -44,38 +24,35 @@ const filePath = file.path || '';
 const serverUUID = server.UUID;
 %>
 
-<div id="page-content" class="flex-1 min-w-0 overflow-y-auto pt-0 pb-12 lg:pb-12">
+<div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('dashboard'), url: '/' },
     { label: server.name, url: '/server/' + serverUUID },
     { label: t('files'), url: '/server/' + serverUUID + '/files' },
     { label: file.name }
   ] }) %>
+</div>
 
-  <div class="px-8 pt-4">
-    <div class="flex flex-wrap items-start justify-between gap-4">
-      <div class="flex-1 min-w-0">
-        <h1 class="text-lg font-semibold" style="color:var(--theme-text-strong)"><%= t('files') %></h1>
-        <div class="flex items-center gap-3 mt-1.5 flex-wrap">
-          <div class="flex items-center gap-1.5">
-            <%- icon('box', { class: 'h-3 w-3 shrink-0' }) %>
-            <span class="text-[11px] truncate max-w-[140px]" style="color:var(--theme-text-muted)"><%= server.image?.name %></span>
-          </div>
-          <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
-          <div class="flex items-center gap-1.5">
-            <%- icon('server', { class: 'h-3 w-3 shrink-0' }) %>
-            <span class="text-[11px] truncate max-w-[100px]" style="color:var(--theme-text-muted)"><%= server.node?.name %></span>
-          </div>
-          <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
-          <div class="flex items-center gap-1.5">
-            <%- icon('hash', { class: 'h-3 w-3 shrink-0' }) %>
-            <span class="text-[11px] font-mono" style="color:var(--theme-text-muted)"><%= serverUUID.split('-')[0] %></span>
-          </div>
-        </div>
-      </div>
-    </div>
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title break-all"><%= file.name %></h1>
+    <p class="al-page-desc break-all"><%= t('editingFileIn', { path: filePath }) %></p>
   </div>
+  <div>
+    <a class="al-btn-secondary al-btn-sm" href="/server/<%= serverUUID %>/files">
+      <%- icon('arrow-left', { class: 'size-4', strokeWidth: 2 }) %>
+      <%= t('backToFiles') %>
+    </a>
+    <% if (file.type !== 'directory') { %>
+      <a class="al-btn-primary al-btn-sm" href="/server/<%= serverUUID %>/files/download<%= filePath.split('/').map(encodeURIComponent).join('/') %>">
+        <%- icon('download', { class: 'size-4', strokeWidth: 2 }) %>
+        <%= t('download') %>
+      </a>
+    <% } %>
+  </div>
+</header>
 
+<div class="al-page-body">
   <div id="file-editor-root" data-config="<%- JSON.stringify({
     serverUUID: serverUUID,
     filePath: filePath,
@@ -88,60 +65,56 @@ const serverUUID = server.UUID;
     saveUrl: '/server/' + serverUUID + '/files/' + encodeURIComponent(filePath),
   }).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') %>">
 
-    <div class="flex flex-col lg:flex-row px-8 mt-8">
-      <div class="al-ui-surface overflow-hidden rounded-xl w-full">
-        <div class="p-5">
-          <div class="al-editor-toolbar flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
-            <h2 class="al-editor-path text-sm font-medium min-w-0" style="color:var(--theme-text-strong)">
-              <a class="hover:text-[var(--theme-text-strong)] transition" href="/server/<%= serverUUID %>/files" style="color:var(--theme-text-muted)">/home/container/</a>
-              <%
-                if (filePath) {
-                  const parts = filePath.split('/');
-                  let curBuild = '';
-                  parts.forEach(function(part, index) {
-                    curBuild += part;
-                    if (index < parts.length - 1) { %>
-                      <a href="/server/<%= serverUUID %>/files?path=<%= curBuild %>" class="hover:text-[var(--theme-text-strong)] transition" style="color:var(--theme-text-muted)"><%= part %></a><span style="color:var(--theme-text-muted)">/</span>
-                    <% curBuild += '/';
-                    } else { %>
-                      <span style="color:var(--theme-text-strong)"><%= part %></span>
-                    <% }
-                  });
-                }
-              %>
-            </h2>
-            <div class="flex shrink-0">
-              <button id="saveBtn" class="al-ui-button-primary min-w-24" type="button">
-                <%- icon('save', { class: 'h-4 w-4 mr-1.5', strokeWidth: 2 }) %>
-                <%= t('saveBtn') %>
-              </button>
-            </div>
+    <div class="al-card">
+      <div class="al-editor-toolbar flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
+        <h2 class="al-editor-path text-sm font-medium min-w-0" style="color:var(--theme-text-strong)">
+          <a class="hover:text-[var(--theme-text-strong)] transition" href="/server/<%= serverUUID %>/files" style="color:var(--theme-text-muted)">/home/container/</a>
+          <%
+            if (filePath) {
+              const parts = filePath.split('/');
+              let curBuild = '';
+              parts.forEach(function(part, index) {
+                curBuild += part;
+                if (index < parts.length - 1) { %>
+                  <a href="/server/<%= serverUUID %>/files?path=<%= curBuild %>" class="hover:text-[var(--theme-text-strong)] transition" style="color:var(--theme-text-muted)"><%= part %></a><span style="color:var(--theme-text-muted)">/</span>
+                <% curBuild += '/';
+                } else { %>
+                  <span style="color:var(--theme-text-strong)"><%= part %></span>
+                <% }
+              });
+            }
+          %>
+        </h2>
+        <div class="flex shrink-0">
+          <button id="saveBtn" class="al-btn-primary al-btn-sm min-w-24" type="button">
+            <%- icon('save', { class: 'size-4', strokeWidth: 2 }) %>
+            <%= t('saveBtn') %>
+          </button>
+        </div>
+      </div>
+      <div class="al-editor-frame" id="editor-container-wrapper">
+        <div class="al-editor-shell" id="editor-container"></div>
+        <div class="al-editor-status flex flex-col xl:flex-row xl:justify-between xl:items-center px-3 py-2 border-t text-xs font-mono overflow-x-auto" style="background:var(--theme-bg-secondary);border-top-color:var(--theme-border);color:var(--theme-text-muted);">
+          <div class="flex items-center gap-3 whitespace-nowrap">
+            <div id="editor-status"><%= t('editorLineColumn') %></div>
+            <div id="file-info" class="al-editor-stat"><%= t('loadingEllipsis') %></div>
           </div>
-          <div class="border rounded-xl overflow-hidden" style="border-color:var(--theme-border)" id="editor-container-wrapper">
-            <div class="al-editor-shell" id="editor-container"></div>
-            <div class="al-editor-status flex flex-col xl:flex-row xl:justify-between xl:items-center px-3 py-2 border-t text-xs font-mono overflow-x-auto" style="background:var(--theme-bg-secondary);border-top-color:var(--theme-border);color:var(--theme-text-muted);">
-              <div class="flex items-center gap-3 whitespace-nowrap">
-                <div id="editor-status">Line: 1, Column: 1</div>
-                <div id="file-info" class="px-2 py-0.5 rounded" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('loadingEllipsis') %></div>
-              </div>
-              <div class="flex flex-wrap items-center gap-3">
-                <div class="flex items-center">
-                  <span class="opacity-75 mr-1.5"><%= t('wordWrap') %>:</span>
-                  <button type="button" id="toggle-wordwrap" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('offLabel') %></button>
-                </div>
-                <div class="flex items-center">
-                  <span class="opacity-75 mr-1.5"><%= t('minimap') %>:</span>
-                  <button type="button" id="toggle-minimap" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('offLabel') %></button>
-                </div>
-                <div class="flex items-center">
-                  <span class="opacity-75 mr-1.5"><%= t('theme') %>:</span>
-                  <button type="button" id="toggle-theme" class="px-1.5 py-0.5 rounded transition-colors" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('autoLabel') %></button>
-                </div>
-                <div class="flex items-center">
-                  <span class="opacity-75 mr-1.5"><%= t('saveBtn') %>:</span>
-                  <span data-kbd class="px-1.5 py-0.5 rounded" style="background:var(--theme-bg-secondary);color:var(--theme-text-muted)"><%= t('ctrlS') %></span>
-                </div>
-              </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center">
+              <span class="opacity-75 mr-1.5"><%= t('wordWrap') %>:</span>
+              <button type="button" id="toggle-wordwrap"><%= t('offLabel') %></button>
+            </div>
+            <div class="flex items-center">
+              <span class="opacity-75 mr-1.5"><%= t('minimap') %>:</span>
+              <button type="button" id="toggle-minimap"><%= t('offLabel') %></button>
+            </div>
+            <div class="flex items-center">
+              <span class="opacity-75 mr-1.5"><%= t('theme') %>:</span>
+              <button type="button" id="toggle-theme"><%= t('autoLabel') %></button>
+            </div>
+            <div class="flex items-center">
+              <span class="opacity-75 mr-1.5"><%= t('saveBtn') %>:</span>
+              <span data-kbd><%= t('ctrlS') %></span>
             </div>
           </div>
         </div>

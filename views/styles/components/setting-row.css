@@ -1,0 +1,66 @@
+@layer components {
+  /* ── al-setting-row: a labelled control inside a card ────────────────
+     Anatomy: copy (title + description) on the left, the control that the
+     copy justifies on the right. It is a panel, not a card — it lives
+     inside `.al-card-body`, so it must not borrow `.al-card`'s surface.
+
+     Used by: views/admin/users/create.ejs (role, admin status),
+              views/admin/users/edit.ejs (role, admin status),
+              views/fragments/admin/users/user-create-form.ejs */
+  .al-setting-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--theme-border);
+    border-radius: 0.75rem;
+    background: var(--theme-bg-secondary);
+  }
+  /* Rows stack with the same rhythm the card body already uses. */
+  .al-setting-row:not(:first-child) {
+    margin-top: 0.75rem;
+  }
+
+  .al-setting-copy {
+    min-width: 0;
+    flex: 1 1 12rem;
+  }
+  .al-setting-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    color: var(--theme-text-strong);
+  }
+  .al-setting-desc {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    margin-top: 0.25rem;
+    color: var(--theme-text-muted);
+  }
+
+  /* The control keeps a predictable width so a select never collapses to
+     its longest option, and stays optically flush right. */
+  .al-setting-control {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex: 0 0 auto;
+    min-width: 11rem;
+  }
+
+  /* Phones: the row becomes a column so the control never squeezes the
+     copy into a two-word line. */
+  @media (max-width: 639px) {
+    .al-setting-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .al-setting-control {
+      justify-content: flex-start;
+      min-width: 0;
+    }
+  }
+}

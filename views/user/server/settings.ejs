@@ -211,7 +211,7 @@
           body: JSON.stringify({ preserveData: true })
         }).then(function(r) { return r.json(); }).then(function(data) {
           loader.setStage('Reinstallation initiated!');
-          setTimeout(function() { loader.close(); if (data.success) showToast('Server reinstalling.', 'success'); else showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
+          setTimeout(function() { loader.close(); if (data.success !== false) showToast('Server reinstalling.', 'success'); else showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
         }).catch(function() { loader.close(); showToast('Something went wrong.', 'error'); });
       }
     });
@@ -236,7 +236,7 @@
             body: JSON.stringify({ preserveData: false })
           }).then(function(r) { return r.json(); }).then(function(data) {
             loader.setStage('Reinstallation initiated!');
-            setTimeout(function() { loader.close(); if (data.success) showToast('Server reinstalling. All data was deleted.', 'success'); else showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
+            setTimeout(function() { loader.close(); if (data.success !== false) showToast('Server reinstalling. All data was deleted.', 'success'); else showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }, 1000);
           }).catch(function() { loader.close(); showToast('Something went wrong.', 'error'); });
         }
       });

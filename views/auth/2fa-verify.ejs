@@ -1,49 +1,65 @@
 <%- include('../layouts/auth', { title: t('twoFactorAuth') }) %>
 
-<div class="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 pt-24 pb-32">
-  <div class="w-full max-w-sm">
-    <div class="text-center mb-8">
-      <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>"
-        alt="<%= t('logoAlt') %>"
-        class="h-16 w-auto mx-auto mb-6"
-        style="background:var(--theme-logo-bg); border-radius: 1.5rem; padding: 0.5rem;">
-      <h1 class="text-2xl font-bold" style="color:var(--theme-text-strong);">
-        <%= t('twoFactorTitle') %>
-      </h1>
-      <p class="text-sm mt-1.5" style="color:var(--theme-text-muted);">
-        <%= t('twoFactorSubtitle') %>
+<div class="al-auth">
+  <div class="al-auth-form">
+    <div class="mx-auto w-full max-w-sm lg:w-96">
+      <div>
+        <img class="al-auth-logo"
+          src="<%= (settings && settings.logo && settings.logo.startsWith('/')) ? settings.logo : '/' + ((settings && settings.logo) || 'favicon.ico') %>"
+          alt="<%= (settings && settings.title) || 'Airlink' %>" width="48" height="48">
+        <h1 class="al-auth-title mt-6"><%= t('twoFactorTitle') %></h1>
+        <p class="al-auth-subtitle"><%= t('twoFactorSubtitle') %></p>
+      </div>
+
+      <% if (req.query.err) { %>
+      <div class="al-auth-error mt-6" role="alert" aria-live="assertive">
+        <span class="mt-0.5 shrink-0"><%- icon('alert-triangle', { class: 'h-5 w-5', style: 'color:var(--theme-danger)' }) %></span>
+        <div>
+          <p class="al-auth-error-title">
+            <% if (req.query.err === 'missing') { %><%= t('errorTitleAllFieldsRequired') %>
+            <% } else { %><%= t('errorTitleInvalidCredentials') %><% } %>
+          </p>
+          <p class="al-auth-error-body">
+            <% if (req.query.err === 'missing') { %><%= t('errorAllFieldsRequired') %>
+            <% } else { %><%= t('errorInvalidCredentials') %><% } %>
+          </p>
+        </div>
+      </div>
+      <% } %>
+
+      <form method="POST" action="/2fa" class="mt-8 space-y-6">
+        <%- include('../partials/csrf') %>
+
+        <%- include('../partials/ui/form-field', {
+          type: 'text',
+          name: 'token',
+          label: t('field2faCode'),
+          id: 'twofa-code',
+          placeholder: t('field2faCodePlaceholder'),
+          required: true,
+          autocomplete: 'one-time-code',
+          inputmode: 'numeric',
+          cls: 'text-center text-2xl tracking-[0.4em] font-mono'
+        }) %>
+
+        <%- include('../partials/ui/button', {
+          type: 'submit',
+          label: t('verify'),
+          variant: 'primary',
+          size: 'lg',
+          cls: 'w-full'
+        }) %>
+      </form>
+
+      <p class="mt-6 text-sm" style="color:var(--theme-text-muted);">
+        <a href="/login" class="font-medium hover:underline" style="color:var(--theme-primary); text-underline-offset:3px;">
+          <%= t('backToLogin') %>
+        </a>
       </p>
     </div>
-
-    <form method="POST" action="/2fa" class="space-y-4">
-      <%- include('../partials/csrf') %>
-
-      <%- include('../partials/ui/form-field', {
-        type: 'text',
-        name: 'token',
-        label: t('field2faCode'),
-        id: 'twofa-code',
-        placeholder: t('field2faCodePlaceholder'),
-        required: true,
-        autocomplete: 'one-time-code',
-        cls: 'text-center text-2xl tracking-[0.5em] font-mono'
-      }) %>
-
-      <%- include('../partials/ui/button', {
-        type: 'submit',
-        label: t('verify'),
-        variant: 'primary',
-        cls: 'w-full'
-      }) %>
-    </form>
-
-    <p class="text-center text-sm mt-6" style="color:var(--theme-text-muted);">
-      <a href="/login" class="font-medium hover:underline" style="color:var(--theme-primary);">
-        <%- icon('arrow-left', { class: 'w-3.5 h-3.5 inline-block mr-1 -mt-0.5' }) %>
-        <%= t('backToLogin') %>
-      </a>
-    </p>
   </div>
+
+  <%- include('../partials/auth-visual', { wallpaper: settings.loginWallpaper, fallback: '/assets/auth/login.jpg' }) %>
 </div>
 
 <%- include('../layouts/auth-footer') %>

@@ -1,75 +1,159 @@
-/* ── al-field: error/success association ────────────────────────────── */
-.al-field-invalid .al-input {
-  border-color: var(--theme-danger, #dc2626);
-}
-.al-field-invalid .al-input:focus {
-  box-shadow: 0 0 0 3px
-    color-mix(in srgb, var(--theme-danger, #dc2626) 15%, transparent);
-}
-.al-field-success .al-input {
-  border-color: var(--theme-success, #16a34a);
-}
-.al-field-message {
-  @apply text-xs mt-1.5;
-}
-.al-field-invalid .al-field-message {
-  color: var(--theme-danger, #dc2626);
-}
-.al-field-success .al-field-message {
-  color: var(--theme-success, #16a34a);
-}
+@layer components {
+  /* ── Fields ──────────────────────────────────────────────────────────
+     One field anatomy: label above, control, optional help or error below.
+     `al-form-*` (used by views/partials/ui/form-field) and `al-input` /
+     `al-label` (used by hand-written markup) render the same control, so
+     a form built either way looks identical. */
 
-/* Inputs */
-.al-input {
-  @apply w-full rounded-xl px-2.5 py-1.5 text-[13px] transition-colors outline-none;
-  background: var(--theme-bg-input);
-  border: 1px solid var(--theme-border-input);
-  color: var(--theme-text-strong);
-}
-.al-input::placeholder {
-  color: var(--theme-text-placeholder);
-}
-.al-input:focus {
-  border-color: var(--theme-border-accent);
-  box-shadow: 0 0 0 3px var(--theme-accent-subtle);
-}
-.al-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+  .al-form-field {
+    @apply flex flex-col gap-1.5;
+  }
 
-/* Labels */
-.al-label {
-  @apply block text-[11px] font-medium mb-1;
-  color: var(--theme-text-muted);
-}
+  /* Labels */
+  .al-label,
+  .al-form-label {
+    @apply block text-[13px] font-medium leading-5;
+    color: var(--theme-text-muted);
+  }
+  .al-form-label .text-red-500,
+  .al-form-label .al-required {
+    color: var(--theme-danger, #dc2626);
+  }
 
-/* Radio selection — active state uses theme accent */
-.al-radio-active {
-  border-color: var(--theme-accent);
-  background: var(--theme-accent-subtle);
-}
-.al-radio-ring-active {
-  border-color: var(--theme-accent);
-}
-.al-radio-dot-active {
-  background: var(--theme-accent);
-}
+  /* Controls */
+  .al-input,
+  .al-form-input,
+  .al-form-textarea,
+  .al-form-select {
+    @apply w-full rounded-xl px-3 py-2 text-sm transition-colors outline-none;
+    background: var(--theme-bg-input);
+    border: 1px solid var(--theme-border-input);
+    color: var(--theme-text-strong);
+  }
+  .al-form-textarea {
+    @apply min-h-[6rem];
+    resize: vertical;
+  }
+  .al-form-select {
+    @apply pr-8;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 1rem) 50%, calc(100% - 0.7rem) 50%;
+    background-size: 0.3rem 0.3rem, 0.3rem 0.3rem;
+    background-repeat: no-repeat;
+  }
+  .al-input::placeholder,
+  .al-form-input::placeholder,
+  .al-form-textarea::placeholder,
+  .al-form-select::placeholder {
+    color: var(--theme-text-placeholder);
+  }
+  .al-input:focus,
+  .al-form-input:focus,
+  .al-form-textarea:focus,
+  .al-form-select:focus {
+    border-color: var(--theme-primary, var(--theme-border-accent));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary, #2563eb) 18%, transparent);
+  }
+  .al-input:disabled,
+  .al-form-input:disabled,
+  .al-form-textarea:disabled,
+  .al-form-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
-/* Toggle switch — activated: accent track + accent-text dot */
-.al-toggle-track {
-  @apply w-10 h-[22px] rounded-full flex items-center p-0.5 transition-colors cursor-pointer;
-  background: var(--theme-toggle-bg, var(--theme-border));
-  border: 1px solid var(--theme-btn-border, var(--theme-border));
-}
-.peer:checked ~ .al-toggle-track {
-  background: var(--theme-accent);
-}
-.al-toggle-dot {
-  @apply w-[18px] h-[18px] rounded-full transition-transform shadow-sm;
-  background: var(--theme-accent-text);
-}
-.peer:checked ~ .al-toggle-track .al-toggle-dot {
-  transform: translateX(18px);
-  background: var(--theme-accent-text);
+  /* Invalid control — paired with aria-invalid="true" by the partial. */
+  .al-form-error {
+    border-color: var(--theme-danger, #dc2626);
+  }
+  .al-form-error:focus {
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--theme-danger, #dc2626) 18%, transparent);
+  }
+
+  /* Helper + error copy */
+  .al-form-help {
+    @apply text-[13px];
+    color: var(--theme-text-muted);
+  }
+  .al-form-error-msg {
+    @apply text-[13px];
+    color: var(--theme-danger, #dc2626);
+  }
+
+  /* ── al-field: error/success association ────────────────────────────── */
+  .al-field-invalid .al-input,
+  .al-field-invalid .al-form-input,
+  .al-field-invalid .al-form-textarea,
+  .al-field-invalid .al-form-select {
+    border-color: var(--theme-danger, #dc2626);
+  }
+  .al-field-invalid .al-input:focus,
+  .al-field-invalid .al-form-input:focus {
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--theme-danger, #dc2626) 15%, transparent);
+  }
+  .al-field-success .al-input,
+  .al-field-success .al-form-input {
+    border-color: var(--theme-success, #16a34a);
+  }
+  .al-field-message {
+    @apply text-xs mt-1.5;
+  }
+  .al-field-invalid .al-field-message {
+    color: var(--theme-danger, #dc2626);
+  }
+  .al-field-success .al-field-message {
+    color: var(--theme-success, #16a34a);
+  }
+
+  /* ── Checkboxes and radios ────────────────────────────────────────── */
+  .al-form-check {
+    @apply flex items-start gap-2;
+  }
+  .al-form-checkbox,
+  .al-form-radio {
+    @apply mt-0.5 h-4 w-4 shrink-0 rounded;
+    accent-color: var(--theme-primary, #2563eb);
+  }
+  .al-form-check-label {
+    @apply text-sm;
+    color: var(--theme-text);
+  }
+  .al-form-field:has(.al-form-check) {
+    gap: 0.375rem;
+  }
+
+  /* Radio selection — active state uses the brand colour */
+  .al-radio-active {
+    border-color: var(--theme-primary, var(--theme-accent));
+    background: var(--theme-accent-subtle);
+  }
+  .al-radio-ring-active {
+    border-color: var(--theme-primary, var(--theme-accent));
+  }
+  .al-radio-dot-active {
+    background: var(--theme-primary, var(--theme-accent));
+  }
+
+  /* Toggle switch — brand colour when on, so the control reads as an
+     action rather than as navigation (navigation owns `--theme-accent`). */
+  .al-toggle-track {
+    @apply w-10 h-[22px] rounded-full flex items-center p-0.5 transition-colors cursor-pointer;
+    background: var(--theme-toggle-bg, var(--theme-border));
+    border: 1px solid var(--theme-btn-border, var(--theme-border));
+  }
+  .peer:checked ~ .al-toggle-track {
+    background: var(--theme-primary, var(--theme-accent));
+  }
+  .al-toggle-dot {
+    @apply w-[18px] h-[18px] rounded-full transition-transform shadow-sm;
+    background: var(--theme-accent-text);
+  }
+  .peer:checked ~ .al-toggle-track .al-toggle-dot {
+    transform: translateX(18px);
+    background: var(--theme-btn-primary-text, var(--theme-accent-text));
+  }
 }

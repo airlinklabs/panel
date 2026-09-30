@@ -1,0 +1,25 @@
+/* Code block — monospaced preformatted output (commands, JSON, logs). */
+@layer components {
+  .al-code {
+    @apply overflow-x-auto rounded-xl border p-3 text-left text-xs;
+    background: var(--theme-bg-secondary);
+    color: var(--theme-text);
+    border-color: var(--theme-border);
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    line-height: 1.6;
+    white-space: pre;
+    tab-size: 2;
+  }
+
+  .al-code-wrap {
+    @apply overflow-x-auto rounded-xl border;
+    background: var(--theme-bg-secondary);
+    border-color: var(--theme-border);
+  }
+
+  .al-code-wrap .al-code {
+    @apply border-0;
+    margin: 0;
+    border-radius: 0;
+  }
+}

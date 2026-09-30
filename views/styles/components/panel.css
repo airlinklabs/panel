@@ -1,0 +1,25 @@
+@layer components {
+  /* ── al-panel: an inset sub-surface inside a card ────────────────────
+     Metric strips, setting rows and transient status boxes sit *inside* a
+     card, so they must read as an inset rather than a second card: one step
+     down in surface, a hairline, no shadow of their own (elevation is
+     declared once, on the card above it).
+
+     Used by: views/admin/overview/index.ejs, views/admin/servers/create.ejs,
+     views/admin/servers/edit.ejs, views/admin/nodes/edit.ejs,
+     views/admin/nodes/stats.ejs */
+  .al-panel {
+    border-radius: 0.75rem;
+    background: var(--theme-bg-secondary);
+    border: 1px solid var(--theme-border);
+    padding: 1rem;
+  }
+
+  /* Header row inside a panel: title column + optional control. */
+  .al-panel-head {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+  }
+  .al-panel-head > :first-child {
+    @apply min-w-0;
+  }
+}

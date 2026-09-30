@@ -1,0 +1,55 @@
+/* Chip — small inline value token (port, tag, version) with optional
+   remove button. Read-only variant uses the badge palette. */
+@layer components {
+  .al-chip {
+    @apply inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium;
+    background: var(--theme-bg-secondary);
+    color: var(--theme-text);
+    border-color: var(--theme-border);
+    line-height: 1.4;
+  }
+
+  .al-chip-mono {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    font-size: 11px;
+  }
+
+  .al-chip-accent {
+    background: color-mix(in srgb, var(--theme-accent) 14%, transparent);
+    color: var(--theme-accent);
+    border-color: color-mix(in srgb, var(--theme-accent) 30%, transparent);
+  }
+
+  .al-chip-success {
+    background: color-mix(in srgb, var(--theme-success) 14%, transparent);
+    color: var(--theme-success);
+    border-color: color-mix(in srgb, var(--theme-success) 30%, transparent);
+  }
+
+  .al-chip-danger {
+    background: color-mix(in srgb, var(--theme-danger) 14%, transparent);
+    color: var(--theme-danger);
+    border-color: color-mix(in srgb, var(--theme-danger) 30%, transparent);
+  }
+
+  .al-chip-warning {
+    background: color-mix(in srgb, var(--theme-warning) 14%, transparent);
+    color: var(--theme-warning);
+    border-color: color-mix(in srgb, var(--theme-warning) 30%, transparent);
+  }
+
+  .al-chip-remove {
+    @apply -mr-1 inline-flex h-5 w-5 items-center justify-center rounded-full transition;
+    color: var(--theme-text-muted);
+  }
+
+  .al-chip-remove:hover {
+    background: color-mix(in srgb, var(--theme-danger) 18%, transparent);
+    color: var(--theme-danger);
+  }
+
+  .al-chip-remove:focus-visible {
+    outline: 2px solid var(--theme-accent);
+    outline-offset: 1px;
+  }
+}

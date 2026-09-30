@@ -1,0 +1,41 @@
+@layer components {
+  /* ── al-criteria: requirement checklist marks ─────────────────────────
+     The list shell is `.al-pw-criteria` (pages/auth.css); this file owns
+     the mark that swaps from a muted dot to a check when a rule is met,
+     plus the "typed but unmet" state. Red only starts meaning something
+     once the field has been typed into — `data-touched` on the list is
+     what makes that distinction, so an untouched field never looks like
+     it already failed.
+
+     Both icons render into one grid cell, so the swap never reflows the
+     text beside it.
+
+     Used by: views/admin/users/create.ejs (username + password rules) */
+  .al-criteria-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+  .al-criteria-mark > svg {
+    grid-area: 1 / 1;
+    transition: opacity var(--dur-quick, 150ms) ease;
+  }
+
+  /* Default (rule unmet): the dot shows, the check does not. */
+  .al-criteria-done {
+    opacity: 0;
+  }
+  .al-pw-criteria li[data-met="true"] .al-criteria-pending {
+    opacity: 0;
+  }
+  .al-pw-criteria li[data-met="true"] .al-criteria-done {
+    opacity: 1;
+  }
+
+  /* Typed but unmet — pending grey becomes a warning red. */
+  .al-pw-criteria[data-touched="true"] li[data-met="false"] {
+    color: var(--theme-danger);
+  }
+}

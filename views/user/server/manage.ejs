@@ -1,72 +1,77 @@
-<%- include('../../layouts/user', { title: server.name || 'Server' }) %>
+<%- include('../../layouts/user', { title: server.name || t('console') }) %>
 
-<div class="px-4 sm:px-8 pt-4 pb-8">
+<div class="al-page-crumbs">
   <%- include('../../partials/ui/breadcrumb', { items: [
     { label: t('dashboard'), url: '/' },
-    { label: server.name || 'Server' }
+    { label: server.name || t('console') }
   ] }) %>
+</div>
 
-  <div class="flex flex-wrap items-start justify-between gap-4 mt-4">
-    <div class="flex-1 min-w-0">
-      <h1 class="text-xl font-semibold" style="color:var(--theme-text-strong)"><%= server.name %></h1>
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-[11px]" style="color:var(--theme-text-muted)">
-        <% if (server.node) { %><span class="flex items-center gap-1"><%- icon('server', { class: 'w-3 h-3' }) %> <%= server.node.name %></span><% } %>
-        <span class="flex items-center gap-1"><%- icon('hash', { class: 'w-3 h-3' }) %> <%= server.UUID %></span>
-      </div>
-    </div>
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= server.name %></h1>
+    <p class="al-page-desc flex flex-wrap items-center gap-x-4 gap-y-1">
+      <% if (server.node) { %><span class="inline-flex items-center gap-1"><%- icon('server', { class: 'w-3.5 h-3.5' }) %> <%= server.node.name %></span><% } %>
+      <span class="inline-flex items-center gap-1"><%- icon('hash', { class: 'w-3.5 h-3.5' }) %> <span class="font-mono"><%= server.UUID %></span></span>
+    </p>
   </div>
+</header>
 
+<div class="al-page-body">
   <% if (server.Suspended) { %>
-  <div class="mt-4 flex items-center gap-2.5 rounded-xl px-4 py-3" style="background:var(--theme-warning-bg);border:1px solid color-mix(in srgb, var(--theme-warning) 20%, transparent)">
-    <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0', style: 'color:var(--theme-warning)' }) %>
-    <p class="text-sm font-medium" style="color:var(--theme-warning)"><%= t('serverSuspended') %></p>
+  <div class="al-alert-warning mb-4" role="alert">
+    <%- icon('triangle-alert', { class: 'size-4 shrink-0 mt-0.5', 'aria-hidden': 'true' }) %>
+    <div class="min-w-0">
+      <p class="al-alert-title"><%= t('serverSuspended') %></p>
+      <p class="al-alert-body"><%= t('serverSuspendedDesc') %></p>
+    </div>
   </div>
   <% } %>
 
   <!-- Power Controls -->
-  <div class="flex gap-2 mt-4">
+  <div class="flex flex-wrap gap-2 mb-4">
     <button id="startBtn" type="button"
       <%= server.Suspended ? 'disabled' : '' %>
-      class="al-btn-success inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
-      <%- icon('play', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
+      class="al-btn-success min-h-11">
+      <%- icon('play', { class: 'w-4 h-4', strokeWidth: 2 }) %>
       <%= t('start') %>
     </button>
     <button id="restartBtn" type="button"
       <%= server.Suspended ? 'disabled' : '' %>
-      class="al-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
-      <%- icon('refresh-cw', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
+      class="al-btn-secondary min-h-11">
+      <%- icon('refresh-cw', { class: 'w-4 h-4', strokeWidth: 2 }) %>
       <%= t('restart') %>
     </button>
     <button id="stopBtn" type="button"
       <%= server.Suspended ? 'disabled' : '' %>
-      class="al-btn-danger inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
-      <%- icon('square', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
+      class="al-btn-danger min-h-11">
+      <%- icon('square', { class: 'w-4 h-4', strokeWidth: 2 }) %>
       <%= t('stop') %>
     </button>
     <button id="killBtn" type="button"
       <%= server.Suspended ? 'disabled' : '' %>
-      class="al-btn-danger-outline inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
-      <%- icon('zap', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
+      class="al-btn-danger-outline min-h-11">
+      <%- icon('zap', { class: 'w-4 h-4', strokeWidth: 2 }) %>
       <%= t('kill') %>
     </button>
   </div>
 
   <!-- Console -->
-  <div class="mt-6 rounded-xl overflow-hidden" style="border:1px solid var(--theme-border)">
-    <div class="flex items-center justify-between px-4 py-2.5 shrink-0" style="background:var(--theme-bg-secondary);border-bottom:1px solid var(--theme-border)">
-      <span class="text-[11px] font-medium tracking-wide" style="color:var(--theme-text-muted)"><%= t('console') %></span>
-      <span id="consoleStatus" class="text-[11px] font-medium" style="color:var(--theme-text-muted)">--</span>
+  <div class="al-card al-card-flush">
+    <div class="al-console-bar">
+      <span class="al-console-label"><%= t('console') %></span>
+      <span id="consoleStatus" class="al-console-status">--</span>
     </div>
-    <div id="terminal-container" class="relative" style="height:420px;background:var(--theme-bg)">
+    <div id="terminal-container" class="al-console-screen">
       <div id="terminal"></div>
     </div>
-    <div class="relative" style="border-top:1px solid var(--theme-border)">
-      <p id="consoleReadOnlyNotice" class="hidden text-[11px] px-4 py-1.5 m-0" style="color:var(--theme-text-muted)"><%= t('viewOnlyNotice') %></p>
+    <div class="al-console-inputbar">
+      <p id="consoleReadOnlyNotice" class="al-console-notice hidden"><%= t('viewOnlyNotice') %></p>
       <input id="consoleInput" type="text" autocomplete="off"
         placeholder="<%= t('typeACommand') %>"
+        aria-label="<%= t('typeACommand') %>"
         <%= server.Suspended ? 'disabled' : '' %>
-        class="w-full px-4 py-3 text-sm outline-none placeholder:font-medium rounded-b-xl"
-        style="background:var(--theme-bg-card);color:var(--theme-text-strong)">
+        class="al-console-input">
     </div>
   </div>
 </div>
@@ -76,6 +81,12 @@
 (function() {
   var serverId = '<%= server.UUID %>';
   var suspended = <%= !!server.Suspended %>;
+  var powerSent = <%- JSON.stringify({
+    start: t('powerActionSent', { action: t('start') }),
+    restart: t('powerActionSent', { action: t('restart') }),
+    stop: t('powerActionSent', { action: t('stop') }),
+    kill: t('powerActionSent', { action: t('kill') })
+  }) %>;
 
   document.getElementById('startBtn').addEventListener('click', function() {
     powerAction('start');
@@ -97,9 +108,9 @@
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken }
     }).then(function(r) { return r.json(); })
     .then(function(d) {
-      if (d.success !== false) showToast(action.charAt(0).toUpperCase() + action.slice(1) + ' command sent.', 'success');
-      else showToast(d.error || 'Failed.', 'error');
-    }).catch(function() { showToast('Request failed.', 'error'); });
+      if (d.success !== false) showToast(powerSent[action], 'success');
+      else showToast(d.error || '<%= t('commandFailed') %>', 'error');
+    }).catch(function() { showToast('<%= t('requestFailed') %>', 'error'); });
   }
 })();
 </script>

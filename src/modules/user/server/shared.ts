@@ -7,6 +7,7 @@ import type {
 } from '../../../generated/prisma/client';
 import prisma from '../../../db';
 import { getParamAsString } from '../../../utils/typeHelpers';
+import { parseDockerImageRef } from '../../../utils/dockerImage';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   getPrimaryExternalPort,
@@ -308,7 +309,9 @@ export function getConfiguredDockerImage(
   if (!server.dockerImage) {
     return null;
   }
-  return String(Object.values(JSON.parse(String(server.dockerImage)))[0]);
+  // Handles both the legacy object form and a plain image reference instead
+  // of throwing a SyntaxError out of the start path.
+  return parseDockerImageRef(server.dockerImage) ?? null;
 }
 
 export async function stopServerContainer(

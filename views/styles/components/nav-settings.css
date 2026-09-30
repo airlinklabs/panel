@@ -1,23 +1,25 @@
-/* ── Settings tab highlight — theme-driven active state ────────
-   Active pill uses --theme-accent / --theme-accent-text so every
-   theme (Solarized, Material, user) controls its own active identity. */
-#sliding-background {
-  background: var(--theme-accent) !important;
-  border-color: var(--theme-accent) !important;
-  box-shadow: var(--shadow-card);
-}
-.dark #sliding-background {
-  box-shadow: var(--shadow-card-dark);
-}
-.nav-link2.nav2-active {
-  color: var(--theme-accent-text);
-}
+@layer components {
+  /* ── Settings tab highlight — theme-driven active state ────────
+     Active pill uses --theme-accent / --theme-accent-text so every
+     theme (Solarized, Material, user) controls its own active identity. */
+  #sliding-background {
+    background: var(--theme-accent) !important;
+    border-color: var(--theme-accent) !important;
+    box-shadow: var(--shadow-card);
+  }
+  .dark #sliding-background {
+    box-shadow: var(--shadow-card-dark);
+  }
+  .nav-link2.nav2-active {
+    color: var(--theme-accent-text);
+  }
 
-/* Server subnav (serverTemplate) — same active pill */
-.nav-link2[data-active="true"] {
-  background: var(--theme-accent) !important;
-  border-color: var(--theme-accent) !important;
-  box-shadow: none !important;
-  color: var(--theme-accent-text) !important;
-  font-weight: 700 !important;
+  /* Server subnav (serverTemplate) — same active pill */
+  .nav-link2[data-active="true"] {
+    background: var(--theme-accent) !important;
+    border-color: var(--theme-accent) !important;
+    box-shadow: none !important;
+    color: var(--theme-accent-text) !important;
+    font-weight: 700 !important;
+  }
 }

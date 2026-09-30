@@ -1,80 +1,182 @@
-<%- include('../layouts/user', { title: 'Dashboard' }) %>
+<%- include('../layouts/user', { title: t('dashboard') }) %>
+<%
+  const hasServers = typeof servers !== 'undefined' && Array.isArray(servers) && servers.length > 0;
+  const canCreate = typeof canCreateServer !== 'undefined' && canCreateServer;
+  const hasError = typeof errorMessage !== 'undefined' && errorMessage && errorMessage.message;
+  const hasFolders = typeof folders !== 'undefined' && Array.isArray(folders) && folders.length > 0;
 
-<div class="px-4 sm:px-6 lg:px-8 pt-4">
-  <div class="flex items-start justify-between gap-4">
-    <div>
-      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--theme-text-strong)"><%= t('dashboard') %></h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted)"><%= t('welcomeBack') %>, <%= user.username %></p>
+  /* Server names and UUIDs are user data; the list view's cells are built
+     as HTML strings for partials/ui/table, so escape them here. */
+  function escCell(v) {
+    return String(v === null || v === undefined ? '' : v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+  function statCell(v) {
+    const raw = v === null || v === undefined || v === '' ? '--' : `${v}%`;
+    return `<span class="al-badge al-badge-neutral font-mono tabular-nums">${escCell(raw)}</span>`;
+  }
+%>
+
+<header class="al-page-header">
+  <div>
+    <h1 class="al-page-title"><%= t('dashboard') %></h1>
+    <p class="al-page-desc"><%= t('welcomeBack') %>, <%= user.username %></p>
+  </div>
+  <% if (hasServers || canCreate) { %>
+  <div>
+    <% if (hasServers) { %>
+    <div class="al-segmented" role="group" aria-label="<%= t('viewMode') %>">
+      <button id="gridViewBtn" type="button" class="al-segmented-btn" aria-pressed="true">
+        <%- icon('grid', { class: 'h-4 w-4', 'aria-hidden': 'true' }) %><%= t('gridView') %>
+      </button>
+      <button id="listViewBtn" type="button" class="al-segmented-btn" aria-pressed="false">
+        <%- icon('list', { class: 'h-4 w-4', 'aria-hidden': 'true' }) %><%= t('listView') %>
+      </button>
     </div>
-    <% if (typeof canCreateServer !== 'undefined' && canCreateServer) { %>
-    <a href="/create-server" class="al-btn al-btn-primary inline-flex items-center gap-1.5 shrink-0">
+    <% } %>
+    <% if (canCreate) { %>
+    <a href="/create-server" class="al-btn al-btn-primary shrink-0">
       <%- icon('plus', { class: 'size-4', strokeWidth: 1.5 }) %>
       <%= t('createServer') %>
     </a>
     <% } %>
   </div>
+  <% } %>
+</header>
 
-  <% if (typeof errorMessage !== 'undefined' && errorMessage && errorMessage.message) { %>
-  <div class="mt-4 p-3 rounded-xl text-[13px]" style="background:var(--theme-warning-bg); border:1px solid var(--theme-warning); color:var(--theme-warning);">
-    <%= errorMessage.message %>
+<div class="al-page-body">
+  <% if (hasError) { %>
+  <div class="al-alert-warning mb-4" role="alert">
+    <%- icon('alert-triangle', { class: 'h-4 w-4 shrink-0 mt-0.5', 'aria-hidden': 'true' }) %>
+    <div class="min-w-0">
+      <p class="al-alert-title"><%= t('errorTitle') %></p>
+      <p class="al-alert-body"><%= errorMessage.message %></p>
+    </div>
   </div>
   <% } %>
 
-  <div class="mt-5">
-    <% if (!Array.isArray(servers) || servers.length === 0) { %>
-      <%- include('../partials/empty-state', {
-        iconName: 'server',
-        title: t('noServersYet'),
-        description: t('createFirstServerDesc'),
-        action: (typeof canCreateServer !== 'undefined' && canCreateServer)
-          ? '<a href="/create-server" class="al-btn al-btn-primary">' + t('createServer') + '</a>'
-          : ''
-      }) %>
-    <% } else { %>
+  <% if (!hasServers) { %>
+    <%- include('../partials/empty-state', {
+      iconName: 'server',
+      title: t('noServersYet'),
+      description: t('createFirstServerDesc'),
+      action: canCreate
+        ? '<a href="/create-server" class="al-btn al-btn-primary">' + t('createServer') + '</a>'
+        : ''
+    }) %>
+  <% } else { %>
 
-      <% if (typeof folders !== 'undefined' && Array.isArray(folders) && folders.length > 0) { %>
-        <% folders.forEach(function(folder) { %>
-        <div class="mb-6">
-          <div class="flex items-center gap-2 mb-3">
+  <div id="gridView">
+    <% if (hasFolders) { %>
+      <% folders.forEach(function(folder) { %>
+      <section class="al-section mb-6">
+        <div class="al-section-head">
+          <div class="flex min-w-0 items-center gap-2">
             <%- icon('folder', { class: 'w-4 h-4', style: 'color:var(--theme-text-muted)' }) %>
-            <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= folder.name %></h3>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <% servers.filter(function(s) { return folder.members && folder.members.some(function(m) { return m.serverUUID === s.UUID; }); }).forEach(function(server) { %>
-              <%- include('../partials/server-card', { server: server }) %>
-            <% }); %>
+            <h2 class="al-section-title truncate"><%= folder.name %></h2>
           </div>
         </div>
-        <% }); %>
-
-        <% var unfoldered = servers.filter(function(s) { return !folders.some(function(f) { return f.members && f.members.some(function(m) { return m.serverUUID === s.UUID; }); }); }); %>
-        <% if (unfoldered.length > 0) { %>
-        <div class="mb-6">
-          <div class="flex items-center gap-2 mb-3">
-            <%- icon('layers', { class: 'w-4 h-4', style: 'color:var(--theme-text-muted)' }) %>
-            <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= t('other') %></h3>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <% unfoldered.forEach(function(server) { %>
-              <%- include('../partials/server-card', { server: server }) %>
-            <% }); %>
-          </div>
-        </div>
-        <% } %>
-      <% } else { %>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <% servers.forEach(function(server) { %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% servers.filter(function(s) { return folder.members && folder.members.some(function(m) { return m.serverUUID === s.UUID; }); }).forEach(function(server) { %>
             <%- include('../partials/server-card', { server: server }) %>
           <% }); %>
         </div>
-      <% } %>
+      </section>
+      <% }); %>
 
-      <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
-        <%- include('../partials/pagination', { currentPage: typeof currentPage !== 'undefined' ? currentPage : 1, totalPages: totalPages }) %>
+      <% var unfoldered = servers.filter(function(s) { return !folders.some(function(f) { return f.members && f.members.some(function(m) { return m.serverUUID === s.UUID; }); }); }); %>
+      <% if (unfoldered.length > 0) { %>
+      <section class="al-section mb-6">
+        <div class="al-section-head">
+          <div class="flex min-w-0 items-center gap-2">
+            <%- icon('layers', { class: 'w-4 h-4', style: 'color:var(--theme-text-muted)' }) %>
+            <h2 class="al-section-title"><%= t('other') %></h2>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% unfoldered.forEach(function(server) { %>
+            <%- include('../partials/server-card', { server: server }) %>
+          <% }); %>
+        </div>
+      </section>
       <% } %>
-
+    <% } else { %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% servers.forEach(function(server) { %>
+          <%- include('../partials/server-card', { server: server }) %>
+        <% }); %>
+      </div>
     <% } %>
   </div>
+
+  <div id="listView" class="hidden">
+    <%
+      const listRows = servers.map(function(s) {
+        const running = s.status === 'running';
+        return {
+          server: '<a class="al-table-cell-strong al-btn-link" href="/server/' + escCell(s.UUID) + '">' + escCell(s.name) + '</a>',
+          status: '<span class="' + (running ? 'al-badge-online' : 'al-badge-offline') +
+            '"><span class="al-dot-' + (running ? 'online al-dot-ping' : 'offline') + '"></span>' +
+            escCell(running ? t('running') : t('stopped')) + '</span>',
+          ram: statCell(s.ramUsage),
+          cpu: statCell(s.cpuUsage),
+        };
+      });
+    %>
+    <%- include('../partials/ui/table', {
+      id: 'serverList',
+      columns: [
+        { header: t('serverColumn'), key: 'server' },
+        { header: t('status'), key: 'status' },
+        { header: t('ramUsage'), key: 'ram' },
+        { header: t('cpuUsage'), key: 'cpu' }
+      ],
+      rows: listRows,
+      emptyState: t('noServersYet')
+    }) %>
+  </div>
+
+  <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+    <%- include('../partials/pagination', { currentPage: typeof currentPage !== 'undefined' ? currentPage : 1, totalPages: totalPages }) %>
+  <% } %>
+
+  <% } %>
 </div>
+
+<script nonce="<%- nonce %>">
+  (function () {
+    var grid = document.getElementById('gridView');
+    var list = document.getElementById('listView');
+    var gridBtn = document.getElementById('gridViewBtn');
+    var listBtn = document.getElementById('listViewBtn');
+    if (!grid || !list || !gridBtn || !listBtn) { return; }
+
+    var STORAGE_KEY = 'serverViewPreference';
+
+    function applyView(view) {
+      var isGrid = view !== 'list';
+      grid.classList.toggle('hidden', !isGrid);
+      list.classList.toggle('hidden', isGrid);
+      gridBtn.setAttribute('aria-pressed', isGrid ? 'true' : 'false');
+      listBtn.setAttribute('aria-pressed', isGrid ? 'false' : 'true');
+    }
+
+    var saved = 'grid';
+    try { saved = localStorage.getItem(STORAGE_KEY) || 'grid'; } catch (e) { saved = 'grid'; }
+    applyView(saved);
+
+    gridBtn.addEventListener('click', function () {
+      applyView('grid');
+      try { localStorage.setItem(STORAGE_KEY, 'grid'); } catch (e) {}
+    });
+    listBtn.addEventListener('click', function () {
+      applyView('list');
+      try { localStorage.setItem(STORAGE_KEY, 'list'); } catch (e) {}
+    });
+  })();
+</script>
 
 <%- include('../layouts/user-footer') %>
