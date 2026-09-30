@@ -91,7 +91,7 @@
     "lucide": "^1.18.0",
     "monaco-editor": "^0.56.0",
     "multer": "^2.2.0",
-    "nodemailer": "^9.0.3",
+    "nodemailer": "^10.0.9",
     "otpauth": "^9.5.1",
     "pg": "^8.23.0",
     "pino": "^10.3.1",
